@@ -16,9 +16,9 @@ tags:
 
 ##  任务简介
 
-AppDynamics是针对混合和现代云原生应用重新设计的可观测性平台，可提供Cisco全栈可观测性所需的业务洞察。AppDynamics 解决方案集中了技术堆栈的实时可见性，并将分布式环境的复杂性转化为相关和 AI 辅助的见解。AppDynamics 解决方案将技术运行状况、应用程序性能和安全性与用户体验和业务影响联系起来，为您的团队提供快速解决问题和优化数字服务所需的数据，以与最重要的内容保持一致。
+Cisco AppDynamics 提供功能强大、易于使用的应用程序性能管理（APM）解决方案，端到端监控亚马逊云的应用程序，包括微服务和 Docker，通过 CloudWatch 集成为 EC2、DynamoDB、Lambda 等提供支持。AppDynamics可比较和验证云迁移前后的从客户到业务的优化，从而加速客户上云，因而深受用户喜爱。
 
-为了方便用户在AWS云端安装部署AppDynamics，我们需要制作一个AWS的安装镜像AMI。用户使用安装镜像来启动EC2实例并自动完成Enterprise Console的部署，再通过Enterprise Console的Web界面来安装部署AppDynamics的Controller 和 Event Server，简化安装部署。
+为了提升用户在亚马逊云科技云端安装部署AppDynamics软件的效率，我们需要制作一个打包好的安装镜像，叫做Amazon Machine Images (AMI)。用户使用AMI镜像启动虚拟机即可进入AppDynamics的设置界面，这能帮助用户节省大量软件下载、安装调试的时间，极大改善用户的安装体验。
 
 本次任务的目标是需要完成AppDynamics AMI的制作，且为了便于后续维护，维护的工作主要包括操作系统层面的安全漏洞修复、AppDynamics软件版本的升级，尽量使用自动化，节省人的时间精力的同时，避免人为错误。
 
@@ -95,9 +95,9 @@ sys.installationDir=/opt/appdynamics/platform
 
 **一些对话经验：**
 
-- 在经过多次与ChatGPT对话后，它告诉我他能安装的AppDynamics最新版本是21.6.1，如果我请他直接安装23.1.1.18，它在理解上会出错误，于是我请它按照21.6.1版本来安装。
-- 如果一次提问的内容过于复杂，ChatGPT在生成代码时，会因为时间过久而中断，因此，要注意控制一次对话的长度。
-- 如果它理解不对，可以直接指正它，并缩小目标，使得需求更具体，比如请使用‘write_files’和‘runcmd’生成代码。如果不加限制，它可能会给出整段代码全部都用 echo 语句来实现，比结构化的代码可读性要差一些。
+- ChatGPT所掌握的数据截止到2021年9月，比如您问他卡塔尔世界杯的结果，他是不知道的。在经过多次与ChatGPT对话，它告诉我他能安装的AppDynamics最新版本是21.6.1，如果我请它直接安装23.1.1.18，它给出的代码有误。于是我请它按照21.6.1版本来安装，在上面的对话中可以看出有这部分的内容。
+- 如果一次提问的需求过于复杂，它在生成代码时，会因意外中断，因此，要注意控制一次对话的长度和问题的复杂度。上面列出的对话内容是多次对话整理出来的。
+- 如果它理解不对，可以直接指正它，吧需求提的更具体，比如请使用‘write_files’和‘runcmd’生成代码。如果不加限制，它可能会给出整段代码全部都用 echo 语句来实现，相比结构化的代码，不易理解。
 
 ##  生成的cloud-init代码
 
@@ -306,9 +306,7 @@ ExecStart=/bin/sh -c 'sleep 5 && cp /opt/appdynamics/response.varfile.bak /opt/a
 WantedBy=multi-user.target
 ```
 
-**可以看出是符合预期的。**
-
-**执行 history -c 清除历史记录。**
+**可以看出是符合预期的，执行 history -c 清除历史记录。**
 
 ##  生成AMI镜像
 
@@ -336,7 +334,7 @@ WantedBy=multi-user.target
 
 ![SCR-20230301-x8g.png](ChatGPT-generate-code-to-build-AMI-for-AppDynamics/SCR-20230301-x8g.png)
 
-**除了user-data维持空白，其他设置可于创建AMI的EC2一致。**
+**除了user-data维持空白，其他设置可与创建AMI的EC2一致。**
 
 **3、EC2创建后，转到EC2的信息页面**
 
@@ -367,4 +365,4 @@ password: 从信息页面中拷贝instance-id，如上图为i-06b75d367808d02af
 
 [https://github.com/weiborao/appd-console-install-cloud-init/blob/main/appd-install-cloud-init-CN.yaml](https://github.com/weiborao/appd-console-install-cloud-init/blob/main/appd-install-cloud-init-CN.yaml)
 
-非常感谢各位耐心的阅读，谢谢。
+非常感谢各位耐心的阅读，
