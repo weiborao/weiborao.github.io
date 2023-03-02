@@ -12,6 +12,8 @@ tags:
 
 ThousandEyes提供了三种Agent进行网络和应用的探测，分别是Cloud Agent、Enterprise Agent和Endpoint Agent。Cloud Agent 由ThousandEyes在全球部署和维护，当前，ThousandEyes在全球200多个城市共部署了400多个[Cloud Agent](https://www.thousandeyes.com/product/cloud-agents)，可供全球用户使用。Enterprise Agent由用户自己部署，可以部署为虚拟机或者容器，可以安装在物理硬件，如Intel NCU或者树莓派中，支持Windows、Linux系统，还可以部署在思科或Juniper的网络设备中，也能通过CloudFormation在AWS云中自动部署。Endpoint Agent是浏览器插件，用户在访问网站时，可以自助的使用Endpoint Agent进行测试，由ThousandEyes进行数据分析，从而帮助用户快速了解其数字体验，以及快速定位问题所在。用户可以根据自己的需要来选择一种或多种Agent进行探测，ThousandEyes平台会自动完成分析和展现，提供网络和应用状况的洞见分析。
 
+<!-- more -->
+
 # 在AWS上部署TE Agent
 
 ## 了解部署过程

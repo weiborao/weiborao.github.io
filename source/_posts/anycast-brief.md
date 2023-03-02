@@ -16,6 +16,8 @@ AnyCast的好处：
 - 实现负载均衡，且对客户端是透明的（由网络路由实现）
 - 缓解DDOS攻击，AnyCast将DDOS攻击流量引导至本地服务器，极大的减少了DDOS流量的范围以及规模
 
+<!-- more -->
+
 Office 365 的SharePoint使用了AnyCast，例如nslookup 解析[cisco.sharepoint.com](https://cisco.sharepoint.com)、[citrix.sharepoint.com](http://citrix.sharepoint.com)、[intel.sharepoint.com](http://intel.sharepoint.com) 得到相同的地址
 
 ```bash
