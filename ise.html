@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco ISE Ultimate Canvas - V6.0 (Fully Offline)</title>
+    
+    <!-- CSS 样式部分 (已包含所有必要的模拟 Tailwind 类) -->
+    <style>
+        /* --- Reset & Base --- */
+        *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb; }
+        html { line-height: 1.5; -webkit-text-size-adjust: 100%; tab-size: 4; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; line-height: inherit; background-color: #f1f5f9; color: #1B252E; display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 30px; }
+        h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; margin: 0; }
+        ul, ol { list-style: none; margin: 0; padding: 0; }
+        p { margin: 0; }
+        img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
+        
+        /* --- Variables (Colors) --- */
+        :root {
+            --c-blue: #00BCEB;
+            --c-navy: #1B252E;
+            --c-dark: #005073;
+            --c-sky: #6CCDF5;
+            --c-green: #25C266;
+            --c-red: #E2231A;
+            --c-orange: #FF9E1B;
+            --c-purple: #9232ac;
+            --c-gray: #F4F5F7;
+            --c-slate: #3E3E3E;
+        }
+
+        /* --- Utilities (Simulating Tailwind) --- */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .items-center { align-items: center; }
+        .items-end { align-items: flex-end; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .shrink-0 { flex-shrink: 0; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-none { flex: none; }
+        .grow { flex-grow: 1; }
+        .overflow-hidden { overflow: hidden; }
+        .block { display: block; }
+        .hidden { display: none; }
+
+        /* Sizing */
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        .w-56 { width: 14rem; }
+        .h-56 { height: 14rem; }
+        .w-72 { width: 18rem; }
+        .w-1\/3 { width: 33.333333%; }
+        .w-3\/4 { width: 75%; }
+        .max-w-4xl { max-width: 56rem; }
+        .h-40 { height: 10rem; }
+        
+        /* Arbitrary Values & Positioning */
+        .h-\[8\%\] { height: 8%; }
+        .h-\[92\%\] { height: 92%; }
+        .top-\[4\%\] { top: 4%; }
+        .top-\[18\%\] { top: 18%; }
+        .bottom-\[8\%\] { bottom: 8%; }
+        .left-\[5\%\] { left: 5%; }
+        .right-\[5\%\] { right: 5%; }
+
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+        .top-1\/2 { top: 50%; }
+        .left-1\/2 { left: 50%; }
+        .bottom-5 { bottom: 1.25rem; }
+        .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+        .-translate-x-1\/2 { --tw-translate-x: -50%; transform: translateX(-50%) translateY(var(--tw-translate-y, 0)); }
+        .-translate-y-1\/2 { --tw-translate-y: -50%; transform: translateX(var(--tw-translate-x, 0)) translateY(-50%); }
+        .z-0 { z-index: 0; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        
+        /* Spacing */
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .pb-2 { padding-bottom: 0.5rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .pb-6 { padding-bottom: 1.5rem; }
+        .pl-3 { padding-left: 0.75rem; }
+        .pl-4 { padding-left: 1rem; }
+        .pl-5 { padding-left: 1.25rem; }
+        
+        .m-0 { margin: 0; }
+        .mt-0\.5 { margin-top: 0.125rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-auto { margin-top: auto; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-5 { gap: 1.25rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-8 { gap: 2rem; }
+        .gap-10 { gap: 2.5rem; }
+        .space-y-1 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(0.25rem * var(--tw-space-y-reverse)); }
+        .space-y-2 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(0.5rem * var(--tw-space-y-reverse)); }
+        .space-y-3 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(0.75rem * var(--tw-space-y-reverse)); }
+        .space-y-4 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(1rem * var(--tw-space-y-reverse)); }
+        .space-y-5 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(1.25rem * var(--tw-space-y-reverse)); }
+
+        /* Typography */
+        .font-sans { font-family: "Segoe UI", Roboto, sans-serif; }
+        .font-mono { font-family: "Consolas", "Menlo", "Monaco", monospace; }
+        .text-\[9px\] { font-size: 9px; }
+        .text-\[10px\] { font-size: 10px; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .text-sm { font-size: 0.85rem; line-height: 1.25rem; }
+        .text-base { font-size: 0.95rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        
+        .font-medium { font-weight: 500; }
+        .font-bold { font-weight: 700; }
+        .font-extrabold { font-weight: 800; }
+        .font-black { font-weight: 900; }
+        
+        .italic { font-style: italic; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        .leading-none { line-height: 1; }
+        .leading-snug { line-height: 1.375; }
+        .leading-relaxed { line-height: 1.625; }
+        .text-center { text-align: center; }
+        .text-justify { text-align: justify; }
+        .select-none { user-select: none; }
+        .list-disc { list-style-type: disc; }
+
+        /* Colors */
+        .text-white { color: #fff; }
+        .text-gray-200 { color: #e5e7eb; }
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-500 { color: #6b7280; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .text-red-800 { color: #991b1b; }
+        .text-green-600 { color: #16a34a; }
+        .text-green-800 { color: #166534; }
+        .text-red-600 { color: #dc2626; }
+        .text-blue-600 { color: #2563eb; }
+        .text-purple-900 { color: #581c87; }
+        .text-green-900 { color: #14532d; }
+        
+        .bg-white { background-color: #fff; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .bg-gray-200 { background-color: #e5e7eb; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .bg-blue-100 { background-color: #dbeafe; }
+        .bg-green-50 { background-color: #f0fdf4; }
+        .bg-green-100 { background-color: #dcfce7; }
+        .bg-red-50 { background-color: #fef2f2; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .bg-orange-50 { background-color: #fff7ed; }
+        .bg-orange-100 { background-color: #ffedd5; }
+        .bg-purple-50 { background-color: #faf5ff; }
+        .bg-slate-50 { background-color: #f8fafc; }
+        .bg-sky-50 { background-color: #f0f9ff; }
+        
+        /* Cisco Colors */
+        .text-cisco-blue { color: var(--c-blue); }
+        .text-cisco-navy { color: var(--c-navy); }
+        .text-cisco-dark { color: var(--c-dark); }
+        .text-cisco-green { color: var(--c-green); }
+        .text-cisco-red { color: var(--c-red); }
+        .text-cisco-orange { color: var(--c-orange); }
+        .text-cisco-purple { color: var(--c-purple); }
+        
+        .bg-cisco-blue { background-color: var(--c-blue); }
+        .bg-cisco-navy { background-color: var(--c-navy); }
+        .bg-cisco-green { background-color: var(--c-green); }
+        .bg-cisco-red { background-color: var(--c-red); }
+        .bg-cisco-orange { background-color: var(--c-orange); }
+        .bg-cisco-purple { background-color: var(--c-purple); }
+
+        .border-cisco-blue { border-color: var(--c-blue); }
+        .border-cisco-navy { border-color: var(--c-navy); }
+        .border-cisco-green { border-color: var(--c-green); }
+        .border-cisco-red { border-color: var(--c-red); }
+        .border-cisco-orange { border-color: var(--c-orange); }
+        .border-cisco-purple { border-color: var(--c-purple); }
+        .border-cisco-sky { border-color: var(--c-sky); }
+        .border-cisco-dark { border-color: var(--c-dark); }
+
+        /* Borders & Rounded */
+        .border { border-width: 1px; }
+        .border-t { border-top-width: 1px; }
+        .border-b { border-bottom-width: 1px; }
+        .border-r { border-right-width: 1px; }
+        .border-t-4 { border-top-width: 4px; }
+        .border-t-8 { border-top-width: 8px; }
+        .border-b-4 { border-bottom-width: 4px; }
+        .border-l-4 { border-left-width: 4px; }
+        .border-l-8 { border-left-width: 8px; }
+        
+        .border-gray-100 { border-color: #f3f4f6; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-gray-300 { border-color: #d1d5db; }
+        .border-gray-500 { border-color: #6b7280; }
+        .border-gray-600 { border-color: #4b5563; }
+        .border-slate-200 { border-color: #e2e8f0; }
+        .border-blue-100 { border-color: #dbeafe; }
+        .border-green-100 { border-color: #dcfce7; }
+        .border-red-100 { border-color: #fee2e2; }
+        .border-orange-100 { border-color: #ffedd5; }
+        .border-purple-100 { border-color: #f3e8ff; }
+        .border-sky-100 { border-color: #e0f2fe; }
+
+        .rounded { border-radius: 0.25rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-r { border-top-right-radius: 0.25rem; border-bottom-right-radius: 0.25rem; }
+        
+        /* Effects */
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .shadow-card { box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.04); }
+        
+        .opacity-10 { opacity: 0.1; }
+        .opacity-50 { opacity: 0.5; }
+        .pointer-events-none { pointer-events: none; }
+
+        /* Print & Page Layout */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { size: A4 landscape; margin: 0; }
+            .page-container { 
+                width: 297mm; height: 210mm; page-break-after: always; margin: 0; padding: 0;
+                overflow: hidden; border: none; box-shadow: none;
+            }
+            .print\:gap-0 { gap: 0; }
+        }
+
+        .page-container {
+            width: 297mm; height: 210mm; background-color: white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); position: relative;
+            display: flex; flex-direction: column; overflow: hidden; padding: 10mm 12mm; 
+        }
+
+        .list-tech li { position: relative; padding-left: 14px; margin-bottom: 4px; line-height: 1.4; }
+        .list-tech li::before { 
+            content: ""; position: absolute; left: 4px; top: 8px; width: 4px; height: 4px;
+            background-color: #00BCEB; border-radius: 50%;
+        }
+
+        .tech-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .tech-table th { background-color: #f8fafc; text-align: left; padding: 8px; border-bottom: 2px solid #e2e8f0; color: #1B252E; font-weight: 700; }
+        .tech-table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: top; line-height: 1.4; }
+        .tech-table tr:last-child td { border-bottom: none; }
+
+        .module-header {
+            font-size: 1rem; font-weight: 700; color: #1B252E;
+            border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        // --- 1. 图标定义 (SVG Strings) ---
+        const icons = {
+            shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />',
+            lock: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />',
+            user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />',
+            server: '<rect x="2" y="2" width="20" height="8" rx="2" ry="2" /><rect x="2" y="14" width="20" height="8" rx="2" ry="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" />',
+            wifi: '<path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><line x1="12" y1="20" x2="12.01" y2="20" />',
+            search: '<circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />',
+            settings: '<circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />',
+            layers: '<polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" />',
+            check: '<polyline points="20 6 9 17 4 12" />',
+            alert: '<circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />',
+            arrowRight: '<line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />',
+            share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+            target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+            database: '<ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />',
+            code: '<polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />',
+            cloud: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />',
+            key: '<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />'
+        };
+
+        // --- 2. 组件函数 (返回 HTML 字符串) ---
+
+        function renderIcon(path, size = 18, color = "currentColor", className = "") {
+            return `
+            <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}">
+                ${path}
+            </svg>`;
+        }
+
+        function renderHeader(pageNum, title, subtitle) {
+            return `
+            <div class="flex justify-between items-end border-b-4 border-cisco-blue pb-4 mb-6 shrink-0 h-[8%]">
+                <div class="flex items-center gap-4">
+                    <div class="bg-cisco-navy text-white p-3 rounded-xl shadow-lg">
+                        ${renderIcon(icons.shield, 36, "white")}
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-cisco-navy leading-none uppercase tracking-tight">${title}</h1>
+                        <div class="text-sm font-bold text-cisco-blue tracking-widest uppercase mt-1">Cisco Identity Services Engine | ${subtitle}</div>
+                    </div>
+                </div>
+                <div class="text-5xl font-black text-gray-200 font-mono leading-none select-none">PAGE ${pageNum}</div>
+            </div>`;
+        }
+
+        function renderSectionBox(title, iconPath, contentHtml, className = "", color = "border-cisco-navy") {
+            const iconHtml = iconPath ? renderIcon(iconPath, 22, "", "text-cisco-navy") : '';
+            return `
+            <div class="bg-white rounded-lg shadow-card border-t-4 ${color} p-5 flex flex-col ${className}">
+                <div class="module-header">
+                    ${iconHtml}
+                    <span>${title}</span>
+                </div>
+                <div class="flex-1 overflow-hidden">${contentHtml}</div>
+            </div>`;
+        }
+
+        // --- 3. 页面渲染函数 ---
+
+        function renderPage1() {
+            return `
+            <div class="page-container">
+                ${renderHeader("01", "解决方案概览", "Solution Overview: What, Why, How")}
+                
+                <div class="flex-1 flex flex-col gap-6 overflow-hidden">
+                    <div class="flex-1 grid grid-cols-3 gap-6">
+                        <!-- WHAT -->
+                        ${renderSectionBox("What is ISE?", icons.shield, `
+                            <p class="text-xs text-gray-700 leading-relaxed mb-4 text-justify">
+                                Cisco ISE 是新一代<strong>身份与访问控制策略平台</strong>。它不仅仅是 RADIUS 服务器，更是企业构建<strong>零信任 (Zero Trust)</strong> 架构的决策核心。
+                            </p>
+                            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-cisco-blue mt-auto">
+                                <strong class="block text-cisco-navy mb-2 text-xs">核心定义:</strong>
+                                <ul class="list-tech text-xs text-gray-700">
+                                    <li><strong>PDP:</strong> 策略决策点 (Policy Decision Point)。</li>
+                                    <li><strong>Visibility:</strong> 消除盲区，识别一切。</li>
+                                    <li><strong>Segmentation:</strong> 软件定义隔离。</li>
+                                </ul>
+                            </div>
+                        `, "", "border-cisco-blue")}
+
+                        <!-- WHY -->
+                        ${renderSectionBox("Why ISE?", icons.target, `
+                            <ul class="list-tech text-xs text-gray-700 space-y-3">
+                                <li>
+                                    <strong>全面可见性:</strong> 识别所有入网设备 (ISE 通过 Profiling 发现所有 IoT 和哑终端。)。
+                                </li>
+                                <li>
+                                    <strong>最小权限:</strong> 基于身份动态下发权限，非静态端口。
+                                </li>
+                                <li>
+                                    <strong>持续信任:</strong> 会话期间持续监控状态，动态响应，实现“永不信任，始终验证”。
+                                </li>
+                                <li>
+                                    <strong>威胁遏制:</strong> 联动安全生态，自动隔离受感染终端，防止不打补丁、无杀毒软件的“脏”设备接入核心网络。
+                                </li>
+                            </ul>
+                        `, "", "border-cisco-navy")}
+
+                        <!-- HOW -->
+                        ${renderSectionBox("How it works?", icons.settings, `
+                            <div class="text-xs text-gray-700 space-y-3 text-justify">
+                                <p>作为中央 AAA 服务器，通过标准协议与网络设备 (NAD) 交互。</p>
+                                <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                                    <strong class="block text-cisco-dark mb-1">机制:</strong>
+                                    <ul class="text-xs text-gray-600 space-y-1">
+                                        <li><strong>1. 收集:</strong> Who, What, Where, When。</li>
+                                        <li><strong>2. 决策:</strong> 匹配认证/授权策略。</li>
+                                        <li><strong>3. 执行:</strong> 下发 VLAN, ACL, SGT。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `, "", "border-cisco-green")}
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-2 gap-6">
+                        <!-- Scenarios -->
+                        <div class="bg-white p-5 rounded shadow-card border border-gray-200">
+                            <h3 class="font-bold text-cisco-navy border-b pb-2 mb-3 text-sm">关键应用场景</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex items-center gap-2 text-xs text-gray-700"><span class="text-cisco-green font-bold">✔</span> 安全无线/有线接入</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-700"><span class="text-cisco-green font-bold">✔</span> 访客管理 & BYOD</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-700"><span class="text-cisco-green font-bold">✔</span> 终端合规 (Posture)</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-700"><span class="text-cisco-green font-bold">✔</span> 威胁响应 (RTC)</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-700"><span class="text-cisco-green font-bold">✔</span> 微分段 (TrustSec)</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-700"><span class="text-cisco-green font-bold">✔</span> 资产画像 (Profiling)</div>
+                            </div>
+                        </div>
+
+                        <!-- Licensing -->
+                        <div class="bg-white p-5 rounded shadow-card border border-gray-200">
+                            <h3 class="font-bold text-cisco-navy border-b pb-2 mb-3 text-sm">3.x 许可层级</h3>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                                    <span class="font-bold text-gray-700">Essentials</span>
+                                    <span class="text-gray-500">基础 AAA, 802.1X，Guest</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-blue-50 p-2 rounded">
+                                    <span class="font-bold text-cisco-blue">Advantage</span>
+                                    <span class="text-gray-500">画像, TrustSec, BYOD, PxGrid</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-purple-50 p-2 rounded">
+                                    <span class="font-bold text-cisco-purple">Premier</span>
+                                    <span class="text-gray-500">Posture, 威胁响应, MDM Compliance</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personas -->
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 flex-none mt-auto">
+                        <h3 class="font-bold text-cisco-navy text-sm mb-3">ISE 核心角色 (Personas)</h3>
+                        <div class="grid grid-cols-4 gap-4 text-center">
+                            <div class="bg-white p-2 rounded border border-gray-200"><strong class="text-cisco-blue text-sm block">PAN</strong><span class="text-xs text-gray-500">管理与配置</span></div>
+                            <div class="bg-white p-2 rounded border border-gray-200"><strong class="text-cisco-purple text-sm block">MnT</strong><span class="text-xs text-gray-500">监控与日志</span></div>
+                            <div class="bg-white p-2 rounded border border-gray-200"><strong class="text-cisco-green text-sm block">PSN</strong><span class="text-xs text-gray-500">策略执行引擎</span></div>
+                            <div class="bg-white p-2 rounded border border-gray-200"><strong class="text-cisco-orange text-sm block">pxGrid</strong><span class="text-xs text-gray-500">生态集成枢纽</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage2() {
+            return `
+            <div class="page-container">
+                ${renderHeader("02", "合规战略：NIST CSF 2.0 映射", "Framework Core Alignment")}
+                
+                <div class="flex-1 flex flex-col h-full overflow-hidden">
+                    <div class="mb-4 text-center">
+                        <p class="text-sm text-gray-600 max-w-4xl mx-auto">
+                            Cisco ISE 的功能模块与 NIST 网络安全框架 2.0 (CSF) 的六大核心功能高度对齐，帮助企业构建标准化的合规架构。
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-5 flex-1">
+                        <!-- 1. GOVERN -->
+                        <div class="bg-white rounded-xl shadow-card border-t-4 border-gray-600 p-4 flex flex-col">
+                            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                                <span class="bg-gray-600 text-white text-xs font-black px-2 py-1 rounded">GOVERN</span>
+                                <h3 class="font-bold text-cisco-navy text-base">治理</h3>
+                            </div>
+                            <div class="flex-1 space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-navy">GV.SC (供应链)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-gray-50 p-2 rounded">通过访客门户管理供应商权限，提供受限账号，降低第三方风险。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-navy">GV.PO (策略)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-gray-50 p-2 rounded">ISE PAN 提供统一策略中心，集中管理有线/无线/VPN 规则，满足审计要求。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. IDENTIFY -->
+                        <div class="bg-white rounded-xl shadow-card border-t-4 border-cisco-blue p-4 flex flex-col">
+                            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                                <span class="bg-cisco-blue text-white text-xs font-black px-2 py-1 rounded">IDENTIFY</span>
+                                <h3 class="font-bold text-cisco-navy text-base">识别</h3>
+                            </div>
+                            <div class="flex-1 space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-blue">ID.AM (资产)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-blue-50 p-2 rounded">利用 Profiling 探针 (DHCP/NMAP) 自动发现并建立全网资产清单。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-blue">ID.RA (风险)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-blue-50 p-2 rounded">设备接入时触发 Posture 检查和漏洞扫描 (TC-NAC) 量化风险。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-blue">ID.IM (改进)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-blue-50 p-2 rounded">Context Visibility 提供长期在线历史，辅助容量规划。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. PROTECT -->
+                        <div class="bg-white rounded-xl shadow-card border-t-4 border-cisco-purple p-4 flex flex-col">
+                            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                                <span class="bg-cisco-purple text-white text-xs font-black px-2 py-1 rounded">PROTECT</span>
+                                <h3 class="font-bold text-cisco-navy text-base">保护</h3>
+                            </div>
+                            <div class="flex-1 space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-purple">PR.AC (访问)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-purple-50 p-2 rounded">强制 802.1X 认证。利用 TrustSec (SGT) 实现微分段，防止横向移动。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-purple">PR.DS (数据)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-purple-50 p-2 rounded">管理 MACsec 密钥 (MKA)，保护链路层数据机密性。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-purple">PR.MA (维护)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-purple-50 p-2 rounded">TACACS+ 严格控制管理员权限，记录每一条维护命令。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. DETECT -->
+                        <div class="bg-white rounded-xl shadow-card border-t-4 border-cisco-orange p-4 flex flex-col">
+                            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                                <span class="bg-cisco-orange text-white text-xs font-black px-2 py-1 rounded">DETECT</span>
+                                <h3 class="font-bold text-cisco-navy text-base">检测</h3>
+                            </div>
+                            <div class="flex-1 space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-orange">DE.AE (异常)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-orange-50 p-2 rounded">检测 MAC 欺骗、位置突变等异常行为，及时生成 MnT 告警。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-orange">DE.CM (监控)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-orange-50 p-2 rounded">实时分析 Radius 日志。通过 pxGrid 向 SIEM/SOC 推送丰富上下文。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. RESPOND -->
+                        <div class="bg-white rounded-xl shadow-card border-t-4 border-cisco-red p-4 flex flex-col">
+                            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                                <span class="bg-cisco-red text-white text-xs font-black px-2 py-1 rounded">RESPOND</span>
+                                <h3 class="font-bold text-cisco-navy text-base">响应</h3>
+                            </div>
+                            <div class="flex-1 space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-red">RS.MI (缓解)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-red-50 p-2 rounded">快速威胁遏制 (RTC)。接收 FMC/XDR 告警，自动触发 CoA 隔离终端。</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-red">RS.AN (分析)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-red-50 p-2 rounded">触发 ANC 策略进行抓包 (TCP Dump) 或流量重定向，协助取证。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. RECOVER -->
+                        <div class="bg-white rounded-xl shadow-card border-t-4 border-cisco-green p-4 flex flex-col">
+                            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                                <span class="bg-cisco-green text-white text-xs font-black px-2 py-1 rounded">RECOVER</span>
+                                <h3 class="font-bold text-cisco-navy text-base">恢复</h3>
+                            </div>
+                            <div class="flex-1 space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><strong class="text-cisco-green">RC.RP (恢复)</strong></div>
+                                    <p class="text-xs text-gray-600 leading-snug bg-green-50 p-2 rounded">自动化的配置备份与恢复。提供自助修复门户，指导用户修复不合规项。</p>
+                                </div>
+                                <div class="flex-1 flex items-end justify-center opacity-50">
+                                    ${renderIcon(icons.check, 48, "", "text-cisco-green")}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage3() {
+            return `
+            <div class="page-container">
+                ${renderHeader("03", "核心概念：认证与协议 (Part 1)", "AAA • 802.1X • EAP • RADIUS vs TACACS+")}
+                
+                <div class="flex-1 grid grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col gap-6">
+                        ${renderSectionBox("AAA 框架", icons.server, `
+                            <div class="space-y-5">
+                                <div class="bg-blue-50 p-4 rounded border-l-4 border-cisco-blue">
+                                    <strong class="block text-cisco-navy text-base mb-1">Authentication (认证)</strong>
+                                    <p class="text-xs text-gray-700 italic mb-2">“你是谁？” (Who are you?)</p>
+                                    <span class="text-xs text-gray-600 block">目标：确认身份。验证用户或设备的凭据（密码、证书）。</span>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded border-l-4 border-cisco-purple">
+                                    <strong class="block text-cisco-navy text-base mb-1">Authorization (授权)</strong>
+                                    <p class="text-xs text-gray-700 italic mb-2">“你能做什么？” (What can you do?)</p>
+                                    <span class="text-xs text-gray-600 block">目标：分配权限。根据策略下发 VLAN, ACL, SGT 等。</span>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded border-l-4 border-cisco-green">
+                                    <strong class="block text-cisco-navy text-base mb-1">Accounting (记账)</strong>
+                                    <p class="text-xs text-gray-700 italic mb-2">“你做了什么？” (What did you do?)</p>
+                                    <span class="text-xs text-gray-600 block">目标：审计活动。记录会话时长、流量、开始/结束时间。</span>
+                                </div>
+                            </div>
+                        `, "", "border-cisco-navy")}
+
+                        ${renderSectionBox("802.1X 端口控制协议", icons.lock, `
+                            <p class="text-xs text-gray-700 mb-4 text-justify">
+                                IEEE 标准，用于有线和无线网络的基于端口的访问控制。包含三个核心角色：
+                            </p>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="bg-gray-50 p-3 rounded border text-center">
+                                    <div class="font-bold text-cisco-navy text-sm mb-1">Supplicant</div>
+                                    <div class="text-xs text-gray-500">请求者 (终端)</div>
+                                    <div class="text-[9px] text-gray-400 mt-1">发起认证</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded border text-center">
+                                    <div class="font-bold text-cisco-navy text-sm mb-1">Authenticator</div>
+                                    <div class="text-xs text-gray-500">认证者 (交换机/AP)</div>
+                                    <div class="text-[9px] text-gray-400 mt-1">控制端口</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded border text-center">
+                                    <div class="font-bold text-cisco-navy text-sm mb-1">Auth Server</div>
+                                    <div class="text-xs text-gray-500">认证服务器 (ISE)</div>
+                                    <div class="text-[9px] text-gray-400 mt-1">验证策略</div>
+                                </div>
+                            </div>
+                        `, "", "border-cisco-blue")}
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        ${renderSectionBox("EAP 方法 (Extensible Authentication Protocol)", icons.check, `
+                            <table class="tech-table">
+                                <thead>
+                                    <tr>
+                                        <th>方法</th>
+                                        <th>描述</th>
+                                        <th>优缺点</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-bold text-cisco-blue">EAP-TLS</td>
+                                        <td>基于<strong>双方证书</strong>的相互认证。</td>
+                                        <td><span class="text-green-600 font-bold">最高安全性</span>。需 PKI 基础设施支持。</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-cisco-blue">EAP-PEAP</td>
+                                        <td>建立 TLS 隧道保护内层认证 (如 MSCHAPv2)。</td>
+                                        <td>部署简单 (仅需服务器证书)，广泛使用。</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-cisco-blue">EAP-FAST</td>
+                                        <td>使用 PAC (凭据) 快速重建隧道。</td>
+                                        <td>思科私有，支持快速漫游。</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-bold text-gray-500">EAP-MD5</td>
+                                        <td>基于哈希的简单认证。</td>
+                                        <td><span class="text-red-600 font-bold">不安全</span>。易受字典攻击，且不支持密钥生成。</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        `, "", "border-cisco-green")}
+
+                        ${renderSectionBox("RADIUS vs TACACS+", icons.layers, `
+                            <table class="tech-table">
+                                <thead>
+                                    <tr>
+                                        <th>特性</th>
+                                        <th class="text-cisco-blue w-1/3">RADIUS</th>
+                                        <th class="text-cisco-purple w-1/3">TACACS+</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>主要用途</strong></td>
+                                        <td><strong>网络接入 (NAC)</strong><br/>(802.1X, Wi-Fi)</td>
+                                        <td><strong>设备管理 (Admin)</strong><br/>(登录交换机配置)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>协议</strong></td>
+                                        <td>UDP (标准)</td>
+                                        <td>TCP (思科)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>加密</strong></td>
+                                        <td>仅密码加密</td>
+                                        <td><strong>全报文加密</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>授权粒度</strong></td>
+                                        <td>会话级 (VLAN/ACL)</td>
+                                        <td>命令级 (Command Sets)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        `, "", "border-cisco-purple")}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage4() {
+            return `
+            <div class="page-container">
+                ${renderHeader("04", "核心概念：高级术语 (Part 2)", "MAB • CoA • WebAuth • Identity Sources")}
+                
+                <div class="flex-1 grid grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col gap-6">
+                        ${renderSectionBox("MAB (MAC Authentication Bypass)", icons.settings, `
+                            <p class="text-sm text-gray-700 mb-3 font-bold">用于不支持 802.1X 的哑终端 (打印机/IoT)。</p>
+                            <div class="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                                <ul class="list-tech text-sm text-gray-800 space-y-3">
+                                    <li><strong>机制:</strong> 交换机等到 802.1X 超时，将 MAC 地址作为用户名和密码发送给 ISE。</li>
+                                    <li><strong>Call Check:</strong> ISE 检查 Internal Endpoints 数据库。</li>
+                                    <li><strong>Profiling Link:</strong> MAB 是触发 Profiling 的关键时刻 (DHCP 收集)。</li>
+                                    <li><strong>安全隐患:</strong> MAC 易被伪造。应配合 <span class="text-red-600 font-bold">Profiling 策略</span> 使用 (如 MAC+设备类型 必须匹配)。</li>
+                                </ul>
+                            </div>
+                        `, "", "border-cisco-orange")}
+
+                        ${renderSectionBox("CoA (Change of Authorization)", icons.alert, `
+                            <p class="text-sm text-gray-700 mb-3 font-bold">RFC 5176。允许 ISE 在会话进行中动态更改权限。</p>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100 mb-4">
+                                <strong class="text-cisco-red block mb-2">常见触发场景:</strong>
+                                <ul class="list-decimal pl-5 text-sm text-gray-800 space-y-2">
+                                    <li>访客登录成功 &gt; 开启 Internet。</li>
+                                    <li>Posture 状态变为合规 &gt; 移除重定向。</li>
+                                    <li>Profiler 发现设备类型 &gt; 更新授权。</li>
+                                </ul>
+                            </div>
+                            <div class="text-sm bg-gray-100 p-3 rounded text-gray-700 border border-gray-300">
+                                <strong>端口要求:</strong> 必须在 NAD 上开启 <span class="font-mono bg-white px-1 rounded border">UDP 1700 (Cisco)</span> 或 <span class="font-mono bg-white px-1 rounded border">3799 (RFC)</span>。
+                            </div>
+                        `, "", "border-cisco-red")}
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        ${renderSectionBox("Web Authentication (WebAuth)", icons.wifi, `
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-gray-300 pl-3">
+                                    <strong class="text-gray-600 text-sm block">LWA (Local Web Auth):</strong>
+                                    <p class="text-sm text-gray-500">网页在 WLC/Switch 上托管。ISE 仅做 Radius 认证。功能有限，不推荐。</p>
+                                </div>
+                                <div class="border-l-4 border-cisco-blue pl-3 bg-blue-50 p-2 rounded-r">
+                                    <strong class="text-cisco-blue text-sm block">CWA (Central Web Auth):</strong>
+                                    <p class="text-sm text-gray-700 mb-2">网页在 ISE 上。流量被重定向到 ISE 门户。</p>
+                                    <strong class="text-xs text-gray-600">支持高级功能：</strong>
+                                    <div class="flex gap-2 mt-1">
+                                        <span class="text-xs bg-white px-2 py-1 rounded border">自注册</span>
+                                        <span class="text-xs bg-white px-2 py-1 rounded border">设备指纹</span>
+                                        <span class="text-xs bg-white px-2 py-1 rounded border">姿态评估</span>
+                                        <span class="text-xs bg-white px-2 py-1 rounded border">MDM 引导</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `, "", "border-cisco-blue")}
+
+                        ${renderSectionBox("身份源 (Identity Sources)", icons.database, `
+                            <ul class="list-tech text-sm text-gray-800 space-y-2">
+                                <li><strong>Internal User:</strong> ISE 本地数据库。访客账号通常存由于此。</li>
+                                <li><strong>Active Directory:</strong> 通过 Kerberos/LDAP 集成。支持多域。</li>
+                                <li><strong>LDAP:</strong> Sun, OpenLDAP (用于非 AD 环境)。</li>
+                                <li><strong>ODBC:</strong> SQL Server, Oracle (主要用于只读属性查找)。</li>
+                                <li><strong>SAML IdP:</strong> Azure AD, Okta。用于 WebAuth 和 VPN 接入认证。</li>
+                                <li><strong>Certificate Profile:</strong> 从 x.509 证书提取字段 (CN, SAN) 作为身份。</li>
+                            </ul>
+                            <div class="mt-4 p-3 bg-purple-50 rounded border border-purple-100">
+                                <strong class="text-sm text-cisco-purple block">Identity Source Sequence:</strong>
+                                <p class="text-xs text-gray-600 mt-1">可配置按顺序查找多个源 (如先查 AD，失败再查 LDAP，最后查本地)。</p>
+                            </div>
+                        `, "", "border-cisco-purple")}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage5() {
+            return `
+            <div class="page-container">
+                ${renderHeader("05", "策略执行逻辑流水线", "Policy Logic • Execution Flow • Step-by-Step")}
+                
+                <div class="flex-1 flex flex-col justify-center gap-6 h-full px-4">
+                    
+                    <!-- Top Row: Phase 1 & 2 -->
+                    <div class="grid grid-cols-2 gap-8 h-40">
+                        <div class="bg-white p-5 rounded-xl shadow-card border-l-8 border-gray-500 flex flex-col justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-gray-100 p-2 rounded-full">${renderIcon(icons.wifi, 24, "", "text-gray-600")}</div>
+                                <h3 class="text-xl font-bold text-cisco-navy">1. 连接 (Connection)</h3>
+                            </div>
+                            <div class="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded border border-gray-200">
+                                MAB (MAC Address) <br/> 802.1X (EAPOL)
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-card border-l-8 border-cisco-navy flex flex-col justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-gray-100 p-2 rounded-full">${renderIcon(icons.user, 24, "", "text-cisco-navy")}</div>
+                                <h3 class="text-xl font-bold text-cisco-navy">2. 身份 (Identity)</h3>
+                            </div>
+                            <div class="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded border border-gray-200">
+                                Active Directory <br/> Certificate / ODBC
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle Row: Phase 3 & 4 (Policy Set LIGHT MODE) -->
+                    <div class="grid grid-cols-2 gap-8 h-40">
+                        <div class="bg-white p-5 rounded-xl shadow-card border-l-8 border-cisco-blue flex flex-col justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-gray-100 p-2 rounded-full">${renderIcon(icons.search, 24, "", "text-cisco-blue")}</div>
+                                <h3 class="text-xl font-bold text-cisco-navy">3. 上下文 (Context)</h3>
+                            </div>
+                            <div class="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded border border-gray-200">
+                                Profiling (IoT Type) <br/> Location / Time
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-card border-l-8 border-cisco-sky border-r border-t border-b border-gray-200 flex flex-col justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-sky-50 p-2 rounded-full">${renderIcon(icons.settings, 24, "", "text-cisco-dark")}</div>
+                                <h3 class="text-xl font-bold text-cisco-navy">4. 策略集 (Policy Set)</h3>
+                            </div>
+                            <div class="text-sm text-gray-700 font-mono bg-sky-50 p-3 rounded border border-sky-100">
+                                AuthN & AuthZ Rules <br/> IF Condition THEN Result
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: Phase 5 & 6 -->
+                    <div class="grid grid-cols-2 gap-8 h-40">
+                        <div class="bg-white p-5 rounded-xl shadow-card border-l-8 border-cisco-orange flex flex-col justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-gray-100 p-2 rounded-full">${renderIcon(icons.check, 24, "", "text-cisco-orange")}</div>
+                                <h3 class="text-xl font-bold text-cisco-navy">5. 姿态 (Posture)</h3>
+                            </div>
+                            <div class="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded border border-gray-200">
+                                Compliance Check <br/> AnyConnect Agent
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-card border-l-8 border-cisco-green flex flex-col justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-gray-100 p-2 rounded-full">${renderIcon(icons.lock, 24, "", "text-cisco-green")}</div>
+                                <h3 class="text-xl font-bold text-cisco-navy">6. 强制执行 (Enforcement)</h3>
+                            </div>
+                            <div class="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded border border-gray-200 flex justify-between px-4">
+                                <span>VLAN</span> <span>ACL</span> <span>SGT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage6() {
+            return `
+            <div class="page-container">
+                ${renderHeader("06", "核心场景：访客与 BYOD", "Guest Portal • Device Onboarding • Visual Workflows")}
+                
+                <div class="grid grid-cols-2 gap-8 h-full">
+                    
+                    <!-- GUEST ACCESS -->
+                    <div class="flex flex-col gap-5 bg-white p-6 rounded-xl shadow-card border-t-8 border-cisco-orange h-full">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-2">
+                            <div>
+                                <h2 class="text-2xl font-bold text-cisco-navy">访客接入 (Guest Access)</h2>
+                                <p class="text-sm text-gray-500">CWA (Central Web Auth) 流程图</p>
+                            </div>
+                            ${renderIcon(icons.user, 32, "", "text-cisco-orange")}
+                        </div>
+
+                        <!-- SVG Flow for Guest -->
+                        <div class="bg-orange-50 rounded-lg p-4 flex justify-center mb-4 border border-orange-100">
+                            <svg width="100%" height="80" viewBox="0 0 400 80">
+                                <g transform="translate(20,10)">
+                                    <rect x="0" y="0" width="80" height="60" rx="5" fill="white" stroke="#FF9E1B" stroke-width="2"/>
+                                    <text x="40" y="35" text-anchor="middle" font-size="12" fill="#333">1.连接</text>
+                                </g>
+                                <path d="M100 40 L140 40" stroke="#999" stroke-width="2" marker-end="url(#arrow)"/>
+                                <g transform="translate(140,10)">
+                                    <rect x="0" y="0" width="80" height="60" rx="5" fill="white" stroke="#FF9E1B" stroke-width="2"/>
+                                    <text x="40" y="35" text-anchor="middle" font-size="12" fill="#333">2.重定向</text>
+                                </g>
+                                <path d="M220 40 L260 40" stroke="#999" stroke-width="2" marker-end="url(#arrow)"/>
+                                <g transform="translate(260,10)">
+                                    <rect x="0" y="0" width="80" height="60" rx="5" fill="white" stroke="#FF9E1B" stroke-width="2"/>
+                                    <text x="40" y="35" text-anchor="middle" font-size="12" fill="#333">3.认证</text>
+                                </g>
+                                <defs>
+                                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                        <path d="M0,0 L0,6 L9,3 z" fill="#999" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+
+                        <div class="space-y-4 flex-1">
+                            <div class="flex gap-4 items-start">
+                                <div class="w-6 h-6 rounded-full bg-cisco-orange text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1">1</div>
+                                <div>
+                                    <strong class="text-sm text-gray-800 block">重定向 (Redirection)</strong>
+                                    <p class="text-xs text-gray-600 leading-relaxed">用户连接开放 Wi-Fi。发起 HTTP 请求。网络设备拦截并重定向到 ISE 门户 (TCP 8443)。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start">
+                                <div class="w-6 h-6 rounded-full bg-cisco-orange text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1">2</div>
+                                <div>
+                                    <strong class="text-sm text-gray-800 block">门户认证 (Portal Auth)</strong>
+                                    <p class="text-xs text-gray-600 leading-relaxed">输入用户名/密码（赞助商创建）或自注册。接受 AUP 协议。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start">
+                                <div class="w-6 h-6 rounded-full bg-cisco-orange text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1">3</div>
+                                <div>
+                                    <strong class="text-sm text-gray-800 block">CoA Re-Auth</strong>
+                                    <p class="text-xs text-gray-600 leading-relaxed">认证成功。ISE 发送 CoA 给网络设备，强制重新检查权限。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start">
+                                <div class="w-6 h-6 rounded-full bg-cisco-orange text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1">4</div>
+                                <div>
+                                    <strong class="text-sm text-gray-800 block">授权访问</strong>
+                                    <p class="text-xs text-gray-600 leading-relaxed">新的 Radius 请求匹配“已认证访客”策略。ISE 下发 PermitInternet 权限。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BYOD -->
+                    <div class="flex flex-col gap-5 bg-white p-6 rounded-xl shadow-card border-t-8 border-cisco-blue h-full">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-2">
+                            <div>
+                                <h2 class="text-2xl font-bold text-cisco-navy">BYOD 自动注册</h2>
+                                <p class="text-sm text-gray-500">Native Supplicant Provisioning (NSP)</p>
+                            </div>
+                            ${renderIcon(icons.wifi, 32, "", "text-cisco-blue")}
+                        </div>
+
+                        <!-- SVG Flow for BYOD -->
+                        <div class="bg-blue-50 rounded-lg p-4 flex justify-center mb-4 border border-blue-100">
+                            <svg width="100%" height="80" viewBox="0 0 400 80">
+                                <g transform="translate(20,10)">
+                                    <rect x="0" y="0" width="80" height="60" rx="5" fill="white" stroke="#00BCEB" stroke-width="2"/>
+                                    <text x="40" y="25" text-anchor="middle" font-size="10" fill="#333">Open SSID</text>
+                                    <text x="40" y="45" text-anchor="middle" font-size="9" fill="#999">Onboarding</text>
+                                </g>
+                                <path d="M100 40 L140 40" stroke="#999" stroke-width="2" marker-end="url(#arrow)"/>
+                                <g transform="translate(140,10)">
+                                    <rect x="0" y="0" width="80" height="60" rx="5" fill="white" stroke="#00BCEB" stroke-width="2"/>
+                                    <text x="40" y="25" text-anchor="middle" font-size="10" fill="#333">Download</text>
+                                    <text x="40" y="45" text-anchor="middle" font-size="9" fill="#999">Profile/Cert</text>
+                                </g>
+                                <path d="M220 40 L260 40" stroke="#999" stroke-width="2" marker-end="url(#arrow)"/>
+                                <g transform="translate(260,10)">
+                                    <rect x="0" y="0" width="80" height="60" rx="5" fill="white" stroke="#25C266" stroke-width="2"/>
+                                    <text x="40" y="25" text-anchor="middle" font-size="10" fill="#333">Secure SSID</text>
+                                    <text x="40" y="45" text-anchor="middle" font-size="9" fill="#999">EAP-TLS</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="space-y-4 flex-1">
+                            <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-2">
+                                <strong class="text-cisco-navy block text-sm mb-1">Dual SSID 策略 (推荐):</strong>
+                                <ul class="list-disc pl-5 text-xs text-gray-700">
+                                    <li><strong>SSID 1 (Open):</strong> "ISE-Prov". 用于注册。</li>
+                                    <li><strong>SSID 2 (Secure):</strong> "Corp-Secure". EAP-TLS, 仅限已注册设备。</li>
+                                </ul>
+                            </div>
+
+                            <div class="flex gap-4 items-start">
+                                ${renderIcon(icons.settings, 18, "currentColor", "text-cisco-blue shrink-0 mt-1")}
+                                <div>
+                                    <strong class="text-sm text-gray-800">配置下发</strong>
+                                    <p class="text-xs text-gray-600">ISE 推送 NSA 助手或配置文件。自动安装 CA 根证书并申请用户个人证书 (SCEP)。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start">
+                                ${renderIcon(icons.check, 18, "currentColor", "text-cisco-green shrink-0 mt-1")}
+                                <div>
+                                    <strong class="text-sm text-gray-800">无缝切换</strong>
+                                    <p class="text-xs text-gray-600">配置完成后，设备自动断开 Open SSID，使用证书无缝连接 Secure SSID。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage7() {
+            return `
+            <div class="page-container">
+                ${renderHeader("07", "核心场景：合规与微分段", "Posture • TrustSec Matrix • Visualized")}
+                
+                <div class="grid grid-cols-2 gap-8 h-full">
+                    
+                    <!-- POSTURE -->
+                    <div class="flex flex-col gap-5 bg-white p-6 rounded-xl shadow-card border-t-8 border-cisco-purple h-full">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-2">
+                            <div>
+                                <h2 class="text-2xl font-bold text-cisco-navy">态势评估 (Posture)</h2>
+                                <p class="text-sm text-gray-500">端点健康检查流程</p>
+                            </div>
+                            ${renderIcon(icons.check, 32, "", "text-cisco-purple")}
+                        </div>
+
+                        <!-- SVG Illustration -->
+                        <div class="flex justify-center py-4">
+                            <svg width="200" height="80" viewBox="0 0 200 80">
+                                <circle cx="50" cy="40" r="25" fill="none" stroke="#9232ac" stroke-width="4"/>
+                                <text x="50" y="48" text-anchor="middle" fill="#9232ac" font-size="20" font-weight="bold">?</text>
+                                
+                                <path d="M90 40 L110 40" stroke="#999" stroke-width="2" marker-end="url(#arrow)"/>
+                                
+                                <rect x="120" y="10" width="60" height="60" rx="5" fill="#f3e8ff" stroke="#9232ac" stroke-width="2"/>
+                                <path d="M135 40 L145 50 L165 30" fill="none" stroke="#25C266" stroke-width="3"/>
+                            </svg>
+                        </div>
+
+                        <div class="space-y-4 text-sm text-gray-700 flex-1">
+                            <p>使用 <strong>Cisco Secure Client (AnyConnect)</strong> 进行深度扫描。</p>
+                            
+                            <div class="bg-purple-50 p-4 rounded border border-purple-100">
+                                <strong class="text-purple-900 block mb-2">典型检查条件:</strong>
+                                <ul class="grid grid-cols-2 gap-2 text-xs">
+                                    <li class="flex items-center gap-1">✅ 操作系统补丁 (Hotfix)</li>
+                                    <li class="flex items-center gap-1">✅ 杀毒软件库最新</li>
+                                    <li class="flex items-center gap-1">✅ 硬盘加密 (BitLocker)</li>
+                                    <li class="flex items-center gap-1">✅ 注册表/进程检查</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <strong class="block text-gray-800 mb-2">流程逻辑:</strong>
+                                <ol class="list-decimal pl-5 space-y-2 text-xs text-gray-600">
+                                    <li>设备接入，状态为 <strong>Unknown</strong>。重定向到配置门户。</li>
+                                    <li>客户端下载合规模块，后台运行扫描。</li>
+                                    <li><strong>Non-Compliant:</strong> 触发修复 (Remediation)，如自动开启防火墙。</li>
+                                    <li><strong>Compliant:</strong> 汇报 ISE。ISE 发送 CoA 更改状态为 Permit。</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEGMENTATION -->
+                    <div class="flex flex-col gap-5 bg-white p-6 rounded-xl shadow-card border-t-8 border-cisco-green h-full">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-2">
+                            <div>
+                                <h2 class="text-2xl font-bold text-cisco-navy">网络微分段 (TrustSec)</h2>
+                                <p class="text-sm text-gray-500">基于 SGT 矩阵的访问控制</p>
+                            </div>
+                            ${renderIcon(icons.layers, 32, "", "text-cisco-green")}
+                        </div>
+
+                        <div class="border border-gray-200 rounded overflow-hidden mb-4 shadow-sm">
+                            <table class="tech-table text-center w-full">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-gray-100 text-xs">SRC \\ DST</th>
+                                        <th class="bg-blue-50 text-xs">App_Svr (10)</th>
+                                        <th class="bg-blue-50 text-xs">Internet (5)</th>
+                                        <th class="bg-blue-50 text-xs">IoT_GW (15)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="bg-gray-50 font-bold text-xs">Emp (4)</td>
+                                        <td class="bg-green-100 text-green-800 font-bold text-xs">PERMIT</td>
+                                        <td class="bg-green-100 text-green-800 font-bold text-xs">PERMIT</td>
+                                        <td class="bg-red-100 text-red-800 font-bold text-xs">DENY</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-gray-50 font-bold text-xs">IoT (9)</td>
+                                        <td class="bg-red-100 text-red-800 font-bold text-xs">DENY</td>
+                                        <td class="bg-red-100 text-red-800 font-bold text-xs">DENY</td>
+                                        <td class="bg-green-100 text-green-800 font-bold text-xs">PERMIT</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="space-y-4 text-sm text-gray-700 flex-1">
+                            <p>抛弃传统的基于 IP 的 ACL。将用户/设备抽象为“组” (Tags)。</p>
+
+                            <div class="bg-green-50 p-4 rounded border border-green-100">
+                                <strong class="text-green-900 block mb-2 text-sm">关键优势:</strong>
+                                <ul class="list-tech text-xs text-gray-700">
+                                    <li><strong>解耦:</strong> 策略与 IP 无关。网络变更无需修改 ACL。</li>
+                                    <li><strong>自动化:</strong> 交换机从 ISE 下载策略矩阵 (SGACL)。</li>
+                                    <li><strong>一致性:</strong> 跨有线、无线、VPN 统一策略。</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <strong class="text-sm text-gray-800 block mb-2">执行点 (Enforcement):</strong>
+                                <ul class="list-disc pl-5 text-xs text-gray-600 space-y-1">
+                                    <li><strong>Switch/WLC:</strong> 出口方向 (Egress) 过滤。</li>
+                                    <li><strong>Firewall (ASA/FTD):</strong> 基于 SGT 的规则。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderPage8() {
+            return `
+            <div class="page-container font-sans">
+                ${renderHeader("08", "Cisco 安全解决方案与ISE之间的联动", "Unified Security Posture • pxGrid • Rapid Response")}
+                
+                <div class="flex-1 relative bg-slate-50 rounded-xl overflow-hidden border border-slate-200 h-[92%]">
+                    
+                    <!-- 背景装饰 -->
+                    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: linear-gradient(#005073 1px, transparent 1px), linear-gradient(90deg, #005073 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+                    <!-- 中央枢纽 -->
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                        <div class="w-56 h-56 bg-white rounded-full shadow-2xl border-[8px] border-cisco-navy flex flex-col items-center justify-center p-4 text-center">
+                            ${renderIcon(icons.shield, 48, "", "text-cisco-blue mb-2")}
+                            <h2 class="text-2xl font-black text-cisco-navy">ISE 核心枢纽</h2>
+                            <div class="text-[10px] font-bold text-gray-400 tracking-widest uppercase mt-0.5">CONTEXT EXCHANGE</div>
+                            <div class="mt-3 flex gap-2 justify-center">
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[9px] font-mono rounded border">pxGrid</span>
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[9px] font-mono rounded border">REST API</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 连接线 (SVG) -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+                        <line x1="50%" y1="50%" x2="82%" y2="28%" stroke="#E2231A" stroke-width="2" stroke-dasharray="8,4" />
+                        <line x1="50%" y1="50%" x2="82%" y2="82%" stroke="#FF9E1B" stroke-width="2" stroke-dasharray="8,4" />
+                        <line x1="50%" y1="50%" x2="50%" y2="8%" stroke="#00BCEB" stroke-width="2" stroke-dasharray="8,4" />
+                        <line x1="50%" y1="50%" x2="18%" y2="82%" stroke="#25C266" stroke-width="2" stroke-dasharray="8,4" />
+                        <line x1="50%" y1="50%" x2="18%" y2="28%" stroke="#1B252E" stroke-width="2" stroke-dasharray="8,4" />
+                    </svg>
+
+                    <!-- Top Right: Firewall -->
+                    <div class="absolute top-[18%] right-[5%] w-72 bg-white p-4 rounded-xl shadow-xl border-t-8 border-cisco-red z-20">
+                        <div class="flex items-center gap-3 mb-2 border-b border-gray-100 pb-2">
+                            <div class="bg-red-100 p-2 rounded text-cisco-red">${renderIcon(icons.lock, 20)}</div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">思科安全防火墙 (FMC)</h3>
+                                <span class="text-[10px] text-white bg-cisco-red px-2 py-0.5 rounded font-bold">IDENTITY FIREWALL</span>
+                            </div>
+                        </div>
+                        <ul class="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                            <li><strong>共享:</strong> ISE 推送 "User-to-IP" 和 SGT。</li>
+                            <li><strong>策略:</strong> 基于用户组写规则，而非 IP。</li>
+                            <li><strong>遏制:</strong> IPS 发现攻击 -> 自动隔离终端。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Bottom Right: Analytics -->
+                    <div class="absolute bottom-[8%] right-[5%] w-72 bg-white p-4 rounded-xl shadow-xl border-t-8 border-cisco-orange z-20">
+                        <div class="flex items-center gap-3 mb-2 border-b border-gray-100 pb-2">
+                            <div class="bg-orange-100 p-2 rounded text-cisco-orange">${renderIcon(icons.search, 20)}</div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">安全网络分析 (SNA)</h3>
+                                <span class="text-[10px] text-white bg-cisco-orange px-2 py-0.5 rounded font-bold">BEHAVIORAL ANALYTICS</span>
+                            </div>
+                        </div>
+                        <ul class="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                            <li><strong>上下文:</strong> 提供 "Who is IP?" 身份详情。</li>
+                            <li><strong>检测:</strong> 发现数据窃取或异常流量。</li>
+                            <li><strong>响应:</strong> 指示 ISE 实施 Quarantine。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Top Center: DNAC -->
+                    <div class="absolute top-[4%] left-1/2 transform -translate-x-1/2 w-72 bg-white p-4 rounded-xl shadow-xl border-t-8 border-cisco-blue z-20">
+                        <div class="flex items-center gap-3 mb-2 border-b border-gray-100 pb-2">
+                            <div class="bg-blue-100 p-2 rounded text-cisco-blue">${renderIcon(icons.server, 20)}</div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">Catalyst 管理中心</h3>
+                                <span class="text-[10px] text-white bg-cisco-blue px-2 py-0.5 rounded font-bold">SD-ACCESS AUTOMATION</span>
+                            </div>
+                        </div>
+                        <ul class="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                            <li><strong>设计:</strong> 图形化设计策略矩阵 (SGACL)。</li>
+                            <li><strong>执行:</strong> 策略自动同步并推送到全网。</li>
+                            <li><strong>保障:</strong> ISE 提供客户端连接健康数据。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Bottom Left: Duo & MDM -->
+                    <div class="absolute bottom-[8%] left-[5%] w-72 bg-white p-4 rounded-xl shadow-xl border-t-8 border-cisco-green z-20">
+                        <div class="flex items-center gap-3 mb-2 border-b border-gray-100 pb-2">
+                            <div class="bg-green-100 p-2 rounded text-cisco-green">${renderIcon(icons.check, 20)}</div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">零信任接入 (Duo/MDM)</h3>
+                                <span class="text-[10px] text-white bg-cisco-green px-2 py-0.5 rounded font-bold">ZERO TRUST ACCESS</span>
+                            </div>
+                        </div>
+                        <ul class="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                            <li><strong>MFA:</strong> 管理员登录或 VPN 接入触发 Duo。</li>
+                            <li><strong>合规:</strong> 查询 Intune/Jamf。"Non-Compliant" 拒绝接入。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Top Left: XDR -->
+                    <div class="absolute top-[18%] left-[5%] w-72 bg-white p-4 rounded-xl shadow-xl border-t-8 border-cisco-navy z-20">
+                        <div class="flex items-center gap-3 mb-2 border-b border-gray-100 pb-2">
+                            <div class="bg-gray-200 p-2 rounded text-cisco-navy">${renderIcon(icons.layers, 20)}</div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">威胁响应 (XDR)</h3>
+                                <span class="text-[10px] text-white bg-cisco-navy px-2 py-0.5 rounded font-bold">THREAT RESPONSE</span>
+                            </div>
+                        </div>
+                        <ul class="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                            <li><strong>可视:</strong> 统一查看 ISE 用户会话数据。</li>
+                            <li><strong>行动:</strong> SOC 分析师一键触发 ISE 隔离。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Bottom Summary -->
+                    <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 text-center w-3/4">
+                        <p class="text-sm text-gray-500 italic font-medium">
+                            "通过与更广泛的生态系统集成，ISE 将网络从单纯的传输层转变为安全执行者。"
+                        </p>
+                    </div>
+
+                </div>
+            </div>`;
+        }
+
+        // --- 4. 主渲染逻辑 ---
+        
+        const root = document.getElementById('root');
+        const pages = [
+            renderPage1(),
+            renderPage2(),
+            renderPage3(),
+            renderPage4(),
+            renderPage5(),
+            renderPage6(),
+            renderPage7(),
+            renderPage8()
+        ];
+
+        // 拼接所有页面并注入到 DOM
+        root.innerHTML = `<div class="flex flex-col gap-10 print:gap-0">${pages.join('')}</div>`;
+
+    </script>
+</body>
+</html>
