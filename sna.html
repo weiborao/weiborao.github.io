@@ -29,7 +29,6 @@
         body {
             margin: 0;
             padding: 0;
-            /* CHANGED: Light background for screen viewing context to avoid "Dark Mode" feel */
             background-color: #f3f4f6; 
             font-family: var(--font-stack);
             color: var(--text-main);
@@ -53,7 +52,7 @@
             margin-bottom: 20px;
             padding: 12mm;
             position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Softer shadow */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -62,7 +61,7 @@
 
         /* Utility Classes */
         h1, h2, h3, h4 { margin: 0 0 8px 0; font-weight: 700; color: var(--cisco-navy); }
-        h1 { font-size: 24pt; border-bottom: 2px solid var(--cisco-blue); padding-bottom: 10px; margin-bottom: 20px; }
+        h1 { font-size: 24pt; border-bottom: 2px solid var(--cisco-blue); padding-bottom: 10px; margin-bottom: 15px; }
         h2 { font-size: 16pt; color: var(--cisco-blue); margin-top: 10px; border-left: 4px solid var(--cisco-navy); padding-left: 10px; }
         h3 { font-size: 12pt; color: var(--cisco-dark-navy); margin-top: 8px; }
         p { margin-bottom: 8px; text-align: justify; }
@@ -93,6 +92,8 @@
             padding: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .card-header {
             display: flex;
@@ -100,6 +101,10 @@
             margin-bottom: 8px;
             border-bottom: 1px solid #eee;
             padding-bottom: 6px;
+            flex-shrink: 0;
+        }
+        .card-body {
+            flex-grow: 1;
         }
         .card-icon { width: 20px; height: 20px; margin-right: 8px; fill: var(--cisco-blue); }
         .card-title { font-weight: bold; font-size: 11pt; color: var(--cisco-navy); }
@@ -114,8 +119,10 @@
             font-size: 8pt;
             border-bottom: 1px solid #eee;
             padding-bottom: 5px;
+            flex-shrink: 0;
         }
         .page-footer {
+            margin-top: auto; /* Push to bottom if flex container */
             position: absolute;
             bottom: 10mm;
             left: 12mm;
@@ -128,32 +135,29 @@
             padding-top: 5px;
         }
 
-        /* SVG Icons */
-        .icon-lg { width: 40px; height: 40px; }
-        
         /* Custom Components */
         .metric-box {
             text-align: center;
             background: var(--cisco-gray-bg);
-            padding: 10px;
+            padding: 15px;
             border-radius: var(--border-radius);
             border-left: 3px solid var(--cisco-green);
         }
-        .metric-val { font-size: 18pt; font-weight: bold; color: var(--cisco-green); }
-        .metric-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-val { font-size: 20pt; font-weight: bold; color: var(--cisco-green); }
+        .metric-label { font-size: 9pt; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px; }
 
         .arch-diagram {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: var(--cisco-gray-bg);
-            padding: 15px;
+            padding: 10px 15px; /* Compact padding */
             border-radius: var(--border-radius);
             margin: 10px 0;
         }
         .arch-node {
             background: white;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid var(--cisco-blue);
             border-radius: 4px;
             text-align: center;
@@ -180,7 +184,6 @@
 
         /* Specific Table Styling */
         table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-        /* CHANGED: Th background to Blue instead of Navy for brighter look */
         th { background: var(--cisco-blue); color: white; text-align: left; padding: 6px; }
         td { border-bottom: 1px solid #eee; padding: 6px; }
         tr:nth-child(even) { background-color: #f9f9f9; }
@@ -190,7 +193,6 @@
         .pill-blue { background: #e0f7fa; color: #006064; }
         .pill-red { background: #ffebee; color: #b71c1c; }
         .pill-green { background: #e8f5e9; color: #1b5e20; }
-        .pill-purple { background: #f3e5f5; color: #4a148c; }
     </style>
 </head>
 <body>
@@ -204,6 +206,7 @@
 <div class="preview-container">
 
     <!-- PAGE 1: FUNDAMENTALS -->
+    <!-- Optimization: Removed fixed height from grid-3 to allow bottom section to pull up -->
     <div class="page">
         <div class="page-header">
             <span>Cisco Secure Network Analytics (SNA) Technical Whitepaper</span>
@@ -212,18 +215,21 @@
         
         <h1>PART 1: 全貌与核心价值 (The Fundamentals)</h1>
         
-        <div class="grid-3" style="height: 100%;">
+        <!-- Changed height from 100% to auto to reduce white space -->
+        <div class="grid-3" style="margin-bottom: 25px;">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">What: The Network General Ledger</div>
                 </div>
-                <p><strong>定义与隐喻：</strong> SNA (原 Stealthwatch) 是网络的“总账”。如同财务总账记录每一笔交易，SNA 记录每一次网络通信。</p>
-                <ul>
-                    <li><strong>单一事实来源 (Single Source of Truth):</strong> 端点日志可能被黑客擦除，但网络数据包在线路上的传输无法被撤销。Telemetry 数据不可篡改，提供了绝对的客观性。</li>
-                    <li><strong>无代理架构 (Agentless):</strong> 利用现有的路由器、交换机、防火墙作为传感器。无需在服务器或IoT设备上安装 Agent，即可实现对 100% 网络资产的可视化。</li>
-                </ul>
-                <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; margin-top: 10px;">
-                    <small><strong>核心理念：</strong> "Network as a Sensor" (网络即传感器) 与 "Network as an Enforcer" (网络即执行器)。</small>
+                <div class="card-body">
+                    <p><strong>定义与隐喻：</strong> SNA (原 Stealthwatch) 是网络的“总账”。如同财务总账记录每一笔交易，SNA 记录每一次网络通信。</p>
+                    <ul>
+                        <li><strong>单一事实来源:</strong> 端点日志可能被黑客擦除，但网络数据包在线路上的传输无法被撤销。Telemetry 数据不可篡改，提供了绝对的客观性。</li>
+                        <li><strong>无代理架构:</strong> 利用现有的路由器、交换机、防火墙作为传感器。无需在服务器或IoT设备上安装 Agent，即可实现对 100% 网络资产的可视化。</li>
+                    </ul>
+                    <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; margin-top: auto;">
+                        <small><strong>核心理念：</strong> "Network as a Sensor" & "Network as an Enforcer"。</small>
+                    </div>
                 </div>
             </div>
 
@@ -231,68 +237,72 @@
                 <div class="card-header">
                     <div class="card-title">Why: 填补防御盲区</div>
                 </div>
-                <p>解决传统 FW 和 EDR 无法覆盖的痛点：</p>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 8px;">
-                        <span class="pill pill-red">影子 IT & BYOD</span><br>
-                        员工私自接入的未受管设备，无法安装 EDR，但在网络流量中无处遁形。
-                    </li>
-                    <li style="margin-bottom: 8px;">
-                        <span class="pill pill-red">IoT/OT 设备</span><br>
-                        摄像头、打印机、医疗设备等“黑盒”系统，往往是内网薄弱环节。
-                    </li>
-                    <li style="margin-bottom: 8px;">
-                        <span class="pill pill-red">加密流量威胁</span><br>
-                        恶意软件利用 TLS 隐藏 C&C 通信，传统 DPI 无法深入检测。
-                    </li>
-                    <li>
-                        <span class="pill pill-red">横向移动</span><br>
-                        一旦通过边界，黑客在内网的流量通常被信任，防火墙视而不见。
-                    </li>
-                </ul>
+                <div class="card-body">
+                    <p>解决传统 FW 和 EDR 无法覆盖的痛点：</p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 8px;">
+                            <span class="pill pill-red">影子 IT & BYOD</span><br>
+                            员工私自接入的未受管设备，无法安装 EDR，但在网络流量中无处遁形。
+                        </li>
+                        <li style="margin-bottom: 8px;">
+                            <span class="pill pill-red">IoT/OT 设备</span><br>
+                            摄像头、打印机、医疗设备等“黑盒”系统，往往是内网薄弱环节。
+                        </li>
+                        <li style="margin-bottom: 8px;">
+                            <span class="pill pill-red">加密流量威胁</span><br>
+                            恶意软件利用 TLS 隐藏 C&C 通信，传统 DPI 无法深入检测。
+                        </li>
+                        <li>
+                            <span class="pill pill-red">横向移动</span><br>
+                            一旦通过边界，黑客在内网的流量通常被信任，防火墙视而不见。
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">How: 全栈可视与检测</div>
                 </div>
-                <p><strong>覆盖范围：</strong></p>
-                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                    <span class="code-snippet">Campus</span>
-                    <span class="code-snippet">DC</span>
-                    <span class="code-snippet">AWS/Azure</span>
-                    <span class="code-snippet">K8s</span>
+                <div class="card-body">
+                    <p><strong>覆盖范围：</strong></p>
+                    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                        <span class="code-snippet">Campus</span>
+                        <span class="code-snippet">DC</span>
+                        <span class="code-snippet">AWS/Azure</span>
+                    </div>
+                    <p><strong>检测逻辑双引擎：</strong></p>
+                    <ol>
+                        <li style="margin-bottom: 10px;"><strong>统计基线 (Baselining):</strong> 学习“什么是正常”。建立长达数月的流量模型。</li>
+                        <li><strong>实时行为启发式 (Heuristics):</strong> 识别“什么是已知恶”。基于特征的确定性检测。</li>
+                    </ol>
                 </div>
-                <p><strong>检测逻辑双引擎：</strong></p>
-                <ol>
-                    <li><strong>统计基线 (Baselining):</strong> 学习“什么是正常”。建立长达数月的流量模型。</li>
-                    <li><strong>实时行为启发式 (Heuristics):</strong> 识别“什么是已知恶”。基于特征的确定性检测。</li>
-                </ol>
             </div>
         </div>
 
-        <div style="margin-top: 15px;">
+        <!-- Moved up and increased padding for better balance -->
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start;">
             <h2>商业价值 (ROI & Business Value)</h2>
-            <div class="grid-4">
+            <div class="grid-4" style="margin-top: 15px;">
                 <div class="metric-box">
                     <div class="metric-val">↓ 90%</div>
                     <div class="metric-label">MTTD (检测时间)</div>
-                    <small style="color: #666">从事后数月缩短至实时</small>
+                    <small style="color: #666; display: block; margin-top: 5px;">从事后数月缩短至实时</small>
                 </div>
                 <div class="metric-box">
                     <div class="metric-val">↓ 50%</div>
                     <div class="metric-label">MTTR (响应时间)</div>
-                    <small style="color: #666">联动 ISE 自动隔离</small>
+                    <small style="color: #666; display: block; margin-top: 5px;">联动 ISE 自动隔离</small>
                 </div>
                 <div class="metric-box">
                     <div class="metric-val">100x</div>
                     <div class="metric-label">查询速度</div>
-                    <small style="color: #666">Data Store 新架构</small>
+                    <small style="color: #666; display: block; margin-top: 5px;">Data Store 新架构</small>
                 </div>
                 <div class="metric-box">
                     <div class="metric-val">365+ Days</div>
                     <div class="metric-label">数据留存</div>
-                    <small style="color: #666">支持长期取证调查</small>
+                    <small style="color: #666; display: block; margin-top: 5px;">支持长期取证调查</small>
                 </div>
             </div>
         </div>
@@ -390,7 +400,6 @@
             </div>
         </div>
 
-        <!-- CHANGED: Dark block replaced with Light Blue block + Border -->
         <div style="background: #e6f7fd; color: var(--text-main); padding: 15px; border-radius: var(--border-radius); margin-top: 20px; border-left: 5px solid var(--cisco-blue);">
             <h3 style="color: var(--cisco-navy);">Architectural Insight: The Gap Filler</h3>
             <p style="margin:0; font-size: 10pt;">
@@ -405,6 +414,7 @@
     </div>
 
     <!-- PAGE 3: ARCHITECTURE -->
+    <!-- Optimization: Compacted layout even further to fix footer overlap -->
     <div class="page">
         <div class="page-header">
             <span>SNA Technical Whitepaper</span>
@@ -413,11 +423,12 @@
 
         <h1>PART 3.1: 架构组件 (Architecture)</h1>
 
-        <div class="arch-diagram">
+        <!-- Compacted padding and margin -->
+        <div class="arch-diagram" style="padding: 5px 15px; margin: 5px 0 10px 0;">
             <div class="arch-node">
                 <strong>Network Devices</strong><br>
-                <span style="font-size:8pt; color:#666">Routers, Switches, FW</span><br>
-                <span class="code-snippet">NetFlow/IPFIX</span>
+                <span style="font-size:8pt; color:#666">Routers, Switches</span><br>
+                <span class="code-snippet">NetFlow</span>
             </div>
             <div class="arch-arrow"></div>
             <div class="arch-node">
@@ -433,57 +444,60 @@
             </div>
             <div class="arch-arrow"></div>
             <div class="arch-node" style="border-color: var(--cisco-purple); border-width: 2px;">
-                <strong>SNA Manager (SMC)</strong><br>
+                <strong>SNA Manager</strong><br>
                 <span style="font-size:8pt; color:#666">Console & Policy</span><br>
-                <span class="pill pill-green">The Brain</span>
+                <span class="pill pill-green">SMC</span>
             </div>
         </div>
 
-        <div class="grid-2">
+        <!-- Reduced gap and margins to pull content up -->
+        <div class="grid-2" style="margin-bottom: 5px; row-gap: 8px;">
             <div class="card">
                 <div class="card-header"><div class="card-title">1. Flow Collector (FC)</div></div>
-                <p>遥测数据的摄入点。核心功能包括：</p>
-                <ul>
-                    <li><strong>数据去重 (Deduplication):</strong> 相同流量经过多个路由器会产生多条流日志，FC 将其合并，避免虚报流量。</li>
-                    <li><strong>流拼接 (Stitching):</strong> 将双向通信（Inbound/Outbound）拼接为单一会话记录。</li>
-                    <li><strong>NAT 还原:</strong> 结合 FW 日志（如 Cisco ASA/FTD NSEL），关联 NAT 前后的 IP 地址，确保审计可追溯。</li>
+                <!-- Compacted text -->
+                <p style="margin-bottom: 2px; font-size: 9.5pt;">遥测数据的摄入点。核心功能包括：</p>
+                <ul style="margin-bottom: 2px; font-size: 9.5pt;">
+                    <li><strong>数据去重 (Deduplication):</strong> 合并重复流日志。</li>
+                    <li><strong>流拼接 (Stitching):</strong> 拼接双向通信为单会话。</li>
+                    <li><strong>NAT 还原:</strong> 结合 FW 日志关联 NAT 前后 IP。</li>
                 </ul>
             </div>
             <div class="card">
                 <div class="card-header"><div class="card-title">2. SNA Manager (SMC)</div></div>
-                <p>系统的管理控制台与可视化大脑。</p>
-                <ul>
-                    <li><strong>集中管理:</strong> 管理所有 FC 和 Flow Sensors。</li>
-                    <li><strong>可视化:</strong> 提供 Java 客户端 (Legacy) 和 Web UI (Modern) 仪表盘。</li>
-                    <li><strong>策略中心:</strong> 定义主机组 (Host Groups) 和安全策略。</li>
+                <p style="margin-bottom: 2px; font-size: 9.5pt;">系统的管理控制台与可视化大脑。</p>
+                <ul style="margin-bottom: 2px; font-size: 9.5pt;">
+                    <li><strong>集中管理:</strong> 管理所有 FC 和 Sensors。</li>
+                    <li><strong>可视化:</strong> 提供 Java (Legacy) 和 Web UI。</li>
+                    <li><strong>策略中心:</strong> 定义主机组 (Host Groups) 和策略。</li>
                 </ul>
             </div>
             <div class="card">
                 <div class="card-header"><div class="card-title">3. Flow Sensor (FS)</div></div>
-                <p>针对无法生成 NetFlow 的盲区（如纯二层交换环境）提供的 DPI 探针。</p>
-                <ul>
-                    <li><strong>L7 解析:</strong> 基于 SPAN/Mirror 流量，识别应用层协议（HTTP Host, URL, DNS Query）。</li>
-                    <li><strong>性能监控:</strong> 计算 RTT, SRT 等精确延迟指标。</li>
+                <p style="margin-bottom: 2px; font-size: 9.5pt;">针对无法生成 NetFlow 的盲区提供的 DPI 探针。</p>
+                <ul style="margin-bottom: 2px; font-size: 9.5pt;">
+                    <li><strong>L7 解析:</strong> 识别 HTTP Host, URL, DNS。</li>
+                    <li><strong>性能监控:</strong> 计算 RTT, SRT 等延迟指标。</li>
                 </ul>
             </div>
             <div class="card">
                 <div class="card-header"><div class="card-title">4. Cisco Telemetry Broker (CTB)</div></div>
-                <p>现代混合云环境的数据枢纽。</p>
-                <ul>
-                    <li><strong>协议转换:</strong> 将私有日志格式转换为标准 IPFIX。</li>
-                    <li><strong>多云支持:</strong> 摄取 AWS VPC Flow Logs / Azure NSG Logs。</li>
-                    <li><strong>智能路由:</strong> 将数据过滤后分发给 SNA (安全分析) 和 Splunk (合规存储)，降低 SIEM 成本。</li>
+                <p style="margin-bottom: 2px; font-size: 9.5pt;">现代混合云环境的数据枢纽。</p>
+                <ul style="margin-bottom: 2px; font-size: 9.5pt;">
+                    <li><strong>协议转换:</strong> 私有格式转标准 IPFIX。</li>
+                    <li><strong>多云支持:</strong> 摄取 AWS/Azure 流日志。</li>
+                    <li><strong>智能路由:</strong> 过滤分发给 SNA 和 Splunk。</li>
                 </ul>
             </div>
         </div>
         
-        <div style="margin-top: 15px; border: 1px dashed var(--cisco-blue); padding: 10px; border-radius: 6px;">
-            <h3 style="margin-top:0;">Deep Dive: Data Store 架构优势</h3>
-            <p>传统架构使用本地数据库，查询受限。新版 Data Store 采用分布式列式存储集群：</p>
-            <ul class="grid-2" style="margin-bottom:0;">
-                <li><strong>速度:</strong> 查询速度提升 100 倍，秒级返回亿级记录统计。</li>
-                <li><strong>留存:</strong> 支持 1-2 年以上的原始流记录存储，不仅是聚合数据。</li>
-                <li><strong>分离:</strong> 计算 (SMC) 与 存储 (Data Store) 分离，支持弹性扩展。</li>
+        <!-- Deep Dive Box with margin auto to sit at bottom, but now has space -->
+        <div style="margin-top: auto; margin-bottom: 20px; border: 1px dashed var(--cisco-blue); padding: 8px; border-radius: 6px;">
+            <h3 style="margin-top:0; font-size: 11pt;">Deep Dive: Data Store 架构优势</h3>
+            <p style="margin-bottom: 4px; font-size: 9.5pt;">传统架构使用本地数据库，查询受限。新版 Data Store 采用分布式列式存储集群：</p>
+            <ul class="grid-2" style="margin-bottom:0; font-size: 9.5pt;">
+                <li><strong>速度:</strong> 查询速度提升 100 倍，秒级返回亿级记录。</li>
+                <li><strong>留存:</strong> 支持 1-2 年以上的原始流记录存储。</li>
+                <li><strong>分离:</strong> 计算 (SMC) 与 存储 分离，弹性扩展。</li>
             </ul>
         </div>
 
@@ -494,51 +508,54 @@
     </div>
 
     <!-- PAGE 4: DETECTION ENGINES -->
-    <div class="page">
-        <div class="page-header">
+    <!-- Optimization: Tuned font size to 10.8pt and line-height to 1.4 to fix overlap -->
+    <div class="page" style="font-size: 10.8pt; line-height: 1.4;">
+        <div class="page-header" style="font-size: 8pt;">
             <span>SNA Technical Whitepaper</span>
             <span>Technical Deep Dive</span>
         </div>
 
         <h1>PART 3.2: 多层检测引擎 (Multi-Layer Detection)</h1>
 
-        <div class="grid-2" style="height: 100%;">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">1. 行为启发式 (Heuristics)</div>
+        <div class="grid-2" style="height: 100%; gap: 10px;">
+            <div class="card" style="justify-content: space-between;">
+                <div>
+                    <div class="card-header">
+                        <div class="card-title" style="font-size: 12pt;">1. 行为启发式 (Heuristics)</div>
+                    </div>
+                    <p><strong>机制：</strong> 基于预定义的逻辑算法，不依赖历史基线。主要针对已知的攻击特征。</p>
+                    <div style="background: var(--cisco-gray-bg); padding: 10px; border-radius: 4px; margin-top: 8px;">
+                        <strong>典型事件：</strong>
+                        <ul style="margin-bottom:0; margin-top: 5px;">
+                            <li><span class="highlight">Address Scan:</span> 单源 IP 快速访问大量目的 IP。</li>
+                            <li><span class="highlight">Brute Force Login:</span> 短时间内大量的 SSH/RDP 连接尝试。</li>
+                            <li><span class="highlight">High Concern Index:</span> 聚合多个低严重度事件生成的综合评分。</li>
+                        </ul>
+                    </div>
                 </div>
-                <p><strong>机制：</strong> 基于预定义的逻辑算法，不依赖历史基线。主要针对已知的攻击特征。</p>
-                <div style="background: var(--cisco-gray-bg); padding: 10px; border-radius: 4px;">
-                    <strong>典型事件：</strong>
-                    <ul style="margin-bottom:0;">
-                        <li><span class="highlight">Address Scan:</span> 单源 IP 快速访问大量目的 IP。</li>
-                        <li><span class="highlight">Brute Force Login:</span> 短时间内大量的 SSH/RDP 连接尝试（通常伴随小字节包）。</li>
-                        <li><span class="highlight">High Concern Index:</span> 聚合多个低严重度事件生成的综合评分。</li>
-                    </ul>
-                </div>
-                <p style="margin-top:10px; font-size: 9pt;"><strong>优势：</strong> 即插即用，部署当天即可发现简单的扫描和暴力破解行为。</p>
+                <p style="font-size: 10pt; color: #555; margin-top: 8px;"><strong>优势：</strong> 即插即用，部署当天即可发现简单的扫描和暴力破解行为。</p>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">2. 统计学习与基线 (Statistical Baselining)</div>
+                    <div class="card-title" style="font-size: 12pt;">2. 统计学习与基线 (Statistical Baselining)</div>
                 </div>
                 <p><strong>机制：</strong> 动态建立每个主机、主机组的行为模型。</p>
                 
-                <h4 style="margin-top:10px;">Peer Group Baselining (对等组分析)</h4>
+                <h4 style="margin-top:8px; font-size: 11pt;">Peer Group Baselining (对等组分析)</h4>
                 <p>这是 SNA 的杀手锏。它不仅对比“历史的自己”，还对比“同组的伙伴”。</p>
-                <div style="border-left: 3px solid var(--cisco-blue); padding-left: 8px;">
-                    <small><strong>场景：</strong> 假设“市场部 PC”组内的主机通常只访问 Mail 和 Web 服务器。如果有台 PC 突然开始连接 数据库服务器（即使流量不大），这相对于 Peer Group 是异常的。</small>
+                <div style="border-left: 3px solid var(--cisco-blue); padding-left: 8px; margin-top: 5px;">
+                    <small style="font-size: 9.5pt;"><strong>场景：</strong> 假设“市场部 PC”组内的主机通常只访问 Mail 和 Web 服务器。如果有台 PC 突然开始连接 数据库服务器（即使流量不大），这相对于 Peer Group 是异常的。</small>
                 </div>
 
-                <h4 style="margin-top:10px;">技术辩证: "污染的基线"</h4>
-                <p style="font-size: 9pt; color: #555;"><strong>Q: 如果部署时主机已被攻陷，基线是否会被污染？</strong><br>
+                <h4 style="margin-top:8px; font-size: 11pt;">技术辩证: "污染的基线"</h4>
+                <p style="font-size: 10pt; color: #555;"><strong>Q: 如果部署时主机已被攻陷，基线是否会被污染？</strong><br>
                 <strong>A:</strong> 是的，基线会偏高。但 SNA 结合了“全局威胁情报”和“启发式检测”。即使基线被污染，其 C&C 通信仍会触发 Talos 告警，其扫描行为仍会触发启发式规则。</p>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">3. 融合分析 (Converged Analytics)</div>
+                    <div class="card-title" style="font-size: 12pt;">3. 融合分析 (Converged Analytics)</div>
                 </div>
                 <p>基于机器学习的高级分析层，通过云端或本地引擎处理。</p>
                 <ul>
@@ -549,7 +566,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">4. Cisco Talos 威胁情报</div>
+                    <div class="card-title" style="font-size: 12pt;">4. Cisco Talos 威胁情报</div>
                 </div>
                 <p>全球最大的非政府威胁情报组织。</p>
                 <ul>
@@ -784,7 +801,6 @@
         <h1>PART 4.3: 勒索软件防御 (Ransomware Defense)</h1>
 
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <!-- CHANGED: Dark block replaced with Light Blue block + Border -->
             <div style="width:30%; background:#e6f7fd; color:var(--text-main); padding:15px; border-radius:var(--border-radius); border-left: 5px solid var(--cisco-blue);">
                 <h3 style="color:var(--cisco-navy);">Kill Chain View</h3>
                 <p style="font-size:9pt;">勒索软件不仅仅是最后的“加密”。它包含一系列网络行为。SNA 的目标是在“加密”发生前阻断它。</p>
@@ -931,7 +947,6 @@
 
         <h1>PART 4.5: 网络运维协同 (NetOps/SecOps Convergence)</h1>
 
-        <!-- CHANGED: Dark block replaced with Cisco Blue (lighter appearance via Gradient) -->
         <div style="background: linear-gradient(135deg, #00bceb, #0096bb); color: white; padding: 15px; border-radius: var(--border-radius); margin-bottom: 20px;">
             <h3 style="color: white; margin: 0;">MTTI: Mean Time To Innocence (缩短无辜证明时间)</h3>
             <p style="margin: 5px 0 0 0; font-size: 10pt;">当应用变慢时，由于指责游戏（是网络问题？还是应用问题？），排查往往耗时。SNA 提供客观数据来终结争论。</p>
@@ -991,40 +1006,41 @@
     </div>
 
     <!-- PAGE 11: WORKFLOW -->
-    <div class="page">
-        <div class="page-header">
+    <!-- Optimization: Increased font size to 12pt and padding for fullness -->
+    <div class="page" style="font-size: 12pt; line-height: 1.6;">
+        <div class="page-header" style="font-size: 8pt;">
             <span>SNA Technical Whitepaper</span>
             <span>Operations</span>
         </div>
 
         <h1>PART 5: 数据流向与运营流程 (Workflow)</h1>
 
-        <div class="grid-3" style="height: 100%;">
-            <div class="card" style="border-top: 4px solid var(--cisco-blue);">
-                <div class="card-header"><div class="card-title">Step 1: 广泛采集 (Ingest)</div></div>
+        <div class="grid-3" style="height: 100%; gap: 20px;">
+            <div class="card" style="border-top: 5px solid var(--cisco-blue); padding: 20px;">
+                <div class="card-header"><div class="card-title" style="font-size: 14pt;">Step 1: 广泛采集 (Ingest)</div></div>
                 <p>尽可能从所有接触点获取遥测数据：</p>
                 <ul>
                     <li><strong>Infrastructure:</strong> 开启 Core/Distribution Switch, Edge Routers 的 NetFlow/IPFIX。</li>
-                    <li><strong>Firewalls:</strong> 集成 Cisco FTD/ASA (通过 Security Analytics and Logging - SAL) 获取事件日志。</li>
+                    <li><strong>Firewalls:</strong> 集成 Cisco FTD/ASA (通过 SAL) 获取事件日志。</li>
                     <li><strong>Proxy:</strong> 集成 WSA / Zscaler 日志。</li>
                     <li><strong>Endpoints:</strong> 部署 AnyConnect NVM 模块，获取进程级可视性。</li>
                 </ul>
-                <div class="code-snippet" style="margin-top: 10px; text-align: center;">Target: 100% Network Visibility</div>
+                <div class="code-snippet" style="margin-top: 15px; text-align: center; font-size: 11pt;">Target: 100% Network Visibility</div>
             </div>
 
-            <div class="card" style="border-top: 4px solid var(--cisco-purple);">
-                <div class="card-header"><div class="card-title">Step 2: 关联分析 (Correlate)</div></div>
+            <div class="card" style="border-top: 5px solid var(--cisco-purple); padding: 20px;">
+                <div class="card-header"><div class="card-title" style="font-size: 14pt;">Step 2: 关联分析 (Correlate)</div></div>
                 <p>原始 IP 地址缺乏上下文。此阶段通过集成 <strong>Cisco ISE</strong> 丰富数据：</p>
                 <ul>
                     <li><strong>Identity:</strong> 谁登录了该 IP？(AD User)</li>
                     <li><strong>Device:</strong> 设备类型是什么？(iPad, Printer)</li>
                     <li><strong>SGT (Security Group Tag):</strong> 安全组标记是什么？</li>
                 </ul>
-                <p style="margin-top:10px;">SMC 将这些上下文“缝合”到流记录中，使告警从 "10.1.1.1 访问恶意网站" 变为 "HR员工 Bob 的 iPad 访问恶意网站"。</p>
+                <p style="margin-top:15px;">SMC 将这些上下文“缝合”到流记录中，使告警从 "10.1.1.1 访问恶意网站" 变为 "HR员工 Bob 的 iPad 访问恶意网站"。</p>
             </div>
 
-            <div class="card" style="border-top: 4px solid var(--cisco-red);">
-                <div class="card-header"><div class="card-title">Step 3: 告警与响应 (Act)</div></div>
+            <div class="card" style="border-top: 5px solid var(--cisco-red); padding: 20px;">
+                <div class="card-header"><div class="card-title" style="font-size: 14pt;">Step 3: 告警与响应 (Act)</div></div>
                 <p>将洞察转化为行动：</p>
                 <ul>
                     <li><strong>告警分级:</strong> 区分 Critical, Major, Minor 事件。利用 Host Groups 策略降噪。</li>
@@ -1040,9 +1056,9 @@
             </div>
         </div>
         
-        <div style="margin-top: 20px; padding: 10px; background: #fafafa; border: 1px solid #ddd; border-radius: 4px;">
-            <strong>运营最佳实践 (Best Practices):</strong>
-            <ul>
+        <div style="margin-top: 25px; padding: 20px; background: #fafafa; border: 1px solid #ddd; border-radius: 4px;">
+            <strong style="font-size: 13pt;">运营最佳实践 (Best Practices):</strong>
+            <ul style="margin-top: 10px;">
                 <li><strong>Host Group Tuning:</strong> 部署初期的首要任务。准确划分 "Catch All" 里的 IP 到正确的组（如 Servers, Users, Printers），是消除误报的关键。</li>
                 <li><strong>Baseline Training:</strong> 系统通常需要 2-4 周时间建立稳定的基线。在此期间不要急于开启所有阻断策略。</li>
             </ul>
@@ -1133,7 +1149,6 @@
 
         <h1>PART 7: 总结与订购 (Summary & Ordering)</h1>
 
-        <!-- CHANGED: Dark block replaced with Gradient Blue -->
         <div style="background: linear-gradient(135deg, #00bceb, #006064); color: white; padding: 20px; border-radius: var(--border-radius); text-align: center; margin-bottom: 20px;">
             <h2 style="color: white; border: none; margin: 0;">The Network is The Sensor</h2>
             <p style="margin-top: 10px; font-size: 11pt; text-align: center;">
