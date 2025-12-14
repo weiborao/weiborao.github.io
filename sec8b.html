@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>智能安全闭环系统深度报告</title>
+    <title>Intelligent Security Closed-Loop / 智能安全闭环系统</title>
     
     <style>
-        /* --- 1. Cisco Official Brand Colors (2024/2025 Palette) --- */
+        /* --- 1. Cisco Official Brand Colors --- */
         :root {
             /* Primary Colors */
-            --cisco-midnight: #0D274D;      /* Deep Backgrounds */
-            --cisco-heritage-blue: #1B4170; /* Primary Actions/Headers */
-            --cisco-sky-blue: #00BCEB;      /* Highlights/Icons/Graphs */
+            --cisco-midnight: #0D274D;
+            --cisco-heritage-blue: #1B4170;
+            --cisco-sky-blue: #00BCEB;
             
-            /* Supporting Colors */
-            --cisco-green: #6ABF4B;         /* Success/Safe */
-            --cisco-red: #E2231A;           /* Alert/Threat */
-            --cisco-orange: #F99D22;        /* Warning/AI/Intelligence */
-            --cisco-slate: #6E6E6E;         /* Neutral Text */
+            /* Status Colors */
+            --cisco-green: #6ABF4B;
+            --cisco-red: #E2231A;
+            --cisco-orange: #F99D22;
             
-            /* UI Colors */
+            /* Neutrals */
             --color-bg: #F4F5F7;
             --color-card: #FFFFFF;
             --color-text-main: #333333;
-            --border-radius: 12px;
-            --shadow: 0 4px 12px rgba(13, 39, 77, 0.08);
+            --color-text-light: #58585B;
+            --border-color: #E5E5E5;
         }
 
         /* --- 2. Global Resets --- */
@@ -39,16 +38,49 @@
             padding-bottom: 60px;
         }
 
+        /* Language Toggle Button */
+        .lang-switch-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 4px;
+            display: flex;
+            border: 1px solid var(--cisco-heritage-blue);
+        }
+
+        .lang-btn {
+            border: none;
+            background: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--cisco-heritage-blue);
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background-color: var(--cisco-heritage-blue);
+            color: white;
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+
         /* Typography */
         h1 { font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
         h2 { font-size: 1.4rem; color: var(--cisco-heritage-blue); font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--cisco-sky-blue); }
         h3 { font-size: 1.2rem; color: var(--cisco-midnight); font-weight: 700; margin-bottom: 0.8rem; }
         h4 { font-size: 1rem; color: var(--cisco-heritage-blue); font-weight: 700; margin-bottom: 0.4rem; }
-        p { font-size: 0.95rem; color: #4B5563; margin-bottom: 1rem; text-align: justify; }
+        p { font-size: 0.95rem; color: var(--color-text-light); margin-bottom: 1rem; text-align: justify; }
         .text-sm { font-size: 0.85rem; }
-        .text-xs { font-size: 0.75rem; }
         
-        /* Desktop Scaling */
         @media (min-width: 768px) {
             h1 { font-size: 2.8rem; }
             h2 { font-size: 2rem; }
@@ -64,14 +96,13 @@
 
         .card {
             background: var(--color-card);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(13, 39, 77, 0.08);
             padding: 24px;
             margin-bottom: 24px;
             border-top: 4px solid transparent;
         }
 
-        /* Grid System */
         .grid { display: grid; gap: 24px; }
         .grid-cols-1 { grid-template-columns: 1fr; }
         
@@ -81,20 +112,19 @@
             .md-span-2 { grid-column: span 2; }
         }
 
-        /* --- 4. Component Styles --- */
+        /* --- 4. Components --- */
         
-        /* Header */
         header {
             background: linear-gradient(135deg, var(--cisco-midnight) 0%, var(--cisco-heritage-blue) 100%);
             color: white;
-            padding: 4rem 0 3rem;
+            padding: 6rem 0 3rem; /* Extra padding for toggle button */
             text-align: center;
             clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
             margin-bottom: 2rem;
         }
         .subtitle { color: var(--cisco-sky-blue); font-weight: 600; font-size: 1.1rem; }
 
-        /* Question Section (The Hook) */
+        /* The Hook (Questions) */
         .question-box {
             background: #FFF;
             border-left: 5px solid var(--cisco-red);
@@ -103,13 +133,14 @@
             border-radius: 0 8px 8px 0;
             display: flex;
             align-items: start;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .q-icon { font-size: 1.5rem; margin-right: 12px; line-height: 1; color: var(--cisco-red); }
-        .q-text { font-weight: 600; color: var(--cisco-midnight); font-size: 0.95rem; }
+        .q-icon { font-size: 1.5rem; margin-right: 12px; line-height: 1; color: var(--cisco-red); font-weight: bold; }
+        .q-text { font-weight: 600; color: var(--cisco-midnight); font-size: 0.95rem; text-align: left; }
 
-        /* Feature Cards (Common Ground) */
+        /* Feature Cards (What/Why/How) */
         .feature-card {
-            border: 1px solid #E5E7EB;
+            border: 1px solid var(--border-color);
             transition: transform 0.2s;
         }
         .feature-card:active { transform: scale(0.98); }
@@ -130,7 +161,7 @@
         .tag-why { background: #DCFCE7; color: var(--cisco-green); }
         .tag-how { background: #FEF3C7; color: var(--cisco-orange); }
 
-        /* Chart Containers */
+        /* Chart Wrapper */
         .chart-wrapper {
             width: 100%;
             height: 280px;
@@ -143,7 +174,7 @@
         }
         svg { width: 100%; height: 100%; overflow: visible; }
 
-        /* Scenario 2: Timeline */
+        /* Timeline (Scenario 2) */
         .timeline { position: relative; padding-left: 24px; border-left: 2px solid #E5E7EB; margin-left: 12px; }
         .timeline-item { position: relative; margin-bottom: 32px; }
         .timeline-item:last-child { margin-bottom: 0; }
@@ -156,7 +187,7 @@
         }
         
         .timeline-card {
-            background: #1F2937; /* Dark mode card for hacker context */
+            background: #1F2937; /* Dark Mode Card */
             color: #F3F4F6;
             padding: 16px;
             border-radius: 8px;
@@ -164,9 +195,9 @@
             border-left: 4px solid var(--cisco-sky-blue);
         }
         .timeline-card h4 { color: var(--cisco-sky-blue); }
-        .timeline-card p { color: #D1D5DB; font-size: 0.9rem; margin: 0; }
+        .timeline-card p { color: #D1D5DB; font-size: 0.9rem; margin: 0; text-align: left; }
 
-        /* Chemical Reaction - FIXED LAYOUT */
+        /* Reaction Flow (Conclusion) */
         .reaction-wrapper {
             background: linear-gradient(135deg, var(--cisco-heritage-blue), var(--cisco-midnight));
             color: white;
@@ -175,7 +206,6 @@
             text-align: center;
         }
         
-        /* Default Mobile: Vertical Column */
         .reaction-flow {
             display: flex;
             flex-direction: column;
@@ -184,13 +214,12 @@
             margin-top: 2rem;
         }
 
-        /* Tablet/Desktop: Horizontal Row */
-        /* Lowered breakpoint to 640px to ensure it goes horizontal on more devices */
-        @media (min-width: 640px) {
+        /* Desktop: Horizontal Layout */
+        @media (min-width: 768px) {
             .reaction-flow {
                 flex-direction: row;
                 justify-content: center;
-                align-items: flex-start; /* Align tops */
+                align-items: flex-start;
             }
         }
 
@@ -201,29 +230,29 @@
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.2);
             flex: 1;
-            min-width: 200px; /* Ensure content fits */
+            min-width: 200px;
             max-width: 300px;
         }
+        .reaction-step p { text-align: center; color: #E0F2FE; }
 
         .reaction-arrow {
             font-size: 2rem;
             color: var(--cisco-sky-blue);
-            transform: rotate(90deg); /* Points down on Mobile */
+            transform: rotate(90deg); /* Mobile: Down */
             margin: 0;
             align-self: center;
         }
 
-        @media (min-width: 640px) {
+        @media (min-width: 768px) {
             .reaction-arrow {
-                transform: rotate(0deg); /* Points right on Desktop */
-                margin-top: 50px; /* Vertically center with cards */
+                transform: rotate(0deg); /* Desktop: Right */
+                margin-top: 50px;
             }
         }
 
-        /* Animation */
+        /* Utilities */
         .animate-enter { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-        
         .animate-draw { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawLine 2s ease-out forwards; }
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
 
@@ -231,303 +260,545 @@
 </head>
 <body>
 
-    <header>
-        <div class="container">
-            <h1 class="animate-enter" style="animation-delay: 0.1s;">智能安全闭环系统</h1>
-            <p class="subtitle animate-enter" style="animation-delay: 0.2s;">eBPF Tetragon + Splunk + Foundation-sec-8B</p>
-            <div style="margin-top: 1rem; opacity: 0.8; font-size: 0.9rem;" class="animate-enter" style="animation-delay: 0.3s;">
-                深度感知 · 全局关联 · 认知决策
-            </div>
-        </div>
-    </header>
+    <!-- Language Switcher -->
+    <div class="lang-switch-container">
+        <button class="lang-btn active" id="btn-cn" onclick="switchLang('cn')">中文</button>
+        <button class="lang-btn" id="btn-en" onclick="switchLang('en')">EN</button>
+    </div>
 
-    <main class="container">
-
-        <!-- 1. The Hook: 痛点提问 -->
-        <section class="animate-enter" style="animation-delay: 0.4s;">
-            <h2 style="border: none; margin-bottom: 0.5rem;">您是否也面临这些挑战？</h2>
-            <div class="question-box">
-                <span class="q-icon">?</span>
-                <span class="q-text">您是否遭遇过Linux主机急需打关键补丁，但因为担心重启会导致核心业务停机，而不得不冒险“裸奔”？</span>
-            </div>
-            <div class="question-box">
-                <span class="q-icon">?</span>
-                <span class="q-text">您是否遇到过服务器CPU利用率长期99%，却查不出原因？直到三个月后收到云厂商账单，才发现被植入了挖矿脚本？检测和响应时间（MTTD/MTTR）为何如此漫长？</span>
-            </div>
-            <div class="question-box">
-                <span class="q-icon">?</span>
-                <span class="q-text">您是否曾因信任第三方开源库，却不知其中潜伏着恶意代码（供应链投毒）？等到两年后漏洞爆发时，您的数据早已泄露。</span>
-            </div>
-        </section>
-
-        <!-- 2. Common Ground: 普世介绍 -->
-        <section class="card animate-enter" style="animation-delay: 0.5s;">
-            <h2>核心技术：通俗解读</h2>
-            <p>面对上述挑战，我们引入了三位“超级专家”，组成了新一代的智能安全闭环系统。</p>
-            
-            <div class="grid grid-cols-1 md-grid-cols-3">
-                <!-- Tetragon -->
-                <div class="feature-card tetragon" style="padding: 16px; border-radius: 8px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px;">🔬</div>
-                    <h3>eBPF Tetragon</h3>
-                    <p class="text-sm" style="font-weight: bold; color: var(--cisco-heritage-blue);">系统的“透视眼”</p>
-                    
-                    <div style="margin-top: 10px;">
-                        <span class="wwh-tag tag-what">What</span>
-                        <p class="text-sm">它是安装在Linux内核（系统心脏）中的高清监控探头。基于eBPF技术，无需修改内核即可运行。</p>
-                        
-                        <span class="wwh-tag tag-why">Why</span>
-                        <p class="text-sm">传统杀毒软件运行在应用层，容易被黑客绕过或致系统卡顿。Tetragon 运行在底层，黑客无法隐身，且对性能几乎零影响。</p>
-                        
-                        <span class="wwh-tag tag-how">How</span>
-                        <p class="text-sm">它在系统关键关卡（如文件打开、网络连接）设立哨卡，一旦发现违规行为，不仅能记录，还能当场拦截。</p>
-                    </div>
-                </div>
-
-                <!-- Splunk -->
-                <div class="feature-card splunk" style="padding: 16px; border-radius: 8px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px;">🧠</div>
-                    <h3>Splunk</h3>
-                    <p class="text-sm" style="font-weight: bold; color: var(--cisco-sky-blue);">系统的“超级大脑”</p>
-                    
-                    <div style="margin-top: 10px;">
-                        <span class="wwh-tag tag-what">What</span>
-                        <p class="text-sm">它是大数据的汇聚中心，负责收集、存储并分析海量的机器数据。</p>
-                        
-                        <span class="wwh-tag tag-why">Why</span>
-                        <p class="text-sm">单一的线索（如一次登录失败）说明不了问题，但将千万个线索拼在一起，就能还原攻击全貌。人类做不到，但Splunk可以。</p>
-                        
-                        <span class="wwh-tag tag-how">How</span>
-                        <p class="text-sm">它接收Tetragon传来的数据，通过关联规则（SIEM）发现异常，并通过自动化编排（SOAR）指挥系统进行响应。</p>
-                    </div>
-                </div>
-
-                <!-- LLM -->
-                <div class="feature-card llm" style="padding: 16px; border-radius: 8px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px;">🔮</div>
-                    <h3>Foundation-sec-8B</h3>
-                    <p class="text-sm" style="font-weight: bold; color: var(--cisco-orange);">系统的“AI 军师”</p>
-                    
-                    <div style="margin-top: 10px;">
-                        <span class="wwh-tag tag-what">What</span>
-                        <p class="text-sm">它是Cisco开源的、专精于网络安全的大语言模型。它读过无数安全报告，懂代码，也懂黑客思维。</p>
-                        
-                        <span class="wwh-tag tag-why">Why</span>
-                        <p class="text-sm">面对复杂攻击，人工分析需要数小时查资料、写脚本。AI军师可以秒级推理出攻击意图，并生成防御代码。</p>
-                        
-                        <span class="wwh-tag tag-how">How</span>
-                        <p class="text-sm">它阅读Splunk的警报，像侦探一样推理，并自动生成修复脚本或拦截策略，交给Tetragon执行。</p>
-                    </div>
+    <!-- ======================= CHINESE CONTENT ======================= -->
+    <div id="content-cn">
+        <header>
+            <div class="container">
+                <h1 class="animate-enter">智能安全闭环系统</h1>
+                <p class="subtitle animate-enter" style="text-align: center;">eBPF Tetragon + Splunk + Foundation-sec-8B</p>
+                <div style="margin-top: 1rem; opacity: 0.8; font-size: 0.9rem;" class="animate-enter">
+                    深度感知 · 全局关联 · 认知决策
                 </div>
             </div>
-        </section>
+        </header>
 
-        <!-- 3. Frameworks: 专业背书 -->
-        <section class="card">
-            <h2>安全框架与体系映射</h2>
-            <p>为了确保系统的专业性与合规性，我们将该方案对标业界两大权威框架：<strong>NIST CSF 2.0</strong>（美国国家标准与技术研究院网络安全框架）和 <strong>MITRE ATT&CK</strong>（对抗战术、技术和常识知识库）。</p>
-            
-            <div class="grid grid-cols-1 md-grid-cols-2" style="align-items: center;">
-                <div>
-                    <h4 style="margin-top: 1rem;">NIST CSF 2.0 覆盖</h4>
-                    <p class="text-sm">NIST CSF 定义了治理、识别、保护、检测、响应、恢复六大功能。本系统重点强化了后四个环节。</p>
-                    <ul style="list-style: none; margin-top: 1rem;">
-                        <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
-                            <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
-                            <span class="text-sm"><strong>保护 (Protect):</strong> Tetragon 在内核层直接阻断恶意调用，无需等待上层应用反应。</span>
-                        </li>
-                        <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
-                            <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
-                            <span class="text-sm"><strong>检测 (Detect):</strong> Splunk 关联内核信号与网络日志，发现潜伏威胁。</span>
-                        </li>
-                        <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
-                            <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
-                            <span class="text-sm"><strong>响应 & 恢复 (Respond/Recover):</strong> Foundation-sec-8B 自动生成止损策略，大幅缩短 MTTR。</span>
-                        </li>
-                    </ul>
+        <main class="container">
+            <!-- 1. The Hook -->
+            <section class="animate-enter">
+                <h2 style="border: none;">您是否也面临这些挑战？</h2>
+                <div class="question-box">
+                    <span class="q-icon">?</span>
+                    <span class="q-text">您是否遭遇过Linux主机急需打关键补丁，但因为担心重启会导致核心业务停机，而不得不冒险“裸奔”？</span>
                 </div>
-                
-                <div style="text-align: center;">
-                    <h4 style="margin-bottom: 1rem;">能力提升对比</h4>
-                    <div class="chart-wrapper" id="radar-chart"></div>
-                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.8rem;">
-                        <span style="color: #999;">● 传统 SIEM</span>
-                        <span style="color: var(--cisco-sky-blue); font-weight: bold;">● 智能闭环系统</span>
-                    </div>
+                <div class="question-box">
+                    <span class="q-icon">?</span>
+                    <span class="q-text">您是否遇到过服务器CPU利用率长期99%，却查不出原因？直到三个月后收到云厂商账单，才发现被植入了挖矿脚本？</span>
                 </div>
-            </div>
-        </section>
-
-        <!-- 4. Scenario 1: Linux Host Security -->
-        <section class="card">
-            <h2>场景一：Linux 主机防御与自动修复</h2>
-            
-            <div style="background: #F0F9FF; padding: 16px; border-radius: 8px; border-left: 4px solid var(--cisco-heritage-blue); margin-bottom: 20px;">
-                <h4 style="margin-bottom: 5px;">背景与挑战</h4>
-                <p class="text-sm" style="margin-bottom: 0;">Linux 是现代云基础设施的基石。其主要安全目标是保证<strong>机密性</strong>（数据不泄露）和<strong>完整性</strong>（系统不被篡改）。如果不做防护，黑客利用 Rootkit（内核级后门）潜伏，甚至修改日志擦除痕迹，导致企业在数据被窃取数月后才察觉。</p>
-            </div>
-
-            <div class="grid grid-cols-1 md-grid-cols-2">
-                <div>
-                    <h4>MTTD (平均检测时间) 与 MTTR (平均响应时间)</h4>
-                    <p class="text-sm">在传统模式下，运维人员收到告警后，需要登录服务器、查日志、Google 报错代码、编写修复脚本、测试脚本、申请变更窗口……这个过程通常耗时数小时甚至数天。</p>
-                    <p class="text-sm">智能闭环系统通过 AI 自动化了“调查-决策-编码”的过程，将时间压缩至分钟级。</p>
+                <div class="question-box">
+                    <span class="q-icon">?</span>
+                    <span class="q-text">您是否曾因信任第三方开源库，却不知其中潜伏着恶意代码（供应链投毒）？等到两年后漏洞爆发时，您的数据早已泄露。</span>
                 </div>
-                <div class="chart-wrapper" id="bar-chart"></div>
-            </div>
-        </section>
+            </section>
 
-        <!-- 5. Scenario 2: Honeypot -->
-        <section class="card" style="background: linear-gradient(to bottom, #111827, #1F2937); color: white;">
-            <h2 style="color: white; border-color: #374151;">场景二：高交互蜜罐内的意图分析</h2>
-            
-            <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-                <h4 style="color: var(--cisco-sky-blue);">什么是蜜罐？为什么传统蜜罐看不清？</h4>
-                <p class="text-sm" style="color: #D1D5DB; margin-bottom: 0;">
-                    蜜罐是故意暴露给黑客的“诱饵”系统。它不仅能吸引攻击，更能消耗黑客资源并提取威胁情报。
-                    <br><br>
-                    <strong>传统痛点：</strong> 高级黑客进入系统后，第一件事就是关闭审计服务（Auditd）并删除日志（<code>rm -rf /var/log/*</code>）。传统安全工具基于日志文件工作，一旦日志被删，就变成了“瞎子”。
-                    <br><br>
-                    <strong>新方案优势：</strong> Tetragon 运行在内核内存中，黑客无法在用户空间删除它。即使黑客删除了文件，Tetragon 依然能记录下“删除文件”这一动作本身，以及黑客在内存中执行的每一个命令。
-                </p>
-            </div>
-
-            <h4 style="color: white; margin-bottom: 20px;">MITRE ATT&CK 攻击链还原</h4>
-            <div class="timeline">
-                <!-- T0 -->
-                <div class="timeline-item">
-                    <div class="timeline-dot" style="border-color: var(--cisco-heritage-blue);"></div>
-                    <div class="timeline-card">
-                        <div style="display: flex; justify-content: space-between;">
-                            <h4>Tetragon (深度感知)</h4>
-                            <span style="font-family: monospace; color: #9CA3AF;">T=0s</span>
+            <!-- 2. Common Ground -->
+            <section class="card animate-enter">
+                <h2>核心技术：通俗解读</h2>
+                <p>面对挑战，我们引入了三位“超级专家”，组成了新一代的智能安全闭环系统。</p>
+                <div class="grid grid-cols-1 md-grid-cols-3">
+                    <div class="feature-card tetragon" style="padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔬</div>
+                        <h3>eBPF Tetragon</h3>
+                        <p class="text-sm" style="font-weight: bold; color: var(--cisco-heritage-blue);">系统的“透视眼”</p>
+                        <div style="margin-top: 12px;">
+                            <span class="wwh-tag tag-what">What</span>
+                            <p class="text-sm">它是安装在Linux内核（系统心脏）中的高清监控探头。基于eBPF技术，无需修改内核即可运行。</p>
+                            <span class="wwh-tag tag-why">Why</span>
+                            <p class="text-sm">传统杀毒软件易被绕过或致系统卡顿。Tetragon 运行在底层，黑客无法隐身，且对性能几乎零影响。</p>
+                            <span class="wwh-tag tag-how">How</span>
+                            <p class="text-sm">它在系统关键关卡（如文件打开、网络连接）设立哨卡，一旦发现违规行为，不仅能记录，还能当场拦截。</p>
                         </div>
-                        <p>捕获到隐蔽进程启动 <code>/bin/sh</code>，并尝试通过 <code>socket_connect</code> 连接外部陌生 IP。即使黑客修改了进程名伪装成 <code>nginx</code>，内核 ID 依然暴露了它。</p>
                     </div>
-                </div>
-
-                <!-- T+0.5 -->
-                <div class="timeline-item">
-                    <div class="timeline-dot" style="border-color: var(--cisco-sky-blue);"></div>
-                    <div class="timeline-card" style="border-left-color: var(--cisco-heritage-blue);">
-                        <div style="display: flex; justify-content: space-between;">
-                            <h4 style="color: var(--cisco-sky-blue);">Splunk (ATT&CK 映射)</h4>
-                            <span style="font-family: monospace; color: #9CA3AF;">T+0.5s</span>
+                    <div class="feature-card splunk" style="padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🧠</div>
+                        <h3>Splunk</h3>
+                        <p class="text-sm" style="font-weight: bold; color: var(--cisco-sky-blue);">系统的“超级大脑”</p>
+                        <div style="margin-top: 12px;">
+                            <span class="wwh-tag tag-what">What</span>
+                            <p class="text-sm">它是大数据的汇聚中心，负责收集、存储并分析海量的机器数据。</p>
+                            <span class="wwh-tag tag-why">Why</span>
+                            <p class="text-sm">单一的线索（如一次登录失败）说明不了问题，但将千万个线索拼在一起，就能还原攻击全貌。人类做不到，但Splunk可以。</p>
+                            <span class="wwh-tag tag-how">How</span>
+                            <p class="text-sm">它接收Tetragon传来的数据，通过关联规则（SIEM）发现异常，并通过自动化编排（SOAR）指挥系统进行响应。</p>
                         </div>
-                        <p>将内核信号映射到攻击矩阵：
-                        <br>• <strong>执行 (Execution):</strong> T1059 (Command-Line)
-                        <br>• <strong>C2 通信:</strong> T1071 (App Layer Protocol)</p>
                     </div>
-                </div>
-
-                <!-- T+2.0 -->
-                <div class="timeline-item">
-                    <div class="timeline-dot" style="border-color: var(--cisco-orange);"></div>
-                    <div class="timeline-card" style="border-left-color: var(--cisco-orange);">
-                        <div style="display: flex; justify-content: space-between;">
-                            <h4 style="color: var(--cisco-orange);">Foundation-sec-8B (意图推理)</h4>
-                            <span style="font-family: monospace; color: #9CA3AF;">T+2.0s</span>
+                    <div class="feature-card llm" style="padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔮</div>
+                        <h3>Foundation-sec-8B</h3>
+                        <p class="text-sm" style="font-weight: bold; color: var(--cisco-orange);">系统的“AI 军师”</p>
+                        <div style="margin-top: 12px;">
+                            <span class="wwh-tag tag-what">What</span>
+                            <p class="text-sm">它是Cisco开源的、专精于网络安全的大语言模型。它读过无数安全报告，懂代码，也懂黑客思维。</p>
+                            <span class="wwh-tag tag-why">Why</span>
+                            <p class="text-sm">面对复杂攻击，人工分析需要数小时查资料、写脚本。AI军师可以秒级推理出攻击意图，并生成防御代码。</p>
+                            <span class="wwh-tag tag-how">How</span>
+                            <p class="text-sm">它阅读Splunk的警报，像侦探一样推理，并自动生成修复脚本或拦截策略，交给Tetragon执行。</p>
                         </div>
-                        <p>AI 分析黑客输入的命令序列。推理结论：“攻击者正在尝试下载勒索软件载荷，尚未开始加密”。建议：立即切断网络并抓取内存快照。</p>
                     </div>
                 </div>
+            </section>
 
-                <!-- T+3.0 -->
-                <div class="timeline-item">
-                    <div class="timeline-dot" style="border-color: var(--cisco-green);"></div>
-                    <div class="timeline-card" style="border-left-color: var(--cisco-green);">
-                        <div style="display: flex; justify-content: space-between;">
-                            <h4 style="color: var(--cisco-green);">闭环响应 (Enforce)</h4>
-                            <span style="font-family: monospace; color: #9CA3AF;">T+3.0s</span>
+            <!-- 3. Frameworks -->
+            <section class="card">
+                <h2>安全框架与体系映射</h2>
+                <p>为了确保系统的专业性与合规性，我们将该方案对标业界两大权威框架：<strong>NIST CSF 2.0</strong>（美国国家标准与技术研究院网络安全框架）和 <strong>MITRE ATT&CK</strong>（对抗战术、技术和常识知识库）。</p>
+                <div class="grid grid-cols-1 md-grid-cols-2" style="align-items: center;">
+                    <div>
+                        <h4 style="margin-top: 1rem;">NIST CSF 2.0 覆盖</h4>
+                        <p class="text-sm">NIST CSF 定义了治理、识别、保护、检测、响应、恢复六大功能。本系统重点强化了后四个环节。</p>
+                        <ul style="list-style: none; margin-top: 1rem;">
+                            <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
+                                <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
+                                <span class="text-sm"><strong>保护 (Protect):</strong> Tetragon 在内核层直接阻断恶意调用，无需等待上层应用反应。</span>
+                            </li>
+                            <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
+                                <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
+                                <span class="text-sm"><strong>检测 (Detect):</strong> Splunk 关联内核信号与网络日志，发现潜伏威胁。</span>
+                            </li>
+                            <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
+                                <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
+                                <span class="text-sm"><strong>响应 & 恢复 (Respond/Recover):</strong> Foundation-sec-8B 自动生成止损策略，大幅缩短 MTTR。</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4 style="margin-bottom: 1rem;">能力提升对比</h4>
+                        <div class="chart-wrapper" id="radar-chart-cn"></div>
+                        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.8rem;">
+                            <span style="color: #999;">● 传统 SIEM</span>
+                            <span style="color: var(--cisco-sky-blue); font-weight: bold;">● 智能闭环系统</span>
                         </div>
-                        <p>系统自动下发 eBPF 网络策略，静默丢弃该进程的所有出站流量，黑客以为网络卡顿，实则已成瓮中之鳖。</p>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- 6. Scenario 3: Supply Chain -->
-        <section class="card">
-            <h2>场景三：供应链投毒与基线漂移检测</h2>
-            
-            <div style="background: #FFF7ED; padding: 16px; border-radius: 8px; border-left: 4px solid var(--cisco-orange); margin-bottom: 20px;">
-                <h4 style="margin-bottom: 5px; color: #C2410C;">什么是供应链攻击？</h4>
-                <p class="text-sm" style="margin-bottom: 0;">
-                    当您从官方渠道下载了一个软件更新，您会默认它是安全的。但如果黑客入侵了软件开发商，在官方更新包里植入了后门，这就是供应链攻击（如著名的 SolarWinds 事件）。
-                    <br>这类攻击利用了“信任”，因此极难防御。传统杀毒软件通常会放行有数字签名的官方程序。
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md-grid-cols-3">
-                <div class="md-span-2">
-                    <div class="chart-wrapper" id="line-chart"></div>
+            <!-- 4. Scenario 1 -->
+            <section class="card">
+                <h2>场景一：Linux 主机防御与自动修复</h2>
+                <div style="background: #F0F9FF; padding: 16px; border-radius: 8px; border-left: 4px solid var(--cisco-heritage-blue); margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 5px;">背景与挑战</h4>
+                    <p class="text-sm" style="margin-bottom: 0;">Linux 是现代云基础设施的基石。其主要安全目标是保证<strong>机密性</strong>（数据不泄露）和<strong>完整性</strong>（系统不被篡改）。如果不做防护，黑客利用 Rootkit（内核级后门）潜伏，甚至修改日志擦除痕迹，导致企业在数据被窃取数月后才察觉。</p>
                 </div>
-                <div style="display: flex; flex-direction: column; justify-content: center; gap: 1rem;">
-                    <div style="border-left: 3px solid #9CA3AF; padding-left: 10px;">
-                        <strong>1. 画像建立 (Profiling)</strong>
-                        <p class="text-sm">Tetragon 在软件正常运行时，学习其行为基线（例如：该软件只读写 /var/log，从不连接外网）。</p>
+                <div class="grid grid-cols-1 md-grid-cols-2">
+                    <div>
+                        <h4>MTTD (平均检测时间) 与 MTTR (平均响应时间)</h4>
+                        <p class="text-sm">在传统模式下，运维人员收到告警后，需要登录服务器、查日志、Google 报错代码、编写修复脚本、测试脚本、申请变更窗口……这个过程通常耗时数小时甚至数天。</p>
+                        <p class="text-sm">智能闭环系统通过 AI 自动化了“调查-决策-编码”的过程，将时间压缩至分钟级。</p>
                     </div>
-                    <div style="border-left: 3px solid var(--cisco-red); padding-left: 10px;">
-                        <strong style="color: var(--cisco-red);">2. 漂移检测 (Drift)</strong>
-                        <p class="text-sm">软件更新后，突然尝试读取 <code>/etc/shadow</code>（密码文件）。这偏离了基线！Splunk 立即告警。</p>
+                    <div class="chart-wrapper" id="bar-chart-cn"></div>
+                </div>
+            </section>
+
+            <!-- 5. Scenario 2 -->
+            <section class="card" style="background: linear-gradient(to bottom, #111827, #1F2937); color: white;">
+                <h2 style="color: white; border-color: #374151;">场景二：高交互蜜罐内的意图分析</h2>
+                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                    <h4 style="color: var(--cisco-sky-blue);">什么是蜜罐？为什么传统蜜罐看不清？</h4>
+                    <p class="text-sm" style="color: #D1D5DB; margin-bottom: 0;">
+                        蜜罐是故意暴露给黑客的“诱饵”系统。它不仅能吸引攻击，更能消耗黑客资源并提取威胁情报。
+                        <br><br>
+                        <strong>传统痛点：</strong> 高级黑客进入系统后，第一件事就是关闭审计服务（Auditd）并删除日志（<code>rm -rf /var/log/*</code>）。传统安全工具基于日志文件工作，一旦日志被删，就变成了“瞎子”。
+                        <br><br>
+                        <strong>新方案优势：</strong> Tetragon 运行在内核内存中，黑客无法在用户空间删除它。即使黑客删除了文件，Tetragon 依然能记录下“删除文件”这一动作本身，以及黑客在内存中执行的每一个命令。
+                    </p>
+                </div>
+                <h4 style="color: white; margin-bottom: 20px;">MITRE ATT&CK 攻击链还原</h4>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-heritage-blue);"></div>
+                        <div class="timeline-card">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4>Tetragon (深度感知)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T=0s</span>
+                            </div>
+                            <p>捕获到隐蔽进程启动 <code>/bin/sh</code>，并尝试通过 <code>socket_connect</code> 连接外部陌生 IP。即使黑客修改了进程名伪装成 <code>nginx</code>，内核 ID 依然暴露了它。</p>
+                        </div>
                     </div>
-                    <div style="border-left: 3px solid var(--cisco-orange); padding-left: 10px;">
-                        <strong style="color: var(--cisco-orange);">3. 智能定性</strong>
-                        <p class="text-sm">AI 介入分析：这是新功能的正常行为，还是后门特征？结合威胁情报，AI 判定为恶意后门。</p>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-sky-blue);"></div>
+                        <div class="timeline-card" style="border-left-color: var(--cisco-heritage-blue);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4 style="color: var(--cisco-sky-blue);">Splunk (ATT&CK 映射)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T+0.5s</span>
+                            </div>
+                            <p>将内核信号映射到攻击矩阵：<br>• <strong>执行 (Execution):</strong> T1059 (Command-Line)<br>• <strong>C2 通信:</strong> T1071 (App Layer Protocol)</p>
+                        </div>
                     </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-orange);"></div>
+                        <div class="timeline-card" style="border-left-color: var(--cisco-orange);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4 style="color: var(--cisco-orange);">Foundation-sec-8B (意图推理)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T+2.0s</span>
+                            </div>
+                            <p>AI 分析黑客输入的命令序列。推理结论：“攻击者正在尝试下载勒索软件载荷，尚未开始加密”。建议：立即切断网络并抓取内存快照。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-green);"></div>
+                        <div class="timeline-card" style="border-left-color: var(--cisco-green);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4 style="color: var(--cisco-green);">闭环响应 (Enforce)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T+3.0s</span>
+                            </div>
+                            <p>系统自动下发 eBPF 网络策略，静默丢弃该进程的所有出站流量，黑客以为网络卡顿，实则已成瓮中之鳖。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Scenario 3 -->
+            <section class="card">
+                <h2>场景三：供应链投毒与基线漂移检测</h2>
+                <div style="background: #FFF7ED; padding: 16px; border-radius: 8px; border-left: 4px solid var(--cisco-orange); margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 5px; color: #C2410C;">什么是供应链攻击？</h4>
+                    <p class="text-sm" style="margin-bottom: 0;">
+                        当您从官方渠道下载了一个软件更新，您会默认它是安全的。但如果黑客入侵了软件开发商，在官方更新包里植入了后门，这就是供应链攻击（如著名的 SolarWinds 事件）。
+                        <br>这类攻击利用了“信任”，因此极难防御。传统杀毒软件通常会放行有数字签名的官方程序。
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md-grid-cols-3">
+                    <div class="md-span-2">
+                        <div class="chart-wrapper" id="line-chart-cn"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: center; gap: 1rem;">
+                        <div style="border-left: 3px solid #9CA3AF; padding-left: 10px;">
+                            <strong>1. 画像建立 (Profiling)</strong>
+                            <p class="text-sm">Tetragon 在软件正常运行时，学习其行为基线（例如：该软件只读写 /var/log，从不连接外网）。</p>
+                        </div>
+                        <div style="border-left: 3px solid var(--cisco-red); padding-left: 10px;">
+                            <strong style="color: var(--cisco-red);">2. 漂移检测 (Drift)</strong>
+                            <p class="text-sm">软件更新后，突然尝试读取 <code>/etc/shadow</code>（密码文件）。这偏离了基线！Splunk 立即告警。</p>
+                        </div>
+                        <div style="border-left: 3px solid var(--cisco-orange); padding-left: 10px;">
+                            <strong style="color: var(--cisco-orange);">3. 智能定性</strong>
+                            <p class="text-sm">AI 介入分析：这是新功能的正常行为，还是后门特征？结合威胁情报，AI 判定为恶意后门。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Conclusion -->
+            <section class="reaction-wrapper animate-enter">
+                <h2 style="color: white; border-bottom: none;">系统的“化学反应”</h2>
+                <p style="color: var(--cisco-sky-blue); font-size: 1.1rem; margin-bottom: 2rem;">当三个组件结合，我们构建了 IDPR (识别-检测-保护-响应) 的完整自动化闭环。</p>
+                <div class="reaction-flow">
+                    <div class="reaction-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔬</div>
+                        <h3 style="color: white;">深度感知 (Depth)</h3>
+                        <p style="color: #E0F2FE;">Tetragon 提供了传统工具无法企及的内核级视野，让攻击者无处遁形。</p>
+                    </div>
+                    <div class="reaction-arrow">➜</div>
+                    <div class="reaction-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🧠</div>
+                        <h3 style="color: white;">全局关联 (Context)</h3>
+                        <p style="color: #E0F2FE;">Splunk 将孤立的内核信号编织成完整的攻击故事，赋予数据以前后文意义。</p>
+                    </div>
+                    <div class="reaction-arrow">➜</div>
+                    <div class="reaction-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔮</div>
+                        <h3 style="color: white;">认知决策 (Cognition)</h3>
+                        <p style="color: #E0F2FE;">Foundation-sec-8B 将人类专家的经验转化为秒级响应代码，实现防御的自动化。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer style="text-align: center; padding: 2rem; color: #6B7280; font-size: 0.85rem; background: var(--cisco-midnight);">
+            <p style="color: #9CA3AF;">© 2025 安全研究报告 | Cisco Technology Stack Integration Analysis</p>
+        </footer>
+    </div>
+
+    <!-- ======================= ENGLISH CONTENT ======================= -->
+    <div id="content-en" class="hidden">
+        <header>
+            <div class="container">
+                <h1 class="animate-enter">Intelligent Security Closed-Loop</h1>
+                <p class="subtitle animate-enter" style="text-align: center;">eBPF Tetragon + Splunk + Foundation-sec-8B</p>
+                <div style="margin-top: 1rem; opacity: 0.8; font-size: 0.9rem;" class="animate-enter">
+                    Depth · Context · Cognition
                 </div>
             </div>
-        </section>
+        </header>
 
-        <!-- 7. Conclusion: Chemical Reaction -->
-        <section class="reaction-wrapper animate-enter">
-            <h2 style="color: white; border-bottom: none;">系统的“化学反应”</h2>
-            <p style="color: var(--cisco-sky-blue); font-size: 1.1rem; margin-bottom: 2rem;">当三个组件结合，我们构建了 IDPR (识别-检测-保护-响应) 的完整自动化闭环。</p>
-            
-            <div class="reaction-flow">
-                <div class="reaction-step">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px;">🔬</div>
-                    <h3 style="color: white;">深度感知 (Depth)</h3>
-                    <p class="text-sm" style="color: #E0F2FE;">Tetragon 提供了传统工具无法企及的内核级视野，让攻击者无处遁形。</p>
+        <main class="container">
+            <!-- 1. The Hook -->
+            <section class="animate-enter">
+                <h2 style="border: none;">Have You Faced These Challenges?</h2>
+                <div class="question-box">
+                    <span class="q-icon">?</span>
+                    <span class="q-text">Have you ever hesitated to patch a critical Linux host because you feared the reboot would cause business downtime, forcing you to run vulnerable?</span>
                 </div>
-                
-                <div class="reaction-arrow">➜</div>
-                
-                <div class="reaction-step">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px;">🧠</div>
-                    <h3 style="color: white;">全局关联 (Context)</h3>
-                    <p class="text-sm" style="color: #E0F2FE;">Splunk 将孤立的内核信号编织成完整的攻击故事，赋予数据以前后文意义。</p>
+                <div class="question-box">
+                    <span class="q-icon">?</span>
+                    <span class="q-text">Have you experienced server CPU usage hitting 99% for unknown reasons, only to discover 3 months later via a cloud bill that it was a crypto miner? Why was detection (MTTD) so slow?</span>
                 </div>
-                
-                <div class="reaction-arrow">➜</div>
-                
-                <div class="reaction-step">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px;">🔮</div>
-                    <h3 style="color: white;">认知决策 (Cognition)</h3>
-                    <p class="text-sm" style="color: #E0F2FE;">Foundation-sec-8B 将人类专家的经验转化为秒级响应代码，实现防御的自动化。</p>
+                <div class="question-box">
+                    <span class="q-icon">?</span>
+                    <span class="q-text">Have you unknowingly used a third-party software library containing malicious code (Supply Chain Poisoning), only to find out two years later when data was leaked?</span>
                 </div>
-            </div>
-        </section>
+            </section>
 
-    </main>
+            <!-- 2. Common Ground -->
+            <section class="card animate-enter">
+                <h2>Core Technologies: The "Super Team"</h2>
+                <p>To address these challenges, we introduce a new generation of intelligent security comprising three "Super Experts".</p>
+                <div class="grid grid-cols-1 md-grid-cols-3">
+                    <div class="feature-card tetragon" style="padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔬</div>
+                        <h3>eBPF Tetragon</h3>
+                        <p class="text-sm" style="font-weight: bold; color: var(--cisco-heritage-blue);">The "X-Ray Vision"</p>
+                        <div style="margin-top: 12px;">
+                            <span class="wwh-tag tag-what">What</span>
+                            <p class="text-sm">A high-definition CCTV camera installed deep in the Linux Kernel. Uses eBPF technology to run without modifying the kernel.</p>
+                            <span class="wwh-tag tag-why">Why</span>
+                            <p class="text-sm">Traditional antivirus runs in the app layer and can be bypassed or slow down the system. Tetragon runs at the bottom layer; hackers cannot hide, and performance impact is near zero.</p>
+                            <span class="wwh-tag tag-how">How</span>
+                            <p class="text-sm">It sets up checkpoints at key system events (file opens, network connects). If a violation occurs, it not only records it but can block it instantly.</p>
+                        </div>
+                    </div>
+                    <div class="feature-card splunk" style="padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🧠</div>
+                        <h3>Splunk</h3>
+                        <p class="text-sm" style="font-weight: bold; color: var(--cisco-sky-blue);">The "Super Brain"</p>
+                        <div style="margin-top: 12px;">
+                            <span class="wwh-tag tag-what">What</span>
+                            <p class="text-sm">The central hub for Big Data, responsible for collecting, storing, and analyzing massive amounts of machine data.</p>
+                            <span class="wwh-tag tag-why">Why</span>
+                            <p class="text-sm">A single clue implies little, but piecing together thousands of clues reveals the full attack. Humans can't process this scale, but Splunk can.</p>
+                            <span class="wwh-tag tag-how">How</span>
+                            <p class="text-sm">It ingests Tetragon data, uses correlation rules (SIEM) to detect anomalies, and orchestrates the system response via automation (SOAR).</p>
+                        </div>
+                    </div>
+                    <div class="feature-card llm" style="padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔮</div>
+                        <h3>Foundation-sec-8B</h3>
+                        <p class="text-sm" style="font-weight: bold; color: var(--cisco-orange);">The "AI Strategist"</p>
+                        <div style="margin-top: 12px;">
+                            <span class="wwh-tag tag-what">What</span>
+                            <p class="text-sm">A specialized security LLM open-sourced by Cisco. It has read millions of security reports, understands code, and knows hacker psychology.</p>
+                            <span class="wwh-tag tag-why">Why</span>
+                            <p class="text-sm">Complex attacks require hours of human analysis to research and script fixes. This AI Strategist can infer intent and generate defense code in seconds.</p>
+                            <span class="wwh-tag tag-how">How</span>
+                            <p class="text-sm">It reads Splunk alerts, reasons like a detective, and automatically generates remediation scripts or blocking policies for Tetragon.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    <footer style="text-align: center; padding: 2rem; color: #6B7280; font-size: 0.85rem; background: var(--cisco-midnight);">
-        <p style="color: #9CA3AF;">© 2025 安全研究报告 | Cisco Technology Stack Integration Analysis</p>
-    </footer>
+            <!-- 3. Frameworks -->
+            <section class="card">
+                <h2>Security Framework Mapping</h2>
+                <p>To ensure professionalism, we map this solution to industry standards: <strong>NIST CSF 2.0</strong> and <strong>MITRE ATT&CK</strong>.</p>
+                <div class="grid grid-cols-1 md-grid-cols-2" style="align-items: center;">
+                    <div>
+                        <h4 style="margin-top: 1rem;">NIST CSF 2.0 Coverage</h4>
+                        <p class="text-sm">NIST CSF defines Govern, Identify, Protect, Detect, Respond, and Recover. This system revolutionizes the latter four.</p>
+                        <ul style="list-style: none; margin-top: 1rem;">
+                            <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
+                                <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
+                                <span class="text-sm"><strong>Protect:</strong> Tetragon blocks malicious syscalls in the kernel, not waiting for apps to react.</span>
+                            </li>
+                            <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
+                                <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
+                                <span class="text-sm"><strong>Detect:</strong> Splunk correlates kernel signals with network logs to find hidden threats.</span>
+                            </li>
+                            <li style="margin-bottom: 0.8rem; display: flex; align-items: start;">
+                                <span style="color: var(--cisco-green); margin-right: 8px;">●</span>
+                                <span class="text-sm"><strong>Respond & Recover:</strong> Foundation-sec-8B generates mitigation strategies, drastically reducing MTTR.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4 style="margin-bottom: 1rem;">Capability Score</h4>
+                        <div class="chart-wrapper" id="radar-chart-en"></div>
+                        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.8rem;">
+                            <span style="color: #999;">● Traditional SIEM</span>
+                            <span style="color: var(--cisco-sky-blue); font-weight: bold;">● Integrated Solution</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    <!-- Native JS for SVG Charts -->
+            <!-- 4. Scenario 1 -->
+            <section class="card">
+                <h2>Scenario 1: Linux Host Defense & Auto-Remediation</h2>
+                <div style="background: #F0F9FF; padding: 16px; border-radius: 8px; border-left: 4px solid var(--cisco-heritage-blue); margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 5px;">Background & Challenge</h4>
+                    <p class="text-sm" style="margin-bottom: 0;">Linux is the bedrock of cloud infrastructure. Its security goals are <strong>Confidentiality</strong> (no leaks) and <strong>Integrity</strong> (no tampering). Without protection, hackers use Rootkits (kernel backdoors) to hide, even deleting logs to erase tracks, leaving enterprises unaware of data theft for months.</p>
+                </div>
+                <div class="grid grid-cols-1 md-grid-cols-2">
+                    <div>
+                        <h4>MTTD (Mean Time To Detect) & MTTR (Respond)</h4>
+                        <p class="text-sm">In traditional modes, upon alert, admins must manually investigate logs, Google errors, write scripts, test, and schedule downtime... taking hours or days.</p>
+                        <p class="text-sm">The Intelligent Closed-Loop automates the "Investigate-Decide-Code" process via AI, compressing time to minutes.</p>
+                    </div>
+                    <div class="chart-wrapper" id="bar-chart-en"></div>
+                </div>
+            </section>
+
+            <!-- 5. Scenario 2 -->
+            <section class="card" style="background: linear-gradient(to bottom, #111827, #1F2937); color: white;">
+                <h2 style="color: white; border-color: #374151;">Scenario 2: Intention Analysis in a Honeypot</h2>
+                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                    <h4 style="color: var(--cisco-sky-blue);">What is a Honeypot? Why are old ones "blind"?</h4>
+                    <p class="text-sm" style="color: #D1D5DB; margin-bottom: 0;">
+                        A honeypot is a "decoy" system exposed to attract hackers. 
+                        <br><br><strong>Traditional Pain Point:</strong> Advanced hackers disable audit services and delete logs immediately upon entry. Traditional security tools based on log files become blind.
+                        <br><br><strong>New Solution:</strong> Tetragon runs in kernel memory. Hackers cannot delete it from user space. Even if they delete files, Tetragon records the *act* of deletion and every command executed in memory.
+                    </p>
+                </div>
+                <h4 style="color: white; margin-bottom: 20px;">MITRE ATT&CK Chain Reconstruction</h4>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-heritage-blue);"></div>
+                        <div class="timeline-card">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4>Tetragon (Deep Perception)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T=0s</span>
+                            </div>
+                            <p>Captures stealthy process start <code>/bin/sh</code> and attempt to <code>socket_connect</code> to unknown external IP. Even if renamed to <code>nginx</code>, the Kernel ID exposes it.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-sky-blue);"></div>
+                        <div class="timeline-card" style="border-left-color: var(--cisco-heritage-blue);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4 style="color: var(--cisco-sky-blue);">Splunk (ATT&CK Map)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T+0.5s</span>
+                            </div>
+                            <p>Maps kernel signals to attack matrix:<br>• <strong>Execution:</strong> T1059 (Command-Line)<br>• <strong>C2 Channel:</strong> T1071 (App Layer Protocol)</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-orange);"></div>
+                        <div class="timeline-card" style="border-left-color: var(--cisco-orange);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4 style="color: var(--cisco-orange);">Foundation-sec-8B (Intent)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T+2.0s</span>
+                            </div>
+                            <p>AI analyzes command sequence. Conclusion: "Attacker attempting to download ransomware payload, encryption not started." Recommendation: Cut network.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="border-color: var(--cisco-green);"></div>
+                        <div class="timeline-card" style="border-left-color: var(--cisco-green);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4 style="color: var(--cisco-green);">Closed-Loop (Enforce)</h4>
+                                <span style="font-family: monospace; color: #9CA3AF;">T+3.0s</span>
+                            </div>
+                            <p>System auto-deploys eBPF policy to silently drop outbound traffic. The hacker thinks the network lags, but is actually trapped.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Scenario 3 -->
+            <section class="card">
+                <h2>Scenario 3: Supply Chain Poisoning & Drift Detection</h2>
+                <div style="background: #FFF7ED; padding: 16px; border-radius: 8px; border-left: 4px solid var(--cisco-orange); margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 5px; color: #C2410C;">What is a Supply Chain Attack?</h4>
+                    <p class="text-sm" style="margin-bottom: 0;">
+                        When you download an update from an official source, you trust it. But if hackers compromise the software vendor and inject a backdoor into the official update, that is a Supply Chain Attack (e.g., SolarWinds). It exploits "trust" and is hard to defend against.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md-grid-cols-3">
+                    <div class="md-span-2">
+                        <div class="chart-wrapper" id="line-chart-en"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: center; gap: 1rem;">
+                        <div style="border-left: 3px solid #9CA3AF; padding-left: 10px;">
+                            <strong>1. Profiling</strong>
+                            <p class="text-sm">Tetragon learns the normal baseline of the software (e.g., only reads /var/log).</p>
+                        </div>
+                        <div style="border-left: 3px solid var(--cisco-red); padding-left: 10px;">
+                            <strong style="color: var(--cisco-red);">2. Drift Detection</strong>
+                            <p class="text-sm">After an update, it suddenly tries to read <code>/etc/shadow</code>. This deviates from the baseline! Splunk alerts.</p>
+                        </div>
+                        <div style="border-left: 3px solid var(--cisco-orange); padding-left: 10px;">
+                            <strong style="color: var(--cisco-orange);">3. Classification</strong>
+                            <p class="text-sm">AI analyzes behavior: "Is this a new feature or a backdoor?" Using threat intel, AI identifies it as malicious.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Conclusion -->
+            <section class="reaction-wrapper animate-enter">
+                <h2 style="color: white; border-bottom: none;">The "Chemical Reaction"</h2>
+                <p style="color: var(--cisco-sky-blue); font-size: 1.1rem; margin-bottom: 2rem;">When combined, we build a complete IDPR (Identify-Detect-Protect-Respond) Automated Loop.</p>
+                <div class="reaction-flow">
+                    <div class="reaction-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔬</div>
+                        <h3 style="color: white;">Depth</h3>
+                        <p style="color: #E0F2FE;">Tetragon provides kernel-level visibility traditional tools cannot match.</p>
+                    </div>
+                    <div class="reaction-arrow">➜</div>
+                    <div class="reaction-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🧠</div>
+                        <h3 style="color: white;">Context</h3>
+                        <p style="color: #E0F2FE;">Splunk weaves isolated signals into a complete attack story.</p>
+                    </div>
+                    <div class="reaction-arrow">➜</div>
+                    <div class="reaction-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔮</div>
+                        <h3 style="color: white;">Cognition</h3>
+                        <p style="color: #E0F2FE;">Foundation-sec-8B converts experience into sub-second response.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer style="text-align: center; padding: 2rem; color: #6B7280; font-size: 0.85rem; background: var(--cisco-midnight);">
+            <p style="color: #9CA3AF;">© 2025 Security Report | Cisco Technology Stack Integration Analysis</p>
+        </footer>
+    </div>
+
+    <!-- Native JS for Interaction & Charts -->
     <script>
-        // Colors
         const ChartColors = {
             blue: '#1B4170', sky: '#00BCEB', green: '#6ABF4B', 
             red: '#E2231A', gray: '#9CA3AF', orange: '#F99D22'
         };
 
-        // 1. Radar Chart (NIST CSF)
-        function drawRadar() {
-            const el = document.getElementById('radar-chart');
+        // Switch Language Function
+        function switchLang(lang) {
+            const cn = document.getElementById('content-cn');
+            const en = document.getElementById('content-en');
+            const btnCn = document.getElementById('btn-cn');
+            const btnEn = document.getElementById('btn-en');
+
+            if (lang === 'cn') {
+                cn.classList.remove('hidden');
+                en.classList.add('hidden');
+                btnCn.classList.add('active');
+                btnEn.classList.remove('active');
+            } else {
+                cn.classList.add('hidden');
+                en.classList.remove('hidden');
+                btnCn.classList.remove('active');
+                btnEn.classList.add('active');
+            }
+        }
+
+        // --- Chart Generators (Reusable) ---
+
+        // 1. Radar Chart
+        function drawRadar(lang) {
+            const id = lang === 'cn' ? 'radar-chart-cn' : 'radar-chart-en';
+            const el = document.getElementById(id);
+            if(!el) return;
+
             const w = 350, h = 260, cx = 175, cy = 130, r = 80;
-            const labels = ['治理', '识别', '保护', '检测', '响应', '恢复'];
+            const labels = lang === 'cn' 
+                ? ['治理', '识别', '保护', '检测', '响应', '恢复']
+                : ['Govern', 'Identify', 'Protect', 'Detect', 'Respond', 'Recover'];
+            
             const dataOld = [3, 3, 2, 4, 2, 2];
             const dataNew = [4, 5, 5, 5, 5, 4];
             
@@ -543,7 +814,7 @@
                 svg += `<polygon points="${points.join(' ')}" fill="none" stroke="#E5E7EB" stroke-width="1"/>`;
             }
             
-            // Axes & Labels
+            // Labels
             for(let j=0; j<6; j++){
                 let a = (Math.PI*2/6)*j - Math.PI/2;
                 let x = cx + r*Math.cos(a);
@@ -562,69 +833,73 @@
 
             svg += `<polygon points="${getPoints(dataOld)}" fill="#9CA3AF" fill-opacity="0.2" stroke="${ChartColors.gray}" stroke-width="2" />`;
             svg += `<polygon points="${getPoints(dataNew)}" fill="${ChartColors.sky}" fill-opacity="0.2" stroke="${ChartColors.sky}" stroke-width="2" class="animate-draw"/>`;
-            
             svg += `</svg>`;
             el.innerHTML = svg;
         }
 
-        // 2. Bar Chart (MTTD/MTTR)
-        function drawBar() {
-            const el = document.getElementById('bar-chart');
+        // 2. Bar Chart
+        function drawBar(lang) {
+            const id = lang === 'cn' ? 'bar-chart-cn' : 'bar-chart-en';
+            const el = document.getElementById(id);
+            if(!el) return;
+
             const w = 400, h = 250, p = 30;
+            const labels = lang === 'cn' ? ['检测 (MTTD)', '响应 (MTTR)'] : ['Detect (MTTD)', 'Respond (MTTR)'];
             let svg = `<svg viewBox="0 0 ${w} ${h}">`;
             
-            // Axis
             svg += `<line x1="${p}" y1="${h-p}" x2="${w-p}" y2="${h-p}" stroke="#9CA3AF"/>`;
             
-            // Group 1: MTTD
+            // G1
             svg += `<rect x="70" y="${h-p-100}" width="40" height="100" fill="${ChartColors.red}" rx="4"/>`;
             svg += `<text x="90" y="${h-p-105}" text-anchor="middle" font-size="10" fill="${ChartColors.red}" font-weight="bold">45m</text>`;
             svg += `<rect x="120" y="${h-p-5}" width="40" height="5" fill="${ChartColors.green}" rx="4"/>`;
             svg += `<text x="140" y="${h-p-10}" text-anchor="middle" font-size="10" fill="${ChartColors.green}" font-weight="bold"><1m</text>`;
-            svg += `<text x="115" y="${h-p+15}" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">检测 (MTTD)</text>`;
+            svg += `<text x="115" y="${h-p+15}" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">${labels[0]}</text>`;
             
-            // Group 2: MTTR
+            // G2
             svg += `<rect x="240" y="${h-p-180}" width="40" height="180" fill="${ChartColors.red}" rx="4"/>`;
             svg += `<text x="260" y="${h-p-185}" text-anchor="middle" font-size="10" fill="${ChartColors.red}" font-weight="bold">120m</text>`;
             svg += `<rect x="290" y="${h-p-5}" width="40" height="5" fill="${ChartColors.green}" rx="4"/>`;
             svg += `<text x="310" y="${h-p-10}" text-anchor="middle" font-size="10" fill="${ChartColors.green}" font-weight="bold"><1m</text>`;
-            svg += `<text x="285" y="${h-p+15}" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">响应 (MTTR)</text>`;
+            svg += `<text x="285" y="${h-p+15}" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">${labels[1]}</text>`;
 
             svg += `</svg>`;
             el.innerHTML = svg;
         }
 
-        // 3. Line Chart (Drift)
-        function drawLine() {
-            const el = document.getElementById('line-chart');
+        // 3. Line Chart
+        function drawLine(lang) {
+            const id = lang === 'cn' ? 'line-chart-cn' : 'line-chart-en';
+            const el = document.getElementById(id);
+            if(!el) return;
+
             const w = 500, h = 250, p = 30;
-            const data1 = [20,22,19,21,20,25,20,21,19,20]; // Baseline
-            const data2 = [20,22,19,21,20,35,85,92,40,20]; // Real
-            
+            const data1 = [20,22,19,21,20,25,20,21,19,20]; 
+            const data2 = [20,22,19,21,20,35,85,92,40,20]; 
+            const labels = lang === 'cn' 
+                ? { y: '系统调用量', base: '正常基线', update: '更新 (漂移开始)' }
+                : { y: 'Syscalls', base: 'Baseline', update: 'Update (Drift)' };
+
             let svg = `<svg viewBox="0 0 ${w} ${h}">`;
             
-            // Axis
             svg += `<line x1="${p}" y1="${h-p}" x2="${w-p}" y2="${h-p}" stroke="#9CA3AF"/>`;
             svg += `<line x1="${p}" y1="${h-p}" x2="${p}" y2="${p}" stroke="#9CA3AF"/>`;
-            svg += `<text x="15" y="${h/2}" transform="rotate(-90, 15, ${h/2})" text-anchor="middle" font-size="10" fill="#666">系统调用量</text>`;
+            svg += `<text x="15" y="${h/2}" transform="rotate(-90, 15, ${h/2})" text-anchor="middle" font-size="10" fill="#666">${labels.y}</text>`;
             
             const step = (w-2*p)/9;
             const max = 100;
             const getD = (arr) => arr.map((v, i) => `${i===0?'M':'L'} ${p+i*step} ${h-p - (v/max)*(h-2*p)}`).join(' ');
 
-            // Baseline
             svg += `<path d="${getD(data1)}" fill="none" stroke="${ChartColors.gray}" stroke-dasharray="5,5" stroke-width="2"/>`;
             
-            // Real
             let d2 = getD(data2);
             svg += `<path d="${d2} L ${w-p} ${h-p} L ${p} ${h-p} Z" fill="${ChartColors.orange}" fill-opacity="0.1" stroke="none"/>`;
             svg += `<path d="${d2}" fill="none" stroke="${ChartColors.orange}" stroke-width="2" class="animate-draw"/>`;
             
-            // Markers
-            svg += `<text x="${p+10}" y="${h-p-30}" font-size="10" fill="${ChartColors.gray}">正常基线</text>`;
+            svg += `<text x="${p+10}" y="${h-p-30}" font-size="10" fill="${ChartColors.gray}">${labels.base}</text>`;
             let t0x = p + 5*step;
             svg += `<line x1="${t0x}" y1="${p}" x2="${t0x}" y2="${h-p}" stroke="${ChartColors.red}" stroke-dasharray="2,2"/>`;
-            svg += `<text x="${t0x}" y="${p-5}" text-anchor="middle" fill="${ChartColors.red}" font-size="10" font-weight="bold">更新 (漂移开始)</text>`;
+            svg += `<text x="${t0x}" y="${p-5}" text-anchor="middle" fill="${ChartColors.red}" font-size="10" font-weight="bold">${labels.update}</text>`;
 
             svg += `</svg>`;
             el.innerHTML = svg;
@@ -632,9 +907,14 @@
 
         // Init
         window.onload = function() {
-            drawRadar();
-            drawBar();
-            drawLine();
+            // Draw CN Charts
+            drawRadar('cn');
+            drawBar('cn');
+            drawLine('cn');
+            // Draw EN Charts
+            drawRadar('en');
+            drawBar('en');
+            drawLine('en');
         };
     </script>
 </body>
