@@ -2,6 +2,7 @@
 title: Ansible-K8S-Cilium
 date: 2025-08-04 09:23:21
 tags:
+description: 本文使用Ansible脚本从零开始部署Ubuntu虚拟机，然后在Ubuntu上安装K8S，使用Cilium作为CNI。
 ---
 # Setup K8S with Ansible from zero
 

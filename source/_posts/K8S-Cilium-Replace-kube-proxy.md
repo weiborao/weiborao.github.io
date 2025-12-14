@@ -2,6 +2,7 @@
 title: Kubernetes with CNI Cilium 安装学习
 date: 2025-08-01 16:06:36
 tags:
+description: 本文从零开始部署Ubuntu虚拟机，然后在Ubuntu上安装K8S，使用Cilium作为CNI。
 ---
 # Kubernetes with CNI Cilium 安装学习
 
