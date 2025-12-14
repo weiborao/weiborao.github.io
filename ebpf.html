@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>eBPF: The Superpower of Linux Kernel</title>
+    <style>
+        /* --- CSS Variables & Cisco Color Palette --- */
+        :root {
+            --cisco-blue: #049FD9;
+            --cisco-dark-blue: #1D2729;
+            --cisco-midnight: #0D274D;
+            --cisco-sky-blue: #6ABF4B; 
+            --cisco-green: #6CC24A;
+            --cisco-red: #E2231A;
+            --cisco-orange: #FF9E1B;
+            --cisco-gray: #F2F2F2;
+            --cisco-light-gray: #E8E8E8;
+            --text-main: #333333;
+            --text-light: #FFFFFF;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* --- Reset & Base --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-main);
+            background-color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Components --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--cisco-blue);
+            color: white;
+            box-shadow: 0 4px 6px rgba(4, 159, 217, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #0380ae;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(4, 159, 217, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 30px;
+            margin-bottom: 20px;
+            border-top: 4px solid var(--cisco-blue);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cisco-dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo svg {
+            height: 28px;
+            width: auto;
+        }
+
+        .lang-switch {
+            background: var(--cisco-gray);
+            border-radius: 20px;
+            padding: 4px;
+            display: flex;
+            font-size: 0.85rem;
+        }
+
+        .lang-btn {
+            padding: 6px 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: #666;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: var(--cisco-blue);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            background: linear-gradient(135deg, var(--cisco-dark-blue) 0%, #0D274D 100%);
+            color: white;
+            padding: 80px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Abstract background shapes */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(4,159,217,0.2) 0%, rgba(0,0,0,0) 70%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 24px;
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 strong {
+            font-weight: 800;
+            display: block;
+            color: var(--cisco-blue);
+            margin-top: 10px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            font-weight: 300;
+        }
+
+        /* --- Sections General --- */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            color: var(--cisco-dark-blue);
+            margin-bottom: 60px;
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--cisco-blue);
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        /* --- Analogy Grid --- */
+        .analogy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .analogy-item {
+            text-align: center;
+            height: 100%;
+        }
+
+        .analogy-icon {
+            height: 140px;
+            margin-bottom: 25px;
+            transition: transform 0.3s;
+        }
+        
+        .analogy-item:hover .analogy-icon {
+            transform: scale(1.05);
+        }
+
+        /* --- How It Works (Process) --- */
+        .process-section {
+            background-color: #FAFAFA;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            position: relative;
+            margin-top: 40px;
+        }
+
+        .step-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            background: var(--cisco-blue);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .step-arrow {
+            position: absolute;
+            top: 35px; /* Aligned with step number usually */
+            right: -15px;
+            z-index: 1;
+            color: #ccc;
+        }
+
+        /* --- Features Grid --- */
+        .features {
+            background-color: var(--cisco-dark-blue);
+            color: white;
+        }
+        
+        .features .section-title {
+            color: white;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 12px;
+            border-top: none;
+            border-left: 4px solid var(--cisco-blue);
+            backdrop-filter: blur(5px);
+            transition: background 0.3s;
+        }
+
+        .feature-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .icon-blue { color: #56CCF2; }
+        .icon-green { color: var(--cisco-green); }
+        .icon-red { color: #FF6B6B; }
+
+        .feature-card h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+
+        .feature-card p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+        }
+
+        /* --- Scenarios Section --- */
+        .scenario-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+
+        .scenario-text h3 {
+            color: var(--cisco-blue);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .scenario-visual {
+            background: #f4f6f8;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- Interactive Demo --- */
+        .demo-section {
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .pipeline-container {
+            background: var(--cisco-dark-blue);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+            margin: 30px auto;
+            max-width: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .kernel-zone {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed rgba(255,255,255,0.1);
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 15px;
+            color: rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .packet {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 10px;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: var(--cisco-dark-blue);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+            z-index: 10;
+            transition: left 0.1s linear, opacity 0.3s;
+        }
+
+        .ebpf-program {
+            width: 140px;
+            height: 140px;
+            background: rgba(4, 159, 217, 0.15);
+            border: 2px solid var(--cisco-blue);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            box-shadow: 0 0 30px rgba(4, 159, 217, 0.2);
+            z-index: 5;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .control-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            text-align: left;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--cisco-dark-blue);
+            color: white;
+            text-align: center;
+            padding: 60px 0;
+            font-size: 0.9rem;
+            border-top: 5px solid var(--cisco-blue);
+        }
+
+        /* --- Utilities --- */
+        .hidden { display: none !important; }
+        .text-cisco-blue { color: var(--cisco-blue); }
+        .text-bold { font-weight: 700; }
+        
+        /* --- Mobile Tweaks --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .process-steps { grid-template-columns: 1fr; gap: 40px; }
+            .step-arrow { display: none; }
+            .step-arrow-mobile { display: block; text-align: center; margin: 10px 0; color: #ccc; transform: rotate(90deg); }
+            .scenario-container { grid-template-columns: 1fr; }
+            .analogy-grid { grid-template-columns: 1fr; }
+            .pipeline-container { height: 180px; }
+            .ebpf-program { width: 100px; height: 100px; font-size: 0.7rem; }
+            .nav-wrapper { flex-direction: row; }
+            .logo span { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container nav-wrapper">
+            <div class="logo">
+                <svg viewBox="0 0 64 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="64" height="32" rx="4" fill="white"/>
+                    <path d="M14 24V16" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M22 24V10" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M30 24V14" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M38 24V8" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M46 24V14" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M54 24V19" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                <span>Security Architect View</span>
+            </div>
+            <div class="lang-switch">
+                <div class="lang-btn active" onclick="setLang('zh')">中文</div>
+                <div class="lang-btn" onclick="setLang('en')">EN</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="lang-zh">eBPF<br><strong>Linux 内核的超能力</strong></h1>
+            <h1 class="lang-en hidden">eBPF<br><strong>The Superpower of Linux Kernel</strong></h1>
+            
+            <p class="lang-zh">无需重启，无需修改源码，让操作系统即刻拥有全新的安全、网络与可观测能力。<br>这不仅仅是技术升级，这是基础设施的范式转移。</p>
+            <p class="lang-en hidden">Instantly grant the OS new security, networking, and observability capabilities without restarting or modifying the source code.<br>It's not just an upgrade; it's a paradigm shift for infrastructure.</p>
+            
+            <button class="btn btn-primary lang-zh" onclick="scrollToDemo()">体验交互 Demo</button>
+            <button class="btn btn-primary lang-en hidden" onclick="scrollToDemo()">Try Interactive Demo</button>
+
+            <div class="hero-graphic" style="margin-top: 50px;">
+                <!-- SVG: A stylized chip/brain lighting up -->
+                <svg width="240" height="180" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="40" y="30" width="120" height="90" rx="10" fill="rgba(255,255,255,0.05)" stroke="white" stroke-width="1.5"/>
+                    <circle cx="100" cy="75" r="25" fill="#049FD9" fill-opacity="0.9">
+                        <animate attributeName="r" values="25;28;25" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="fill-opacity" values="0.9;0.6;0.9" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <path d="M100 75L40 30" stroke="#6CC24A" stroke-width="2" stroke-dasharray="4 4"/>
+                    <path d="M100 75L160 30" stroke="#6CC24A" stroke-width="2" stroke-dasharray="4 4"/>
+                    <path d="M100 75L40 120" stroke="#6CC24A" stroke-width="2" stroke-dasharray="4 4"/>
+                    <path d="M100 75L160 120" stroke="#6CC24A" stroke-width="2" stroke-dasharray="4 4"/>
+                    <text x="100" y="80" text-anchor="middle" fill="white" font-size="10" font-family="sans-serif" font-weight="bold" letter-spacing="1">KERNEL</text>
+                    
+                    <!-- Floating particles -->
+                    <circle cx="50" cy="50" r="2" fill="#E2231A"><animate attributeName="cy" values="50;40;50" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="150" cy="100" r="2" fill="#FF9E1B"><animate attributeName="cy" values="100;110;100" dur="4s" repeatCount="indefinite"/></circle>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analogy Section -->
+    <section class="container">
+        <h2 class="section-title lang-zh">通俗理解：什么是 eBPF？</h2>
+        <h2 class="section-title lang-en hidden">Concept: What is eBPF?</h2>
+
+        <div class="analogy-grid">
+            <!-- Analogy 1 -->
+            <div class="card analogy-item">
+                <div class="analogy-icon">
+                    <svg viewBox="0 0 100 80" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 60H90V70H10V60Z" fill="#333"/>
+                        <path d="M20 60V40C20 30 30 20 50 20C70 20 80 30 80 40V60" stroke="#1D2729" stroke-width="4"/>
+                        <circle cx="30" cy="60" r="10" fill="#049FD9"/>
+                        <circle cx="70" cy="60" r="10" fill="#049FD9"/>
+                        <path d="M80 10L95 25" stroke="#6CC24A" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M95 10L80 25" stroke="#6CC24A" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="lang-zh">无需停车的引擎升级</h3>
+                <h3 class="lang-en hidden">Engine Upgrade while Driving</h3>
+                <p class="lang-zh" style="margin-top:10px; color:#666;">
+                    传统的内核修改像是在做复杂的开胸手术，风险极高且需要停机。eBPF 就像给正在高速公路上行驶的汽车升级引擎，安全、即时、无感。
+                </p>
+                <p class="lang-en hidden" style="margin-top:10px; color:#666;">
+                    Traditional kernel changes are like risky open-heart surgery requiring downtime. eBPF is like upgrading a car's engine while driving on the highway—safe, instant, and seamless.
+                </p>
+            </div>
+
+            <!-- Analogy 2 -->
+            <div class="card analogy-item">
+                <div class="analogy-icon">
+                    <svg viewBox="0 0 100 80" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="60" height="40" rx="4" stroke="#1D2729" stroke-width="2"/>
+                        <circle cx="50" cy="40" r="15" stroke="#049FD9" stroke-width="4"/>
+                        <circle cx="50" cy="40" r="5" fill="#049FD9"/>
+                        <path d="M10 40H20M80 40H90" stroke="#E2231A" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="lang-zh">系统的 X 光机</h3>
+                <h3 class="lang-en hidden">X-Ray for the System</h3>
+                <p class="lang-zh" style="margin-top:10px; color:#666;">
+                    eBPF 可以在系统关键节点安插“智能探头”。它能看到每一个数据包、每一个文件读写，让黑客行为无处遁形，且不影响系统运行。
+                </p>
+                <p class="lang-en hidden" style="margin-top:10px; color:#666;">
+                    eBPF places "smart probes" at key system points. It sees every packet and file access, leaving no place for hackers to hide, without slowing down the system.
+                </p>
+            </div>
+
+            <!-- Analogy 3 -->
+            <div class="card analogy-item">
+                <div class="analogy-icon">
+                    <svg viewBox="0 0 100 80" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="30" y="10" width="40" height="60" rx="5" stroke="#1D2729" stroke-width="2"/>
+                        <path d="M35 25H65" stroke="#ccc" stroke-width="2"/>
+                        <path d="M35 35H65" stroke="#ccc" stroke-width="2"/>
+                        <path d="M35 45H55" stroke="#ccc" stroke-width="2"/>
+                        <rect x="20" y="50" width="60" height="20" rx="5" fill="#049FD9" fill-opacity="0.2" stroke="#049FD9" stroke-width="2"/>
+                        <text x="50" y="65" text-anchor="middle" font-size="8" fill="#049FD9">SANDBOX</text>
+                    </svg>
+                </div>
+                <h3 class="lang-zh">安全的沙箱运行</h3>
+                <h3 class="lang-en hidden">Safe Sandbox Execution</h3>
+                <p class="lang-zh" style="margin-top:10px; color:#666;">
+                    eBPF 代码在内核中运行前必须通过严格的“安检”（Verifier）。任何可能导致死循环或系统崩溃的代码都会被拒绝执行。
+                </p>
+                <p class="lang-en hidden" style="margin-top:10px; color:#666;">
+                    eBPF code must pass a strict "security check" (Verifier) before running. Any code that could crash the system or loop forever is rejected instantly.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deep Dive: How It Works -->
+    <section class="process-section">
+        <div class="container">
+            <h2 class="section-title lang-zh">深度解析：eBPF 运行流程</h2>
+            <h2 class="section-title lang-en hidden">Deep Dive: How eBPF Works</h2>
+            <p class="lang-zh" style="text-align: center; max-width: 700px; margin: 0 auto;">为什么它既强大又安全？因为每一段代码在运行前都要经过严格的“安检”。</p>
+            <p class="lang-en hidden" style="text-align: center; max-width: 700px; margin: 0 auto;">Why is it both powerful and safe? Because every piece of code undergoes a strict "security check" before running.</p>
+
+            <div class="process-steps">
+                <!-- Step 1 -->
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4 class="lang-zh">编写程序</h4>
+                    <h4 class="lang-en hidden">Write Program</h4>
+                    <p class="lang-zh" style="font-size: 0.9rem; color: #666;">开发者使用 C 或 Rust 编写 eBPF 程序，定义需要监控的系统事件。</p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem; color: #666;">Developers write eBPF programs in C or Rust, defining which system events to monitor.</p>
+                    <div class="step-arrow">➜</div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="step-card" style="border-top: 4px solid var(--cisco-orange);">
+                    <div class="step-number" style="background: var(--cisco-orange);">2</div>
+                    <h4 class="lang-zh">验证器 (Verifier)</h4>
+                    <h4 class="lang-en hidden">The Verifier</h4>
+                    <p class="lang-zh" style="font-size: 0.9rem; color: #666;"><strong>最关键的一步。</strong>内核检查代码是否安全：没有死循环、不访问非法内存。</p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem; color: #666;"><strong>Critical Step.</strong> The kernel checks if code is safe: no infinite loops, no illegal memory access.</p>
+                    <div class="step-arrow">➜</div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4 class="lang-zh">JIT 编译</h4>
+                    <h4 class="lang-en hidden">JIT Compile</h4>
+                    <p class="lang-zh" style="font-size: 0.9rem; color: #666;">即时编译器将字节码转换为机器码，确保运行速度接近原生内核代码。</p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem; color: #666;">JIT converts bytecode to machine code, ensuring execution speed matches native kernel code.</p>
+                    <div class="step-arrow">➜</div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-card" style="border-top: 4px solid var(--cisco-green);">
+                    <div class="step-number" style="background: var(--cisco-green);">4</div>
+                    <h4 class="lang-zh">挂载与执行</h4>
+                    <h4 class="lang-en hidden">Attach & Run</h4>
+                    <p class="lang-zh" style="font-size: 0.9rem; color: #666;">程序挂载到 Hook 点（如网卡、系统调用）。事件触发时，代码毫秒级响应。</p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem; color: #666;">Program attaches to Hooks (NIC, Syscalls). When events occur, code executes in milliseconds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why it matters (Use Cases) -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title lang-zh" style="margin-top:0;">为什么这很重要？三大应用支柱</h2>
+            <h2 class="section-title lang-en hidden" style="margin-top:0;">The Three Pillars of eBPF</h2>
+            
+            <div class="feature-grid">
+                <!-- Security -->
+                <div class="feature-card">
+                    <div class="feature-icon-box">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="lang-zh">下一代安全</h3>
+                    <h3 class="lang-en hidden">Next-Gen Security</h3>
+                    <p class="lang-zh"><strong>场景：</strong> 容器逃逸检测、DDoS 防御。<br>在攻击造成破坏之前，在内核层直接拦截。这比传统的杀毒软件更快、更隐蔽。</p>
+                    <p class="lang-en hidden"><strong>Use Case:</strong> Container escape detection, DDoS mitigation.<br>Intercept attacks at kernel level. Faster and stealthier than traditional antivirus.</p>
+                </div>
+
+                <!-- Observability -->
+                <div class="feature-card">
+                    <div class="feature-icon-box">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#56CCF2" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </div>
+                    <h3 class="lang-zh">深度可观测性</h3>
+                    <h3 class="lang-en hidden">Deep Observability</h3>
+                    <p class="lang-zh"><strong>场景：</strong> 绘制服务依赖图、分析 MySQL 慢查询。<br>无需修改应用代码，eBPF 就能告诉你任何进程消耗了多少资源。</p>
+                    <p class="lang-en hidden"><strong>Use Case:</strong> Service dependency mapping, MySQL slow query analysis.<br>No code changes needed to see exactly what resources any process is consuming.</p>
+                </div>
+
+                <!-- Networking -->
+                <div class="feature-card">
+                    <div class="feature-icon-box">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6CC24A" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            <line x1="6" y1="6" x2="6" y2="6"></line>
+                            <line x1="6" y1="18" x2="6" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h3 class="lang-zh">云原生网络</h3>
+                    <h3 class="lang-en hidden">Cloud Native Networking</h3>
+                    <p class="lang-zh"><strong>场景：</strong> Kubernetes Service Load Balancing。<br>绕过复杂的 iptables 规则，以极高的效率处理云环境中的海量微服务流量。</p>
+                    <p class="lang-en hidden"><strong>Use Case:</strong> Kubernetes Service Load Balancing.<br>Bypasses complex iptables, handling massive microservice traffic with extreme efficiency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real World Scenarios -->
+    <section class="container">
+        <h2 class="section-title lang-zh">实战场景：eBPF 改变了什么？</h2>
+        <h2 class="section-title lang-en hidden">Real World: What Changed?</h2>
+
+        <!-- Scenario 1 -->
+        <div class="scenario-container">
+            <div class="scenario-text">
+                <h3 class="lang-zh">场景一：抵御 DDoS 攻击</h3>
+                <h3 class="lang-en hidden">Scenario 1: Defeating DDoS</h3>
+                <p class="lang-zh"><strong>过去：</strong> 流量进入内核，经过层层协议栈解析，最后才被防火墙丢弃。此时 CPU 已经过载。<br><br><strong>现在 (XDP + eBPF)：</strong> 在网卡接收到数据包的瞬间（协议栈之前）就进行识别和丢弃。性能提升可达 10 倍以上，保护后端服务不被压垮。</p>
+                <p class="lang-en hidden"><strong>Before:</strong> Traffic enters kernel, goes through protocol stacks, and is finally dropped. CPU is already overloaded.<br><br><strong>Now (XDP + eBPF):</strong> Packets are identified and dropped at the NIC driver level instantly. Performance improves 10x+, saving backend services.</p>
+            </div>
+            <div class="scenario-visual">
+                <svg width="300" height="150" viewBox="0 0 300 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="50" width="60" height="80" rx="4" fill="#E2231A" fill-opacity="0.1" stroke="#E2231A" stroke-dasharray="4 4"/>
+                    <text x="40" y="95" text-anchor="middle" font-size="12" fill="#E2231A">DDOS</text>
+                    
+                    <path d="M70 90H110" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                    
+                    <!-- Wall -->
+                    <rect x="120" y="20" width="10" height="110" fill="#049FD9"/>
+                    <text x="125" y="145" text-anchor="middle" font-size="10" fill="#049FD9" font-weight="bold">eBPF</text>
+                    
+                    <!-- Server -->
+                    <rect x="200" y="40" width="80" height="70" rx="4" fill="#6CC24A" fill-opacity="0.2" stroke="#6CC24A"/>
+                    <text x="240" y="80" text-anchor="middle" font-size="12" fill="#1D2729">SERVER</text>
+                    <text x="240" y="100" text-anchor="middle" font-size="10" fill="#6CC24A">SAFE & HAPPY</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Scenario 2 -->
+        <div class="scenario-container">
+            <div class="scenario-visual">
+                <svg width="300" height="150" viewBox="0 0 300 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- App -->
+                    <rect x="20" y="20" width="260" height="110" rx="8" fill="#F2F2F2"/>
+                    <circle cx="60" cy="75" r="20" fill="#ddd"/>
+                    <circle cx="150" cy="75" r="20" fill="#ddd"/>
+                    <circle cx="240" cy="75" r="20" fill="#ddd"/>
+                    
+                    <!-- Lens -->
+                    <circle cx="150" cy="75" r="35" stroke="#049FD9" stroke-width="3" fill="none"/>
+                    <path d="M175 100L195 120" stroke="#049FD9" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <!-- Data inside lens -->
+                    <text x="150" y="70" text-anchor="middle" font-size="10" fill="#333">SQL Query</text>
+                    <text x="150" y="85" text-anchor="middle" font-size="10" fill="#E2231A">2500ms</text>
+                </svg>
+            </div>
+            <div class="scenario-text">
+                <h3 class="lang-zh">场景二：上帝视角的故障排查</h3>
+                <h3 class="lang-en hidden">Scenario 2: God-Mode Troubleshooting</h3>
+                <p class="lang-zh"><strong>问题：</strong> 应用变慢了，是网络问题、数据库问题还是代码问题？<br><br><strong>eBPF 解法：</strong> 它可以追踪每一个系统调用。通过 eBPF，我们可以生成“火焰图”，精确看到在哪个函数上花费了多少纳秒，且不需要应用重新编译或重启。</p>
+                <p class="lang-en hidden"><strong>Problem:</strong> App is slow. Is it the network? DB? Code?<br><br><strong>eBPF Solution:</strong> It traces every syscall. With eBPF, we can generate flame graphs showing exactly how many nanoseconds were spent in which function, without recompiling or restarting the app.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo -->
+    <section class="demo-section container" id="demo">
+        <h2 class="section-title lang-zh">互动演示：我是 eBPF 过滤器</h2>
+        <h2 class="section-title lang-en hidden">Interactive: I am the eBPF Filter</h2>
+        <p class="lang-zh" style="text-align: center;">亲手操作，体验 eBPF 如何在内核层“瞬间”处理流量。</p>
+        <p class="lang-en hidden" style="text-align: center;">Hands-on: See how eBPF handles traffic "instantly" at the kernel level.</p>
+
+        <div class="pipeline-container">
+            <div class="kernel-zone">LINUX KERNEL SPACE</div>
+            <div id="packet-track" style="position: absolute; width: 100%; height: 100%; top:0; left:0;"></div>
+            <div class="ebpf-program">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:5px;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="lang-zh">eBPF 逻辑</span>
+                <span class="lang-en hidden">eBPF Logic</span>
+            </div>
+        </div>
+
+        <div class="control-panel">
+             <div style="margin-bottom: 20px;">
+                <h4 class="lang-zh" style="margin-bottom: 10px; color: var(--cisco-dark-blue);">1. 编写规则 (Write Rule)</h4>
+                <h4 class="lang-en hidden" style="margin-bottom: 10px; color: var(--cisco-dark-blue);">1. Write Rule</h4>
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="security-rule" style="width: 20px; height: 20px; margin-right: 10px; accent-color: var(--cisco-blue);"> 
+                    <span class="lang-zh">启用防火墙规则 (丢弃红色数据包)</span>
+                    <span class="lang-en hidden">Enable Firewall Rule (Drop Red Packets)</span>
+                </label>
+             </div>
+             
+             <div>
+                <h4 class="lang-zh" style="margin-bottom: 10px; color: var(--cisco-dark-blue);">2. 模拟流量 (Simulate Traffic)</h4>
+                <h4 class="lang-en hidden" style="margin-bottom: 10px; color: var(--cisco-dark-blue);">2. Simulate Traffic</h4>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="sendPacket('normal')" style="background-color: var(--cisco-green); border: none; flex: 1;">
+                        <span class="lang-zh">发送正常流量 (HTTP)</span>
+                        <span class="lang-en hidden">Send HTTP (Normal)</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="sendPacket('malicious')" style="background-color: var(--cisco-red); border: none; flex: 1;">
+                        <span class="lang-zh">发送攻击流量 (Exploit)</span>
+                        <span class="lang-en hidden">Send Exploit (Attack)</span>
+                    </button>
+                </div>
+             </div>
+             <div id="demo-log" style="font-family: monospace; font-size: 0.9rem; color: #666; margin-top: 20px; min-height: 24px; padding: 10px; background: #eee; border-radius: 4px;">
+                 <span class="lang-zh">> 等待指令...</span>
+                 <span class="lang-en hidden">> Waiting for command...</span>
+             </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="container" style="background: white;">
+        <h2 class="section-title lang-zh">常见问题 (FAQ)</h2>
+        <h2 class="section-title lang-en hidden">FAQ</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <div>
+                <h4 class="lang-zh text-cisco-blue">eBPF 会让系统变慢吗？</h4>
+                <h4 class="lang-en hidden text-cisco-blue">Will eBPF slow down my system?</h4>
+                <p class="lang-zh" style="font-size: 0.95rem; color: #555;">几乎不会。经过 JIT 编译后，eBPF 是原生机器码，效率极高。且它避免了数据在用户态和内核态之间反复拷贝，通常比传统监控手段更快。</p>
+                <p class="lang-en hidden" style="font-size: 0.95rem; color: #555;">Barely. After JIT compilation, it's native machine code. It avoids context switching overhead, often making it faster than traditional monitoring tools.</p>
+            </div>
+            <div>
+                <h4 class="lang-zh text-cisco-blue">如果我的代码有 Bug 会搞挂系统吗？</h4>
+                <h4 class="lang-en hidden text-cisco-blue">Can my buggy code crash the system?</h4>
+                <p class="lang-zh" style="font-size: 0.95rem; color: #555;">不会。验证器（Verifier）是核心安全屏障。它会拒绝任何包含死循环、越界访问或不可达指令的代码加载到内核。</p>
+                <p class="lang-en hidden" style="font-size: 0.95rem; color: #555;">No. The Verifier is the key security barrier. It rejects any code with infinite loops, out-of-bounds access, or unreachable instructions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div style="margin-bottom: 25px;">
+                <svg viewBox="0 0 64 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="height: 30px; opacity: 0.8;">
+                    <path d="M14 24V16" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M22 24V10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M30 24V14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M38 24V8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M46 24V14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M54 24V19" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <p class="lang-zh" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">安全架构师技术分享系列</p>
+            <p class="lang-en hidden" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">Security Architect Tech Series</p>
+            
+            <p class="lang-zh" style="opacity: 0.6;">基于 CISCO LIVE BRKSEC-2169 设计理念 | 为普及 eBPF 技术而作</p>
+            <p class="lang-en hidden" style="opacity: 0.6;">Based on CISCO LIVE BRKSEC-2169 Concepts | Made to democratize eBPF</p>
+            
+            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <span style="display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.8rem; margin: 0 5px;">CISSP</span>
+                <span style="display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.8rem; margin: 0 5px;">CEH</span>
+                <span style="display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.8rem; margin: 0 5px;">Linux Kernel</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        // Language Switching Logic
+        function setLang(lang) {
+            const zhElements = document.querySelectorAll('.lang-zh');
+            const enElements = document.querySelectorAll('.lang-en');
+            const btns = document.querySelectorAll('.lang-btn');
+
+            if (lang === 'zh') {
+                zhElements.forEach(el => el.classList.remove('hidden'));
+                enElements.forEach(el => el.classList.add('hidden'));
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+                document.documentElement.lang = 'zh-CN';
+            } else {
+                zhElements.forEach(el => el.classList.add('hidden'));
+                enElements.forEach(el => el.classList.remove('hidden'));
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+                document.documentElement.lang = 'en';
+            }
+        }
+
+        function scrollToDemo() {
+            document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Demo Logic
+        let isProcessing = false;
+
+        function sendPacket(type) {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const track = document.getElementById('packet-track');
+            const packet = document.createElement('div');
+            const isSecurityEnabled = document.getElementById('security-rule').checked;
+            const log = document.getElementById('demo-log');
+            const isEnglish = document.documentElement.lang === 'en';
+
+            // Initial Log
+            log.innerHTML = isEnglish 
+                ? `<span style="color:#666">> Packet Ingress: ${type.toUpperCase()}</span>` 
+                : `<span style="color:#666">> 数据包进入: ${type.toUpperCase()}</span>`;
+
+            packet.className = 'packet';
+            packet.style.backgroundColor = type === 'malicious' ? 'var(--cisco-red)' : 'var(--cisco-green)';
+            packet.style.color = 'white';
+            packet.innerText = type === 'malicious' ? 'BAD' : 'OK';
+            
+            // Start Position
+            packet.style.left = '0%';
+            track.appendChild(packet);
+
+            // Animate to center (eBPF check)
+            setTimeout(() => {
+                packet.style.left = '45%'; // Center
+            }, 50);
+
+            // Logic Check at center
+            setTimeout(() => {
+                let passed = true;
+                
+                // eBPF Logic Simulation
+                packet.style.transform = 'translateY(-50%) scale(1.3)'; // Pulse effect
+                packet.style.boxShadow = '0 0 20px rgba(4, 159, 217, 0.8)'; // Highlight processing
+
+                if (type === 'malicious' && isSecurityEnabled) {
+                    passed = false;
+                    // Flash yellow border for inspection
+                    packet.style.border = '3px solid #FF9E1B'; 
+                }
+
+                setTimeout(() => {
+                    packet.style.transform = 'translateY(-50%) scale(1)';
+                    packet.style.boxShadow = '0 0 15px rgba(255,255,255,0.3)';
+                    
+                    if (passed) {
+                        packet.style.left = '100%';
+                        packet.style.opacity = '0';
+                        log.innerHTML = isEnglish 
+                            ? `<span style="color:var(--cisco-green)">> VERDICT: PASS. Packet forwarded to userspace.</span>` 
+                            : `<span style="color:var(--cisco-green)">> 判定: 通过。数据包转发至用户态。</span>`;
+                    } else {
+                        packet.style.top = '150%'; // Drop down
+                        packet.style.opacity = '0';
+                        packet.style.backgroundColor = '#333'; // Turn black when dropped
+                        log.innerHTML = isEnglish 
+                            ? `<span style="color:var(--cisco-red)">> VERDICT: DROP. Threat blocked at kernel level.</span>` 
+                            : `<span style="color:var(--cisco-red)">> 判定: 丢弃。威胁在内核层被拦截。</span>`;
+                    }
+
+                    // Cleanup
+                    setTimeout(() => {
+                        packet.remove();
+                        isProcessing = false;
+                    }, 800);
+
+                }, 800); // Processing time simulation
+
+            }, 1200); // Time to reach center
+        }
+    </script>
+</body>
+</html>
