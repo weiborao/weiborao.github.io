@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cisco Security Omni-Guide | 专家全景指南</title>
+    <style>
+        /* --- 1. CISCO BRAND & DESIGN SYSTEM --- */
+        :root {
+            /* Primary Palette */
+            --cisco-blue: #00BCEB;       /* Core Blue */
+            --cisco-dark-blue: #005073;  /* Deep Navy */
+            --cisco-midnight: #1B2C42;   /* UI Background */
+            --cisco-sky: #64BBE3;        /* Light Blue accents */
+            
+            /* Functional Palette (NIST/Status) */
+            --color-id: #0096AF;   /* Identify */
+            --color-pr: #95509F;   /* Protect */
+            --color-de: #FF9E1B;   /* Detect */
+            --color-re: #E2231A;   /* Respond */
+            --color-rc: #6ABF4B;   /* Recover */
+
+            /* UI Variables */
+            --bg-body: #F4F6F8;
+            --bg-card: #FFFFFF;
+            --text-main: #333333;
+            --text-light: #666666;
+            --radius-sm: 8px;
+            --radius-lg: 16px;
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
+            --shadow-hover: 0 10px 25px rgba(0,0,0,0.12);
+        }
+
+        /* --- 2. GLOBAL RESET & TYPOGRAPHY --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-body); color: var(--text-main); padding-bottom: 100px; line-height: 1.6; }
+        
+        h1, h2, h3, h4 { margin: 0; color: var(--cisco-midnight); }
+        h1 { font-size: 1.8rem; font-weight: 800; text-align: center; margin: 20px 0 5px 0; }
+        .subtitle { text-align: center; color: var(--text-light); font-size: 0.9rem; margin-bottom: 30px; }
+        
+        h2 { font-size: 1.4rem; padding-left: 15px; border-left: 5px solid var(--cisco-blue); margin: 30px 0 20px 0; display: flex; align-items: center; justify-content: space-between; }
+        h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--cisco-dark-blue); }
+
+        /* --- 3. LAYOUT UTILITIES --- */
+        .container { max-width: 900px; margin: 0 auto; padding: 0 15px; padding-top: 10px; }
+        .card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow-card); position: relative; overflow: hidden; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+        /* --- 4. INTERACTIVE COMPONENTS --- */
+        /* Language Switcher - MOVED TO TOP RIGHT */
+        .lang-switch { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 1000; 
+            background: rgba(27, 44, 66, 0.9); /* Cisco Midnight with opacity */
+            border-radius: 30px; 
+            padding: 4px; 
+            display: flex; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+            backdrop-filter: blur(5px);
+        }
+        .lang-btn { background: transparent; border: none; color: #ccc; padding: 6px 14px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 0.85rem; }
+        .lang-btn.active { background: var(--cisco-blue); color: white; }
+        .hidden { display: none !important; }
+
+        /* Accordion / Detailed Specs */
+        .specs-toggle { color: var(--cisco-blue); cursor: pointer; font-size: 0.9rem; font-weight: bold; margin-top: 10px; display: inline-block; border-bottom: 1px dashed var(--cisco-blue); }
+        .specs-content { display: none; background: #f9f9f9; padding: 15px; border-radius: var(--radius-sm); margin-top: 10px; font-size: 0.9rem; border-left: 3px solid var(--cisco-blue); }
+        .specs-content.show { display: block; animation: fadeIn 0.4s; }
+
+        /* Tag Badges */
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; color: white; margin-right: 5px; margin-bottom: 5px; }
+        .bg-blue { background: var(--cisco-blue); }
+        .bg-dark { background: var(--cisco-midnight); }
+        .bg-nist-id { background: var(--color-id); }
+        .bg-nist-pr { background: var(--color-pr); }
+        .bg-nist-de { background: var(--color-de); }
+        .bg-nist-re { background: var(--color-re); }
+
+        /* --- 5. VISUALIZATION STYLES --- */
+        .svg-container { width: 100%; overflow-x: auto; display: flex; justify-content: center; padding: 10px 0; background: #fff; border-radius: 8px; }
+        
+        /* Attack Scenario Simulator Styles */
+        .scenario-box { background: #222; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; height: 150px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #444; }
+        .log-entry { margin-bottom: 5px; }
+        .log-time { color: #888; margin-right: 10px; }
+        .log-alert { color: #ff5555; font-weight: bold; }
+        .log-action { color: var(--cisco-blue); font-weight: bold; }
+        .scenario-btn { background: var(--color-re); color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
+        .scenario-btn:active { transform: scale(0.98); }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Language Controls (Top Right) -->
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="switchLang('zh')">中</button>
+        <button class="lang-btn" onclick="switchLang('en')">EN</button>
+    </div>
+
+    <div class="container">
+        
+        <!-- HEADER -->
+        <header>
+            <div style="text-align:center; padding-top:20px;">
+                <!-- Cisco Logo SVG -->
+                <svg width="80" height="45" viewBox="0 0 80 45" style="display:inline-block;">
+                    <path d="M14 32h-3v-12h3v12zm13 0h-3v-22h3v22zm13 0h-3v-12h3v12zm13 0h-3v-22h3v22zm13 0h-3v-15h3v15zM14 17a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13-9a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13 9a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13-9a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13 12a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0z" fill="#00BCEB"/>
+                </svg>
+            </div>
+            <h1 class="lang-zh">Cisco 安全全景指南 v4.1</h1>
+            <h1 class="lang-en hidden">Cisco Security Omni-Guide v4.1</h1>
+            <p class="subtitle lang-zh">NIST CSF · Splunk · XDR · SASE · Zero Trust</p>
+            <p class="subtitle lang-en hidden">NIST CSF · Splunk · XDR · SASE · Zero Trust</p>
+        </header>
+
+        <!-- 1. THE HOOK: ATTACK SIMULATION -->
+        <section class="card" style="border-top: 5px solid var(--color-re);">
+            <h2 style="margin-top:0; border:none; padding:0;">
+                <span class="lang-zh">⚠️ 攻防演练：勒索病毒入侵</span>
+                <span class="lang-en hidden">⚠️ Simulation: Ransomware Attack</span>
+            </h2>
+            <p class="lang-zh">为了让您直观理解各个产品的作用，我们模拟一次攻击。请点击下方按钮，观察 Cisco 全栈如何协同工作。</p>
+            <p class="lang-en hidden">To understand the stack, let's simulate an attack. Click below to see how Cisco solutions collaborate to stop it.</p>
+            
+            <div id="console-log" class="scenario-box">
+                <div class="log-entry"><span class="log-time">00:00:00</span> System Ready. Monitoring...</div>
+            </div>
+            
+            <button class="scenario-btn" onclick="runScenario()">
+                <span class="lang-zh">⚡ 开始模拟攻击</span>
+                <span class="lang-en hidden">⚡ Simulate Attack</span>
+            </button>
+        </section>
+
+        <!-- 2. FOUNDATION: NIST & METHODOLOGY -->
+        <section>
+            <h2 class="lang-zh">第一章：方法论与框架 (Common Ground)</h2>
+            <h2 class="lang-en hidden">Chapter 1: Methodology (Common Ground)</h2>
+            
+            <div class="grid-2">
+                <!-- NIST Explanation -->
+                <div class="card">
+                    <h3>NIST CSF</h3>
+                    <p class="lang-zh">网络安全不是买个防火墙就结束了。它是一个基于风险管理的生命周期。</p>
+                    <p class="lang-en hidden">Security is not a one-time purchase. It's a risk management lifecycle.</p>
+                    
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; align-items:center;">
+                            <span class="tag bg-nist-id" style="width:80px; text-align:center;">IDENTIFY</span>
+                            <span class="lang-zh" style="font-size:0.85rem">知道你有什么资产 (Cyber Vision, ISE)</span>
+                            <span class="lang-en hidden" style="font-size:0.85rem">Know your assets (Cyber Vision, ISE)</span>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="tag bg-nist-pr" style="width:80px; text-align:center;">PROTECT</span>
+                            <span class="lang-zh" style="font-size:0.85rem">筑墙防御 (Firewall, Duo, Umbrella)</span>
+                            <span class="lang-en hidden" style="font-size:0.85rem">Build walls (Firewall, Duo, Umbrella)</span>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="tag bg-nist-de" style="width:80px; text-align:center;">DETECT</span>
+                            <span class="lang-zh" style="font-size:0.85rem">发现绕过防御的威胁 (SNA, XDR)</span>
+                            <span class="lang-en hidden" style="font-size:0.85rem">Spot what got through (SNA, XDR)</span>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="tag bg-nist-re" style="width:80px; text-align:center;">RESPOND</span>
+                            <span class="lang-zh" style="font-size:0.85rem">自动化隔离与阻断 (ISE, Splunk)</span>
+                            <span class="lang-en hidden" style="font-size:0.85rem">Auto-quarantine (ISE, Splunk)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Splunk Integration -->
+                <div class="card" style="border: 2px solid #000;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3>Cisco + Splunk</h3>
+                        <span class="tag bg-dark">NEW</span>
+                    </div>
+                    <p class="lang-zh"><strong>数据就是安全。</strong> 以前，Cisco 强在网络和控制。现在有了 Splunk，我们拥有了业界最强的大数据分析平台 (SIEM/SOAR)。</p>
+                    <p class="lang-en hidden"><strong>Data is Security.</strong> Cisco owned the network. Now with Splunk, we own the Data Platform (SIEM/SOAR).</p>
+                    <ul style="font-size:0.9rem; padding-left:20px;">
+                        <li class="lang-zh"><strong>Splunk:</strong> 收集所有日志（服务器、应用、云、防火墙）。</li>
+                        <li class="lang-en hidden"><strong>Splunk:</strong> Ingests ALL logs (Server, App, Cloud, FW).</li>
+                        <li class="lang-zh"><strong>Cisco Security Cloud:</strong> 提供遥测数据并执行 Splunk 下达的指令。</li>
+                        <li class="lang-en hidden"><strong>Cisco Security Cloud:</strong> Provides telemetry & executes Splunk's orders.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ARCHITECTURE VISUALIZATION -->
+        <section class="card">
+            <h3 class="lang-zh" style="text-align:center;">Cisco Security Cloud 全景架构</h3>
+            <h3 class="lang-en hidden" style="text-align:center;">Cisco Security Cloud Architecture</h3>
+            <div class="svg-container">
+                <svg width="600" height="300" viewBox="0 0 600 300">
+                    <!-- BACKGROUND ZONES -->
+                    <rect x="10" y="40" width="100" height="220" rx="10" fill="#E6F2FF" stroke="#00BCEB" stroke-dasharray="4"/>
+                    <text x="60" y="60" text-anchor="middle" font-size="10" fill="#005073" font-weight="bold">USER / EDGE</text>
+
+                    <rect x="150" y="40" width="180" height="220" rx="10" fill="#F4F4F4" stroke="#999"/>
+                    <text x="240" y="60" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">NETWORK / CAMPUS</text>
+
+                    <rect x="370" y="40" width="100" height="220" rx="10" fill="#FFF8E1" stroke="#FF9E1B" stroke-dasharray="4"/>
+                    <text x="420" y="60" text-anchor="middle" font-size="10" fill="#D35400" font-weight="bold">CLOUD / APP</text>
+                    
+                    <rect x="500" y="40" width="90" height="220" rx="10" fill="#333" stroke="black"/>
+                    <text x="545" y="60" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">SOC / OPS</text>
+
+                    <!-- CONNECTORS -->
+                    <line x1="110" y1="150" x2="150" y2="150" stroke="#00BCEB" stroke-width="2"/>
+                    <line x1="330" y1="150" x2="370" y2="150" stroke="#00BCEB" stroke-width="2"/>
+                    <line x1="470" y1="150" x2="500" y2="150" stroke="#00BCEB" stroke-width="2"/>
+
+                    <!-- COMPONENTS -->
+                    <!-- SASE -->
+                    <circle cx="60" cy="120" r="20" fill="white" stroke="#00BCEB" stroke-width="2"/>
+                    <text x="60" y="125" text-anchor="middle" font-size="8">Secure</text>
+                    <text x="60" y="135" text-anchor="middle" font-size="8">Access</text>
+
+                    <!-- DUO -->
+                    <circle cx="60" cy="180" r="20" fill="white" stroke="#0096AF" stroke-width="2"/>
+                    <text x="60" y="185" text-anchor="middle" font-size="9">Duo</text>
+
+                    <!-- FIREWALL -->
+                    <rect x="160" y="130" width="30" height="40" fill="#95509F" rx="4"/>
+                    <text x="175" y="155" text-anchor="middle" fill="white" font-size="8">FW</text>
+
+                    <!-- ISE -->
+                    <rect x="220" y="80" width="40" height="30" fill="#0096AF" rx="4"/>
+                    <text x="240" y="100" text-anchor="middle" fill="white" font-size="8">ISE</text>
+
+                    <!-- SNA -->
+                    <rect x="220" y="190" width="40" height="30" fill="#FF9E1B" rx="4"/>
+                    <text x="240" y="210" text-anchor="middle" fill="white" font-size="8">SNA</text>
+
+                    <!-- WORKLOAD -->
+                    <rect x="400" y="130" width="40" height="30" fill="#95509F" rx="4"/>
+                    <text x="420" y="150" text-anchor="middle" fill="white" font-size="8">Workload</text>
+
+                    <!-- SPLUNK / XDR -->
+                    <rect x="510" y="100" width="70" height="100" fill="#000" stroke="#6ABF4B" stroke-width="2"/>
+                    <text x="545" y="140" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Splunk</text>
+                    <text x="545" y="160" text-anchor="middle" fill="#fff" font-size="10">+ XDR</text>
+
+                    <!-- DATA FLOW -->
+                    <path d="M260 95 H 510" stroke="#666" stroke-width="1" stroke-dasharray="2" opacity="0.5"/>
+                    <path d="M260 205 H 510" stroke="#666" stroke-width="1" stroke-dasharray="2" opacity="0.5"/>
+                    <path d="M190 150 H 510" stroke="#666" stroke-width="1" stroke-dasharray="2" opacity="0.5"/>
+                </svg>
+            </div>
+            <p class="lang-zh" style="font-size:0.8rem; text-align:center; color:#666;">图解：用户 (Edge) 通过 SASE 接入，网络层 (Network) 由 ISE/FW 保护，云端 (Cloud) 由 Workload 隔离。所有数据汇聚至 Splunk/XDR 进行分析。</p>
+            <p class="lang-en hidden" style="font-size:0.8rem; text-align:center; color:#666;">Diagram: Users enter via SASE, Network secured by ISE/FW, Cloud segmented by Workload. All telemetry feeds into Splunk/XDR.</p>
+        </section>
+
+        <!-- 4. PRODUCT DEEP DIVE (EXPANDABLE) -->
+        <section>
+            <h2 class="lang-zh">第二章：核心产品深度解析 (Deep Dive)</h2>
+            <h2 class="lang-en hidden">Chapter 2: Product Deep Dive</h2>
+
+            <!-- PRODUCT 1: FIREWALL -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>Cisco Secure Firewall (FMC/FTD)</h3>
+                    <span class="tag bg-nist-pr">PROTECT</span>
+                </div>
+                <p class="lang-zh">“安全的一道防线”。不仅仅是访问控制，更是搭载了 Snort 3 引擎的 IPS（入侵防御系统）。</p>
+                <p class="lang-en hidden">"The First Line of Defense". Powered by Snort 3 IPS, not just ACLs.</p>
+                
+                <div class="specs-toggle" onclick="toggleSpecs('spec-fw')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
+                <div id="spec-fw" class="specs-content">
+                    <ul>
+                        <li><strong>Snort 3 Engine:</strong> 相比 Snort 2，采用多线程处理，吞吐量提升显著，规则语法更灵活。</li>
+                        <li><strong>TLS 1.3 Decryption:</strong> 硬件加速解密，看见加密流量中的威胁。</li>
+                        <li><strong>Virtual Patching:</strong> 在服务器打补丁之前，通过防火墙规则拦截针对该漏洞的 CVE 攻击。</li>
+                        <li><strong>Dynamic Objects:</strong> 与 Azure/AWS 联动，基于云标签（Tag）而不是 IP 写策略。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PRODUCT 2: ISE -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>Identity Services Engine (ISE)</h3>
+                    <span class="tag bg-nist-id">IDENTIFY</span>
+                </div>
+                <p class="lang-zh">“零信任的大脑”。负责网络准入（NAC）、设备健康检查（Posture）和微分段（Segmentation）。</p>
+                <p class="lang-en hidden">"The Brain of Zero Trust". Handles NAC, Posture, and Segmentation.</p>
+                
+                <div class="specs-toggle" onclick="toggleSpecs('spec-ise')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
+                <div id="spec-ise" class="specs-content">
+                    <ul>
+                        <li><strong>802.1X / MAB:</strong> 有线无线统一认证标准。</li>
+                        <li><strong>pxGrid (Platform Exchange Grid):</strong> Cisco 的独门绝技。ISE 知道“IP 1.1.1.1 是财务部的 Bob”。它通过 pxGrid 把这个信息告诉防火墙，防火墙就能写“允许 Bob 访问数据库”的策略，而不是基于 IP。</li>
+                        <li><strong>SGT (Security Group Tag):</strong> 在数据包头打上标签，实现与 IP 无关的隔离。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PRODUCT 3: SECURE NETWORK ANALYTICS (SNA) -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>Secure Network Analytics (NDR)</h3>
+                    <span class="tag bg-nist-de">DETECT</span>
+                </div>
+                <p class="lang-zh">“全网监控摄像头”。不需要在服务器装代理，通过交换机发送的 NetFlow 分析流量行为。</p>
+                <p class="lang-en hidden">"CCTV for the Network". Uses NetFlow. No agents required.</p>
+                
+                <div class="specs-toggle" onclick="toggleSpecs('spec-sna')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
+                <div id="spec-sna" class="specs-content">
+                    <ul>
+                        <li><strong>ETA (Encrypted Traffic Analytics):</strong> 不需要解密，通过分析数据包的长度、到达时间间隔、初始握手特征，识别加密流量中的恶意软件（准确率 >99%）。</li>
+                        <li><strong>Behavioral Modeling:</strong> 自动学习基线。如果一台打印机半夜突然向海外 IP 发送 1GB 数据，立即报警。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PRODUCT 4: CYBER VISION (OT/IoT) -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>Cisco Cyber Vision (OT Security)</h3>
+                    <span class="tag bg-nist-id">IDENTIFY</span>
+                </div>
+                <p class="lang-zh">“听懂机器语言”。运行在工业交换机上的传感器，解析工控协议 (Modbus, DNP3)。</p>
+                <p class="lang-en hidden">"Speaks Machine Language". Sensor runs on switches, parses OT protocols.</p>
+                
+                <div class="specs-toggle" onclick="toggleSpecs('spec-cv')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
+                <div id="spec-cv" class="specs-content">
+                    <ul>
+                        <li><strong>Deep Packet Inspection (DPI):</strong> 能看懂“PLC 正在对离心机下达‘停止’指令”。</li>
+                        <li><strong>No Extra Hardware:</strong> 传感器是软件容器 (IOx)，直接跑在 Cisco IE3300/3400 交换机上，无需旁路部署额外的探针硬件。</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- PRODUCT 5: SECURE ACCESS (SSE) -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>Cisco Secure Access (SASE/SSE)</h3>
+                    <span class="tag bg-blue">CLOUD</span>
+                </div>
+                <p class="lang-zh">“未来的 VPN”。基于云的安全服务边缘。无论用户在哪里，都通过 Cisco 云网关访问互联网或内网应用。</p>
+                <p class="lang-en hidden">"The Future of VPN". Cloud-delivered security edge. Unified access.</p>
+                
+                <div class="specs-toggle" onclick="toggleSpecs('spec-sse')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
+                <div id="spec-sse" class="specs-content">
+                    <ul>
+                        <li><strong>ZTNA (Zero Trust Network Access):</strong> 只有应用连接，没有网络连接。黑客无法利用受损的终端扫描内网。</li>
+                        <li><strong>SWG (Secure Web Gateway):</strong> 云端代理，过滤网页恶意内容。</li>
+                        <li><strong>Experience Monitoring:</strong> 集成了 ThousandEyes，当用户喊慢时，知道是 WiFi 还是 App 的问题。</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 5. VERTICALS: MANUFACTURING DEEP DIVE -->
+        <section>
+            <h2 class="lang-zh">第三章：行业纵深 - 制造业 (Manufacturing)</h2>
+            <h2 class="lang-en hidden">Chapter 3: Vertical Deep Dive - Manufacturing</h2>
+            
+            <div class="card" style="border-left: 5px solid var(--cisco-dark-blue);">
+                <h3>The Purdue Model Alignment (普渡模型)</h3>
+                <p class="lang-zh">制造业安全的核心是将 IT（企业网）与 OT（工业网）进行分层防御。</p>
+                <p class="lang-en hidden">Core of Mfg security is layering IT and OT defenses.</p>
+                
+                <div class="svg-container">
+                    <svg width="500" height="200" viewBox="0 0 500 200">
+                        <g>
+                            <rect x="10" y="10" width="480" height="40" fill="#E6F2FF" rx="5"/>
+                            <text x="250" y="35" text-anchor="middle" font-size="12" fill="#005073" font-weight="bold">Level 4-5: Enterprise (IT) - Protected by Firewall / Umbrella</text>
+                        </g>
+                        <g>
+                            <rect x="10" y="60" width="480" height="30" fill="#FFE0B2" rx="5"/>
+                            <text x="250" y="80" text-anchor="middle" font-size="12" fill="#E65100" font-weight="bold">Level 3.5: Industrial DMZ - Cisco ISA 3000 Firewall</text>
+                        </g>
+                        <g>
+                            <rect x="10" y="100" width="480" height="40" fill="#E8F5E9" rx="5"/>
+                            <text x="250" y="125" text-anchor="middle" font-size="12" fill="#1B5E20" font-weight="bold">Level 0-3: OT/ICS - Visibility by Cyber Vision</text>
+                        </g>
+                        
+                        <!-- Arrows -->
+                        <line x1="250" y1="50" x2="250" y2="60" stroke="#333" stroke-width="2"/>
+                        <line x1="250" y1="90" x2="250" y2="100" stroke="#333" stroke-width="2"/>
+                    </svg>
+                </div>
+                
+                <div class="specs-toggle" onclick="toggleSpecs('spec-mfg')">▶ <span class="lang-zh">制造业销售痛点与对策</span><span class="lang-en hidden">Mfg Sales Pain Points</span></div>
+                <div id="spec-mfg" class="specs-content">
+                    <ul class="lang-zh">
+                        <li><strong>痛点：</strong> “我们不能在 PLC 上装杀毒软件，会导致停机。”</li>
+                        <li><strong>对策：</strong> “没错。所以您需要 Cyber Vision。它是无代理（Agentless）的被动监听，完全不影响生产，但能告诉您哪台 PLC 的固件有漏洞。”</li>
+                        <li><strong>痛点：</strong> “设备供应商需要远程连进来修机器。”</li>
+                        <li><strong>对策：</strong> “使用 Cisco Secure Equipment Access (SEA)。不要给 VPN 账号。SEA 允许他们只远程桌面到那一台机器，无法访问其他网络。”</li>
+                    </ul>
+                    <ul class="lang-en hidden">
+                        <li><strong>Pain:</strong> "Can't install AV on PLCs. It crashes them."</li>
+                        <li><strong>Solution:</strong> "Exactly. Use Cyber Vision. Agentless, passive monitoring. Zero impact, but 100% visibility."</li>
+                        <li><strong>Pain:</strong> "Vendors need remote access."</li>
+                        <li><strong>Solution:</strong> "Use Secure Equipment Access (SEA). No VPNs. Granular ZTNA access only to the specific machine."</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. SALES & DISCOVERY -->
+        <section>
+            <h2 class="lang-zh">第四章：销售实战 (Sales Playbook)</h2>
+            <h2 class="lang-en hidden">Chapter 4: Sales Playbook</h2>
+
+            <div class="grid-2">
+                <!-- Discovery Questions -->
+                <div class="card">
+                    <h3>发掘机会 (Discovery)</h3>
+                    <ul style="padding-left:15px; font-size:0.9rem;">
+                        <li style="margin-bottom:10px;">
+                            <strong class="lang-zh">问 CIO (IT 经理):</strong>
+                            <div class="lang-zh">“您现在有多少种不同的安全工具？当发生警报时，您的团队需要切换多少个控制台？”</div>
+                            <div class="lang-en hidden">"How many security consoles do you have? How much time is wasted switching context?"</div>
+                            <span class="tag bg-dark">Pitch: Platform / XDR</span>
+                        </li>
+                        <li style="margin-bottom:10px;">
+                            <strong class="lang-zh">问 Network Team:</strong>
+                            <div class="lang-zh">“如果有人绕过了防火墙，在内网横向移动，您的交换机能告诉您吗？”</div>
+                            <div class="lang-en hidden">"If someone bypasses the firewall, can your switches tell you about lateral movement?"</div>
+                            <span class="tag bg-dark">Pitch: SNA / ISE</span>
+                        </li>
+                         <li style="margin-bottom:10px;">
+                            <strong class="lang-zh">问 OT/Plant Manager:</strong>
+                            <div class="lang-zh">“上次因为勒索病毒导致的停产造成了多少损失？您知道现在工厂里有多少台 WinXP 裸奔吗？”</div>
+                            <div class="lang-en hidden">"What's the cost of downtime? How many unpatched WinXP machines do you have?"</div>
+                            <span class="tag bg-dark">Pitch: Cyber Vision</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Glossary -->
+                <div class="card" style="background:#f4f6f8;">
+                    <h3>术语表 (Glossary)</h3>
+                    <div style="height:200px; overflow-y:auto; font-size:0.85rem;">
+                        <p><strong>XDR:</strong> Extended Detection and Response. 跨产品（端点、网络、云）的威胁检测与响应平台。</p>
+                        <p><strong>SASE:</strong> Secure Access Service Edge. 网络(SD-WAN)与安全(SSE)的云端融合。</p>
+                        <p><strong>SSE:</strong> SASE 中剥离掉 SD-WAN 的纯安全部分 (SWG, CASB, ZTNA)。</p>
+                        <p><strong>SOAR:</strong> Security Orchestration, Automation and Response. 比如 Splunk Phantom，负责把“封锁IP”这种动作自动化。</p>
+                        <p><strong>NDR:</strong> Network Detection and Response. 即 Cisco SNA。</p>
+                        <p><strong>Talos:</strong> Cisco 的威胁情报团队，世界上最大的非政府安全研究组织。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer style="text-align:center; padding-top:20px; border-top:1px solid #ddd; color:#999; font-size:0.8rem;">
+            <p>Cisco Security Omni-Guide v4.1 | Expert Edition</p>
+            <p>Designed for Offline & Mobile Use</p>
+        </footer>
+
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // 1. Language Switcher
+        function switchLang(lang) {
+            const zhEls = document.querySelectorAll('.lang-zh');
+            const enEls = document.querySelectorAll('.lang-en');
+            const btns = document.querySelectorAll('.lang-btn');
+
+            if (lang === 'zh') {
+                zhEls.forEach(el => el.classList.remove('hidden'));
+                enEls.forEach(el => el.classList.add('hidden'));
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+            } else {
+                zhEls.forEach(el => el.classList.add('hidden'));
+                enEls.forEach(el => el.classList.remove('hidden'));
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+            }
+        }
+
+        // 2. Specs Toggle
+        function toggleSpecs(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                el.classList.remove('show');
+            } else {
+                el.style.display = 'block';
+                // Small timeout to allow CSS transition if added later
+                setTimeout(() => el.classList.add('show'), 10);
+            }
+        }
+
+        // 3. Attack Simulation Logic
+        function runScenario() {
+            const consoleLog = document.getElementById('console-log');
+            const isZh = !document.querySelector('.lang-zh').classList.contains('hidden');
+            
+            // Clear previous
+            consoleLog.innerHTML = '';
+
+            const logs = [
+                { time: 1000, zh: "检测到异常: 用户 Bob 收到带有恶意附件的邮件。", en: "Anomaly: User Bob received phishing email with attachment.", type: "alert" },
+                { time: 2500, zh: "终端执行: 恶意文件试图运行 PowerShell 脚本。", en: "Endpoint: Malicious file attempting PowerShell execution.", type: "alert" },
+                { time: 3500, zh: "Cisco Secure Client: 拦截并隔离本地文件 (AMP)。", en: "Secure Client: File quarantined locally (AMP).", type: "action" },
+                { time: 5000, zh: "网络异常: 设备试图连接已知的 C&C 僵尸网络服务器。", en: "Network: Device attempting C&C connection.", type: "alert" },
+                { time: 6000, zh: "Secure Firewall: 阻断出站连接 (基于 Talos 情报)。", en: "Firewall: Outbound connection blocked (Talos Intel).", type: "action" },
+                { time: 7500, zh: "ISE 响应: 将设备隔离至 'Guest' VLAN，移除访问权限。", en: "ISE Response: Device moved to Quarantine VLAN.", type: "action" },
+                { time: 9000, zh: "Splunk/XDR: 生成完整攻击溯源报告。威胁已清除。", en: "Splunk/XDR: Attack storyboard generated. Threat contained.", type: "success" }
+            ];
+
+            let currentTime = 0;
+
+            logs.forEach(log => {
+                currentTime += (log.time - currentTime) + Math.random() * 500; // random delay
+                setTimeout(() => {
+                    const text = isZh ? log.zh : log.en;
+                    const date = new Date();
+                    const timeStr = date.toTimeString().split(' ')[0];
+                    
+                    let colorClass = "";
+                    if (log.type === 'alert') colorClass = "log-alert";
+                    if (log.type === 'action') colorClass = "log-action";
+                    if (log.type === 'success') colorClass = "log-action"; // Green? using blue for simplicity or inline style
+
+                    const entry = document.createElement('div');
+                    entry.className = "log-entry";
+                    entry.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${colorClass}">${text}</span>`;
+                    
+                    if (log.type === 'success') entry.style.color = '#0f0';
+
+                    consoleLog.appendChild(entry);
+                    consoleLog.scrollTop = consoleLog.scrollHeight;
+                }, log.time);
+            });
+        }
+    </script>
+</body>
+</html>
