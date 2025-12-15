@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eBPF & Isovalent: Infrastructure Evolution Briefing</title>
+    <style>
+        :root {
+            /* Cisco Color Palette */
+            --cisco-blue: #00bceb;
+            --cisco-dark-blue: #0d274d;
+            --cisco-green: #6cc24a;
+            --cisco-red: #e2231a;
+            --cisco-orange: #f5a623;
+            --cisco-gray: #58585b;
+            --cisco-light-gray: #f2f2f2;
+            --bg-white: #ffffff;
+            --text-main: #333333;
+            --code-bg: #2d2d2d;
+            --code-text: #f8f8f2;
+        }
+
+        body {
+            font-family: "Segoe UI", "San Francisco", Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cisco-light-gray);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Utility Classes */
+        .lang-en { display: none; }
+        .lang-zh { display: block; }
+        body.english-mode .lang-en { display: block; }
+        body.english-mode .lang-zh { display: none; }
+
+        /* Navigation */
+        nav {
+            background-color: var(--cisco-dark-blue);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background-color: var(--cisco-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .lang-btn:hover {
+            background-color: #0096bb;
+        }
+
+        /* Hero Section */
+        header {
+            background: linear-gradient(135deg, var(--cisco-dark-blue) 0%, #005073 100%);
+            color: white;
+            padding: 4rem 1.5rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 1rem 0;
+            font-size: 2.2rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-top: 5px solid var(--cisco-blue);
+        }
+
+        .card h2 {
+            color: var(--cisco-dark-blue);
+            border-bottom: 2px solid var(--cisco-light-gray);
+            padding-bottom: 1rem;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Executive Summary Box */
+        .exec-summary {
+            background: linear-gradient(to right, #f0f9ff, #e6f7fc);
+            border: 1px solid #bde0fe;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .exec-summary h3 {
+            color: var(--cisco-dark-blue);
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .summary-item {
+            text-align: center;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .summary-item:hover {
+            transform: translateY(-5px);
+        }
+        .summary-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Value List (V5/V8 Style) */
+        .value-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        .value-item {
+            background: #fcfcfc;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 5px solid var(--cisco-blue);
+            transition: transform 0.2s;
+        }
+        .value-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .value-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        .value-check {
+            color: var(--cisco-green);
+            font-size: 1.4rem;
+            margin-right: 10px;
+        }
+        .value-title {
+            font-weight: bold;
+            color: var(--cisco-dark-blue);
+            font-size: 1.15rem;
+        }
+        .value-desc {
+            color: var(--cisco-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            padding-left: 2rem;
+        }
+        .highlight-text {
+            color: var(--cisco-blue);
+            font-weight: bold;
+        }
+
+        /* Tech Detail Section (Restored from V4) */
+        .tech-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px dashed #ddd;
+        }
+        .tech-section:last-child {
+            border-bottom: none;
+        }
+        .tech-title {
+            font-size: 1.4rem;
+            color: var(--cisco-blue);
+            margin-bottom: 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        /* v4 specific styling for content */
+        .tech-content {
+            padding-left: 1rem;
+            border-left: 3px solid #eee;
+        }
+
+        /* SVG Illustrations */
+        .illustration {
+            width: 100%;
+            height: auto;
+            margin: 2rem 0;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        
+        /* Highlight Box (from v4) */
+        .highlight-box {
+            background-color: rgba(0, 188, 235, 0.08);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--cisco-blue);
+        }
+
+        /* Code Block (from v4) */
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        /* Comparison Table */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        .comparison-table th {
+            background-color: var(--cisco-dark-blue);
+            color: white;
+            font-weight: 600;
+        }
+        .tag-good { color: var(--cisco-green); font-weight: bold; display: block; margin-bottom: 4px; }
+        .tag-bad { color: var(--cisco-red); font-weight: bold; display: block; margin-bottom: 4px; }
+        .col-feat { width: 20%; font-weight: bold; color: #555; }
+        .col-iso { width: 40%; background-color: rgba(108, 194, 74, 0.03); }
+        .col-old { width: 40%; background-color: rgba(226, 35, 26, 0.02); }
+
+        /* FAQ Section */
+        .qa-item {
+            background: #fcfcfc;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .qa-question {
+            font-weight: bold;
+            color: var(--cisco-dark-blue);
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+        .qa-question::before {
+            content: "Q: ";
+            color: var(--cisco-orange);
+        }
+        .qa-answer {
+            color: var(--cisco-gray);
+            line-height: 1.7;
+        }
+
+        /* Glossary */
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .glossary-item {
+            background: #fcfcfc;
+            padding: 1rem;
+            border-left: 3px solid var(--cisco-orange);
+            border-radius: 4px;
+        }
+        .glossary-term {
+            font-weight: bold;
+            color: var(--cisco-dark-blue);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            background: var(--cisco-dark-blue);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+            .card { padding: 1.5rem; }
+            .value-desc { padding-left: 0; }
+            .tech-content { padding-left: 0; border-left: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#00bceb"/>
+                <path d="M2 17L12 22L22 17" stroke="#00bceb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="#00bceb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Isovalent Strategy</span>
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()">English / 中文</button>
+    </nav>
+
+    <header>
+        <h1 class="lang-zh">面向未来的 IT 基础设施架构：eBPF 赋能之旅</h1>
+        <h1 class="lang-en">Future-Ready Infrastructure: The eBPF Empowerment Journey</h1>
+        
+        <p class="subtitle lang-zh">致 IT 基础设施与运营团队：构建一个安全、可视、高性能的自动化资源交付平台</p>
+        <p class="subtitle lang-en">To IT Infrastructure & Ops Team: Building a Secure, Observable, High-Performance Platform</p>
+    </header>
+
+    <div class="container">
+
+        <!-- Executive Summary (v8/v4) -->
+        <section class="card">
+            <div class="exec-summary">
+                <h3 class="lang-zh">💡 一分钟了解核心价值</h3>
+                <h3 class="lang-en">💡 Core Value in 1 Minute</h3>
+                <p class="lang-zh">对于非技术背景的管理层，本方案带来的商业价值概括如下：</p>
+                <p class="lang-en">For non-technical leadership, the business value is summarized as:</p>
+                
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-icon">💰</span>
+                        <strong class="lang-zh">降低硬件成本</strong>
+                        <strong class="lang-en">Reduce TCO</strong>
+                        <p class="lang-zh" style="font-size:0.9rem;">通过移除过时的网络组件，CPU 利用率降低 30%-40%，用更少的服务器跑更多的业务。</p>
+                        <p class="lang-en" style="font-size:0.9rem;">Remove legacy components, drop CPU usage by 30%-40%. Run more apps on fewer servers.</p>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon">🛡️</span>
+                        <strong class="lang-zh">业务连续性</strong>
+                        <strong class="lang-en">Business Continuity</strong>
+                        <p class="lang-zh" style="font-size:0.9rem;">无需重启系统即可修补漏洞（虚拟补丁）。生产线不停机，业务不中断。</p>
+                        <p class="lang-en" style="font-size:0.9rem;">Patch without rebooting (Virtual Patching). Zero downtime for production lines.</p>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon">👁️</span>
+                        <strong class="lang-zh">故障定责清晰</strong>
+                        <strong class="lang-en">Clear Accountability</strong>
+                        <p class="lang-zh" style="font-size:0.9rem;">不再在"网络问题"还是"应用问题"之间推诿。可视化大屏一眼看清故障点，大幅缩短修复时间。</p>
+                        <p class="lang-en" style="font-size:0.9rem;">No more finger-pointing between "Network" vs "App". Visualize faults instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: 5 Core Strategic Values (v8/v5) -->
+        <section class="card">
+            <h2 class="lang-zh">1. 核心战略价值与责任交付</h2>
+            <h2 class="lang-en">1. Core Strategic Value & Delivery</h2>
+            
+            <p class="lang-zh">我们不仅仅是引入一项新技术，而是为您现有的基础设施注入以下五大战略优势：</p>
+            <p class="lang-en">We are injecting five strategic advantages into your existing infrastructure:</p>
+
+            <div class="value-list">
+                <!-- Item 1: HA -->
+                <div class="value-item">
+                    <div class="value-header">
+                        <span class="value-check">✅</span>
+                        <span class="value-title lang-zh">保障业务高可用性与稳定性 (High Availability)</span>
+                        <span class="value-title lang-en">Ensure High Availability & Stability</span>
+                    </div>
+                    <div class="value-desc lang-zh">
+                        <span class="highlight-text">免重启安全加固：</span> 利用 Tetragon 的动态策略，可即时防御漏洞，无需等待停机维护窗口，最大化业务在线时间。
+                    </div>
+                    <div class="value-desc lang-en">
+                        <span class="highlight-text">No-Reboot Hardening:</span> Use Tetragon dynamic policies to mitigate vulnerabilities instantly without maintenance windows, maximizing uptime.
+                    </div>
+                </div>
+
+                <!-- Item 2: Security Posture -->
+                <div class="value-item">
+                    <div class="value-header">
+                        <span class="value-check">✅</span>
+                        <span class="value-title lang-zh">提升基础设施安全水位 (Security Posture)</span>
+                        <span class="value-title lang-en">Elevate Security Posture</span>
+                    </div>
+                    <div class="value-desc lang-zh">
+                        <span class="highlight-text">内核级同步阻断：</span> 区别于传统日志告警，Tetragon 在攻击造成实际损害前（如文件读写）就进行拦截，从根本上防范数据泄露、系统篡改和容器逃逸。
+                    </div>
+                    <div class="value-desc lang-en">
+                        <span class="highlight-text">Kernel-Level Blocking:</span> Unlike traditional logging, Tetragon blocks attacks before damage occurs (e.g., file access), preventing leakage.
+                    </div>
+                </div>
+
+                <!-- Item 3: Performance -->
+                <div class="value-item">
+                    <div class="value-header">
+                        <span class="value-check">✅</span>
+                        <span class="value-title lang-zh">确保业务应用性能 (Application Performance)</span>
+                        <span class="value-title lang-en">Ensure Application Performance</span>
+                    </div>
+                    <div class="value-desc lang-zh">
+                        <span class="highlight-text">极致性能：</span> Cilium 移除 kube-proxy 提供接近物理机的网络性能；Tetragon 的安全监控开销<strong>小于 1%</strong>，保障核心业务应用不受影响。
+                    </div>
+                    <div class="value-desc lang-en">
+                        <span class="highlight-text">Ultimate Performance:</span> Cilium removes kube-proxy for near-metal speed; Tetragon overhead is <strong>< 1%</strong>.
+                    </div>
+                </div>
+
+                <!-- Item 4: Ops Efficiency -->
+                <div class="value-item">
+                    <div class="value-header">
+                        <span class="value-check">✅</span>
+                        <span class="value-title lang-zh">提升运维与故障排查效率 (Ops Efficiency)</span>
+                        <span class="value-title lang-en">Boost Ops Efficiency</span>
+                    </div>
+                    <div class="value-desc lang-zh">
+                        <span class="highlight-text">全局可视化：</span> Hubble 提供实时的服务依赖和流量拓扑，将复杂的云原生网络环境“透明化”，帮助团队快速定位问题根源（是网络？DNS？还是应用？）。
+                    </div>
+                    <div class="value-desc lang-en">
+                        <span class="highlight-text">Global Visibility:</span> Hubble provides real-time topology, making complex networks "transparent" to quickly pinpoint root causes.
+                    </div>
+                </div>
+
+                <!-- Item 5: MTTR -->
+                <div class="value-item">
+                    <div class="value-header">
+                        <span class="value-check">✅</span>
+                        <span class="value-title lang-zh">缩短安全事件响应时间 (Reduce MTTR)</span>
+                        <span class="value-title lang-en">Reduce Security MTTR</span>
+                    </div>
+                    <div class="value-desc lang-zh">
+                        <span class="highlight-text">自动化安全闭环：</span> 结合 Splunk 与 AI，实现从检测、分析到响应的分钟级自动化，大幅提升安全团队的响应效率。
+                    </div>
+                    <div class="value-desc lang-en">
+                        <span class="highlight-text">Automated Loop:</span> Combine with Splunk & AI to automate detection-to-response in minutes.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: eBPF Deep Dive (RESTORED FROM V4) -->
+        <section class="card">
+            <h2 class="lang-zh">2. eBPF：Linux 内核的数字化转型</h2>
+            <h2 class="lang-en">2. eBPF: Digital Transformation of the Linux Kernel</h2>
+
+            <div class="highlight-box">
+                <p class="lang-zh"><strong>为什么现在谈 eBPF？</strong> 过去，Linux 内核像是一个功能固定的硬件；现在，eBPF 把它变成了软件定义的平台。Google, Meta, Netflix 都在用它重构基础设施。</p>
+                <p class="lang-en"><strong>Why eBPF Now?</strong> In the past, the Linux Kernel was like fixed hardware; now, eBPF turns it into a software-defined platform. Google, Meta, Netflix are all rebuilding infrastructure with it.</p>
+            </div>
+
+            <h3 class="lang-zh">传统架构 vs eBPF 架构</h3>
+            <h3 class="lang-en">Traditional vs eBPF Architecture</h3>
+            
+            <!-- Comparison SVG -->
+            <svg class="illustration" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+                <!-- Left: Traditional -->
+                <g transform="translate(50, 20)">
+                    <text x="150" y="20" text-anchor="middle" font-weight="bold" fill="#0d274d">传统方式 (Traditional)</text>
+                    <rect x="50" y="40" width="200" height="250" fill="white" stroke="#ccc" rx="5"/>
+                    <!-- User Space -->
+                    <rect x="60" y="50" width="180" height="80" fill="#f2f2f2"/>
+                    <text x="150" y="70" text-anchor="middle" font-size="12">User Space App</text>
+                    <text x="150" y="90" text-anchor="middle" font-size="10" fill="red">Copy Data 🐢</text>
+                    <!-- Kernel -->
+                    <rect x="60" y="140" width="180" height="140" fill="#dceef5"/>
+                    <text x="150" y="160" text-anchor="middle" font-size="12">Linux Kernel</text>
+                    <path d="M 150 120 L 150 150" stroke="red" stroke-width="2" stroke-dasharray="4"/>
+                    <rect x="80" y="180" width="140" height="30" fill="#e2231a" opacity="0.2"/>
+                    <text x="150" y="200" text-anchor="middle" font-size="10">iptables list (Huge)</text>
+                </g>
+
+                <!-- Right: eBPF -->
+                <g transform="translate(450, 20)">
+                    <text x="150" y="20" text-anchor="middle" font-weight="bold" fill="#00bceb">eBPF 方式 (Modern)</text>
+                    <rect x="50" y="40" width="200" height="250" fill="white" stroke="#00bceb" rx="5"/>
+                    <!-- User Space -->
+                    <rect x="60" y="50" width="180" height="60" fill="#f2f2f2"/>
+                    <text x="150" y="80" text-anchor="middle" font-size="12">User Space App</text>
+                    <!-- Kernel with eBPF -->
+                    <rect x="60" y="120" width="180" height="160" fill="#dceef5"/>
+                    <text x="150" y="140" text-anchor="middle" font-size="12">Linux Kernel + eBPF</text>
+                    
+                    <!-- JIT Compiler -->
+                    <rect x="70" y="160" width="160" height="100" fill="#00bceb" opacity="0.1"/>
+                    <text x="150" y="180" text-anchor="middle" font-size="11" font-weight="bold">JIT Compiler</text>
+                    <text x="150" y="200" text-anchor="middle" font-size="10">Native Machine Code ⚡</text>
+                    <text x="150" y="220" text-anchor="middle" font-size="10">Map Lookup (O(1))</text>
+                </g>
+
+                <text x="400" y="180" text-anchor="middle" font-weight="bold" fill="#6cc24a">VS</text>
+            </svg>
+
+            <p class="lang-zh"><strong>核心差异：</strong> 传统方式依赖 iptables 逐条匹配规则，就像要在几千页的纸质名册里一个个找人，随着规则增加，速度越来越慢。eBPF 使用 Hash Map 进行数据查找，就像使用电子搜索引擎，无论数据有多少，查找速度永远是<strong>瞬间完成</strong>。</p>
+            <p class="lang-en"><strong>Core Difference:</strong> Traditional methods check rules one by one, like searching a paper phonebook. eBPF uses Hash Maps, like a digital search engine—lookup speed is <strong>instant</strong> regardless of scale.</p>
+        </section>
+
+        <!-- Section 3: The Toolkit Deep Dive (RESTORED FROM V4) -->
+        <section class="card">
+            <h2 class="lang-zh">3. Isovalent 工具集详解：架构升级</h2>
+            <h2 class="lang-en">3. Isovalent Toolkit Deep Dive: Architecture Upgrade</h2>
+
+            <!-- Cilium -->
+            <div class="tech-section">
+                <div class="tech-title">
+                    <span class="lang-zh">🟢 Cilium：下一代网络高速公路</span>
+                    <span class="lang-en">🟢 Cilium: Next-Gen Networking Highway</span>
+                </div>
+                <div class="tech-content">
+                    <p class="lang-zh"><strong>痛点：</strong> 现有的 Kubernetes 网络组件（kube-proxy）在大规模场景下更新慢且延迟高。</p>
+                    <p class="lang-zh"><strong>Cilium 方案：</strong> Cilium 利用 eBPF 绕过了复杂的内核协议栈，为数据包开辟了“快车道”。</p>
+                    <p class="lang-zh"><strong>亮点：透明加密 (WireGuard)</strong> - 在制造业场景中，设备与服务器之间的通信安全至关重要。Cilium 可以开启透明加密，所有节点间的流量自动加密，而对上层应用完全透明，无需修改一行代码即可满足合规要求。</p>
+                    <hr>
+                    <p class="lang-en"><strong>Pain Point:</strong> Existing components (kube-proxy) are slow and latent at scale.</p>
+                    <p class="lang-en"><strong>Solution:</strong> Cilium uses eBPF to create a "fast lane" for packets, bypassing complex stacks.</p>
+                    <p class="lang-en"><strong>Highlight: Transparent Encryption (WireGuard)</strong> - Secure comms without changing app code.</p>
+                </div>
+            </div>
+
+            <!-- Tetragon -->
+            <div class="tech-section">
+                <div class="tech-title">
+                    <span class="lang-zh">🛡️ Tetragon：内置的安全卫士</span>
+                    <span class="lang-en">🛡️ Tetragon: Built-in Security Guard</span>
+                </div>
+                <div class="tech-content">
+                    <p class="lang-zh"><strong>工作原理：</strong> 传统安全软件像是在大楼走廊里装摄像头（容易被绕过）。Tetragon 是在墙体里埋感应器。任何程序试图打开敏感文件或建立非法连接，都会在动作发生的<strong>那一微秒</strong>被内核直接拦截。</p>
+                    <p class="lang-zh"><strong>关键能力：文件完整性监控 (FIM)</strong> - 制造业的生产配方文件（Recipe Files）非常敏感。Tetragon 可以监控对特定文件的任何写入尝试，一旦发现未授权的篡改，立即阻断并告警。</p>
+                    <p class="lang-zh"><strong>虚拟补丁：</strong> 发现系统漏洞但没时间重启打补丁？通过 Tetragon 下发一条策略，直接禁止触发该漏洞的操作，系统照常运行，漏洞却已失效。</p>
+                    
+                    <div class="code-block">
+# 策略示例：禁止篡改关键密码文件
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: block-critical-file-write
+spec:
+  kprobes:
+  - call: "fd_install"
+    selectors:
+    - matchArgs:
+      - index: 1
+        operator: "Prefix"
+        values: ["/etc/passwd", "/opt/production/recipes/"] 
+    action: "SigKill" # 发现写操作直接杀掉进程
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hubble -->
+            <div class="tech-section">
+                <div class="tech-title">
+                    <span class="lang-zh">🔭 Hubble：网络的“透视眼”</span>
+                    <span class="lang-en">🔭 Hubble: Network "X-Ray"</span>
+                </div>
+                <div class="tech-content">
+                    <p class="lang-zh">Hubble 将看不见的网络流量转化为可视化的地图。它不仅告诉您 A 访问了 B，还能告诉您：</p>
+                    <ul class="lang-zh">
+                        <li>访问失败是因为网络不通？还是 DNS 解析超时？</li>
+                        <li>是被安全策略拦截了？还是应用自己报错了？</li>
+                    </ul>
+                    <p class="lang-zh"><strong>服务依赖拓扑：</strong> Hubble 会自动生成全网服务调用图，帮助您一眼识别出系统中的“孤岛”或异常连接。</p>
+                    <hr>
+                    <p class="lang-en">Hubble turns invisible traffic into visible maps. It identifies if failures are due to network, DNS, or policy drops instantly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Technology Gap (Table - V8/V5) -->
+        <section class="card">
+            <h2 class="lang-zh">4. 技术代差对比：Isovalent eBPF vs 传统方案</h2>
+            <h2 class="lang-en">4. Technology Generation Gap: Isovalent eBPF vs Legacy</h2>
+            
+            <p class="lang-zh">为什么选择 eBPF 路线？以下是架构层面的根本性差异：</p>
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th class="col-feat">特性 (Feature)</th>
+                            <th class="col-iso">Isovalent / eBPF (现代方案)</th>
+                            <th class="col-old">Legacy / 传统方案 (旧方案)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>安全防御机制</strong><br><small>Security</small></td>
+                            <td>
+                                <span class="tag-good">同步阻断 (Synchronous Enforcement)</span>
+                                在恶意行为发生前，直接在内核空间杀死进程，消除延迟。
+                            </td>
+                            <td>
+                                <span class="tag-bad">异步检测 (Asynchronous Detection)</span>
+                                如日志分析或传统安全工具，像摄像头一样只能记录下犯罪过程，但发现时损害已造成。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>部署与系统影响</strong><br><small>Deployment</small></td>
+                            <td>
+                                <span class="tag-good">近零影响 (开销 < 1%)</span>
+                                无需修改内核源码或加载内核模块，动态加载，安全稳定。
+                            </td>
+                            <td>
+                                <span class="tag-bad">高性能损耗 / 风险</span>
+                                Sidecar 代理会导致大量排队（延迟）；内核模块存在风险，往往需要停机重启。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>安全事件上下文</strong><br><small>Context</small></td>
+                            <td>
+                                <span class="tag-good">内核级可观测性</span>
+                                能够将低层的系统调用即时映射到高层的 Kubernetes 元数据 (Pod, Namespace)。
+                            </td>
+                            <td>
+                                <span class="tag-bad">信息盲区 / 易被篡改</span>
+                                传统 eBPF 工具可能只看到 PID/IP。Auditd 日志易被高级黑客删除，导致“瞎子”状态。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>网络性能 (K8s)</strong><br><small>Network Performance</small></td>
+                            <td>
+                                <span class="tag-good">取代 kube-proxy</span>
+                                通过 eBPF 数据平面提供增强的 Service 支持、更低的延迟，并保留外部客户端源 IP。
+                            </td>
+                            <td>
+                                <span class="tag-bad">性能瓶颈</span>
+                                依赖传统 kube-proxy 和 iptables，规则多了会卡顿，存在同步开销。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 5: Ecosystem (SVG + Splunk Text) -->
+        <section class="card">
+            <h2 class="lang-zh">5. 生态闭环：现有投资价值最大化</h2>
+            <h2 class="lang-en">5. Ecosystem: Maximizing Existing Investments</h2>
+            <p class="lang-zh">我们不是推翻您现有的体系，而是无缝融入 Cisco ACI 和 Splunk：</p>
+            
+            <svg class="illustration" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+                <g transform="translate(100, 50)">
+                    <circle cx="40" cy="40" r="30" fill="#00bceb" opacity="0.2"/>
+                    <text x="40" y="45" text-anchor="middle" font-weight="bold" fill="#00bceb">1. 拦截</text>
+                    <text x="40" y="90" text-anchor="middle" font-size="12">Tetragon</text>
+                </g>
+                <path d="M 180 90 L 220 90" stroke="#ccc" stroke-width="2" marker-end="url(#arrow)"/>
+                <g transform="translate(250, 50)">
+                    <circle cx="40" cy="40" r="30" fill="#333" opacity="0.1"/>
+                    <text x="40" y="45" text-anchor="middle" font-weight="bold" fill="#333">2. 告警</text>
+                    <text x="40" y="90" text-anchor="middle" font-size="12">Splunk</text>
+                </g>
+                <path d="M 330 90 L 370 90" stroke="#ccc" stroke-width="2" marker-end="url(#arrow)"/>
+                <g transform="translate(400, 50)">
+                    <circle cx="40" cy="40" r="30" fill="#6cc24a" opacity="0.2"/>
+                    <text x="40" y="45" text-anchor="middle" font-weight="bold" fill="#6cc24a">3. 响应</text>
+                    <text x="40" y="90" text-anchor="middle" font-size="12">Cisco ACI</text>
+                </g>
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#ccc" />
+                    </marker>
+                </defs>
+            </svg>
+
+            <div class="highlight-box">
+                <h4 class="lang-zh" style="margin-top:0; color:var(--cisco-dark-blue);">Splunk 集成价值：上下文即王道</h4>
+                <p class="lang-zh">Tetragon 发送到 Splunk 的不是杂乱的日志，而是包含<strong>完整故事线</strong>的数据。您不仅知道“谁”做了坏事，还能知道“是谁启动了它”，攻击路径一目了然。</p>
+                <p class="lang-en">Splunk receives full story-lines, not noisy logs. See the entire attack path instantly.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Enterprise Value (Table) -->
+        <section class="card">
+            <h2 class="lang-zh">6. 为什么制造业需要 Isovalent 企业版？</h2>
+            <h2 class="lang-en">6. Why Manufacturing Needs Enterprise Edition?</h2>
+            
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th class="col-feature">需求 (Requirement)</th>
+                            <th class="col-iso">Isovalent 企业版</th>
+                            <th class="col-old">开源社区版</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>老旧系统支持</strong><br><small>RHEL 7, CentOS 7</small></td>
+                            <td><strong>全面支持</strong><br>提供旧版内核兼容构建，保护既有资产。</td>
+                            <td>有限支持<br>通常依赖较新内核 (5.4+)。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>安全合规</strong><br><small>FIPS, SOC2</small></td>
+                            <td><strong>FIPS 认证镜像</strong><br>开箱即用合规报表。</td>
+                            <td>需自行配置<br>无官方认证。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>技术支持</strong><br><small>SLA</small></td>
+                            <td><strong>24/7/365 专家支持</strong><br>含热修复补丁 (Hotfixes)。</td>
+                            <td>社区支持<br>无 SLA 保障。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 7: FAQ -->
+        <section class="card">
+            <h2 class="lang-zh">7. FAQ (常见问题)</h2>
+            <h2 class="lang-en">7. FAQ</h2>
+            
+            <div class="qa-item">
+                <div class="qa-question lang-zh">Q: 使用这套方案，我需要修改现有的应用程序代码吗？</div>
+                <div class="qa-question lang-en">Q: Do I need to change my app code?</div>
+                <div class="qa-answer lang-zh">
+                    <strong>完全不需要。</strong> eBPF 在内核层工作，对上层应用是完全透明的。无论您运行的是 Java, Python 还是旧的遗留系统，都能直接享受安全和网络加速，无需重新开发。
+                </div>
+            </div>
+
+            <div class="qa-item">
+                <div class="qa-question lang-zh">Q: 我们的服务器有一些是老旧的 Linux 版本，能支持吗？</div>
+                <div class="qa-question lang-en">Q: We have old Linux servers, is it supported?</div>
+                <div class="qa-answer lang-zh">
+                    <strong>是的，Isovalent 企业版支持。</strong> 即使内核较旧（如 RHEL 7），企业版也提供了兼容支持，确保您无需立即升级操作系统也能使用 eBPF 能力。
+                </div>
+            </div>
+
+            <div class="qa-item">
+                <div class="qa-question lang-zh">Q: 这会增加我的运维复杂度吗？</div>
+                <div class="qa-question lang-en">Q: Will this increase complexity?</div>
+                <div class="qa-answer lang-zh">
+                    <strong>反而会降低。</strong> 以前您需要维护防火墙规则、Sidecar 代理、日志收集器等一堆组件。现在 Cilium 一套方案解决了网络、安全和监控，排查问题变得像看地图一样简单。
+                </div>
+            </div>
+        </section>
+
+        <!-- Appendix: Glossary -->
+        <section class="card">
+            <h2 class="lang-zh">📖 附录：通俗概念辞典</h2>
+            <h2 class="lang-en">📖 Appendix: Glossary for Business Leaders</h2>
+            <div class="glossary-grid">
+                <div class="glossary-item">
+                    <span class="glossary-term lang-zh">Kernel (系统内核)</span>
+                    <span class="glossary-term lang-en">Kernel</span>
+                    <p class="lang-zh">操作系统的“大脑”和“心脏”。它控制着所有硬件和软件的交互。Isovalent 的工具就是在这个核心区域工作的，所以效率极高。</p>
+                    <p class="lang-en">The "brain" of the OS. Controls all hardware/software interaction. Our tools work here, hence the high efficiency.</p>
+                </div>
+                <div class="glossary-item">
+                    <span class="glossary-term lang-zh">Sidecar (边车模式)</span>
+                    <span class="glossary-term lang-en">Sidecar</span>
+                    <p class="lang-zh">传统技术需要在每个应用旁边挂一个“小助手”来处理网络（就像三轮摩托车的边车）。这会消耗大量内存。我们通过 eBPF 去掉了这个“边车”，让车跑得更快、更省油。</p>
+                    <p class="lang-en">Traditional tech attaches a "helper" to every app (like a motorcycle sidecar), eating RAM. We remove this "sidecar" using eBPF, saving resources.</p>
+                </div>
+                <div class="glossary-item">
+                    <span class="glossary-term lang-zh">Zero Trust (零信任)</span>
+                    <span class="glossary-term lang-en">Zero Trust</span>
+                    <p class="lang-zh">默认不信任任何人。以前是“进了大门就是自己人”，现在是“即使在家里，进卧室也要刷卡”。Tetragon 提供了这种级别的内部安全管控。</p>
+                    <p class="lang-en">Trust no one by default. Even inside the network perimeter, every action is verified. Tetragon provides this granular internal security.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p class="lang-zh">Prepared for Infrastructure Team | Powered by Isovalent & Cisco</p>
+        <p class="lang-en">Prepared for Infrastructure Team | Powered by Isovalent & Cisco</p>
+        <p style="opacity: 0.7; font-size: 0.8rem; margin-top: 10px;">Confidential - For Internal Discussion Only</p>
+    </footer>
+
+    <script>
+        // Language Toggle Logic
+        function toggleLanguage() {
+            const body = document.body;
+            if (body.classList.contains('english-mode')) {
+                body.classList.remove('english-mode');
+            } else {
+                body.classList.add('english-mode');
+            }
+        }
+    </script>
+</body>
+</html>
