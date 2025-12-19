@@ -158,6 +158,18 @@
         .dash-label { color: #888; font-size: 0.75rem; margin-bottom: 5px; }
         .dash-value { color: var(--cisco-blue); font-size: 1.6rem; font-weight: bold; margin-top: auto; }
 
+        /* --- Expert Perspective Box (New) --- */
+        .expert-persp {
+            background: linear-gradient(to right, #0D274D, #005073);
+            color: white; padding: 30px; border-radius: 12px; margin-top: 40px;
+            position: relative; overflow: hidden;
+        }
+        .expert-persp::after {
+            content: "TECH INSIGHT"; position: absolute; top: 10px; right: -30px;
+            background: var(--cisco-orange); font-size: 10px; font-weight: bold;
+            padding: 5px 40px; transform: rotate(45deg);
+        }
+
         /* --- Final Conclusion Section --- */
         .final-conclusion { 
             background-color: var(--cisco-midnight) !important; 
@@ -219,7 +231,6 @@
         .btn-outline { background: transparent; border: 2px solid var(--cisco-blue); color: var(--cisco-blue); padding: 14px 32px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-outline:hover { background: var(--cisco-blue); color: white; }
         
-        .divider { border: 0; height: 1px; background: linear-gradient(to right, transparent, #D1D9E0, transparent); margin: 60px 0; }
         .case-badge { background: var(--cisco-midnight); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-bottom: 15px; display: inline-block; text-transform: uppercase; }
 
         @media (max-width: 768px) {
@@ -304,6 +315,67 @@
         </div>
     </section>
 
+    <!-- [INSERTED CONTENT START]: What is Tetragon & TracingPolicy -->
+    <section id="tetragon-deep-dive" style="background: #F9FAFB;">
+        <div class="container">
+            <div class="section-header">
+                <h2>
+                    <span class="lang-zh">什么是 Tetragon? (What)</span>
+                    <span class="lang-en">What is Tetragon?</span>
+                </h2>
+                <p>
+                    <span class="lang-zh">Tetragon 是 Cilium 开源社区下的核心项目，它利用 <b>eBPF</b> 技术提供深度的内核级安全观测。不同于传统的安全工具，它能感知 Kubernetes 身份（Pod, Namespace, Labels），并在恶意行为发生的瞬间在内核态将其阻断。</span>
+                    <span class="lang-en">Tetragon is a core project under Cilium, using <b>eBPF</b> for deep kernel-level security observability. It understands Kubernetes identities and enforces blocking in the kernel.</span>
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="card" style="border-top-color: var(--cisco-midnight);">
+                    <h4 style="margin-bottom:10px;">内核级过滤</h4>
+                    <p style="font-size: 0.95rem;">在数据进入用户态前完成筛选，极低开销。</p>
+                </div>
+                <div class="card" style="border-top-color: var(--cisco-midnight);">
+                    <h4 style="margin-bottom:10px;">K8s 全感知</h4>
+                    <p style="font-size: 0.95rem;">自动关联进程与容器/Pod 身份。</p>
+                </div>
+                <div class="card" style="border-top-color: var(--cisco-midnight);">
+                    <h4 style="margin-bottom:10px;">实时阻断</h4>
+                    <p style="font-size: 0.95rem;">非事后告警，而是即时预防。</p>
+                </div>
+            </div>
+
+            <div class="view-section" style="margin-top: 60px;">
+                <div class="view-title">核心灵魂：TracingPolicy</div>
+                <p>
+                    <span class="lang-zh">TracingPolicy 是一种 CRD（自定义资源声明），它定义了两个关键要素：</span>
+                    <span class="lang-en">TracingPolicy is a CRD that defines two key elements for enforcement:</span>
+                </p>
+                <div class="grid-3" style="margin-top:20px;">
+                    <div class="definition-card">
+                        <strong>触发条件 (Trigger)</strong>
+                        <p style="font-size: 0.9rem; margin-top:10px;">特定的系统调用（Syscalls）或内核函数及其参数。</p>
+                    </div>
+                    <div class="definition-card" style="border-color: var(--cisco-red);">
+                        <strong>处置动作 (Action)</strong>
+                        <p style="font-size: 0.9rem; margin-top:10px;">观测记录、发送信号（如 <b>SIGKILL</b>）或覆盖返回值。</p>
+                    </div>
+                </div>
+
+                <div class="expert-persp">
+                    <h4>
+                        <span class="lang-zh">专家视角:</span>
+                        <span class="lang-en">Expert Perspective:</span>
+                    </h4>
+                    <p style="font-size: 1rem; margin-top:10px; opacity: 0.9;">
+                        <span class="lang-zh">Tetragon 使用 <b>Kprobes</b> 和 <b>Tracepoints</b> 拦截内核事件。通过 <b>BPF Maps</b> 将内核数据高效传递至用户态的 Tetragon Agent 及其导出的 JSON 日志。</span>
+                        <span class="lang-en">Tetragon uses <b>Kprobes</b> and <b>Tracepoints</b> to intercept events, passing data via <b>BPF Maps</b> to the Tetragon Agent.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- [INSERTED CONTENT END] -->
+
     <!-- Section 2: Sequential Perspectives -->
     <section id="perspectives">
         <div class="container">
@@ -349,7 +421,7 @@
         </div>
     </section>
 
-    <!-- Section 3: Technical Architecture (How it Works) -->
+    <!-- Section 3: Technical Architecture -->
     <section id="how-it-works" style="background: white;">
         <div class="container">
             <div class="section-header">
@@ -361,50 +433,29 @@
             </div>
             
             <div style="background: #F9FAFB; padding: 40px; border-radius: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
-                <!-- SVG Architecture -->
                 <svg width="100%" height="350" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#049FD9" /></marker>
                         <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#E2231A" /></marker>
                     </defs>
-                    <!-- User Space -->
                     <rect x="50" y="20" width="700" height="100" rx="8" fill="#F0F8FC" stroke="#049FD9" stroke-width="2" stroke-dasharray="5,5"/>
                     <text class="lang-zh" x="65" y="45" font-weight="bold" fill="#0D274D">User Space (用户空间)</text>
-                    <text class="lang-en" x="65" y="45" font-weight="bold" fill="#0D274D">User Space</text>
                     <circle cx="200" cy="70" r="25" fill="white" stroke="#049FD9" stroke-width="2"/>
                     <text x="200" y="74" text-anchor="middle" font-size="12" fill="#049FD9">App</text>
-                    
-                    <!-- Kernel Space -->
                     <rect x="50" y="160" width="700" height="160" rx="8" fill="#0D274D" />
                     <text class="lang-zh" x="65" y="185" font-weight="bold" fill="white">Kernel Space (内核空间)</text>
-                    <text class="lang-en" x="65" y="185" font-weight="bold" fill="white">Kernel Space</text>
-
-                    <!-- Flow -->
                     <line x1="200" y1="95" x2="200" y2="200" stroke="#049FD9" stroke-width="3" marker-end="url(#arrow-blue)"/>
                     <text x="210" y="140" fill="#58585B" font-size="12">1. Syscall (open/write)</text>
-
-                    <!-- Hook -->
                     <rect x="150" y="210" width="120" height="70" rx="4" fill="#005073" stroke="#6CC24A" stroke-width="2"/>
                     <text x="210" y="240" text-anchor="middle" fill="white" font-weight="bold">eBPF Hook</text>
-                    <text x="210" y="260" text-anchor="middle" fill="#6CC24A" font-size="11">kprobe/sys_open</text>
-
-                    <!-- Tetragon Engine -->
                     <line x1="270" y1="245" x2="380" y2="245" stroke="#6CC24A" stroke-width="2" stroke-dasharray="4"/>
                     <rect x="380" y="210" width="180" height="70" rx="4" fill="#6CC24A"/>
                     <text x="470" y="240" text-anchor="middle" fill="#0D274D" font-weight="bold">Policy Engine</text>
-                    <text class="lang-zh" x="470" y="260" text-anchor="middle" fill="#0D274D" font-size="11">匹配安全策略...</text>
-                    <text class="lang-en" x="470" y="260" text-anchor="middle" fill="#0D274D" font-size="11">Matching Policy...</text>
-
-                    <!-- Enforcement -->
                     <line x1="560" y1="245" x2="630" y2="245" stroke="white" stroke-width="2"/>
                     <rect x="630" y="210" width="100" height="70" rx="4" fill="#E2231A"/>
                     <text x="680" y="240" text-anchor="middle" fill="white" font-weight="bold">SIGKILL</text>
-                    <text x="680" y="260" text-anchor="middle" fill="white" font-size="11">Signal -9</text>
-
-                    <!-- Blocking Line -->
                     <path d="M 680 210 Q 680 120 230 70" fill="none" stroke="#E2231A" stroke-width="2" marker-end="url(#arrow-red)"/>
                     <text class="lang-zh" x="520" y="100" fill="#E2231A" font-weight="bold">2. 拦截并杀死进程</text>
-                    <text class="lang-en" x="520" y="100" fill="#E2231A" font-weight="bold">2. Intercept & Kill</text>
                 </svg>
             </div>
         </div>
