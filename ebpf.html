@@ -46,6 +46,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            width: 100%;
         }
 
         .btn {
@@ -76,15 +77,36 @@
             background: white;
             border-radius: 12px;
             box-shadow: var(--card-shadow);
-            padding: 30px;
+            padding: clamp(20px, 5%, 40px);
             margin-bottom: 20px;
             border-top: 4px solid var(--cisco-blue);
             transition: var(--transition);
+            width: 100%;
+            word-wrap: break-word;
         }
         
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Winston 原则：显著性呼吁框 (Salience Callout) */
+        .winston-callout {
+            background: rgba(4, 159, 217, 0.05);
+            border-left: 5px solid var(--cisco-blue);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-weight: 500;
+            color: var(--cisco-midnight);
+        }
+
+        .winston-callout strong {
+            color: var(--cisco-blue);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 5px;
         }
 
         /* --- Header --- */
@@ -388,9 +410,11 @@
         .comparison-wrapper {
             overflow-x: auto;
             margin: 60px 0;
+            -webkit-overflow-scrolling: touch;
         }
         .comparison-table {
             width: 100%;
+            min-width: 600px;
             border-collapse: collapse;
             background: white;
             border-radius: 12px;
@@ -425,6 +449,7 @@
             display: flex;
             background: #2d2d2d;
             border-bottom: 1px solid #444;
+            overflow-x: auto;
         }
         .tab-btn {
             padding: 15px 25px;
@@ -435,6 +460,7 @@
             font-weight: bold;
             transition: var(--transition);
             font-size: 0.9rem;
+            white-space: nowrap;
         }
         .tab-btn.active {
             color: var(--cisco-blue);
@@ -527,7 +553,7 @@
         /* --- Detail Components Section --- */
         .detail-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
             margin-top: 50px;
         }
@@ -771,7 +797,7 @@
         .text-cisco-blue { color: var(--cisco-blue); }
         .text-bold { font-weight: 700; }
 
-        /* --- New Diagram Styles --- */
+        /* --- Diagram Styles --- */
         .diagram-container {
             display: flex;
             justify-content: center;
@@ -784,6 +810,49 @@
         .arch-svg {
             max-width: 100%;
             height: auto;
+        }
+
+        /* --- Responsive Tweaks for iPhone --- */
+        @media (max-width: 768px) {
+            :root {
+                --section-padding: 60px;
+            }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1.1rem; }
+            .section-title { font-size: 1.8rem; margin-bottom: 40px; }
+            
+            /* 重点：运行流程卡片在手机端竖向排列 */
+            .process-steps {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .step-arrow { display: none; }
+            .step-card { border-top: 4px solid var(--cisco-blue); }
+            .step-card[style*="border-top-color"] { border-top-width: 4px !important; }
+
+            .detail-grid { grid-template-columns: 1fr; }
+            .scenario-container { grid-template-columns: 1fr; gap: 30px; }
+            .evolution-timeline::before { left: 20px; }
+            .timeline-item { width: 100%; text-align: left !important; padding-left: 45px; }
+            .timeline-point { left: 11px !important; }
+            
+            .pipeline-container { height: 200px; padding: 15px; }
+            .ebpf-program { width: 120px; height: 120px; }
+
+            /* 修正 Isovalent 卡片溢出 */
+            .isovalent-main-card {
+                padding: 20px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .isovalent-header-box {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px !important;
+            }
+            .isovalent-header-box h3 {
+                font-size: 1.5rem !important;
+            }
         }
     </style>
 </head>
@@ -823,6 +892,12 @@
             <button class="btn btn-primary lang-zh" onclick="scrollToDemo()">体验交互 Demo</button>
             <button class="btn btn-primary lang-en hidden" onclick="scrollToDemo()">Try Interactive Demo</button>
 
+            <!-- Winston 原则：The Promise (核心承诺) -->
+            <div class="winston-callout lang-zh" style="max-width: 600px; margin: 40px auto 0; text-align: left; background: rgba(255,255,255,0.1); color: white; border-left-color: var(--cisco-blue);">
+                <strong>核心承诺 / THE PROMISE</strong>
+                阅读本文，您将掌握如何利用 eBPF 将原本黑盒的 Linux 内核变为可编程、透明且绝对安全的智能底座。
+            </div>
+
             <div class="hero-graphic" style="margin-top: 60px;">
                 <svg width="280" height="200" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="30" y="20" width="140" height="110" rx="12" fill="rgba(255,255,255,0.05)" stroke="white" stroke-width="1.5"/>
@@ -846,6 +921,12 @@
         <span class="golden-badge lang-en hidden">PAIN POINTS / WHY</span>
         <h2 class="section-title lang-zh">为什么要引入 eBPF？</h2>
         <h2 class="section-title lang-en hidden">Why eBPF?</h2>
+
+        <!-- Winston 原则：The Bottom Line (标语化结论) -->
+        <div class="winston-callout lang-zh">
+            <strong>核心洞察 / THE BOTTOM LINE</strong>
+            eBPF 终结了“内核开发以年为单位”的历史，开启了“内核创新以秒为单位”的新纪元。
+        </div>
 
         <p class="lang-zh" style="text-align: center; max-width: 850px; margin: -20px auto 40px;">Linux 内核是现代基础架构的基石，但其作为“共享资源”的特性，导致了<strong>稳定性与创新速度</strong>之间的剧烈冲突。传统上，在内核中实现新功能面临着难以逾越的障碍：</p>
         <p class="lang-en hidden" style="text-align: center; max-width: 850px; margin: -20px auto 40px;">The Linux kernel is the bedrock of modern infrastructure, but its nature as a "shared resource" creates a sharp conflict between <strong>stability and the pace of innovation</strong>. Historically, implementing new features in the kernel faced insurmountable obstacles:</p>
@@ -883,37 +964,25 @@
                 <thead>
                     <tr>
                         <th class="lang-zh">维度 / Dimension</th>
-                        <th class="lang-en hidden">Dimension</th>
                         <th class="lang-zh">传统方式 (LKM / Upstream)</th>
-                        <th class="lang-en hidden">Traditional (LKM / Upstream)</th>
                         <th class="lang-zh">eBPF 模式</th>
-                        <th class="lang-en hidden">eBPF Mode</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td class="lang-zh">交付速度</td>
-                        <td class="lang-en hidden">Delivery Speed</td>
                         <td class="lang-zh"><span class="cross-icon">✗</span> 以“年”为单位</td>
-                        <td class="lang-en hidden">Measured in Years</td>
                         <td class="lang-zh"><span class="check-icon">✓</span> 以“秒”为单位 (即时加载)</td>
-                        <td class="lang-en hidden">Measured in Seconds</td>
                     </tr>
                     <tr>
                         <td class="lang-zh">安全性</td>
-                        <td class="lang-en hidden">Safety</td>
                         <td class="lang-zh"><span class="cross-icon">✗</span> 高风险 (Panic 隐患)</td>
-                        <td class="lang-en hidden">High Risk (Panic potential)</td>
                         <td class="lang-zh"><span class="check-icon">✓</span> 极高 (验证器强校验)</td>
-                        <td class="lang-en hidden">Extreme (Strict Verification)</td>
                     </tr>
                     <tr>
                         <td class="lang-zh">系统重启</td>
-                        <td class="lang-en hidden">Reboot Required</td>
                         <td class="lang-zh"><span class="cross-icon">✗</span> 通常需要重启内核</td>
-                        <td class="lang-en hidden">Often Required</td>
                         <td class="lang-zh"><span class="check-icon">✓</span> 无需重启，热插拔</td>
-                        <td class="lang-en hidden">None, Hot-swappable</td>
                     </tr>
                 </tbody>
             </table>
@@ -990,6 +1059,12 @@
             <span class="golden-badge lang-en hidden">THE DICTIONARY</span>
             <h2 class="section-title lang-zh">eBPF 核心术语百科</h2>
             <h2 class="section-title lang-en hidden">The eBPF Dictionary</h2>
+
+            <!-- Winston 原则：Mental Model (建立心理模型) -->
+            <div class="winston-callout lang-zh">
+                <strong>心理模型 / MENTAL MODEL</strong>
+                您可以将 eBPF 理解为 <strong>“内核态的 JavaScript”</strong>：它让 Linux 内核具备了 Web 浏览器一样的事件驱动、沙盒隔离和脚本化扩展能力。
+            </div>
 
             <div class="term-group">
                 <h3 class="term-group-title lang-zh">1. 内核虚拟化与执行基石</h3>
@@ -1200,21 +1275,18 @@
                     <h3 class="lang-zh">辅助函数 (Helper Functions)</h3>
                     <h3 class="lang-en hidden">Helper Functions</h3>
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
-                        eBPF 程序不允许直接调用任意内核函数以防破坏稳定性。内核提供了一组受控的 <strong>Helper API</strong>，作为安全的“工具箱”。
-                    </p>
-                    <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
-                        eBPF programs cannot call arbitrary kernel functions. The kernel provides restricted <strong>Helper APIs</strong> as a safe "toolbox".
+                        eBPF 程序的设计哲学强调安全与隔离，不允许直接调用任意内核函数。内核提供了一组受控的 <strong>Helper API</strong>，作为安全的“工具箱”。
                     </p>
                     <ul class="hook-list">
                         <li class="hook-item">
                             <span class="hook-label">Data</span>
-                            <span class="hook-desc lang-zh">`bpf_probe_read()` 安全读取内存；`bpf_get_current_pid()` 获取进程 ID。</span>
+                            <span class="hook-desc lang-zh">`bpf_probe_read()` 用于安全读取内核内存；`bpf_get_current_pid()` 获取进程 ID。</span>
                             <span class="hook-desc lang-en hidden">`bpf_probe_read()` for safe memory access; `bpf_get_current_pid()` for process info.</span>
                         </li>
                         <li class="hook-item">
                             <span class="hook-label">Network</span>
-                            <span class="hook-desc lang-zh">`bpf_skb_load_bytes()` 解析包数据；`bpf_redirect()` 极速转发。</span>
-                            <span class="hook-desc lang-en hidden">`bpf_skb_load_bytes()` for packet parsing; `bpf_redirect()` for fast forwarding.</span>
+                            <span class="hook-desc lang-zh">`bpf_skb_load_bytes()` 解析包数据；`bpf_redirect()` 实现极速包重定向。</span>
+                            <span class="hook-desc lang-en hidden">`bpf_skb_load_bytes()` for packet parsing; `bpf_redirect()` for fast packet redirect.</span>
                         </li>
                     </ul>
                 </div>
@@ -1223,14 +1295,14 @@
                     <h3 class="lang-zh">尾调用 (Tail Calls)</h3>
                     <h3 class="lang-en hidden">Tail Calls</h3>
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
-                        为了突破 4096 条指令的单一程序限制，尾调用允许 eBPF 程序像 <strong>“接力赛”</strong> 一样跳转到另一个程序运行。
+                        受限于单一程序 4096 条指令的限制，尾调用允许 eBPF 程序像 <strong>“接力赛”</strong> 一样跳转到另一个程序运行，且不增加栈开销。
                     </p>
                     <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
-                        To bypass the 4096-instruction limit, tail calls allow eBPF programs to jump to another like a <strong>"relay race"</strong>.
+                        Tail calls allow eBPF programs to jump to another like a <strong>"relay race"</strong>, bypassing instruction limits without stack overhead.
                     </p>
                     <div class="insight-card" style="margin: 15px 0 0; font-size: 0.85rem;">
-                        <span class="lang-zh">优势：逻辑解耦、不增加栈深度、支持构建复杂的规则链条（如 Cilium 的多阶管道）。</span>
-                        <span class="lang-en hidden">Pros: Modularity, zero stack overhead, enables complex logic chains (e.g., Cilium pipelines).</span>
+                        <span class="lang-zh">核心优势：实现逻辑解耦、构建复杂的模块化处理管道（如 Cilium 的网络逻辑链路）。</span>
+                        <span class="lang-en hidden">Core Benefit: Decoupled logic, builds complex modular processing pipelines (e.g., Cilium's link).</span>
                     </div>
                 </div>
             </div>
@@ -1238,42 +1310,42 @@
             <div class="card" style="margin-top: 30px; border-top-color: var(--cisco-green);">
                 <h3 class="lang-zh">挂钩点全景观 (Hook Points)</h3>
                 <h3 class="lang-en hidden">Hook Points Overview</h3>
-                <p class="lang-zh" style="margin-bottom: 20px;">eBPF 的强大源于其全方位的“监听站”布局，覆盖了系统的每一个核心路径：</p>
-                <p class="lang-en hidden" style="margin-bottom: 20px;">eBPF's power comes from its ubiquitous "listening posts" across every core system path:</p>
+                <p class="lang-zh" style="margin-bottom: 20px;">eBPF 通过在内核关键路径上设置“监听站”，在不改动源码的情况下注入自定义逻辑：</p>
+                <p class="lang-en hidden" style="margin-bottom: 20px;">eBPF injects logic via ubiquitous "listening posts" throughout core kernel paths:</p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                     <ul class="hook-list">
                         <li class="hook-item">
                             <span class="hook-label">XDP</span>
-                            <span class="hook-desc lang-zh"><strong>最早钩子：</strong>在网卡驱动层拦截包。用于 DDoS 防护和线速负载均衡。</span>
-                            <span class="hook-desc lang-en hidden"><strong>Earliest:</strong> NIC driver level. Used for DDoS defense and line-rate LB.</span>
+                            <span class="hook-desc lang-zh"><strong>最早钩子：</strong>在网卡驱动层拦截包，适用于 DDoS 防护。</span>
+                            <span class="hook-desc lang-en hidden"><strong>Earliest Hook:</strong> NIC driver layer packet interception.</span>
                         </li>
                         <li class="hook-item">
                             <span class="hook-label">TC</span>
-                            <span class="hook-desc lang-zh"><strong>流控层：</strong>在包整形和调度阶段介入，支持分类与限速 QoS。</span>
+                            <span class="hook-desc lang-zh"><strong>流控层：</strong>在包整形阶段介入，支持 QoS 与包标记。</span>
                             <span class="hook-desc lang-en hidden"><strong>Traffic Control:</strong> Ingress/Egress shaping and QoS marking.</span>
                         </li>
                         <li class="hook-item">
                             <span class="hook-label">LSM</span>
-                            <span class="hook-desc lang-zh"><strong>安全模块：</strong>扩展内核安全框架，实现零信任运行时的权限拦截。</span>
-                            <span class="hook-desc lang-en hidden"><strong>Security:</strong> Extends kernel security modules for zero-trust enforcement.</span>
+                            <span class="hook-desc lang-zh"><strong>安全模块：</strong>扩展 Linux 安全框架，实现内核级权限实时控制。</span>
+                            <span class="hook-desc lang-en hidden"><strong>Security:</strong> Extends Linux Security Modules for real-time enforcement.</span>
                         </li>
                     </ul>
                     <ul class="hook-list">
                         <li class="hook-item">
                             <span class="hook-label">Kprobes</span>
-                            <span class="hook-desc lang-zh"><strong>内核探针：</strong>动态钩住任意内核函数，深入诊断调度或 IO 瓶颈。</span>
-                            <span class="hook-desc lang-en hidden"><strong>Dynamic Kernel:</strong> Probes any kernel function for bottleneck diagnosis.</span>
+                            <span class="hook-desc lang-zh"><strong>动态探针：</strong>钩住任意内核函数，深入诊断性能瓶颈。</span>
+                            <span class="hook-desc lang-en hidden"><strong>Dynamic:</strong> Probes any kernel function for bottleneck diagnosis.</span>
                         </li>
                         <li class="hook-item">
                             <span class="hook-label">Uprobes</span>
-                            <span class="hook-desc lang-zh"><strong>用户探针：</strong>钩住应用程序（如 libc）函数，实现无侵入追踪。</span>
-                            <span class="hook-desc lang-en hidden"><strong>Userspace:</strong> Traces app functions (e.g., libc) without code modification.</span>
+                            <span class="hook-desc lang-zh"><strong>用户探针：</strong>针对应用程序（如 libc）实现无侵入追踪。</span>
+                            <span class="hook-desc lang-en hidden"><strong>Userspace:</strong> Traces app functions without code modification.</span>
                         </li>
                         <li class="hook-item">
                             <span class="hook-label">Tracepts</span>
-                            <span class="hook-desc lang-zh"><strong>静态追踪：</strong>内核内置的稳定追踪点，开销极低且版本兼容性好。</span>
-                            <span class="hook-desc lang-en hidden"><strong>Tracepoints:</strong> Static, stable kernel events with minimal overhead.</span>
+                            <span class="hook-desc lang-zh"><strong>静态追踪：</strong>由开发者预定义的稳定追踪点，开销极低。</span>
+                            <span class="hook-desc lang-en hidden"><strong>Tracepoints:</strong> Static, pre-defined events with minimal overhead.</span>
                         </li>
                     </ul>
                 </div>
@@ -1351,6 +1423,12 @@ b.trace_print()
             <span class="golden-badge lang-en hidden">THREE PILLARS</span>
             <h2 class="section-title lang-zh" style="margin-top:0;">为什么这很重要？三大应用支柱</h2>
             <h2 class="section-title lang-en hidden" style="margin-top:0;">The Three Pillars of eBPF</h2>
+
+            <!-- Winston 原则：Salience (强化核心价值的显著性) -->
+            <div class="winston-callout lang-zh" style="background: rgba(255,255,255,0.05); color: white; border-left-color: var(--cisco-sky-blue);">
+                <strong>价值锚点 / THE VALUE ANCHOR</strong>
+                eBPF 并不是为了替代现有的网络或安全工具，而是为了赋予它们 <strong>“动态进化的生命力”</strong>。
+            </div>
             
             <div class="pillars-grid">
                 <!-- Security Pillar -->
@@ -1363,7 +1441,7 @@ b.trace_print()
                     </div>
                     <h3 class="lang-zh">下一代安全架构</h3>
                     <h3 class="lang-en hidden">Next-Gen Security</h3>
-                    <p class="lang-zh"><strong>核心痛点：</strong> 传统安全软件位于用户态，黑客一旦进入内核便完全失效。<br><br><strong>eBPF 解法：</strong> 直接在内核入口处进行监控。它不仅能感知进程在做什么，更能即时拦截恶意文件打开、非法容器逃逸或可疑网络外联。</p>
+                    <p class="lang-zh"><strong>核心痛点：</strong> 传统安全软件位于用户态，黑客一旦进入内核便完全失效。且传统审计工具容易绕过。<br><br><strong>eBPF 解法：</strong> 具备 **不可绕过性 (Unbypassable)**。直接在内核入口处监控。不仅感知进程行为，更能即时拦截恶意文件打开或容器逃逸，符合 CISSP 纵深防御原则。</p>
                     <p class="lang-en hidden"><strong>Pain Point:</strong> User-space security fails once kernel is compromised.<br><br><strong>eBPF Solution:</strong> Direct monitoring at kernel entry points. It senses activity and intercepts malicious file access or container escape instantly.</p>
                 </div>
 
@@ -1378,7 +1456,7 @@ b.trace_print()
                     </div>
                     <h3 class="lang-zh">极致可观测性</h3>
                     <h3 class="lang-en hidden">Extreme Observability</h3>
-                    <p class="lang-zh"><strong>核心痛点：</strong> 业务排障通常需要插入代码日志，这会带来性能损耗，且无法观测内核层抖动。<br><br><strong>eBPF 解法：</strong> 无需修改应用代码，透视整个软件栈。它能生成高精度的火焰图，捕获被加密之前的原始请求数据包。</p>
+                    <p class="lang-zh"><strong>核心痛点：</strong> 业务排障通常需插入日志，带来性能损耗，且无法观测内核层抖动。<br><br><strong>eBPF 解法：</strong> 无需修改应用代码，透视整个软件栈。生成高精度火焰图，捕获被加密之前的原始请求数据包，提供上帝视角般的系统可见性。</p>
                     <p class="lang-en hidden"><strong>Pain Point:</strong> Logging adds overhead and misses kernel-level jitter.<br><br><strong>eBPF Solution:</strong> Zero-code instrumentation to peek into the whole stack. Generates high-fidelity flame graphs and captures unencrypted raw packets.</p>
                 </div>
 
@@ -1393,7 +1471,7 @@ b.trace_print()
                     </div>
                     <h3 class="lang-zh">云原生网络加速</h3>
                     <h3 class="lang-en hidden">Networking Acceleration</h3>
-                    <p class="lang-zh"><strong>核心痛点：</strong> Kubernetes 依赖的 `iptables` 会随着节点增加而变得极其臃肿，导致转发延迟。<br><br><strong>eBPF 解法：</strong> 通过 XDP，数据包在到达协议栈之前就被转发。它绕过复杂的协议栈路径，实现近乎线速的负载均衡。</p>
+                    <p class="lang-zh"><strong>核心痛点：</strong> Kubernetes 依赖的 `iptables` 会随着节点增加而变得极其臃肿，导致转发延迟。<br><br><strong>eBPF 解法：</strong> 通过 XDP，在协议栈分配缓冲区前即转发包。绕过复杂的通用路径，实现近乎线速的负载均衡，支撑超大规模云原生集群。</p>
                     <p class="lang-en hidden"><strong>Pain Point:</strong> Bloated `iptables` in large K8s clusters cause latency.<br><br><strong>eBPF Solution:</strong> Using XDP to process packets before the protocol stack. Bypassing complex paths for near line-rate load balancing.</p>
                 </div>
             </div>
@@ -1408,8 +1486,8 @@ b.trace_print()
         <h2 class="section-title lang-en hidden">Terminal: eBPF Interactive Demo</h2>
         
         <div class="control-panel" style="max-width: 900px;">
-            <p class="lang-zh" style="margin-bottom: 25px; color: #444; font-size: 1.05rem;">点击下方的实验场景，亲历 eBPF 如何在毫秒间改变系统的运行规则。</p>
-            <p class="lang-en hidden" style="margin-bottom: 25px; color: #444; font-size: 1.05rem;">Select a scenario to witness how eBPF changes system rules in milliseconds.</p>
+            <p class="lang-zh" style="margin-bottom: 25px; color: #444; font-size: 1.05rem;">点击下方的实验场景，亲历 eBPF 如何在毫秒间改变系统的运行规则与观测深度。</p>
+            <p class="lang-en hidden" style="margin-bottom: 25px; color: #444; font-size: 1.05rem;">Select a scenario to witness how eBPF changes system rules and observation depth.</p>
             
             <div class="terminal-wrapper" id="kernel-terminal">
                 <div class="terminal-line"><span class="terminal-prompt">root@linux-kernel:~#</span> <span class="terminal-cursor"></span></div>
@@ -1427,6 +1505,10 @@ b.trace_print()
                 <button class="btn btn-primary" onclick="runProfilingSimulation()" id="prof-btn" style="background-color: var(--cisco-orange);">
                     <span class="lang-zh">调度追踪 (Sched Trace)</span>
                     <span class="lang-en hidden">Sched Profiling</span>
+                </button>
+                <button class="btn btn-primary" onclick="runAuditSimulation()" id="audit-btn" style="background-color: var(--cisco-midnight);">
+                    <span class="lang-zh">合规审计 (Audit)</span>
+                    <span class="lang-en hidden">Anti-Evasion Audit</span>
                 </button>
                 <button class="btn" onclick="resetTerminal()" style="background: #666; color: white;">
                     <span class="lang-zh">重置终端</span>
@@ -1482,11 +1564,12 @@ b.trace_print()
         <div class="container">
             <span class="golden-badge lang-zh">产业先驱 / LEADERSHIP</span>
             <span class="golden-badge lang-en hidden">ISOVALENT & CISCO</span>
-            <h2 class="section-title lang-zh">Isovalent 与 Cisco 的安全愿景</h2>
-            <h2 class="section-title lang-en hidden">Isovalent & Cisco's Security Vision</h2>
+            <h2 class="section-title lang-zh">Isovalent 的工业化贡献：开启 eBPF 的“即战力”时代</h2>
+            <h2 class="section-title lang-en hidden">Isovalent's Industrial Contribution: The Era of "Ready-to-Use" eBPF</h2>
 
-            <div class="card" style="border-left-width: 8px; border-left-color: var(--cisco-blue); background: #fdfdfd; padding: 50px;">
-                <div style="display: flex; align-items: center; gap: 25px; margin-bottom: 35px;">
+            <!-- Winston 原则：Chunking (分块化信息提升可读性) -->
+            <div class="card isovalent-main-card" style="border-left-width: 8px; border-left-color: var(--cisco-blue); background: #fdfdfd; padding: 50px;">
+                <div class="isovalent-header-box" style="display: flex; align-items: center; gap: 25px; margin-bottom: 35px;">
                     <div style="background: var(--cisco-midnight); padding: 18px; border-radius: 14px;">
                         <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -1498,55 +1581,37 @@ b.trace_print()
                     </div>
                 </div>
 
-                <!-- Isovalent Contributions -->
+                <!-- Isovalent Contributions Matrix -->
                 <div class="detail-grid" style="margin-bottom: 50px;">
                     <div>
-                        <h4 class="lang-zh" style="color: var(--cisco-blue); margin-bottom: 15px; font-size: 1.25rem;">核心贡献：定义标准</h4>
-                        <h4 class="lang-en hidden" style="color: var(--cisco-blue); margin-bottom: 15px; font-size: 1.25rem;">Key Contributions</h4>
-                        <p class="lang-zh" style="font-size: 1rem; color: #555; margin-bottom: 15px;">Isovalent 是 Cilium 和 Tetragon 项目的初创团队。他们不仅贡献了 eBPF 核心代码，更通过 **eBPF 基金会**（与 Meta、Google 共同创立）推动了技术的标准化。</p>
-                        <ul class="hook-list">
-                            <li class="hook-item">
-                                <span class="hook-label" style="min-width: 110px;">Cilium Leader</span>
-                                <span class="hook-desc lang-zh">作为 CNCF 毕业项目，Cilium 已成为 Google、AWS 等主流云提供商的标准数据平面。</span>
-                            </li>
-                            <li class="hook-item">
-                                <span class="hook-label" style="min-width: 110px;">Kernel Upstrm</span>
-                                <span class="hook-desc lang-zh">持续贡献 Linux 内核上游代码，推动 eBPF 从简单的过滤扩展到全栈观测。</span>
-                            </li>
-                        </ul>
+                        <h4 class="lang-zh" style="color: var(--cisco-blue); margin-bottom: 15px; font-size: 1.25rem;">1. 开源引领与内核深耕</h4>
+                        <p class="lang-zh" style="font-size: 1rem; color: #555; margin-bottom: 15px;">Isovalent 是 **Cilium** 的创建者，成功推动其成为 CNCF 毕业项目。他们通过 **Tetragon** 扩展了安全边界，同时持续贡献 Linux 内核上游代码，使 eBPF 从简单的网络过滤演进为全栈安全/观测引擎。</p>
                     </div>
                     <div>
-                        <h4 class="lang-zh" style="color: var(--cisco-green); margin-bottom: 15px; font-size: 1.25rem;">Cisco 联动：主流化里程碑</h4>
-                        <h4 class="lang-en hidden" style="color: var(--cisco-green); margin-bottom: 15px; font-size: 1.25rem;">Cisco Strategic Synergy</h4>
-                        <p class="lang-zh" style="font-size: 1rem; color: #555; margin-bottom: 15px;">2023 年，Cisco 完成对 Isovalent 的收购，正式将 eBPF 定位为 **Security Cloud** 的核心基石，开启了多云安全的新纪元。</p>
-                        <p class="lang-en hidden" style="font-size: 1rem; color: #555; margin-bottom: 15px;">Cisco's acquisition of Isovalent in 2023 marks eBPF's mainstream adoption, powering the core of Cisco Security Cloud.</p>
-                        <div style="background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px; font-size: 0.9rem; color: #666;">
-                            <strong class="lang-zh">2025 洞察：</strong> 发布了《Kubernetes 网络状态》年度报告，定义了零信任微分段的行业基准。
-                        </div>
+                        <h4 class="lang-zh" style="color: var(--cisco-green); margin-bottom: 15px; font-size: 1.25rem;">2. 标准制定与社区教育</h4>
+                        <p class="lang-zh" style="font-size: 1rem; color: #555; margin-bottom: 15px;">2021 年，Isovalent 联合 Meta、Google 等成立 **eBPF 基金会**。他们维护核心文档项目并发布权威报告，将 eBPF 定位为重定义网络、安全、追踪的变革性技术。</p>
                     </div>
                 </div>
 
-                <!-- Why Isovalent matters -->
-                <h3 class="lang-zh" style="color: var(--cisco-midnight); font-size: 1.6rem; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px;">为什么有了 Isovalent，人们使用 eBPF 更加方便高效？</h3>
-                <h3 class="lang-en hidden" style="color: var(--cisco-midnight); font-size: 1.6rem; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Why Isovalent Makes eBPF Effortless?</h3>
-
+                <!-- Industrial Pillars Section -->
+                <h3 class="lang-zh" style="color: var(--cisco-midnight); font-size: 1.6rem; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px;">降低门槛：从“写代码”到“用方案”</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
                     <div class="feature-box" style="padding: 20px; box-shadow: none; border-color: #eee;">
-                        <h5 class="lang-zh" style="color: var(--cisco-blue); margin-bottom: 10px;">1. 简化开发与部署</h5>
-                        <p class="lang-zh" style="font-size: 0.9rem;"><strong>BPF CO-RE：</strong> 解决了跨内核版本的兼容性难题，实现“一次编译，到处运行”。<br><strong>无 Sidecar 服务网格：</strong> 摒弃侵入式代理，直接在内核层处理网络逻辑，资源开销降低 80% 以上。</p>
+                        <h5 class="lang-zh" style="color: var(--cisco-blue); margin-bottom: 10px;">简化开发与部署</h5>
+                        <p class="lang-zh" style="font-size: 0.9rem;"><strong>BPF CO-RE：</strong> 彻底解决了传统 eBPF 必须在目标机器重编译的痛点，实现“一次编译，到处运行”。<br><strong>无 Sidecar 服务网格：</strong> 摒弃传统复杂的代理模型，直接在内核处理网络逻辑，极大降低了资源消耗。</p>
                     </div>
                     <div class="feature-box" style="padding: 20px; box-shadow: none; border-color: #eee;">
-                        <h5 class="lang-zh" style="color: var(--cisco-green); margin-bottom: 10px;">2. 提升性能与观测</h5>
-                        <p class="lang-zh" style="font-size: 0.9rem;"><strong>iptables 替换：</strong> 在 Kubernetes 中以 eBPF 替代传统规则，吞吐量提升显著。<br><strong>端到端洞察：</strong> 提供内核级 metrics 和 traces，非专家也能通过可视化仪表盘掌握系统脉动。</p>
+                        <h5 class="lang-zh" style="color: var(--cisco-green); margin-bottom: 10px;">提升性能与观测</h5>
+                        <p class="lang-zh" style="font-size: 0.9rem;"><strong>原生高效：</strong> 通过 eBPF 替换传统的 iptables，人们无需再深入内核源码即可获得极速网络转发能力。<br><strong>全栈洞察：</strong> 提供现成的内核级遥测看板，将原本晦涩的内核数据转化为易懂的指标。</p>
                     </div>
                     <div class="feature-box" style="padding: 20px; box-shadow: none; border-color: #eee;">
-                        <h5 class="lang-zh" style="color: var(--cisco-red); margin-bottom: 10px;">3. 增强安全可访问性</h5>
-                        <p class="lang-zh" style="font-size: 0.9rem;"><strong>运行时拦截：</strong> Tetragon 将 eBPF 从“监控探针”变成了“执行引擎”。通过企业级平台，用户无需编程即可部署复杂的零信任策略和实时威胁响应。</p>
+                        <h5 class="lang-zh" style="color: var(--cisco-red); margin-bottom: 10px;">企业级即战平台</h5>
+                        <p class="lang-zh" style="font-size: 0.9rem;"><strong>零信任方案：</strong> 将复杂的安全拦截包装成易用的策略引擎。Cisco 收购 Isovalent 后，eBPF 正式成为 **Security Cloud** 的底层核心，让内核级超能力变为企业现成的安全防线。</p>
                     </div>
                 </div>
 
                 <div class="insight-card" style="margin-top: 40px; background: rgba(4, 159, 217, 0.03);">
-                    <span class="lang-zh"><strong>架构师视角：</strong> Isovalent 的核心贡献在于解决了 eBPF 的“落地难题”。他们开发的 **CO-RE** 实践和庞大的社区生态，让企业级用户能够像使用 SaaS 一样简单地消费内核级的超能力，将 eBPF 从“专家工具”变成了“人人可用”的基础设施标准。</span>
+                    <span class="lang-zh"><strong>架构师视角：</strong> Isovalent 的核心价值在于<strong>抽象了 eBPF 的底层复杂性</strong>。随着他们加入 Cisco 战略版图，原本需要顶级 C 程序员手写数百行代码实现的内核逻辑，现在只需一套现成的企业级方案即可轻松部署，这标志着 eBPF 真正走向了工业主流化。</span>
                 </div>
             </div>
         </div>
@@ -1579,12 +1644,25 @@ b.trace_print()
         </div>
     </section>
 
+    <!-- Winston 原则：The Empowering End (赋能式结尾) -->
+    <section style="background: var(--cisco-dark-blue); color: white; padding: 80px 0; text-align: center; border-bottom: 2px solid var(--cisco-blue);">
+        <div class="container">
+            <h2 class="lang-zh" style="font-size: 2rem; margin-bottom: 20px;">技术深远影响：从“被动防御”到“主动可编程”</h2>
+            <p class="lang-zh" style="max-width: 800px; margin: 0 auto; opacity: 0.8; line-height: 1.8;">
+                掌握 eBPF 并不意味着您需要成为一名内核黑客，而是意味着您拥有了<strong>重塑基础设施边界的能力</strong>。在 Isovalent 与 Cisco 的共同推动下，这种超能力已触手可及。
+            </p>
+            <div style="margin-top: 40px;">
+                <button class="btn btn-primary" onclick="scrollToDemo()">立即开启内核探索之旅</button>
+            </div>
+        </div>
+    </section>
+
     <!-- FAQ Section -->
     <section class="container" style="background: white; border-top: 1px solid #eee;">
         <h2 class="section-title lang-zh">常见问题解答 (FAQ)</h2>
         <h2 class="section-title lang-en hidden">FAQ</h2>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
             <div class="card">
                 <h4 class="lang-zh text-cisco-blue">eBPF 会增加系统负担导致变慢吗？</h4>
                 <h4 class="lang-en hidden text-cisco-blue">Will eBPF slow down my system?</h4>
@@ -1615,7 +1693,7 @@ b.trace_print()
             <p class="lang-en hidden" style="font-size: 1.2rem; font-weight: 800; margin-bottom: 12px;">Security Architect Tech Series</p>
             <p class="lang-zh" style="opacity: 0.6; font-size: 0.9rem;">基于 Cisco Live 架构准则 | 深度研究与转化成果</p>
             <div style="margin-top: 35px; opacity: 0.5;">
-                <span style="margin: 0 15px;">CISSP</span> | <span style="margin: 0 15px;">CKA</span> | <span style="margin: 0 15px;">SRE</span>
+                <span style="margin: 0 10px;">CISSP</span> | <span style="margin: 0 10px;">CKA</span> | <span style="margin: 0 10px;">SRE</span>
             </div>
         </div>
     </footer>
@@ -1699,6 +1777,21 @@ b.trace_print()
             sendPacketSimulation('TRACE', 'var(--cisco-green)');
         }
 
+        function runAuditSimulation() {
+            const terminal = document.getElementById('kernel-terminal');
+            const btns = document.querySelectorAll('.controls .btn');
+            btns.forEach(b => b.disabled = true);
+            const lines = [
+                { text: "root@linux-kernel:~# export LD_PRELOAD=/tmp/evil.so", delay: 0 },
+                { text: "root@linux-kernel:~# whoami", delay: 600 },
+                { text: "[  Audit Insight  ] Anti-Evasion Check: BPF detected raw syscall via kprobe.", delay: 1200, color: "#fff", bold: true },
+                { text: "[  Audit Insight  ] Logic: Userspace hooks bypassed, but Kernel eBPF captured real intent.", delay: 1800, color: "var(--cisco-blue)" },
+                { text: "Result: User attempted evasion. Identity logged.", delay: 2400 }
+            ];
+            animateTerminal(lines, btns);
+            sendPacketSimulation('AUDIT', 'var(--cisco-midnight)');
+        }
+
         function animateTerminal(lines, btns) {
             const terminal = document.getElementById('kernel-terminal');
             terminal.innerHTML = "";
@@ -1744,7 +1837,7 @@ b.trace_print()
                 packet.style.transform = 'translateY(-50%) scale(1.4)';
                 packet.style.boxShadow = `0 0 30px ${color}`;
                 setTimeout(() => {
-                    if (text === 'BAD') {
+                    if (text === 'BAD' || text === 'AUDIT') {
                         packet.style.top = '150%';
                         packet.style.opacity = '0';
                     } else {
