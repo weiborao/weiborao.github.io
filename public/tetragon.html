@@ -102,6 +102,13 @@
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
         
+        .grid-scenarios { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 24px; 
+            margin-top: 40px;
+        }
+
         .grid-monitoring { 
             display: flex; 
             flex-wrap: wrap; 
@@ -127,6 +134,7 @@
             background: white; padding: 35px 28px; border-radius: var(--radius-lg);
             box-shadow: var(--shadow-card); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             border-top: 4px solid transparent; height: 100%;
+            position: relative;
         }
         .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); border-top-color: var(--cisco-blue); }
         
@@ -541,19 +549,42 @@
             margin-bottom: 10px;
         }
 
-        /* [NEW] Quick Insights Style */
+        /* Winston's Bridge Style */
         .winston-bridge {
             font-style: italic; color: var(--cisco-slate); border-left: 3px solid var(--cisco-platinum);
             padding-left: 15px; margin: 20px 0; font-size: 0.95rem; line-height: 1.4;
         }
 
+        /* [NEW] Comparison Table Style */
+        .comparison-card {
+            background: #FFFFFF; border: 1px solid var(--cisco-platinum);
+            border-radius: var(--radius-lg); overflow: hidden; margin-top: 30px;
+            box-shadow: var(--shadow-card);
+        }
+        .comparison-header { background: var(--cisco-midnight); color: white; padding: 15px 25px; font-weight: bold; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; border-bottom: 1px solid var(--cisco-platinum); }
+        .comparison-cell { padding: 15px 20px; font-size: 0.85rem; border-right: 1px solid var(--cisco-platinum); display: flex; align-items: center; }
+        .comparison-cell:last-child { border-right: none; }
+        .comparison-label { font-weight: bold; background: #F8FAFC; color: var(--cisco-midnight); }
+        .comparison-footer { background: #FFF9F0; padding: 15px; color: #856404; font-size: 0.85rem; border-top: 1px solid #FFEBA0; text-align: center; }
+
+        /* [NEW] New Badge for 2025 */
+        .card-new-badge {
+            position: absolute; top: -10px; right: 20px; background: var(--cisco-orange);
+            color: white; font-size: 0.65rem; font-weight: bold; padding: 2px 8px;
+            border-radius: 10px; text-transform: uppercase; box-shadow: 0 4px 8px rgba(245, 128, 37, 0.3);
+            z-index: 2;
+        }
+
         @media (max-width: 768px) {
             h1 { font-size: 2.2rem; }
-            .grid-3, .grid-4, .grid-monitoring, .grid-2x2, .dash-grid, .perf-insight-panel, .roadmap-container, .arch-split-container { grid-template-columns: 1fr; flex-direction: column; }
+            .grid-3, .grid-4, .grid-monitoring, .grid-2x2, .dash-grid, .perf-insight-panel, .roadmap-container, .arch-split-container, .grid-scenarios { grid-template-columns: 1fr; flex-direction: column; }
             .final-conclusion { padding: 60px 0; }
             .discovery-card { grid-template-columns: 1fr; }
             .identity-box, .mttr-grid { flex-direction: column; grid-template-columns: 1fr; }
             .roadmap-step::after { content: "↓"; right: 50%; top: auto; bottom: -20px; transform: translateX(50%); }
+            .comparison-grid { grid-template-columns: 1fr; }
+            .comparison-cell { border-right: none; border-bottom: 1px solid var(--cisco-platinum); }
         }
     </style>
 </head>
@@ -610,7 +641,6 @@
                     <strong>核心价值：弥补“左移安全”的盲区</strong>
                     <p>即使镜像扫描和静态配置分析（Shift Left）是完美的，也无法覆盖 0-day 漏洞利用、供应链污染或运行时的特权提升。运行时安全提供 <b>“Shield Right”</b>，在恶意行为发生的瞬间构建最后一道防线。</p>
 
-                    <!-- [WINSTON ADDITION: The Bridge] -->
                     <div class="winston-bridge">
                         <strong>逻辑桥梁：</strong> 既然漏洞不可避免地会进入生产环境，我们必须在执行路径上安置“关卡”。
                     </div>
@@ -624,6 +654,24 @@
                             <strong>运行时盾牌 (Shield Right)</strong>
                             <p style="font-size: 0.9rem; margin-top:10px;">在生产运行阶段构建实时屏障。应对那些绕过开发阶段检查的未知威胁（0-day）或内部破坏。</p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- [RE-INSERTED & ENHANCED: Falco vs Tetragon Matrix] -->
+                <div class="comparison-card">
+                    <div class="comparison-header">定位对比：Falco (检测) vs Tetragon (执法)</div>
+                    <div class="comparison-grid">
+                        <div class="comparison-cell comparison-label">核心能力</div>
+                        <div class="comparison-cell"><strong>Falco: 安全摄像头</strong></div>
+                        <div class="comparison-cell"><strong>Tetragon: 内核盾牌</strong></div>
+                    </div>
+                    <div class="comparison-grid">
+                        <div class="comparison-cell comparison-label">响应模型</div>
+                        <div class="comparison-cell">异步检测：恶意行为发生后，推送到用户态分析并报警。</div>
+                        <div class="comparison-cell">同步阻断：恶意行为在内核态被识别，并在 syscall 完成前即刻 Kill。</div>
+                    </div>
+                    <div class="comparison-footer">
+                        💡 <strong>架构师视点：</strong> Falco 擅长广域审计与基线监控；Tetragon 则为关键业务提供“不可绕过”的实时安全契约。
                     </div>
                 </div>
             </div>
@@ -667,7 +715,6 @@
                 <p>Tetragon 是 Cilium 开源社区下的核心项目，它利用 <b>eBPF</b> 技术提供深度的内核级安全观测。不同于传统的安全工具，它能感知 <b>Kubernetes 身份</b>（Pod, Namespace, Labels），并在恶意行为发生的瞬间在内核态将其阻断。传统安全依赖用户态 Agent，容易被绕过。Tetragon 挂载在内核执行路径的核心点（如 LSM 或系统调用入口），提供“不可绕过”的审计一致性。</p>
             </div>
 
-            <!-- Winston's Star Badge Added -->
             <div style="text-align: center; margin-bottom: 40px;">
                 <div class="star-badge">✨ 核心点 (The Star): 内核态同步阻断</div>
                 <p style="font-size: 0.9rem; color: #666;">记住这个概念：Tetragon 不仅仅是“看到”威胁，而是在威胁发生<b>之前</b>由内核直接强制中断。</p>
@@ -744,7 +791,6 @@
                 </div>
             </div>
 
-            <!-- [WINSTON ADDITION: Mental Model Card] -->
             <div class="mechanism-card" style="background: #F8FAFC; border: 1px dashed var(--cisco-blue);">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <div style="font-size: 1.5rem;">🧠</div>
@@ -790,12 +836,10 @@
                 <p>下图展示了 Tetragon 如何利用 <b>kprobes</b> 进行深度观测，并利用内核 <b>LSM BPF</b> 实现不可绕过的安全阻断。</p>
             </div>
             
-            <!-- Winston's Bridge: Explaining the flow before the diagram -->
             <p style="text-align: center; max-width: 700px; margin: 0 auto 30px; font-style: italic; color: #666;">
                 请观察数据是如何从<b>用户态请求</b>进入<b>内核钩子</b>，并在<b>策略引擎</b>的判断下触发<b>实时 SIGKILL</b> 的。这个闭环在微秒内完成，不经过复杂的应用堆栈。
             </p>
 
-            <!-- SVG Diagram -->
             <div style="background: #F9FAFB; padding: 40px; border-radius: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
                 <svg width="100%" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -839,7 +883,6 @@
                 </svg>
             </div>
 
-            <!-- Architecture Detailed Overview -->
             <div class="view-section" style="margin-top: 60px;">
                 <div class="view-title">Tetragon 架构设计详述 (Architecture Overview)</div>
                 <p>Isovalent Tetragon 是一个专为 Kubernetes 设计的基于 eBPF 的安全可观测性工具。其架构强调<b>内核优先 (kernel-first)</b> 原则，将核心逻辑下沉至内核，以实现亚毫秒级的防御。下面详细说明其分层工作模式：</p>
@@ -875,6 +918,11 @@
                 <div class="coordination-banner">
                     <h4 style="color: var(--cisco-midnight); margin-bottom: 10px;">内核-用户空间协同机制 (Coordination)</h4>
                     <p style="font-size: 0.95rem;">Tetragon 形成了一个高效的协同管道：<b>内核负责检测与阻断，用户空间负责分析与输出。</b></p>
+                    
+                    <div class="winston-bridge" style="background: white; padding: 10px; border-radius: 4px;">
+                        <strong>SRE 速览：</strong> 既然 90% 的过滤发生在内核，你的业务 Pod 几乎感受不到安全组件的存在。
+                    </div>
+
                     <div class="grid-3" style="margin-top: 15px;">
                         <div>
                             <strong style="color: var(--cisco-blue);">数据流向</strong>
@@ -931,13 +979,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="mechanism-card" style="margin-top: 40px;">
-                <div class="expert-persp-box" style="margin-top:20px; border-left-color: var(--cisco-red); background: #FFF5F5; color: var(--cisco-midnight);">
-                    <strong>LSM BPF 阻断 vs 用户态 LD_PRELOAD 劫持</strong>
-                    <p style="font-size: 0.95rem; margin-top:10px; opacity:0.9;">基于 <b>LD_PRELOAD</b> 的用户态劫持极其脆弱，攻击者只需使用静态链接的二进制文件或执行 <code>unset LD_PRELOAD</code> 即可轻易绕过监控。而 Tetragon 挂载于内核 <b>LSM BPF</b> 接口。无论攻击者如何尝试修改路径或环境变量，只要触碰系统资源，就必须触发检查。这提供了物理层面的“审计一致性”且对攻击者完全透明。</p>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -973,19 +1014,20 @@
         </div>
     </section>
 
-    <!-- Section 6: Application Scenarios -->
+    <!-- Section 6: Application Scenarios & Defensive Value -->
     <section id="scenarios" style="background: #F9FAFB;">
         <div class="container">
             <div class="section-header">
                 <h2>应用场景与防御价值 (Value)</h2>
                 <p>将安全策略下沉到内核，构建不可绕过的运行时防御边界。</p>
             </div>
-            <div class="grid-4">
+
+            <div class="grid-scenarios">
                 <div class="card" style="border-top: 4px solid var(--cisco-red);">
                     <strong>深度防御 (Security)</strong>
                     <ul style="font-size: 0.85rem; list-style: none; margin-top:10px;">
                         <li style="margin-bottom:8px;">• <b>文件篡改：</b> 监控 <code>/etc/passwd</code>, <code>/etc/shadow</code> 等敏感配置文件的 <code>write</code> 行为。</li>
-                        <li style="margin-bottom:8px;">• <b>反弹 Shell：</b> 监控 <code>connect</code> 调用，禁止非白名单地址的外连企企图。</li>
+                        <li style="margin-bottom:8px;">• <b>反弹 Shell：</b> 监控 <code>connect</code> 调用，禁止非白名单地址的外连企图。</li>
                         <li>• <b>容器逃逸：</b> 检测异常的 Namespace 挂载行为，强制执行边界隔离。</li>
                     </ul>
                 </div>
@@ -1000,6 +1042,12 @@
                 <div class="card" style="border-top: 4px solid var(--cisco-midnight);">
                     <strong>取证分析 (Forensics)</strong>
                     <p style="font-size: 0.85rem; margin-top: 10px;">入侵发生后，利用 Tetragon 的深度祖先进程树回溯攻击者的横向移动轨迹、指令执行序列及环境变量指纹，提供法庭级证据链。</p>
+                </div>
+                <!-- [NEW CARD] 2025: Supply Chain Validation -->
+                <div class="card" style="border-top: 4px solid var(--cisco-orange);">
+                    <div class="card-new-badge">New 2025</div>
+                    <strong>2025: 供应链验证</strong>
+                    <p style="font-size: 0.85rem; margin-top: 10px;"><b>[新增强]</b> 与 SBOM (软件物料清单) 深度联动。确保 Pod 运行时的二进制文件指纹与镜像 SBOM 记录 100% 匹配，预防供应链投毒利用。</p>
                 </div>
             </div>
 
@@ -1123,7 +1171,6 @@
                 <p>沉浸式体验内核级威胁阻断。请在下方实验场景中点击“启动演练”。</p>
             </div>
 
-            <!-- Winston's Memory Hook: Why we do this -->
             <div style="background: #FFF; border: 1px solid var(--cisco-blue); padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: center;">
                 <p style="margin:0; font-weight: bold; color: var(--cisco-midnight);">
                     “Hear and you forget; see and you remember; DO and you understand.” 
@@ -1250,7 +1297,7 @@
                 <span class="mitre-tag">MITRE T1190</span>
                 <h4>Log4Shell 漏洞防护 (CVE-2021-44228)</h4>
                 <div class="view-section">
-                    <p><strong>JNDI 注入原理：递归解析劫持。</strong>Log4j 库格在处理日志时会递归解析 <code>${jndi:ldap://...}</code> 字符串。这强制 Java 应用连接远程服务器下载并执行恶意字节码。这是典型的从“合规应用层行为”转化为“恶意内核级行为”的案例。</p>
+                    <p><strong>JNDI 注入原理：递归解析劫持。</strong>Log4j 库在处理日志时会递归解析 <code>${jndi:ldap://...}</code> 字符串。这强制 Java 应用连接远程服务器下载并执行恶意字节码。这是典型的从“合规应用层行为”转化为“恶意内核级行为”的案例。</p>
                     <p><strong>运行时补救：</strong>通过 Tetragon 实施<b>“虚拟补丁 (Virtual Patching)”</b>。即使应用未升级，只要通过策略禁止 Java 进程调用 <code>execve</code> 启动不受信的 Shell，就能在 RCE 发生的瞬间切断攻击链。</p>
                 </div>
                 <div class="yaml-block">
@@ -1371,7 +1418,6 @@
                 Tetragon 的核心价值在于将安全从“被动防御”转变为“基于预期行为的主动策略”。
             </div>
 
-            <!-- Winston's Takeaway Grid -->
             <div style="max-width: 800px; margin: 0 auto 40px; background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px dashed rgba(255,255,255,0.2);">
                 <h4 style="color: var(--cisco-blue); text-align: center; margin-bottom: 20px;">🔑 关键结论 (Key Takeaways)</h4>
                 <ul style="color: white; font-size: 0.95rem; padding-left: 20px; line-height: 1.8;">
@@ -1396,12 +1442,10 @@
                 </div>
             </div>
 
-            <!-- [WINSTON ADDITION: The Final Word] -->
             <div style="margin-top: 50px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
                 <p style="font-size: 1.2rem; font-weight: 600; color: var(--cisco-blue);">最后一句话：如果安全不能实时，那它只是取证。</p>
             </div>
 
-            <!-- Winston's Final Call to Action -->
             <div style="text-align: center; margin-top: 40px;">
                 <p style="color: #61C6E2; font-weight: bold; font-size: 1.1rem;">准备好构建你的内核级防线了吗？</p>
                 <button class="btn-primary" onclick="scrollToId('lab-section')" style="background: var(--white); color: var(--cisco-midnight); border: none; padding: 16px 40px; border-radius: 30px; font-weight: 700; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">立即启动实验室演练</button>
