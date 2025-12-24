@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco Hypershield & N9300 Architecture Deep Dive</title>
+    <style>
+        :root {
+            --cisco-blue: #005073;
+            --cisco-sky: #00bceb;
+            --cisco-gray: #f2f2f2;
+            --cisco-text: #333333;
+            --cisco-accent: #2b9c3b;
+            --cisco-dark: #002d3f;
+            --white: #ffffff;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--cisco-gray);
+            color: var(--cisco-text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Language Toggle Button */
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--cisco-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-weight: bold;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .lang-toggle:hover {
+            background: var(--cisco-sky);
+            transform: scale(1.05);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            color: var(--cisco-blue);
+            font-size: 3rem;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--cisco-sky);
+            font-size: 1.4rem;
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Section Styling */
+        section {
+            background: var(--white);
+            margin-bottom: 50px;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.06);
+            transition: var(--transition);
+            border-left: 6px solid var(--cisco-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        section::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at top right, rgba(0,188,235,0.05), transparent);
+        }
+
+        section:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+        }
+
+        h2 {
+            display: flex;
+            align-items: center;
+            color: var(--cisco-blue);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        h2 svg {
+            margin-right: 18px;
+            width: 36px;
+            height: 36px;
+            color: var(--cisco-sky);
+        }
+
+        h3 {
+            color: var(--cisco-blue);
+            margin: 25px 0 15px 0;
+            font-size: 1.4rem;
+        }
+
+        .highlight-box {
+            background: rgba(0, 188, 235, 0.05);
+            border-left: 4px solid var(--cisco-sky);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Golden Circle */
+        .golden-circle {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .circle-card {
+            background: var(--cisco-gray);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .circle-card h3 {
+            color: var(--cisco-blue);
+            margin-top: 0;
+            font-weight: 800;
+        }
+
+        /* Data Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 18px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: var(--cisco-blue);
+            color: white;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        .data-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Analogy Grid */
+        .analogy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .analogy-item {
+            border: 1px solid #eee;
+            padding: 30px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .icon-box {
+            width: 70px;
+            height: 70px;
+            background: var(--cisco-blue);
+            color: white;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        /* Stack visual */
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .layer {
+            padding: 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .layer small {
+            font-weight: normal;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .layer-1 { background: #003a52; }
+        .layer-2 { background: #005a7e; }
+        .layer-3 { background: #0087bd; }
+        .layer-4 { background: #00bceb; }
+
+        /* Detail List */
+        .detail-list {
+            list-style: none;
+        }
+
+        .detail-list li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        .detail-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--cisco-sky);
+            font-weight: bold;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .golden-circle { grid-template-columns: 1fr; }
+            h1 { font-size: 2.2rem; }
+            section { padding: 30px; }
+            .lang-toggle { top: 10px; right: 10px; padding: 6px 12px; }
+        }
+
+        [lang="en"] { display: none; }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-item {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-top: 4px solid var(--cisco-sky);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--cisco-blue); display: block; }
+        .stat-label { font-size: 0.9rem; color: #666; }  
+/* --- 增量样式: 时序图与 AI 增强 --- */
+        .sequence-container {
+            width: 100%;
+            background: #fdfdfd;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px dashed var(--cisco-sky);
+            margin: 30px 0;
+            overflow-x: auto;
+        }
+        .sequence-svg { min-width: 800px; height: auto; }
+        .node-label { font-weight: bold; fill: var(--cisco-blue); font-size: 14px; }
+        .process-text { font-size: 12px; fill: var(--cisco-text); }
+        .step-marker { fill: var(--cisco-sky); font-weight: bold; font-size: 12px; }
+        
+        @keyframes flowLine { to { stroke-dashoffset: 0; } }
+        .flow-arrow { stroke-dasharray: 8; stroke-dashoffset: 100; animation: flowLine 2s linear infinite; }
+
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .ai-card {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #ffffff, #f9f9f9);
+        }
+        .ai-tag {
+            display: inline-block;
+            background: var(--cisco-blue);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }              
+/* --- 增量样式: 决策者摘要表格 --- */
+        .summary-table-wrapper {
+            margin-top: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .comparison-table th {
+            background: #f8f9fa;
+            color: var(--cisco-blue);
+            font-weight: 800;
+            padding: 20px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+        .tag-old {
+            background: #ffebee;
+            color: #c62828;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .tag-new {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .metric-label {
+            font-weight: bold;
+            color: var(--cisco-blue);
+            display: block;
+            margin-bottom: 5px;
+        }        
+/* --- 增量样式: 终端模拟器 --- */
+        .terminal-container {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 40px 0;
+            border-top: 25px solid #333;
+            position: relative;
+        }
+        .terminal-container::before {
+            content: "● ● ●";
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+        .terminal-body {
+            height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .term-prompt { color: #2b9c3b; font-weight: bold; }
+        .term-cmd { color: #fff; }
+        .term-json-key { color: #9cdcfe; }
+        .term-json-val { color: #ce9178; }
+        .term-alert {
+            background: #e91e63;
+            color: white;
+            padding: 2px 5px;
+            font-weight: bold;
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker { 50% { opacity: 0; } }
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #fff;
+            animation: blinker 1s step-end infinite;
+        }   
+        /* 导航地图样式 */
+        .reading-path {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: -40px auto 40px;
+            justify-content: center;
+        }
+        .path-node {
+            font-size: 11px;
+            background: #e0e0e0;
+            padding: 4px 12px;
+            border-radius: 15px;
+            color: var(--cisco-blue);
+            border: 1px solid transparent;
+        }
+        .path-node.active {
+            background: var(--cisco-blue);
+            color: white;
+        }             
+    </style>
+</head>
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-value">400G</span>
+            <span class="stat-label txt-zh">原生线速解密</span>
+            <span class="stat-label txt-en">Line-rate Decryption</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">&lt; 20μs</span>
+            <span class="stat-label txt-zh">超低安全附加延迟</span>
+            <span class="stat-label txt-en">Ultra-low Security Latency</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">0-Day</span>
+            <span class="stat-label txt-zh">自主漏洞热补丁</span>
+            <span class="stat-label txt-en">Autonomous Exploit Protection</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">1:1</span>
+            <span class="stat-label txt-zh">数字孪生策略验证</span>
+            <span class="stat-label txt-en">Digital Twin Validation</span>
+        </div>
+    </div>
+    <div class="reading-path">
+        <span class="path-node active">01.挑战</span>
+        <span class="path-node">02.基石</span>
+        <span class="path-node">03.硬件</span>
+        <span class="path-node">04.隐喻</span>
+        <span class="path-node">05.流程</span>
+        <span class="path-node">06.全景</span>
+        <span class="path-node">07.实战</span>
+        <span class="path-node">08.AI加速</span>
+        <span class="path-node">09.TCO对比</span>
+        <span class="path-node">10.实时模拟</span>
+        <span class="path-node">11.总结</span>
+    </div>    
+<body>
+
+    <button class="lang-toggle" onclick="toggleLanguage()">Switch to English / 切换中文</button>
+
+    <div class="container">
+        <header>
+            <h1 id="main-title">织就安全之茧：Cisco Hypershield 深度解析</h1>
+            <p class="subtitle" id="main-subtitle">从 eBPF 内核感知到 P4 硬件加速，构建 AI 时代的主动防御基座</p>
+        </header>
+
+        <!-- 01. Why (Golden Circle) -->
+        <section id="section-1">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span class="txt-zh">01. 愿景与挑战：为什么需要 Hypershield？</span>
+                <span class="txt-en">01. Vision & Challenge: Why Hypershield?</span>
+            </h2>
+            
+            <div class="txt-zh">
+                <p>在超大规模云原生环境下，传统的“护城河”式防御已经崩溃。现代数据中心面临三大瓶颈：</p>
+                <ul class="detail-list" style="margin: 20px 0;">
+                    <li><strong>软件定义的局限：</strong> 纯软件防火墙在处理 100G/400G 流量时会消耗主机 30% 以上的 CPU 资源。</li>
+                    <li><strong>分段死角：</strong> 容器间的“东西向流量”庞大且隐蔽，集中式网关无法做到细粒度的微分段。</li>
+                    <li><strong>零日漏洞真空期：</strong> 从漏洞发现到补丁部署存在“风险时间差”，攻击者利用此窗口期横向渗透。</li>
+                </ul>
+                <p>Cisco Hypershield 的出现是为了将安全功能直接织入网络结构中，实现真正的“全分布式、硬件加速、自愈式”安全。</p>
+            </div>
+
+            <div class="txt-en">
+                <p>In hyper-scale cloud-native environments, traditional "moat" defense has collapsed. Modern data centers face three major bottlenecks:</p>
+                <ul class="detail-list" style="margin: 20px 0;">
+                    <li><strong>Software Limitations:</strong> Pure software firewalls consume over 30% of host CPU when handling 100G/400G traffic.</li>
+                    <li><strong>Segmentation Blind Spots:</strong> Massive and hidden East-West traffic between containers cannot be micro-segmented by centralized gateways.</li>
+                    <li><strong>Zero-Day Gaps:</strong> The "time-to-vulnerability" gap between discovery and patching is a prime target for lateral movement.</li>
+                </ul>
+            </div>
+            
+            <div class="golden-circle">
+                <div class="circle-card">
+                    <h3 class="txt-zh">核心驱动 (Why)</h3><h3 class="txt-en">The Why</h3>
+                    <p class="txt-zh">消除安全与性能的博弈。让安全像空气一样无处不在，却不消耗业务算力。</p>
+                    <p class="txt-en">Eliminate the trade-off between security and performance. Ubiquitous security without CPU tax.</p>
+                </div>
+                <div class="circle-card">
+                    <h3 class="txt-zh">技术路径 (How)</h3><h3 class="txt-en">The How</h3>
+                    <p class="txt-zh">通过 DPU (AMD Pensando) 卸载安全算力，结合 eBPF 实现实时内核级深度观测。</p>
+                    <p class="txt-en">Offload security to DPU (AMD Pensando) and use eBPF for real-time kernel observability.</p>
+                </div>
+                <div class="circle-card">
+                    <h3 class="txt-zh">产品愿景 (What)</h3><h3 class="txt-en">The What</h3>
+                    <p class="txt-zh">一种分布式的“安全织物”，能够自动防御、自动更新、自动测试的安全繭。</p>
+                    <p class="txt-en">A distributed security fabric that acts as a self-defending, self-updating cocoon.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 02. Technical Foundation -->
+        <section id="section-2">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+                <span class="txt-zh">02. 核心组件深度定义 (Technical Foundation)</span>
+                <span class="txt-en">02. Deep Dive into Core Components</span>
+            </h2>
+            
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="txt-zh">关键技术</th><th class="txt-en">Key Technology</th>
+                            <th class="txt-zh">技术原理 (Mechanism)</th><th class="txt-en">Mechanism</th>
+                            <th class="txt-zh">架构价值 (Value)</th><th class="txt-en">Architectural Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>DPU / SmartNIC</strong></td>
+                            <td class="txt-zh">专为数据中心设计的处理器，集成 ARM 核心与硬件流水线。</td>
+                            <td class="txt-en">Processors for DC with ARM cores and hardware pipelines.</td>
+                            <td class="txt-zh"><strong>物理隔离：</strong> 安全逻辑运行在独立于主机的 DPU 内存中，即便 OS 沦陷，安全依然稳固。</td>
+                            <td class="txt-en">Physical isolation: Security logic runs in separate memory. OS compromise doesn't affect security.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>P4 Runtime</strong></td>
+                            <td class="txt-zh">基于“匹配-动作”流水线的编程语言，直接操作硬件。</td>
+                            <td class="txt-en">Match-Action pipeline language for hardware control.</td>
+                            <td class="txt-zh"><strong>毫秒级动态执行：</strong> 将安全规则转化为 ASIC 逻辑。无需查找表，直接在线速下丢弃非法包。</td>
+                            <td class="txt-en">Line-rate enforcement. Converts rules into ASIC logic for zero-latency drops.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>eBPF (Tetragon)</strong></td>
+                            <td class="txt-zh">Linux 内核沙箱，通过 Hook 系统调用捕获行为元数据。</td>
+                            <td class="txt-en">Kernel sandbox capturing metadata via syscall hooks.</td>
+                            <td class="txt-zh"><strong>上下文感知：</strong> 不仅看 IP/端口，还能识别“哪个用户执行了哪个进程，打开了哪个文件”。</td>
+                            <td class="txt-en">Context awareness: Identifies users, processes, and file activities, not just IP/Ports.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="txt-zh">Hypershield 的三大自治支柱 (The Three Pillars)</h3>
+            <h3 class="txt-en">The Three Pillars of Hypershield</h3>
+            <div class="analogy-grid" style="margin-bottom: 30px;">
+                <div class="analogy-item">
+                    <h4 class="txt-zh" style="color:var(--cisco-blue)">1. 自主分段 (Autonomous Segmentation)</h4>
+                    <h4 class="txt-en" style="color:var(--cisco-blue)">1. Autonomous Segmentation</h4>
+                    <p class="txt-zh">利用 AI 分析流量行为，自动创建和优化微分段规则，消除传统防火墙复杂的维护工作。</p>
+                    <p class="txt-en">Uses AI to analyze traffic patterns, automatically creating and refining micro-segmentation rules.</p>
+                </div>
+                <div class="analogy-item">
+                    <h4 class="txt-zh" style="color:var(--cisco-blue)">2. 分布式漏洞防护 (Exploit Protection)</h4>
+                    <h4 class="txt-en" style="color:var(--cisco-blue)">2. Distributed Exploit Protection</h4>
+                    <p class="txt-zh">在漏洞补丁发布前，自动在 DPU 层面拦截针对漏洞的攻击尝试，实现“补偿性控制”。</p>
+                    <p class="txt-en">Automatically blocks exploit attempts at the DPU level before vendor patches are deployed.</p>
+                </div>
+                <div class="analogy-item">
+                    <h4 class="txt-zh" style="color:var(--cisco-blue)">3. 自愈式策略更新 (Self-qualifying Policy)</h4>
+                    <h4 class="txt-en" style="color:var(--cisco-blue)">3. Self-qualifying Policy</h4>
+                    <p class="txt-zh">通过双胞胎测试 (Shadow Testing) 持续验证策略变更，确保安全加固不会意外中断业务。</p>
+                    <p class="txt-en">Continuously validates policy changes via Shadow Testing to prevent business downtime.</p>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <p class="txt-zh"><strong>专家洞察：</strong> P4 与 eBPF 的结合实现了“上下联动”。eBPF 负责在主机端提供“为什么阻断”的上下文，而 P4 在网络交换端提供“如何阻断”的极致性能。这是一种**感官与肌肉**的完美协同。</p>
+                <p class="txt-en"><strong>Expert Insight:</strong> The synergy between P4 and eBPF connects context with performance. eBPF provides the "why" (observability), while P4 provides the "how" (high-speed enforcement).</p>
+            </div>
+        </section>
+
+        <!-- 03. N9300 Smart Switch -->
+        <section id="section-3">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
+                <span class="txt-zh">03. 硬件基座：Cisco Nexus 9300 Smart Switch</span>
+                <span class="txt-en">03. Hardware Foundation: Nexus 9300 Smart Switch</span>
+            </h2>
+            
+            <div class="txt-zh">
+                <p>N9300 不仅仅是一个交换机，它是一个集成了 <strong>AMD Pensando DPU</strong> 的智能控制节点。它在传统交换架构基础上增加了“第三条路径”：</p>
+            </div>
+            <div class="txt-en">
+                <p>N9300 is more than a switch; it's an intelligent control node integrating <strong>AMD Pensando DPUs</strong>. It adds a "third path" to traditional switch architectures:</p>
+            </div>
+
+            <div class="analogy-grid">
+                <div class="analogy-item">
+                    <h3 class="txt-zh">1. 并行安全处理流水线</h3>
+                    <h3 class="txt-en">1. Parallel Security Pipeline</h3>
+                    <p class="txt-zh">流量在经过交换芯片的同时，被镜像到内置 DPU。在 DPU 中进行状态防火墙 (Stateful FW)、负载均衡和深度加密检测，且不影响主转发路径的延迟。</p>
+                    <p class="txt-en">Traffic is mirrored to the built-in DPU for stateful FW, LB, and encryption inspection, without impacting primary forwarding latency.</p>
+                </div>
+                <div class="analogy-item">
+                    <h3 class="txt-zh">2. 弹性规则引擎</h3>
+                    <h3 class="txt-en">2. Elastic Rule Engine</h3>
+                    <p class="txt-zh">传统的 ACL 受到 TCAM 硬件容量限制。N9300 利用 DPU 的大容量存储和 P4 灵活性，可以支持数百万条细粒度的动态安全规则。</p>
+                    <p class="txt-en">Unlike traditional ACLs limited by TCAM, N9300 uses DPU memory and P4 flexibility to support millions of fine-grained dynamic rules.</p>
+                </div>
+                <div class="analogy-item">
+                    <h3 class="txt-zh">3. 线速加解密 (Line-rate Crypto)</h3>
+                    <h3 class="txt-en">3. Line-rate Crypto</h3>
+                    <p class="txt-zh">内置硬件加速器处理 IPsec/TLS，实现网络透明的全流量加密。这是实现“零信任”物理层的关键。</p>
+                    <p class="txt-en">Built-in accelerators handle IPsec/TLS for transparent encryption, key to achieving Zero Trust at the physical layer.</p>
+                </div>
+            </div>
+            <div class="highlight-box" style="border-left: 4px solid var(--cisco-accent);">
+                <h4 class="txt-zh">硬件规格透视：AMD Pensando DPU</h4>
+                <h4 class="txt-en">Hardware Specs: AMD Pensando DPU</h4>
+                <ul class="detail-list" style="margin-top:10px;">
+                    <li class="txt-zh"><strong>P4 可编程流水线：</strong> 提供处理 400Gbps 流量的完全灵活性，支持自定义协议解析。</li>
+                    <li class="txt-en"><strong>P4 Programmable Pipeline:</strong> Full flexibility for 400Gbps traffic, supporting custom protocol parsing.</li>
+                    <li class="txt-zh"><strong>大规模会话表：</strong> 在交换机硬件中维护数百万个有状态连接（Stateful Sessions）。</li>
+                    <li class="txt-en"><strong>Massive Session Table:</strong> Maintains millions of stateful connections directly in switch hardware.</li>
+                    <li class="txt-zh" style="border-top: 1px solid rgba(0,0,0,0.1); padding-top:10px; margin-top:10px;">
+                        <strong>2025 前瞻 (Salina 架构)：</strong> 引入超大规模并行处理引擎，专门优化 AI 工作负载下的微秒级跳数延迟。
+                    </li>
+                    <li class="txt-en" style="border-top: 1px solid rgba(0,0,0,0.1); padding-top:10px; margin-top:10px;">
+                        <strong>2025 Roadmap (Salina):</strong> Next-gen engine optimized for sub-microsecond hop latency in AI-intensive workloads.
+                    </li>                    
+                </ul>
+            </div>            
+        </section>
+        <div style="text-align: center; margin: -20px 0 30px; color: var(--cisco-sky); font-style: italic;">
+            <span class="txt-zh">▼ 理解了坚实的硬件“肌肉”，让我们换个视角，看看这些组件如何组合成智慧的“免疫系统”</span>
+            <span class="txt-en">▼ Having understood the hardware "muscles," let's see how they orchestrate into an intelligent "immune system"</span>
+        </div>
+        <!-- 04. The Immune System Analogy -->
+        <section id="section-4" style="background: var(--cisco-blue); color: white;">
+            <h2 style="color: white;">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                <span class="txt-zh">04. 隐喻解析：数字免疫系统</span>
+                <span class="txt-en">04. Analogy: The Digital Immune System</span>
+            </h2>
+            
+            <p class="txt-zh" style="margin-bottom: 30px;">Patrick Henry Winston 曾说：<strong>类比是通向理解的桥梁。</strong> 我们可以把 Cisco Hypershield 看作一个高度进化的生物防御系统：</p>
+            <p class="txt-en" style="margin-bottom: 30px;">As Patrick Henry Winston noted: <strong>Analogy is the bridge to understanding.</strong> We can view Cisco Hypershield as a highly evolved biological defense system:</p>
+
+            <div class="analogy-grid">
+                <div class="analogy-item" style="color: var(--cisco-text)">
+                    <div class="icon-box">🔍</div>
+                    <h3 class="txt-zh">白细胞 (Tetragon/eBPF)</h3>
+                    <h3 class="txt-en">White Blood Cells</h3>
+                    <p class="txt-zh">穿梭在 Linux 内核的每一个血管中，实时检测“细胞”（进程）的 DNA 是否发生变异或行为异常。</p>
+                    <p class="txt-en">Cruising through every vein of the Linux kernel, detecting if "cell" (process) behavior is abnormal.</p>
+                </div>
+                <div class="analogy-item" style="color: var(--cisco-text)">
+                    <div class="icon-box">⚡</div>
+                    <h3 class="txt-zh">中枢神经 (Hypershield AI)</h3>
+                    <h3 class="txt-en">Central Nervous System</h3>
+                    <p class="txt-zh">接收感官信号，并在毫秒内推演这是否是一次攻击。它负责在全球数千个节点间同步防御姿态。</p>
+                    <p class="txt-en">Receives signals and reasons within milliseconds. Synchronizes defense postures across thousands of nodes.</p>
+                </div>
+                <div class="analogy-item" style="color: var(--cisco-text)">
+                    <div class="icon-box">🛡️</div>
+                    <h3 class="txt-zh">抗体/皮肤 (Smart Switch DPU)</h3>
+                    <h3 class="txt-en">Antibodies / Skin</h3>
+                    <p class="txt-zh">物理屏障。它在病毒（恶意包）接触到核心业务之前，直接在网络接口层级将其灭活。</p>
+                    <p class="txt-en">Physical barrier. Neutralizes viruses (malicious packets) at the interface level before they touch the core logic.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 05. Layered Architecture & Workflow -->
+        <section id="section-5">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                <span class="txt-zh">05. 运作流水线：感知、推演与双胞胎测试</span>
+                <span class="txt-en">05. Workflow: Sensing, Reasoning & Shadow Testing</span>
+            </h2>
+            
+            <div class="txt-zh">
+                <p>Hypershield 引入了革命性的<strong>“双胞胎测试 (Shadow Testing)”</strong>机制，解决了安全运维中“怕改错规则导致业务中断”的痛点：</p>
+            </div>
+            <div class="txt-en">
+                <p>Hypershield introduces a revolutionary <strong>Shadow Testing</strong> mechanism, solving the fear of breaking business with new security rules:</p>
+            </div>
+
+            <div class="stack">
+                <div class="layer layer-1">
+                    <span class="txt-zh">第 1 步：实时感知 (Kernel Observability)</span>
+                    <span class="txt-en">Step 1: Real-time Sensing</span>
+                    <small class="txt-zh">Tetragon 捕获行为指纹。例如：Apache 进程突然 fork 了 bash。这是一个典型的 RCE 攻击信号。</small>
+                    <small class="txt-en">Tetragon captures fingerprints. E.g., Apache forking bash—a classic RCE signal.</small>
+                </div>
+                <div class="layer layer-2">
+                    <span class="txt-zh">第 2 步：双胞胎验证 (Shadow Execution)</span>
+                    <span class="txt-en">Step 2: Shadow Validation</span>
+                    <small class="txt-zh">在 DPU 的独立分片中运行新策略。新策略会处理真实的流量镜像，但不进行实际阻断，只报告“如果是正式环境，这笔流量会被丢弃”。</small>
+                    <small class="txt-en">Run new policies on mirrored traffic in isolated DPU shards without blocking. Report "what-if" outcomes.</small>
+                </div>
+                <div class="layer layer-3">
+                    <span class="txt-zh">第 3 步：AI 推演与确信 (Reasoning & Confidence)</span>
+                    <span class="txt-en">Step 3: Reasoning & Confidence</span>
+                    <small class="txt-zh">Hypershield 分析双胞胎测试的结果。如果没有误杀正常业务，AI 会给出 100% 确信度，建议正式部署。</small>
+                    <small class="txt-en">Analyze shadow results. If no false positives, AI grants 100% confidence for deployment.</small>
+                </div>
+                <div class="layer layer-4">
+                    <span class="txt-zh">第 4 步：分布式强制执行 (Distributed Enforcement)</span>
+                    <span class="txt-en">Step 4: Distributed Enforcement</span>
+                    <small class="txt-zh">通过 P4 驱动全网 N9300 和服务器 DPU。在全网范围内瞬间封死受攻击的漏洞路径。</small>
+                    <small class="txt-en">Push via P4 to all N9300s and DPUs. Instantly seal the vulnerability path across the entire fabric.</small>
+                </div>
+            </div>
+            <div class="sequence-container">
+                <h4 class="txt-zh" style="text-align: center; margin-bottom: 20px;">技术协同：从内核感知到硬件阻断的时序流</h4>
+                <h4 class="txt-en" style="text-align: center; margin-bottom: 20px;">Technical Synergy: From Kernel Sensing to Hardware Enforcement</h4>
+                
+                <svg class="sequence-svg" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="150" y1="60" x2="150" y2="300" stroke="#ddd" stroke-dasharray="4" />
+                    <line x1="400" y1="60" x2="400" y2="300" stroke="#ddd" stroke-dasharray="4" />
+                    <line x1="650" y1="60" x2="650" y2="300" stroke="#ddd" stroke-dasharray="4" />
+
+                    <rect x="75" y="20" width="150" height="40" rx="8" fill="var(--cisco-blue)" />
+                    <text x="150" y="45" text-anchor="middle" fill="white" class="node-label">Host (eBPF/Tetragon)</text>
+                    <rect x="325" y="20" width="150" height="40" rx="8" fill="var(--cisco-sky)" />
+                    <text x="400" y="45" text-anchor="middle" fill="white" class="node-label">Hypershield AI Fabric</text>
+                    <rect x="575" y="20" width="150" height="40" rx="8" fill="var(--cisco-dark)" />
+                    <text x="650" y="45" text-anchor="middle" fill="white" class="node-label">Smart Switch (P4 DPU)</text>
+
+                    <g>
+                        <path d="M 150 100 L 390 100" stroke="var(--cisco-blue)" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+                        <text x="160" y="90" class="step-marker">STEP 1</text>
+                        <text x="160" y="115" class="process-text txt-zh">eBPF 捕获系统调用异常</text>
+                        <text x="160" y="115" class="process-text txt-en">eBPF detects syscall anomaly</text>
+                    </g>
+                    <g>
+                        <path d="M 400 120 Q 450 150 400 180" stroke="var(--cisco-sky)" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+                        <text x="410" y="145" class="step-marker">STEP 2</text>
+                        <text x="410" y="165" class="process-text txt-zh">AI 推演策略并进行双胞胎验证</text>
+                        <text x="410" y="165" class="process-text txt-en">AI reasons policy & validates via Shadow Test</text>
+                    </g>
+                    <g>
+                        <path d="M 400 220 L 640 220" stroke="var(--cisco-sky)" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+                        <text x="410" y="210" class="step-marker">STEP 3</text>
+                        <text x="410" y="235" class="process-text txt-zh">下发 P4 规则至硬件流水线</text>
+                        <text x="410" y="235" class="process-text txt-en">Push P4 rules to hardware pipeline</text>
+                    </g>
+                    <g>
+                        <circle cx="650" cy="270" r="15" fill="#e91e63" />
+                        <text x="650" y="275" text-anchor="middle" fill="white" style="font-size:10px; font-weight:bold;">DROP</text>
+                        <text x="480" y="265" class="step-marker">STEP 4</text>
+                        <text x="480" y="285" class="process-text txt-zh">DPU 线速拦截恶意包 (Elba ASIC)</text>
+                        <text x="480" y="285" class="process-text txt-en">DPU drops packets at line-rate</text>
+                        <path d="M 750 270 L 670 270" stroke="#e91e63" stroke-width="3" fill="none" class="flow-arrow" marker-end="url(#arrowhead-red)" />
+                    </g>
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="var(--cisco-blue)" />
+                        </marker>
+                        <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#e91e63" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>            
+        </section>
+
+        <section id="section-6">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                <span class="txt-zh">06 全景视角：一致的安全织物</span>
+                <span class="txt-en">06 Panorama: A Unified Security Fabric</span>
+            </h2>
+            <div class="txt-zh">
+                <p>Hypershield 不止于 N9300。它是分布在 **网络节点 (Switch)**、**计算节点 (Server DPU)** 和 **云端 (K8s Sidecar)** 的统一安全层：</p>
+            </div>
+            <div class="txt-en">
+                <p>Hypershield is not just N9300. it's a unified security layer across **Switches**, **Server DPUs**, and **Cloud (K8s Sidecars)**:</p>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="txt-zh">部署点</th><th class="txt-en">Deployment Point</th>
+                            <th class="txt-zh">角色与职责</th><th class="txt-en">Role & Responsibility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>N9300 Smart Switch</strong></td>
+                            <td class="txt-zh"><strong>物理入口屏障：</strong> 拦截未授权的东西向流量，保护不具备安装 DPU 条件的遗留服务器。</td>
+                            <td class="txt-en"><strong>Physical Entry Barrier:</strong> Micro-segments E-W traffic for legacy servers without DPUs.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Server DPU (AMD Pensando)</strong></td>
+                            <td class="txt-zh"><strong>深度工作负载保护：</strong> 在应用入口处进行零信任强制执行，完全卸载 CPU 安全负担。</td>
+                            <td class="txt-en"><strong>Deep Workload Protection:</strong> Zero-trust enforcement at the application's doorstep, offloading CPU.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fabric Manager (Cloud Native)</strong></td>
+                            <td class="txt-zh"><strong>指挥中心：</strong> AI 驱动的统一策略管理，跨私有云、公有云实现安全逻辑一致。</td>
+                            <td class="txt-en"><strong>Control Center:</strong> AI-driven policy management ensuring consistent security across Hybrid Cloud.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- 07. Practical Scenario: Log4j Example -->
+        <section id="section-scenario" style="border-left: 6px solid #e91e63;">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 13h-2V7h2v6zm0 4h-2v-2h2v2zm-1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                <span class="txt-zh">07 实战场景：当 Log4j 再次发生时</span>
+                <span class="txt-en">07 Scenario: Facing a Log4j-style Crisis</span>
+            </h2>
+            <div class="highlight-box" style="background: rgba(233, 30, 99, 0.05); border-left: 4px solid #e91e63;">
+                <p class="txt-zh"><strong>场景引入：</strong> 架构的精妙最终要接受烈火的检验。当 0-Day 漏洞突袭，这套“织物”如何反应？</p>
+                <p class="txt-en"><strong>Context:</strong> Architectural elegance is proven under fire. How does the "fabric" react when a 0-day exploit strikes?</p>
+            </div>            
+            <div class="analogy-grid">
+                <div class="txt-zh">
+                    <h3 style="color: #e91e63;">传统方式 (The Hard Way)</h3>
+                    <ul class="detail-list">
+                        <li>手动搜索数万个容器的补丁状态。</li>
+                        <li>更新 WAF 规则，容易造成业务误伤。</li>
+                        <li>等待数周才能完成全量补丁。</li>
+                    </ul>
+                </div>
+                <div class="txt-en">
+                    <h3 style="color: #e91e63;">The Old Way</h3>
+                    <ul class="detail-list">
+                        <li>Manual scanning of thousands of containers.</li>
+                        <li>Updating WAF rules, risking false positives.</li>
+                        <li>Weeks to patch everything.</li>
+                    </ul>
+                </div>
+                <div class="txt-zh">
+                    <h3 style="color: var(--cisco-accent);">Hypershield 方式 (The Smart Way)</h3>
+                    <ul class="detail-list">
+                        <li><strong>检测：</strong> Tetragon 在内核发现 Java 进程尝试出站连接非预期的 LDAP。</li>
+                        <li><strong>自治：</strong> Hypershield 自动生成针对性的 P4 过滤规则。</li>
+                        <li><strong>阻断：</strong> DPU 在网络入口阻断该反弹 Shell 流量，业务逻辑无需任何改动。</li>
+                    </ul>
+                </div>
+                <div class="txt-en">
+                    <h3 style="color: var(--cisco-accent);">Hypershield Way</h3>
+                    <ul class="detail-list">
+                        <li><strong>Detection:</strong> Tetragon detects Java process initiating unexpected LDAP outbound.</li>
+                        <li><strong>Autonomy:</strong> Hypershield generates targeted P4 filtering rules.</li>
+                        <li><strong>Blocking:</strong> DPU blocks the reverse shell at the entry. Zero business downtime.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section id="section-8" style="background: #f4f7f9; border-left: 6px solid var(--cisco-sky);">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16.5C21 16.88 20.79 17.21 20.47 17.38L12.57 21.82C12.41 21.94 12.21 22 12 22C11.79 22 11.59 21.94 11.43 21.82L3.53 17.38C3.21 17.21 3 16.88 3 16.5V7.5C3 7.12 3.21 6.79 3.53 6.62L11.43 2.18C11.59 2.06 11.79 2 12 2C12.21 2 12.41 2.06 12.57 2.18L20.47 6.62C20.79 6.79 21 7.12 21 7.5V16.5Z"/></svg>
+                <span class="txt-zh">08. 赋能 AI：加速与安全并重</span>
+                <span class="txt-en">08. Empowering AI: Security at the Speed of GPU</span>
+            </h2>
+            <div class="txt-zh">
+                <p>AI 集群依赖 RDMA (RoCEv2) 实现 GPU 间的零拷贝通信。传统的 CPU 软件过滤会带来难以承受的尾延迟 (Tail Latency)。</p>
+            </div>
+            <div class="txt-en">
+                <p>AI clusters rely on RDMA (RoCEv2) for zero-copy GPU communication. Traditional CPU filtering adds prohibitive tail latency.</p>
+            </div>
+            
+            <div class="ai-grid">
+                <div class="ai-card">
+                    <span class="ai-tag">Performance</span>
+                    <h4 class="txt-zh">RoCEv2 硬件卸载</h4>
+                    <h4 class="txt-en">RoCEv2 Offload</h4>
+                    <p class="txt-zh">N9300 利用 AMD Pensando Elba 架构，在硬件层直接解析 RDMA 头部，实现微秒级延迟下的安全检测。</p>
+                    <p class="txt-en">N9300 uses AMD Pensando Elba to parse RDMA headers in hardware, enabling microsecond-level security.</p>
+                </div>
+                <div class="ai-card">
+                    <span class="ai-tag">Security</span>
+                    <h4 class="txt-zh">GPU 东西向分段</h4>
+                    <h4 class="txt-en">GPU E-W Segmentation</h4>
+                    <p class="txt-zh">自主分段 (Autonomous Segmentation) 自动识别 GPU 训练作业的流量模式，动态闭合未使用的端口。</p>
+                    <p class="txt-en">Autonomous Segmentation identifies GPU training patterns and dynamically closes unused ports.</p>
+                </div>
+                <div class="ai-card">
+                    <span class="ai-tag">Scale</span>
+                    <h4 class="txt-zh">400G 硬件加解密</h4>
+                    <h4 class="txt-en">400G Line-rate Encryption</h4>
+                    <p class="txt-zh">支持 400G 线速的 MACsec/IPsec，保护 AI 训练数据的跨机架传输安全，不消耗服务器 GPU 算力。</p>
+                    <p class="txt-en">MACsec/IPsec at 400G protects cross-rack AI data without consuming GPU/CPU cycles.</p>
+                </div>
+            </div>
+        </section>
+        <section id="section-9">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span class="txt-zh">09. 架构演进：传统防火墙 vs. Hypershield</span>
+                <span class="txt-en">09. Evolution: Traditional FW vs. Hypershield</span>
+            </h2>
+            
+            <div class="summary-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">维度 (Dimension)</th>
+                            <th style="width: 40%;" class="txt-zh">传统边界防御 (Legacy)</th>
+                            <th style="width: 40%;" class="txt-en">Legacy Perimeter Defense</th>
+                            <th style="width: 40%;" class="txt-zh">Cisco Hypershield (AI-Native)</th>
+                            <th style="width: 40%;" class="txt-en">Cisco Hypershield (AI-Native)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="metric-label">部署粒度<br><small>Granularity</small></span></td>
+                            <td>
+                                <span class="tag-old">粗粒度</span>
+                                <p class="txt-zh">基于 IP/VLAN 的中心化网关</p>
+                                <p class="txt-en">IP/VLAN-based centralized gateways</p>
+                            </td>
+                            <td>
+                                <span class="tag-new">超细粒度</span>
+                                <p class="txt-zh">基于进程、用户、容器标识的分布式织物</p>
+                                <p class="txt-en">Process/User/Container identity-based fabric</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="metric-label">性能开销<br><small>Performance</small></span></td>
+                            <td>
+                                <span class="tag-old">高损耗 (CPU Tax)</span>
+                                <p class="txt-zh">占用主机 30% CPU 或增加 50ms+ 延迟</p>
+                                <p class="txt-en">30% Host CPU tax or 50ms+ latency</p>
+                            </td>
+                            <td>
+                                <span class="tag-new">零开销 (Offloaded)</span>
+                                <p class="txt-zh">硬件线速转发，主机 CPU 零消耗</p>
+                                <p class="txt-en">Hardware line-rate, Zero CPU tax</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="metric-label">策略变更<br><small>Policy Change</small></span></td>
+                            <td>
+                                <span class="tag-old">手动/风险高</span>
+                                <p class="txt-zh">维护数万条 ACL，变更需窗口期，怕断网</p>
+                                <p class="txt-en">Manual ACLs, maintenance windows required</p>
+                            </td>
+                            <td>
+                                <span class="tag-new">自主/自验证</span>
+                                <p class="txt-zh">AI 自动生成并通过双胞胎测试验证策略</p>
+                                <p class="txt-en">AI-generated & self-validated via Shadow Test</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="metric-label">漏洞防御<br><small>Vulnerability</small></span></td>
+                            <td>
+                                <span class="tag-old">被动补丁</span>
+                                <p class="txt-zh">等待厂商补丁平均需 21 天，窗口期风险巨大</p>
+                                <p class="txt-en">Average 21 days for patching, high exposure risk</p>
+                            </td>
+                            <td>
+                                <span class="tag-new">主动热修复</span>
+                                <p class="txt-zh">数小时内完成分布式硬件补偿控制 (DEP)</p>
+                                <p class="txt-en">Distributed Exploit Protection (DEP) within hours</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="highlight-box" style="margin-top: 30px; background: rgba(43, 156, 59, 0.05); border-left: 4px solid var(--cisco-accent);">
+                <p class="txt-zh"><strong>决策洞察：</strong> 从 TCO 角度看，Hypershield 释放的 30% 服务器算力通常可以在大型数据中心中抵消硬件升级本身的成本，同时将安全响应从“天”降低到“分钟”。</p>
+                <p class="txt-en"><strong>Executive Insight:</strong> From a TCO perspective, reclaiming 30% of server CPU power often offsets hardware costs in large DCs, while slashing MTTR from days to minutes.</p>
+            </div>
+        </section>    
+        <section id="section-10">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                <span class="txt-zh">10. 实时模拟：eBPF 捕获 RCE 攻击</span>
+                <span class="txt-en">10. Live Simulation: eBPF Detecting RCE</span>
+            </h2>
+            <p class="txt-zh">以下模拟展示了 Tetragon 如何在内核层级发现 Apache 进程尝试反弹 Shell 的瞬间：</p>
+            <p class="txt-en">Simulation of Tetragon detecting a reverse shell attempt from an Apache process at the kernel level:</p>
+            
+            <div class="terminal-container">
+                <div class="terminal-body" id="terminal-content">
+                    <span class="term-prompt">root@hypershield-node-01:~#</span> <span class="term-cmd" id="typing-area"></span><span class="cursor"></span>
+                </div>
+            </div>
+        </section>        
+        <!-- 11. Summary & Future -->
+        <section id="section-11" style="border-left: 5px solid var(--cisco-accent);">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                <span class="txt-zh">11. 总结：安全架构的新纪元</span>
+                <span class="txt-en">11. Summary: A New Era of Security Architecture</span>
+            </h2>
+            
+            <div class="txt-zh">
+                <p>Cisco Hypershield 代表了安全从“边界设备”到“原生织物”的根本转变：</p>
+                <ul class="detail-list" style="margin: 20px 0;">
+                    <li><strong>极致性能：</strong> 硬件级的阻断意味着安全不再是延迟的代名词。</li>
+                    <li><strong>极致可见：</strong> eBPF 提供了深入骨髓的内生可见性。</li>
+                    <li><strong>极致韧性：</strong> 独立的 DPU 运行环境确保了即使操作系统受损，安全系统依然在离线（Out-of-band）运行。</li>
+                </ul>
+                <div class="highlight-box" style="background: #e8f5e9;">
+                    <p><strong>结论：</strong> 面对 AI 驱动的新型威胁，我们的防御必须同样具备 AI 的进化速度。Cisco Hypershield 并非只是一个新的防火墙，它是数据中心的<strong>外骨骼 (Exoskeleton)</strong>。</p>
+                </div>
+            </div>
+
+            <div class="txt-en">
+                <p>Cisco Hypershield represents a radical shift from "perimeter appliances" to "native fabric":</p>
+                <ul class="detail-list" style="margin: 20px 0;">
+                    <li><strong>Extreme Performance:</strong> Hardware-level enforcement means security is no longer a latency penalty.</li>
+                    <li><strong>Extreme Visibility:</strong> eBPF provides deep-seated, endogenous observability.</li>
+                    <li><strong>Extreme Resilience:</strong> Independent DPU environments ensure security operates out-of-band even if the OS is compromised.</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer style="text-align: center; color: #888; font-size: 14px; margin-top: 40px; padding-bottom: 40px;">
+            <p>© 2025 Cisco Systems, Inc. | Hypershield Architecture Analysis | AI Expert Collaboration</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentLang = 'zh';
+
+        function toggleLanguage() {
+            const zhElements = document.querySelectorAll('.txt-zh');
+            const enElements = document.querySelectorAll('.txt-en');
+            
+            if (currentLang === 'zh') {
+                zhElements.forEach(el => el.style.display = 'none');
+                enElements.forEach(el => el.style.display = 'block');
+                document.getElementById('main-title').innerText = 'Weaving the Security Cocoon: Cisco Hypershield Deep Dive';
+                document.getElementById('main-subtitle').innerText = 'From eBPF Observability to P4 Acceleration, Building the Active Defense for the AI Era';
+                currentLang = 'en';
+            } else {
+                zhElements.forEach(el => el.style.display = 'block');
+                enElements.forEach(el => el.style.display = 'none');
+                document.getElementById('main-title').innerText = '织就安全之茧：Cisco Hypershield 深度解析';
+                document.getElementById('main-subtitle').innerText = '从 eBPF 内核感知到 P4 硬件加速，构建 AI 时代的主动防御基座';
+                currentLang = 'zh';
+            }
+        }
+
+        // Initialize display
+        window.onload = () => {
+            const enElements = document.querySelectorAll('.txt-en');
+            enElements.forEach(el => el.style.display = 'none');
+        // 终端模拟器逻辑
+            const terminal = document.getElementById('terminal-content');
+            const typingArea = document.getElementById('typing-area');
+            const fullCmd = "tetra observe --namespace production --process apache2";
+            let cmdIdx = 0;
+
+            function typeCommand() {
+                if (cmdIdx < fullCmd.length) {
+                    typingArea.innerHTML += fullCmd.charAt(cmdIdx);
+                    cmdIdx++;
+                    setTimeout(typeCommand, 50);
+                } else {
+                    setTimeout(showLogs, 1000);
+                }
+            }
+
+            function showLogs() {
+                const logs = [
+                    '<br>[INFO] Listening for process execution events...',
+                    '<br>{"process": "apache2", "action": "accept_connection", "src_ip": "10.0.1.45"}',
+                    '<br>{"process": "apache2", "action": "read_file", "path": "/var/www/html/index.html"}',
+                    '<br><span class="term-alert">[CRITICAL] ANOMALY DETECTED</span>',
+                    '<br><span class="term-json-key">"parent":</span> <span class="term-json-val">"/usr/sbin/apache2"</span>',
+                    '<br><span class="term-json-key">"binary":</span> <span class="term-json-val">"/bin/bash"</span>',
+                    '<br><span class="term-json-key">"event":</span> <span class="term-json-val">"process_exec"</span>',
+                    '<br>[HYPERSHIELD] <span style="color:var(--cisco-sky)">Reasoning: Unauthorized child process for web server.</span>',
+                    '<br>[HYPERSHIELD] <span style="color:#e91e63">ACTION: SIGKILL sent. P4 Rule deployed to DPU.</span>',
+                    '<br>[RESULT] Attack neutralized in <span style="color:var(--cisco-accent)">0.8ms</span>.'
+                ];
+                let logIdx = 0;
+                function printNextLog() {
+                    if (logIdx < logs.length) {
+                        terminal.innerHTML += logs[logIdx];
+                        logIdx++;
+                        terminal.scrollTop = terminal.scrollHeight;
+                        setTimeout(printNextLog, 800);
+                    }
+                }
+                printNextLog();
+            }
+
+            // 启动打字机效果
+            setTimeout(typeCommand, 1500);
+        }
+    </script>
+</body>
+</html>
