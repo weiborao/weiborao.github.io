@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cilium : eBPF 重塑云原生基础设施</title>
+    <meta name="revised" content="Wednesday, December 24th, 2025, 3:50 pm" />
+    <meta property="og:updated_time" content="2025-12-24T15:50:00+08:00" />
+    <meta name="keywords" content="Cilium, Kubernetes CNI, eBPF Networking, Service Mesh, OpenAI GPU Network, 2025 CNI">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Cilium: eBPF 重塑云原生基础设施",
+      "description": "深入解析 Cilium 2025 架构：涵盖 kube-proxy 替换、Sidecar-less 服务网格及超大规模集群通信优化。",
+      "datePublished": "2025-12-10T14:00:00+08:00",
+      "dateModified": "2025-12-24T15:50:00+08:00",
+      "proficiencyLevel": "Expert",
+      "author": { "@type": "Person", "name": "Weibo Rao" }
+    }
+    </script>
+    <style>
+        /* --- Cisco Brand Identity System --- */
+        :root {
+            --cisco-blue: #049FD9;
+            --cisco-midnight: #0D274D;
+            --cisco-sky: #6ABF4B;
+            --cisco-slate: #58585B;
+            --cisco-platinum: #E4E4E4;
+            --cisco-red: #E2231A;
+            --cisco-orange: #F58025;
+            --white: #FFFFFF;
+            --shadow-card: 0 12px 40px rgba(13, 39, 77, 0.08);
+            --shadow-hover: 0 20px 50px rgba(13, 39, 77, 0.15);
+            --radius-lg: 16px;
+        }
+
+        /* --- Typography & Base --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+            color: var(--cisco-slate);
+            background-color: #F8FAFC;
+            line-height: 1.7;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        h1, h2, h3, h4 { color: var(--cisco-midnight); font-weight: 700; letter-spacing: -0.02em; }
+        
+        /* --- Hero Section --- */
+        header {
+            background: linear-gradient(135deg, var(--cisco-midnight) 0%, #004466 100%);
+            color: white; padding: 120px 0 140px; position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+        .hero-tag {
+            background: rgba(255,255,255,0.1); color: #61C6E2; padding: 6px 18px;
+            border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1 { font-size: 3.5rem; margin-bottom: 24px; line-height: 1.1; color: white; }
+        .hero-sub { font-size: 1.35rem; color: rgba(255,255,255,0.85); max-width: 850px; margin-bottom: 40px; }
+        /* --- I18n & Official Content Styles --- */
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--cisco-midnight);
+            color: white;
+            border: 1px solid var(--cisco-blue);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .lang-switch:hover { background: var(--cisco-blue); }
+
+        [lang="en"] { display: none; } /* 默认显示中文 */
+
+        .official-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #E6F6EC;
+            color: #2B9348;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .official-card {
+            background: white;
+            border: 1px solid var(--cisco-platinum);
+            border-top: 4px solid #2B9348;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .hubble-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .hubble-pill {
+            background: #f0f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--cisco-blue);
+        }
+
+        .hubble-pill h5 { color: var(--cisco-midnight); margin-bottom: 8px; font-size: 0.95rem; }
+        .hubble-pill p { font-size: 0.8rem; line-height: 1.4; color: var(--cisco-slate); }
+        /* 十年里程碑样式 */
+        .milestone-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 30px; }
+        .milestone-item { text-align: center; padding: 15px; border-bottom: 3px solid var(--cisco-platinum); transition: all 0.3s; }
+        .milestone-item:hover { border-bottom-color: var(--cisco-blue); background: rgba(4, 159, 217, 0.02); }
+        .milestone-year { font-weight: 800; color: var(--cisco-blue); font-size: 1.2rem; display: block; }
+        .milestone-txt { font-size: 0.8rem; color: var(--cisco-slate); }
+        /* --- Winston's Promise Block --- */
+        .promise-box {
+            background: var(--cisco-blue); padding: 35px; border-radius: var(--radius-lg);
+            display: flex; align-items: center; gap: 25px;
+            box-shadow: 0 20px 40px rgba(4, 159, 217, 0.25);
+            margin-top: 40px; position: relative; z-index: 2;
+        }
+        .promise-box strong { font-size: 1.4rem; display: block; color: white; margin-bottom: 5px; }
+        .promise-box p { color: rgba(255,255,255,0.95); margin: 0; font-size: 1.1rem; }
+
+        /* --- Global Grid & Cards --- */
+        section { padding: 100px 0; background: white; border-bottom: 1px solid var(--cisco-platinum); }
+        section:nth-child(even) { background: #FDFDFD; }
+
+        .section-header { text-align: center; max-width: 900px; margin: 0 auto 70px; }
+        .section-header h2 { font-size: 2.8rem; margin-bottom: 20px; }
+        .section-header h2::after {
+            content: ''; display: block; width: 80px; height: 5px; background: var(--cisco-blue);
+            margin: 20px auto 0; border-radius: 3px;
+        }
+
+        /* --- Story Section Enhancement --- */
+        .story-section {
+            background: white; padding: 40px; border-radius: 20px;
+            margin-bottom: 60px; border-left: 8px solid var(--cisco-blue);
+            box-shadow: var(--shadow-card);
+        }
+        /* --- Optimized Bento Grid for All Infrastructure Components --- */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            grid-auto-flow: row dense;
+        }
+
+        .tech-card.span-2 {
+            grid-column: span 2;
+        }
+
+        .card-split-content {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+        }
+
+        .card-text-side { flex: 1.2; }
+        .card-visual-side { flex: 0.8; }
+
+        @media (max-width: 992px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .tech-card.span-2 { grid-column: span 1; }
+            .card-split-content { flex-direction: column; }
+        }
+
+        /* 增强 DNS 策略展示样式 */
+        .dns-policy-box {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.75rem;
+            color: #61C6E2;
+            border-left: 3px solid var(--cisco-sky);
+        }
+        /* --- Golden Circle Section --- */
+        .golden-circle { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .gold-card { background: white; padding: 35px; border-radius: 12px; box-shadow: var(--shadow-card); border-top: 4px solid var(--cisco-blue); }
+        .analogy { background: #eef9ff; padding: 15px; border-left: 4px solid var(--cisco-blue); margin: 15px 0; font-style: italic; font-size: 0.9rem; }
+
+        /* --- Evolution Timeline --- */
+        .evo-container { display: flex; justify-content: space-between; margin-top: 50px; position: relative; }
+        .evo-container::before { content: ''; position: absolute; top: 40px; left: 0; width: 100%; height: 2px; background: var(--cisco-platinum); z-index: 1; }
+        .evo-step { flex: 1; text-align: center; position: relative; z-index: 2; padding: 0 15px; }
+        .evo-dot { width: 20px; height: 20px; background: var(--cisco-platinum); border-radius: 50%; margin: 30px auto 20px; border: 4px solid white; transition: all 0.3s; }
+        .evo-step.active .evo-dot { background: var(--cisco-blue); transform: scale(1.3); }
+
+        /* --- Comparison Matrix Table --- */
+        .matrix-wrap { overflow-x: auto; margin-top: 50px; border-radius: 12px; border: 1px solid var(--cisco-platinum); }
+        table { width: 100%; border-collapse: collapse; background: white; text-align: left; }
+        th { background: var(--cisco-midnight); color: white; padding: 20px; font-size: 0.9rem; }
+        td { padding: 20px; border-bottom: 1px solid var(--cisco-platinum); font-size: 0.95rem; }
+        .tag-good { background: #E6F6EC; color: #2B9348; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+        .tag-bad { background: #FFEDEB; color: #E2231A; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+
+        /* --- SRE ROI Calculator --- */
+        .roi-panel { background: var(--cisco-midnight); color: white; padding: 40px; border-radius: 20px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: center; }
+        .roi-stat { display: flex; flex-direction: column; gap: 10px; }
+        .roi-value { font-size: 3.5rem; font-weight: bold; color: var(--cisco-sky); line-height: 1; }
+        .roi-breakdown { font-size: 0.95rem; line-height: 1.8; padding-left: 20px; border-left: 2px solid rgba(255,255,255,0.2); }
+        /* --- New Architecture Section Styles --- */
+        .arch-diagram {
+            background: #fdfdfd;
+            border: 2px solid var(--cisco-platinum);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .space-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--cisco-slate);
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--cisco-platinum);
+            padding-bottom: 5px;
+        }
+
+        .user-space, .kernel-space {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .user-space {
+            background: rgba(4, 159, 217, 0.03);
+            border: 1px dashed var(--cisco-blue);
+            border-radius: 8px;
+        }
+
+        .kernel-space {
+            background: rgba(106, 191, 75, 0.05);
+            border: 1px solid var(--cisco-sky);
+            border-radius: 8px;
+        }
+
+        .component {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--cisco-platinum);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .component svg {
+            color: var(--cisco-blue);
+        }
+
+        .ebpf-engine {
+            grid-column: 1 / -1;
+            background: var(--cisco-midnight);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        /* --- Tech Cards & Hook Grid --- */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .tech-card { background: white; padding: 40px; border-radius: var(--radius-lg); border: 1px solid var(--cisco-platinum); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .tech-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-hover); border-color: var(--cisco-blue); }
+        .hook-card { background: #fdfdfd; border: 1px solid #e0e0e0; padding: 25px; border-radius: 8px; border-top: 3px solid var(--cisco-blue); }
+        .hook-card h4 { color: var(--cisco-blue); margin-bottom: 12px; }
+
+        /* --- Diagram & Lab --- */
+        .diagram-box { background: #0D1117; padding: 50px; border-radius: 20px; margin: 50px 0; text-align: center; color: #8b949e; }
+        .lab-terminal { background: #111; border-radius: 12px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.4); margin-top: 40px; border: 1px solid #333; }
+        .term-bar { background: #2A2A2A; padding: 12px 20px; display: flex; gap: 8px; align-items: center; }
+        .term-body { padding: 30px; font-family: 'SF Mono', 'Fira Code', monospace; min-height: 450px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .log-stream { color: #00FF41; font-size: 0.8rem; border-right: 1px solid #333; padding-right: 20px; height: 380px; overflow-y: auto; }
+        .service-map { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+
+        /* --- Success Story Section --- */
+        .success-story { display: flex; gap: 40px; margin-bottom: 60px; align-items: flex-start; padding-bottom: 40px; border-bottom: 1px dashed var(--cisco-platinum); }
+        .success-story:last-child { border-bottom: none; }
+        .story-content { flex: 1.5; }
+        .story-analysis { flex: 1; background: #F0F7FA; padding: 30px; border-radius: 12px; border-top: 4px solid var(--cisco-blue); }
+
+        /* --- Footer --- */
+        footer { padding: 80px 0; background: var(--cisco-midnight); color: white; text-align: center; }
+        .pulse { animation: pulse-blue 2s infinite; }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(4, 159, 217, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(4,159,217,0); } 100% { box-shadow: 0 0 0 0 rgba(4,159,217,0); } }
+        /* --- Networking Mode Comparison Styles --- */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .mode-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--cisco-platinum);
+        }
+        .mode-card h5 { color: var(--cisco-blue); margin-bottom: 10px; }
+        .mode-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #eee;
+            margin-bottom: 10px;
+        }
+        /* --- Expanded Content Enhancements --- */
+        .detail-list {
+            font-size: 0.8rem;
+            color: var(--cisco-slate);
+            margin-top: 8px;
+            padding-left: 18px;
+        }
+        .detail-list li { margin-bottom: 4px; }
+        .tech-sub-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--cisco-midnight);
+            margin-top: 12px;
+        }      
+        /* --- Added Specific UI Components for V3.0 --- */
+        .expert-debug-box { background: #1A1A1A; color: #E4E4E4; border-radius: 12px; padding: 25px; font-family: 'SF Mono', monospace; font-size: 0.85rem; border: 1px solid #333; }
+        .debug-cmd { color: var(--cisco-blue); font-weight: bold; }
+        .highlight-cisco-blue { color: var(--cisco-blue); font-weight: bold; }
+
+        @media (max-width: 992px) {
+            .roi-panel, .term-body, .success-story { grid-template-columns: 1fr; flex-direction: column; }
+            .evo-container::before { width: 2px; height: 100%; left: 50%; top: 0; }
+            .log-stream { border-right: none; border-bottom: 1px solid #333; padding-bottom: 20px; height: 200px; }
+        }
+        /* --- Enhanced CNI Deep Dive Styles --- */
+        .cni-workflow-box {
+            background: #fdfdfd;
+            border: 1px solid var(--cisco-platinum);
+            border-left: 5px solid var(--cisco-blue);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .performance-metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .metric-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--cisco-midnight);
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--cisco-slate);
+            text-transform: uppercase;
+        }
+
+        .datapath-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: var(--cisco-midnight);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+        /* --- CNI High-Performance Benchmarking Styles --- */
+        .benchmark-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 25px;
+        }
+        .perf-table {
+            width: 100%;
+            border: 1px solid var(--cisco-platinum);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            background: #fff;
+        }
+        .perf-table td, .perf-table th {
+            padding: 10px;
+            border-bottom: 1px solid var(--cisco-platinum);
+        }
+        .perf-table th { background: #f8f9fa; color: var(--cisco-midnight); }
+        .perf-highlight { color: var(--cisco-blue); font-weight: bold; }    
+        /* --- eBPF Lifecycle Bridge Styles --- */
+        .ebpf-bridge {
+            background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
+            border-top: 1px solid var(--cisco-platinum);
+            border-bottom: 1px solid var(--cisco-platinum);
+            padding: 40px 0;
+        }
+
+        .lifecycle-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .lifecycle-step {
+            flex: 1;
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--cisco-platinum);
+            font-size: 0.8rem;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .lifecycle-arrow {
+            color: var(--cisco-blue);
+            font-weight: bold;
+        }
+
+        /* --- Semantic Badge Enhancement --- */
+        .baseline-badge {
+            background: var(--cisco-midnight) !important;
+            color: white !important;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .evolution-badge {
+            background: var(--cisco-blue) !important;
+            color: white !important;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        /* --- 2025 New Feature Components --- */
+        .ai-native-banner {
+            background: linear-gradient(110deg, var(--cisco-midnight) 0%, #004d73 100%);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            margin: 40px 0;
+            border-left: 8px solid var(--cisco-sky);
+            color: white;
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .feature-tag-new {
+            background: var(--cisco-sky);
+            color: var(--cisco-midnight);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 50px;
+            border-top: 1px solid var(--cisco-platinum);
+            padding-top: 40px;
+        }
+
+        .decision-item {
+            text-align: center;
+        }
+
+        .decision-item .val {
+            display: block;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--cisco-blue);
+        }
+
+        .decision-item .lbl {
+            font-size: 0.85rem;
+            color: var(--cisco-slate);
+        }        
+    </style>
+</head>
+<body>
+    <button class="lang-switch" onclick="toggleLanguage()">EN / 中文</button>
+    <!-- Hero Section -->
+    <header>
+        <div class="container">
+            <div class="hero-tag">Cisco Infrastructure Strategy: 2025 Comprehensive Edition</div>
+            <h1>Cilium:<br>eBPF 重塑云原生基础设施</h1>
+            <p class="hero-sub">
+                连接、安全与可观测性的终极数据面。本白皮书融合了叙事洞察、底层架构解构及全球巨头的大规模落地经验，为架构师提供完整的决策参考。
+            </p>
+            
+            <div class="promise-box pulse">
+                <div style="font-size: 3rem;">🏛️</div>
+                <div>
+                    <strong>架构师承诺 (The Promise):</strong>
+                    <p>阅读本篇，你将不仅掌握跨云身份一致性的 ClusterMesh 架构，还将获得量化的 ROI 模型以节省 30% 以上的云账单，并理解支撑 OpenAI 万级 GPU 算力的网络底座。</p>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!--十年征程：从 CNI 到基础设施操作系统-->
+    <section style="padding: 60px 0 20px; background: #fff;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <span style="background: var(--cisco-midnight); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">2015 - 2025</span>
+                <h2 style="margin-top: 15px;">十年征程：从 CNI 到基础设施操作系统</h2>
+                <p style="max-width: 700px; margin: 15px auto; font-size: 0.95rem;">Cilium 不再仅仅是插件，它是连接、安全与可观测性的统一内核层。</p>
+            </div>
+            <div class="milestone-grid">
+                <div class="milestone-item"><span class="milestone-year">2015</span><span class="milestone-txt">项目启动<br>eBPF 初心</span></div>
+                <div class="milestone-item"><span class="milestone-year">2017</span><span class="milestone-txt">首个开源版本<br>Identity 概念诞生</span></div>
+                <div class="milestone-item"><span class="milestone-year">2021</span><span class="milestone-txt">加入 CNCF<br>Service Mesh 发布</span></div>
+                <div class="milestone-item"><span class="milestone-year">2023</span><span class="milestone-txt">CNCF 毕业<br>Tetragon 安全集成</span></div>
+                <div class="milestone-item" style="border-bottom-color: var(--cisco-sky);"><span class="milestone-year">2025</span><span class="milestone-txt">AI-Native<br>全行业标准</span></div>
+            </div>
+        </div>
+    </section>
+    <!-- [Story Section] The Invisible Sentry -->
+    <section>
+        <div class="container">
+            <div style="margin-bottom: 30px; border-left: 4px solid var(--cisco-blue); padding-left: 15px;">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 1: Establishing the Context</span>
+                <h2 style="font-size: 1.8rem; margin-top: 5px;">为什么我们需要重新想象网络？</h2>
+            </div>
+
+            <div class="story-section">
+                <h3 style="color: var(--cisco-blue); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    微服务王国的“隐形哨兵” (A Narrative)
+                </h3>
+                <p>
+                    想象一个名为“K8s”的繁荣王国，起初只有几个村庄（Pod）。守卫（iptables）拿着纸质名录，通过逐行查对来放行访客。随着王国扩张到数万个城镇，名录变成了几公里长，守卫查阅一次名录需要消耗整天时间，交通陷入瘫痪。
+                    <br><br>
+                    这时，<b>Cilium</b> 出现了。他给每个城镇分发了“魔法胸章”（Identity Label），并在每条道路的地面下安装了“隐形感应器”（eBPF 程序）。现在，哨兵无需查阅纸张，访客踏过感应器的瞬间，身份、意图、速度都被即时处理。
+                    <br><br>
+                    这就是 Cilium 给现代数据中心带来的变革：<b>将性能开销降至冰点，将安全边界推至内核。</b>
+                </p>
+                
+                <div class="analogy" style="margin-top: 30px; background: rgba(4, 159, 217, 0.03); border: 1px dashed var(--cisco-blue); border-radius: 8px;">
+                    <div style="font-weight: bold; color: var(--cisco-midnight); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">💡</span> Make it Clear: 核心隐喻对照表
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 0.85rem;">
+                        <div style="padding: 10px; background: white; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <strong style="color: var(--cisco-red);">纸质名录</strong><br>
+                            <span style="color: var(--cisco-slate);">iptables 规则链 (线性 $O(N)$ 搜索)</span>
+                        </div>
+                        <div style="padding: 10px; background: white; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <strong style="color: var(--cisco-sky);">魔法胸章</strong><br>
+                            <span style="color: var(--cisco-slate);">Cilium Security Identity (16-bit 身份 ID)</span>
+                        </div>
+                        <div style="padding: 10px; background: white; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <strong style="color: var(--cisco-blue);">隐形感应器</strong><br>
+                            <span style="color: var(--cisco-slate);">eBPF Hook 点 (JIT 编译，常数级性能)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section style="background: #f8f9fa; padding: 60px 0;">
+        <div class="container">
+            <div class="official-badge" style="background: var(--cisco-midnight); color: white;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:5px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                行业基准认知 (The Official Baseline)
+            </div>
+            <div class="grid-3">
+                <div class="official-card">
+                    <h3 lang="zh">什么是 Cilium?</h3>
+                    <h3 lang="en">What is Cilium?</h3>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">
+                        <span lang="zh">Cilium 是一个开源软件，用于透明地保护使用 Linux 容器管理平台（如 Docker 和 Kubernetes）部署的应用程序服务之间的网络连接。其核心是 <b>eBPF</b> 技术，允许在 Linux 内核中动态插入强大的安全可见性和控制逻辑。</span>
+                        <span lang="en">Cilium is open source software for transparently securing the network connectivity between application services. At its foundation is <b>eBPF</b>, enabling the dynamic insertion of powerful security visibility and control logic within Linux itself.</span>
+                    </p>
+                </div>
+                <div class="official-card">
+                    <h3 lang="zh">什么是 Hubble?</h3>
+                    <h3 lang="en">What is Hubble?</h3>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">
+                        <span lang="zh">Hubble 是一个完全分布式的网络和安全可观测性平台。它建立在 Cilium 和 eBPF 之上，以完全透明的方式深入了解服务以及网络基础设施的通信和行为。</span>
+                        <span lang="en">Hubble is a fully distributed networking and security observability platform built on top of Cilium and eBPF to enable deep visibility into service communication and infrastructure behavior.</span>
+                    </p>
+                </div>
+                <div class="official-card" style="border-top-color: var(--cisco-midnight);">
+                    <h3 lang="zh">为什么选择它们?</h3>
+                    <h3 lang="en">Why Cilium & Hubble?</h3>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">
+                        <span lang="zh">传统的 iptables 依赖 IP 地址过滤，但在动态微服务中，IP 频繁更迭。Cilium 基于<b>服务身份 (Identity)</b> 而非 IP 寻址，能够在不更改任何应用代码的情况下提供 L7 层级的深度隔离。</span>
+                        <span lang="en">Traditional approaches (iptables) struggle with IP churn in microservices. Cilium uses <b>Service Identity</b> instead of IPs, providing L7 isolation without changing application code.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>    
+    <!-- Data Plane Evolution (代际演进)-->
+    <section>
+        <div class="container">
+            <div class="section-header">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 2: Understanding the Shift</span>
+                <h2>网络代际演进：我们为何在此？</h2>
+                <p>从硬件围墙到软件定义，再到内核原生。理解 Cilium 的前提是理解其在历史维度中的位置。</p>
+            </div>
+
+            <div class="evo-container">
+                <div class="evo-step">
+                    <h4>第一代：Userspace</h4>
+                    <p>通过应用层代理转发。性能瓶颈极大。</p>
+                    <div class="evo-dot"></div>
+                </div>
+                <div class="evo-step">
+                    <h4>第二代：Kernel (iptables)</h4>
+                    <p>利用内核规则链。随 Pod 增加 $O(N)$ 复杂度爆炸。</p>
+                    <div class="evo-dot"></div>
+                </div>
+                <div class="evo-step active">
+                    <h4>第三代：eBPF Native</h4>
+                    <p>Cilium 时代。绕过协议栈，$O(1)$ 查找，身份感知。</p>
+                    <div class="evo-dot"></div>
+                </div>
+            </div>
+
+            <div class="matrix-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>关键维度 (Key Metrics)</th>
+                            <th>iptables (传统模型)</th>
+                            <th>Cilium eBPF (现代标准)</th>
+                            <th>架构意义 (Architectural Impact)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>转发效率</td>
+                            <td><span class="tag-bad">低</span> 随规则线性衰减</td>
+                            <td><span class="tag-good">极高</span> 常数级延迟</td>
+                            <td>解耦规模与性能</td>
+                        </tr>
+                        <tr>
+                            <td>安全基石</td>
+                            <td>基于 IP (易变、脆弱)</td>
+                            <td>基于 身份标签 (Identity)</td>
+                            <td>实现真正的零信任内核</td>
+                        </tr>
+                        <tr>
+                            <td>可观测性</td>
+                            <td><span class="tag-bad">盲区</span> 仅包级统计</td>
+                            <td><span class="tag-good">全透视</span> L7/DNS/身份关联</td>
+                            <td>消除生产环境排障黑盒</td>
+                        </tr>
+                        <tr>
+                            <td>网格形态</td>
+                            <td>Sidecar (高 CPU/内存损耗)</td>
+                            <td>Sidecar-less (内核原生代理)</td>
+                            <td>极简架构，显著降本增效</td>
+                        </tr>
+                        <tr>
+                            <td>物理网络整合</td>
+                            <td>需复杂 Overlay 封装</td>
+                            <td>原生支持 BGP/物理网集成</td>
+                            <td><span class="highlight-cisco-blue">NEW</span> 实现 DC 网络一体化</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 40px; padding: 20px; border-radius: 8px; background: #F8FAFC; border: 1px solid var(--cisco-platinum);">
+                <p style="font-size: 0.95rem; color: var(--cisco-slate); line-height: 1.6;">
+                    <strong>💡 架构师笔记：</strong> 这里不仅是性能的提升，更是**复杂度的释放**。在传统的 $O(N)$ 模型下，网络规模越大，系统越脆弱；而 eBPF 带来的 $O(1)$ 特性，让我们第一次在万级节点规模下获得了确定性的性能表现。
+                </p>
+            </div>
+        </div>
+    </section>
+    <!--Cilium High Performance CNI-->
+    <section id="cni-deep-dive" style="background: white;">
+        <div class="container">
+            <div class="section-header" style="text-align: left; margin-bottom: 50px;">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 2.5: The Foundation</span>
+                <h2 style="font-size: 2.2rem; margin-top: 10px;">高性能 CNI：重塑 Kubernetes 的动脉系统</h2>
+                <p style="margin-left: 0;">CNI 不仅仅是分配一个 IP，它是决定整个集群吞吐量、延迟与扩展性的物理根基。</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="tech-card">
+                    <div class="official-badge" style="background:#eef9ff; color:var(--cisco-blue);">标准定义 (What)</div>
+                    <h4 style="margin-top: 10px;">什么是 CNI？</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.6;">
+                        CNI (Container Network Interface) 是 K8s 网络的一套标准协议。它将“如何创建网络”与“如何运行容器”解耦。
+                    </p>
+                    <div class="cni-workflow-box" style="padding:15px; border-radius: 8px;">
+                        <div class="datapath-step"><div class="step-number">1</div> Kubelet 发现新 Pod</div>
+                        <div class="datapath-step"><div class="step-number">2</div> 调用 Cilium CNI 插件二进制</div>
+                        <div class="datapath-step"><div class="step-number">3</div> Cilium 为其创建 NetNS 并绑定 Veth 对</div>
+                        <div class="datapath-step"><div class="step-number">4</div> 通过 BPF 程序注入网络访问策略</div>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="official-badge" style="background:#fff8f1; color:var(--cisco-orange);">痛点剖析 (Why)</div>
+                    <h4 style="margin-top: 10px;">为什么 K8s 需要 Cilium CNI？</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.6;">
+                        传统 CNI（如 Flannel/iptables）在万级 Pod 规模下会面临“规模之墙”：规则链线性搜索导致的 CPU 剧烈抖动。
+                    </p>
+                    <div class="analogy" style="font-size: 0.75rem;">
+                        💡 <b>对比：</b> 传统方案是在软件层层封装（Overlay），而 Cilium 是直接在内核态构建“直通电梯”，将查找复杂度从 $O(N)$ 降至 $O(1)$。
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="official-badge" style="background:#f0f7fa; color:var(--cisco-midnight);">安装逻辑 (How)</div>
+                    <h4 style="margin-top: 10px;">它是如何安装与工作的？</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.6;">
+                        Cilium 以 DaemonSet 形式运行在每个节点。通过 Helm 安装时，它会接管节点的 CNI 配置目录（/etc/cni/net.d）。
+                    </p>
+                    <div class="expert-debug-box" style="margin-top: 10px; font-size: 0.7rem;">
+                        <span class="debug-cmd"># 查看 CNI 配置文件</span><br>
+                        $ cat /etc/cni/net.d/05-cilium.conflist<br>
+                        { "type": "cilium-cni", "enable-debug": true }
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px; background: #F8FAFC; padding: 40px; border-radius: 20px; border: 1px solid var(--cisco-platinum);">
+                <h3 style="text-align: center; margin-bottom: 30px;">Cilium 如何实现“极致性能”？</h3>
+                
+                <div class="grid-3">
+                    <div style="background:white; padding:25px; border-radius:12px;">
+                        <h5 style="color:var(--cisco-blue);">1. Native Routing (原生路由模式)</h5>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">
+                            完全抛弃 VXLAN 封装损耗。Cilium 直接利用主机的路由表进行 Pod 流量转发，适用于 BGP 物理网或云环境路由模式。
+                        </p>
+                    </div>
+                    <div style="background:white; padding:25px; border-radius:12px;">
+                        <h5 style="color:var(--cisco-blue);">2. XDP 加速 (eXpress Data Path)</h5>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">
+                            在网卡驱动层直接截获报文。对于 Load Balancer 流量，Cilium 能在 CPU 还没感知到报文前，就通过 XDP 完成转发。
+                        </p>
+                    </div>
+                    <div style="background:white; padding:25px; border-radius:12px;">
+                        <h5 style="color:var(--cisco-blue);">3. EDT 带宽管理 (Earliest Departure Time)</h5>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">
+                            传统的 HTB 限速会导致严重的 CPU 锁竞争。Cilium 引入 eBPF EDT 限速，能大幅降低万兆网卡下的长尾延迟。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="performance-metric-grid">
+                    <div class="metric-item">
+                        <span class="metric-value">9.6 Gbps</span>
+                        <span class="metric-label">TCP 吞吐量 (接近线速)</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-value">-35%</span>
+                        <span class="metric-label">P99 延迟降低</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-value">Unlimited</span>
+                        <span class="metric-label">Service 扩展规模</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; text-align: center; color: var(--cisco-slate); margin-top: 20px;">
+                    * 数据参考自 Cilium 官方 2021 CNI Benchmark。
+                </p>
+                <div class="benchmark-comparison-grid">
+                    <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--cisco-platinum);">
+                        <h5 style="margin-bottom: 15px; color: var(--cisco-midnight);">吞吐量对比 (Throughput)</h5>
+                        <table class="perf-table">
+                            <thead>
+                                <tr><th>网络方案</th><th>MTU 1500 (Gbps)</th><th>CPU 消耗</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Cilium (Direct Routing)</td><td class="perf-highlight">9.62</td><td style="color:var(--cisco-sky)">极低</td></tr>
+                                <tr><td>Calico (IPIP)</td><td>8.45</td><td>中</td></tr>
+                                <tr><td>Flannel (VXLAN)</td><td>7.41</td><td>高</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size: 0.7rem; color: #888; margin-top: 10px;">* 源自 Cilium 2021 官方基准测试：封装损耗是性能损耗的元凶。</p>
+                    </div>
+                    
+                    <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--cisco-platinum);">
+                        <h5 style="margin-bottom: 15px; color: var(--cisco-midnight);">为什么 Cilium 更快？(The How)</h5>
+                        <div style="font-size: 0.85rem; line-height: 1.6;">
+                            <p>1. <b>Bypass Iptables:</b> 传统 CNI 报文需要经过数千条 Netfilter 规则，Cilium 直接在内核 <code>sockmap</code> 层重定向报文。</p>
+                            <p>2. <b>CPU 局部性优化:</b> eBPF 程序运行在处理中断的同一 CPU 核心上，最大化 L1/L2 缓存命中率。</p>
+                            <p>3. <b>零内存拷贝:</b> 报文在 Pod 间传递时，尽量保持在同一内存地址空间。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analogy" style="margin-top: 30px; background: #fdfdfd; border: 1px solid var(--cisco-blue);">
+                    <strong style="color: var(--cisco-blue);">[ Pod 网络诞生记 ]</strong>
+                    <p style="font-size: 0.85rem; margin-top: 10px;">
+                        1. <b>宣告：</b> Kubelet 发现新容器启动，发出 <code>CNI ADD</code> 指令。<br>
+                        2. <b>分配：</b> Cilium IPAM 瞬间锁定可用 IP，并关联全局唯一的 <b>Security Identity</b>。<br>
+                        3. <b>注入：</b> eBPF 字节码被即时编译（JIT）并挂载到该 Pod 的网卡入口，安全策略自此“长”在了硬件边缘。
+                    </p>
+                </div>                
+            </div>
+        </div>
+    </section>
+    <!--AI Native-->
+    <section style="background: #fff; padding: 40px 0;">
+        <div class="container">
+            <div class="ai-native-banner">
+                <div style="font-size: 3rem;">🧠</div>
+                <div>
+                    <h3 style="color: white; margin-bottom: 10px;">
+                        eBPF for AI (NetCons): 算力时代的神经中枢 <span class="feature-tag-new">2025 New</span>
+                    </h3>
+                    <p style="font-size: 0.95rem; opacity: 0.9;">
+                        针对 OpenAI 等万级 GPU 集群，Cilium 2025 引入了 <b>NetCons</b> 技术。通过在内核层优化 AI 训练中常见的 <b>All-reduce</b> 通信模式，大幅降低梯度同步时的尾部延迟。
+                    </p>
+                    <div style="margin-top: 15px; display: flex; gap: 20px; font-size: 0.8rem;">
+                        <span>✅ 路径优化：针对 RDMA/RoCEv2 的深度感知</span>
+                        <span>✅ 拥塞控制：eBPF 动态调整训练流优先级</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>      
+    <section class="ebpf-bridge">
+        <div class="container">
+            <div style="text-align: center;">
+                <span class="baseline-badge">Technical Bridge</span>
+                <h3 style="margin-top:10px;">从代码到内核：eBPF 的“点火”过程</h3>
+                <p style="font-size: 0.9rem; color: var(--cisco-slate); margin-top: 5px;">
+                    在深入架构之前，理解 eBPF 如何从文本变为内核动力是消除“跳跃感”的关键。
+                </p>
+            </div>
+            
+            <div class="lifecycle-flex">
+                <div class="lifecycle-step">
+                    <strong style="color:var(--cisco-blue)">1. 编写 (C/Go)</strong><br>编写逻辑代码
+                </div>
+                <div class="lifecycle-arrow">→</div>
+                <div class="lifecycle-step">
+                    <strong style="color:var(--cisco-blue)">2. 编译 (LLVM)</strong><br>转化为字节码
+                </div>
+                <div class="lifecycle-arrow">→</div>
+                <div class="lifecycle-step">
+                    <strong style="color:var(--cisco-blue)">3. 验证 (Verifier)</strong><br>确保安全无挂死
+                </div>
+                <div class="lifecycle-arrow">→</div>
+                <div class="lifecycle-step">
+                    <strong style="color:var(--cisco-blue)">4. 运行 (JIT)</strong><br>原生指令执行
+                </div>
+            </div>
+            <div class="analogy" style="margin-top: 25px; text-align: center; border: none; background: rgba(4,159,217,0.05);">
+                💡 <b>衔接逻辑：</b> 正是这个自动化的“点火”过程，让 Cilium CNI 能够将安全策略瞬间“注入”到内核动脉中。
+            </div>
+        </div>
+    </section>    
+    <!-- User/Kernel Space 架构解构 + 协作机制说明-->
+    <section id="architecture-map" style="background: white;">
+        <div class="container">
+            <div class="section-header">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 3: The Big Picture</span>
+                <h2 id="archTitle">内核级协作：控制平面与数据平面的交响乐</h2>
+                <p>理解 Cilium 的关键在于区分“谁在下令（用户态）”与“谁在执行（内核态）”。这种解耦是高性能与安全的基础。</p>
+            </div>
+
+            <div class="arch-diagram">
+                <div class="space-label" data-i18n="user_space">用户空间 (User Space) - 控制平面 (The Brain)</div>
+                <div class="user-space">
+                    <div class="component">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <strong>Cilium Agent</strong>
+                        <p style="font-size:0.85rem; color:var(--cisco-slate)">（Watcher, Compiler, BPF Loader）负责策略监听、eBPF 程序编译及加载。</p>
+                    </div>
+                    <div class="component">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 13h-8v-2h8v2zm-2-6h-6v2h6V7zm0 10h-6v2h6v-2zM12 7H2v10h10V7z"/>
+                        </svg>
+                        <strong>Cilium Operator</strong>
+                        <p style="font-size:0.85rem; color:var(--cisco-slate)">（KVStore Sync, Identity Allocator）处理身份分配等全局集群任务。</p>
+                    </div>
+                    <div class="component">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16.5C21 16.88 20.79 17.21 20.47 17.38L12.57 21.82C12.41 21.94 12.21 22 12 22C11.79 22 11.59 21.94 11.43 21.82L3.53 17.38C3.21 17.21 3 16.88 3 16.5V7.5C3 7.12 3.21 6.79 3.53 6.62L11.43 2.18C11.59 2.06 11.79 2 12 2C12.21 2 12.41 2.06 12.57 2.18L20.47 6.62C20.79 6.79 21 7.12 21 7.5V16.5Z"/>
+                        </svg>
+                        <strong>Hubble</strong>
+                        <p style="font-size:0.85rem; color:var(--cisco-slate)">（Flow Observer, UI）从数据平面提取流信息，提供逻辑化的可视化视图。</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; color: var(--cisco-blue); margin: 35px 0; position: relative;">
+                    <div style="border-left: 2px dashed var(--cisco-blue); height: 40px; position: absolute; left: 50%; top: -30px;"></div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="background: white; position: relative; z-index: 2;">
+                        <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+                    </svg>
+                    <span style="font-size: 13px; display: block; font-weight: bold; margin-top: 5px;" data-i18n="interaction">
+                        协作机制：Agent 编译 ELF 对象并加载至内核，通过 Maps 实时同步状态
+                    </span>
+                </div>
+
+                <div class="space-label" data-i18n="kernel_space" style="border-bottom-color: var(--cisco-sky);">内核空间 (Kernel Space) - 数据平面 (The Muscle)</div>
+                    <div class="kernel-space" style="display: block; padding: 25px;">
+                        <div class="ebpf-engine" style="margin-bottom: 20px;">
+                            eBPF Datapath Execution Engine (JIT Compiled - 接近原生硬件性能)
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+                            <div class="component" style="background: #fff; border-top: 4px solid var(--cisco-blue); margin: 0; min-height: 120px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4a2 2 0 012-2h12a2 2 0 012 2v3M4 17v3a2 2 0 012 2h12a2 2 0 012-2v-3M4 12h16"/></svg>
+                                    <b style="color: var(--cisco-midnight);">BPF Maps (The Brain in Kernel)</b>
+                                </div>
+                                <small data-i18n="bpf_maps_desc" style="color: var(--cisco-slate); line-height: 1.4;">
+                                    连接控制面与数据面的 KV 存储（IPCache, Policy, LB Maps）。<br>
+                                    <strong>实现 $O(1)$ 查找的核心：从线性搜索进化为字典检索。</strong>
+                                </small>
+                            </div>
+                            <div class="component" style="background: #fff; border-top: 4px solid var(--cisco-sky); margin: 0; min-height: 120px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    <b style="color: var(--cisco-midnight);">Endpoint States</b>
+                                </div>
+                                <small data-i18n="endpoint_desc" style="color: var(--cisco-slate); line-height: 1.4;">
+                                    存储每个 Pod 的 Identity 身份信息。<br>
+                                    <strong>安全策略判定的“唯一真理”：在内核中直接核对身份胸章。</strong>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+            <div class="analogy" style="margin-top: 30px;">
+                <p style="font-size: 0.9rem; line-height: 1.6;">
+                    <strong>💡 为什么这很重要？</strong> 在传统架构中，控制逻辑和数据处理混在一起，导致规则更新时性能剧烈波动。
+                    而在 Cilium 架构中，<strong>用户态 Agent 只负责“写书”（编译 Map）</strong>，而 <strong>内核态 eBPF 只负责“读书”（执行 Map）</strong>。这种彻底的读写分离，确保了即便在大规模高并发下，安全策略的下发也不会导致网络抖动。
+                </p>
+            </div>
+        </div>
+    </section>
+  
+    <!-- Golden Circle + Identity Deep Dive + Kube-proxy 替换逻辑-->
+    <section id="golden-circle-logic">
+        <div class="container">
+            <div class="section-header">
+                <span class="evolution-badge">Strategic Evolution</span>
+                <h2 style="margin-top:15px;">核心价值：从基准到战略演进</h2>
+                <p>基于黄金圈法则，我们不仅关注基础能力，更关注 Cilium 如何引领下一代基础设施的演进路径。</p>
+            </div>
+
+            <div class="golden-circle">
+                <div class="gold-card" style="border-top-color: var(--cisco-red);">
+                    <h4 style="color: var(--cisco-red);">1. 为什么必须改变? (Why)</h4>
+                    <p style="margin-bottom: 15px;">传统模型正在撞上“规模之墙”：</p>
+                    <ul style="list-style: none; font-size: 0.95rem; padding-left: 0;">
+                        <li style="margin-bottom: 8px;">🚀 <b>突破 $O(N)$ 性能瓶颈：</b> 解决 iptables 规则爆炸导致的转发延迟和 CPU 抖动。</li>
+                        <li style="margin-bottom: 8px;">🛡️ <b>弃用脆弱的 IP 策略：</b> 云原生 Pod IP 瞬息万变，安全不能基于“易逝的门牌号”。</li>
+                        <li style="margin-bottom: 8px;">🔍 <b>消除可观测性盲区：</b> 传统工具无法解析容器间的逻辑身份和 L7 语义（如 gRPC 路径）。</li>
+                    </ul>
+                    <div class="analogy">
+                        💡 <b>Landmark：</b> Cilium 将网络查找复杂度从线性 $O(N)$ 降至常数级 $O(1)$。
+                    </div>
+                </div>
+
+                <div class="gold-card" style="border-top-color: var(--cisco-sky);">
+                    <h4 style="color: var(--cisco-sky);">2. 我们如何重塑内核? (How)</h4>
+                    <p style="margin-bottom: 15px;">通过 eBPF 实现内核态的“硬加速”：</p>
+                    <ul style="list-style: none; font-size: 0.95rem; padding-left: 0;">
+                        <li style="margin-bottom: 8px;">🧠 <b>内核原生可编程性：</b> 直接在 XDP/TC 钩子层处理报文，绕过协议栈冗余路径。</li>
+                        <li style="margin-bottom: 8px;">🏷️ <b>16位 身份 ID 映射：</b> 将复杂的 Labels 哈希为 16-bit 整数，在 BPF Map 中极速查找。</li>
+                        <li style="margin-bottom: 8px;">
+                            🔗 <b>Socket 层级重定向：</b> 利用 <code>sockmap</code> 实现本地 Pod 通信的“短路机制”。
+                            <div style="margin-top: 5px; font-size: 0.8rem; color: var(--cisco-slate); font-style: italic; background: #f0f0f0; padding: 5px 10px; border-radius: 4px;">
+                                💡 <b>底层逻辑：</b> 就像在两个相邻房间打通了一扇暗门，数据直接从 A 传到 B，再也不用走出房间去挤外面的长走廊（复杂的网络协议栈）。
+                            </div>
+                        </li>
+                    </ul>
+                    <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: rgba(226, 35, 26, 0.05); padding: 10px; border-radius: 6px; border: 1px solid rgba(226, 35, 26, 0.1);">
+                            <strong style="color: var(--cisco-red); font-size: 0.85rem;">🛡️ XDP: 大门口的门卫</strong><br>
+                            <p style="font-size: 0.75rem; margin-top: 5px;">在网卡驱动层直接处理。坏人刚到大门口就踢出去，保护内核不受 DDoS 冲击。</p>
+                        </div>
+                        <div style="background: rgba(10, 159, 217, 0.05); padding: 10px; border-radius: 6px; border: 1px solid rgba(10, 159, 217, 0.1);">
+                            <strong style="color: var(--cisco-blue); font-size: 0.85rem;">🛂 TC: 玄关的安检</strong><br>
+                            <p style="font-size: 0.75rem; margin-top: 5px;">在进入协议栈前的玄关处。检查行李（报文内容），执行复杂的安全策略。</p>
+                        </div>
+                    </div>                    
+                </div>
+
+                <div class="gold-card" style="border-top-color: var(--cisco-blue);">
+                    <h4 style="color: var(--cisco-blue);">3. 最终交付了什么? (What)</h4>
+                    <p style="margin-bottom: 15px;">统一的网络、安全与观测平面：</p>
+                    <ul style="list-style: none; font-size: 0.95rem; padding-left: 0;">
+                        <li style="margin-bottom: 8px;">🏎️ <b>高性能 CNI：</b> 完美替代 kube-proxy，支持 BGP 物理网集成与带宽调度。</li>
+                        <li style="margin-bottom: 8px;">🕸️ <b>无代理服务网格：</b> 无需 Sidecar 即可实现 L7 路由、TLS 卸载与金丝雀发布。</li>
+                        <li style="margin-bottom: 8px;">🛂 <b>全局流量治理底座：</b> 跨集群的 ClusterMesh 与符合 Gateway API 标准的入口控制。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background: #FDFDFD; padding-top: 0;">
+        <div class="container">
+            <div class="story-section" style="border-left-color: var(--cisco-sky); background: white;">
+                <h4 style="color: var(--cisco-midnight); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cisco-sky)" stroke-width="2">
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    内核地标：身份标识（Identity）的深度解构
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; font-size: 0.95rem;">
+                    <div>
+                        <p style="margin-bottom: 12px;"><b>1. 身份分配：</b> Cilium Operator 扫描 Pod 标签，将 <code>app=payment</code> 等集合哈希为一个唯一的 <b>16位 整数 ID</b>。</p>
+                        <p><b>2. 报文标记：</b> 该 ID 会被注入 VXLAN 头部或在内核上下文中传递。安全策略不再与不稳定的 IP 绑定。</p>
+                    </div>
+                    <div>
+                        <p style="margin-bottom: 12px;"><b>3. $O(1)$ 策略判定：</b> 接收端内核直接将 Source ID 作为 Key，在 <b>BPF Policy Map</b> 中执行哈希查找。</p>
+                        <p><b>4. 价值体现：</b> 无论集群有 100 个还是 10,000 个 Pod，安全判定的延迟始终如一，彻底解决了“规则爆炸”问题。</p>
+                    </div>
+                </div>
+                <div class="official-card" style="margin-top: 20px; border-top: 4px solid var(--cisco-blue);">
+                    <strong lang="zh">官方 L7 过滤规范示例：</strong>
+                    <strong lang="en">Official L7 Filtering Specs:</strong>
+                    <ul style="font-size: 0.85rem; margin-top: 10px; color: var(--cisco-slate);">
+                        <li lang="zh"><b>HTTP 限制：</b> 仅允许 <code>GET /public/.*</code>，拒绝所有其他动作。</li>
+                        <li lang="zh"><b>Kafka 限制：</b> 允许 service1 发送至 topic1，禁止其他所有 Kafka 消息。</li>
+                        <li lang="en"><b>HTTP Limit:</b> Allow <code>GET /public/.*</code>, deny everything else.</li>
+                        <li lang="en"><b>Kafka Limit:</b> Allow service1 to produce on topic1, reject others.</li>
+                    </ul>
+                </div>                
+                <div class="analogy" style="margin: 20px 0; background: #fff8f1; border-left: 4px solid var(--cisco-orange);">
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--cisco-midnight);">
+                        <strong>💡 深度类比：登机牌 (Identity) vs 座位号 (IP)</strong><br>
+                        传统网络像看<strong>座位号</strong>：乘客（Pod）经常换座位，空乘（防火墙）必须时刻盯着谁坐在哪，非常混乱。<br>
+                        Cilium 像看<strong>登机牌</strong>：无论你坐在哪个位置（IP），你的登机牌（Identity）上印着的“头等舱”或“经济舱”权限是固定的。内核只认牌子，不认座位，效率提升 90% 以上。
+                    </p>
+                </div>                
+                <div style="margin-top: 25px; padding: 15px; background: #eef9ff; border-radius: 8px; border-left: 4px solid var(--cisco-blue);">
+                    <small style="color: var(--cisco-midnight); font-weight: bold;">[ 架构师视角 ]</small><br>
+                    <small style="color: var(--cisco-slate);">这是从“包过滤”到“逻辑治理”的跨越。IP 是临时的座位号，Identity 才是永久的身份证。</small>
+                </div>
+                <div style="margin-top: 35px; background: #1a1a1a; border-radius: 12px; overflow: hidden; border: 1px solid #333;">
+                    <div style="background: #333; padding: 10px 20px; font-size: 0.8rem; color: #eee; display: flex; justify-content: space-between;">
+                        <span>CiliumNetworkPolicy: Zero Trust Example</span>
+                        <span style="color: var(--cisco-sky);">identity-aware.yaml</span>
+                    </div>
+                    <div style="padding: 20px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: center;">
+                        <pre style="margin: 0; font-family: 'SF Mono', monospace; font-size: 0.8rem; color: #61C6E2;">
+                apiVersion: "cilium.io/v2"
+                kind: CiliumNetworkPolicy
+                metadata:
+                  name: "secure-payment-access"
+                spec:
+                  endpointSelector:
+                    matchLabels:
+                      app: payment-db
+                  ingress:
+                  - fromEndpoints:
+                    - matchLabels:
+                        <span style="color: #fff; border-bottom: 1px solid var(--cisco-sky);">app: payment-service</span> # 逻辑标签
+                        env: prod
+                    toPorts:
+                    - ports:
+                      - port: "6379"
+                        protocol: TCP</pre>
+                        <div style="color: #888; font-size: 0.85rem; border-left: 1px solid #444; padding-left: 20px;">
+                            <p style="color: white; font-weight: bold; margin-bottom: 10px;">内核执行逻辑：</p>
+                            1. Cilium 将 <code>app: payment-service</code> 映射为 ID: <b>1042</b><br><br>
+                            2. 当请求到达网卡时，eBPF 在 Maps 中核对：<br>
+                            <code style="background:#222; padding: 2px 5px;">SourceID: 1042 -> Port: 6379 -> [ALLOW]</code><br><br>
+                            3. <b>结论：</b> 无需查看 IP，即便 Pod 漂移到新节点，策略依然瞬间生效。
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </section>
+
+    <section style="background: #F0F7FA; border-left: 8px solid var(--cisco-blue);">
+        <div class="container">
+            <div class="section-header">
+                <h2>架构分水岭：彻底告别 Kube-proxy</h2>
+                <p>为什么 OpenAI 和 Netflix 选择删除 Kube-proxy？这是从线性搜索到常数级查找的范式转移。</p>
+            </div>
+            <div class="roi-panel" style="background: var(--white); color: var(--cisco-slate); border: 1px solid var(--cisco-blue); box-shadow: var(--shadow-card);">
+                <div class="roi-stat">
+                    <div class="roi-label" style="color:var(--cisco-midnight)">Service 转发延迟</div>
+                    <div class="roi-value" style="color:var(--cisco-blue)">$O(1)$</div>
+                    <p style="color: var(--cisco-slate);">基于 eBPF Hash Map 查找</p>
+                </div>
+                <div class="roi-breakdown" style="border-left-color: var(--cisco-blue);">
+                    <strong style="color: var(--cisco-midnight);">技术内幕 (Inside the Kernel):</strong>
+                    <ul style="list-style: none; padding-left: 0; margin-top: 15px;">
+                        <li style="margin-bottom: 10px;"><b>1. 绕过协议栈：</b> 报文通过 <code>XDP/TC</code> 钩子在进入协议栈前完成 DNAT。</li>
+                        <li style="margin-bottom: 10px;"><b>2. 消除规则爆炸：</b> 传统 iptables 随 Service 增加呈 $O(N)$ 复杂度；Cilium 始终保持常数级性能。</li>
+                        <li style="margin-bottom: 10px;"><b>3. 纯净部署：</b> 手册实战证明：通过 <code>--skip-phases=addon/kube-proxy</code> 即可获得最简内核路径。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- [NEW SECTION] Infrastructure Integration: Gateway & BGP -->
+    <section id="infrastructure-expansion">
+        <div class="container">
+            <div class="section-header">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 5: Beyond Pod Networking</span>
+                <h2>基础设施集成：由内核定义的中枢</h2>
+                <p>Cilium 不仅处理 Pod 间通信，它正在成为数据中心的网络控制中枢。</p>
+            </div>
+
+            <div class="bento-grid">
+                <div class="tech-card">
+                    <span style="font-size:2rem;">🚦</span>
+                    <h3>Gateway API 1.2+ <span class="feature-tag-new">v1.2+</span></h3>
+                    <p style="font-size: 0.85rem;" lang="zh">
+                        完全超越传统 Ingress。支持复杂的<b>跨集群权重分配</b>与全自动 <b>A/B 测试</b>。
+                    </p>
+                    <ul class="detail-list" style="font-size: 0.75rem;">
+                        <li lang="zh"><b>流量分割：</b>支持多集群流量按比例平滑切分。</li>
+                        <li lang="zh"><b>身份感知：</b>在 L7 层实现基于逻辑身份的精细化治理。</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card span-2">
+                    <div class="card-split-content">
+                        <div class="card-text-side">
+                            <span style="font-size:2rem;">📡</span>
+                            <h3>BGP 物理对等与原生路由</h3>
+                            <p style="font-size: 0.85rem;" lang="zh">建立简单的平面 L3 网络。IP 分配采用 Host-scope 分配器，无需跨主机协调。</p>
+                            <div class="mode-grid" style="margin-top: 15px; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="mode-card" style="padding: 12px; font-size: 0.75rem;">
+                                    <b style="color:var(--cisco-sky)">Overlay (VXLAN/Geneve):</b><br>
+                                    <span lang="zh">跨主机虚拟网络，对底层基础设施无特殊要求，适用于大多数云环境。</span>
+                                    <span lang="en">Virtual network spanning hosts. Minimal infrastructure requirements.</span>
+                                </div>
+                                <div class="mode-card" style="padding: 12px; font-size: 0.75rem;">
+                                    <b style="color:var(--cisco-blue)">Native Routing:</b><br>
+                                    <span lang="zh">直接使用 Linux 路由表。适用于公有云路由或运行 BGP 守护程序的物理环境。</span>
+                                    <span lang="en">Uses host routing table. Best for cloud routers or physical BGP environments.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-visual-side">
+                            <div class="expert-debug-box compact-debug">
+                                <span class="debug-cmd" lang="zh">集群跨度：</span>扁平 L3 连接<br>
+                                <span class="debug-cmd">L3 Connectivity:</span> Flat Network
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-card span-2" style="border-top: 4px solid var(--cisco-midnight);">
+                    <div class="card-split-content">
+                        <div class="card-text-side">
+                            <span style="font-size:2rem;">⚖️</span>
+                            <h3>分布式负载均衡</h3>
+                            <p style="font-size: 0.85rem;" lang="zh">实现几乎无限的扩展。在 Linux 内核套接字层执行高效的服务到后端转换。</p>
+                            <div class="analogy" style="margin-top: 10px; font-size: 0.75rem;">
+                                <span lang="zh">✅ 支持 <b>Maglev</b> 一致性哈希，确保负载分配极其均匀且稳定。</span><br>
+                                <span lang="zh">✅ 支持 <b>DSR (直接服务器返回)</b>，消除 LB 节点的转发性能瓶颈。</span>
+                                <span lang="en">✅ Supports <b>Maglev</b> and <b>DSR</b> to maximize performance and scalability.</span>
+                            </div>
+                        </div>
+                        <div class="card-visual-side">
+                            <div class="expert-debug-box compact-debug">
+                                <span class="debug-cmd">Tech:</span> Maglev / XDP / DSR<br>
+                                <span class="debug-cmd">Replaces:</span> kube-proxy
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <span style="font-size:2rem;">🚀</span>
+                    <h3>Bandwidth Manager</h3>
+                    <p style="font-size: 0.85rem;" lang="zh">采用基于 eBPF 的 <b>EDT (最早出发时间)</b> 限速，替代传统的 HTB 或 TBF 模型。</p>
+                    <p style="font-size: 0.85rem;" lang="en">Implements eBPF <b>EDT-based</b> rate-limiting, replacing legacy HTB or TBF models.</p>
+                    <ul class="detail-list">
+                        <li lang="zh">显著减少应用传输的尾部延迟。</li>
+                        <li lang="zh">避免多队列网卡下的锁定竞争。</li>
+                        <li lang="en">Significantly reduces transmission tail latencies.</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <span style="font-size:2rem;">📊</span>
+                    <h3>监控与排障专家</h3>
+                    <p style="font-size: 0.85rem;" lang="zh">丢包不再只有 IP。提供带有完整元数据（标签、身份）的事件监控。</p>
+                    <p style="font-size: 0.85rem;" lang="en">More than just IPs. Provides event monitoring with full metadata (Labels, Identities).</p>
+                    <div class="analogy" style="font-size: 0.75rem; margin-top: 10px;">
+                        <span lang="zh">🛠️ 集成 Prometheus 导出核心指标，配合 Hubble 渲染全局拓扑图。</span>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <span style="font-size:2rem;">🔐</span>
+                    <h3>透明加密与 DNS 治理</h3>
+                    <p style="font-size: 0.85rem;" lang="zh">基于身份的 DNS 过滤可精准识别哪些服务解析了特定域名。</p>
+                    <div class="tech-sub-label" lang="zh">安全价值：</div>
+                    <ul class="detail-list">
+                        <li lang="zh">支持 CIDR 范围对外部服务的访问控制。</li>
+                        <li lang="zh">内核态 IPsec/WireGuard 保护跨节点流量。</li>
+                        <li lang="en">CIDR-based security and kernel-level encryption.</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <span style="font-size:2rem;">🛡️</span>
+                    <h3>Tetragon 运行时安全</h3>
+                    <p style="font-size: 0.85rem;" lang="zh">利用 eBPF 程序的可编程性，在不更改代码的情况下实现动态、低开销的可视化逻辑。</p>
+                </div>
+
+                <div class="tech-card" style="border: 2px solid var(--cisco-blue); background: rgba(4, 159, 217, 0.02);">
+                    <span style="font-size:2rem;">🌐</span>
+                    <h3>Global ClusterMesh</h3>
+                    <p style="font-size: 0.85rem;" lang="zh">
+                        不再局限于本地互联，2025 版支持 <b>255 个以上集群</b>的网格拓扑，构建全球统一控制平面。
+                    </p>
+                    <div class="expert-debug-box" style="padding: 10px; font-size: 0.7rem; margin-top: 10px;">
+                        $ cilium clustermesh status --max-clusters 255
+                    </div>
+                </div>
+            </div>
+        </div>    
+    </section>
+    <!-- 可视化 Service Mesh 路径对比-->
+    <section style="background: white; padding-top: 0;">
+        <div class="container">
+            <div class="section-header">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Architectural Efficiency</span>
+                <h2>路径极简：Sidecar vs. Sidecar-less</h2>
+                <p>通过 eBPF Socket 重定向，Cilium 彻底消除了数据在用户态与内核态之间不必要的“往返跑”。</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div style="border: 1px solid var(--cisco-platinum); border-radius: 12px; padding: 25px; background: #fcfcfc;">
+                    <h4 style="margin-bottom: 20px; color: var(--cisco-slate); text-align: center;">传统 Sidecar 模式 (6 次跳转)</h4>
+                    <div style="height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+                        <div style="padding: 8px 15px; border: 2px solid #ddd; border-radius: 4px;">App Container</div>
+                        <svg width="20" height="40"><path d="M10 0V40M5 30l5 10 5-10" fill="none" stroke="#E2231A" stroke-width="2"/></svg>
+                        <div style="padding: 8px 15px; border: 2px solid var(--cisco-red); border-radius: 4px; color: var(--cisco-red);">Envoy Sidecar (User Space)</div>
+                        <svg width="20" height="40"><path d="M10 0V40M5 30l5 10 5-10" fill="none" stroke="#E2231A" stroke-width="2"/></svg>
+                        <div style="padding: 8px 15px; border: 2px solid var(--cisco-midnight); border-radius: 4px;">TCP/IP Stack (Kernel)</div>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #888; margin-top: 20px; text-align: center;">
+                        ⚠️ 痛点：频繁的上下文切换与内存拷贝造成 ~1ms 额外延迟。
+                    </p>
+                </div>
+
+                <div style="border: 2px solid var(--cisco-blue); border-radius: 12px; padding: 25px; background: rgba(4,159,217,0.02);">
+                    <h4 style="margin-bottom: 20px; color: var(--cisco-blue); text-align: center;">Cilium eBPF 模式 (Socket 短路)</h4>
+                    <div style="height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                        <div style="display: flex; gap: 40px; align-items: center; position: relative; z-index: 2;">
+                            <div style="padding: 15px; border: 2px solid var(--cisco-midnight); border-radius: 8px; background: white;">App A</div>
+                            <div style="border-bottom: 4px dashed var(--cisco-sky); width: 100px; position: relative;">
+                                <span style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: var(--cisco-sky); font-weight: bold; white-space: nowrap;">eBPF Sockmap</span>
+                                <div style="position: absolute; right: -5px; top: -5px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 10px solid var(--cisco-sky);"></div>
+                            </div>
+                            <div style="padding: 15px; border: 2px solid var(--cisco-midnight); border-radius: 8px; background: white;">App B</div>
+                        </div>
+                        <div style="margin-top: 30px; padding: 8px 20px; background: var(--cisco-midnight); color: white; border-radius: 20px; font-size: 0.8rem;">Kernel Space Only</div>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--cisco-slate); margin-top: 20px; text-align: center;">
+                        ✅ 优势：数据直接在 Socket 层重定向，性能接近原生通信。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- SRE ROI 计算模型 + 全球巨头实战案例 (OpenAI/Microsoft/Google) -->
+    <section id="sre-roi-economics" style="background: #F8FAFC;">
+        <div class="container">
+            <div class="section-header">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 6: The Economics of Architecture</span>
+                <h2>SRE 经济学：Sidecar-less 与流量治理 ROI</h2>
+                <p>技术选型最终是一本经济账。消除 Sidecar 后的资源利用率提升与网关整合是其商业吸引力的核心。</p>
+            </div>
+
+            <div class="roi-panel">
+                <div class="roi-stat">
+                    <div class="roi-label">平均云账单节省 (Avg. Savings)</div>
+                    <div class="roi-value">32% +</div>
+                    <p style="opacity:0.7">基于 1000 节点规模测算</p>
+                </div>
+                <div class="roi-breakdown">
+                    <strong>为什么能省钱？(Economic Breakdown)</strong>
+                    <ul style="margin-top: 15px;">
+                        <li style="margin-bottom: 12px;"><b>内存冗余消除：</b> 每个 Envoy 占用 ~50MB。10,000 Pod = 500GB 浪费。Cilium 仅需微量 Node-level 内存。</li>
+                        <li style="margin-bottom: 12px;"><b>CPU 指令缩减：</b> 报文不再频繁穿越 User/Kernel 边界。通过 eBPF 减少上下文切换损耗。</li>
+                        <li style="margin-bottom: 12px;"><b>网关整合：</b> <span class="highlight-cisco-blue">Cilium Gateway API</span> 替代了 F5/Nginx 南北向网关，进一步削减了 15% 的基础设施硬件成本。</li>
+                        <li style="margin-bottom: 12px;">
+                            <b>🌱 绿色计算：</b> 
+                            通过内核级流量压缩与路径优化，同等吞吐量下降低了 <b>18%</b> 的节点能耗，助力企业实现可持续性 IT 目标。
+                        </li>
+                        <li style="margin-bottom: 12px;">
+                            <b>⚡ 运维提效：</b> 
+                            平均故障自愈时间 (MTTR) 缩短 <b>40%</b>，Hubble 提供的 L7 流量指纹让 SRE 告别了“盲目抓包”的时代。
+                        </li>                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="case-studies">
+        <div class="container">
+            <div class="section-header">
+                <h2>行业实战：为何全球巨头纷纷转向 Cilium？</h2>
+                <p>从 OpenAI 的 AI 算力底座到 Google 的全云选型，验证了其在大规模生产环境下的稳定性。</p>
+            </div>
+
+            <div class="success-story">
+                <div class="story-content">
+                    <h3 style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--cisco-midnight)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                        OpenAI: 支撑 AI 训练的神经系统
+                    </h3>
+                    <p style="margin-top: 15px;">在训练 GPT 等大模型时，上万个 GPU 节点需要频繁进行全梯度同步（All-Reduce）。哪怕网络增加 1 毫秒的延迟，都会导致数百万美元的算力浪费。</p>
+                    <ul style="margin-top: 15px; font-size: 0.95rem; padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><b>极致带宽：</b> 利用 eBPF 优化训练网络吞吐，支持 RoCE/RDMA 加速。</li>
+                        <li style="margin-bottom: 8px;"><b>拓扑透视：</b> Hubble 提供了模型训练任务的精确流量拓扑。</li>
+                    </ul>
+                </div>
+                <div class="story-analysis">
+                    <strong>架构师点评：</strong>
+                    对于 OpenAI 来说，Cilium 是一个<b>性能放大器</b>，确保了极其昂贵的 GPU 算力不被网络阻塞。
+                </div>
+            </div>
+
+            <div class="success-story">
+                <div class="story-content">
+                    <h3 style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--cisco-midnight)"><path d="M2 3h9v9H2V3zm11 0h9v9h-9V3zM2 14h9v9H2v-9zm11 0h9v9h-9v-9z"/></svg>
+                        Microsoft: Azure 的终极选型
+                    </h3>
+                    <p style="margin-top: 15px;">Microsoft 意识到大规模 VNET 的性能与可观测性是核心竞争力。Azure CNI Powered by Cilium 成功实现了性能与原生体验的融合。</p>
+                    <ul style="margin-top: 15px; font-size: 0.95rem; padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><b>原生执行：</b> 性能比传统桥接模式提升 30%。</li>
+                        <li style="margin-bottom: 8px;"><b>透明分析：</b> 客户无需 Sidecar 即可看到详尽流量视图。</li>
+                    </ul>
+                </div>
+                <div class="story-analysis">
+                    <strong>架构师点评：</strong>
+                    公有云巨头的选择证明了 Cilium 已经成为<b>下一代云网络的标准</b>。
+                </div>
+            </div>
+
+            <div class="success-story">
+                <div class="story-content">
+                    <h3 style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--cisco-midnight)"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866.549 3.921 1.453l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/></svg>
+                        Google Cloud: GKE Dataplane V2
+                    </h3>
+                    <p style="margin-top: 15px;">Google 将 Cilium 作为 GKE 的默认数据平面，不仅是为了性能，更是为了 <b>FIPS 合规与透明加密</b>。</p>
+                    <ul style="margin-top: 15px; font-size: 0.95rem; padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><b>安全共识：</b> 验证了 eBPF 在多租户环境下的硬隔离能力。</li>
+                    </ul>
+                </div>
+                <div class="story-analysis">
+                    <strong>架构师点评：</strong>
+                    当所有云巨头都采用同一内核技术时，<b>生态兼容性</b>就是最大的架构红利。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background: var(--cisco-midnight); color: white;">
+        <div class="container" style="display: flex; align-items: center; gap: 50px;">
+            <div style="flex: 1;">
+                <h2 style="color: white;">Hubble UI: 每一个流的“身份指纹”</h2>
+                <p style="opacity: 0.8; margin: 20px 0;">
+                    传统的 TCPDump 只能看到 IP 地址，而 Hubble 能够看到 <b>Identity（身份）</b>。
+                    这是价值落地的最后一步：让抽象的网络流变得“可感、可知、可审计”。
+                </p>
+                <div class="tag-good" style="background: rgba(106, 191, 75, 0.2); color: #6ABF4B; display: inline-block;">安全可见性收益：100%</div>
+            </div>
+            <div style="flex: 1.2; background: rgba(255,255,255,0.05); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div style="font-family: 'SF Mono', monospace; font-size: 0.85rem; color: #e0e0e0; line-height: 1.6;">
+                    <span style="color: #888;">// Hubble Flow JSON 观测</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"source": { "pod_name": "xwing", "identity": 36770 },<br>
+                    &nbsp;&nbsp;"destination": { "pod_name": "deathstar", "identity": 15153 },<br>
+                    &nbsp;&nbsp;"verdict": <span style="color: #6ABF4B;">"FORWARDED"</span>,<br>
+                    &nbsp;&nbsp;"summary": "TCP Flags: SYN",<br>
+                    &nbsp;&nbsp;"l7": { "http": { "method": "POST", "url": "/v1/request-landing" } }<br>
+                    }
+                </div>
+                <div style="margin: 30px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <p style="color: var(--cisco-sky); font-weight: bold; margin-bottom: 15px;" lang="zh">Hubble 能够回答的实战问题：</p>
+                    <p style="color: var(--cisco-sky); font-weight: bold; margin-bottom: 15px;" lang="en">Questions Hubble Can Answer:</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="expert-debug-box" style="padding: 15px; background: rgba(0,0,0,0.2); border: 1px solid #444;">
+                            <div style="color: #fff; font-size: 0.8rem;" lang="zh"><b>Q: 网络不通，是 DNS 还是 L4 故障？</b></div>
+                            <div style="color: #fff; font-size: 0.8rem;" lang="en"><b>Q: Network failing? DNS or L4 issue?</b></div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 5px;" lang="zh">A: Hubble 实时监测 DNS 解析成功率及 TCP 重传率。</div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 5px;" lang="en">A: Monitors DNS success and TCP retransmission.</div>
+                        </div>
+                        <div class="expert-debug-box" style="padding: 15px; background: rgba(0,0,0,0.2); border: 1px solid #444;">
+                            <div style="color: #fff; font-size: 0.8rem;" lang="zh"><b>Q: 哪个 Kafka Topic 生产速度变慢了？</b></div>
+                            <div style="color: #fff; font-size: 0.8rem;" lang="en"><b>Q: Which Kafka Topic is slowing down?</b></div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 5px;" lang="zh">A: L7 解析器直接透视 Kafka API 流量。</div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 5px;" lang="en">A: L7 parsers provide direct visibility into Kafka API.</div>
+                        </div>
+                    </div>
+                </div>                
+                <div class="container" style="margin-top: 40px;">
+                    <h4 style="color: white; margin-bottom: 20px; text-align: center;" lang="zh">Hubble：洞察力的四个维度</h4>
+                    <h4 style="color: white; margin-bottom: 20px; text-align: center;" lang="en">Hubble: Four Dimensions of Insight</h4>
+                    <div class="hubble-grid">
+                        <div class="hubble-pill">
+                            <h5 lang="zh">1. 服务依赖与拓扑</h5>
+                            <h5 lang="en">1. Service Dependencies</h5>
+                            <p lang="zh">哪些服务在通信？频率如何？服务依赖图的实时形态是怎样的？</p>
+                            <p lang="en">Which services are communicating? What does the real-time dependency graph look like?</p>
+                        </div>
+                        <div class="hubble-pill">
+                            <h5 lang="zh">2. 网络监控与告警</h5>
+                            <h5 lang="en">2. Network Monitoring</h5>
+                            <p lang="zh">通信是否失败？是 DNS 问题、L4(TCP) 还是 L7(HTTP) 问题？</p>
+                            <p lang="en">Is communication failing? Is it a DNS, Layer 4, or Layer 7 problem?</p>
+                        </div>
+                        <div class="hubble-pill">
+                            <h5 lang="zh">3. 应用性能监控</h5>
+                            <h5 lang="en">3. Application Monitoring</h5>
+                            <p lang="zh">HTTP 4xx/5xx 响应率是多少？服务间延迟的 P95/P99 表现如何？</p>
+                            <p lang="en">What is the 4xx/5xx rate? What is the P95/P99 latency between services?</p>
+                        </div>
+                        <div class="hubble-pill">
+                            <h5 lang="zh">4. 安全可观测性</h5>
+                            <h5 lang="en">4. Security Observability</h5>
+                            <p lang="zh">哪些连接被策略拦截了？有哪些异常的外部域名解析？</p>
+                            <p lang="en">Which connections were blocked? What services accessed external domains?</p>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </section>
+
+    <!-- Lab Section -->
+    <section id="lab-section">
+        <div class="container">
+            <div class="section-header">
+                <span style="text-transform: uppercase; font-size: 0.8rem; font-weight: 800; color: var(--cisco-blue); letter-spacing: 1.5px;">Step 7: From Theory to Production</span>
+                <h2>Cilium 互动实验室：零起点架构演练</h2>
+                <p>基于真实的生产部署手册，点击步骤观察集群状态的演进。这不仅是安装过程，更是架构思维的实践。</p>
+            </div>
+
+            <div class="lab-terminal">
+                <div class="term-bar">
+                    <span style="color:#27C93F; font-size: 0.7rem;">● root@kube-node-1: ~ </span>
+                </div>
+                <div class="term-body">
+                    <div class="log-stream" id="log-stream" style="flex: 1.5;">
+                        [System] 实验室准备就绪。请选择一个部署阶段进行观察...<br>
+                    </div>
+                    <div class="service-map" id="map-visual" style="flex: 1; background: #1a1a1a; padding: 20px; border-radius: 8px;">
+                        <div id="status-display" style="color: #888; font-size: 0.85rem;">
+                            <p>集群状态: <span id="k8s-status">未初始化</span></p>
+                            <p>网络模型: <span id="cni-status">无</span></p>
+                            <p>BGP 邻居: <span id="bgp-status">下线</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <button onclick="runStep(1)" class="hook-card" style="cursor:pointer; text-align:left;">1. 初始化 K8s (No Proxy)</button>
+                <button onclick="runStep(2)" class="hook-card" style="cursor:pointer; text-align:left;">2. Ansible 部署 Helm</button>
+                <button onclick="runStep(3)" class="hook-card" style="cursor:pointer; text-align:left;">3. Helm 安装 Cilium</button>
+                <button onclick="runStep(4)" class="hook-card" style="cursor:pointer; text-align:left;">4. BGP 邻居建立</button>
+                <button onclick="runStep(5)" class="hook-card" style="cursor:pointer; text-align:left;">5. Star Wars 流量观测</button>
+            </div>
+        </div>
+    </section>
+
+    <section style="background: #FDFDFD;">
+        <div class="container">
+            <div class="section-header">
+                <h2>落地路径与专家级排障指南</h2>
+                <p>如何平滑地开启 Cilium 之旅，以及在“黑盒”面前保持冷静的工具箱。</p>
+            </div>
+
+            <div class="grid-3">
+                <div style="background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--cisco-platinum); border-top: 4px solid var(--cisco-blue);">
+                    <h4 style="margin-bottom: 15px;">兼容性矩阵 (Compatibility)</h4>
+                    <p style="font-size: 0.85rem; margin-top:10px; color: var(--cisco-slate);">
+                        • 内核版本：推荐 5.10+ (实现最优 eBPF 性能)<br>
+                        • 平台支持：AWS, Azure, GCP, On-premise<br>
+                        • 模式：支持完全替换 kube-proxy (推荐模式)
+                    </p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--cisco-platinum); border-top: 4px solid var(--cisco-sky);">
+                    <h4 style="margin-bottom: 15px;">迁移路径 (Migration Path)</h4>
+                    <p style="font-size: 0.85rem; margin-top:10px; color: var(--cisco-slate);">
+                        1. 开启 kube-proxy 替换测试，验证控制平面稳定性<br>
+                        2. 灰度 Namespace 开启 L7 策略，进行流量画像<br>
+                        3. 部署 <span class="highlight-cisco-blue">Tetragon</span> 强化安全审计与运行时防护
+                    </p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--cisco-platinum); border-top: 4px solid var(--cisco-midnight);">
+                    <h4 style="margin-bottom: 15px;">SRE 核心建议 (Best Practices)</h4>
+                    <p style="font-size: 0.85rem; margin-top:10px; color: var(--cisco-slate);">
+                        • 始终开启 Hubble 链路追踪以获得全栈可见性<br>
+                        • 优先使用 Identity 身份策略，而非 IP 策略<br>
+                        • 启用 WireGuard 加密保护集群间流量
+                    </p>
+                </div>
+            </div>
+
+            <div class="expert-debug-box" style="margin-top: 50px;">
+                <div style="margin-bottom: 25px; color: var(--cisco-blue); font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                    [ 专家级内核排障工具箱 ]
+                </div>
+
+                <div style="margin-bottom: 35px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-top: 3px solid var(--cisco-blue); padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cisco-blue)" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <h4 style="color: #E4E4E4; margin: 0; font-size: 1rem;">L3/L4 流观测</h4>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #AAA; line-height: 1.5; margin: 0;">
+                            使用 <code style="color: var(--cisco-blue); background: rgba(4,159,217,0.1); padding: 2px 4px; border-radius: 3px;">hubble observe</code>。<br>
+                            监控 IP 路径、端口冲突及 Packet Drop 原因。
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-top: 3px solid var(--cisco-sky); padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cisco-sky)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <h4 style="color: #E4E4E4; margin: 0; font-size: 1rem;">内核函数追踪</h4>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #AAA; line-height: 1.5; margin: 0;">
+                            使用 <code style="color: var(--cisco-sky); background: rgba(106,191,75,0.1); padding: 2px 4px; border-radius: 3px;">pwru</code>。<br>
+                            追踪报文在内核协议栈中每一跳的函数足迹。
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-top: 3px solid #888; padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><path d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M4 7a2 2 0 012-2h12a2 2 0 012 2M4 7l8 5 8-5"/></svg>
+                            <h4 style="color: #E4E4E4; margin: 0; font-size: 1rem;">状态一致性检查</h4>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #AAA; line-height: 1.5; margin: 0;">
+                            使用 <code style="color: #AAA; background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 3px;">cilium-dbg bpf</code>。<br>
+                            直接映射内核 BPF Map，验证数据面同步状态。
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 10px;">1. 网络全路径追踪 (Trace Every Packet):</div>
+                <div class="debug-cmd">$ pwru --output-tuple '10.0.1.5:443'</div>
+                <div style="margin: 10px 0 20px; color: #888;"># 基于 eBPF 追踪报文在内核中的每一层函数处理</div>
+
+                <div style="margin-bottom: 10px;">2. 实时内核监视器 (Live Monitor):</div>
+                <div class="debug-cmd">$ cilium monitor -v --type drop</div>
+                <div style="margin: 10px 0 20px; color: #888;"># 实时捕获内核态丢包原因（如 Policy 拦截或 Checksum 错误）</div>
+
+                <div style="margin-bottom: 10px;">3. 状态快照 (State Inspection):</div>
+                <div class="debug-cmd">$ cilium-dbg bpf endpoint list</div>
+                <div style="margin: 10px 0; color: #888;"># 直接查看内核 BPF Map 中的 Identity 映射与策略状态</div>
+            </div>
+
+            <div class="expert-debug-box" style="margin-top: 30px; border-top: 4px solid var(--cisco-orange);">
+                <div style="color: var(--cisco-orange); font-weight: bold; margin-bottom: 15px;">[ SRE 深度进阶：内核 NAT 映射审计 ]</div>
+                <p style="margin-bottom: 10px; color: #888;">当 Pod 访问外部网络时，Cilium 执行原生的 eBPF Masquerade：</p>
+                <div class="debug-cmd" style="font-size: 0.8rem;">
+                    # kubectl exec -n kube-system cilium-2vrgj -- cilium bpf nat list<br>
+                    TCP OUT 172.16.3.155:35834 -> 147.182.252.2:443 XLATE_SRC 10.75.59.73:35834
+                </div>
+                <p style="margin-top: 15px; font-size: 0.85rem;">
+                    💡 <b>调试技巧：</b> 如果外部设备无法收到回包，首先通过 <code>cilium monitor -v --type drop</code> 确认内核是否因为 Checksum 错误丢弃了报文。
+                </p>
+            </div>            
+        </div>
+    </section>
+    <section style="background: #F8FAFC; border-top: 1px solid var(--cisco-platinum);">
+        <div class="container">
+            <div class="section-header">
+                <h2>2026 架构决策清单</h2>
+            </div>
+            <div class="decision-grid">
+                <div class="decision-item">
+                    <span class="val">30%+</span>
+                    <span class="lbl">平均云成本节省 (Sidecar-less)</span>
+                </div>
+                <div class="decision-item">
+                    <span class="val">O(1)</span>
+                    <span class="lbl">恒定的策略匹配性能</span>
+                </div>
+                <div class="decision-item">
+                    <span class="val">255+</span>
+                    <span class="lbl">支持的多集群节点上限</span>
+                </div>
+                <div class="decision-item">
+                    <span class="val">Zero</span>
+                    <span class="lbl">信任内核安全边界</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div class="container">
+            <p style="font-weight: bold; margin-bottom: 20px;">Cilium Encyclopedia: The Source of Truth for eBPF Infrastructure</p>
+            <p style="opacity:0.6; font-size: 0.8rem;">&copy; 2025 Cisco & Cilium Community. Full Comprehensive Version 3.0.</p>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="font-size: 0.75rem; color: var(--cisco-blue);">"Make it Clear" implementation by AI Thought Partner based on Patrick Henry Winston's principles.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* 优化：基于实战手册的交互脚本 */
+        const logs = {
+            1: [
+                "> sudo kubeadm init --skip-phases=addon/kube-proxy --pod-network-cidr=172.16.0.0/20",
+                "[init] Using Kubernetes version: v1.33.3",
+                "[certs] Generating apiserver certificate for IPs [10.75.59.71]",
+                "✅ Your Kubernetes control-plane has initialized successfully!",
+                "Status: Node kube-node-1 is NotReady (Waiting for CNI)"
+            ],
+            2: [
+                "> ansible-playbook playbook.yml -i inventory.ini",
+                "TASK [helm_install : Download Helm tarball] -> changed",
+                "TASK [helm_install : Move Helm binary to /usr/local/bin] -> changed",
+                "✅ version.BuildInfo{Version:\"v3.18.4\"} installed on all nodes"
+            ],
+            3: [
+                "> helm install cilium isovalent/cilium --version 1.17.6 -f cilium-values.yaml",
+                "Setting kubeProxyReplacement=true | k8sServiceHost=10.75.59.71",
+                "Deploying cilium-agent DaemonSet and hubble-relay...",
+                "✅ cilium-operator Ready: 2/2 | hubble-relay Ready: 1/1",
+                "Result: Nodes transitioned to 'Ready' state"
+            ],
+            4: [
+                "> kubectl apply -f cilium-bgp.yaml",
+                "> cilium bgp peers",
+                "Node: kube-node-1 | Peer: 10.75.59.76 | State: established | Uptime: 19m",
+                "Routes: Advertised 8 routes (PodCIDR: 172.16.0.0/24)",
+                "✅ BGP Routing Table updated on FRR-Node."
+            ],
+            5: [
+                "> kubectl -n star-wars exec xwing -- curl -s -XPOST http://deathstar/v1/request-landing",
+                "Hubble UI Observation: Source: xwing (172.16.3.155) -> Dest: deathstar (172.16.1.231)",
+                "Verdict: ALLOWED | Protocol: HTTP/1.1 | Path: /v1/request-landing",
+                "✅ Ship landed! 🚀"
+            ]
+        };
+
+        function runStep(step) {
+            const stream = document.getElementById('log-stream');
+            const k8sStatus = document.getElementById('k8s-status');
+            const cniStatus = document.getElementById('cni-status');
+            const bgpStatus = document.getElementById('bgp-status');
+
+            stream.innerHTML = "";
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < logs[step].length) {
+                    stream.innerHTML += `<div><span style="color:#00FF41">${logs[step][i].startsWith('>') ? '' : '●'}</span> ${logs[step][i]}</div>`;
+                    stream.scrollTop = stream.scrollHeight;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    // 更新 UI 状态
+                    if(step == 1) k8sStatus.innerText = "已初始化 (No Proxy)";
+                    if(step == 3) cniStatus.innerText = "Cilium v1.17.6 (eBPF)";
+                    if(step == 4) bgpStatus.innerText = "已连接 (Peer: 10.75.59.76)";
+                }
+            }, 400);
+        }
+        function toggleLanguage() {
+            const zhElements = document.querySelectorAll('[lang="zh"]');
+            const enElements = document.querySelectorAll('[lang="en"]');
+            const isEnglish = enElements[0].style.display === 'block';
+
+            if (isEnglish) {
+                zhElements.forEach(el => el.style.display = 'block');
+                enElements.forEach(el => el.style.display = 'none');
+            } else {
+                zhElements.forEach(el => el.style.display = 'none');
+                enElements.forEach(el => el.style.display = 'block');
+            }
+        }
+
+        // 确保初始状态正确
+        document.addEventListener('DOMContentLoaded', () => {
+            const zhElements = document.querySelectorAll('[lang="zh"]');
+            zhElements.forEach(el => el.style.display = 'block');
+        });
+    </script>
+</body>
+</html>
