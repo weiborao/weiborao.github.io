@@ -1,0 +1,35 @@
+name: Hexo Deploy with Custom SEO
+
+on:
+  push:
+    branches:
+      - main # 或者是你的主分支名
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Generate Hexo Site
+        run: npx hexo generate
+
+      - name: Run Custom Sitemap Script
+        run: |
+          chmod +x ./scripts/generate_sitemap.sh
+          ./scripts/generate_sitemap.sh
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
