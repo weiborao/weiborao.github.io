@@ -1,19 +1,19 @@
 ---
 title: 作品集 (Works)
-date: 2025-12-25 09:50:00
+date: 2025-12-25 15:50:00
 type: "works"
 layout: "page"
-description: "Weibo Rao 的技术研究、架构设计与开源实践成果展示，涵盖 eBPF、零信任及云原生自动化。"
+description: 
 ---
 
 # 🚀 技术作品集 | Technical Portfolio
 
-> **思想的宽度决定了架构的高度。** 这里是我在基础设施可编程、网络安全及自动化领域的实战记录与深度洞察。
+这里是我在基础设施可编程、网络安全及自动化领域的实战记录与深度洞察，本文为AI生成。
 
 ---
 
 ## 🛡️ eBPF 与可观测性 (Canvas 交互系列)
-*将复杂的 Linux 内核逻辑转化为具备“上帝视角”的交互式视觉专题。*
+*将复杂的 Linux 内核逻辑转化为交互式视觉专题。*
 
 * **[eBPF: Linux 内核的超能力](https://weiborao.link/ebpf.html)**
     深度解析 eBPF 如何重塑现代化基础设施平台，涵盖 JIT 编译、Verifier 验证器及 2025 年最新的 Netkit 演进。
