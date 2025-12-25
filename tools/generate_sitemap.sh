@@ -40,7 +40,9 @@ pages=(
   "sna.html:0.8"
   "ebpfv3.html:0.7"
   "isestory.html:0.7"
+  "My-GenAI-works-md:0.9"
 )
+
 
 # 3. 循环写入列表中的页面
 for item in "${pages[@]}"; do
