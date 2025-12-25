@@ -6,7 +6,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>eBPF: The Superpower of Linux Kernel</title>
-    <meta name="revised" content="Thursday, December 25th, 2025, 2:50 pm" />
+    <meta name="revised" content="Thursday, December 25th, 2025, 9:30 pm" />
     <meta property="og:updated_time" content="2025-12-25T14:50:00+08:00" />
     <meta name="keywords" content="eBPF, Linux Kernel, XDP, Kprobes, 2025 Report, JIT, CO-RE">
 
@@ -17,7 +17,7 @@
       "headline": "eBPF: The Superpower of Linux Kernel",
       "description": "深度解析 eBPF 如何重塑现代化基础设施平台，涵盖 JIT 编译、Verifier 验证器及 CO-RE 跨版本运行机制。",
       "datePublished": "2025-12-20T10:00:00+08:00",
-      "dateModified": "2025-12-25T14:50:00+08:00",
+      "dateModified": "2025-12-25T21:30:00+08:00",
       "proficiencyLevel": "Expert",
       "author": { "@type": "Person", "name": "Weibo Rao" }
     }
@@ -1753,6 +1753,32 @@
                         the checkpoint activates instantly for non-stop auditing or interception.
                     </p>
                 </div>
+                <div class="card" style="border-top-color: var(--cisco-green); background: rgba(108, 194, 74, 0.02); display: flex; flex-direction: column; justify-content: center;">
+                    <h4 class="lang-zh" style="color: var(--cisco-green); margin-bottom: 12px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 5px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        内核级“热插拔”真相
+                    </h4>
+                    <h4 class="lang-en hidden" style="color: var(--cisco-green); margin-bottom: 12px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 5px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        The Truth of Kernel-level "Hot-swapping"
+                    </h4>
+
+                    <p class="lang-zh" style="font-size: 0.95rem; line-height: 1.6; color: #444;">
+                        Hook 的物理本质是内核预留的<strong>“函数指针插槽”</strong>。
+                        <br><br>
+                        正因为这些桩点是<strong>“预置”</strong>的，eBPF 才能在不修改内核源码、不重新编译的情况下，像<strong>“乐高积木”</strong>一样动态地插拔功能，让操作系统拥有了即时的防御进化能力。
+                    </p>
+                    <p class="lang-en hidden" style="font-size: 0.95rem; line-height: 1.6; color: #444;">
+                        The physical essence of a Hook is a <strong>"function pointer slot"</strong> reserved by the kernel.
+                        <br><br>
+                        Because these probe points are <strong>"pre-defined,"</strong> eBPF can dynamically plug and unplug functions like <strong>"Lego bricks"</strong> without modifying kernel source code or recompiling, granting the OS instant defensive evolution capabilities.
+                    </p>
+
+                    <div style="margin-top: 15px; border-top: 1px dashed rgba(108, 194, 74, 0.3); padding-top: 10px; font-size: 0.8rem; color: var(--cisco-green); font-weight: 600;">
+                        <span class="lang-zh">#逻辑解耦 #动态插桩 #零重启</span>
+                        <span class="lang-en hidden">#LogicalDecoupling #DynamicInstrumentation #ZeroReboot</span>
+                    </div>
+                </div>                              
                 <div class="card" style="border-top-color: var(--cisco-red); background: rgba(226, 35, 26, 0.02);">
                     <h4 class="lang-zh">后 CrowdStrike 时代的安全准则</h4>
                     <h4 class="lang-en hidden">Post-CrowdStrike Security Standards</h4>
@@ -1769,6 +1795,7 @@
                         only after trial by the Security Court (Verifier)."
                     </p>
                 </div>
+
             </div>
 
             <div class="insight-card" style="margin-top: 40px; border-left-color: var(--cisco-orange);">
@@ -2422,74 +2449,64 @@
 
                 <div id="c-kernel" class="code-content">
                     <div class="lang-zh">
-                        <span class="code-comment">// 内核态：极速拦截非 80/443 端口的非法包</span>
-                        SEC(<span class="code-string">"xdp"</span>)
-                        <span class="code-keyword">int</span> <span class="code-func">xdp_drop_illegal</span>(<span
-                            class="code-keyword">struct</span> xdp_md *ctx) {
-                        <span class="code-keyword">if</span> (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
-                        <span class="code-keyword">return</span> XDP_DROP; <span class="code-comment">// 硬件级丢弃，不占
-                            CPU</span>
+<span class="code-comment">// 内核态：极速拦截非 80/443 端口的非法包</span>
+SEC(<span class="code-string">"xdp"</span>)
+<span class="code-keyword">int</span> <span class="code-func">xdp_drop_illegal</span>(<span 
+class="code-keyword">struct</span> xdp_md *ctx) {
+<span class="code-keyword">if</span> (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
+<span class="code-keyword">return</span> XDP_DROP; <span class="code-comment">// 硬件级丢弃，不占CPU</span>}
+<span class="code-keyword">return</span> XDP_PASS;}
+</div>
+<div class="lang-en hidden">
+<span class="code-comment">// Kernel-space: High-speed interception of non-80/443 packets</span>
+SEC(<span class="code-string">"xdp"</span>)
+<span class="code-keyword">int</span> <span class="code-func">xdp_drop_illegal</span>(<span
+ class="code-keyword">struct</span> xdp_md *ctx) {
+ <span class="code-keyword">if</span> (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
+ <span class="code-keyword">return</span> XDP_DROP; <span class="code-comment">// Hardware-level drop, minimal CPU overhead</span>
                         }
-                        <span class="code-keyword">return</span> XDP_PASS;
+<span class="code-keyword">return</span> XDP_PASS;
                         }
-                    </div>
-                    <div class="lang-en hidden">
-                        <span class="code-comment">// Kernel-space: High-speed interception of non-80/443 packets</span>
-                        SEC(<span class="code-string">"xdp"</span>)
-                        <span class="code-keyword">int</span> <span class="code-func">xdp_drop_illegal</span>(<span
-                            class="code-keyword">struct</span> xdp_md *ctx) {
-                        <span class="code-keyword">if</span> (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
-                        <span class="code-keyword">return</span> XDP_DROP; <span class="code-comment">// Hardware-level
-                            drop, minimal CPU overhead</span>
-                        }
-                        <span class="code-keyword">return</span> XDP_PASS;
-                        }
-                    </div>
+</div>
                 </div>
 
                 <div id="python-bcc" class="code-content hidden">
                     <div class="lang-zh">
-                        <span class="code-comment"># 用户态：实时统计系统调用延迟直方图</span>
-                        <span class="code-keyword">from</span> bcc <span class="code-keyword">import</span> BPF
-                        b = BPF(text=<span class="code-string">"TRACE_SYSCALL_LATENCY_CODE"</span>)
-                        <span class="code-keyword">print</span>(<span class="code-string">"正在实时收集内核函数 [do_sys_openat2]
-                            耗时分布..."</span>)
-                        b[<span class="code-string">"dist"</span>].print_log2_hist(<span
-                            class="code-string">"usecs"</span>)
-                        <span class="code-comment"># 0 侵入生成的性能火焰图数据</span>
+<span class="code-comment"># 用户态：实时统计系统调用延迟直方图</span>
+<span class="code-keyword">from</span> bcc <span class="code-keyword">import</span> BPF
+  b = BPF(text=<span class="code-string">"TRACE_SYSCALL_LATENCY_CODE"</span>)
+<span class="code-keyword">print</span>(<span class="code-string">"正在实时收集内核函数 [do_sys_openat2]耗时分布..."</span>)
+  b[<span class="code-string">"dist"</span>].print_log2_hist(<span class="code-string">"usecs"</span>)
+<span class="code-comment"># 0 侵入生成的性能火焰图数据</span>
                     </div>
                     <div class="lang-en hidden">
-                        <span class="code-comment"># User-space: Real-time syscall latency histogram statistics</span>
-                        <span class="code-keyword">from</span> bcc <span class="code-keyword">import</span> BPF
-                        b = BPF(text=<span class="code-string">"TRACE_SYSCALL_LATENCY_CODE"</span>)
-                        <span class="code-keyword">print</span>(<span class="code-string">"Collecting latency
-                            distribution for [do_sys_openat2]..."</span>)
-                        b[<span class="code-string">"dist"</span>].print_log2_hist(<span
-                            class="code-string">"usecs"</span>)
-                        <span class="code-comment"># Non-intrusive performance data for flame graphs</span>
+<span class="code-comment"># User-space: Real-time syscall latency histogram statistics</span>
+<span class="code-keyword">from</span> bcc <span class="code-keyword">import</span> BPF
+ b = BPF(text=<span class="code-string">"TRACE_SYSCALL_LATENCY_CODE"</span>)
+<span class="code-keyword">print</span>(<span class="code-string">"Collecting latency distribution for [do_sys_openat2]..."</span>)
+ b[<span class="code-string">"dist"</span>].print_log2_hist(<span class="code-string">"usecs"</span>)
+<span class="code-comment"># Non-intrusive performance data for flame graphs</span>
                     </div>
                 </div>
 
                 <div id="go-libbpf" class="code-content hidden">
                     <div class="lang-zh">
-                        <span class="code-comment">// 用户态：将内核 Maps 中的攻击数据同步至仪表盘</span>
-                        <span class="code-keyword">func</span> <span class="code-func">pollAuditEvents</span>() {
-                        events := bpfModule.GetMap(<span class="code-string">"attack_map"</span>)
-                        <span class="code-keyword">for</span> {
-                        data := events.Poll() <span class="code-comment">// 毫秒级同步：内核态沙盒 -> 用户态大屏</span>
-                        updateDashboard(data)
-                        }
-                        }
+<span class="code-comment">// 用户态：将内核 Maps 中的攻击数据同步至仪表盘</span>
+<span class="code-keyword">func</span> <span class="code-func">pollAuditEvents</span>() { 
+events := bpfModule.GetMap(<span class="code-string">"attack_map"</span>)
+<span class="code-keyword">for</span> { data := events.Poll() <span class="code-comment">// 毫秒级同步：内核态沙盒 -> 用户态大屏</span>
+updateDashboard(data)
+}
+}
                     </div>
                     <div class="lang-en hidden">
-                        <span class="code-comment">// User-space: Synchronize attack data from kernel Maps to
+<span class="code-comment">// User-space: Synchronize attack data from kernel Maps to
                             dashboard</span>
-                        <span class="code-keyword">func</span> <span class="code-func">pollAuditEvents</span>() {
-                        events := bpfModule.GetMap(<span class="code-string">"attack_map"</span>)
-                        <span class="code-keyword">for</span> {
-                        data := events.Poll() <span class="code-comment">// MS-level sync: Kernel sandbox -> Userspace
-                            screen</span>
-                        updateDashboard(data)
+<span class="code-keyword">func</span> <span class="code-func">pollAuditEvents</span>() {
+events := bpfModule.GetMap(<span class="code-string">"attack_map"</span>)
+<span class="code-keyword">for</span> {
+data := events.Poll() <span class="code-comment">// MS-level sync: Kernel sandbox -> Userspace screen</span>
+updateDashboard(data)
                         }
                         }
                     </div>
