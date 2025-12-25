@@ -29,13 +29,13 @@ description:
 ## 🔒 零信任与安全云 (Security Cloud)
 *基于身份中心化与持续校验的现代安全架构实践。*
 
-* **[Cisco ISE: 零信任架构基石](https://weiborao.link/ise.html)**
+* **[Cisco ISE: 零信任架构基石](https://weiborao.link/isev2.html)**
     视觉化呈现 ISE 在 AAA 鉴权、端点合规及安全策略分发中的核心价值。
-* **[当信任变成最致命的漏洞](https://weiborao.link/trust-vulnerability.html)**
+* **[当信任变成最致命的漏洞](https://weiborao.link/isestory.html)**
     关于边界安全失效后的深度反思，探讨为什么“持续校验”是现代安全的唯一出路。
-* **[Cisco SNA: 从网络数据中提取安全价值](https://weiborao.link/cisco-sna.html)**
+* **[Cisco SNA: 从网络数据中提取安全价值](https://weiborao.link/sna.html)**
     利用 Stealthwatch 流量分析技术，识别内网中的潜伏威胁与异常行为。
-* **[eBPF Tetragon + Splunk + Foundation-sec 智能安全闭环](https://weiborao.link/tetragon-splunk.html)**
+* **[eBPF Tetragon + Splunk + Foundation-sec 智能安全闭环](https://weiborao.link/sec8b.html)**
     构建从内核审计到大规模日志分析的智能防御生态。
 
 ---
@@ -59,17 +59,19 @@ description:
     涵盖 SR-IOV 配置、HugePages 开启及 vCPU 亲和性绑定的深度调优指南。
 * **[有关 AnyCast 技术简述](https://weiborao.link/anycast-brief.html)**
     通俗易懂地解释 AnyCast 的路由机制及其在 DDoS 防御中的天然优势。
+* **[[在Docker容器中tcpdump抓包探秘Traceroute](https://weiborao.link/docker-traceroute-tcpdump.html)]**
+    在一个纯净的容器环境下进行抓包分析Traceroute的过程；通过番外篇介绍ThousandEyes的探针在容器中安装部署，并展示路径可视化分析的效果。
 
 ---
 
 ## 🤖 AI 辅助开发与赋能系列
 *探索生成式 AI 如何重构技术生产力。*
 
-* **[与 ChatGPT 对话：AI 助手加速云计算开发](https://weiborao.link/chatgpt-cloud-dev.html)**
+* **[与 ChatGPT 对话：AI 助手加速云计算开发](https://weiborao.link/Conversation-with-ChatGPT-to-accelerate-Cloud-Develpment.html)**
     实战展示如何利用大模型生成高质量的 IaC（基础设施即代码）片段。
-* **[eBPF 重构 IT 基础设施交付的基石](https://weiborao.link/ebpfinfra.html)**
+* **[eBPF 重构 IT 基础设施交付的基石](https://weiborao.link/ebpv2.html)**
     AI 赋能下的基础设施思考，探讨可编程内核对 DevOps 文化的深远影响。
-* **[面向未来的 IT 基础设施架构：eBPF 赋能之旅](https://weiborao.link/ebpfjourney.html)**
+* **[面向未来的 IT 基础设施架构：eBPF 赋能之旅](https://weiborao.link/ebpfv3.html)**
     勾勒未来五年的技术路线图。
 
 ---
