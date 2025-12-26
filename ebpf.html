@@ -2158,21 +2158,13 @@
                             function entries/exits, while Uprobes provide non-intrusive tracing for userspace
                             applications.</p>
 
-                        <ul class="hook-list" style="margin-top: 10px;">
-                            <li class="hook-item">
-                                <span class="hook-label lang-zh">高效诊断</span>
-                                <span class="hook-label lang-en hidden">Efficiency</span>
-
-                                <span class="hook-desc lang-zh"><strong>2025 优化：</strong> 现代内核支持
-                                    <strong>multi-kprobe</strong>，允许一次性挂钩数千个函数，将批量追踪的 CPU 开销降低了 40% 以上。</span>
-                                <span class="hook-desc lang-en hidden"><strong>2025 Opt:</strong> Modern kernels support
-                                    <strong>multi-kprobe</strong>, allowing thousands of hooks simultaneously while
-                                    cutting batch tracing overhead by over 40%.</span>
-                            </li>
-                        </ul>
-
                         <div class="insight-card"
                             style="margin: 10px 0 0; font-size: 0.85rem; border-left: 2px solid var(--cisco-orange); background: rgba(255, 158, 27, 0.03);">
+                            <span class="lang-zh"><strong>2025 优化：</strong> 现代内核支持
+                            <strong>multi-kprobe</strong>，允许一次性挂钩数千个函数，将批量追踪的 CPU 开销降低了 40% 以上。<br></span>
+                            <span class="lang-en hidden"><strong>2025 Opt:</strong> Modern kernels support
+                            <strong>multi-kprobe</strong>, allowing thousands of hooks simultaneously while
+                                    cutting batch tracing overhead by over 40%.<br></span>
                             <span class="lang-zh"><strong>安全加固：</strong> 在“后 CrowdStrike 时代”，通过 Kprobes 监控关键系统调用（如
                                 `execve`），安全专家可以实现<strong>实时威胁拦截</strong>——不仅是看到攻击，而是瞬间阻断异常进程。</span>
                             <span class="lang-en hidden"><strong>Security Hardening:</strong> In the "Post-CrowdStrike"
@@ -2394,16 +2386,16 @@
                         <pre class="code-content-stable lang-zh">
             # 用户态：实时统计系统调用延迟直方图
             from bcc import BPF
-            b = BPF(text="TRACE_SYSCALL_LATENCY_CODE")
-            print("正在实时收集内核函数 [do_sys_openat2] 耗时分布...")
-            b["dist"].print_log2_hist("usecs")
+                b = BPF(text="TRACE_SYSCALL_LATENCY_CODE")
+                print("正在实时收集内核函数 [do_sys_openat2] 耗时分布...")
+                b["dist"].print_log2_hist("usecs")
                         </pre>
                         <pre class="code-content-stable lang-en hidden">
             # User-space: Real-time syscall latency histogram
             from bcc import BPF
-            b = BPF(text="TRACE_SYSCALL_LATENCY_CODE")
-            print("Collecting latency distribution for [do_sys_openat2]...")
-            b["dist"].print_log2_hist("usecs")
+                b = BPF(text="TRACE_SYSCALL_LATENCY_CODE")
+                print("Collecting latency distribution for [do_sys_openat2]...")
+                b["dist"].print_log2_hist("usecs")
                         </pre>
                     </div>
 
@@ -2457,6 +2449,12 @@
                 <div class="card" style="border-top-color: var(--cisco-midnight);">
                     <h3 class="lang-zh">尾调用 (Tail Calls)</h3>
                     <h3 class="lang-en hidden">Tail Calls</h3>
+                    <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px;">
+                        <strong>定义 (What)：</strong> 尾调用允许一个 eBPF 程序调用另一个程序并<strong>立即替换</strong>当前执行上下文，且不返回。
+                    </p>
+                    <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px;">
+                        <strong>Definition (What):</strong> Tail calls allow an eBPF program to call another and <strong>replace</strong> the execution context without returning.
+                    </p>                    
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
                         <strong>进化：</strong> 早期内核限制为 4096 条指令。但在 2025 年，现代内核已支持 <strong>100 万条指令</strong>
                         的复杂度检查（Complexity Limit）。此演进使得在内核层运行复杂的<strong>轻量级 AI 推理/过滤模型</strong>成为可能。
@@ -2482,6 +2480,12 @@
                         <span class="year-badge-2025">NEW</span>
                         Lifecycle Management (bpf_link)
                     </h3>
+                    <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px;">
+                        <strong>定义 (What)：</strong> bpf_link 是一个内核对象，它代表了 eBPF 程序与内核挂钩点（Hook）之间的<strong>持久化连接</strong>。
+                    </p>
+                    <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px;">
+                        <strong>Definition (What):</strong> bpf_link is a kernel object representing a <strong>persistent connection</strong> between an eBPF program and a hook point.
+                    </p>                    
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
                         <strong>架构价值：</strong> 在 2025 年的生产实践中，我们不再直接 attach 程序，而是通过 <code>bpf_link</code> 进行抽象管理。<br><br>
                         <strong>核心进化：</strong> 它解决了“进程崩溃导致挂钩失效”的痛点。即使用户态管理程序退出，内核态的逻辑依然可以受控存在。这实现了安全策略与管理工具的<strong>原子性解耦</strong>。
@@ -2567,7 +2571,7 @@
             <div class="winston-callout lang-zh"
                 style="background: rgba(255,255,255,0.05); color: white; border-left-color: var(--cisco-sky-blue);">
                 <strong>价值锚点 / THE VALUE ANCHOR</strong>
-                eBPF 并不是为了替代现有的网络或安全工具，而是为了赋予它们 <strong>“动态进化的生命力”</strong>。
+                eBPF 并不是为了替代现有的网络或安全工具，而是为了赋予它们<strong>“动态进化的生命力”</strong>。
             </div>
             <div class="winston-callout lang-en hidden"
                 style="background: rgba(255,255,255,0.05); color: white; border-left-color: var(--cisco-sky-blue);">
