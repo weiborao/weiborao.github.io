@@ -6,8 +6,8 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>eBPF: The Superpower of Linux Kernel</title>
-    <meta name="revised" content="Thursday, December 25th, 2025, 9:30 pm" />
-    <meta property="og:updated_time" content="2025-12-25T14:50:00+08:00" />
+    <meta name="revised" content="Friday, December 26th, 2025, 13:20 am" />
+    <meta property="og:updated_time" content="2025-12-26T13:20:00+08:00" />
     <meta name="keywords" content="eBPF, Linux Kernel, XDP, Kprobes, 2025 Report, JIT, CO-RE">
 
     <script type="application/ld+json">
@@ -17,7 +17,7 @@
       "headline": "eBPF: The Superpower of Linux Kernel",
       "description": "深度解析 eBPF 如何重塑现代化基础设施平台，涵盖 JIT 编译、Verifier 验证器及 CO-RE 跨版本运行机制。",
       "datePublished": "2025-12-20T10:00:00+08:00",
-      "dateModified": "2025-12-25T21:30:00+08:00",
+      "dateModified": "2025-12-26T13:20:00+08:00",
       "proficiencyLevel": "Expert",
       "author": { "@type": "Person", "name": "Weibo Rao" }
     }
@@ -526,78 +526,6 @@
             line-height: 1.5;
         }
 
-        .evolution-timeline {
-            position: relative;
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px 0;
-        }
-
-        .evolution-timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background: linear-gradient(to bottom, transparent, var(--cisco-light-gray), transparent);
-            transform: translateX(-50%);
-        }
-
-        .timeline-item {
-            margin-bottom: 60px;
-            position: relative;
-            width: 50%;
-            padding: 0 40px;
-        }
-
-        .timeline-item:nth-child(odd) {
-            left: 0;
-            text-align: right;
-        }
-
-        .timeline-item:nth-child(even) {
-            left: 50%;
-            text-align: left;
-        }
-
-        .timeline-point {
-            position: absolute;
-            top: 10px;
-            width: 20px;
-            height: 20px;
-            background: var(--cisco-blue);
-            border: 4px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(4, 159, 217, 0.2);
-            z-index: 2;
-        }
-
-        .timeline-item:nth-child(odd) .timeline-point {
-            right: -10px;
-        }
-
-        .timeline-item:nth-child(even) .timeline-point {
-            left: -10px;
-        }
-
-        .timeline-year {
-            font-weight: 900;
-            color: var(--cisco-blue);
-            font-size: 1.4rem;
-            font-family: 'Courier New', monospace;
-        }
-
-        .timeline-content h5 {
-            margin: 8px 0;
-            color: var(--cisco-dark-blue);
-            font-size: 1.2rem;
-        }
-
-        .timeline-content p {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
         .process-section {
             background-color: #FAFAFA;
         }
@@ -655,7 +583,50 @@
             color: #ddd;
             font-size: 1.5rem;
         }
+        /* --- 移除冗余后的增量优化：代码窗格稳定性 --- */
+        .code-window {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
 
+        .code-header {
+            background: #333;
+            padding: 10px 15px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .code-content-stable {
+            padding: 20px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #d4d4d4;
+            line-height: 1.6;
+            overflow-x: auto;
+            /* 核心：配合 JS 处理缩进，使用 pre 保证原始对齐 */
+            white-space: pre; 
+            tab-size: 4;
+            background: #1e1e1e;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .code-content-stable { 
+                font-size: 0.8rem; 
+                white-space: pre-wrap; /* 移动端允许换行防止溢出 */
+            }
+        }
         .hook-list {
             list-style: none;
             padding: 0;
@@ -695,6 +666,43 @@
             margin: 40px 0;
         }
 
+        /* --- i18n 修复：确保语言切换时既能显示，又不破坏原始布局属性 --- */
+        /* 默认隐藏逻辑 */
+        [data-lang="zh"] .lang-en { display: none !important; }
+        [data-lang="en"] .lang-zh { display: none !important; }
+
+        /* 关键修复：使用 revert 恢复标签原始的 display 属性（如 table-cell, inline-block 等） */
+        /* 这样可以确保按钮居中（inline-block）和表格正常（table-cell） */
+        [data-lang="en"] .lang-en:not(.tab-content) { 
+            display: revert !important; 
+        }
+        [data-lang="zh"] .lang-zh:not(.tab-content) { 
+            display: revert !important; 
+        }
+
+        /* 针对 Flex 容器的特殊适配（保持原样） */
+        [data-lang="en"] .nav-left .lang-en,
+        [data-lang="en"] .logo .lang-en {
+            display: flex !important;
+        }
+        [data-lang="zh"] .nav-left .lang-zh,
+        [data-lang="zh"] .logo .lang-zh {
+            display: flex !important;
+        }
+
+
+        /* 确保 Tab 容器行为稳定 */
+        .tab-content.hidden { display: none !important; }
+        .tab-content { display: block !important; width: 100%; }
+
+        /* 代码窗格优化：确保 pre 标签内的代码左对齐且不产生额外偏移 */
+        .code-content-stable {
+            white-space: pre !important;
+            text-align: left !important;
+            margin: 0 !important;
+            padding: 20px !important;
+        }
+
         .tabs-header {
             display: flex;
             background: #2d2d2d;
@@ -718,16 +726,6 @@
             color: var(--cisco-blue);
             background: #1e1e1e;
             border-bottom: 3px solid var(--cisco-blue);
-        }
-
-        .code-content {
-            padding: 25px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.95rem;
-            color: #d4d4d4;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            line-height: 1.6;
         }
 
         .code-keyword {
@@ -1089,6 +1087,24 @@
             border: 1px solid var(--cisco-blue);
         }
 
+        /* 增强：2025 报告卡片的视觉深度 */
+        .report-highlight {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom right, #f8f9fa, #ffffff);
+        }
+
+        .report-highlight::before {
+            content: '2025';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(4, 159, 217, 0.03);
+            pointer-events: none;
+        }
+
         .metric-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1183,6 +1199,72 @@
             color: #999;
         }
 
+        /* 增量样式：逻辑引导线 */
+        .logic-connector {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--cisco-blue), transparent);
+            margin: 0 auto;
+        }
+
+        /* 增强：卡片内的代码高亮微调 */
+        .term-card strong {
+            color: var(--cisco-midnight);
+            border-bottom: 1px solid rgba(4, 159, 217, 0.3);
+        }
+
+        /* 2025 标识浮层 */
+        .year-badge-2025 {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--cisco-green);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        /* 增强：确保 detail-grid 卡片等高且内容垂直分布 */
+        .detail-grid .card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .detail-grid .card p {
+            flex-grow: 1; /* 让正文自动填充剩余空间，使底部的 Insight Card 对齐 */
+        }
+
+        /* 优化 Insight Card 的边框和文字颜色 */
+        .detail-grid .insight-card {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* 运行机制章节内代码块的特殊适配 / Specific styling for code tabs in the mechanism section */
+        .process-section .code-tabs {
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .process-section .code-tabs::after {
+            content: '';
+            display: block;
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, var(--cisco-light-gray), transparent);
+            margin: 0 auto;
+        }
+
+        /* 确保详情网格与上方代码块有清晰的逻辑间距 */
+        .process-section .detail-grid {
+            margin-top: 40px;
+        }
+
         /* 页脚样式 */
         footer {
             background: var(--cisco-dark-blue);
@@ -1216,19 +1298,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .evolution-timeline::before {
-                left: 20px;
-            }
-
-            .timeline-item {
-                width: 100%;
-                text-align: left !important;
-                padding-left: 45px;
-            }
-
-            .timeline-point {
-                left: 11px !important;
-            }
 
             .process-steps {
                 grid-template-columns: 1fr;
@@ -1307,8 +1376,6 @@
                     <path d="M46 24V14" stroke="#049FD9" stroke-width="3" stroke-linecap="round" />
                     <path d="M54 24V19" stroke="#049FD9" stroke-width="3" stroke-linecap="round" />
                 </svg>
-                <span class="lang-zh">安全架构师视角</span>
-                <span class="lang-en hidden">Security Architect View</span>
             </div>
             <div class="lang-switch">
                 <div class="lang-btn active" onclick="setLang('zh')">中文</div>
@@ -1328,16 +1395,17 @@
 
                 <span style="margin: 0 10px; opacity: 0.5;">|</span>
 
-                <span class="lang-zh">最后更新：2025-12-25</span>
-                <span class="lang-en hidden">Last Updated: 2025-12-25</span>
+                <span class="lang-zh">最后更新：2025-12-26</span>
+                <span class="lang-en hidden">Last Updated: 2025-12-26</span>
             </div>
             <p class="lang-zh">无需重启，无需修改源码，让操作系统即刻拥有全新的安全、网络与可观测能力。<br>这不仅仅是技术升级，这是基础设施的范式转移。</p>
             <p class="lang-en hidden">Instantly grant the OS new security, networking, and observability capabilities
                 without restarting or modifying the source code.<br>It's not just an upgrade; it's a paradigm shift for
                 infrastructure.</p>
-
-            <button class="btn btn-primary lang-zh" onclick="scrollToDemo()">体验交互 Demo</button>
-            <button class="btn btn-primary lang-en hidden" onclick="scrollToDemo()">Try Interactive Demo</button>
+            <div style="margin-top: 40px; text-align: center;">
+                <button class="btn btn-primary lang-zh" onclick="scrollToDemo()">体验交互 Demo</button>
+                <button class="btn btn-primary lang-en hidden" onclick="scrollToDemo()">Try Interactive Demo</button>
+            </div>
 
             <div class="hero-evidence-bar">
                 <div class="evidence-item">
@@ -1406,16 +1474,33 @@
                 style="border-left: 5px solid var(--cisco-blue); background: rgba(4, 159, 217, 0.03); padding: 30px; border-radius: 8px;">
                 <p class="lang-zh" style="font-size: 1.2rem; line-height: 1.8; color: var(--cisco-midnight);">
                     <strong>什么是 eBPF？</strong><br>
-                    eBPF 是一项革命性的技术，起源于 Linux 内核，它可以在特权上下文中（如操作系统内核）运行沙盒程序。它用于安全有效地扩展内核的功能，而无需通过更改内核源代码或加载内核模块的方式来实现。
+                    eBPF (Extended Berkeley Packet Filter) 是一项革命性的技术，起源于 Linux 内核，它可以在特权上下文中（如操作系统内核）运行沙盒程序。它用于安全有效地扩展内核的功能，而无需通过更改内核源代码或加载内核模块的方式来实现。
                 </p>
                 <p class="lang-en hidden" style="font-size: 1.2rem; line-height: 1.8; color: var(--cisco-midnight);">
                     <strong>What is eBPF?</strong><br>
-                    eBPF is a revolutionary technology, originating in the Linux kernel, that can run sandboxed programs
+                    eBPF (Extended Berkeley Packet Filter) is a revolutionary technology, originating in the Linux kernel, that can run sandboxed programs
                     in a privileged context such as the operating system kernel. It is used to safely and efficiently
                     extend the capabilities of the kernel without requiring changing kernel source code or loading
                     kernel modules.
                 </p>
             </div>
+            <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; opacity: 0.9;">
+                <div style="padding: 15px; border-left: 2px solid var(--cisco-light-gray);">
+                    <span style="font-size: 1.0rem; color: var(--cisco-blue); font-weight: bold;">1992 - cBPF</span>
+                    <p style="font-size: 1.0rem; margin-top: 5px;" class="lang-zh">诞生于 Berkeley 实验室，最初仅为 tcpdump 提供简单的包过滤逻辑。</p>
+                    <p style="font-size: 1.0rem; margin-top: 5px;" class="lang-en hidden">Born at Berkeley, initially just packet filtering logic for tcpdump.</p>
+                </div>
+                <div style="padding: 15px; border-left: 2px solid var(--cisco-blue);">
+                    <span style="font-size: 1.0rem; color: var(--cisco-blue); font-weight: bold;">2014 - eBPF Revolution</span>
+                    <p style="font-size: 1.0rem; margin-top: 5px;" class="lang-zh">由 Alexei Starovoitov 扩展指令集，使其从网络工具进化为通用的内核编程引擎。</p>
+                    <p style="font-size: 1.0rem; margin-top: 5px;" class="lang-en hidden">Extended by Alexei Starovoitov, evolving from a network tool to a general-purpose kernel engine.</p>
+                </div>
+                <div style="padding: 15px; border-left: 2px solid var(--cisco-green);">
+                    <span style="font-size: 1.0rem; color: var(--cisco-green); font-weight: bold;">2025+ - Programmable Base</span>
+                    <p style="font-size: 1.0rem; margin-top: 5px;" class="lang-zh">成为云原生操作系统的“事实标准”，甚至跨越至 Windows 生态，实现全栈可编程。</p>
+                    <p style="font-size: 1.0rem; margin-top: 5px;" class="lang-en hidden">The "de-facto standard" for cloud-native OS, extending even to Windows ecosystems.</p>
+                </div>
+            </div>            
         </div>
     </section>
 
@@ -1492,9 +1577,18 @@
             <table class="comparison-table">
                 <thead>
                     <tr>
-                        <th class="lang-zh">维度 / Dimension</th>
-                        <th class="lang-zh">传统方式 (LKM / Upstream)</th>
-                        <th class="lang-zh">eBPF 模式</th>
+                        <th>
+                            <span class="lang-zh">维度 / Dimension</span>
+                            <span class="lang-en hidden">Dimension</span>
+                        </th>
+                        <th>
+                            <span class="lang-zh">传统方式 (LKM / Upstream)</span>
+                            <span class="lang-en hidden">Traditional (LKM / Upstream)</span>
+                        </th>
+                        <th>
+                            <span class="lang-zh">eBPF 模式</span>
+                            <span class="lang-en hidden">eBPF Mode</span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1882,8 +1976,8 @@
             <span class="golden-badge lang-zh">术语百科 / KNOWLEDGE BASE</span>
             <span class="golden-badge lang-en hidden">THE DICTIONARY / KNOWLEDGE BASE</span>
 
-            <h2 class="section-title lang-zh">eBPF 核心术语百科</h2>
-            <h2 class="section-title lang-en hidden">The eBPF Core Dictionary</h2>
+            <h2 class="section-title lang-zh">核心术语图解</h2>
+            <h2 class="section-title lang-en hidden">Core Dictionary & Visuals</h2>
 
             <div class="winston-callout lang-zh">
                 <strong>核心价值 / CORE VALUE</strong>
@@ -1963,10 +2057,7 @@
                         <h4 class="lang-zh">Verifier (验证器)</h4>
                         <h4 class="lang-en hidden">Verifier (Validator)</h4>
                         <p class="lang-zh">eBPF 的“安全闸门”。它通过模拟执行来分析代码的状态机，确保程序没有死循环、不访问越界内存、不破坏内核完整性，是 eBPF 安全性的终极保障。</p>
-                        <p class="lang-en hidden">The "security gate" of eBPF. It analyzes the code's state machine
-                            through simulated execution to ensure the program has no infinite loops, doesn't access
-                            out-of-bounds memory, and doesn't compromise kernel integrity, providing the ultimate
-                            guarantee for eBPF safety.</p>
+                        <p class="lang-en hidden">The "security gate" of eBPF. It analyzes the code's state machine through simulated execution to ensure the program has no infinite loops, doesn't access out-of-bounds memory, and doesn't compromise kernel integrity, providing the ultimate guarantee for eBPF safety.</p>
                         <div class="insight-card"
                             style="margin: 10px 0 0; font-size: 0.85rem; border-left: 2px solid var(--cisco-red); background: rgba(226, 35, 26, 0.02);">
                             <span class="lang-zh">
@@ -1986,7 +2077,7 @@
                                 <strong>Mathematical Safety Proof:</strong> The verifier traverses the state space of
                                 every <strong>register</strong>. It mathematically proves no out-of-bounds access beyond
                                 4 bytes, fundamentally eliminating memory overflows.
-                            </span>
+                            </span>                           
                         </div>
                     </div>
                     <div class="term-card">
@@ -2011,7 +2102,7 @@
                     </div>
 
                     <div class="term-card">
-                        <h4 class="lang-zh">Helper Functions</h4>
+                        <h4 class="lang-zh">辅助函数Helper Functions</h4>
                         <h4 class="lang-en hidden">Helper Functions</h4>
                         <p class="lang-zh">内核为 eBPF 程序开放的安全接口。由于程序不能直接调用内核私有函数，Helper 提供了获取时间、读写
                             Map、生成日志等受控的受限能力。比如：bpf_trace_printk()（打印日志）、bpf_map_lookup_elem()（查表）、bpf_redirect()（重定向网络包）。
@@ -2095,95 +2186,20 @@
         </div>
     </section>
 
-    <!-- Evolution Timeline -->
-    <section>
-        <div class="container">
-            <span class="golden-badge lang-zh">发展简史 / EVOLUTION</span>
-            <span class="golden-badge lang-en hidden">HISTORY / EVOLUTION</span>
-            <div class="winston-callout lang-zh" style="margin-bottom: 30px; border-left-color: var(--cisco-gray);">
-                <strong>承上启下 / PERSPECTIVE</strong>
-                了解了 eBPF 的底层密码后，我们不禁好奇：它是如何从一个简单的“包过滤器”进化为如今统治数据中心的“超级引擎”的？
-            </div>
-            <div class="winston-callout lang-en hidden"
-                style="margin-bottom: 30px; border-left-color: var(--cisco-gray);">
-                <strong>PERSPECTIVE</strong>
-                Having decoded the underlying secrets of eBPF, how did it evolve from a simple "packet filter" to the
-                "super engine" dominating modern data centers?
-            </div>
-            <h2 class="section-title lang-zh">技术演进：从过滤器到超级内核</h2>
-            <h2 class="section-title lang-en hidden">Evolution: From Filter to Super Kernel</h2>
-
-            <div class="evolution-timeline">
-                <div class="timeline-item">
-                    <div class="timeline-point"></div>
-                    <div class="timeline-year">1992</div>
-                    <div class="timeline-content">
-                        <h5 class="lang-zh">cBPF：伯克利包过滤器的诞生</h5>
-                        <h5 class="lang-en hidden">cBPF: Birth of Berkeley Packet Filter</h5>
-                        <p class="lang-zh">最初的设计是为了提升网络包过滤效率。当时它只是一个简单的 2 寄存器虚拟机，作为 `tcpdump` 的心脏存在。</p>
-                        <p class="lang-en hidden">Originally designed to improve packet filtering efficiency. It was a
-                            simple 2-register VM, serving as the heart of `tcpdump`.</p>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-point"></div>
-                    <div class="timeline-year">2014</div>
-                    <div class="timeline-content">
-                        <h5 class="lang-zh">eBPF：进入通用编程时代</h5>
-                        <h5 class="lang-en hidden">eBPF: The Universal Programming Era</h5>
-                        <p class="lang-zh">内核开发者 Alexei Starovoitov 扩展了指令集（10 个寄存器）。Linux 3.15 首次集成，eBPF
-                            从网络扩展到了系统监控、安全和跟踪。</p>
-                        <p class="lang-en hidden">Kernel developer Alexei Starovoitov extended the instruction set to 10
-                            registers. First integrated in Linux 3.15, eBPF expanded from networking to system
-                            monitoring, security, and tracing.</p>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-point"></div>
-                    <div class="timeline-year">2018</div>
-                    <div class="timeline-content">
-                        <h5 class="lang-zh">CO-RE：实现跨版本交付</h5>
-                        <h5 class="lang-en hidden">CO-RE: Achieving Cross-Version Delivery</h5>
-                        <p class="lang-zh">BTF 元数据机制成熟，解决了 eBPF 在不同 Linux 发行版之间的兼容性噩梦，这标志着 eBPF 真正具备了大规模商业交付的能力。</p>
-                        <p class="lang-en hidden">The maturation of BTF metadata mechanism solved the compatibility
-                            nightmare across different Linux distributions, marking eBPF's readiness for large-scale
-                            commercial delivery.</p>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-point"></div>
-                    <div class="timeline-year">NOW</div>
-                    <div class="timeline-content">
-                        <h5 class="lang-zh">可编程内核标准</h5>
-                        <h5 class="lang-en hidden">The Programmable Kernel Standard</h5>
-                        <p class="lang-zh">eBPF 正在成为云原生操作系统的“事实标准”。Microsoft 甚至推出了 eBPF for Windows，证明了这种可编程内核范式的普适性。
-                        </p>
-                        <p class="lang-en hidden">eBPF is becoming the "de-facto standard" for cloud-native operating
-                            systems. Microsoft's introduction of eBPF for Windows proves the universality of this
-                            programmable kernel paradigm.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Deep Dive Section -->
     <section class="process-section">
         <div class="container">
             <span class="golden-badge lang-zh">运行机制 / INNER WORKINGS</span>
             <span class="golden-badge lang-en hidden">INNER WORKINGS / MECHANISM</span>
 
-            <h2 class="section-title lang-zh">深度解析：eBPF 运行流程</h2>
-            <h2 class="section-title lang-en hidden">Deep Dive: How eBPF Works</h2>
+            <h2 class="section-title lang-zh">eBPF 运行机制</h2>
+            <h2 class="section-title lang-en hidden">eBPF Mechanism</h2>
             <p class="lang-zh" style="text-align: center; max-width: 850px; margin: -40px auto 40px; color: #666;">
-                在了解了 eBPF 的进化历程后，我们需要深入其内部，观察字节码是如何跨越权限边界，在确保系统绝对安全的前提下实现高性能执行的。
+                了解了 JIT、CO-RE 和 Maps 等组件后，我们需要深入其内部，观察字节码是如何跨越权限边界，在确保系统绝对安全的前提下实现高性能执行的。
             </p>
             <p class="lang-en hidden"
                 style="text-align: center; max-width: 850px; margin: -40px auto 40px; color: #666;">
-                After exploring eBPF's evolution, we dive into its inner workings to see how bytecode crosses privilege
+                Having explored components like JIT and CO-RE, we dive into its inner workings to see how bytecode crosses privilege
                 boundaries and achieves high-performance execution while maintaining absolute system safety.
             </p>
             <p class="lang-zh" style="text-align: center; max-width: 800px; margin: 0 auto 30px;">eBPF
@@ -2273,6 +2289,12 @@
                     <p class="lang-en hidden">Developers write C code, compiled via LLVM/Clang into special eBPF
                         bytecode. This hardware-independent intermediate format is the first abstraction for code
                         safety.</p>
+                    <p class="lang-zh" style="font-size: 0.85rem; margin-top: 10px; color: var(--cisco-blue); border-top: 1px dashed rgba(4,159,217,0.2); padding-top: 8px;">
+                        <strong>2025 补充：</strong> 除了 C 语言，现代化框架如 <strong>Aya (Rust)</strong> 已支持将高级语言直接编译为 eBPF 字节码，显著提升了开发阶段的内存安全性。
+                    </p>
+                    <p class="lang-en hidden" style="font-size: 0.85rem; margin-top: 10px; color: var(--cisco-blue); border-top: 1px dashed rgba(4,159,217,0.2); padding-top: 8px;">
+                        <strong>2025 Note:</strong> Beyond C, modern frameworks like <strong>Aya (Rust)</strong> now support direct compilation to eBPF bytecode, enhancing memory safety during development.
+                    </p>                        
                     <div class="step-arrow">➜</div>
                 </div>
                 <div class="step-card" style="border-top-color: var(--cisco-orange);">
@@ -2305,7 +2327,110 @@
                         Maps.</p>
                 </div>
             </div>
+            <div style="margin-top: 40px; text-align: center;">
+                <div class="logic-connector"></div>
+                <div class="lang-zh">
+                    <p style="color: var(--cisco-midnight); font-weight: bold; margin: 20px 0;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                        代码实现：这些流程在源码中如何体现？
+                    </p>
+                </div>
+                <div class="lang-en hidden">
+                    <p style="color: var(--cisco-midnight); font-weight: bold; margin: 20px 0;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                        Code Implementation: How does the flow look in source?
+                    </p>
+                </div>
+            </div>
 
+            <div class="code-tabs" style="margin-top: 20px;">
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchTab(event, 'c-kernel')">
+                        <span class="lang-zh">C (内核态逻辑)</span>
+                        <span class="lang-en hidden">C (Kernel Logic)</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab(event, 'python-bcc')">
+                        <span class="lang-zh">Python (动态诊断)</span>
+                        <span class="lang-en hidden">Python (Diagnosis)</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab(event, 'go-libbpf')">
+                        <span class="lang-zh">Go (安全看板)</span>
+                        <span class="lang-en hidden">Go (Dashboard)</span>
+                    </button>
+                </div>
+
+                <div class="code-window">
+                    <div class="code-header">
+                        <div class="dot dot-red"></div>
+                        <div class="dot dot-yellow"></div>
+                        <div class="dot dot-green"></div>
+                        <span style="color: #888; font-size: 0.75rem; margin-left: 10px; font-family: sans-serif; letter-spacing: 1px;">EBPF_ARCH_CORE_VIEW</span>
+                    </div>
+                    
+                    <div id="c-kernel" class="tab-content">
+                        <pre class="code-content-stable lang-zh">
+            // 内核态：极速拦截非 80/443 端口的非法包
+            SEC("xdp")
+            int xdp_drop_illegal(struct xdp_md *ctx) {
+                if (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
+                    return XDP_DROP; // 硬件级丢弃，不占CPU
+                }
+                return XDP_PASS;
+            }
+                        </pre>
+                        <pre class="code-content-stable lang-en hidden">
+            // Kernel-space: High-speed interception of non-80/443 packets
+            SEC("xdp")
+            int xdp_drop_illegal(struct xdp_md *ctx) {
+                if (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
+                    return XDP_DROP; // Hardware-level drop, zero CPU impact
+                }
+                return XDP_PASS;
+            }
+                        </pre>
+                    </div>
+
+                    <div id="python-bcc" class="tab-content hidden">
+                        <pre class="code-content-stable lang-zh">
+            # 用户态：实时统计系统调用延迟直方图
+            from bcc import BPF
+            b = BPF(text="TRACE_SYSCALL_LATENCY_CODE")
+            print("正在实时收集内核函数 [do_sys_openat2] 耗时分布...")
+            b["dist"].print_log2_hist("usecs")
+                        </pre>
+                        <pre class="code-content-stable lang-en hidden">
+            # User-space: Real-time syscall latency histogram
+            from bcc import BPF
+            b = BPF(text="TRACE_SYSCALL_LATENCY_CODE")
+            print("Collecting latency distribution for [do_sys_openat2]...")
+            b["dist"].print_log2_hist("usecs")
+                        </pre>
+                    </div>
+
+                    <div id="go-libbpf" class="tab-content hidden">
+                        <pre class="code-content-stable lang-zh">
+            // 用户态：将内核 Maps 中的攻击数据同步至仪表盘
+            func pollAuditEvents() {
+                events := bpfModule.GetMap("attack_map")
+                for {
+                    data := events.Poll() // 毫秒级同步：内核态沙盒 -> 用户态大屏
+                    updateDashboard(data)
+                }
+            }
+                        </pre>
+                        <pre class="code-content-stable lang-en hidden">
+            // User-space: Synchronize attack data from kernel Maps to dashboard
+            func pollAuditEvents() {
+                events := bpfModule.GetMap("attack_map")
+                for {
+                    data := events.Poll() // MS-level sync: Kernel Sandbox -> User-space UI
+                    updateDashboard(data)
+                }
+            }
+                        </pre>
+                    </div>
+                </div>
+            </div>
             <div class="detail-grid">
                 <div class="card" style="border-top-color: var(--cisco-blue);">
                     <h3 class="lang-zh">辅助函数 (Helper Functions)</h3>
@@ -2317,22 +2442,16 @@
                         eBPF design emphasizes safety and isolation, forbidding direct calls to arbitrary kernel
                         functions. The kernel provides controlled Helper APIs as a secure "toolbox."
                     </p>
-                    <ul class="hook-list">
-                        <li class="hook-item">
-                            <span class="hook-label">Data</span>
-                            <span class="hook-desc lang-zh">`bpf_probe_read()` 用于安全读取内核内存；`bpf_get_current_pid()` 获取进程
-                                ID。</span>
-                            <span class="hook-desc lang-en hidden">`bpf_probe_read()` for safe kernel memory reads;
-                                `bpf_get_current_pid()` to retrieve process IDs.</span>
-                        </li>
-                        <li class="hook-item">
-                            <span class="hook-label">Network</span>
-                            <span class="hook-desc lang-zh">`bpf_skb_load_bytes()` 解析包数据；`bpf_redirect()`
-                                实现极速包重定向。</span>
-                            <span class="hook-desc lang-en hidden">`bpf_skb_load_bytes()` to parse packet data;
-                                `bpf_redirect()` for high-speed packet redirection.</span>
-                        </li>
-                    </ul>
+                    <div class="insight-card" style="margin-top: 5px; background: rgba(108, 194, 74, 0.03); border-left-color: var(--cisco-green); padding: 12px; font-style: normal;">
+                        <span class="lang-zh" style="font-size: 0.85rem; color: #444;">
+                            <strong style="color: var(--cisco-green);">2025 进阶：从 Helper 到 Kfuncs</strong><br>
+                            虽然 Helper 是稳定的安全 API，但现代内核（v6.x+）正转向 <strong>Kfuncs</strong>（内核函数直接映射）。它允许 eBPF 程序以更原生的性能调用内核内部逻辑，这在处理百万级 PPS 的安全审计时表现卓越。
+                        </span>
+                        <span class="lang-en hidden" style="font-size: 0.85rem; color: #444;">
+                            <strong style="color: var(--cisco-green);">Advanced 2025: Helper to Kfuncs</strong><br>
+                            While Helpers remain the stable API, <strong>Kfuncs</strong> (v6.x+) offer native-like performance for calling internal kernel logic—ideal for Million-PPS security auditing.
+                        </span>
+                    </div>
                 </div>
 
                 <div class="card" style="border-top-color: var(--cisco-midnight);">
@@ -2340,25 +2459,38 @@
                     <h3 class="lang-en hidden">Tail Calls</h3>
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
                         <strong>进化：</strong> 早期内核限制为 4096 条指令。但在 2025 年，现代内核已支持 <strong>100 万条指令</strong>
-                        的复杂度检查（Complexity Limit）。
+                        的复杂度检查（Complexity Limit）。此演进使得在内核层运行复杂的<strong>轻量级 AI 推理/过滤模型</strong>成为可能。
                     </p>
                     <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
                         <strong>Evolution:</strong> Early kernels were limited to 4096 instructions. In 2025, modern
-                        kernels support up to <strong>1 million instructions</strong> complexity limit.
-                    </p>
-                    <p class="lang-zh" style="font-size: 0.8rem; color: #777; margin-top: 5px;">
-                        *注：此演进使得在内核层运行复杂的<strong>轻量级 AI 推理/过滤模型</strong>成为可能。
-                    </p>
-                    <p class="lang-en hidden" style="font-size: 0.8rem; color: #777; margin-top: 5px;">
-                        *Note: This evolution enables running complex <strong>lightweight AI inference/filtering
+                        kernels support up to <strong>1 million instructions</strong> complexity limit.This evolution enables running complex <strong>lightweight AI inference/filtering
                             models</strong> at the kernel layer.
                     </p>
-                    <div class="insight-card" style="margin: 15px 0 0; font-size: 0.85rem;">
+                    <div class="insight-card" style="margin-top: 5px; font-size: 0.85rem;">
                         <span class="lang-zh">核心优势：实现逻辑解耦、构建复杂的模块化处理管道（如 Cilium 的网络逻辑链路）。</span>
                         <span class="lang-en hidden">Core Benefit: Logical decoupling and building complex modular
                             processing pipelines (e.g., Cilium's network logic links).</span>
                     </div>
                 </div>
+                <div class="card" style="border-top-color: var(--cisco-blue); background: rgba(4, 159, 217, 0.01);">
+                    <span class="year-badge-2025" style="position: static; margin-right: 8px; vertical-align: middle;">NEW</span>
+                    <h3 class="lang-zh">
+                        <span class="year-badge-2025">NEW</span>
+                        生命周期管理 (bpf_link)
+                    </h3>
+                    <h3 class="lang-en hidden">
+                        <span class="year-badge-2025">NEW</span>
+                        Lifecycle Management (bpf_link)
+                    </h3>
+                    <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
+                        <strong>架构价值：</strong> 在 2025 年的生产实践中，我们不再直接 attach 程序，而是通过 <code>bpf_link</code> 进行抽象管理。<br><br>
+                        <strong>核心进化：</strong> 它解决了“进程崩溃导致挂钩失效”的痛点。即使用户态管理程序退出，内核态的逻辑依然可以受控存在。这实现了安全策略与管理工具的<strong>原子性解耦</strong>。
+                    </p>
+                    <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
+                        <strong>Arch Value:</strong> In 2025, we manage hooks via <code>bpf_link</code> instead of raw attachment.<br><br>
+                        <strong>Evolution:</strong> It decouples the program lifecycle from the user-space process. If the manager crashes, the kernel-level defense remains intact, ensuring <strong>atomic persistence</strong> of security policies.
+                    </p>
+                </div>                
             </div>
 
             <div class="card" style="margin-top: 30px; border-top-color: var(--cisco-green);">
@@ -2422,98 +2554,6 @@
         </div>
     </section>
 
-    <!-- Code Examples Section -->
-    <section style="background: #fdfdfd;">
-        <div class="container">
-            <span class="golden-badge lang-zh">代码实操 / POLYGLOT EBPF</span>
-            <span class="golden-badge lang-en hidden">CODE EXAMPLES / POLYGLOT EBPF</span>
-
-            <h2 class="section-title lang-zh">多语言开发实战</h2>
-            <h2 class="section-title lang-en hidden">eBPF in Action: Polyglot Snippets</h2>
-
-            <div class="code-tabs">
-                <div class="tabs-header">
-                    <button class="tab-btn active" onclick="switchTab('c-kernel')">
-                        <span class="lang-zh">C (网络防火墙)</span>
-                        <span class="lang-en hidden">C (Network Firewall)</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('python-bcc')">
-                        <span class="lang-zh">Python (性能诊断)</span>
-                        <span class="lang-en hidden">Python (Performance Diagnosis)</span>
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('go-libbpf')">
-                        <span class="lang-zh">Go (安全监测看板)</span>
-                        <span class="lang-en hidden">Go (Security Dashboard)</span>
-                    </button>
-                </div>
-
-                <div id="c-kernel" class="code-content">
-                    <div class="lang-zh">
-<span class="code-comment">// 内核态：极速拦截非 80/443 端口的非法包</span>
-SEC(<span class="code-string">"xdp"</span>)
-<span class="code-keyword">int</span> <span class="code-func">xdp_drop_illegal</span>(<span 
-class="code-keyword">struct</span> xdp_md *ctx) {
-<span class="code-keyword">if</span> (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
-<span class="code-keyword">return</span> XDP_DROP; <span class="code-comment">// 硬件级丢弃，不占CPU</span>}
-<span class="code-keyword">return</span> XDP_PASS;}
-</div>
-<div class="lang-en hidden">
-<span class="code-comment">// Kernel-space: High-speed interception of non-80/443 packets</span>
-SEC(<span class="code-string">"xdp"</span>)
-<span class="code-keyword">int</span> <span class="code-func">xdp_drop_illegal</span>(<span
- class="code-keyword">struct</span> xdp_md *ctx) {
- <span class="code-keyword">if</span> (parse_port(ctx) != 80 && parse_port(ctx) != 443) {
- <span class="code-keyword">return</span> XDP_DROP; <span class="code-comment">// Hardware-level drop, minimal CPU overhead</span>
-                        }
-<span class="code-keyword">return</span> XDP_PASS;
-                        }
-</div>
-                </div>
-
-                <div id="python-bcc" class="code-content hidden">
-                    <div class="lang-zh">
-<span class="code-comment"># 用户态：实时统计系统调用延迟直方图</span>
-<span class="code-keyword">from</span> bcc <span class="code-keyword">import</span> BPF
-  b = BPF(text=<span class="code-string">"TRACE_SYSCALL_LATENCY_CODE"</span>)
-<span class="code-keyword">print</span>(<span class="code-string">"正在实时收集内核函数 [do_sys_openat2]耗时分布..."</span>)
-  b[<span class="code-string">"dist"</span>].print_log2_hist(<span class="code-string">"usecs"</span>)
-<span class="code-comment"># 0 侵入生成的性能火焰图数据</span>
-                    </div>
-                    <div class="lang-en hidden">
-<span class="code-comment"># User-space: Real-time syscall latency histogram statistics</span>
-<span class="code-keyword">from</span> bcc <span class="code-keyword">import</span> BPF
- b = BPF(text=<span class="code-string">"TRACE_SYSCALL_LATENCY_CODE"</span>)
-<span class="code-keyword">print</span>(<span class="code-string">"Collecting latency distribution for [do_sys_openat2]..."</span>)
- b[<span class="code-string">"dist"</span>].print_log2_hist(<span class="code-string">"usecs"</span>)
-<span class="code-comment"># Non-intrusive performance data for flame graphs</span>
-                    </div>
-                </div>
-
-                <div id="go-libbpf" class="code-content hidden">
-                    <div class="lang-zh">
-<span class="code-comment">// 用户态：将内核 Maps 中的攻击数据同步至仪表盘</span>
-<span class="code-keyword">func</span> <span class="code-func">pollAuditEvents</span>() { 
-events := bpfModule.GetMap(<span class="code-string">"attack_map"</span>)
-<span class="code-keyword">for</span> { data := events.Poll() <span class="code-comment">// 毫秒级同步：内核态沙盒 -> 用户态大屏</span>
-updateDashboard(data)
-}
-}
-                    </div>
-                    <div class="lang-en hidden">
-<span class="code-comment">// User-space: Synchronize attack data from kernel Maps to
-                            dashboard</span>
-<span class="code-keyword">func</span> <span class="code-func">pollAuditEvents</span>() {
-events := bpfModule.GetMap(<span class="code-string">"attack_map"</span>)
-<span class="code-keyword">for</span> {
-data := events.Poll() <span class="code-comment">// MS-level sync: Kernel sandbox -> Userspace screen</span>
-updateDashboard(data)
-                        }
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Why it matters: Three Pillars -->
     <section class="features">
@@ -2705,8 +2745,8 @@ updateDashboard(data)
             <span class="golden-badge lang-zh">明星项目 / ECOSYSTEM</span>
             <span class="golden-badge lang-en hidden">INDUSTRY LEADERS / ECOSYSTEM</span>
 
-            <h2 class="section-title lang-zh" style="color:white;">eBPF 明星项目全景观</h2>
-            <h2 class="section-title lang-en hidden" style="color:white;">The eBPF Ecosystem</h2>
+            <h2 class="section-title lang-zh" style="color:white;">开源项目生态</h2>
+            <h2 class="section-title lang-en hidden" style="color:white;">Open-Source Ecosystem</h2>
 
             <div class="feature-grid-eco">
                 <div class="feature-card">
@@ -3065,11 +3105,8 @@ updateDashboard(data)
     <!--2025 INDUSTRY REPORT-->
     <section class="container" style="padding-top: 0;">
         <div class="report-highlight">
-            <span class="golden-badge lang-zh">2025 行业白皮书摘要 / STRATEGIC INSIGHT</span>
-            <span class="golden-badge lang-en hidden">2025 INDUSTRY REPORT / STRATEGIC INSIGHT</span>
-
-            <h2 class="lang-zh" style="margin-bottom: 20px;">eBPF for the Infrastructure Platform</h2>
-            <h2 class="lang-en hidden" style="margin-bottom: 20px;">eBPF for the Infrastructure Platform</h2>
+        <h2 class="section-title lang-zh">2025 技术趋势</h2>
+        <h2 class="section-title lang-en hidden">2025 Tech Trends</h2>
 
             <p class="lang-zh" style="color: #444; margin-bottom: 30px;">
                 eBPF 已经跨越了早期采用者阶段，成为基础设施团队的<strong>战略平台首选</strong>。它通过重塑内核可编程性，正在定义下一代基础设施平台。
@@ -3123,6 +3160,11 @@ updateDashboard(data)
                             Softirq load, enabling "zero-copy" performance for container networking that matches
                             physical host speeds.
                         </span>
+                        <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 6px; font-family: monospace; font-size: 0.75rem; color: var(--cisco-midnight);">
+                            <div class="lang-zh">路径对比：veth (内核协议栈多次跳转) vs Netkit (eBPF 一跳直达)</div>
+                            <div class="lang-en hidden">Path: veth (Multi-hop stack) vs Netkit (eBPF Direct-hop)</div>
+                            
+                        </div>
                     </div>
                 </div>
                 <div class="card" style="border-top-color: var(--cisco-orange);">
@@ -3210,7 +3252,7 @@ updateDashboard(data)
                 within reach.
             </p>
 
-            <div style="margin-top: 40px;">
+            <div style="margin-top: 40px; text-align: center;">
                 <button class="btn btn-primary lang-zh" onclick="scrollToDemo()">立即开启内核探索之旅</button>
                 <button class="btn btn-primary lang-en hidden" onclick="scrollToDemo()">Start Your Kernel Exploration
                     Now</button>
@@ -3276,31 +3318,28 @@ updateDashboard(data)
     </main>
 
     <script>
-        /**
-         * 语言切换函数
-         * @param {string} lang - 'zh' 或 'en'
-         */
+ 
         function setLang(lang) {
-            const zhElements = document.querySelectorAll('.lang-zh');
-            const enElements = document.querySelectorAll('.lang-en');
+            // 1. 原子操作：立即切换根节点状态，触发 CSS 重新渲染
+            document.documentElement.setAttribute('data-lang', lang);
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+            
+            // 2. 局部刷新：仅更新语言切换按钮的 UI 状态
             const btns = document.querySelectorAll('.lang-btn');
+            const isEn = lang === 'en';
+            
+            btns[0].classList.toggle('active', !isEn); // 中文按钮
+            btns[1].classList.toggle('active', isEn);  // 英文按钮
 
-            if (lang === 'zh') {
-                zhElements.forEach(el => el.classList.remove('hidden'));
-                enElements.forEach(el => el.classList.add('hidden'));
-                btns[0].classList.add('active');
-                btns[1].classList.remove('active');
-                document.documentElement.lang = 'zh-CN';
-            } else {
-                zhElements.forEach(el => el.classList.add('hidden'));
-                enElements.forEach(el => el.classList.remove('hidden'));
-                btns[0].classList.remove('active');
-                btns[1].classList.add('active');
-                document.documentElement.lang = 'en';
+            // 3. 特殊逻辑：如果是英文模式，需要确保当前处于 Active 状态的 Tab 代码块也同步更新语言
+            // 这一步解决了原本 Tab 内部代码无法跟随全局语言切换的问题
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab) {
+                const tabIdMatch = activeTab.getAttribute('onclick').match(/'([^']+)'/);
+                if (tabIdMatch) switchTab(null, tabIdMatch[1]);
             }
+        } 
 
-            // 可以在此处添加持久化逻辑，如 localStorage.setItem('pref-lang', lang);
-        }
         /**
         * 平滑滚动至 Demo 区域
         */
@@ -3314,13 +3353,29 @@ updateDashboard(data)
             }
         }
 
-        function switchTab(tabId) {
-            const contents = document.querySelectorAll('.code-content');
-            const btns = document.querySelectorAll('.tab-btn');
-            contents.forEach(c => c.classList.add('hidden'));
-            btns.forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.remove('hidden');
-            if (event) event.currentTarget.classList.add('active');
+        function switchTab(e, tabId) {
+            // 1. 隐藏所有 Tab 容器
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            
+            // 2. 显示目标容器
+            const target = document.getElementById(tabId);
+            if (target) {
+                target.classList.remove('hidden');
+                // 特殊处理：Tab 容器内部的语言显示逻辑
+                const currentLang = document.documentElement.getAttribute('data-lang') || 'zh';
+                target.querySelectorAll('.lang-zh, .lang-en').forEach(el => {
+                    if (el.classList.contains('lang-' + currentLang)) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                });
+            }
+
+            // 3. 按钮高亮逻辑逻辑（保持原文不变）
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            let activeBtn = e ? e.currentTarget : document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
         // 100% 保留原始状态变量
@@ -3495,12 +3550,41 @@ updateDashboard(data)
                 setTimeout(() => el.classList.remove('alert'), 500);
             }
         }
+        /**
+         * 自动清理 HTML 源码缩进带来的位移感
+         */
+        function cleanIndentation() {
+            document.querySelectorAll('.code-content-stable').forEach(block => {
+                const text = block.textContent;
+                const lines = text.split('\n');
+                
+                // 过滤掉首尾纯空行
+                const filteredLines = lines.filter((line, index) => 
+                    !(index === 0 && line.trim() === '') && 
+                    !(index === lines.length - 1 && line.trim() === '')
+                );
 
-        // 初始化语言（可根据浏览器语言自动识别）
-        window.onload = () => {
-            // 默认中文，或根据逻辑检测
+                // 获取最小缩进
+                const minIndent = filteredLines.reduce((min, line) => {
+                    if (line.trim() === '') return min;
+                    const match = line.match(/^(\s*)/);
+                    return Math.min(min, match[0].length);
+                }, Infinity);
+
+                block.textContent = filteredLines.map(line => line.slice(minIndent)).join('\n');
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. 预处理：清理所有代码块缩进
+            cleanIndentation();
+            
+            // 2. 初始化：显示第一个 Tab（传入 null 避免事件冲突）
+            switchTab(null, 'c-kernel');
+            
+            // 3. 默认语言
             setLang('zh');
-        };
+        });
     </script>
 </body>
 
