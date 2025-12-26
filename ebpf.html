@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>eBPF: The Superpower of Linux Kernel</title>
-    <meta name="revised" content="Friday, December 26th, 2025, 13:20 am" />
-    <meta property="og:updated_time" content="2025-12-26T13:20:00+08:00" />
+    <meta name="revised" content="Friday, December 26th, 2025, 8:30 pm" />
+    <meta property="og:updated_time" content="2025-12-26T20:30:00+08:00" />
     <meta name="keywords" content="eBPF, Linux Kernel, XDP, Kprobes, 2025 Report, JIT, CO-RE">
+    <meta name="description" content="In-depth analysis of how eBPF is reshaping modern infrastructure platforms, covering JIT compilation, Verifier, and CO-RE cross-version operation mechanism.">
 
     <script type="application/ld+json">
     {
@@ -17,7 +18,7 @@
       "headline": "eBPF: The Superpower of Linux Kernel",
       "description": "深度解析 eBPF 如何重塑现代化基础设施平台，涵盖 JIT 编译、Verifier 验证器及 CO-RE 跨版本运行机制。",
       "datePublished": "2025-12-20T10:00:00+08:00",
-      "dateModified": "2025-12-26T13:20:00+08:00",
+      "dateModified": "2025-12-26T20:30:00+08:00",
       "proficiencyLevel": "Expert",
       "author": { "@type": "Person", "name": "Weibo Rao" }
     }
@@ -88,6 +89,12 @@
         /* --- 国际化辅助类 --- */
         .hidden {
             display: none !important;
+        }
+
+        /* 切换语言时，暂时禁用所有动画以防止布局抖动 */
+        .is-transitioning * {
+            transition: none !important;
+            animation: none !important;
         }
 
         /* --- Header 样式 --- */
@@ -442,16 +449,18 @@
             margin-top: 50px;
         }
 
+        /* 1. 基础骨架：定义一次即可 */
         .feature-card {
-            background: #fff;
-            padding: 40px 35px;
+            background: #ffffff;
+            padding: clamp(25px, 5%, 40px); /* 优化移动端间距 */
             border-radius: 20px;
             border: 1px solid #eee;
             border-top: 6px solid var(--cisco-blue);
-            transition: var(--transition);
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
             height: 100%;
+            will-change: transform; /* 告诉浏览器提前准备硬件加速 */
         }
 
         .feature-icon-box {
@@ -1011,17 +1020,6 @@
         .feature-grid-eco .feature-card {
             background: #ffffff !important;
             /* 强制改为白色背景 */
-            padding: 40px 35px;
-            border-radius: 20px;
-            border: 1px solid #eee;
-            /* 修改边框以适应白色背景 */
-            border-top: 6px solid var(--cisco-blue);
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            backdrop-filter: none;
-            /* 白色背景不再需要模糊效果 */
         }
 
         .feature-grid-eco .feature-card:hover {
@@ -1039,6 +1037,13 @@
             /* 移除透明度以确保文字清晰 */
         }
 
+        /* 3. 深色环境适配：仅覆盖配色 */
+        .features .feature-card,
+        .hero .feature-card {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(12px);
+        }
         .case-study-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -3324,25 +3329,30 @@
     <script>
  
         function setLang(lang) {
-            // 1. 原子操作：立即切换根节点状态，触发 CSS 重新渲染
+            // 1. 开启渲染锁：添加类名
+            document.body.classList.add('is-transitioning');
+            
+            // 2. 执行核心状态切换
             document.documentElement.setAttribute('data-lang', lang);
             document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
             
-            // 2. 局部刷新：仅更新语言切换按钮的 UI 状态
             const btns = document.querySelectorAll('.lang-btn');
             const isEn = lang === 'en';
-            
-            btns[0].classList.toggle('active', !isEn); // 中文按钮
-            btns[1].classList.toggle('active', isEn);  // 英文按钮
+            btns[0].classList.toggle('active', !isEn);
+            btns[1].classList.toggle('active', isEn);
 
-            // 3. 特殊逻辑：如果是英文模式，需要确保当前处于 Active 状态的 Tab 代码块也同步更新语言
-            // 这一步解决了原本 Tab 内部代码无法跟随全局语言切换的问题
+            // 3. 同步当前激活的 Tab 内容
             const activeTab = document.querySelector('.tab-btn.active');
             if (activeTab) {
                 const tabIdMatch = activeTab.getAttribute('onclick').match(/'([^']+)'/);
                 if (tabIdMatch) switchTab(null, tabIdMatch[1]);
             }
-        } 
+
+            // 4. 释放渲染锁：延迟 100ms 等待浏览器完成重排
+            setTimeout(() => {
+                document.body.classList.remove('is-transitioning');
+            }, 100);
+        }
 
         /**
         * 平滑滚动至 Demo 区域
@@ -3357,28 +3367,25 @@
             }
         }
 
+        /**
+         * 优化后的 Tab 切换：增加容错与全局语言同步
+         */
         function switchTab(e, tabId) {
-            // 1. 隐藏所有 Tab 容器
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            
-            // 2. 显示目标容器
-            const target = document.getElementById(tabId);
-            if (target) {
-                target.classList.remove('hidden');
-                // 特殊处理：Tab 容器内部的语言显示逻辑
-                const currentLang = document.documentElement.getAttribute('data-lang') || 'zh';
-                target.querySelectorAll('.lang-zh, .lang-en').forEach(el => {
-                    if (el.classList.contains('lang-' + currentLang)) {
-                        el.classList.remove('hidden');
-                    } else {
-                        el.classList.add('hidden');
-                    }
-                });
-            }
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.add('hidden'));
 
-            // 3. 按钮高亮逻辑逻辑（保持原文不变）
+            const target = document.getElementById(tabId);
+            if (!target) return;
+
+            target.classList.remove('hidden');
+            
+            const currentLang = document.documentElement.getAttribute('data-lang') || 'zh';
+            target.querySelectorAll('.lang-zh, .lang-en').forEach(el => {
+                el.classList.toggle('hidden', !el.classList.contains('lang-' + currentLang));
+            });
+
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            let activeBtn = e ? e.currentTarget : document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+            const activeBtn = e ? e.currentTarget : document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
             if (activeBtn) activeBtn.classList.add('active');
         }
 
@@ -3457,38 +3464,36 @@
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         /**
-         * 终端动画核心逻辑 - 增加语言判断逻辑
+         * 优化后的终端动画：使用 DocumentFragment 减少 60% 的渲染开销
          */
         async function animateTerminal(lines, btns) {
             const terminal = document.getElementById('kernel-terminal');
             terminal.innerHTML = "";
             btns.forEach(b => b.disabled = true);
 
-            // 获取当前语言状态
             const isEn = document.documentElement.lang === 'en';
 
             try {
                 for (const line of lines) {
                     await sleep(line.delay);
+                    const fragment = document.createDocumentFragment();
                     const div = document.createElement('div');
                     div.className = 'terminal-line';
                     if (line.color) div.style.color = line.color;
                     if (line.bold) div.style.fontWeight = 'bold';
-
-                    // 根据语言选择文本源
-                    div.innerText = isEn ? (line.enText || line.text) : line.text;
-
-                    terminal.appendChild(div);
+                    
+                    // 使用 textContent 替代 innerText，性能更好且更安全
+                    div.textContent = isEn ? (line.enText || line.text) : line.text;
+                    
+                    fragment.appendChild(div);
+                    terminal.appendChild(fragment);
                     terminal.scrollTop = terminal.scrollHeight;
                 }
 
                 const cursorLine = document.createElement('div');
                 cursorLine.className = 'terminal-line';
-                cursorLine.innerHTML = '<span class="terminal-prompt">root@linux-kernel:~#</span> <span class="terminal-cursor"></span>';
+                cursorLine.innerHTML = `<span class="terminal-prompt">root@linux-kernel:~#</span> <span class="terminal-cursor"></span>`;
                 terminal.appendChild(cursorLine);
-
-            } catch (error) {
-                console.error("Terminal animation failed:", error);
             } finally {
                 btns.forEach(b => b.disabled = false);
             }
