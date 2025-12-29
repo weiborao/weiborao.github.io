@@ -6,8 +6,8 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=yes, viewport-fit=cover">
     <title>eBPF: The Superpower of Linux Kernel</title>
-    <meta name="revised" content="Monday, December 29th, 2025, 11:30 am" />
-    <meta property="og:updated_time" content="2025-12-29T11:30:00+08:00" />
+    <meta name="revised" content="Monday, December 29th, 2025, 1:45 pm" />
+    <meta property="og:updated_time" content="2025-12-29T13:45:00+08:00" />
     <meta name="keywords" content="eBPF, Linux Kernel, XDP, Kprobes, 2025 Report, JIT, CO-RE">
     <meta name="description"
         content="In-depth analysis of how eBPF is reshaping modern infrastructure platforms, covering JIT compilation, Verifier, and CO-RE cross-version operation mechanism.">
@@ -19,7 +19,7 @@
       "headline": "eBPF: The Superpower of Linux Kernel",
       "description": "深度解析 eBPF 如何重塑现代化基础设施平台，涵盖 JIT 编译、Verifier 验证器及 CO-RE 跨版本运行机制。",
       "datePublished": "2025-12-20T10:00:00+08:00",
-      "dateModified": "2025-12-29T11:30:00+08:00",
+      "dateModified": "2025-12-29T13:45:00+08:00",
       "proficiencyLevel": "Expert",
       "author": { "@type": "Person", "name": "Weibo Rao" }
     }
@@ -27,1193 +27,1440 @@
 
     <style>
         /* --- 100% 原始保留所有 CSS 变量与样式 --- */
-:root {
-    --cisco-blue: #049FD9;
-    --cisco-dark-blue: #1D2729;
-    --cisco-midnight: #0D274D;
-    --cisco-sky-blue: #6ABF4B;
-    --cisco-green: #6CC24A;
-    --cisco-red: #E2231A;
-    --cisco-orange: #FF9E1B;
-    --cisco-gray: #F2F2F2;
-    --cisco-light-gray: #E8E8E8;
-    --text-main: #333;
-    --text-light: #FFF;
-    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    --transition: all 0.3s ease;
-    --section-padding: 120px
-    }
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent
-    }
-body {
-    font-family: var(--font-family);
-    color: var(--text-main);
-    background-color: #fff;
-    line-height: 1.6;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased
-    }
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    width: 100%
-    }
-/* --- 核心组件样式 --- */
-.btn {
-    display: inline-block;
-    padding: 12px 28px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: var(--transition);
-    cursor: pointer;
-    border: none;
-    font-size: 1rem
-    }
-.btn-primary {
-    background-color: var(--cisco-blue);
-    color: white;
-    box-shadow: 0 4px 6px rgba(4, 159, 217, 0.3)
-    }
-/* --- 国际化辅助类 --- */
-.hidden {
-    display: none !important
-    }
-/* 切换语言时，暂时禁用所有动画以防止布局抖动 */
-.is-transitioning * {
-    transition: none !important;
-    animation: none !important
-    }
-/* --- Header 样式 --- */
-header {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    padding: 15px 0
-    }
-.nav-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center
-    }
-.logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--cisco-dark-blue);
-    display: flex;
-    align-items: center;
-    gap: 12px
-    }
-.logo svg {
-    height: 28px;
-    width: auto
-    }
-/* --- 导航栏左侧布局与返回按钮 --- */
-.nav-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    /* 保持按钮与 Logo 之间的呼吸感 */
-    }
-.btn-home {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    color: var(--cisco-dark-blue);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: var(--transition)
-    }
-.btn-home:hover {
-    border-color: var(--cisco-blue);
-    color: var(--cisco-blue);
-    background: rgba(4, 159, 217, 0.05)
-    }
-.btn-home svg {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-    /* 自动跟随文字颜色 */
-    }
-/* 移动端适配：空间有限时隐藏文字，只留图标 */
-@media (max-width: 480px) {
-    .btn-home span {
-        display: none
+        :root {
+            --cisco-blue: #049FD9;
+            --cisco-dark-blue: #1D2729;
+            --cisco-midnight: #0D274D;
+            --cisco-sky-blue: #6ABF4B;
+            --cisco-green: #6CC24A;
+            --cisco-red: #E2231A;
+            --cisco-orange: #FF9E1B;
+            --cisco-gray: #F2F2F2;
+            --cisco-light-gray: #E8E8E8;
+            --text-main: #333;
+            --text-light: #FFF;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+            --section-padding: 120px
         }
-    .btn-home {
-        padding: 6px 8px
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent
         }
-    }
-.lang-switch {
-    background: var(--cisco-gray);
-    border-radius: 20px;
-    padding: 4px;
-    display: flex;
-    font-size: 0.85rem
-    }
-.lang-btn {
-    padding: 6px 14px;
-    border-radius: 16px;
-    cursor: pointer;
-    color: #666;
-    font-weight: 600;
-    transition: all 0.2s
-    }
-.lang-btn.active {
-    background: white;
-    color: var(--cisco-blue);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
-    }
-.hero {
-    background: linear-gradient(135deg, var(--cisco-dark-blue) 0%, #0D274D 100%);
-    color: white;
-    padding: 100px 0 140px;
-    text-align: center;
-    position: relative;
-    overflow: hidden
-    }
-.hero::before {
-    content: "";
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(4, 159, 217, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
-    z-index: 0
-    }
-.hero-content {
-    position: relative;
-    z-index: 1
-    }
-.hero h1 {
-    font-size: 3rem;
-    margin-bottom: 24px;
-    font-weight: 300;
-    letter-spacing: -1px
-    }
-.hero h1 strong {
-    font-weight: 800;
-    display: block;
-    color: var(--cisco-blue);
-    margin-top: 10px
-    }
-.hero p {
-    font-size: 1.25rem;
-    opacity: 0.9;
-    max-width: 700px;
-    margin: 0 auto 40px;
-    font-weight: 300
-    }
-/* Winston 原则：显著性呼吁框 (Salience Callout) */
-.winston-callout {
-    background: rgba(4, 159, 217, 0.05);
-    border-left: 5px solid var(--cisco-blue);
-    padding: 15px 20px;
-    margin: 20px 0;
-    border-radius: 0 8px 8px 0;
-    font-weight: 500;
-    color: var(--cisco-midnight)
-    }
-.winston-callout strong {
-    color: var(--cisco-blue);
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    display: block;
-    margin-bottom: 5px
-    }
-.winston-callout p {
-    margin: 0
-    }
-.hero-evidence-bar {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 50px;
-    flex-wrap: wrap
-    }
-.evidence-item {
-    text-align: left;
-    border-left: 3px solid var(--cisco-blue);
-    padding-left: 15px
-    }
-.section-title {
-    text-align: center;
-    font-size: 2.2rem;
-    color: var(--cisco-dark-blue);
-    margin-bottom: 60px;
-    font-weight: 700;
-    position: relative
-    }
-.section-title::after {
-    content: "";
-    display: block;
-    width: 60px;
-    height: 4px;
-    background: var(--cisco-blue);
-    margin: 20px auto 0;
-    border-radius: 2px
-    }
-.golden-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--cisco-blue);
-    color: white;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-    text-transform: uppercase
-    }
-.grid-3 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin: 40px 0
-    }
-.feature-box {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    box-shadow: var(--card-shadow);
-    transition: var(--transition)
-    }
-.feature-box:hover {
-    transform: translatey(-5px);
-    border-color: var(--cisco-blue)
-    }
-.feature-box svg {
-    width: 48px;
-    height: 48px;
-    fill: var(--cisco-blue);
-    margin-bottom: 20px
-    }
-.comparison-wrapper {
-    overflow-x: auto;
-    margin: 60px 0;
-    -webkit-overflow-scrolling: touch
-    }
-.comparison-table {
-    width: 100%;
-    min-width: 600px;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--card-shadow)
-    }
-.comparison-table th {
-    background: var(--cisco-dark-blue);
-    color: white;
-    padding: 20px;
-    text-align: left;
-    font-size: 1rem
-    }
-.comparison-table td {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    font-size: 0.95rem
-    }
-.analogy-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 40px
-    }
-.analogy-item {
-    text-align: center;
-    height: 100%
-    }
-.analogy-icon {
-    height: 140px;
-    margin-bottom: 25px;
-    transition: transform 0.3s
-    }
-.analogy-tag {
-    font-family: "Courier New", monospace;
-    font-size: 0.75rem;
-    color: var(--cisco-blue);
-    font-weight: bold;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 8px
-    }
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    padding: clamp(20px, 5%, 40px);
-    margin-bottom: 20px;
-    border-top: 4px solid var(--cisco-blue);
-    transition: var(--transition)
-    }
-.check-icon {
-    color: var(--cisco-green);
-    font-weight: bold
-    }
-.cross-icon {
-    color: var(--cisco-red);
-    font-weight: bold
-    }
-.symbol-container {
-    background: #f8f9fa;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    margin: 40px 0
-    }
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-    margin-top: 50px
-    }
-.insight-card {
-    background: #f8f9fa;
-    border-left: 4px solid var(--cisco-blue);
-    padding: 20px;
-    margin: 30px 0;
-    font-style: italic;
-    color: #555;
-    font-size: 1rem;
-    line-height: 1.7
-    }
-.pillars-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    margin-top: 50px
-    }
-/* 1. 基础骨架：定义一次即可 */
-.feature-card {
-    background: #fff;
-    padding: clamp(25px, 5%, 40px);
-    /* 优化移动端间距 */
-    border-radius: 20px;
-    border: 1px solid #eee;
-    border-top: 6px solid var(--cisco-blue);
-    transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    will-change: transform;
-    /* 告诉浏览器提前准备硬件加速 */
-    }
-.feature-icon-box {
-    width: 75px;
-    height: 75px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 30px;
-    background: rgba(255, 255, 255, 0.1);
-    transition: var(--transition)
-    }
-.term-group {
-    margin-bottom: 60px
-    }
-.term-group-title {
-    font-size: 1.6rem;
-    color: var(--cisco-blue);
-    border-left: 6px solid var(--cisco-blue);
-    padding-left: 18px;
-    margin-bottom: 30px;
-    font-weight: 800
-    }
-.term-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 25px
-    }
-.term-card {
-    background: #fff;
-    border: 1px solid #eee;
-    padding: 25px;
-    border-radius: 12px;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden
-    }
-.term-card::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, transparent 50%, var(--cisco-blue) 50%);
-    opacity: 0.05
-    }
-.term-card:hover {
-    border-color: var(--cisco-blue);
-    box-shadow: 0 6px 20px rgba(4, 159, 217, 0.1)
-    }
-.term-card h4 {
-    color: var(--cisco-midnight);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1rem
-    }
-.term-card p {
-    font-size: 0.95rem;
-    color: #555;
-    line-height: 1.5
-    }
-.process-section {
-    background-color: #FAFAFA
-    }
-.diagram-container {
-    display: flex;
-    justify-content: center;
-    margin: 40px 0;
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow)
-    }
-.arch-svg {
-    max-width: 100%;
-    height: auto
-    }
-.process-steps {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 25px;
-    position: relative;
-    margin-top: 50px
-    }
-.step-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    position: relative;
-    z-index: 2
-    }
-.step-number {
-    background: var(--cisco-blue);
-    color: white;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    margin-bottom: 20px
-    }
-/* --- 移除冗余后的增量优化：代码窗格稳定性 --- */
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%
-    }
-.dot-red {
-    background: #ff5f56
-    }
-.dot-yellow {
-    background: #ffbd2e
-    }
-.dot-green {
-    background: #27c93f
-    }
-.code-content-stable {
-    padding: 20px;
-    font-family: "Fira Code", "Courier New", monospace;
-    font-size: 0.9rem;
-    color: #d4d4d4;
-    line-height: 1.6;
-    overflow-x: auto;
-    /* 核心：配合 JS 处理缩进，使用 pre 保证原始对齐 */
-    white-space: pre;
-    tab-size: 4;
-    background: #1e1e1e
-    }
-/* 移动端适配 */
-@media (max-width: 768px) {
-    .code-content-stable {
-        font-size: 0.8rem;
-        white-space: pre-wrap;
-        /* 移动端允许换行防止溢出 */
-        }
-    }
-.hook-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 15px
-    }
-.hook-item {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    gap: 15px;
-    align-items: flex-start
-    }
-.hook-item:last-child {
-    border-bottom: none
-    }
-.hook-label {
-    font-weight: bold;
-    color: var(--cisco-blue);
-    min-width: 80px;
-    font-family: "Courier New", monospace
-    }
-.hook-desc {
-    font-size: 0.9rem;
-    color: #555
-    }
-/* --- i18n 修复：确保语言切换时既能显示，又不破坏原始布局属性 --- */
-/* 默认隐藏逻辑 */
-[data-lang="zh"] .lang-en {
-    display: none !important
-    }
-[data-lang="en"] .lang-zh {
-    display: none !important
-    }
-/* 关键修复：使用 revert 恢复标签原始的 display 属性（如 table-cell, inline-block 等） */
-/* 这样可以确保按钮居中（inline-block）和表格正常（table-cell） */
-[data-lang="en"] .lang-en:not(.tab-content) {
-    display: revert !important
-    }
-[data-lang="zh"] .lang-zh:not(.tab-content) {
-    display: revert !important
-    }
-/* 针对 Flex 容器的特殊适配（保持原样） */
-[data-lang="en"] .nav-left .lang-en, [data-lang="en"] .logo .lang-en {
-    display: flex !important
-    }
-[data-lang="zh"] .nav-left .lang-zh, [data-lang="zh"] .logo .lang-zh {
-    display: flex !important
-    }
-/* 代码窗格优化：确保 pre 标签内的代码左对齐且不产生额外偏移 */
-.code-content-stable {
-    white-space: pre !important;
-    text-align: left !important;
-    margin: 0 !important;
-    padding: 20px !important
-    }
-/* Pillars Styles */
-.features {
-    background-color: var(--cisco-dark-blue);
-    color: white
-    }
-.features .section-title {
-    color: white
-    }
-/* --- 全局卡片架构优化：自适应主题 --- */
-/* 1. 基础卡片样式（默认：浅色环境） */
-.feature-card {
-    background: #fff;
-    padding: 40px 35px;
-    border-radius: 20px;
-    border: 1px solid #eee;
-    border-top: 6px solid var(--cisco-blue);
-    transition: var(--transition);
-    display: flex;
-    flex-direction: column;
-    height: 100%
-    }
-.feature-card h3, .feature-card h4 {
-    color: var(--cisco-midnight);
-    /* 默认深色标题 */
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: 700
-    }
-.feature-card p {
-    color: var(--text-main);
-    /* 默认深色正文 */
-    font-size: 1rem;
-    line-height: 1.7;
-    flex-grow: 1
-    }
-/* 2. 交互效果 */
-.feature-card:hover {
-    transform: translatey(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1)
-    }
-/* 3. 深色环境适配（自动覆盖） */
-/* 作用于：Hero, 三大支柱(.features), 明星项目(midnight背景) */
-.hero .feature-card, .features .feature-card, section[style*="midnight"] .feature-card {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(12px);
-    border-top: 6px solid var(--cisco-blue) !important
-    }
-.hero .feature-card h3, .hero .feature-card h4, .features .feature-card h3, .features .feature-card h4, section[style*="midnight"] .feature-card h3, section[style*="midnight"] .feature-card h4 {
-    color: #fff !important
-    }
-.hero .feature-card p, .features .feature-card p, section[style*="midnight"] .feature-card p {
-    color: rgba(255, 255, 255, 0.8) !important
-    }
-/* 图标盒子背景适配 */
-.feature-icon-box {
-    background: rgba(29, 39, 41, 0.05);
-    /* 浅色背景下的灰色背景 */
-    }
-.features .feature-icon-box, .hero .feature-icon-box {
-    background: rgba(255, 255, 255, 0.1) !important;
-    /* 深色背景下的半透明背景 */
-    }
-.demo-section {
-    background: #fff;
-    border-top: 1px solid #eee
-    }
-/* 终端模拟器容器 */
-.terminal-wrapper {
-    background: #000;
-    border-radius: 8px;
-    padding: 25px;
-    color: #0f0;
-    font-family: "Courier New", Courier, monospace;
-    height: 320px;
-    /* 适当减小固定高度 */
-    max-height: 50vh;
-    /* 最大高度不超过屏幕一半 */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    /* iOS 滚动丝滑 */
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
-    margin: 30px 0;
-    border: 1px solid #444
-    }
-.terminal-line {
-    margin-bottom: 10px;
-    line-height: 1.5;
-    font-size: 0.95rem
-    }
-.terminal-prompt {
-    color: #fff;
-    font-weight: bold
-    }
-.terminal-cursor {
-    display: inline-block;
-    width: 10px;
-    height: 18px;
-    background: #0f0;
-    vertical-align: middle;
-    animation: blink 1s infinite
-    }
-@keyframes blink {
-    50% {
-        opacity: 0;
-        }
-    }
-/* 模拟流水线/赛道容器 */
-.pipeline-container {
-    background: var(--cisco-dark-blue);
-    border-radius: 20px;
-    padding: 30px;
-    position: relative;
-    height: 280px;
-    overflow: hidden;
-    margin: 40px auto;
-    max-width: 1000px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.6)
-    }
-.kernel-zone {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    border: 2px dashed rgba(255, 255, 255, 0.1);
-    pointer-events: none;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 20px;
-    color: rgba(255, 255, 255, 0.25);
-    font-size: 1rem;
-    letter-spacing: 4px;
-    font-weight: bold;
-    text-transform: uppercase
-    }
-/* 数据包样式 */
-.packet {
-    width: 60px;
-    height: 60px;
-    background: white;
-    border-radius: 12px;
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translatey(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 14px;
-    color: var(--cisco-dark-blue);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-    z-index: 10;
-    transition: left 0.1s linear, opacity 0.3s
-    }
-/* eBPF 程序圆形区域 */
-.ebpf-program {
-    width: 160px;
-    height: 160px;
-    background: rgba(4, 159, 217, 0.15);
-    border: 2px solid var(--cisco-blue);
-    border-radius: 50%;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.9rem;
-    box-shadow: 0 0 40px rgba(4, 159, 217, 0.3);
-    z-index: 5
-    }
-/* BPF Maps 仪表盘样式 */
-.map-dashboard {
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid var(--cisco-blue);
-    border-radius: 8px;
-    padding: 15px;
-    width: 220px;
-    color: var(--cisco-blue);
-    font-family: "Courier New", monospace;
-    box-shadow: 0 0 15px rgba(4, 159, 217, 0.3)
-    }
-.map-title {
-    font-size: 0.75rem;
-    color: #fff;
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    text-transform: uppercase
-    }
-.map-stat {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px
-    }
-.stat-value {
-    color: var(--cisco-green);
-    font-weight: bold
-    }
-.stat-value.alert {
-    color: var(--cisco-red);
-    animation: flash 0.5s ease
-    }
-@keyframes flash {
-    50% {
-        opacity: 0.3;
-        }
-    }
-.feature-grid-eco {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 35px;
-    margin-top: 50px
-    }
-/* 针对深色背景下的 feature-card 特殊样式 */
-.feature-grid-eco .feature-card {
-    background: #fff !important;
-    /* 强制改为白色背景 */
-    }
-.feature-grid-eco .feature-card:hover {
-    transform: translatey(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1)
-    }
-/* 100% 还原结构，仅修改配色：正文黑色 */
-.feature-grid-eco .feature-card p {
-    color: #333 !important;
-    /* 强制改为深灰色/黑色 */
-    font-size: 0.95rem;
-    line-height: 1.7;
-    opacity: 1 !important;
-    /* 移除透明度以确保文字清晰 */
-    }
-/* 3. 深色环境适配：仅覆盖配色 */
-.features .feature-card, .hero .feature-card {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(12px)
-    }
-.case-study-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 25px;
-    margin-top: 40px
-    }
-.case-study-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 25px;
-    transition: var(--transition);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between
-    }
-.case-study-card:hover {
-    border-color: var(--cisco-blue);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05)
-    }
-.case-study-meta {
-    font-weight: 800;
-    color: var(--cisco-midnight);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px
-    }
-.case-study-meta span {
-    font-size: 0.7rem;
-    background: var(--cisco-gray);
-    padding: 2px 8px;
-    border-radius: 4px;
-    text-transform: uppercase
-    }
-.report-highlight {
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 40px;
-    margin: 60px 0;
-    border: 1px solid var(--cisco-blue)
-    }
-/* 增强：2025 报告卡片的视觉深度 */
-.report-highlight {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(to bottom right, #f8f9fa, #fff)
-    }
-.report-highlight::before {
-    content: "2025";
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    font-size: 8rem;
-    font-weight: 900;
-    color: rgba(4, 159, 217, 0.03);
-    pointer-events: none
-    }
-.metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin: 30px 0
-    }
-.metric-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: var(--card-shadow)
-    }
-.metric-card .value {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--cisco-blue);
-    display: block
-    }
-.metric-card .label {
-    font-size: 0.9rem;
-    color: #666
-    }
-.faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px
-    }
-/* 专家洞察标签 */
-.checkpoint-tag {
-    background: var(--cisco-midnight);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    position: absolute;
-    top: -20px;
-    left: 10px;
-    white-space: nowrap
-    }
-/* 强化对比卡片中的重要数字 */
-/* 增强 2025 演进卡片的视觉识别度 */
-.insight-card strong {
-    color: var(--cisco-blue)
-    }
-/* 确保深色模式下某些内联卡片的文字对比度 */
-section.features .insight-card p {
-    color: var(--cisco-midnight) !important
-    }
-/* 针对 2x2 矩阵布局的专项优化 */
-.grid-2x2 {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 30px !important
-    }
-/* 移动端适配：回退为单列布局 */
-@media (max-width: 991px) {
-    .grid-2x2 {
-        grid-template-columns: 1fr !important
-        }
-    }
-/* 增强：为术语百科增加“分层认知”视觉标记 */
-.term-card {
-    border-left: 1px solid #eee
-    }
-.term-card.advanced::after {
-    content: "ADVANCED";
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 0.6rem;
-    background: var(--cisco-gray);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #999
-    }
-/* 增量样式：逻辑引导线 */
-.logic-connector {
-    width: 2px;
-    height: 40px;
-    background: linear-gradient(to bottom, var(--cisco-blue), transparent);
-    margin: 0 auto
-    }
-/* 增强：卡片内的代码高亮微调 */
-.term-card strong {
-    color: var(--cisco-midnight);
-    border-bottom: 1px solid rgba(4, 159, 217, 0.3)
-    }
-/* 2025 标识浮层 */
-/* 增强：确保 detail-grid 卡片等高且内容垂直分布 */
-.detail-grid .card {
-    display: flex;
-    flex-direction: column;
-    height: 100%
-    }
-.detail-grid .card p {
-    flex-grow: 1;
-    /* 让正文自动填充剩余空间，使底部的 Insight Card 对齐 */
-    }
-/* 优化 Insight Card 的边框和文字颜色 */
-.detail-grid .insight-card {
-    font-size: 0.85rem;
-    line-height: 1.5
-    }
-/* 确保详情网格与上方代码块有清晰的逻辑间距 */
-.process-section .detail-grid {
-    margin-top: 40px
-    }
-/* 全栈代码协作视窗 */
-.synergy-container {
-    background: #1e1e1e;
-    border-radius: 12px;
-    overflow: hidden;
-    margin: 40px 0;
-    border: 1px solid #333;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3)
-    }
-.synergy-header {
-    background: #252526;
-    padding: 15px 25px;
-    border-bottom: 1px solid #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center
-    }
-.synergy-badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    font-weight: bold;
-    letter-spacing: 1px
-    }
-.badge-kernel {
-    background: rgba(4, 159, 217, 0.2);
-    color: var(--cisco-blue);
-    border: 1px solid var(--cisco-blue)
-    }
-.badge-user {
-    background: rgba(108, 194, 74, 0.2);
-    color: var(--cisco-green);
-    border: 1px solid var(--cisco-green)
-    }
-.synergy-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    /* 移动端优先：垂直排列 */
-    }
-@media (min-width: 992px) {
-    .synergy-grid {
-        grid-template-columns: 1fr 1fr
-        }
-    /* 宽屏：左右分屏 */
-    }
-.code-pane {
-    padding: 0;
-    border-right: 1px solid #333
-    }
-.code-pane:last-child {
-    border-right: none
-    }
-.pane-title {
-    background: #2d2d2d;
-    padding: 8px 20px;
-    font-size: 0.8rem;
-    color: #888;
-    display: flex;
-    justify-content: space-between
-    }
-/* 逻辑线条感 */
-.map-bridge-indicator {
-    background: linear-gradient(90deg, transparent, rgba(4, 159, 217, 0.1), transparent);
-    text-align: center;
-    padding: 10px;
-    font-family: "Courier New", monospace;
-    font-size: 0.8rem;
-    color: var(--cisco-blue);
-    border-top: 1px solid #333;
-    border-bottom: 1px solid #333
-    }
-/* 页脚样式 */
-footer {
-    background: var(--cisco-dark-blue);
-    color: white;
-    text-align: center;
-    font-size: 0.95rem;
-    border-top: 6px solid var(--cisco-blue)
-    }
-footer svg {
-    height: 35px;
-    opacity: 0.9
-    }
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2.2rem
-        }
-    .hero p {
-        font-size: 1.1rem
-        }
-    .section-title {
-        font-size: 1.8rem;
-        margin-bottom: 40px
-        }
-    .pillars-grid {
-        grid-template-columns: 1fr
-        }
-    .process-steps {
-        grid-template-columns: 1fr;
-        gap: 40px
-        }
-    .step-arrow {
-        display: none
-        }
-    .step-card {
-        border-top: 4px solid var(--cisco-blue)
-        }
-    /* --- 移动端专项优化：代码框与列表编号 --- */
-    @media (max-width: 768px) {
-        /* 1. 修复代码框显示不全：允许折行并优化间距 */
-        .code-content-stable {
-            white-space: pre-wrap !important;
-            /* 强制换行防止溢出 */
-            word-break: break-all;
-            /* 允许长单词换行 */
-            font-size: 0.75rem !important;
-            /* 移动端字号略微缩小以容纳更多代码 */
-            padding: 15px !important;
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-main);
+            background-color: #fff;
+            line-height: 1.6;
             overflow-x: hidden;
-            /* 隐藏横向滚动条 */
+            -webkit-font-smoothing: antialiased
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%
+        }
+
+        /* --- 核心组件样式 --- */
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            font-size: 1rem
+        }
+
+        .btn-primary {
+            background-color: var(--cisco-blue);
+            color: white;
+            box-shadow: 0 4px 6px rgba(4, 159, 217, 0.3)
+        }
+
+        /* --- 国际化辅助类 --- */
+        .hidden {
+            display: none !important
+        }
+
+        /* 切换语言时，暂时禁用所有动画以防止布局抖动 */
+        .is-transitioning * {
+            transition: none !important;
+            animation: none !important
+        }
+
+        /* --- Header 样式 --- */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 0
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cisco-dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .logo svg {
+            height: 28px;
+            width: auto
+        }
+
+        /* --- 导航栏左侧布局与返回按钮 --- */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            /* 保持按钮与 Logo 之间的呼吸感 */
+        }
+
+        .btn-home {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            color: var(--cisco-dark-blue);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: var(--transition)
+        }
+
+        .btn-home:hover {
+            border-color: var(--cisco-blue);
+            color: var(--cisco-blue);
+            background: rgba(4, 159, 217, 0.05)
+        }
+
+        .btn-home svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            /* 自动跟随文字颜色 */
+        }
+
+        /* 移动端适配：空间有限时隐藏文字，只留图标 */
+        @media (max-width: 480px) {
+            .btn-home span {
+                display: none
             }
+
+            .btn-home {
+                padding: 6px 8px
+            }
+        }
+
+        .lang-switch {
+            background: var(--cisco-gray);
+            border-radius: 20px;
+            padding: 4px;
+            display: flex;
+            font-size: 0.85rem
+        }
+
+        .lang-btn {
+            padding: 6px 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: #666;
+            font-weight: 600;
+            transition: all 0.2s
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: var(--cisco-blue);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--cisco-dark-blue) 0%, #0D274D 100%);
+            color: white;
+            padding: 100px 0 140px;
+            text-align: center;
+            position: relative;
+            overflow: hidden
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(4, 159, 217, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 0
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 24px;
+            font-weight: 300;
+            letter-spacing: -1px
+        }
+
+        .hero h1 strong {
+            font-weight: 800;
+            display: block;
+            color: var(--cisco-blue);
+            margin-top: 10px
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            font-weight: 300
+        }
+
+        /* Winston 原则：显著性呼吁框 (Salience Callout) */
+        .winston-callout {
+            background: rgba(4, 159, 217, 0.05);
+            border-left: 5px solid var(--cisco-blue);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-weight: 500;
+            color: var(--cisco-midnight)
+        }
+
+        .winston-callout strong {
+            color: var(--cisco-blue);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 5px
+        }
+
+        .winston-callout p {
+            margin: 0
+        }
+
+        .hero-evidence-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+            flex-wrap: wrap
+        }
+
+        .evidence-item {
+            text-align: left;
+            border-left: 3px solid var(--cisco-blue);
+            padding-left: 15px
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            color: var(--cisco-dark-blue);
+            margin-bottom: 60px;
+            font-weight: 700;
+            position: relative
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--cisco-blue);
+            margin: 20px auto 0;
+            border-radius: 2px
+        }
+
+        .golden-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--cisco-blue);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0
+        }
+
+        .feature-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition)
+        }
+
+        .feature-box:hover {
+            transform: translatey(-5px);
+            border-color: var(--cisco-blue)
+        }
+
+        .feature-box svg {
+            width: 48px;
+            height: 48px;
+            fill: var(--cisco-blue);
+            margin-bottom: 20px
+        }
+
+        .comparison-wrapper {
+            overflow-x: auto;
+            margin: 60px 0;
+            -webkit-overflow-scrolling: touch
+        }
+
+        .comparison-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow)
+        }
+
+        .comparison-table th {
+            background: var(--cisco-dark-blue);
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-size: 1rem
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem
+        }
+
+        .analogy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px
+        }
+
+        .analogy-item {
+            text-align: center;
+            height: 100%
+        }
+
+        .analogy-icon {
+            height: 140px;
+            margin-bottom: 25px;
+            transition: transform 0.3s
+        }
+
+        .analogy-tag {
+            font-family: "Courier New", monospace;
+            font-size: 0.75rem;
+            color: var(--cisco-blue);
+            font-weight: bold;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 8px
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: clamp(20px, 5%, 40px);
+            margin-bottom: 20px;
+            border-top: 4px solid var(--cisco-blue);
+            transition: var(--transition)
+        }
+
+        .check-icon {
+            color: var(--cisco-green);
+            font-weight: bold
+        }
+
+        .cross-icon {
+            color: var(--cisco-red);
+            font-weight: bold
+        }
+
+        .symbol-container {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 40px 0
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 50px
+        }
+
+        .insight-card {
+            background: #f8f9fa;
+            border-left: 4px solid var(--cisco-blue);
+            padding: 20px;
+            margin: 30px 0;
+            font-style: italic;
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.7
+        }
+
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px
+        }
+
+        /* --- 增量：JavaScript 类比视觉对比 --- */
+        .analogy-showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 40px 0; }
+        .browser-window { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #fff; box-shadow: var(--card-shadow); height: 260px; display: flex; flex-direction: column; }
+        .browser-bar { background: #eee; padding: 10px; border-bottom: 1px solid #ddd; display: flex; gap: 6px; align-items: center; }
+        .dot-ui { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+        .preview-content { padding: 20px; flex-grow: 1; overflow: hidden; }
+
+        /* 左侧：枯燥风格 */
+        .style-none { font-family: "Times New Roman", serif; color: #000; line-height: 1; }
+        /* 右侧：美化风格 */
+        .style-ebpf { font-family: var(--font-family); color: var(--text-main); }
+        .typewriter-text { font-weight: bold; color: var(--cisco-blue); border-right: 2px solid var(--cisco-blue); white-space: nowrap; overflow: hidden; display: inline-block; }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--cisco-blue) } }
+        .typewriter-cursor { animation: blink-caret 0.75s step-end infinite; }
+
+        /* 1. 基础骨架：定义一次即可 */
+        .feature-card {
+            background: #fff;
+            padding: clamp(25px, 5%, 40px);
+            /* 优化移动端间距 */
+            border-radius: 20px;
+            border: 1px solid #eee;
+            border-top: 6px solid var(--cisco-blue);
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            will-change: transform;
+            /* 告诉浏览器提前准备硬件加速 */
+        }
+
+        .feature-icon-box {
+            width: 75px;
+            height: 75px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: var(--transition)
+        }
+
+        .term-group {
+            margin-bottom: 60px
+        }
+
+        .term-group-title {
+            font-size: 1.6rem;
+            color: var(--cisco-blue);
+            border-left: 6px solid var(--cisco-blue);
+            padding-left: 18px;
+            margin-bottom: 30px;
+            font-weight: 800
+        }
+
+        .term-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px
+        }
+
+        .term-card {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 25px;
+            border-radius: 12px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden
+        }
+
+        .term-card::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, transparent 50%, var(--cisco-blue) 50%);
+            opacity: 0.05
+        }
+
+        .term-card:hover {
+            border-color: var(--cisco-blue);
+            box-shadow: 0 6px 20px rgba(4, 159, 217, 0.1)
+        }
+
+        .term-card h4 {
+            color: var(--cisco-midnight);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem
+        }
+
+        .term-card p {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5
+        }
+
+        .process-section {
+            background-color: #FAFAFA
+        }
+
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow)
+        }
+
+        .arch-svg {
+            max-width: 100%;
+            height: auto
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            position: relative;
+            margin-top: 50px
+        }
+
+        .step-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            position: relative;
+            z-index: 2
+        }
+
+        .step-number {
+            background: var(--cisco-blue);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 20px
+        }
+
+        /* --- 移除冗余后的增量优化：代码窗格稳定性 --- */
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%
+        }
+
+        .dot-red {
+            background: #ff5f56
+        }
+
+        .dot-yellow {
+            background: #ffbd2e
+        }
+
+        .dot-green {
+            background: #27c93f
+        }
+
+        .code-content-stable {
+            padding: 20px;
+            font-family: "Fira Code", "Courier New", monospace;
+            font-size: 0.9rem;
+            color: #d4d4d4;
+            line-height: 1.6;
+            overflow-x: auto;
+            /* 核心：配合 JS 处理缩进，使用 pre 保证原始对齐 */
+            white-space: pre;
+            tab-size: 4;
+            background: #1e1e1e
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .code-content-stable {
+                font-size: 0.8rem;
+                white-space: pre-wrap;
+                /* 移动端允许换行防止溢出 */
+            }
+        }
+
+        .hook-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px
+        }
+
+        .hook-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start
+        }
+
+        .hook-item:last-child {
+            border-bottom: none
+        }
+
+        .hook-label {
+            font-weight: bold;
+            color: var(--cisco-blue);
+            min-width: 80px;
+            font-family: "Courier New", monospace
+        }
+
+        .hook-desc {
+            font-size: 0.9rem;
+            color: #555
+        }
+
+        /* --- i18n 修复：确保语言切换时既能显示，又不破坏原始布局属性 --- */
+        /* 默认隐藏逻辑 */
+        [data-lang="zh"] .lang-en {
+            display: none !important
+        }
+
+        [data-lang="en"] .lang-zh {
+            display: none !important
+        }
+
+        /* 关键修复：使用 revert 恢复标签原始的 display 属性（如 table-cell, inline-block 等） */
+        /* 这样可以确保按钮居中（inline-block）和表格正常（table-cell） */
+        [data-lang="en"] .lang-en:not(.tab-content) {
+            display: revert !important
+        }
+
+        [data-lang="zh"] .lang-zh:not(.tab-content) {
+            display: revert !important
+        }
+
+        /* 针对 Flex 容器的特殊适配（保持原样） */
+        [data-lang="en"] .nav-left .lang-en,
+        [data-lang="en"] .logo .lang-en {
+            display: flex !important
+        }
+
+        [data-lang="zh"] .nav-left .lang-zh,
+        [data-lang="zh"] .logo .lang-zh {
+            display: flex !important
+        }
+
+        /* 代码窗格优化：确保 pre 标签内的代码左对齐且不产生额外偏移 */
+        .code-content-stable {
+            white-space: pre !important;
+            text-align: left !important;
+            margin: 0 !important;
+            padding: 20px !important
+        }
+
+        /* Pillars Styles */
+        .features {
+            background-color: var(--cisco-dark-blue);
+            color: white
+        }
+
+        .features .section-title {
+            color: white
+        }
+
+        /* --- 全局卡片架构优化：自适应主题 --- */
+        /* 1. 基础卡片样式（默认：浅色环境） */
+        .feature-card {
+            background: #fff;
+            padding: 40px 35px;
+            border-radius: 20px;
+            border: 1px solid #eee;
+            border-top: 6px solid var(--cisco-blue);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%
+        }
+
+        .feature-card h3,
+        .feature-card h4 {
+            color: var(--cisco-midnight);
+            /* 默认深色标题 */
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 700
+        }
+
+        .feature-card p {
+            color: var(--text-main);
+            /* 默认深色正文 */
+            font-size: 1rem;
+            line-height: 1.7;
+            flex-grow: 1
+        }
+
+        /* 2. 交互效果 */
+        .feature-card:hover {
+            transform: translatey(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1)
+        }
+
+        /* 3. 深色环境适配（自动覆盖） */
+        /* 作用于：Hero, 三大支柱(.features), 明星项目(midnight背景) */
+        .hero .feature-card,
+        .features .feature-card,
+        section[style*="midnight"] .feature-card {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(12px);
+            border-top: 6px solid var(--cisco-blue) !important
+        }
+
+        .hero .feature-card h3,
+        .hero .feature-card h4,
+        .features .feature-card h3,
+        .features .feature-card h4,
+        section[style*="midnight"] .feature-card h3,
+        section[style*="midnight"] .feature-card h4 {
+            color: #fff !important
+        }
+
+        .hero .feature-card p,
+        .features .feature-card p,
+        section[style*="midnight"] .feature-card p {
+            color: rgba(255, 255, 255, 0.8) !important
+        }
+
+        /* 图标盒子背景适配 */
+        .feature-icon-box {
+            background: rgba(29, 39, 41, 0.05);
+            /* 浅色背景下的灰色背景 */
+        }
+
+        .features .feature-icon-box,
+        .hero .feature-icon-box {
+            background: rgba(255, 255, 255, 0.1) !important;
+            /* 深色背景下的半透明背景 */
+        }
+
+        .demo-section {
+            background: #fff;
+            border-top: 1px solid #eee
+        }
+
+        /* 终端模拟器容器 */
+        .terminal-wrapper {
+            background: #000;
+            border-radius: 8px;
+            padding: 25px;
+            color: #0f0;
+            font-family: "Courier New", Courier, monospace;
+            height: 320px;
+            /* 适当减小固定高度 */
+            max-height: 50vh;
+            /* 最大高度不超过屏幕一半 */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            /* iOS 滚动丝滑 */
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+            margin: 30px 0;
+            border: 1px solid #444
+        }
+
+        .terminal-line {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 0.95rem
+        }
+
+        .terminal-prompt {
+            color: #fff;
+            font-weight: bold
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #0f0;
+            vertical-align: middle;
+            animation: blink 1s infinite
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* 模拟流水线/赛道容器 */
+        .pipeline-container {
+            background: var(--cisco-dark-blue);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+            margin: 40px auto;
+            max-width: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.6)
+        }
+
+        .kernel-zone {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 20px;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 1rem;
+            letter-spacing: 4px;
+            font-weight: bold;
+            text-transform: uppercase
+        }
+
+        /* 数据包样式 */
+        .packet {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translatey(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--cisco-dark-blue);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            z-index: 10;
+            transition: left 0.1s linear, opacity 0.3s
+        }
+
+        /* eBPF 程序圆形区域 */
+        .ebpf-program {
+            width: 160px;
+            height: 160px;
+            background: rgba(4, 159, 217, 0.15);
+            border: 2px solid var(--cisco-blue);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 0 40px rgba(4, 159, 217, 0.3);
+            z-index: 5
+        }
+
+        /* BPF Maps 仪表盘样式 */
+        .map-dashboard {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--cisco-blue);
+            border-radius: 8px;
+            padding: 15px;
+            width: 220px;
+            color: var(--cisco-blue);
+            font-family: "Courier New", monospace;
+            box-shadow: 0 0 15px rgba(4, 159, 217, 0.3)
+        }
+
+        .map-title {
+            font-size: 0.75rem;
+            color: #fff;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            text-transform: uppercase
+        }
+
+        .map-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px
+        }
+
+        .stat-value {
+            color: var(--cisco-green);
+            font-weight: bold
+        }
+
+        .stat-value.alert {
+            color: var(--cisco-red);
+            animation: flash 0.5s ease
+        }
+
+        @keyframes flash {
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .feature-grid-eco {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 35px;
+            margin-top: 50px
+        }
+
+        /* 针对深色背景下的 feature-card 特殊样式 */
+        .feature-grid-eco .feature-card {
+            background: #fff !important;
+            /* 强制改为白色背景 */
+        }
+
+        .feature-grid-eco .feature-card:hover {
+            transform: translatey(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1)
+        }
+
+        /* 100% 还原结构，仅修改配色：正文黑色 */
+        .feature-grid-eco .feature-card p {
+            color: #333 !important;
+            /* 强制改为深灰色/黑色 */
+            font-size: 0.95rem;
+            line-height: 1.7;
+            opacity: 1 !important;
+            /* 移除透明度以确保文字清晰 */
+        }
+
+        /* 3. 深色环境适配：仅覆盖配色 */
+        .features .feature-card,
+        .hero .feature-card {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(12px)
+        }
+
+        .case-study-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 40px
+        }
+
+        .case-study-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 25px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between
+        }
+
+        .case-study-card:hover {
+            border-color: var(--cisco-blue);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05)
+        }
+
+        .case-study-meta {
+            font-weight: 800;
+            color: var(--cisco-midnight);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .case-study-meta span {
+            font-size: 0.7rem;
+            background: var(--cisco-gray);
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase
+        }
+
+        .report-highlight {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 60px 0;
+            border: 1px solid var(--cisco-blue)
+        }
+
+        /* 增强：2025 报告卡片的视觉深度 */
+        .report-highlight {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom right, #f8f9fa, #fff)
+        }
+
+        .report-highlight::before {
+            content: "2025";
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(4, 159, 217, 0.03);
+            pointer-events: none
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: var(--card-shadow)
+        }
+
+        .metric-card .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--cisco-blue);
+            display: block
+        }
+
+        .metric-card .label {
+            font-size: 0.9rem;
+            color: #666
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px
+        }
+
+        /* 专家洞察标签 */
+        .checkpoint-tag {
+            background: var(--cisco-midnight);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            white-space: nowrap
+        }
+
+        /* 强化对比卡片中的重要数字 */
+        /* 增强 2025 演进卡片的视觉识别度 */
+        .insight-card strong {
+            color: var(--cisco-blue)
+        }
+
+        /* 确保深色模式下某些内联卡片的文字对比度 */
+        section.features .insight-card p {
+            color: var(--cisco-midnight) !important
+        }
+
+        /* 针对 2x2 矩阵布局的专项优化 */
+        .grid-2x2 {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 30px !important
+        }
+
+        /* 移动端适配：回退为单列布局 */
+        @media (max-width: 991px) {
+            .grid-2x2 {
+                grid-template-columns: 1fr !important
+            }
+        }
+
+        /* 增强：为术语百科增加“分层认知”视觉标记 */
+        .term-card {
+            border-left: 1px solid #eee
+        }
+
+        .term-card.advanced::after {
+            content: "ADVANCED";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.6rem;
+            background: var(--cisco-gray);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #999
+        }
+
+        /* 增量样式：逻辑引导线 */
+        .logic-connector {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--cisco-blue), transparent);
+            margin: 0 auto
+        }
+
+        /* 增强：卡片内的代码高亮微调 */
+        .term-card strong {
+            color: var(--cisco-midnight);
+            border-bottom: 1px solid rgba(4, 159, 217, 0.3)
+        }
+
+        /* 2025 标识浮层 */
+        /* 增强：确保 detail-grid 卡片等高且内容垂直分布 */
+        .detail-grid .card {
+            display: flex;
+            flex-direction: column;
+            height: 100%
+        }
+
+        .detail-grid .card p {
+            flex-grow: 1;
+            /* 让正文自动填充剩余空间，使底部的 Insight Card 对齐 */
+        }
+
+        /* 优化 Insight Card 的边框和文字颜色 */
+        .detail-grid .insight-card {
+            font-size: 0.85rem;
+            line-height: 1.5
+        }
+
+        /* 确保详情网格与上方代码块有清晰的逻辑间距 */
+        .process-section .detail-grid {
+            margin-top: 40px
+        }
+
+        /* 全栈代码协作视窗 */
+        .synergy-container {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 40px 0;
+            border: 1px solid #333;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3)
+        }
+
         .synergy-header {
-            padding: 10px 15px !important
+            background: #252526;
+            padding: 15px 25px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .synergy-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px
+        }
+
+        .badge-kernel {
+            background: rgba(4, 159, 217, 0.2);
+            color: var(--cisco-blue);
+            border: 1px solid var(--cisco-blue)
+        }
+
+        .badge-user {
+            background: rgba(108, 194, 74, 0.2);
+            color: var(--cisco-green);
+            border: 1px solid var(--cisco-green)
+        }
+
+        .synergy-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            /* 移动端优先：垂直排列 */
+        }
+
+        @media (min-width: 992px) {
+            .synergy-grid {
+                grid-template-columns: 1fr 1fr
             }
-        /* 2. 修复生命周期数字编号靠左问题 */
-        .detail-grid ol {
-            padding-left: 5px !important;
-            /* 减少左侧冗余缩进 */
-            list-style-position: inside !important;
-            /* 让编号进入容器内部 */
+
+            /* 宽屏：左右分屏 */
+        }
+
+        .code-pane {
+            padding: 0;
+            border-right: 1px solid #333
+        }
+
+        .code-pane:last-child {
+            border-right: none
+        }
+
+        .pane-title {
+            background: #2d2d2d;
+            padding: 8px 20px;
+            font-size: 0.8rem;
+            color: #888;
+            display: flex;
+            justify-content: space-between
+        }
+
+        /* 逻辑线条感 */
+        .map-bridge-indicator {
+            background: linear-gradient(90deg, transparent, rgba(4, 159, 217, 0.1), transparent);
+            text-align: center;
+            padding: 10px;
+            font-family: "Courier New", monospace;
+            font-size: 0.8rem;
+            color: var(--cisco-blue);
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333
+        }
+
+        /* 页脚样式 */
+        footer {
+            background: var(--cisco-dark-blue);
+            color: white;
+            text-align: center;
+            font-size: 0.95rem;
+            border-top: 6px solid var(--cisco-blue)
+        }
+
+        footer svg {
+            height: 35px;
+            opacity: 0.9
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem
             }
-        .detail-grid ol li {
-            margin-bottom: 8px;
-            /* 增加行间距，方便手机阅读 */
-            text-indent: -1.4em;
-            /* 悬挂缩进：确保编号后的文字对齐 */
-            padding-left: 1.6em;
-            /* 配合悬挂缩进 */
+
+            .hero p {
+                font-size: 1.1rem
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+                margin-bottom: 40px
+            }
+
+            .pillars-grid {
+                grid-template-columns: 1fr
+            }
+
+            .process-steps {
+                grid-template-columns: 1fr;
+                gap: 40px
+            }
+
+            .step-arrow {
+                display: none
+            }
+
+            .step-card {
+                border-top: 4px solid var(--cisco-blue)
+            }
+
+            /* --- 移动端专项优化：代码框与列表编号 --- */
+            @media (max-width: 768px) {
+
+                /* 1. 修复代码框显示不全：允许折行并优化间距 */
+                .code-content-stable {
+                    white-space: pre-wrap !important;
+                    /* 强制换行防止溢出 */
+                    word-break: break-all;
+                    /* 允许长单词换行 */
+                    font-size: 0.75rem !important;
+                    /* 移动端字号略微缩小以容纳更多代码 */
+                    padding: 15px !important;
+                    overflow-x: hidden;
+                    /* 隐藏横向滚动条 */
+                }
+
+                .synergy-header {
+                    padding: 10px 15px !important
+                }
+
+                /* 2. 修复生命周期数字编号靠左问题 */
+                .detail-grid ol {
+                    padding-left: 5px !important;
+                    /* 减少左侧冗余缩进 */
+                    list-style-position: inside !important;
+                    /* 让编号进入容器内部 */
+                }
+
+                .detail-grid ol li {
+                    margin-bottom: 8px;
+                    /* 增加行间距，方便手机阅读 */
+                    text-indent: -1.4em;
+                    /* 悬挂缩进：确保编号后的文字对齐 */
+                    padding-left: 1.6em;
+                    /* 配合悬挂缩进 */
+                }
+            }
+
+            /* 针对 6 步法优化：中大型屏幕显示 3 列，小型屏幕显示 1 列 */
+            @media (min-width: 992px) {
+                .process-steps {
+                    grid-template-columns: repeat(3, 1fr) !important
+                }
+            }
+
+            @media (max-width: 991px) {
+                .process-steps {
+                    grid-template-columns: 1fr !important
+                }
+            }
+
+            /* 增强步骤卡片的内容一致性 */
+            .step-card {
+                display: flex;
+                flex-direction: column
+            }
+
+            .step-card p {
+                flex-grow: 1
+            }
+
+            .pipeline-container {
+                height: 200px;
+                padding: 15px
+            }
+
+            .ebpf-program {
+                width: 120px;
+                height: 120px
+            }
+
+            .feature-grid-eco {
+                grid-template-columns: 1fr
+            }
+
+            .isovalent-main-card {
+                padding: 20px !important;
+                width: 100% !important;
+                box-sizing: border-box !important
+            }
+
+            .isovalent-header-box {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px !important
+            }
+
+            .isovalent-header-box h3 {
+                font-size: 1.5rem !important
+            }
+
+            .faq-grid {
+                grid-template-columns: 1fr
+            }
+
+            .winston-callout {
+                padding: 20px;
+                font-size: 1.05rem !important
             }
         }
-    /* 针对 6 步法优化：中大型屏幕显示 3 列，小型屏幕显示 1 列 */
-    @media (min-width: 992px) {
-        .process-steps {
-            grid-template-columns: repeat(3, 1fr) !important
-            }
+
+        /* 参考资料列表样式 */
+        .reference-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
         }
-    @media (max-width: 991px) {
-        .process-steps {
-            grid-template-columns: 1fr !important
-            }
+
+        .reference-item {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
-    /* 增强步骤卡片的内容一致性 */
-    .step-card {
-        display: flex;
-        flex-direction: column
+
+        .reference-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--cisco-blue);
+            font-weight: bold;
         }
-    .step-card p {
-        flex-grow: 1
+
+        .reference-item a {
+            color: var(--cisco-midnight);
+            text-decoration: none;
+            word-break: break-all;
+            transition: var(--transition);
         }
-    .pipeline-container {
-        height: 200px;
-        padding: 15px
+
+        .reference-item a:hover {
+            color: var(--cisco-blue);
+            text-decoration: underline;
         }
-    .ebpf-program {
-        width: 120px;
-        height: 120px
-        }
-    .feature-grid-eco {
-        grid-template-columns: 1fr
-        }
-    .isovalent-main-card {
-        padding: 20px !important;
-        width: 100% !important;
-        box-sizing: border-box !important
-        }
-    .isovalent-header-box {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px !important
-        }
-    .isovalent-header-box h3 {
-        font-size: 1.5rem !important
-        }
-    .faq-grid {
-        grid-template-columns: 1fr
-        }
-    .winston-callout {
-        padding: 20px;
-        font-size: 1.05rem !important
-        }
-    }
     </style>
 </head>
 
@@ -1302,13 +1549,14 @@ footer svg {
             <div class="winston-callout lang-zh"
                 style="max-width: 600px; margin: 40px auto 0; text-align: left; background: rgba(255,255,255,0.1); color: white; border-left-color: var(--cisco-blue);">
                 <strong>核心承诺 / THE PROMISE</strong>
-                阅读本文，您将掌握如何利用 eBPF 将原本黑盒的 Linux 内核变为可编程、透明且绝对安全的智能底座。
+                阅读本文，您将掌握如何利用 eBPF 将原本黑盒的 Linux 内核变为可编程、透明且绝对安全的智能底座。本文由Rao Weibo借助Gemini完成。
             </div>
             <div class="winston-callout lang-en hidden"
                 style="max-width: 600px; margin: 40px auto 0; text-align: left; background: rgba(255,255,255,0.1); color: white; border-left-color: var(--cisco-blue);">
                 <strong>THE PROMISE</strong>
                 By reading this, you will learn how to leverage eBPF to transform the "black box" Linux kernel into a
-                programmable, transparent, and secure intelligent foundation.
+                programmable, transparent, and secure intelligent foundation. This blog was created by Rao Weibo through
+                Gemini.
             </div>
 
             <div class="hero-graphic" style="margin-top: 60px;">
@@ -1331,22 +1579,30 @@ footer svg {
     </section>
     <section style="background: #f4f7f9; padding: 60px 0; border-bottom: 1px solid #eef2f5;">
         <div class="container">
-            <div class="winston-callout" style="border-left-color: var(--cisco-orange); background: white; box-shadow: var(--card-shadow); padding: 40px; border-radius: 0 12px 12px 0;">
-                <strong style="color: var(--cisco-orange); font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 15px; display: block;">
+            <div class="winston-callout"
+                style="border-left-color: var(--cisco-orange); background: white; box-shadow: var(--card-shadow); padding: 40px; border-radius: 0 12px 12px 0;">
+                <strong
+                    style="color: var(--cisco-orange); font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 15px; display: block;">
                     <span class="lang-zh">一个典型的 SRE 深夜故事 / THE 3 AM SCENARIO</span>
                     <span class="lang-en hidden">THE 3 AM SCENARIO</span>
                 </strong>
-                <p class="lang-zh" style="margin-top: 10px; font-style: italic; font-size: 1.15rem; line-height: 1.8; color: var(--cisco-midnight);">
+                <p class="lang-zh"
+                    style="margin-top: 10px; font-style: italic; font-size: 1.15rem; line-height: 1.8; color: var(--cisco-midnight);">
                     “想象一下，凌晨三点，你的分布式集群出现不明原因的网络延迟。传统工具告诉你‘流量很大’，但无法告诉你‘哪个内核函数在丢包’。
                     在 eBPF 时代之前，你只能盲目猜测或重启系统；现在，你可以秒级注入一个探针，在不停止业务的情况下，精准定位到那行故障代码。”
                 </p>
-                <p class="lang-en hidden" style="margin-top: 10px; font-style: italic; font-size: 1.15rem; line-height: 1.8; color: var(--cisco-midnight);">
-                    "Imagine 3 AM: your cluster has mystery latency. Traditional tools say 'high traffic' but not 'which kernel function is dropping packets.' 
-                    Before eBPF, you'd guess or reboot; now, you inject a probe in seconds to pinpoint the bug without downtime."
+                <p class="lang-en hidden"
+                    style="margin-top: 10px; font-style: italic; font-size: 1.15rem; line-height: 1.8; color: var(--cisco-midnight);">
+                    "Imagine 3 AM: your cluster has mystery latency. Traditional tools say 'high traffic' but not 'which
+                    kernel function is dropping packets.'
+                    Before eBPF, you'd guess or reboot; now, you inject a probe in seconds to pinpoint the bug without
+                    downtime."
                 </p>
-                <div style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px; font-size: 0.9rem; color: #888;">
+                <div
+                    style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px; font-size: 0.9rem; color: #888;">
                     <span class="lang-zh">—— 这种从“黑盒猜测”到“白盒观测”的转变，正是 eBPF 的魅力所在。</span>
-                    <span class="lang-en hidden">—— This shift from 'Black-box Guessing' to 'White-box Observability' is the essence of eBPF.</span>
+                    <span class="lang-en hidden">—— This shift from 'Black-box Guessing' to 'White-box Observability' is
+                        the essence of eBPF.</span>
                 </div>
             </div>
         </div>
@@ -1673,11 +1929,15 @@ footer svg {
                     <h4 class="lang-zh">用户态 (User Space)</h4>
                     <h4 class="lang-en hidden">User Space</h4>
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
-                        <strong>定义：</strong>这是一个非特权层 (Unprivileged Layer)。运行在此空间的应用（如 Web 浏览器、数据库）被剥夺了直接操作硬件的权力。这种限制保护了系统的稳定性，应用必须通过系统调用（System Call）向内核“申请”资源<br><br>
+                        <strong>定义：</strong>这是一个非特权层 (Unprivileged Layer)。运行在此空间的应用（如 Web
+                        浏览器、数据库）被剥夺了直接操作硬件的权力。这种限制保护了系统的稳定性，应用必须通过系统调用（System Call）向内核“申请”资源<br><br>
                         <strong>类比：</strong>用户空间是安全的驾驶舱，乘客（应用）不能碰引擎；内核空间是布满管线的引擎室。eBPF 实现了在驾驶舱内，安全地将指令送入引擎室。
                     </p>
                     <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
-                        <strong>Definition:</strong> This is an Unprivileged Layer. Applications running here (e.g., browsers, databases) are stripped of the power to operate hardware directly.This restriction protects system stability. Apps must "apply" for resources from the kernel via System Calls.<br><br>
+                        <strong>Definition:</strong> This is an Unprivileged Layer. Applications running here (e.g.,
+                        browsers, databases) are stripped of the power to operate hardware directly.This restriction
+                        protects system stability. Apps must "apply" for resources from the kernel via System
+                        Calls.<br><br>
                         <strong>Analogy:</strong> User space is the cockpit where passengers (apps) can't touch the
                         engine; kernel space is the engine room. eBPF safely sends commands into the engine room from
                         the cockpit.
@@ -1706,7 +1966,13 @@ footer svg {
                         <strong>类比：</strong>它是驾驶舱内的各种踏板与旋钮。当你想加速（读取文件）或转向（发送包）时，必须通过这些标准接口发出请求。
                     </p>
                     <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
-                        <strong>Definition:</strong> The system call interface is the standard programming interface for user-mode programs to request kernel services. When an application needs to perform operations such as reading/writing files, sending/receiving network traffic, allocating memory, or coordinating concurrent processes, it must request the kernel to perform these operations on its behalf through the system call interface. It is the only legitimate channel across permission boundaries, and this design prevents malicious or faulty programs from directly damaging hardware or stealing memory data from other applications.<br><br>
+                        <strong>Definition:</strong> The system call interface is the standard programming interface for
+                        user-mode programs to request kernel services. When an application needs to perform operations
+                        such as reading/writing files, sending/receiving network traffic, allocating memory, or
+                        coordinating concurrent processes, it must request the kernel to perform these operations on its
+                        behalf through the system call interface. It is the only legitimate channel across permission
+                        boundaries, and this design prevents malicious or faulty programs from directly damaging
+                        hardware or stealing memory data from other applications.<br><br>
                         <strong>Analogy:</strong> These are the pedals and knobs in the cockpit. To accelerate (read
                         files) or steer (send packets), you must use these standard interfaces.
                     </p>
@@ -1737,13 +2003,20 @@ footer svg {
                     <h4 class="lang-zh">eBPF 沙盒：虚拟化保护层</h4>
                     <h4 class="lang-en hidden">eBPF Sandbox: Virtualized Protection Layer</h4>
                     <p class="lang-zh" style="font-size: 0.95rem; margin-top: 10px;">
-                        <strong>定义：</strong>eBPF 程序运行在内核态虚拟机中，通过 <strong>Verifier（验证器）</strong> 对字节码进行<strong>DAG (Directed Acyclic Graph，有向无环图)</strong>
-                        分析，确保内存安全且不含死循环。<strong>eBPF虚拟机</strong>驻留在内核，专门用于执行 eBPF 指令集。它为程序提供了一个受限的运行环境，确保其在高性能执行的同时，不会对内核其他部分产生副作用。<strong>字节码</strong>是eBPF程序的编码形式，由eBPF虚拟机负责执行。<br>
+                        <strong>定义：</strong>eBPF 程序运行在内核态虚拟机中，通过 <strong>Verifier（验证器）</strong> 对字节码进行<strong>DAG
+                            (Directed Acyclic Graph，有向无环图)</strong>
+                        分析，确保内存安全且不含死循环。<strong>eBPF虚拟机</strong>驻留在内核，专门用于执行 eBPF
+                        指令集。它为程序提供了一个受限的运行环境，确保其在高性能执行的同时，不会对内核其他部分产生副作用。<strong>字节码</strong>是eBPF程序的编码形式，由eBPF虚拟机负责执行。<br>
                         <strong>类比：</strong>它像是一套智能防错系统，在任何不安全的代码下发给引擎前将其拦截在“虚拟试车台”中，确保核心底座的绝对稳定。
                     </p>
                     <p class="lang-en hidden" style="font-size: 0.95rem; margin-top: 10px;">
                         <strong>Definition:</strong> eBPF programs run in a kernel-space VM, analyzed by a
-                        <strong>Verifier</strong> via <strong>DAG (Directed Acyclic Graph)</strong> to ensure memory safety and no infinite loops.<br>The eBPF virtual machine resides in the kernel and is dedicated to executing the eBPF instruction set. <strong>eBPF Virtual Machine</strong> provides a restricted runtime environment for programs, ensuring that they can execute at high performance without causing side effects on other parts of the kernel. <strong>eBPF Bytecode</strong> is the encoded form of eBPF programs, executed by the eBPF VM.<br>
+                        <strong>Verifier</strong> via <strong>DAG (Directed Acyclic Graph)</strong> to ensure memory
+                        safety and no infinite loops.<br>The eBPF virtual machine resides in the kernel and is dedicated
+                        to executing the eBPF instruction set. <strong>eBPF Virtual Machine</strong> provides a
+                        restricted runtime environment for programs, ensuring that they can execute at high performance
+                        without causing side effects on other parts of the kernel. <strong>eBPF Bytecode</strong> is the
+                        encoded form of eBPF programs, executed by the eBPF VM.<br>
                         <strong>Analogy:</strong> Like an intelligent error-prevention system that intercepts unsafe
                         code on a "virtual test stand" before reaching the engine.
                     </p>
@@ -1786,7 +2059,9 @@ footer svg {
                         才能在不修改内核源码、不重新编译的情况下，像<strong>“乐高积木”</strong>一样动态地插拔功能，让操作系统拥有了即时的防御进化能力。
                     </p>
                     <p class="lang-en hidden" style="font-size: 0.95rem; line-height: 1.6; color: #444;">
-                        The physical essence of a Hook is a <strong>"function pointer slot"</strong> reserved by the kernel, eBPF uses a hook mechanism to dynamically fill or replace pointers to eBPF programs in these slots.
+                        The physical essence of a Hook is a <strong>"function pointer slot"</strong> reserved by the
+                        kernel, eBPF uses a hook mechanism to dynamically fill or replace pointers to eBPF programs in
+                        these slots.
                         <br><br>
                         Because these probe points are <strong>"pre-defined,"</strong> eBPF can dynamically plug and
                         unplug functions like <strong>"Lego bricks"</strong> without modifying kernel source code or
@@ -1906,6 +2181,44 @@ footer svg {
                     <p class="lang-en hidden">JS turns static pages into apps; eBPF turns static kernels into
                         programmable platforms. Hot-load new features instantly, cutting evolution from years to
                         seconds.</p>
+                </div>
+            </div>
+
+            <div class="analogy-showcase">
+                <div class="browser-window">
+                    <div class="browser-bar">
+                        <div class="dot-ui"></div><div class="dot-ui"></div><div class="dot-ui"></div>
+                        <span style="font-size: 10px; color: #999; margin-left: 10px;">static_kernel_page.html</span>
+                    </div>
+                    <div class="preview-content style-none">
+                        <h1>Traditional Kernel</h1>
+                        <p>System is running.</p>
+                        <p>Network status: OK</p>
+                        <p>Security: Passive mode</p>
+                        <button disabled>Cannot Change Without Reboot</button>
+                    </div>
+                </div>
+
+                <div class="browser-window" style="border-color: var(--cisco-blue);">
+                    <div class="browser-bar" style="background: var(--cisco-midnight);">
+                        <div class="dot-ui" style="background: #ff5f56;"></div>
+                        <div class="dot-ui" style="background: #ffbd2e;"></div>
+                        <div class="dot-ui" style="background: #27c93f;"></div>
+                        <span style="font-size: 10px; color: #fff; margin-left: 10px;">ebpf_programmable_kernel.html</span>
+                    </div>
+                    <div class="preview-content style-ebpf" style="background: linear-gradient(180deg, #fff 0%, #f4faff 100%);">
+                        <h1 style="color: var(--cisco-midnight); font-size: 1.4rem; margin-bottom: 10px;">eBPF Powered Kernel</h1>
+                        <div style="margin-bottom: 15px;">
+                            <span class="lang-zh">当前状态：</span>
+                            <span class="lang-en hidden">Current Status:</span>
+                            <span id="typewriter-zh" class="typewriter-text typewriter-cursor"></span>
+                            <span id="typewriter-en" class="typewriter-text typewriter-cursor hidden"></span>
+                        </div>
+                        <div style="background: rgba(108, 194, 74, 0.1); border: 1px solid var(--cisco-green); padding: 10px; border-radius: 6px; font-size: 0.85rem; color: var(--cisco-green);">
+                            <span class="lang-zh">✔ 动态加载安全补丁成功 (无需重启)</span>
+                            <span class="lang-en hidden">✔ Dynamic security patch loaded (Zero Reboot)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2447,25 +2760,31 @@ footer svg {
                 </div>
             </div>
             <div class="container" style="margin-top: 60px;">
-                <div style="background: var(--cisco-gray); border-radius: 12px; padding: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+                <div
+                    style="background: var(--cisco-gray); border-radius: 12px; padding: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
                     <div>
                         <h4 class="lang-zh" style="color: var(--cisco-midnight); margin-bottom: 15px;">传统内核开发：长路漫漫</h4>
-                        <h4 class="lang-en hidden" style="color: var(--cisco-midnight); margin-bottom: 15px;">Traditional: The Long Road</h4>
+                        <h4 class="lang-en hidden" style="color: var(--cisco-midnight); margin-bottom: 15px;">
+                            Traditional: The Long Road</h4>
                         <p style="font-size: 0.9rem; color: #666;">
                             <span class="lang-zh">修改源码 → 社区讨论 (1年) → 内核合并 (0.5年) → 发行版更新 (2年) → 重启生产环境。</span>
-                            <span class="lang-en hidden">Edit source → RFC (1yr) → Merge (0.5yr) → Distro (2yr) → Reboot.</span>
+                            <span class="lang-en hidden">Edit source → RFC (1yr) → Merge (0.5yr) → Distro (2yr) →
+                                Reboot.</span>
                         </p>
                     </div>
                     <div style="border-left: 2px solid var(--cisco-blue); padding-left: 30px;">
                         <h4 class="lang-zh" style="color: var(--cisco-blue); margin-bottom: 15px;">eBPF 开发：即刻进化</h4>
-                        <h4 class="lang-en hidden" style="color: var(--cisco-blue); margin-bottom: 15px;">eBPF: Instant Evolution</h4>
+                        <h4 class="lang-en hidden" style="color: var(--cisco-blue); margin-bottom: 15px;">eBPF: Instant
+                            Evolution</h4>
                         <p style="font-size: 0.9rem; color: var(--cisco-midnight);">
-                            <span class="lang-zh"><strong>编写 C/Go 代码 → 编译并验证 (Verifier) → 热加载至内核 → 毫秒级生效。</strong></span>
-                            <span class="lang-en hidden"><strong>Write C/Go → Verify → Hot-load → Active in ms.</strong></span>
+                            <span class="lang-zh"><strong>编写 C/Go 代码 → 编译并验证 (Verifier) → 热加载至内核 →
+                                    毫秒级生效。</strong></span>
+                            <span class="lang-en hidden"><strong>Write C/Go → Verify → Hot-load → Active in
+                                    ms.</strong></span>
                         </p>
                     </div>
                 </div>
-            </div>            
+            </div>
             <div style="margin-top: 40px; text-align: center;">
                 <div class="logic-connector"></div>
                 <div class="lang-zh">
@@ -2601,7 +2920,7 @@ footer svg {
             while (ring_buffer__poll(rb, 100) >= 0);</pre>
                     </div>
                 </div>
-                
+
                 <div class="map-bridge-indicator">
                     <span class="lang-zh">➔ 逻辑链路：内核态事件捕获 → BPF Map (Ring Buffer) → 用户态实时响应 ➔</span>
                     <span class="lang-en hidden">➔ Logic: Event Capture → BPF Map Bridge → Real-time Response ➔</span>
@@ -2611,35 +2930,54 @@ footer svg {
             <div class="detail-grid" style="margin-top: 50px;">
                 <div class="card" style="border-top-color: var(--cisco-blue); grid-column: 1 / -1;">
                     <h4 class="lang-zh" style="display:flex; align-items:center; gap:10px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--cisco-blue)"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--cisco-blue)">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
                         eBPF 程序全生命周期概览 (The Hard Way)
                     </h4>
                     <h4 class="lang-en hidden">Full eBPF Program Lifecycle (The Hard Way)</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
-                        <ol style="font-size: 0.92rem; color: #444; line-height: 2; list-style-position: inside; padding-left: 0;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <ol
+                            style="font-size: 0.92rem; color: #444; line-height: 2; list-style-position: inside; padding-left: 0;">
                             <li class="lang-zh"><strong>编写：</strong> 使用 C/Rust 定义逻辑与 Map 结构。</li>
-                            <li class="lang-en hidden"><strong>Write:</strong> Define logic and Map structures in C/Rust.</li>
+                            <li class="lang-en hidden"><strong>Write:</strong> Define logic and Map structures in
+                                C/Rust.</li>
                             <li class="lang-zh"><strong>编译：</strong> Clang/LLVM 将代码转为二进制 ELF 字节码。</li>
-                            <li class="lang-en hidden"><strong>Compile:</strong> Clang/LLVM converts code to ELF bytecode.</li>
+                            <li class="lang-en hidden"><strong>Compile:</strong> Clang/LLVM converts code to ELF
+                                bytecode.</li>
                             <li class="lang-zh"><strong>校验：</strong> Verifier 静态分析 100 万条指令路径的安全性。</li>
-                            <li class="lang-en hidden"><strong>Verify:</strong> Verifier analyzes up to 1M instructions for safety.</li>
+                            <li class="lang-en hidden"><strong>Verify:</strong> Verifier analyzes up to 1M instructions
+                                for safety.</li>
                             <li class="lang-zh"><strong>JIT：</strong> 字节码转换为 CPU 物理寄存器指令。</li>
-                            <li class="lang-en hidden"><strong>JIT:</strong> Bytecode translates to physical CPU instructions.</li>
+                            <li class="lang-en hidden"><strong>JIT:</strong> Bytecode translates to physical CPU
+                                instructions.</li>
                         </ol>
-                        <ol start="5" style="font-size: 0.92rem; color: #444; line-height: 2; list-style-position: inside; padding-left: 0;">
+                        <ol start="5"
+                            style="font-size: 0.92rem; color: #444; line-height: 2; list-style-position: inside; padding-left: 0;">
                             <li class="lang-zh"><strong>加载：</strong> bpftool 通过 `bpf()` 调用注入并关联 Hook。</li>
-                            <li class="lang-en hidden"><strong>Load:</strong> bpftool injects code via `bpf()` syscall.</li>
+                            <li class="lang-en hidden"><strong>Load:</strong> bpftool injects code via `bpf()` syscall.
+                            </li>
                             <li class="lang-zh"><strong>运行：</strong> Hook 被硬件或软件事件瞬间激活。</li>
-                            <li class="lang-en hidden"><strong>Run:</strong> Hook activated by hardware/software events.</li>
+                            <li class="lang-en hidden"><strong>Run:</strong> Hook activated by hardware/software events.
+                            </li>
                             <li class="lang-zh"><strong>交换：</strong> 通过 Maps 与用户空间进行异步或原子状态交换。</li>
-                            <li class="lang-en hidden"><strong>Exchange:</strong> Async state exchange via BPF Maps.</li>
+                            <li class="lang-en hidden"><strong>Exchange:</strong> Async state exchange via BPF Maps.
+                            </li>
                             <li class="lang-zh"><strong>销毁：</strong> 引用计数归零，内核清理机器码与状态。</li>
-                            <li class="lang-en hidden"><strong>Cleanup:</strong> Resources released upon zero reference count.</li>
+                            <li class="lang-en hidden"><strong>Cleanup:</strong> Resources released upon zero reference
+                                count.</li>
                         </ol>
                     </div>
-                    <div class="winston-callout" style="margin-top: 20px; border-left-color: var(--cisco-red); background: rgba(226, 35, 26, 0.03);">
-                        <p class="lang-zh" style="font-size: 0.88rem;"><strong>安全架构师评价：</strong> 这一套流程虽然极其严密且安全，但对开发者要求极高。每一处手写逻辑都可能在 Verifier 环节被弹回。这也是为什么像 <strong>Isovalent</strong> 这样的先驱要推出 **Cilium**——将这些复杂的底层魔法包装成开箱即用的企业级方案。</p>
-                        <p class="lang-en hidden" style="font-size: 0.88rem;"><strong>Architect Review:</strong> This lifecycle is rigorous but complex. Every manual logic step could be rejected by the Verifier. This is why <strong>Isovalent</strong> introduced **Cilium**—to package these low-level magics into turnkey solutions.</p>
+                    <div class="winston-callout"
+                        style="margin-top: 20px; border-left-color: var(--cisco-red); background: rgba(226, 35, 26, 0.03);">
+                        <p class="lang-zh" style="font-size: 0.88rem;"><strong>安全架构师评价：</strong>
+                            这一套流程虽然极其严密且安全，但对开发者要求极高。每一处手写逻辑都可能在 Verifier 环节被弹回。这也是为什么像 <strong>Isovalent</strong>
+                            这样的先驱要推出 **Cilium**——将这些复杂的底层魔法包装成开箱即用的企业级方案。</p>
+                        <p class="lang-en hidden" style="font-size: 0.88rem;"><strong>Architect Review:</strong> This
+                            lifecycle is rigorous but complex. Every manual logic step could be rejected by the
+                            Verifier. This is why <strong>Isovalent</strong> introduced **Cilium**—to package these
+                            low-level magics into turnkey solutions.</p>
                     </div>
                 </div>
             </div>
@@ -2697,10 +3035,12 @@ footer svg {
                         CISSP defense-in-depth principles.
                     </p>
                     <p class="lang-zh">传统的 EDR/HIDS 依赖于劫持系统调用表，这很容易被 Rootkit 绕过。eBPF 运行在执行路径的更深处，
-                            即使攻击者拥有高权限，也无法通过常规手段隐藏其恶意行为。这是真正的<strong>内核级零信任 (Zero Trust at Runtime)</strong>。
+                        即使攻击者拥有高权限，也无法通过常规手段隐藏其恶意行为。这是真正的<strong>内核级零信任 (Zero Trust at Runtime)</strong>。
                     </p>
-                    <p class="lang-en hidden">Traditional EDRs rely on syscall hooking, which Rootkits can bypass. eBPF runs deeper in the execution path. 
-                            Even with high privileges, attackers cannot hide. This is true <strong>Zero Trust at Runtime</strong>.
+                    <p class="lang-en hidden">Traditional EDRs rely on syscall hooking, which Rootkits can bypass. eBPF
+                        runs deeper in the execution path.
+                        Even with high privileges, attackers cannot hide. This is true <strong>Zero Trust at
+                            Runtime</strong>.
                     </p>
                 </div>
 
@@ -3246,28 +3586,81 @@ footer svg {
                 <div class="card" style="border-top-color: var(--cisco-midnight);">
                     <h4 class="lang-zh">虚拟化网络革命：Netkit</h4>
                     <h4 class="lang-en hidden">Virtual Network Revolution: Netkit</h4>
-                    <p class="lang-zh" style="font-size: 0.9rem;"><strong>Netkit</strong>已成为2025年解决容器网络“隐形开销”的战略性技术。它利用eBPF的可编程性，彻底重塑了大规模集群的数据转发路径。
-                        <br> <strong>1.突破veth瓶颈</strong> 传统容器网络依赖 veth 设备对，数据包需多次跳转内核协议栈，伴随频繁的内存拷贝与上下文切换。这种“协议栈税”导致延迟增加，限制了吞吐量，使其无法达到物理机原生性能。
-                        <br> <strong>2.核心进化：内存指针重定向</strong>，自Linux 6.7+ 引入以来，<strong>Netkit</strong>放弃了虚拟设备抽象，改用eBPF的 <strong>bpf_redirect_peer</strong>机制。通过直接在内核层进行内存指针转换，Netkit实现了数据包的<strong>“一跳直达”</strong>，绕过了复杂的通用路径。
-                        <br> <strong>3.极致性能红利零拷贝转发</strong>：使容器网络性能真正匹配物理主机水平，实现近乎线速的转发。相比Sidecar模式，网络资源消耗降低70%以上，并削减了约20%的内核软中断（Softirq）负载。</p>
-                    <p class="lang-en hidden" style="font-size: 0.9rem;"><strong>Netkit</strong> has become a strategic technology for addressing the "hidden overhead" of container networking by 2025. It leverages the programmability of eBPF to completely reshape the data forwarding path for large-scale clusters.
-                        <br> <strong>1. Overcoming the Veth Bottleneck:</strong> Traditional container networking relies on veth device pairs, requiring packets to hop multiple times across the kernel protocol stack, accompanied by frequent memory copies and context switches. This "protocol stack tax" increases latency, limiting throughput and preventing it from reaching the native performance of physical machines.
-                        <br><strong>2. Core Evolution: Memory Pointer Redirection:</strong> Since its introduction in Linux 6.7+, <strong>Netkit</strong> has abandoned virtual device abstraction and adopted eBPF's <strong>bpf_redirect_peer</strong> mechanism. By directly performing memory pointer translation at the kernel level, Netkit achieves<strong> "one-hop" packet delivery</strong>, bypassing complex general paths.
-                        <br><strong>3. Ultimate Performance Benefits: Zero-copy forwarding:</strong> Enables container network performance to truly match that of physical hosts, achieving near-line-speed forwarding.Resource cost reduction: Compared to Sidecar mode, network resource consumption is reduced by more than 70%, and kernel softirq load is reduced by about 20%.
+                    <p class="lang-zh" style="font-size: 0.9rem;">
+                        <strong>Netkit</strong>已成为2025年解决容器网络“隐形开销”的战略性技术。它利用eBPF的可编程性，彻底重塑了大规模集群的数据转发路径。
+                        <br> <strong>1.突破veth瓶颈</strong> 传统容器网络依赖 veth
+                        设备对，数据包需多次跳转内核协议栈，伴随频繁的内存拷贝与上下文切换。这种“协议栈税”导致延迟增加，限制了吞吐量，使其无法达到物理机原生性能。
+                        <br> <strong>2.核心进化：内存指针重定向</strong>，自Linux 6.7+ 引入以来，<strong>Netkit</strong>放弃了虚拟设备抽象，改用eBPF的
+                        <strong>bpf_redirect_peer</strong>机制。通过直接在内核层进行内存指针转换，Netkit实现了数据包的<strong>“一跳直达”</strong>，绕过了复杂的通用路径。
+                        <br>
+                        <strong>3.极致性能红利零拷贝转发</strong>：使容器网络性能真正匹配物理主机水平，实现近乎线速的转发。相比Sidecar模式，网络资源消耗降低70%以上，并削减了约20%的内核软中断（Softirq）负载。
+                    </p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem;"><strong>Netkit</strong> has become a strategic
+                        technology for addressing the "hidden overhead" of container networking by 2025. It leverages
+                        the programmability of eBPF to completely reshape the data forwarding path for large-scale
+                        clusters.
+                        <br> <strong>1. Overcoming the Veth Bottleneck:</strong> Traditional container networking relies
+                        on veth device pairs, requiring packets to hop multiple times across the kernel protocol stack,
+                        accompanied by frequent memory copies and context switches. This "protocol stack tax" increases
+                        latency, limiting throughput and preventing it from reaching the native performance of physical
+                        machines.
+                        <br><strong>2. Core Evolution: Memory Pointer Redirection:</strong> Since its introduction in
+                        Linux 6.7+, <strong>Netkit</strong> has abandoned virtual device abstraction and adopted eBPF's
+                        <strong>bpf_redirect_peer</strong> mechanism. By directly performing memory pointer translation
+                        at the kernel level, Netkit achieves<strong> "one-hop" packet delivery</strong>, bypassing
+                        complex general paths.
+                        <br><strong>3. Ultimate Performance Benefits: Zero-copy forwarding:</strong> Enables container
+                        network performance to truly match that of physical hosts, achieving near-line-speed
+                        forwarding.Resource cost reduction: Compared to Sidecar mode, network resource consumption is
+                        reduced by more than 70%, and kernel softirq load is reduced by about 20%.
                     </p>
                 </div>
                 <div class="card" style="border-top-color: var(--cisco-orange);">
                     <h4 class="lang-zh">AI 调度优化：Sched_ext</h4>
                     <h4 class="lang-en hidden">AI Scheduling Optimization: Sched_ext</h4>
-                    <p class="lang-zh" style="font-size: 0.9rem;"><strong>Sched_ext</strong> 是一项引入Linux内核（自v6.12版本起）的革命性技术，它被定义为一个可扩展的调度器类，允许开发者利用 eBPF 动态地定义、测试和部署自定义的CPU调度策略。<br>在AI训练与大语言模型（LLM）推理等高性能计算场景中，传统的通用调度器（如CFS（完全公平调度器）和EEVDF（最早符合虚拟截止日期优先调度器））往往难以应对极端的并发与时延需求，而 <strong>Sched_ext</strong> 正是打破这一瓶颈的关键。<br>通过 <strong>Sched_ext</strong>，基础设施团队可以编写自定义的BPF程序作为同步回调，直接参与内核调度决策。这使得系统能够根据AI任务的优先级和资源需求，实现精准的CPU亲和性管理。<br>这种精准的调度能将<strong>缓存未命中率 (Cache Misses) 降低约 15%，</strong>并显著压低<strong>P99长尾延迟</strong>，这对于实时响应的生成式AI服务至关重要。</p>
-                    <p class="lang-en hidden" style="font-size: 0.9rem;"><strong>Sched_ext</strong> is a revolutionary technology introduced into the Linux kernel (since version v6.12). Defined as an extensible scheduler class, it allows developers to dynamically define, test, and deploy custom CPU scheduling policies using eBPF.<br>In high-performance computing scenarios such as AI training and Large Language Model (LLM) inference, traditional general-purpose schedulers (such as CFS (Completely Fair Scheduler) and EEVDF (Earliest Meeting Virtual Deadline First Scheduler)) often struggle to handle extreme concurrency and latency demands. <strong>Sched_ext</strong> is key to overcoming this bottleneck. <br>With <strong>Sched_ext</strong>, infrastructure teams can write custom BPF programs as synchronization callbacks to directly participate in kernel scheduling decisions. This enables the system to achieve precise CPU affinity management based on the priority and resource requirements of AI tasks. <br>This precise scheduling can <strong>reduce cache misses by approximately 15%</strong> and significantly reduce <strong>P99 long-tail latency</strong>, which is crucial for real-time generative AI services. </p>
+                    <p class="lang-zh" style="font-size: 0.9rem;"><strong>Sched_ext</strong>
+                        是一项引入Linux内核（自v6.12版本起）的革命性技术，它被定义为一个可扩展的调度器类，允许开发者利用 eBPF
+                        动态地定义、测试和部署自定义的CPU调度策略。<br>在AI训练与大语言模型（LLM）推理等高性能计算场景中，传统的通用调度器（如CFS（完全公平调度器）和EEVDF（最早符合虚拟截止日期优先调度器））往往难以应对极端的并发与时延需求，而
+                        <strong>Sched_ext</strong> 正是打破这一瓶颈的关键。<br>通过
+                        <strong>Sched_ext</strong>，基础设施团队可以编写自定义的BPF程序作为同步回调，直接参与内核调度决策。这使得系统能够根据AI任务的优先级和资源需求，实现精准的CPU亲和性管理。<br>这种精准的调度能将<strong>缓存未命中率
+                            (Cache Misses) 降低约 15%，</strong>并显著压低<strong>P99长尾延迟</strong>，这对于实时响应的生成式AI服务至关重要。</p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem;"><strong>Sched_ext</strong> is a revolutionary
+                        technology introduced into the Linux kernel (since version v6.12). Defined as an extensible
+                        scheduler class, it allows developers to dynamically define, test, and deploy custom CPU
+                        scheduling policies using eBPF.<br>In high-performance computing scenarios such as AI training
+                        and Large Language Model (LLM) inference, traditional general-purpose schedulers (such as CFS
+                        (Completely Fair Scheduler) and EEVDF (Earliest Meeting Virtual Deadline First Scheduler)) often
+                        struggle to handle extreme concurrency and latency demands. <strong>Sched_ext</strong> is key to
+                        overcoming this bottleneck. <br>With <strong>Sched_ext</strong>, infrastructure teams can write
+                        custom BPF programs as synchronization callbacks to directly participate in kernel scheduling
+                        decisions. This enables the system to achieve precise CPU affinity management based on the
+                        priority and resource requirements of AI tasks. <br>This precise scheduling can <strong>reduce
+                            cache misses by approximately 15%</strong> and significantly reduce <strong>P99 long-tail
+                            latency</strong>, which is crucial for real-time generative AI services. </p>
                 </div>
                 <div class="card" style="border-top-color: var(--cisco-blue);">
                     <h4 class="lang-zh">LLM 安全与可观测性</h4>
                     <h4 class="lang-en hidden">LLM Security & Observability</h4>
-                    <p class="lang-zh" style="font-size: 0.9rem;">LLM安全与可观测性已成为eBPF技术的重要应用方向，通过在网络层实时追踪应用程序与外部大语言模型（LLM）的交互，能够精准捕获API请求数据与延迟，构建起<strong>无感的生成式AI安全防线。</strong><br>eBPF通过Uprobes动态挂钩用户态SSL库函数，在数据被加密之前或解密之后直接访问缓冲区内存，从而实现在TLS边界的零侵入明文解析，无需解密代理或提供证书。这使得安全团队能够实时审计<strong>提示词（Prompts）</strong>中的敏感PII数据或注入攻击，构建不可绕过的内核级防线。<br>在性能剖析方面，eBPF以纳秒级精度捕获<strong>TTFT（首字延迟）与ITL（Token 间延迟）</strong>，并能关联分布式链路中的CPU与GPU节点，精准诊断算力停顿与I/O瓶颈。<br>这种“零开发侵入”的方案，将复杂的黑盒交互转变为透明可编程的遥测数据，确保了AI Agent在生产环境中的安全合规与全栈可见。
+                    <p class="lang-zh" style="font-size: 0.9rem;">
+                        LLM安全与可观测性已成为eBPF技术的重要应用方向，通过在网络层实时追踪应用程序与外部大语言模型（LLM）的交互，能够精准捕获API请求数据与延迟，构建起<strong>无感的生成式AI安全防线。</strong><br>eBPF通过Uprobes动态挂钩用户态SSL库函数，在数据被加密之前或解密之后直接访问缓冲区内存，从而实现在TLS边界的零侵入明文解析，无需解密代理或提供证书。这使得安全团队能够实时审计<strong>提示词（Prompts）</strong>中的敏感PII数据或注入攻击，构建不可绕过的内核级防线。<br>在性能剖析方面，eBPF以纳秒级精度捕获<strong>TTFT（首字延迟）与ITL（Token
+                            间延迟）</strong>，并能关联分布式链路中的CPU与GPU节点，精准诊断算力停顿与I/O瓶颈。<br>这种“零开发侵入”的方案，将复杂的黑盒交互转变为透明可编程的遥测数据，确保了AI
+                        Agent在生产环境中的安全合规与全栈可见。
                     </p>
-                    <p class="lang-en hidden" style="font-size: 0.9rem;">LLM security and observability have become key application areas for eBPF technology. By tracking the interaction between applications and external Large Language Models (LLMs) in real time at the network layer, eBPF can accurately capture API request data and latency, building a <strong>seamless generative AI security defense.</strong><br>eBPF dynamically hooks user-space SSL library functions through Uprobes, directly accessing buffer memory before or after data encryption, thus achieving zero-intrusion plaintext parsing at the TLS boundary without the need for decryption proxies or certificates. This allows security teams to audit sensitive PII data or injection attacks in <strong>prompts</strong> in real time, building an unbreakable kernel-level defense. <br>In terms of performance profiling, eBPF captures <strong>TTFT (Title-First-Word Latency) and ITL (Inter-Token Latency)</strong> with nanosecond precision and can correlate CPU and GPU nodes in distributed links to accurately diagnose computational stalls and I/O bottlenecks. This "zero-intrusion" solution transforms complex black-box interactions into transparent, programmable telemetry data, ensuring the security compliance and full-stack visibility of the AI Agent in production environments.</p>
+                    <p class="lang-en hidden" style="font-size: 0.9rem;">LLM security and observability have become key
+                        application areas for eBPF technology. By tracking the interaction between applications and
+                        external Large Language Models (LLMs) in real time at the network layer, eBPF can accurately
+                        capture API request data and latency, building a <strong>seamless generative AI security
+                            defense.</strong><br>eBPF dynamically hooks user-space SSL library functions through
+                        Uprobes, directly accessing buffer memory before or after data encryption, thus achieving
+                        zero-intrusion plaintext parsing at the TLS boundary without the need for decryption proxies or
+                        certificates. This allows security teams to audit sensitive PII data or injection attacks in
+                        <strong>prompts</strong> in real time, building an unbreakable kernel-level defense. <br>In
+                        terms of performance profiling, eBPF captures <strong>TTFT (Title-First-Word Latency) and ITL
+                            (Inter-Token Latency)</strong> with nanosecond precision and can correlate CPU and GPU nodes
+                        in distributed links to accurately diagnose computational stalls and I/O bottlenecks. This
+                        "zero-intrusion" solution transforms complex black-box interactions into transparent,
+                        programmable telemetry data, ensuring the security compliance and full-stack visibility of the
+                        AI Agent in production environments.</p>
                 </div>
             </div>
 
@@ -3344,6 +3737,45 @@ footer svg {
         </div>
     </section>
 
+    <!--References-->
+    <section class="container" style="padding: 80px 20px; border-top: 1px solid #eee;">
+        <h2 class="section-title lang-zh">参考资料 (Reference)</h2>
+        <h2 class="section-title lang-en hidden">Reference</h2>
+
+        <ul class="reference-list">
+            <li class="reference-item"><a href="https://ebpf.io/" target="_blank">ebpf.io - Introduction, Tutorials &
+                    Community Hub</a></li>
+            <li class="reference-item"><a
+                    href="https://ebpf.io/books/buzzing-across-space-illustrated-childrens-guide-to-ebpf.pdf"
+                    target="_blank">A Buzzing Space: Illustrated Children's Guide to eBPF</a></li>
+            <li class="reference-item"><a href="https://docs.ebpf.io/" target="_blank">eBPF Documentation Library -
+                    Concepts and API</a></li>
+            <li class="reference-item"><a href="https://docs.ebpf.io/linux/" target="_blank">eBPF for Linux -
+                    Implementation Details</a></li>
+            <li class="reference-item"><a href="https://ebpf.io/what-is-ebpf/" target="_blank">What is eBPF? - Deep Dive
+                    Exploration</a></li>
+            <li class="reference-item"><a
+                    href="https://www.linuxfoundation.org/hubfs/eBPF/The_State_of_eBPF25_111925.pdf"
+                    target="_blank">Linux Foundation: The State of eBPF 2025 Report</a></li>
+            <li class="reference-item"><a href="https://arxiv.org/html/2410.00026v1" target="_blank">Scientific
+                    Research: The Evolution and Future of eBPF (arXiv)</a></li>
+            <li class="reference-item"><a href="https://www.tigera.io/learn/guides/ebpf/" target="_blank">Tigera: The
+                    Ultimate Guide to eBPF Networking</a></li>
+            <li class="reference-item"><a
+                    href="https://www.ciscolive.com/c/dam/r/ciscolive/emea/docs/2025/pdf/LTRSEC-2274.pdf"
+                    target="_blank">Cisco Live 2025: LTRSEC-2274 - Hands-on eBPF</a></li>
+            <li class="reference-item"><a
+                    href="https://www.ciscolive.com/c/dam/r/ciscolive/emea/docs/2025/pdf/BRKSEC-2169.pdf"
+                    target="_blank">Cisco Live 2025: BRKSEC-2169 - Security Architecture</a></li>
+            <li class="reference-item"><a
+                    href="https://www.ciscolive.com/c/dam/r/ciscolive/global-event/docs/2025/pdf/BRKSEC-2167.pdf"
+                    target="_blank">Cisco Live 2025: BRKSEC-2167 - Zero Trust with eBPF</a></li>
+            <li class="reference-item"><a href="https://isovalent.com/blog/post/why-replace-iptables-with-ebpf/"
+                    target="_blank">Isovalent: Why Replace iptables with eBPF?</a></li>
+            <li class="reference-item"><a href="https://www.youtube.com/watch?v=Wb_vD3XZYOA" target="_blank">Technical
+                    Deep Dive: eBPF Mechanism and Performance (Video)</a></li>
+        </ul>
+    </section>
     <footer>
         <div class="container">
             <div style="margin-bottom: 30px;">
@@ -3404,6 +3836,36 @@ footer svg {
             }
         }
 
+
+        /** --- 增量：打字机效果逻辑 --- **/
+        const zhText = "内核逻辑即时更新中，无需系统重启...";
+        const enText = "Kernel logic updating instantly, no reboot required...";
+        let zhIdx = 0, enIdx = 0;
+
+        function typeWriter() {
+            const zhEl = document.getElementById('typewriter-zh');
+            const enEl = document.getElementById('typewriter-en');
+            
+            if (zhIdx < zhText.length) {
+                zhEl.textContent += zhText.charAt(zhIdx);
+                zhIdx++;
+            }
+            if (enIdx < enText.length) {
+                enEl.textContent += enText.charAt(enIdx);
+                enIdx++;
+            }
+            
+            if (zhIdx < zhText.length || enIdx < enText.length) {
+                setTimeout(typeWriter, 100);
+            } else {
+                // 完成后重置，循环演示
+                setTimeout(() => {
+                    zhEl.textContent = ""; enEl.textContent = "";
+                    zhIdx = 0; enIdx = 0;
+                    typeWriter();
+                }, 3000);
+            }
+        }
         // 100% 保留原始状态变量
         let stats = { xdp: 0, kprobe: 0 };
 
@@ -3605,6 +4067,8 @@ footer svg {
 
             // 2. 默认语言
             setLang('zh');
+
+            typeWriter(); // 启动打字机
         });
     </script>
 </body>
