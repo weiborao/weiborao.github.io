@@ -41,6 +41,8 @@ pages=(
   "ebpfv3.html:0.7"
   "isestory.html:0.7"
   "My-GenAI-works-md.html:0.9"
+  "BRKSEC-2169-ebpf-md.html:0.8"
+  "tetragon-md.html:0.8"
 )
 
 
