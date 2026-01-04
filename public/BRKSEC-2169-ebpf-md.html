@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"weiborao.link","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="这是我通过 AI 生成的 eBPF 技术解析页面。你可以在下方直接浏览，或点击链接全屏查看。">
+    <meta name="description" content="🚀 Linux 内核的“魔法哨兵”：为什么 eBPF 是可观测性与安全的未来？ 作为一名安全架构师，我见证了无数监控方案在高性能需求面前的力不从心。直到 eBPF 的出现，它彻底改变了我们在不触动内核源码的情况下观察、拦截和优化系统的能力。 在我最新的技术博客中，我深入剖析了：🔹 JIT 与 Verifier：如何在高性能与极致安全之间取得平衡？🔹 零侵入观测：如何在不修改业务代码的情况下实">
 <meta property="og:type" content="article">
 <meta property="og:title" content="eBPF 技术展示">
 <meta property="og:url" content="https://weiborao.link/BRKSEC-2169-ebpf-md.html">
 <meta property="og:site_name" content="Rao Weibo的博客">
-<meta property="og:description" content="这是我通过 AI 生成的 eBPF 技术解析页面。你可以在下方直接浏览，或点击链接全屏查看。">
+<meta property="og:description" content="🚀 Linux 内核的“魔法哨兵”：为什么 eBPF 是可观测性与安全的未来？ 作为一名安全架构师，我见证了无数监控方案在高性能需求面前的力不从心。直到 eBPF 的出现，它彻底改变了我们在不触动内核源码的情况下观察、拦截和优化系统的能力。 在我最新的技术博客中，我深入剖析了：🔹 JIT 与 Verifier：如何在高性能与极致安全之间取得平衡？🔹 零侵入观测：如何在不修改业务代码的情况下实">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-12-14T12:10:00.000Z">
-<meta property="article:modified_time" content="2025-12-14T12:10:13.160Z">
+<meta property="article:published_time" content="2026-01-04T12:10:00.000Z">
+<meta property="article:modified_time" content="2026-01-04T15:58:51.921Z">
 <meta property="article:author" content="Rao Weibo">
 <meta property="article:tag" content="AI Works">
 <meta property="article:tag" content="Linux">
@@ -108,7 +108,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">30</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">19</span></a></li><li class="menu-item menu-item-works"><a href="/works/" rel="section"><i class="fa fa-sitemap fa-fw"></i>works</a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">32</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">20</span></a></li><li class="menu-item menu-item-works"><a href="/works/" rel="section"><i class="fa fa-sitemap fa-fw"></i>works</a></li>
   </ul>
 </nav>
 
@@ -145,7 +145,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -155,7 +155,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-count">32</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -224,7 +224,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-14 20:10:00 / 修改时间：20:10:13" itemprop="dateCreated datePublished" datetime="2025-12-14T20:10:00+08:00">2025-12-14</time>
+      <time title="创建时间：2026-01-04 20:10:00 / 修改时间：23:58:51" itemprop="dateCreated datePublished" datetime="2026-01-04T20:10:00+08:00">2026-01-04</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -243,7 +243,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>113</span>
+      <span>297</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -260,7 +260,11 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>这是我通过 AI 生成的 eBPF 技术解析页面。你可以在下方直接浏览，或点击链接全屏查看。</p>
+    <div class="post-body" itemprop="articleBody"><p>🚀 Linux 内核的“魔法哨兵”：为什么 eBPF 是可观测性与安全的未来？</p>
+<p>作为一名安全架构师，我见证了无数监控方案在高性能需求面前的力不从心。直到 eBPF 的出现，它彻底改变了我们在不触动内核源码的情况下观察、拦截和优化系统的能力。</p>
+<p>在我最新的技术博客中，我深入剖析了：<br>🔹 JIT 与 Verifier：如何在高性能与极致安全之间取得平衡？<br>🔹 零侵入观测：如何在不修改业务代码的情况下实现内核级监控？<br>🔹 安全攻防：利用 eBPF 打造下一代运行时安全防御体系。</p>
+<p>逻辑清晰的技术白皮书，带你从底层理解这项革命性技术。</p>
+<p>你可以在下方直接浏览，或点击链接全屏查看。</p>
 <span id="more"></span>
 
 <div style="position: relative; width: 100%; height: 0; padding-bottom: 75%; overflow: hidden; border: 1px solid #eee; border-radius: 8px;">
@@ -287,13 +291,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ise-story-md.html" rel="prev" title="ISE 故事">
-                  <i class="fa fa-angle-left"></i> ISE 故事
+                <a href="/My-GenAI-works-md.html" rel="prev" title="作品集 (Works)">
+                  <i class="fa fa-angle-left"></i> 作品集 (Works)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/My-GenAI-works-md.html" rel="next" title="作品集 (Works)">
-                  作品集 (Works) <i class="fa fa-angle-right"></i>
+                <a href="/tetragon-md.html" rel="next" title="Tetragon 技术展示">
+                  Tetragon 技术展示 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
@@ -331,7 +335,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:59</span>
+    <span title="站点阅读时长">4:01</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
