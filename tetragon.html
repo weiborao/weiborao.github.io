@@ -1084,6 +1084,47 @@ svg {
     display: block;
     margin: 0 auto;
 }
+
+/* --- 修复：企业级演进建议 (Roadmap) 移动端自动堆叠 --- */
+
+/* 1. 为容器增加基础过渡和弹性支持 */
+.roadmap-container {
+    transition: all 0.3s ease;
+}
+
+/* 2. 移动端响应式覆盖 */
+@media (max-width: 768px) {
+    /* 强制将横向 Flex 布局改为纵向排列 */
+    .roadmap-container {
+        flex-direction: column !important; /* 覆盖内联 display: flex 的默认方向 */
+        gap: 30px !important;            /* 增加卡片间的垂直间距 */
+        margin: 20px 0 !important;
+    }
+
+    /* 确保每个阶段卡片占据 100% 宽度 */
+    .roadmap-step {
+        width: 100% !important;
+        flex: none !important;            /* 取消 flex: 1 的均分逻辑 */
+        padding: 30px 25px !important;    /* 稍微调整内边距增强手机易读性 */
+    }
+
+    /* 优化数字序号在手机上的视觉位置 */
+    .step-num {
+        margin-bottom: 12px !important;
+    }
+
+    /* 增加卡片间的视觉引导线（可选，增强阶段感） */
+    .roadmap-step:not(:last-child)::after {
+        content: "↓";
+        position: absolute;
+        bottom: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--cisco-blue);
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+}
     </style>
 
 </head>
@@ -3434,29 +3475,31 @@ Generated Policy for sys_execve... 🚀</div>
             </p>
         </div>
         
-        <div class="roadmap-container" style="display: flex; gap: 20px; margin: 40px 0;">
-            <div class="roadmap-step" style="flex: 1; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--cisco-platinum); position: relative; box-shadow: var(--shadow-card);">
-                <div class="step-num" style="width: 24px; height: 24px; background: var(--cisco-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; margin-bottom: 15px;">1</div>
-                <strong><span lang="zh">运行时可见性 (Visibility)</span><span lang="en">Runtime Visibility</span></strong>
-                <p style="font-size: 0.85rem; margin-top:10px; line-height: 1.6;">
-                    <span lang="zh">初步部署 Tetragon。开启所有关键系统调用的审计日志（Audit Logs），将高质量的内核原始信号送入 Splunk/Cisco XDR，建立全网资产行为视图。</span><span lang="en">Initial Tetragon deployment. Enable Audit Logs for all critical syscalls, funneling high-quality raw kernel signals into Splunk/Cisco XDR to build a comprehensive asset behavior view.</span>
-                </p>
-            </div>
-            <div class="roadmap-step" style="flex: 1; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--cisco-platinum); position: relative; box-shadow: var(--shadow-card);">
-                <div class="step-num" style="width: 24px; height: 24px; background: var(--cisco-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; margin-bottom: 15px;">2</div>
-                <strong><span lang="zh">策略发现 (Discovery)</span><span lang="en">Policy Discovery</span></strong>
-                <p style="font-size: 0.85rem; margin-top:10px; line-height: 1.6;">
-                    <span lang="zh">在测试/预发环境开启策略发现功能。通过观察合法进程（如 Java/Nginx）的行为，自动提炼出“已知良好”的黄金行为白名单。</span><span lang="en">Enable policy discovery in staging. By observing legitimate process behaviors (e.g., Java/Nginx), automatically refine "Known-Good" golden behavior whitelists.</span>
-                </p>
-            </div>
-            <div class="roadmap-step" style="flex: 1; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--cisco-blue); position: relative; box-shadow: var(--shadow-card);">
-                <div class="step-num" style="width: 24px; height: 24px; background: var(--cisco-midnight); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; margin-bottom: 15px;">3</div>
-                <strong><span lang="zh">内核态强制执行 (Enforcement)</span><span lang="en">In-Kernel Enforcement</span></strong>
-                <p style="font-size: 0.85rem; margin-top:10px; line-height: 1.6;">
-                    <span lang="zh">正式下发 SIGKILL 阻断策略。将防御边界从“检测并报警”提升至“亚毫秒级内核态强制阻隔”，彻底杜绝 TOCTOU 攻击。</span><span lang="en">Formally deploy SIGKILL enforcement policies. Elevate defense from "detect and alert" to "sub-millisecond kernel enforcement," eliminating TOCTOU attacks.</span>
-                </p>
-            </div>
-        </div>
+<div class="roadmap-container" style="display: flex; gap: 20px; margin: 40px 0;">
+    <div class="roadmap-step" style="flex: 1; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--cisco-platinum); position: relative; box-shadow: var(--shadow-card);">
+        <div class="step-num" style="width: 24px; height: 24px; background: var(--cisco-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; margin-bottom: 15px;">1</div>
+        <strong><span lang="zh">运行时可见性 (Visibility)</span><span lang="en">Runtime Visibility</span></strong>
+        <p style="font-size: 0.85rem; margin-top:10px; line-height: 1.6;">
+            <span lang="zh">初步部署 Tetragon。开启所有关键系统调用的审计日志（Audit Logs），将高质量的内核原始信号送入 Splunk/Cisco XDR，建立全网资产行为视图。</span><span lang="en">Initial Tetragon deployment. Enable Audit Logs for all critical syscalls, funneling high-quality raw kernel signals into Splunk/Cisco XDR to build a comprehensive asset behavior view.</span>
+        </p>
+    </div>
+
+    <div class="roadmap-step" style="flex: 1; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--cisco-platinum); position: relative; box-shadow: var(--shadow-card);">
+        <div class="step-num" style="width: 24px; height: 24px; background: var(--cisco-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; margin-bottom: 15px;">2</div>
+        <strong><span lang="zh">策略发现 (Discovery)</span><span lang="en">Policy Discovery</span></strong>
+        <p style="font-size: 0.85rem; margin-top:10px; line-height: 1.6;">
+            <span lang="zh">在测试/预发环境开启策略发现功能。通过观察合法进程（如 Java/Nginx）的行为，自动提炼出“已知良好”的黄金行为白名单。</span><span lang="en">Enable policy discovery in staging. By observing legitimate process behaviors (e.g., Java/Nginx), automatically refine "Known-Good" golden behavior whitelists.</span>
+        </p>
+    </div>
+
+    <div class="roadmap-step" style="flex: 1; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--cisco-blue); position: relative; box-shadow: var(--shadow-card);">
+        <div class="step-num" style="width: 24px; height: 24px; background: var(--cisco-midnight); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; margin-bottom: 15px;">3</div>
+        <strong><span lang="zh">内核态强制执行 (Enforcement)</span><span lang="en">In-Kernel Enforcement</span></strong>
+        <p style="font-size: 0.85rem; margin-top:10px; line-height: 1.6;">
+            <span lang="zh">正式下发 SIGKILL 阻断策略。将防御边界从“检测并报警”提升至“亚毫秒级内核态强制阻隔”，彻底杜绝 TOCTOU 攻击。</span><span lang="en">Formally deploy SIGKILL enforcement policies. Elevate defense from "detect and alert" to "sub-millisecond kernel enforcement," eliminating TOCTOU attacks.</span>
+        </p>
+    </div>
+</div>
     </div>
 </section>
 <section style="padding: 60px 0; background: #fff; border-bottom: 1px solid var(--cisco-platinum);">
