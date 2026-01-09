@@ -2060,6 +2060,66 @@ hr::after {
         padding: 0 20px !important;
     }
 }
+
+/* --- 响应式网格增强：解决并列排版在移动端的局限 --- */
+.grid-adaptive-cols {
+    display: grid;
+    /* 核心逻辑：最小宽度 320px，否则自动塌陷为一列 */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 30px;
+    margin-top: 25px;
+}
+
+/* 针对复杂布局（如 YAML 对比）的断点强制堆叠 */
+@media (max-width: 992px) {
+    .grid-adaptive-cols {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+    }
+}
+
+/* --- 增强代码证据块的视觉呈现 --- */
+.code-block-wrapper {
+    background: #1e1e1e;
+    border-radius: 8px;
+    border: 1px solid var(--cisco-platinum);
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+.code-header {
+    background: #333;
+    color: #eee;
+    padding: 8px 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: var(--font-main);
+    border-bottom: 1px solid #444;
+}
+
+.code-content {
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #d4d4d4;
+    white-space: pre-wrap; /* 允许在移动端自动换行 */
+    word-break: break-all;
+    background: #1a1a1a;
+}
+
+/* 适配移动端的网格自适应 */
+.grid-adaptive-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
+    gap: 25px;
+}
+
+@media (max-width: 992px) {
+    .grid-adaptive-cols {
+        grid-template-columns: 1fr !important;
+    }
+}
     </style>
 </head>
 
@@ -3050,7 +3110,72 @@ hr::after {
             <p lang="en">Under $O(1)$, lookup time remains constant whether there are 10 or 100,000 services. Network latency no longer scales with node count, providing a stable foundation for massive AI and microservice workloads.</p>
         </div>
     </div>
+    
 </div>
+
+<div class="tech-sub-section">
+            <h3 lang="zh">5.3 技术证据：iptables 规则链与 eBPF 映射表</h3>
+            <h3 lang="en">5.3 Technical Evidence: iptables Rule Chains vs. eBPF Maps</h3>
+            <p lang="zh">
+                为了理解效率为何会发生代差级跃迁，我们需要对比观察 Linux 内核中两种截然不同的数据结构。
+            </p>
+            <p lang="en">
+                To understand why efficiency undergoes a generational leap, we must compare two distinct data structures within the Linux kernel.
+            </p>
+
+            
+
+            <div class="grid-adaptive-cols">
+                <div class="tech-info-card" style="border-top: 4px solid var(--cisco-midnight);">
+                    <h4 lang="zh" style="color: var(--cisco-midnight);">iptables：顺序匹配的“线性清单”</h4>
+                    <h4 lang="en" style="color: var(--cisco-midnight);">iptables: Sequential "Linear Checklist"</h4>
+                    <div class="code-block-wrapper">
+                        <div lang="zh" class="code-header">iptables 负载均衡规则深度解析</div>
+                        <div lang="en" class="code-header">Detailed iptables Load Balancing Rule Analysis</div>
+                        <div class="code-content">
+<span lang="zh" style="color: #6a9955;">/* * 当请求到达 Service 时，内核必须按顺序逐行比对概率。</span>
+ <span lang="en" style="color: #6a9955;">* When a request hits a Service, the kernel must check probabilities line-by-line.
+ */</span>
+-A KUBE-SVC-ABC -m statistic --mode random --probability 0.33 -j KUBE-SEP-1
+<span lang="zh" style="color: #6a9955;">/* 如果前 33% 没中，则判断下 50%... </span><span lang="en" style="color: #6a9955;">If first 33% miss, check next 50%... */</span>
+-A KUBE-SVC-ABC -m statistic --mode random --probability 0.50 -j KUBE-SEP-2
+-A KUBE-SVC-ABC -j KUBE-SEP-3
+
+<span lang="zh" style="color: #6a9955;">/* * 复杂度 O(N)：规则条数与 Pod 副本数成正比。在大规模集群中，这种线性遍历会导致 CPU 剧烈震荡。</span>
+<span lang="en" style="color: #6a9955;"></span>* Complexity O(N): The number of rules scales with Pod counts. In large clusters, this causes CPU spikes.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-info-card" style="border-top: 4px solid var(--cisco-blue);">
+                    <h4 lang="zh" style="color: var(--cisco-blue);">Cilium eBPF：基于哈希的“即时索引”</h4>
+                    <h4 lang="en" style="color: var(--cisco-blue);">Cilium eBPF: Hash-based "Instant Index"</h4>
+                    <div class="code-block-wrapper">
+                        <div lang="zh" class="code-header">Cilium BPF Map 实时条目查看 (ipcache)</div>
+                        <div lang="en" class="code-header">Real-time Cilium BPF Map Entry (ipcache)</div>
+                        <div class="code-content">
+<span style="color: #6a9955;"># cilium-dbg map get cilium_ipcache</span>
+<span style="color: #569cd6;">Key (Destination IP)</span>    <span style="color: #569cd6;">Value (Metadata/Identity)</span>
+172.16.1.158/32         identity=6   tunnel=10.75.59.82
+172.16.2.156/32         identity=27858  tunnel=0.0.0.0
+
+<span lang="zh" style="color: #6a9955;">/* * 复杂度 O(1)：内核直接将目标 IP 提取为 Key，在哈希表中进行单次精准查询。</span>
+<span lang="en" style="color: #6a9955;">* Complexity O(1): The kernel extracts Dest IP as the Key and performs a single hash lookup.</span>
+<span lang="zh" style="color: #6a9955;">* 无论条目有 20 条还是 20 万条，查找耗时几乎恒定。</span>
+<span lang="en" style="color: #6a9955;">* Lookup time is constant whether there are 20 or 200,000 entries.</span>
+ */</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tech-info-card" style="margin-top: 25px; border-top: 4px solid var(--cisco-sky);">
+                <h4 lang="zh" style="color: var(--cisco-sky);">内核中的 Map 管理全景 (bpftool 视角)</h4>
+                <h4 lang="en" style="color: var(--cisco-sky);">In-Kernel Map Management (via bpftool)</h4>
+                <p lang="zh">Cilium 通过多种专用 Map 维护集群状态。例如 <code>cilium_lb4_services_v2</code> 管理服务映射，<code>cilium_lxc</code> 管理本地端点。这种数据驱动的架构，让内核能够像高性能数据库一样瞬间完成决策。</p>
+                <p lang="en">Cilium maintains state via specialized Maps. e.g., <code>cilium_lb4_services_v2</code> for services and <code>cilium_lxc</code> for local endpoints. This data-driven architecture lets the kernel make instant decisions like a high-perf database.</p>
+            </div>
+        </div>
             </div>
         </section>
 
@@ -3177,7 +3302,7 @@ hr::after {
                         <div lang="zh" style="text-align: center; color: var(--cisco-blue); font-size: 0.8rem; margin-top: 10px;">( 💡 左右滑动查看完整路径 / Swipe to view full path )</div>
                     </div>
                 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div class="grid-adaptive-cols" style="gap: 40px;">
                         <div>
                             <h4 lang="zh" style="color: var(--cisco-midnight); margin-bottom: 15px;">🔍 我们如何重塑内核?
                             </h4>
@@ -3283,6 +3408,32 @@ hr::after {
                             </div>
                         </div>
                 </div>
+
+                <div class="tech-sub-section">
+            <h3 lang="zh">现代流量治理：Gateway API</h3>
+            <h3 lang="en">Modern Traffic Governance: Gateway API</h3>
+            <p lang="zh">
+                Cilium 不仅仅是一个连接插件，更是复杂的流量编排引擎。它原生支持 <b>Gateway API</b>，通过 eBPF 实现内核级的 HTTP 路由、Header 注入及权重分流。这解决了传统 Ingress 模式下，因规则更新导致 Proxy 频繁重载（Reload）而产生的长尾延迟问题。
+            </p>
+            <p lang="en">
+                Cilium is more than a connectivity plugin; it's a sophisticated traffic orchestration engine. It natively supports the <b>Gateway API</b>, implementing kernel-level HTTP routing and header manipulation via eBPF. This eliminates the tail latency caused by frequent proxy reloads in traditional Ingress models during rule updates.
+            </p>
+
+            <div class="grid-adaptive-cols">
+                <div class="tech-info-card" style="border-top: 4px solid var(--cisco-blue);">
+                    <h4 lang="zh" style="color: var(--cisco-blue);">面向角色的资源模型</h4>
+                    <h4 lang="en" style="color: var(--cisco-blue);">Role-oriented Resource Model</h4>
+                    <p lang="zh">通过将配置拆分为 GatewayClass、Gateway 和 Route，实现了基础设施管理员与应用开发者的职责分离，极大降低了大规模集群中的配置冲突概率。</p>
+                    <p lang="en">By splitting configs into GatewayClass, Gateway, and Routes, it separates duties between infrastructure admins and app developers, significantly reducing config conflicts in large clusters.</p>
+                </div>
+                <div class="tech-info-card" style="border-top: 4px solid var(--cisco-sky);">
+                    <h4 lang="zh" style="color: var(--cisco-sky);">内核级无感知切换</h4>
+                    <h4 lang="en" style="color: var(--cisco-sky);">In-Kernel Seamless Switching</h4>
+                    <p lang="zh">流量调度逻辑直接注入 eBPF 程序中，无论是灰度发布还是 A/B 测试，流量切换都在内核中毫秒级完成，且不产生任何上下文拷贝开销。</p>
+                    <p lang="en">Traffic scheduling logic is injected directly into eBPF programs. Whether canary releases or A/B testing, traffic switching happens in-kernel in milliseconds without any context-copying overhead.</p>
+                </div>
+            </div>
+        </div>
             </div>
         </section>
 
@@ -3703,7 +3854,7 @@ hr::after {
                 <div id="sec-7-3" class="sec-sub-section">
                     <h3 class="cisco-sub-header" lang="zh">零信任实践：从端口到 API 的深度控制</h3>
                     <h3 class="cisco-sub-header" lang="en">Zero Trust in Practice: Port to API Control</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div class="grid-adaptive-cols">
                         <div class="code-block-wrapper">
                             <div lang="zh" class="code-header">L3/L4 身份感知策略 (identity-aware.yaml)</div>
                             <div lang="en" class="code-header">L3/L4 Identity Aware Policy (identity-aware.yaml)</div>
