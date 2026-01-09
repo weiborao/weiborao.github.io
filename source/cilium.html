@@ -1993,18 +1993,72 @@ hr::after {
     cursor: default;
 }
 
-.tech-info-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-hover);
-    border-color: var(--cisco-blue);
-}
-
 .metric-highlight {
     font-size: 2.2rem;
     font-weight: 800;
     color: var(--cisco-blue);
     display: block;
     margin-bottom: 5px;
+}
+
+/* --- 移动端专项修复 (Mobile Responsive Fixes) --- */
+@media (max-width: 768px) {
+    /* 1. 修复 Chapter 04 Socket Hook 超出边界 */
+    .kernel-engine > div:last-child {
+        grid-template-columns: 1fr !important; /* 改为单列排列 */
+        gap: 10px;
+    }
+
+    /* 2. 修复 Chapter 05 SVG 滑动功能 */
+    .feynman-visual-wrapper {
+        overflow-x: auto; /* 开启水平滑动 */
+        -webkit-overflow-scrolling: touch;
+        padding: 20px !important;
+    }
+    .feynman-visual-wrapper svg {
+        min-width: 800px; /* 强制 SVG 保持可读大小，触发滑动 */
+        height: auto;
+    }
+
+    /* 3, 7, 8, 9. 修复所有并列布局为上下排列 */
+    /* 涵盖：重塑内核vs深度解析、YAML代码块、Mesh卡片、兼容性矩阵vs迁移路径 */
+    .tech-sub-section > div[style*="display: grid"],
+    #security-identity-chapter .content-wrapper > div[style*="display: grid"],
+    #cluster-mesh .mesh-analogy-grid,
+    #implementation-guide > .container > div[style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+
+    /* 4. 修复 Chapter 05 三个核心价值卡片宽度 */
+    #value-what div[style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* 5. 修复 Chapter 06 Sidecar-free 卡片上下排列 */
+    div[style*="display: flex"][style*="gap: 40px"] {
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+
+    /* 6. 修复 Chapter 06 表格滑动与 Maglev 布局 */
+    .perf-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+    }
+    .perf-table {
+        min-width: 600px; /* 确保表格不被挤压 */
+    }
+    /* 针对 Maglev LB 所在的 Grid 容器 */
+    #perf-benchmarks div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* 通用：修正 section 内边距，增加呼吸感 */
+    .section-container {
+        padding: 0 20px !important;
+    }
 }
     </style>
 </head>
@@ -3120,6 +3174,7 @@ hr::after {
                                 <text x="250" y="14" font-size="12" fill="#4A5568">Kernel Fast-Path</text>
                             </g>
                         </svg>
+                        <div lang="zh" style="text-align: center; color: var(--cisco-blue); font-size: 0.8rem; margin-top: 10px;">( 💡 左右滑动查看完整路径 / Swipe to view full path )</div>
                     </div>
                 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
@@ -3500,6 +3555,7 @@ hr::after {
                                 <p lang="zh" style="font-size: 1.0rem; color: #888; padding: 10px 15px;">* 数据源自 2021 CNI
                                     基准测试。封装（Overlay）是性能损耗的元凶。</p>
                                 <p lang="en" style="font-size: 1.0rem; color: #888; padding: 10px 15px;">* Data sourced from 2021 CNI benchmarks. Overlay is a major cause of performance degradation.</p>
+                                <div lang="zh" style="text-align: center; color: var(--cisco-blue); font-size: 0.8rem; margin-top: 5px;">( 💡 左右滑动查看完整数据 / Swipe for data )</div>
                             </div>
         
                             <div style="background: white; padding: 30px; border-radius: 8px; border: 1px solid #e1e8ed;">
