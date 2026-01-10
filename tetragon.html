@@ -2341,7 +2341,7 @@ svg {
                     </div>
                 </div>
         </section>
-        
+
 <style>
     /* Ancestry Tree Styles */
     .ancestry-container {
@@ -2579,6 +2579,20 @@ svg {
                     <span lang="en">Leveraging Tetragon's engine, achieve L7 visibility (HTTP/DNS/TLS) at the kernel level without sidecars. Identify hidden commands or illegal C2 domain access across encrypted tunnels.</span>
                 </p>
             </div>
+            <div class="card" style="border-top: 4px solid var(--cisco-midnight);">
+                <strong><span lang="zh">虚拟补丁：CVE 实时封堵</span><span lang="en">Virtual Patching: Real-time CVE Mitigation</span></strong>
+                <p style="font-size: 0.85rem; margin-top: 10px; line-height: 1.6;">
+                    <span lang="zh">无需重启 Linux系统或应用容器，通过 TracingPolicy 识别并 SIGKILL 利用特定 CVE（如 Dirty COW）的系统调用序列，实现毫秒级补丁。</span>
+                    <span lang="en">Mitigate CVEs (e.g., Dirty COW) on-the-fly without reboots by killing malicious syscall sequences via TracingPolicy.</span>
+                </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--cisco-orange); position: relative;">
+                <strong><span lang="zh">黄金镜像：运行时漂移检测</span><span lang="en">Golden Image: Runtime Drift Detection</span></strong>
+                <p style="font-size: 0.85rem; margin-top: 10px; line-height: 1.6;">
+                    <span lang="zh">将“黄金镜像”的标准下沉至运行时。一旦容器内发生了非预期的文件写入或 Shell 派生，立即告警并回滚，确保环境的不可变性。</span>
+                    <span lang="en">Enforce "Golden Image" standards at runtime. Detect and alert on drift such as unexpected file writes or shell spawns.</span>
+                </p>
+            </div>
         </div>
 
         <div class="view-section" style="margin-top: 80px;">
@@ -2740,6 +2754,33 @@ svg {
         <span lang="zh">💡 <b>策略已就绪：</b> 我们已根据观测结果自动生成了防御规则。现在，让我们进入实验室，验证这些“内核盾牌”是如何抵御 Dark-Chain 攻击的。</span>
         <span lang="en">💡 <b>Policy Ready:</b> Defense rules have been auto-generated from observations. Let's enter the Lab to verify how these "Kernel Shields" repel Dark-Chain attacks.</span>
     </div>
+    </div>
+</section>
+
+        <section id="best-practices" style="background: #F8FAFC; padding: 80px 0;">
+    <div class="container">
+        <div class="section-header">
+            <h2><span lang="zh">最佳实践：如何提升安全信噪比？</span><span lang="en">Best Practices: Enhancing Signal-to-Noise Ratio</span></h2>
+            <p><span lang="zh">Tetragon 极其强大，但如果配置不当，会产生海量日志压垮 SIEM/XDR。真正的专家深谙“少即是多”。</span><span lang="en">Tetragon is powerful, but poor configuration can overwhelm SIEM/XDR. Experts know that "Less is More."</span></p>
+        </div>
+        
+        <div class="mechanism-card">
+            <h4 style="margin-bottom:20px;"><span lang="zh">🎯 提升信噪比的三大律法</span><span lang="en">Three Laws of SNR Optimization</span></h4>
+            <div class="grid-3">
+                <div class="dashboard-item">
+                    <strong>1. <span lang="zh">内核态预过滤 (In-Kernel Filtering)</span><span lang="en">In-Kernel Filtering</span></strong>
+                    <p style="font-size:0.85rem;"><span lang="zh">不要在用户态去过滤日志！利用 TracingPolicy 的 <code>MatchArgs</code> 仅捕获“写 /etc/shadow”或“跨网段连接”等高价值行为。</span><span lang="en">Filter in the kernel! Capture only high-value actions like writing to sensitive files or cross-subnet connections.</span></p>
+                </div>
+                <div class="dashboard-item">
+                    <strong>2. <span lang="zh">智能限流 (Rate Limiting)</span><span lang="en">Rate Limiting</span></strong>
+                    <p style="font-size:0.85rem;"><span lang="zh">对于高频行为（如文件读取），在 TracingPolicy 中使用 <code>Action: Post</code> 并配置 <code>RateLimit</code>，防止同一 Pod 的重复告警造成日志风暴。</span><span lang="en">Use RateLimit in TracingPolicy for high-frequency events to prevent log storms from a single Pod.</span></p>
+                </div>
+                <div class="dashboard-item">
+                    <strong>3. <span lang="zh">命名空间隔离 (Namespace Scoping)</span><span lang="en">Namespace Scoping</span></strong>
+                    <p style="font-size:0.85rem;"><span lang="zh">仅对高风险、面向外部的 Namespace 开启深度审计。对于内部可信的批处理作业，仅保留基础进程监控。</span><span lang="en">Scope deep auditing to high-risk, internet-facing Namespaces, maintaining basic monitoring for trusted internal jobs.</span></p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 <style>
