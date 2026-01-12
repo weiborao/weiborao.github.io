@@ -12,11 +12,11 @@
 
     <meta name="keywords" content="Tetragon, eBPF Security, eBPF安全, Runtime Enforcement, 运行时防护, SIGKILL, 内核阻断, CVE-2024-3094, MITRE ATT&CK, 云原生安全, Cloud-Native Security">
 
-    <meta name="revised" content="Sunday, January 4th, 2026, 22:20 pm" />
+    <meta name="revised" content="Monday, January 12nd, 2026, 23:20 pm" />
     <meta property="og:title" content="Tetragon: 云原生安全的最后一道防线 | The Final Line of Defense">
     <meta property="og:description" content="探讨 Tetragon 如何在内核态实现亚毫秒级同步阻断。Real-time kernel enforcement for Cloud-Native security.">
     <meta property="og:type" content="article">
-    <meta property="og:updated_time" content="2026-01-04T22:20:00+08:00" />
+    <meta property="og:updated_time" content="2026-01-12T23:20:00+08:00" />
 
     <script type="application/ld+json">
     {
@@ -25,7 +25,7 @@
     "headline": "Tetragon: 云原生安全的最后一道防线 | The Final Line of Defense for Cloud-Native Security",
     "description": "探讨 Tetragon 如何利用 eBPF 在内核态实现亚毫秒级同步阻断。Exploration of Tetragon's kernel-level real-time enforcement using eBPF.",
     "datePublished": "2025-12-20T11:00:00+08:00",
-    "dateModified": "2026-01-04T22:20:00+08:00",
+    "dateModified": "2026-01-12T23:20:00+08:00",
     "proficiencyLevel": "Expert",
     "author": { 
         "@type": "Person", 
@@ -1214,6 +1214,72 @@ svg {
     margin-left: 8px;
 }
 
+/* --- 性能看板响应式增强 (2026 Patch) --- */
+
+/* 1. 规模标签组：解决标签过长导致的溢出 */
+.scale-badge-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* 允许标签在空间不足时自动换行 */
+    margin-bottom: 20px;
+}
+
+.scale-tag {
+    background: rgba(13, 39, 77, 0.05);
+    border: 1px solid var(--cisco-platinum);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--cisco-midnight);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* 2. 替换旧有的 .grid-2x2-custom，采用自适应布局 */
+.grid-2x2-custom {
+    display: grid;
+    /* 核心修复：最小宽度 280px，空间不足自动堆叠，不强制 2 列 */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 25px;
+}
+
+/* 3. 指标卡片内部微调 */
+.dash-widget {
+    background: #F8FAFC;
+    border: 1px solid var(--cisco-platinum);
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* 防止子元素撑开容器 */
+}
+
+.dash-value {
+    /* 使用 clamp 确保字号在 1.2rem 到 1.8rem 之间随屏幕动态缩放 */
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: bold;
+    line-height: 1.2;
+    margin: 5px 0;
+}
+
+.perf-sub-label {
+    font-size: 0.75rem;
+    color: var(--cisco-slate);
+    line-height: 1.4;
+    display: block;
+    margin-top: auto;
+}
+
+.perf-note {
+    font-size: 0.85rem;
+    color: var(--cisco-midnight);
+    background: #FFF9F0;
+    border-left: 3px solid var(--cisco-orange);
+    padding: 15px;
+    margin-top: 20px;
+    line-height: 1.6;
+}
     </style>
 
 </head>
@@ -1236,7 +1302,7 @@ svg {
                 <div class="post-meta" style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-bottom: 20px;">
                     <span lang="zh">发布日期：2025-12-20</span><span lang="en">Published on: 2025-12-20</span>
                     <span style="margin: 0 10px; opacity: 0.5;">|</span>
-                    <span lang="zh">最后更新：2026-01-04</span><span lang="en">Last Updated: 2026-01-04</span>
+                    <span lang="zh">最后更新：2026-01-12</span><span lang="en">Last Updated: 2026-01-12</span>
                 </div>
 
                 <p class="hero-sub">
@@ -2117,20 +2183,20 @@ svg {
                     <span lang="zh">内核态：智能传感器</span><span lang="en">Kernel: Smart Sensors</span>
                 </h4>
                 <p style="font-size: 0.95rem; color: var(--cisco-slate); margin-top: 15px;">
-                    <span lang="zh">Tetragon 的 eBPF 程序作为<b>“内核内置卫士”直接植入内核执行路径，遵循“内核优先” (Kernel-First)</b> 原则以实现亚毫秒级的防御。</span>
+                    <span lang="zh">Tetragon 的 eBPF 程序作为<b>“内核内置卫士”直接植入内核执行路径，遵循“内核优先” (Kernel-First)</b> 原则以实现亚毫秒级的防御。</span><span lang="en">Tetragon's eBPF programs are directly embedded into the kernel execution path as<b> "in-kernel sentinels," following the "Kernel-First"</b> principle to achieve sub-millisecond defense.</span>
                 </p>
                 <ul class="arch-list">
                     <li>
                         <strong><span lang="zh">高效过滤：</span><span lang="en">Efficient Filtering:</span></strong>
-                        <span lang="zh">既然 90% 的过滤发生在内核态，传感器利用 <b>kprobes</b>（监控 execve）、<b>tracepoints</b>（捕获调度器事件）和 <b>LSM BPF</b>（阻断敏感文件访问）直接观察系统，仅将匹配策略的“高价值信号”推送到用户态。这种机制消除了昂贵的边界跨越开销。</span>
+                        <span lang="zh">既然 90% 的过滤发生在内核态，传感器利用 <b>kprobes</b>（监控 execve）、<b>tracepoints</b>（捕获调度器事件）和 <b>LSM BPF</b>（阻断敏感文件访问）直接观察系统，仅将匹配策略的“高价值信号”推送到用户态。这种机制消除了昂贵的边界跨越开销。</span><span lang="en">Since 90% of filtering occurs in the kernel, sensors utilize <b>kprobes</b> (monitoring execve), <b>tracepoints</b> (capturing scheduler events), and <b>LSM BPF</b> (blocking sensitive file access) to observe the system directly, pushing only policy-matching "high-value signals" to user space. This mechanism eliminates expensive boundary-crossing overhead.</span>
                     </li>
                     <li>
                         <strong><span lang="zh">策略本地化：</span><span lang="en">Localized Policy:</span></strong>
-                        <span lang="zh">安全策略（TracingPolicy）被加载至内核 <b>BPF Maps</b> 中。内核程序利用这些原子性状态存储表维护临时状态，即使在极高性能压力下也能确保审计一致性，并实现毫秒级的逻辑判断。</span>
+                        <span lang="zh">安全策略（TracingPolicy）被加载至内核 <b>BPF Maps</b> 中。内核程序利用这些原子性状态存储表维护临时状态，即使在极高性能压力下也能确保审计一致性，并实现毫秒级的逻辑判断。</span><span lang="en">Security policies (TracingPolicy) are loaded into kernel <b>BPF Maps</b>. Kernel programs use these atomic state storage tables to maintain temporary state, ensuring audit consistency even under extreme performance pressure and enabling millisecond-level logic decisions.</span>
                     </li>
                     <li>
                         <strong><span lang="zh">立即阻断：</span><span lang="en">Immediate Enforcement:</span></strong>
-                        <span lang="zh">这是真正的<b>“同步阻断”</b>机制。利用 <code>bpf_send_signal</code> 辅助函数，在恶意系统调用（如非法写文件、特权提升）完成之前，直接在内核上下文触发 <b>SIGKILL</b> 信号终止进程，物理上杜绝了利用时间差绕过的 <b>TOCTOU</b>（检查与使用时间）攻击。</span>
+                        <span lang="zh">这是真正的<b>“同步阻断”</b>机制。利用 <code>bpf_send_signal</code> 辅助函数，在恶意系统调用（如非法写文件、特权提升）完成之前，直接在内核上下文触发 <b>SIGKILL</b> 信号终止进程，物理上杜绝了利用时间差绕过的 <b>TOCTOU</b>（检查与使用时间）攻击。</span><span lang="en">This is a true <b>"Synchronous Enforcement"</b> mechanism. Using the <code>bpf_send_signal</code> helper, it triggers a <b>SIGKILL</b> signal in the kernel context to terminate the process before malicious system calls (like illegal file writes or privilege escalation) complete, physically preventing <b>TOCTOU</b> (Time-of-Check to Time-of-Use) attacks.</span>
                     </li>
                 </ul>
             </div>
@@ -2141,20 +2207,20 @@ svg {
                     <span lang="zh">用户态：指挥中心</span><span lang="en">User: Command Center</span>
                 </h4>
                 <p style="font-size: 0.95rem; color: var(--cisco-slate); margin-top: 15px;">
-                    <span lang="zh">Tetragon Agent 通常以 <b>DaemonSet</b> 形式运行在用户空间，充当大脑角色，负责复杂的逻辑管理、元数据编排与生态集成。</span>
+                    <span lang="zh">Tetragon Agent 通常以 <b>DaemonSet</b> 形式运行在用户空间，充当大脑角色，负责复杂的逻辑管理、元数据编排与生态集成。</span><span lang="en">The Tetragon Agent typically runs as a <b>DaemonSet</b> in user space, acting as the "brain" responsible for complex logic management, metadata orchestration, and ecosystem integration.</span>
                 </p>
                 <ul class="arch-list">
                     <li>
                         <strong><span lang="zh">身份关联：</span><span lang="en">Identity Association:</span></strong>
-                        <span lang="zh">实时订阅 Kubernetes API，利用内核中的 Cgroup 信息在毫秒级将底层 PID 映射为 <b>Pod 标签、Namespace 及服务身份</b>。确保即使在动态基础设施中，安全事件依然具有清晰的上下文身份。</span>
+                        <span lang="zh">实时订阅 Kubernetes API，利用内核中的 Cgroup 信息在毫秒级将底层 PID 映射为 <b>Pod 标签、Namespace 及服务身份</b>。确保即使在动态基础设施中，安全事件依然具有清晰的上下文身份。</span><span lang="en">By subscribing to the Kubernetes API in real-time, it maps low-level PIDs to <b>Pod labels, Namespaces, and service identities</b> in milliseconds using Cgroup info from the kernel. This ensures that even in dynamic infrastructures, security events maintain a clear contextual identity.</span>
                     </li>
                     <li>
                         <strong><span lang="zh">策略编排：</span><span lang="en">Policy Orchestration:</span></strong>
-                        <span lang="zh">将 YAML 声明式策略翻译成内核字节码。在分发前，<b>Verifier（验证器）</b>会对策略进行严格的静态安全分析，确保其内存安全、无死循环且永不引发内核崩溃（Panic），保证了生产环境的绝对稳定。</span>
+                        <span lang="zh">将 YAML 声明式策略翻译成内核字节码。在分发前，<b>Verifier（验证器）</b>会对策略进行严格的静态安全分析，确保其内存安全、无死循环且永不引发内核崩溃（Panic），保证了生产环境的绝对稳定。</span><span lang="en">Translates YAML declarative policies into kernel bytecode. Before distribution, the <b>Verifier</b> performs rigorous static security analysis to ensure memory safety, no infinite loops, and that it never triggers a kernel panic, ensuring absolute stability in production environments.</span>
                     </li>
                     <li>
                         <strong><span lang="zh">结构化输出：</span><span lang="en">Structured Output:</span></strong>
-                        <span lang="zh">通过 gRPC 流、适配 SIEM 的 <b>JSON Logs</b>（含完整参数、Pod 标签、容器镜像指纹）或 Prometheus 指标导出遥测数据。这使得高级行为分析能够生成高优先级警报。</span>
+                        <span lang="zh">通过 gRPC 流、适配 SIEM 的 <b>JSON Logs</b>（含完整参数、Pod 标签、容器镜像指纹）或 Prometheus 指标导出遥测数据。这使得高级行为分析能够生成高优先级警报。</span><span lang="en">Exports telemetry data via gRPC streams, SIEM-compatible <b>JSON Logs</b> (including full arguments, Pod labels, and container image fingerprints), or Prometheus metrics. This allows advanced behavioral analysis to generate high-priority alerts.</span>
                     </li>
                 </ul>
             </div>
@@ -2166,20 +2232,20 @@ svg {
                 <span lang="en">Synergy: BPF Maps & Ring Buffer</span>
             </h4>
             <p style="font-size: 1rem; line-height: 1.7;">
-                <span lang="zh">“传感器”与“指挥中心”通过高效的 <b>BPF Maps</b> 和 <b>Ring Buffer</b> 通信管道实现数据平面与控制平面的完美解耦。</span>
+                <span lang="zh">“传感器”与“指挥中心”通过高效的 <b>BPF Maps</b> 和 <b>Ring Buffer</b> 通信管道实现数据平面与控制平面的完美解耦。</span><span lang="en">"Sensors" and the "Command Center" achieve perfect decoupling of the data plane and control plane through efficient <b>BPF Maps</b> and <b>Ring Buffer</b> communication pipelines.</span>
             </p>
             <ul style="list-style: none; margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                 <li style="font-size: 0.9rem; color: var(--cisco-slate);">
-                    <strong style="color: var(--cisco-orange);">[ <span lang="zh">交互反馈</span> ]</strong><br>
-                    <span lang="zh">用户态负责“下发策略与身份字典”，内核态负责“读取并执行执法”。</span>
+                    <strong style="color: var(--cisco-orange);">[ <span lang="zh">交互反馈</span><span lang="en">Interactive feedback</span> ]</strong><br>
+                    <span lang="zh">用户态负责“下发策略与身份字典”，内核态负责“读取并执行执法”。</span><span lang="en">User space handles "policy and identity dictionary distribution," while the kernel space handles "reading and executing enforcement."</span>
                 </li>
                 <li style="font-size: 0.9rem; color: var(--cisco-slate);">
-                    <strong style="color: var(--cisco-orange);">[ <span lang="zh">数据流向</span> ]</strong><br>
-                    <span lang="zh">内核利用 <b>Perf Ring Buffer</b> 将过滤后的事件推送到用户态；在高流场景下，这种“按需上报”模式极大地优化了系统资源使用。</span>
+                    <strong style="color: var(--cisco-orange);">[ <span lang="zh">数据流向</span><span lang="en">Data flow</span> ]</strong><br>
+                    <span lang="zh">内核利用 <b>Perf Ring Buffer</b> 将过滤后的事件推送到用户态；在高流场景下，这种“按需上报”模式极大地优化了系统资源使用。</span><span lang="en">The kernel uses <b>Perf Ring Buffers</b> to push filtered events to user space; in high-traffic scenarios, this "on-demand reporting" mode significantly optimizes system resource usage.</span>
                 </li>
                 <li style="font-size: 0.9rem; color: var(--cisco-slate);">
-                    <strong style="color: var(--cisco-orange);">[ <span lang="zh">优势集成</span> ]</strong><br>
-                    <span lang="zh">这种协同管道确保了每个节点独立自治运行，同时用户态能聚合全局视图，提供端到端的深度可见性。</span>
+                    <strong style="color: var(--cisco-orange);">[ <span lang="zh">优势集成</span><span lang="en">Advantage Integration</span> ]</strong><br>
+                    <span lang="zh">这种协同管道确保了每个节点独立自治运行，同时用户态能聚合全局视图，提供端到端的深度可见性。</span><span lang="en">This collaborative pipeline ensures each node operates autonomously while user space aggregates a global view, providing end-to-end deep visibility.</span>
                 </li>
             </ul>
         </div>
@@ -2344,91 +2410,80 @@ svg {
                     </div>
                 </div>
 
-                <div class="mechanism-card" style="margin-top: 40px; border-left-color: var(--cisco-green);">
-                    <div class="case-badge" style="background: var(--cisco-green);">
-                        <span lang="zh">生产级性能基准 (SRE Benchmark)</span><span lang="en">Production Performance
-                            Benchmark</span>
-                    </div>
-                    <p style="font-size: 0.95rem; margin-bottom: 25px; color: var(--cisco-slate);">
-                        <span lang="zh">基于思科内部大规模 Kubernetes 集群（1000+ 节点）的实战数据：</span><span lang="en">Based on
-                            real-world data from Cisco's large-scale Kubernetes clusters (1000+ nodes):</span>
-                    </p>
+<div class="mechanism-card" style="margin-top: 40px; border-left-color: var(--cisco-green);">
+    <div class="case-badge" style="background: var(--cisco-green);">
+        <span lang="zh">超大规模生产级基准 (Hyper-Scale Benchmark)</span>
+        <span lang="en">Hyper-Scale Production Benchmark</span>
+    </div>
+    
+    <div class="scale-badge-group">
+        <span class="scale-tag">100+ Clusters</span>
+        <span class="scale-tag">130,000+ Nodes</span>
+        <span class="scale-tag">3,000,000+ Pods</span>
+    </div>
 
-                    <div class="grid-2x2-custom">
-                        <div class="dash-widget"
-                            style="background: #F8FAFC; border: 1px solid var(--cisco-platinum); padding: 20px; border-radius: 8px;">
-                            <div class="dash-label" style="color: #888; font-size: 0.75rem; margin-bottom: 5px;">
-                                <span lang="zh">CPU 资源消耗</span><span lang="en">CPU Resource Consumption</span>
-                            </div>
-                            <div class="dash-value"
-                                style="color: var(--cisco-green); font-size: 1.8rem; font-weight: bold;">
-                                < 1% </div>
-                                    <div style="font-size: 0.7rem; color: #58585B; margin-top: 5px;">
-                                        <span lang="zh">单核峰值负载</span><span lang="en">Single-core Peak Load</span>
-                                    </div>
-                            </div>
-                            <div class="dash-widget"
-                                style="background: #F8FAFC; border: 1px solid var(--cisco-platinum); padding: 20px; border-radius: 8px;">
-                                <div class="dash-label" style="color: #888; font-size: 0.75rem; margin-bottom: 5px;">
-                                    <span lang="zh">单节点吞吐量</span><span lang="en">Single-node Throughput</span>
-                                </div>
-                                <div class="dash-value"
-                                    style="color: var(--cisco-midnight); font-size: 1.8rem; font-weight: bold;"> 1M+
-                                </div>
-                                <div style="font-size: 0.7rem; color: #58585B; margin-top: 5px;">
-                                    <span lang="zh">每秒事件处理量 (Events / Sec)</span><span lang="en">Events / Sec</span>
-                                </div>
-                            </div>
-                            <div class="dash-widget"
-                                style="background: #F8FAFC; border: 1px solid var(--cisco-platinum); padding: 20px; border-radius: 8px;">
-                                <div class="dash-label" style="color: #888; font-size: 0.75rem; margin-bottom: 5px;">
-                                    <span lang="zh">内存占用</span><span lang="en">Memory Footprint</span>
-                                </div>
-                                <div class="dash-value"
-                                    style="color: var(--cisco-midnight); font-size: 1.8rem; font-weight: bold;"> ~120 MB
-                                </div>
-                                <div style="font-size: 0.7rem; color: #58585B; margin-top: 5px;">
-                                    <span lang="zh">Agent 平均内存占用</span><span lang="en">Average Agent Memory</span>
-                                </div>
-                            </div>
-                            <div class="dash-widget"
-                                style="background: #F8FAFC; border: 1px solid var(--cisco-platinum); padding: 20px; border-radius: 8px;">
-                                <div class="dash-label" style="color: #888; font-size: 0.75rem; margin-bottom: 5px;">
-                                    <span lang="zh">延迟抖动</span><span lang="en">Latency Jitter</span>
-                                </div>
-                                <div class="dash-value"
-                                    style="color: var(--cisco-blue); font-size: 1.8rem; font-weight: bold;"> 0.05 ms
-                                </div>
-                                <div style="font-size: 0.7rem; color: #58585B; margin-top: 5px;">
-                                    <span lang="zh">Syscall 系统调用额外延迟</span><span lang="en">Additional Syscall
-                                        Latency</span>
-                                </div>
-                            </div>
-                        </div>
+    <p style="font-size: 0.95rem; margin-bottom: 25px; color: var(--cisco-slate);">
+        <span lang="zh">依据 eBay 工程师 (Jianlin Lv & Liyi Huang) 在 Keynote 中的分享，Tetragon 在全球顶级电商环境下支撑了 <b>300 万个 Pod</b> 的运行时安全。</span>
+        <span lang="en">According to eBay engineers' Keynote, Tetragon secures <b>3 million Pods</b> in a global top-tier e-commerce environment.</span>
+    </p>
 
-                        <div class="data-source-footnote"
-                            style="margin-top: 25px; font-size: 0.75rem; color: var(--cisco-slate); border-top: 1px solid var(--cisco-platinum); padding-top: 15px; font-style: italic; opacity: 0.8;">
-                            <span lang="zh">数据依据：基于 Isovalent 官方性能白皮书及思科 XDR 大规模生产集群压力测试报告. 测试环境：1200+ Node K8s 集群，内核版本
-                                5.15+。</span><span lang="en">Data Source: Based on Isovalent official performance white
-                                paper and Cisco XDR stress test reports. Test Environment: 1200+ Node K8s cluster,
-                                Kernel 5.15+.</span>
-                        </div>
+    <div class="grid-2x2-custom">
+        <div class="dash-widget">
+            <div class="dash-label" style="color: #888; font-size: 0.75rem;">
+                <span lang="zh">进程执行追踪</span><span lang="en">Process Tracking</span>
+            </div>
+            <div class="dash-value" style="color: var(--cisco-midnight);"> 1.6% - 2.4% </div>
+            <div class="perf-sub-label">
+                <span lang="zh">处理 150万个事件 (内核编译场景) 的总开销</span>
+                <span lang="en">Total overhead for 1.5M events during kernel compile</span>
+            </div>
+        </div>
 
-                        <div class="expert-persp-box"
-                            style="margin-top: 30px; background: #F0F7FA; color: var(--cisco-midnight); border-left: 5px solid var(--cisco-blue); border-radius: 8px; padding: 20px;">
-                            <strong style="color: var(--cisco-blue); display: block; margin-bottom: 8px;">
-                                <span lang="zh">SRE 建议：</span><span lang="en">SRE Suggestion:</span>
-                            </strong>
-                            <p style="font-size: 0.9rem; margin: 0; line-height: 1.6; color: var(--cisco-midnight);">
-                                <span lang="zh">由于 Tetragon 所有的过滤逻辑都发生在内核态，只有匹配策略的“高价值信号”才会跨过内核边界进入用户态，这从物理层面保证了在高并发 IO
-                                    场景下系统依然稳健。</span><span lang="en">Since all Tetragon filtering logic happens
-                                    in-kernel, only "high-value signals" matching the policy cross the kernel boundary.
-                                    This physically ensures system stability even in high-concurrency IO
-                                    scenarios.</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <div class="dash-widget">
+            <div class="dash-label" style="color: #888; font-size: 0.75rem;">
+                <span lang="zh">高频文件监控</span><span lang="en">File Monitoring</span>
+            </div>
+            <div class="dash-value" style="color: var(--cisco-green);"> 0.21% </div>
+            <div class="perf-sub-label">
+                <span lang="zh">极高频读取 (1000次/ns) 下的 CPU 损耗</span>
+                <span lang="en">CPU overhead under high-freq reads (1000/ns)</span>
+            </div>
+        </div>
+
+        <div class="dash-widget">
+            <div class="dash-label" style="color: #888; font-size: 0.75rem;">
+                <span lang="zh">网络监控 (2.6万/s)</span><span lang="en">Network (TCP_CRR)</span>
+            </div>
+            <div class="dash-value" style="color: var(--cisco-midnight);"> 5.88% </div>
+            <div class="perf-sub-label">
+                <span lang="zh">观测模式 (Monitoring) 下的连接损耗</span>
+                <span lang="en">Overhead for TCP connection monitoring</span>
+            </div>
+        </div>
+
+        <div class="dash-widget">
+            <div class="dash-label" style="color: #888; font-size: 0.75rem;">
+                <span lang="zh">系统调用额外延迟</span><span lang="en">Syscall Latency</span>
+            </div>
+            <div class="dash-value" style="color: var(--cisco-blue);"> 0.05 ms </div>
+            <div class="perf-sub-label">
+                <span lang="zh">同步阻断与内核过滤产生的极低延迟</span>
+                <span lang="en">Minimal latency from sync enforcement</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="perf-note">
+        <span lang="zh">💡 <b>技术洞见：</b> Tetragon 支撑 300 万 Pod 仍保持低开销的关键在于<b>速率限制 (Rate Limiting)</b> 与<b>精准 LSM 挂钩</b>。这种“内联”处理方式极大减少了跨边界的上下文切换成本。</span>
+        <span lang="en">💡 <b>Tech Insight:</b> The key to securing 3M Pods with minimal overhead is <b>Rate Limiting</b> and <b>Precise LSM Hooks</b>, which minimize context switching.</span>
+    </div>
+
+    <div class="data-source-footnote" style="margin-top: 25px; font-size: 0.7rem; color: var(--cisco-slate); border-top: 1px solid var(--cisco-platinum); padding-top: 15px; font-style: italic; opacity: 0.8;">
+        <span lang="zh">数据来源：[1] Isovalent Runtime Security 1.18 Benchmarks; [2] eBay Keynote (Jianlin Lv & Liyi Huang).</span>
+        <span lang="en">Data Source: [1] Isovalent Runtime Security 1.18 Benchmarks; [2] eBay Keynote (Jianlin Lv & Liyi Huang).</span>
+    </div>
+</div>
+                
         </section>
 
 <style>
@@ -3660,7 +3715,7 @@ Generated Policy for sys_execve... 🚀</div>
                 <tr>
                     <td style="padding: 15px;"><strong><span lang="zh">性能损耗</span><span lang="en">Performance Loss</span></strong></td>
                     <td style="padding: 15px;"><span lang="zh">高 (由于上下文切换)</span><span lang="en">High (Context switching)</span></td>
-                    <td style="padding: 15px; color: var(--cisco-blue); font-weight: bold;"><span lang="zh">极低 (< 1% CPU)</span><span lang="en">Minimal (< 1% CPU)</span></td>
+                    <td style="padding: 15px; color: var(--cisco-blue); font-weight: bold;"><span lang="zh">极低 (~ 2% CPU)</span><span lang="en">Minimal (~ 2% CPU)</span></td>
                 </tr>
             </tbody>
         </table></div>
@@ -3874,6 +3929,16 @@ Generated Policy for sys_execve... 🚀</div>
             <li class="reference-item">Positive Technologies / Yandex Infrastructure. (2025). <a href="https://www.youtube.com/watch?v=lpRRo5d5ueA">Tetragon: Best Practices and Tracing Policy Development</a>.</li>
             <li class="reference-item">Liz Rice (Isovalent at Cisco). (2025). <a href="https://www.youtube.com/watch?v=u4lSpHSVZOw">Security Superpowers With eBPF and Tetragon - FINOS</a>.</li>
             <li class="reference-item">eBPF & Cilium Community. (2025). <a href="https://www.youtube.com/watch?v=ujZnwkC08Hk">Tetragon detects io_uring file access (Liz Rice)</a>.</li>
+        <li class="reference-item">
+    <a href="https://isovalent.com/blog/post/isovalent-runtime-security-118/#performance-benchmarks" target="_blank">
+        [1] Isovalent Blog: Runtime Security 1.18 - Performance Benchmarks and Optimized Data Export
+    </a>
+</li>
+<li class="reference-item">
+    <a href="https://www.youtube.com/watch?v=xEa4KFf5FzY" target="_blank">
+        [2] eBay Keynote: Who Owns Your Pod? - Security Enforcement at eBay Scale (Jianlin Lv & Liyi Huang)
+    </a>
+</li>
         </ul>
     </div>
 </section>
