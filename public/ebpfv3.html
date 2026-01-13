@@ -1,6 +1,210 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"weiborao.link","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="面向未来的 IT 基础设施架构：eBPF 赋能之旅                          {       &quot;@context&quot;: &quot;https:&#x2F;&#x2F;schema.org&quot;,       &quot;@type&quot;: &quot;TechArticle&quot;,       &quot;headline&quot;: &quot;面向未来的 IT 基础设施架构：eBPF 赋能之旅&quot;,       &quot;descr">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Rao Weibo的博客">
+<meta property="og:url" content="https://weiborao.link/ebpfv3.html">
+<meta property="og:site_name" content="Rao Weibo的博客">
+<meta property="og:description" content="面向未来的 IT 基础设施架构：eBPF 赋能之旅                          {       &quot;@context&quot;: &quot;https:&#x2F;&#x2F;schema.org&quot;,       &quot;@type&quot;: &quot;TechArticle&quot;,       &quot;headline&quot;: &quot;面向未来的 IT 基础设施架构：eBPF 赋能之旅&quot;,       &quot;descr">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-24T09:38:37.456Z">
+<meta property="article:modified_time" content="2025-12-24T09:30:23.511Z">
+<meta property="article:author" content="Rao Weibo">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://weiborao.link/ebpfv3.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":true,"permalink":"https://weiborao.link/ebpfv3.html","path":"ebpfv3.html","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title> | Rao Weibo的博客
+</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Rao Weibo的博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">32</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">20</span></a></li><li class="menu-item menu-item-works"><a href="/works/" rel="section"><i class="fa fa-sitemap fa-fw"></i>works</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">面向未来的 IT 基础设施架构：eBPF 赋能之旅</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">Future-Ready Infrastructure: The eBPF Empowerment Journey</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.1.</span> <span class="nav-text">💡 一分钟了解核心价值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.2.</span> <span class="nav-text">💡 Core Value in 1 Minute</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.3.</span> <span class="nav-text">1. 核心战略价值与责任交付</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.4.</span> <span class="nav-text">1. Core Strategic Value &amp; Delivery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.5.</span> <span class="nav-text">2. eBPF：Linux 内核的数字化转型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.6.</span> <span class="nav-text">2. eBPF: Digital Transformation of the Linux Kernel</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.1.</span> <span class="nav-text">传统架构 vs eBPF 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.2.</span> <span class="nav-text">Traditional vs eBPF Architecture</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.3.</span> <span class="nav-text">通俗理解：什么是 eBPF？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.4.</span> <span class="nav-text">Concept: What is eBPF?</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.4.1.</span> <span class="nav-text">无需停车的引擎升级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.4.2.</span> <span class="nav-text">Engine Upgrade while Driving</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.4.3.</span> <span class="nav-text">系统的 X 光机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.4.4.</span> <span class="nav-text">X-Ray for the System</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.4.5.</span> <span class="nav-text">安全的沙箱运行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.4.6.</span> <span class="nav-text">Safe Sandbox Execution</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.5.</span> <span class="nav-text">深度解析：eBPF 运行流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.6.</span> <span class="nav-text">Deep Dive: How eBPF Works</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.1.</span> <span class="nav-text">编写程序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.2.</span> <span class="nav-text">Write Program</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.3.</span> <span class="nav-text">验证器 (Verifier)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.4.</span> <span class="nav-text">The Verifier</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.5.</span> <span class="nav-text">JIT 编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.6.</span> <span class="nav-text">JIT Compile</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.7.</span> <span class="nav-text">挂载与执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.6.8.</span> <span class="nav-text">Attach &amp; Run</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.7.</span> <span class="nav-text">为什么这很重要？三大应用支柱</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">2.6.8.</span> <span class="nav-text">Why it matters? The Three Pillars</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.8.1.</span> <span class="nav-text">下一代安全</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.8.2.</span> <span class="nav-text">Next-Gen Security</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.8.3.</span> <span class="nav-text">深度可观测性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.8.4.</span> <span class="nav-text">Deep Observability</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.8.5.</span> <span class="nav-text">云原生网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.6.8.6.</span> <span class="nav-text">Cloud Native Networking</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.7.</span> <span class="nav-text">3. Isovalent 工具集详解：架构升级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.8.</span> <span class="nav-text">3. Isovalent Toolkit Deep Dive: Architecture Upgrade</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.1.</span> <span class="nav-text">📉 背景：没有 Cilium 的世界 (Before)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.2.</span> <span class="nav-text">📉 Context: The World Before Cilium</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.3.</span> <span class="nav-text">🚀 解决方案：Cilium 是什么？(What)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.4.</span> <span class="nav-text">🚀 The Solution: What is Cilium?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.5.</span> <span class="nav-text">⚡ 深度解析：原理与性能 (How &amp; Why)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.6.</span> <span class="nav-text">⚡ Deep Dive: How &amp; Why</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.7.</span> <span class="nav-text">💎 价值：有了之后有什么不同？(Value)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cilium"><span class="nav-number">2.8.8.</span> <span class="nav-text">💎 Value: What changes with Cilium?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.9.</span> <span class="nav-text">🏢 业务视角：从“摄像头”到“免疫系统”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.10.</span> <span class="nav-text">🏢 Business Perspective: From CCTV to Immune System</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.11.</span> <span class="nav-text">传统安全：摄像头</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.12.</span> <span class="nav-text">Traditional: CCTV Camera</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.13.</span> <span class="nav-text">Sidecar 模式：安检门</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.14.</span> <span class="nav-text">Sidecar: Checkpoint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.15.</span> <span class="nav-text">Tetragon：智能免疫</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.16.</span> <span class="nav-text">Tetragon: Immune System</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.17.</span> <span class="nav-text">⚙️ 技术视角：内核深处的防御架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.18.</span> <span class="nav-text">⚙️ Technical Perspective: Deep Kernel Defense</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.19.</span> <span class="nav-text">内核级可观测性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.20.</span> <span class="nav-text">Kernel-Level Observability</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.21.</span> <span class="nav-text">零开销数据上下文</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.22.</span> <span class="nav-text">Zero-Overhead Context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.23.</span> <span class="nav-text">In-Kernel Enforcement</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.24.</span> <span class="nav-text">In-Kernel Enforcement</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.25.</span> <span class="nav-text">🔍 工作原理可视化：拦截文件篡改</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.26.</span> <span class="nav-text">🔍 Architecture Visualization: Blocking File Tampering</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.27.</span> <span class="nav-text">🚀 为什么 eBPF 更快？(上下文切换的代价)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.28.</span> <span class="nav-text">🚀 Why is eBPF Faster? (Context Switching Cost)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.29.</span> <span class="nav-text">🛡️ 三大核心防御场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.30.</span> <span class="nav-text">🛡️ Three Core Defense Scenarios</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.31.</span> <span class="nav-text">1. 敏感文件防篡改</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.32.</span> <span class="nav-text">1. File Integrity Monitoring</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.33.</span> <span class="nav-text">2. 反弹 Shell 阻断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.34.</span> <span class="nav-text">2. Reverse Shell Blocking</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.35.</span> <span class="nav-text">3. 容器逃逸防御</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.36.</span> <span class="nav-text">3. Container Escape Prev.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.37.</span> <span class="nav-text">📝 策略即代码 (Policy as Code)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.38.</span> <span class="nav-text">📝 Policy as Code</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.39.</span> <span class="nav-text">💻 实时攻防演练：体验“秒杀”黑客</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.40.</span> <span class="nav-text">💻 Live Attack Simulation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.41.</span> <span class="nav-text">技术深度解析：它是如何做到零开销阻断的？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tetragon"><span class="nav-number">2.8.42.</span> <span class="nav-text">Technical Deep Dive: How is Zero-Overhead Blocking Achieved?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.43.</span> <span class="nav-text">📡 为什么我们需要 Hubble？(空中交通管制)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.44.</span> <span class="nav-text">📡 Why Hubble? (Air Traffic Control)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.45.</span> <span class="nav-text">❌ 没有 Hubble (盲区)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.46.</span> <span class="nav-text">❌ Before Hubble (Blind Spot)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.47.</span> <span class="nav-text">✅ 拥有 Hubble (上帝视角)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.48.</span> <span class="nav-text">✅ With Hubble (God View)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.49.</span> <span class="nav-text">⚡ 核心原理：eBPF 的魔法 (The How)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.50.</span> <span class="nav-text">⚡ The Core Principle: eBPF Magic</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.50.1.</span> <span class="nav-text">架构三剑客：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.50.2.</span> <span class="nav-text">Architecture Trio:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.51.</span> <span class="nav-text">💎 核心价值与场景 (The Value)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.52.</span> <span class="nav-text">💎 Core Value &amp; Scenarios</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.52.1.</span> <span class="nav-text">具体场景举例：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hubble"><span class="nav-number">2.8.52.2.</span> <span class="nav-text">Use Cases:</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.9.</span> <span class="nav-text">4. 技术代差对比：Isovalent eBPF vs 传统方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.10.</span> <span class="nav-text">4. Technology Generation Gap: Isovalent eBPF vs Legacy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.11.</span> <span class="nav-text">5. 生态闭环：现有投资价值最大化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.12.</span> <span class="nav-text">5. Ecosystem: Maximizing Existing Investments</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">2.12.1.</span> <span class="nav-text">Splunk 集成价值：上下文即王道</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.13.</span> <span class="nav-text">6. 为什么制造业需要 Isovalent 企业版？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.14.</span> <span class="nav-text">6. Why Manufacturing Needs Enterprise Edition?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.15.</span> <span class="nav-text">7. FAQ (常见问题)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.16.</span> <span class="nav-text">7. FAQ</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.17.</span> <span class="nav-text">📖 附录：通俗概念辞典</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.18.</span> <span class="nav-text">📖 Appendix: Glossary for Business Leaders</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Rao Weibo</p>
+  <div class="site-description" itemprop="description">记录一些工作、学习相关的笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/weiborao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;weiborao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:raoweibo@gmail.com" title="E-Mail → mailto:raoweibo@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner page posts-expand">
+
+
+    
+    
+    
+    <div class="post-block" lang="zh-CN"><header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">
+</h1>
+
+<div class="post-meta-container">
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>面向未来的 IT 基础设施架构：eBPF 赋能之旅</title>
@@ -1997,5 +2201,66 @@
             });
         }
     </script>
+</body>
+</html>
+      </div>
+      
+      
+      
+    </div>
+
+    
+    
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2021 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Rao Weibo</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">66k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:01</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/weiborao" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
 </body>
 </html>
