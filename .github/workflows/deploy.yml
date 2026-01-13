@@ -4,42 +4,49 @@ name: Hexo Best Practice 2026
 on:
   push:
     branches:
-      - main # 只有当你推送源码到 main 时触发
+      - main # 确保你的源码分支名是 main
 
-# 必须设置权限，否则部署会报 403 错误
+# 2026 核心：必须配置以下权限才能直接发布到 GitHub Pages 服务
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# 限制同一时间只有一个部署任务在运行，避免冲突
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20' # 使用长期支持版 Node
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        # 使用 npm ci 代替 npm install 以解决模块丢失报错
+        run: npm ci
 
-      - name: Generate Hexo
+      - name: Generate Hexo Site
         run: |
           npx hexo clean
           npx hexo generate
-          # 执行你的 SEO 脚本
+          # 执行你本地的自定义 Sitemap 脚本
           chmod +x ./tools/generate_sitemap.sh
           ./tools/generate_sitemap.sh
 
-      - name: Upload to Pages Service
+      - name: Upload Artifact
+        # 将生成的 public 目录上传为 GitHub Pages 产物
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './public' # 告诉 GitHub：生成的网页在这里
+          path: './public'
 
   deploy:
     needs: build
@@ -50,4 +57,5 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 # 最终发布
+        # 2026 核心：直接将产物发布到 Pages 引擎
+        uses: actions/deploy-pages@v4
