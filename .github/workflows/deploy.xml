@@ -1,18 +1,24 @@
-name: Hexo CI/CD Best Practice 2026
+name: Hexo Best Practice 2026
 
 on:
   push:
     branches:
-      - main # 源码分支
+      - main # 只有当你推送源码到 main 时触发
+
+# 必须设置权限，否则部署会报 403 错误
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -21,18 +27,26 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Generate Site
+      - name: Generate Hexo
         run: |
           npx hexo clean
           npx hexo generate
-          # 运行你本地的自定义 Sitemap 脚本
+          # 执行你的 SEO 脚本
           chmod +x ./tools/generate_sitemap.sh
           ./tools/generate_sitemap.sh
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload to Pages Service
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: master # 静态网页分支
-          commit_message: "Verified Build: ${{ github.event.head_commit.message }}"
+          path: './public' # 告诉 GitHub：生成的网页在这里
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # 最终发布
