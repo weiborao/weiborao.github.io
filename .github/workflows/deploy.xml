@@ -1,0 +1,38 @@
+name: Hexo CI/CD Best Practice 2026
+
+on:
+  push:
+    branches:
+      - main # 源码分支
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Generate Site
+        run: |
+          npx hexo clean
+          npx hexo generate
+          # 运行你本地的自定义 Sitemap 脚本
+          chmod +x ./tools/generate_sitemap.sh
+          ./tools/generate_sitemap.sh
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: master # 静态网页分支
+          commit_message: "Verified Build: ${{ github.event.head_commit.message }}"
