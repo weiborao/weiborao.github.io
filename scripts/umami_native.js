@@ -1,0 +1,2 @@
+// scripts/umami_native.js
+hexo.extend.injector.register('head_end', '<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>', 'default');
