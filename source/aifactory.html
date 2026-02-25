@@ -1,0 +1,652 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Factory Architecture</title>
+    <style>
+        /* CSS Variables - Cisco Inspired Palette */
+        :root {
+            --cisco-navy: #00223A;
+            --cisco-blue: #00BCEB;
+            --cisco-light-blue: #E8F2F5;
+            --cisco-gray-900: #1E293B;
+            --cisco-gray-700: #334155;
+            --cisco-gray-500: #64748B;
+            --cisco-gray-200: #E2E8F0;
+            --cisco-bg: #F8FAFC;
+            --white: #FFFFFF;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition-speed: 0.3s;
+        }
+
+        /* Reset & Typography */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--cisco-bg);
+            color: var(--cisco-gray-900);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--cisco-navy);
+            color: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            position: relative;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-content {
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--cisco-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .analogy-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-left: 4px solid var(--cisco-blue);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Language Toggle */
+        .lang-toggle {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lang-toggle:hover {
+            background: var(--cisco-blue);
+            border-color: var(--cisco-blue);
+        }
+
+        /* Layer Architectures */
+        .layers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .layer {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: all var(--transition-speed) ease;
+            border: 1px solid var(--cisco-gray-200);
+        }
+
+        .layer-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            background: var(--white);
+            border-bottom: 1px solid transparent;
+            transition: background var(--transition-speed) ease;
+        }
+
+        .layer-header:hover {
+            background: var(--cisco-light-blue);
+        }
+
+        .layer.active .layer-header {
+            border-bottom: 1px solid var(--cisco-gray-200);
+            background: var(--cisco-light-blue);
+        }
+
+        .layer-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--cisco-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .layer-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--white);
+        }
+
+        .layer-title-wrapper {
+            flex-grow: 1;
+        }
+
+        .layer-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--cisco-navy);
+            margin-bottom: 0.25rem;
+        }
+
+        .layer-desc {
+            font-size: 0.9rem;
+            color: var(--cisco-gray-500);
+        }
+
+        .expand-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--cisco-gray-500);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .layer.active .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Layer Content & Tech Cards */
+        .layer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .layer.active .layer-content {
+            padding: 2rem;
+            max-height: 2000px; /* Arbitrary large number to allow expansion */
+            opacity: 1;
+        }
+
+        .tech-card {
+            background: var(--white);
+            border: 1px solid var(--cisco-gray-200);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--cisco-blue);
+        }
+
+        .tech-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--cisco-navy);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .tech-name::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 1.15rem;
+            background-color: var(--cisco-blue);
+            border-radius: 2px;
+        }
+
+        .golden-circle {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .gc-item {
+            font-size: 0.9rem;
+        }
+
+        .gc-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .gc-what .gc-label { background: #E0E7FF; color: #3730A3; }
+        .gc-why .gc-label { background: #FEF3C7; color: #92400E; }
+        .gc-how .gc-label { background: #D1FAE5; color: #065F46; }
+
+        .gc-text {
+            color: var(--cisco-gray-700);
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.8rem; }
+            .header-content { margin-top: 2.5rem; }
+            .lang-toggle { top: 1rem; right: 1rem; }
+            .layer-header { padding: 1.25rem 1rem; }
+            .layer-icon { width: 40px; height: 40px; margin-right: 1rem; }
+            .layer.active .layer-content { padding: 1.5rem 1rem; }
+            .tech-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <span id="langBtnText">EN</span>
+            </button>
+            <div class="header-content">
+                <h1 data-i18n="headerTitle">AI工厂架构全景图</h1>
+                <div class="subtitle" data-i18n="headerSubtitle">解密现代AI基础设施：从底层硬件到上层应用的端到端解析</div>
+                <div class="analogy-box">
+                    <strong data-i18n="analogyTitle">💡 核心隐喻：生产智能的超级现代工厂</strong><br>
+                    <span data-i18n="analogyText">
+                        要理解复杂的AI生态，我们可以将其想象为一个超级工厂：<br>
+                        • <strong>数据</strong> 是原材料<br>
+                        • <strong>GPU</strong> 是流水线工人<br>
+                        • <strong>网络</strong> 是传送带<br>
+                        • <strong>AI应用</strong> 是最终产出的定制商品
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <div class="layers-container" id="layersContainer">
+            <!-- Content will be injected by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Data Structure utilizing the Feynman Technique and Golden Circle
+        const data = {
+            zh: {
+                headerTitle: "AI工厂架构全景图",
+                headerSubtitle: "解密现代AI基础设施：从底层硬件到上层应用的端到端解析",
+                analogyTitle: "💡 核心隐喻：生产智能的超级现代工厂",
+                analogyText: "要理解复杂的AI生态，我们可以将其想象为一个超级工厂：<br>• <strong>数据</strong> 是原材料<br>• <strong>GPU</strong> 是流水线工人<br>• <strong>网络</strong> 是高速传送带<br>• <strong>AI应用</strong> 是最终产出的高价值定制商品",
+                labels: { what: "是什么 (What)", why: "为什么 (Why)", how: "如何实现 (How)" },
+                layers: [
+                    {
+                        id: "layer1",
+                        icon: `<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>`, // Stack icon
+                        title: "第一层：AI 应用与业务层 (Application Layer)",
+                        desc: "工厂的交付窗口——直接为终端用户提供业务价值",
+                        items: [
+                            {
+                                name: "大语言模型 (LLM / Llama 3 / GPT)",
+                                what: "具备百亿/千亿级参数的人工智能基础模型。",
+                                why: "传统软件基于固定规则，而LLM通过理解自然语言，能够执行推理、编程、创作等复杂泛化任务。",
+                                how: "通过预训练（阅读海量互联网数据建立语言神经连接）和微调（对齐人类偏好），利用Transformer架构预测下一个Token。"
+                            },
+                            {
+                                name: "RAG (检索增强生成)",
+                                what: "一种将企业私有知识库与大模型能力结合的应用范式。",
+                                why: "大模型的知识停留在训练截止日，且会产生“幻觉”。企业需要基于最新、绝对准确的私有数据来生成回答。",
+                                how: "当用户提问时，系统先在私有数据库中检索出相关文档（知识），然后将“问题+文档”一起打包喂给大模型，让其基于给定事实进行总结生成。"
+                            },
+                            {
+                                name: "Agentic AI (智能体)",
+                                what: "具备自主规划、工具调用和多步决策能力的AI系统。",
+                                why: "突破LLM只能“陪聊”的限制，使其成为能代替人类执行真实世界复杂任务（如订票、查库、操作软件）的数字员工。",
+                                how: "为大模型配备“大脑（记忆与规划引擎）”和“手脚（API/工具箱）”。模型自主分析任务步骤，按需执行SQL代码或网页搜索，最后汇总结果。"
+                            }
+                        ]
+                    },
+                    {
+                        id: "layer2",
+                        icon: `<path d="M12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-8c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm8.56 3.44c.22-.66.34-1.36.34-2.09 0-3.53-2.61-6.43-6-6.92V.43C19.12.96 22 4.13 22 7.85c0 .92-.17 1.8-.48 2.61l-1.96-1.02zM1.96 11.02C1.74 11.68 1.62 12.38 1.62 13.1c0 3.53 2.61 6.43 6 6.92v1.01c-4.23-.53-7.11-3.7-7.11-7.42 0-.92.17-1.8.48-2.61l1.97 1.02z"/>`, // Orchestration/Gears
+                        title: "第二层：模型编排与推理服务层 (Orchestration & Serving Layer)",
+                        desc: "工厂的车间调度——高效管理算力并提供标准化服务",
+                        items: [
+                            {
+                                name: "Kubernetes (K8s)",
+                                what: "开源的容器编排与集群管理操作系统。",
+                                why: "AI任务极其庞大且组件繁多，手动管理成百上千台服务器上的环境配置会导致灾难。需要自动化的部署、扩展和自愈机制。",
+                                how: "将应用打包成容器（轻量级隔离环境），K8s作为“数据中心操作系统”，智能地将这些容器调度到合适的服务器节点上运行并监控其状态。"
+                            },
+                            {
+                                name: "NVIDIA Run:ai",
+                                what: "构建在K8s之上的AI专用高级算力调度器。",
+                                why: "GPU极其昂贵但利用率往往很低（常被闲置或独占）。企业需要让多个数据科学团队像使用水墨一样共享算力池。",
+                                how: "通过动态配额、任务排队机制以及“切分GPU (Fractional GPUs)”技术，智能拦截并分配算力，将整体资源利用率提升数倍。"
+                            },
+                            {
+                                name: "NVIDIA NIM (推理微服务)",
+                                what: "经过NVIDIA极致优化的容器化AI模型推理引擎。",
+                                why: "将数百GB的大模型部署为高性能API极为复杂，涉及底层的CUDA版本匹配、TensorRT加速等繁杂操作，耗时耗力。",
+                                how: "将预训练模型、运行时引擎和所需依赖全部打包。开发者只需运行一行标准Docker命令，即可在几分钟内拉起一个极高性能的生产级API供上层应用调用。"
+                            }
+                        ]
+                    },
+                    {
+                        id: "layer3",
+                        icon: `<rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><path d="M7 7h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>`, // Chip/Compute
+                        title: "第三层：计算框架与通信加速层 (Compute & Communication Layer)",
+                        desc: "核心流水线——硬件与算法框架的深度交织",
+                        items: [
+                            {
+                                name: "PyTorch",
+                                what: "由Meta主导开发的当前最主流深度学习框架。",
+                                why: "研究人员需要一个灵活、直观的工具来将复杂的数学公式（神经网络架构）转化为可执行的代码。",
+                                how: "提供Pythonic的接口和动态计算图机制。开发者可以像写普通Python代码一样定义神经网络、计算损失函数并控制训练反向传播循环。"
+                            },
+                            {
+                                name: "CUDA (计算统一设备架构)",
+                                what: "NVIDIA推出的让GPU执行通用计算的并行编程平台。",
+                                why: "CPU擅长复杂的单线程逻辑判断；而AI的核心是海量简单的矩阵乘法，需要成千上万个核心同时工作。CUDA架起了软件控制GPU的桥梁。",
+                                how: "允许开发者使用C++等语言编写“内核(Kernel)”程序，直接指挥GPU内部海量的流多处理器(SM)同时对海量数据进行并行数学运算。"
+                            },
+                            {
+                                name: "NCCL (NVIDIA集合通信库)",
+                                what: "专为多GPU节点之间的数据同步优化的底层通信库。",
+                                why: "训练大模型需要成百上千张GPU协同工作。在每一步计算后，GPU们必须相互交换更新的参数（梯度）。如果通信慢，所有GPU都得停机等待。",
+                                how: "提供诸如 All-Reduce、All-Gather 等高度优化的拓扑感知通信算法。它能自动识别硬件架构（如NVLink或PCIe），选择最优路径在GPU间高速汇合数据。"
+                            }
+                        ]
+                    },
+                    {
+                        id: "layer4",
+                        icon: `<path d="M4 4h16v4H4zm0 6h16v4H4zm0 6h16v4H4zM6 6h2v2H6zm0 6h2v2H6zm0 6h2v2H6z"/>`, // Network/Switch
+                        title: "第四层：高性能网络与硬件基础设施 (Infrastructure & Network Layer)",
+                        desc: "传送带与地基——决定整个工厂产能的无损物理底座",
+                        items: [
+                            {
+                                name: "RDMA (远程直接内存访问)",
+                                what: "一种允许跨网络直接读写远程服务器内存的硬件技术。",
+                                why: "传统的TCP/IP网络传输数据时，需要经过操作系统内核多次拷贝和CPU处理，延迟极高且占用CPU资源，无法满足AI海量数据的吞吐需求。",
+                                how: "智能网卡(NIC)直接在硬件层面处理网络封包。一台服务器的GPU可以直接将数据“写入”到另一台服务器的GPU内存中，实现零拷贝、极低延迟和超高带宽。"
+                            },
+                            {
+                                name: "ROCEv2",
+                                what: "基于融合以太网的RDMA协议 (RDMA over Converged Ethernet)。",
+                                why: "原生RDMA最早跑在昂贵的InfiniBand(IB)专有网络上。企业希望在通用、成本更低的以太网架构上也能享受RDMA的性能。",
+                                how: "将RDMA指令封装在标准的UDP/IP以太网数据包中，配合交换机的无损网络配置（如PFC/ECN机制），使标准以太网也能支持AI所需的高速直接内存传输。"
+                            },
+                            {
+                                name: "Adaptive Routing & Packet Spraying",
+                                what: "现代AI交换机（如NVIDIA Spectrum-X）中的高级流量调度机制。",
+                                why: "AI集群的流量往往是多对多的“大象流”（巨大突发流量）。传统路由会将一个数据流绑定在一条死路径上，极易造成局部拥堵导致全网降速。",
+                                how: "自适应路由(Adaptive Routing)实时感知全网拥塞；数据包喷洒(Packet Spraying)将同一个数据流拆散成微小的包，通过所有可用物理路径同时传输，到达终点再由网卡重组，实现100%无拥塞吞吐。"
+                            },
+                            {
+                                name: "UEC (超级以太网联盟标准)",
+                                what: "面向未来AI和HPC工作负载优化的下一代开放式网络传输规范。",
+                                why: "随着千亿参数模型和百万GPU集群的出现，现有的以太网协议在处理微秒级尾部延迟和极高网络连通状态时遇到瓶颈。",
+                                how: "通过行业联盟定义全新的传输层协议和机制（如更细粒度的多路径传输、改进的拥塞控制和更智能的网卡卸载），旨在打造比传统ROCEv2更极致的无损高性能以太网底座。"
+                            }
+                        ]
+                    }
+                ]
+            },
+            en: {
+                headerTitle: "AI Factory Architecture Landscape",
+                headerSubtitle: "Decoding Modern AI Infrastructure: From Hardware to Applications",
+                analogyTitle: "💡 Core Metaphor: The Super Modern Intelligence Factory",
+                analogyText: "To understand the complex AI ecosystem, imagine a super factory:<br>• <strong>Data</strong> is the raw material<br>• <strong>GPUs</strong> are the assembly line workers<br>• <strong>Network</strong> is the high-speed conveyor belt<br>• <strong>AI Apps</strong> are the customized final products",
+                labels: { what: "What", why: "Why", how: "How" },
+                layers: [
+                    {
+                        id: "layer1",
+                        icon: `<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>`,
+                        title: "Layer 1: Application & Business Layer",
+                        desc: "The factory's delivery window — providing direct business value to end users.",
+                        items: [
+                            {
+                                name: "Large Language Models (LLM / Llama 3 / GPT)",
+                                what: "Foundation models with tens/hundreds of billions of parameters.",
+                                why: "Traditional software uses rigid rules; LLMs understand natural language, enabling complex generalized tasks like reasoning, coding, and generation.",
+                                how: "Through pre-training (building neural connections across massive web data) and fine-tuning (aligning with human intent) via the Transformer architecture to predict the next token."
+                            },
+                            {
+                                name: "RAG (Retrieval-Augmented Generation)",
+                                what: "An application paradigm combining private enterprise knowledge with LLM capabilities.",
+                                why: "LLM knowledge is frozen in time and prone to 'hallucinations'. Enterprises need answers grounded in the latest, absolutely accurate private data.",
+                                how: "When queried, the system retrieves relevant documents from a private vector database, then feeds 'Query + Documents' to the LLM to generate an answer strictly based on those facts."
+                            },
+                            {
+                                name: "Agentic AI",
+                                what: "AI systems capable of autonomous planning, tool usage, and multi-step decision-making.",
+                                why: "Breaks the limitation of LLMs as mere 'chatbots', transforming them into digital workers that execute real-world tasks (booking, DB queries, software operation).",
+                                how: "Equips the LLM with a 'Brain' (memory/planner) and 'Hands' (APIs/Tools). The model analyzes steps, executes SQL or web searches autonomously, and synthesizes the final result."
+                            }
+                        ]
+                    },
+                    {
+                        id: "layer2",
+                        icon: `<path d="M12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-8c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm8.56 3.44c.22-.66.34-1.36.34-2.09 0-3.53-2.61-6.43-6-6.92V.43C19.12.96 22 4.13 22 7.85c0 .92-.17 1.8-.48 2.61l-1.96-1.02zM1.96 11.02C1.74 11.68 1.62 12.38 1.62 13.1c0 3.53 2.61 6.43 6 6.92v1.01c-4.23-.53-7.11-3.7-7.11-7.42 0-.92.17-1.8.48-2.61l1.97 1.02z"/>`,
+                        title: "Layer 2: Orchestration & Serving Layer",
+                        desc: "Factory floor scheduling — efficient compute management and standard services.",
+                        items: [
+                            {
+                                name: "Kubernetes (K8s)",
+                                what: "An open-source container orchestration and cluster management OS.",
+                                why: "AI pipelines are massive and complex. Managing environments across thousands of nodes manually is disastrous. Automated deployment, scaling, and self-healing are mandatory.",
+                                how: "Applications are packaged into containers (lightweight isolated environments). K8s acts as the 'Datacenter OS' to intelligently schedule and monitor them across server nodes."
+                            },
+                            {
+                                name: "NVIDIA Run:ai",
+                                what: "An advanced, AI-specific compute scheduler built on top of Kubernetes.",
+                                why: "GPUs are costly but often underutilized (idle or monopolized). Enterprises need multiple data science teams to share a compute pool fluidly.",
+                                how: "Utilizes dynamic quotas, job queuing, and 'Fractional GPUs' technology to intelligently intercept and allocate compute, multiplying overall hardware utilization."
+                            },
+                            {
+                                name: "NVIDIA NIM (Inference Microservices)",
+                                what: "Highly optimized, containerized AI model inference engines by NVIDIA.",
+                                why: "Deploying a massive 100GB model as a fast API is complex, involving strict CUDA version matching and TensorRT acceleration compilation.",
+                                how: "Packages pre-trained models, runtime engines, and dependencies together. Developers run a single standard Docker command to spin up a production-ready, ultra-fast API in minutes."
+                            }
+                        ]
+                    },
+                    {
+                        id: "layer3",
+                        icon: `<rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><path d="M7 7h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>`,
+                        title: "Layer 3: Compute & Communication Layer",
+                        desc: "Core assembly line — deep integration of hardware and algorithmic frameworks.",
+                        items: [
+                            {
+                                name: "PyTorch",
+                                what: "The dominant deep learning framework, primarily developed by Meta.",
+                                why: "Researchers need a flexible, intuitive tool to translate complex mathematical formulas (neural architectures) into executable code.",
+                                how: "Provides a Pythonic interface with dynamic computation graphs. Developers define neural networks, loss functions, and backpropagation loops intuitively as standard Python code."
+                            },
+                            {
+                                name: "CUDA (Compute Unified Device Architecture)",
+                                what: "NVIDIA's parallel computing platform that allows GPUs to execute general-purpose compute.",
+                                why: "CPUs excel at complex logic; AI requires massive, simple matrix multiplications simultaneously. CUDA bridges software to GPU hardware.",
+                                how: "Allows developers to write 'Kernels' in C++ to directly command thousands of Streaming Multiprocessors (SMs) inside the GPU to perform parallel math operations on massive datasets."
+                            },
+                            {
+                                name: "NCCL (NVIDIA Collective Communication Library)",
+                                what: "A low-level library optimized for data synchronization across multi-GPU nodes.",
+                                why: "Training huge models requires thousands of GPUs. After each compute step, GPUs must exchange parameter updates (gradients). If communication lags, all GPUs halt and wait.",
+                                how: "Provides highly optimized topology-aware algorithms like All-Reduce and All-Gather. It automatically detects hardware (NVLink/PCIe) to route data optimally across GPUs."
+                            }
+                        ]
+                    },
+                    {
+                        id: "layer4",
+                        icon: `<path d="M4 4h16v4H4zm0 6h16v4H4zm0 6h16v4H4zM6 6h2v2H6zm0 6h2v2H6zm0 6h2v2H6z"/>`,
+                        title: "Layer 4: Infrastructure & Network Layer",
+                        desc: "Conveyor belt & foundation — the physical layer dictating total factory throughput.",
+                        items: [
+                            {
+                                name: "RDMA (Remote Direct Memory Access)",
+                                what: "Hardware technology allowing direct read/write access to a remote server's memory.",
+                                why: "Traditional TCP/IP networks route data through the OS kernel and CPU, causing high latency and CPU overhead, entirely bottlenecking AI throughput.",
+                                how: "SmartNICs handle packets at the hardware layer. A GPU in Server A can 'write' directly into the memory of a GPU in Server B, achieving zero-copy, ultra-low latency, and massive bandwidth."
+                            },
+                            {
+                                name: "ROCEv2",
+                                what: "RDMA over Converged Ethernet protocol.",
+                                why: "Native RDMA initially ran on expensive, proprietary InfiniBand (IB) networks. Enterprises want RDMA performance over standard, cost-effective Ethernet.",
+                                how: "Encapsulates RDMA commands within standard UDP/IP Ethernet packets. Paired with lossless switch configurations (PFC/ECN), it enables high-speed direct memory transfers over Ethernet."
+                            },
+                            {
+                                name: "Adaptive Routing & Packet Spraying",
+                                what: "Advanced traffic scheduling mechanisms in modern AI switches (e.g., NVIDIA Spectrum-X).",
+                                why: "AI clusters generate massive 'Elephant Flows' (huge traffic bursts). Traditional routing binds a flow to a single path, easily causing local congestion that slows the entire network.",
+                                how: "Adaptive Routing senses network congestion in real-time; Packet Spraying splits a single flow into tiny packets, transmitting them simultaneously across all available paths, reassembling at the NIC for 100% congestion-free throughput."
+                            },
+                            {
+                                name: "UEC (Ultra Ethernet Consortium)",
+                                what: "A next-generation, open networking standard optimized for future AI and HPC workloads.",
+                                why: "As trillion-parameter models and massive GPU clusters emerge, existing Ethernet protocols struggle with microsecond tail-latency and extreme connection states.",
+                                how: "Defines new transport layer protocols via an industry consortium (e.g., fine-grained multi-pathing, improved congestion control, smarter NIC offloads) to build an ultimate lossless Ethernet foundation beyond traditional ROCEv2."
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function renderContent() {
+            const currentData = data[currentLang];
+            const labels = currentData.labels;
+
+            // Update Static Texts
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (currentData[key]) {
+                    el.innerHTML = currentData[key];
+                }
+            });
+
+            // Update Button
+            document.getElementById('langBtnText').innerText = currentLang === 'zh' ? 'EN' : '中文';
+
+            // Render Layers
+            const container = document.getElementById('layersContainer');
+            container.innerHTML = ''; // Clear existing
+
+            currentData.layers.forEach((layer, index) => {
+                // Determine if layer should be open by default (e.g., first layer)
+                const isActive = 'active'; // Changed to make all layers active by default
+                
+                let itemsHtml = '';
+                layer.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="tech-card">
+                            <div class="tech-name">${item.name}</div>
+                            <div class="golden-circle">
+                                <div class="gc-item gc-what">
+                                    <span class="gc-label">${labels.what}</span>
+                                    <span class="gc-text">${item.what}</span>
+                                </div>
+                                <div class="gc-item gc-why">
+                                    <span class="gc-label">${labels.why}</span>
+                                    <span class="gc-text">${item.why}</span>
+                                </div>
+                                <div class="gc-item gc-how">
+                                    <span class="gc-label">${labels.how}</span>
+                                    <span class="gc-text">${item.how}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const layerHtml = `
+                    <div class="layer ${isActive}" onclick="toggleLayer(this)">
+                        <div class="layer-header">
+                            <div class="layer-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${layer.icon}</svg>
+                            </div>
+                            <div class="layer-title-wrapper">
+                                <div class="layer-title">${layer.title}</div>
+                                <div class="layer-desc">${layer.desc}</div>
+                            </div>
+                            <svg class="expand-icon" viewBox="0 0 24 24">
+                                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div class="layer-content" onclick="event.stopPropagation()">
+                            ${itemsHtml}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += layerHtml;
+            });
+        }
+
+        function toggleLayer(element) {
+            const isActive = element.classList.contains('active');
+            
+            // Optional: Close other layers (Accordion style)
+            // document.querySelectorAll('.layer').forEach(layer => layer.classList.remove('active'));
+            
+            if (!isActive) {
+                element.classList.add('active');
+            } else {
+                element.classList.remove('active');
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            renderContent();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', renderContent);
+
+    </script>
+</body>
+</html>
