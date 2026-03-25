@@ -1,0 +1,500 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>802.1X 无线漫游：第一性原理拆解</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        cisco: {
+                            dark: '#0f172a',
+                            panel: '#1e293b',
+                            cyan: '#06b6d4',
+                            blue: '#3b82f6',
+                            green: '#10b981',
+                            text: '#cbd5e1',
+                            muted: '#64748b'
+                        }
+                    },
+                    boxShadow: {
+                        'neon': '0 0 15px rgba(6, 182, 212, 0.3)',
+                        'neon-strong': '0 0 25px rgba(6, 182, 212, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #cbd5e1;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .pulse-ring {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .3; }
+        }
+        
+        .signal-wave {
+            animation: broadcast 2s infinite ease-out;
+            transform-origin: center bottom;
+        }
+        .signal-wave:nth-child(2) { animation-delay: 0.3s; }
+        .signal-wave:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes broadcast {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="antialiased font-sans bg-cisco-dark relative overflow-x-hidden selection:bg-cisco-cyan selection:text-white">
+
+    <!-- Background Grid Effect -->
+    <div class="fixed inset-0 z-0 pointer-events-none opacity-10" 
+         style="background-image: linear-gradient(#334155 1px, transparent 1px), linear-gradient(90deg, #334155 1px, transparent 1px); background-size: 40px 40px;">
+    </div>
+
+    <!-- Header Section -->
+    <header class="relative z-10 pt-20 pb-16 px-6 max-w-5xl mx-auto text-center">
+        <div class="inline-flex items-center justify-center p-3 bg-cisco-panel rounded-2xl mb-6 shadow-neon border border-cisco-cyan/30">
+            <svg class="w-8 h-8 text-cisco-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+            </svg>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+            802.1X 无线漫游 <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cisco-cyan to-cisco-blue">第一性原理拆解</span>
+        </h1>
+        <p class="text-lg text-cisco-muted max-w-3xl mx-auto leading-relaxed">
+            剥离 802.11r/OKC 黑盒优化，回到最严苛的 WPA2-Enterprise 基线场景。用显微镜级别的手术刀，逐一拆解终端从离开 AP-A 到接入 AP-B 的 10 个硬核步骤。
+        </p>
+
+        <!-- Hero SVG Topology -->
+        <div class="mt-12 w-full max-w-4xl mx-auto bg-cisco-panel/50 border border-slate-700/50 rounded-3xl p-8 backdrop-blur-sm relative overflow-hidden">
+            <svg viewBox="0 0 800 300" class="w-full h-auto drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+                <!-- WLC & ISE Cloud -->
+                <rect x="300" y="20" width="200" height="60" rx="10" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+                <text x="400" y="55" fill="#cbd5e1" font-size="18" font-family="Inter" font-weight="bold" text-anchor="middle">WLC & ISE Core</text>
+                
+                <!-- Connections to APs -->
+                <path d="M350 80 L200 150" stroke="#334155" stroke-width="3" stroke-dasharray="5,5"/>
+                <path d="M450 80 L600 150" stroke="#334155" stroke-width="3" stroke-dasharray="5,5"/>
+
+                <!-- AP-A -->
+                <g transform="translate(150, 150)">
+                    <rect x="0" y="0" width="100" height="40" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                    <circle cx="20" cy="0" r="3" fill="#64748b"/>
+                    <circle cx="80" cy="0" r="3" fill="#64748b"/>
+                    <text x="50" y="25" fill="#cbd5e1" font-size="16" font-family="Inter" font-weight="bold" text-anchor="middle">AP-A</text>
+                    <!-- Diminishing Signal -->
+                    <path d="M 10 60 Q 50 90 90 60" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.5"/>
+                    <path d="M 25 75 Q 50 95 75 75" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.3"/>
+                </g>
+
+                <!-- AP-B -->
+                <g transform="translate(550, 150)">
+                    <rect x="0" y="0" width="100" height="40" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+                    <circle cx="20" cy="0" r="3" fill="#06b6d4"/>
+                    <circle cx="80" cy="0" r="3" fill="#06b6d4"/>
+                    <text x="50" y="25" fill="#fff" font-size="16" font-family="Inter" font-weight="bold" text-anchor="middle">AP-B</text>
+                    <!-- Strong Signal -->
+                    <path d="M 10 60 Q 50 90 90 60" fill="none" stroke="#06b6d4" stroke-width="3" class="signal-wave"/>
+                    <path d="M 25 75 Q 50 95 75 75" fill="none" stroke="#06b6d4" stroke-width="3" class="signal-wave"/>
+                    <path d="M 40 85 Q 50 100 60 85" fill="none" stroke="#06b6d4" stroke-width="3" class="signal-wave"/>
+                </g>
+
+                <!-- Client Roaming Path -->
+                <path d="M 200 250 C 300 280, 500 280, 600 250" fill="none" stroke="#3b82f6" stroke-width="4" stroke-dasharray="8,8" opacity="0.6"/>
+                <polygon points="600,250 585,243 590,250 585,257" fill="#3b82f6" opacity="0.6"/>
+                
+                <!-- Client Device -->
+                <g transform="translate(380, 235)">
+                    <rect x="0" y="0" width="40" height="60" rx="6" fill="#0f172a" stroke="#fff" stroke-width="2"/>
+                    <rect x="5" y="5" width="30" height="45" rx="2" fill="#1e293b"/>
+                    <circle cx="20" cy="55" r="2" fill="#64748b"/>
+                    <text x="20" y="30" fill="#fff" font-size="12" font-family="Inter" text-anchor="middle">📱</text>
+                </g>
+                <text x="400" y="220" fill="#3b82f6" font-size="14" font-family="Inter" font-weight="bold" text-anchor="middle">漫游轨迹</text>
+            </svg>
+        </div>
+    </header>
+
+    <!-- Main Timeline Content -->
+    <main class="relative z-10 max-w-5xl mx-auto px-6 pb-24">
+        <div class="relative">
+            <!-- Center Line -->
+            <div class="absolute left-6 md:left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cisco-cyan via-cisco-blue to-cisco-dark -ml-0.5 rounded-full opacity-30"></div>
+
+            <!-- Step 1 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row">
+                <div class="hidden md:block md:w-5/12"></div>
+                <!-- Icon -->
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-cisco-cyan rounded-full flex items-center justify-center z-10 shadow-neon">
+                    <span class="text-cisco-cyan font-bold">01</span>
+                </div>
+                <!-- Content -->
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-cisco-cyan/50 transition-colors shadow-lg group">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cisco-cyan transition-colors">终端离开 AP-A 覆盖（漫游决策期）</h3>
+                        <p class="text-sm text-cisco-muted mb-3">漫游的本质是一个<strong class="text-white">“Break-before-Make（先断后连）”</strong>的过程。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-cisco-cyan">◆</span> <strong>谁来触发漫游？</strong> 记住铁律：漫游始终是终端（Client）的自主决策。基础设施只能建议。</li>
+                            <li><span class="text-cisco-cyan">◆</span> <strong>决策指标：</strong> 基于 RSSI、SNR、Beacon 丢失或重传率。
+                                <ul class="pl-5 mt-1 text-slate-400 space-y-1">
+                                    <li>- <span class="text-white">Apple:</span> RSSI 低于 -70 dBm 开始扫描，新 AP 需好 8-12 dB。</li>
+                                    <li>- <span class="text-white">Android:</span> 通常低于 -75 dBm 开始扫描，新 AP 需好 10 dB。</li>
+                                </ul>
+                            </li>
+                            <li><span class="text-cisco-cyan">◆</span> <strong>11k/v 的作用：</strong> 11k (邻居列表) 缩小扫描范围；11v (BSS 转换管理) 解决粘性客户端。无它们则面临巨大延迟。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row-reverse">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-cisco-cyan rounded-full flex items-center justify-center z-10">
+                    <span class="text-cisco-cyan font-bold">02</span>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 md:pr-12 pt-2 md:pt-0 text-left md:text-right">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-cisco-cyan/50 transition-colors shadow-lg group text-left">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cisco-cyan transition-colors">扫描信道（寻找 AP-B）</h3>
+                        <p class="text-sm text-cisco-muted mb-3">终端决定漫游后，必须通过空口扫描找到目标 AP-B。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-cisco-cyan">◆</span> <strong>被动 vs 主动扫描：</strong>
+                                <ul class="pl-5 mt-1 text-slate-400 space-y-1">
+                                    <li>- <strong>被动：</strong> 只听不说，等 Beacon (102ms)。省电但极慢。</li>
+                                    <li>- <strong>主动：</strong> 发送 Probe Request，等 Response。极快，漫游最常用。</li>
+                                </ul>
+                            </li>
+                            <li><span class="text-cisco-cyan">◆</span> <strong>DFS 信道雷区：</strong> 法规严禁在 DFS 信道主动发包。终端必须先“被动”听到 Beacon，这导致包含 DFS 环境的扫描延迟剧增。</li>
+                            <li><span class="text-cisco-cyan">◆</span> <strong>延迟代价：</strong> 全信道扫描可能耗时数百毫秒至几秒，对语音应用是致命打击。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-cisco-cyan rounded-full flex items-center justify-center z-10">
+                    <span class="text-cisco-cyan font-bold">03</span>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-cisco-cyan/50 transition-colors shadow-lg group">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cisco-cyan transition-colors">底层 802.11 关联 (Auth & Assoc)</h3>
+                        <p class="text-sm text-cisco-muted mb-3">找到 AP-B 后，进行底层的 MAC 层握手，此时尚无数据转发能力。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-cisco-cyan">◆</span> <strong>Open System Auth：</strong> 历史遗留的“空密码”认证过程 (Auth Req/Res)。</li>
+                            <li><span class="text-cisco-cyan">◆</span> <strong>Reassociation Request：</strong> 注意是“重关联”。关键在于包含 <strong>RSN IE</strong>，声明期望的安全策略（如 CCMP/AES 和 802.1X AKM）。</li>
+                            <li><span class="text-cisco-cyan">◆</span> <strong>WLC 的介入：</strong> AP 将这些帧通过 CAPWAP 发给 WLC（如 C9800 WNCd 进程），由 WLC 决定并回复 Reassociation Response。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row-reverse">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-cisco-blue rounded-full flex items-center justify-center z-10 pulse-ring">
+                    <span class="text-cisco-blue font-bold">04</span>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 md:pr-12 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-cisco-blue/50 transition-colors shadow-lg group text-left">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cisco-blue transition-colors">触发 802.1X / EAP</h3>
+                        <p class="text-sm text-cisco-muted mb-3">关联成功，终端进入 <strong class="text-red-400">Port-Unauthorized（端口受控）</strong> 状态，阻断 DHCP/IP，仅放行 EAPOL。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-cisco-blue">◆</span> <strong>EAPOL-Start：</strong> 终端主动发起，请求认证。</li>
+                            <li><span class="text-cisco-blue">◆</span> <strong>EAP-Request / Identity：</strong> WLC 询问终端身份。</li>
+                            <li><span class="text-cisco-blue">◆</span> <strong>EAP-Response / Identity：</strong> 终端回复明文身份（如 `DOMAIN\bob` 或 `anonymous`）。WLC 将其装入 RADIUS 发给 ISE。</li>
+                            <li><span class="text-cisco-blue">◆</span> <strong>方法协商：</strong> ISE 提议 EAP 方法（如 TLS），双方协商达成一致。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-cisco-blue rounded-full flex items-center justify-center z-10">
+                    <span class="text-cisco-blue font-bold">05</span>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-cisco-blue/50 transition-colors shadow-lg group">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cisco-blue transition-colors">完整 EAP 认证交锋 (耗时大户)</h3>
+                        <p class="text-sm text-cisco-muted mb-3">无快速漫游，必须重新执行冗长的认证。</p>
+                        <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700 mb-3">
+                            <h4 class="text-cisco-cyan font-bold text-sm mb-1">场景 A: EAP-TLS (极度安全，但报文碎片多)</h4>
+                            <p class="text-xs text-slate-400">建立双向 TLS。由于证书达数 KB，空口需进行 Fragmentation，产生多次往返：Client Hello -> Server Hello/Cert -> Client Cert/Finished -> Server Finished -> Success。</p>
+                        </div>
+                        <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                            <h4 class="text-cisco-cyan font-bold text-sm mb-1">场景 B: PEAP-MSCHAPv2</h4>
+                            <p class="text-xs text-slate-400">Phase 1 建立外层单向 TLS 隧道；Phase 2 在加密隧道内执行 MSCHAPv2 质询响应。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 & 7 (Combined for layout elegance) -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row-reverse">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-purple-500 rounded-full flex items-center justify-center z-10">
+                    <span class="text-purple-500 font-bold">06</span>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 md:pr-12 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-purple-500/50 transition-colors shadow-lg group text-left">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-purple-500 transition-colors">后端策略与身份校验 (WLC ↔ ISE ↔ AD)</h3>
+                        <p class="text-sm text-cisco-muted mb-3">底层管道数据的流转艺术。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-purple-500">◆</span> <strong>WLC 的翻译官角色：</strong> 抽取空口 EAP，塞入 UDP 1812 的 RADIUS 报文。关键属性：<code class="text-xs bg-slate-800 px-1 rounded text-purple-300">Calling-Station-Id (MAC)</code>。</li>
+                            <li><span class="text-purple-500">◆</span> <strong>ISE 策略引擎：</strong> 匹配 AuthC 策略决定查哪个库，匹配 AuthZ 策略准备下发授权（如 SGT/VLAN）。</li>
+                            <li><span class="text-purple-500">◆</span> <strong>后端裁决：</strong> 
+                                <br/>- PEAP：交由后端 AD 校验哈希并获取组信息。
+                                <br/>- TLS：ISE 本地校验链、有效期及 CRL/OCSP。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-yellow-500 rounded-full flex items-center justify-center z-10 shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+                    <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-yellow-500/50 transition-colors shadow-lg group">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-yellow-500 transition-colors">生成核心密钥 PMK</h3>
+                        <p class="text-sm text-cisco-muted mb-3">安全架构的枢纽环节，加密的“种子”诞生。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-yellow-500">◆</span> <strong>独立计算 MSK：</strong> 终端和 ISE 各自根据 TLS 材料算出一个 64 字节的 MSK。</li>
+                            <li><span class="text-yellow-500">◆</span> <strong>安全分发：</strong> ISE 将 MSK 打包在最后一个 `RADIUS Access-Accept` 中发给 WLC。</li>
+                            <li><span class="text-yellow-500">◆</span> <strong>截取 PMK：</strong> 终端和 WLC 各自截取 MSK 的前 32 字节，这便是大名鼎鼎的 <strong class="text-yellow-400">Pairwise Master Key (PMK)</strong>，与 MAC 绑定存入内存。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="relative flex items-start justify-between mb-16 md:mb-24 reveal w-full flex-col md:flex-row-reverse">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-green-400 rounded-full flex items-center justify-center z-10">
+                    <span class="text-green-400 font-bold">09</span>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 md:pr-12 pt-2 md:pt-0">
+                    <div class="bg-cisco-panel rounded-2xl p-6 border border-slate-700 hover:border-green-400/50 transition-colors shadow-lg group text-left">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors">四次握手 (4-Way Handshake)</h3>
+                        <p class="text-sm text-cisco-muted mb-3">拥有 PMK 主钥匙后，协商用于实际数据加密的临时钥匙。</p>
+                        <div class="font-mono text-xs text-slate-400 space-y-1 bg-slate-900 p-3 rounded border border-slate-700">
+                            <p><span class="text-cisco-cyan">M1 (WLC→终端):</span> 发送 ANonce</p>
+                            <p><span class="text-purple-400">内部计算:</span> PRF(PMK, ANonce, SNonce, MACs) = <strong class="text-white">PTK</strong></p>
+                            <p><span class="text-cisco-cyan">M2 (终端→WLC):</span> 发送 SNonce + MIC</p>
+                            <p><span class="text-cisco-cyan">M3 (WLC→终端):</span> 校验 MIC, 发送加密的 GTK(组播密钥)</p>
+                            <p><span class="text-cisco-cyan">M4 (终端→WLC):</span> ACK 确认安装</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10 -->
+            <div class="relative flex items-start justify-between reveal w-full flex-col md:flex-row">
+                <div class="hidden md:block md:w-5/12"></div>
+                <div class="absolute left-6 md:left-1/2 -ml-6 md:-ml-6 mt-1 w-12 h-12 bg-cisco-dark border-2 border-green-500 rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(16,185,129,0.5)]">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="w-full md:w-5/12 pl-16 md:pl-0 pt-2 md:pt-0">
+                    <div class="bg-gradient-to-br from-cisco-panel to-slate-800 rounded-2xl p-6 border border-green-500/50 hover:border-green-400 transition-colors shadow-lg group">
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors">数据转发恢复 (S_CO_RUN)</h3>
+                        <p class="text-sm text-cisco-muted mb-3">漫游的漫长黑夜终于结束。</p>
+                        <ul class="text-sm space-y-2 text-slate-300">
+                            <li><span class="text-green-500">◆</span> <strong>状态翻转：</strong> WLC 推进终端至 RUN 状态。</li>
+                            <li><span class="text-green-500">◆</span> <strong>策略落地：</strong> 绑定下发的 VLAN ID、ACL 或 SGT 标签。</li>
+                            <li><span class="text-green-500">◆</span> <strong>闸门大开：</strong> 解除阻断，终端随后的 DHCP/ARP/IP 流量由底层的 AES-CCMP 芯片级全速硬件加密。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sequence Diagram Section -->
+    <section class="max-w-5xl mx-auto px-6 pb-20 reveal">
+        <h2 class="text-2xl font-bold text-white border-l-4 border-cisco-cyan pl-4 mb-8">漫游耗时剖析 (MSC 序列图)</h2>
+        <div class="bg-cisco-panel border border-slate-700 rounded-xl p-4 overflow-x-auto">
+            <div class="min-w-[800px] font-mono text-sm">
+                <!-- Headers -->
+                <div class="flex justify-between text-cisco-cyan font-bold border-b border-slate-700 pb-2 mb-4">
+                    <div class="w-1/4 text-center">📱 Client</div>
+                    <div class="w-1/4 text-center">📡 AP / 🎛️ WLC</div>
+                    <div class="w-1/4 text-center">🛡️ ISE</div>
+                    <div class="w-1/4 text-center">🗄️ AD / CA</div>
+                </div>
+                
+                <!-- Lines & Arrows -->
+                <div class="relative w-full text-slate-300">
+                    <!-- Vertical Lifelines -->
+                    <div class="absolute top-0 bottom-0 left-[12.5%] w-px bg-slate-700"></div>
+                    <div class="absolute top-0 bottom-0 left-[37.5%] w-px bg-slate-700"></div>
+                    <div class="absolute top-0 bottom-0 left-[62.5%] w-px bg-slate-700"></div>
+                    <div class="absolute top-0 bottom-0 left-[87.5%] w-px bg-slate-700"></div>
+
+                    <!-- Steps -->
+                    <div class="relative py-2 flex items-center">
+                        <div class="w-full flex justify-between absolute px-[12.5%]">
+                            <div class="h-px bg-slate-500 w-[33%] mt-2 relative">
+                                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-slate-400 whitespace-nowrap">(1) Probe Req/Res (10-100+ ms)</span>
+                                <div class="absolute right-0 top-[-4px] w-2 h-2 border-t-2 border-r-2 border-slate-500 transform rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative py-3 mt-4 flex items-center">
+                        <div class="w-full flex justify-between absolute px-[12.5%]">
+                            <div class="h-px bg-slate-500 w-[33%] mt-2 relative">
+                                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-slate-400">(2) 802.11 Open Auth (~5ms)</span>
+                                <div class="absolute right-0 top-[-4px] w-2 h-2 border-t-2 border-r-2 border-slate-500 transform rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative py-3 mt-4 flex items-center">
+                        <div class="w-full flex justify-between absolute px-[12.5%]">
+                            <div class="h-px bg-slate-500 w-[33%] mt-2 relative">
+                                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-slate-400">(3) Re-Association (~5ms)</span>
+                                <div class="absolute right-0 top-[-4px] w-2 h-2 border-t-2 border-r-2 border-slate-500 transform rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Blockage block -->
+                    <div class="relative py-4 mt-2">
+                        <div class="ml-[12.5%] w-[25%] bg-red-900/30 border border-red-700/50 rounded py-1 text-center text-xs text-red-400 relative z-10">
+                            🔒 端口阻塞 (仅 EAP)
+                        </div>
+                    </div>
+
+                    <div class="relative py-4 flex items-center">
+                        <div class="w-full flex justify-between absolute px-[12.5%]">
+                            <div class="h-px bg-cisco-blue w-[33%] mt-2 relative">
+                                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-cisco-blue">(4-5) EAP Identity Req/Res</span>
+                                <div class="absolute right-0 top-[-4px] w-2 h-2 border-t-2 border-r-2 border-cisco-blue transform rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative py-4 flex items-center">
+                        <div class="w-full absolute pl-[37.5%] pr-[12.5%]">
+                            <div class="h-px bg-purple-500 w-[100%] mt-2 relative">
+                                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-400">RADIUS Access-Request</span>
+                                <div class="absolute right-0 top-[-4px] w-2 h-2 border-t-2 border-r-2 border-purple-500 transform rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Heavy Process Block -->
+                    <div class="relative py-12 mt-4">
+                        <div class="ml-[12.5%] w-[75%] bg-slate-800/80 border border-cisco-cyan/30 rounded py-4 text-center text-sm relative z-10 shadow-lg">
+                            <span class="text-cisco-cyan font-bold">(6) 完整的 EAP-TLS / PEAP 认证循环 (5~20 个报文交互)</span>
+                            <br/>
+                            <span class="text-xs text-slate-400">含证书分片、RADIUS 传输、后台 AD 查询。耗时巨大：<strong class="text-red-400">200ms - 1000+ ms</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="relative py-4 flex items-center">
+                        <div class="w-full absolute pl-[37.5%] pr-[37.5%]">
+                            <div class="h-px bg-yellow-500 w-[100%] mt-2 relative">
+                                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-yellow-400">RADIUS Accept + MSK</span>
+                                <div class="absolute left-0 top-[-4px] w-2 h-2 border-b-2 border-l-2 border-yellow-500 transform rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative py-4 mt-2 flex items-center">
+                        <div class="w-full flex justify-between absolute px-[12.5%]">
+                            <div class="h-px bg-green-500 w-[33%] mt-2 relative flex items-center justify-center">
+                                <span class="absolute -top-4 text-xs text-green-400 whitespace-nowrap">(7-10) 4-Way Handshake (20-50ms)</span>
+                                <div class="absolute right-0 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-[6px] border-l-green-500"></div>
+                                <div class="absolute left-0 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-green-500"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unblock block -->
+                    <div class="relative py-4 mt-6">
+                        <div class="ml-[12.5%] w-[25%] bg-green-900/30 border border-green-500/50 rounded py-1 text-center text-xs text-green-400 relative z-10">
+                            🔓 端口放行 (AES-CCMP)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-slate-800/50 border-l-4 border-red-500 p-6 rounded-r-lg">
+            <h3 class="text-lg font-bold text-white mb-2">架构师总结：为什么需要 802.11r / FT？</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                如时序图所示，一次无优化的基线漫游耗时通常在 <strong class="text-red-400">300ms 到数秒</strong> 不等。这远远打破了实时语音（如 Teams/Webex）容忍的 150ms 延迟红线。
+                <br/><br/>
+                引入 <strong class="text-cisco-cyan">802.11r (Fast Transition)</strong> 的本质，就是通过在 AP/WLC 之间提前派生和缓存密钥（PMK-R0/R1），一刀切掉了序列中 <strong class="text-white">耗时最恐怖的 Step 4 ~ Step 7 (数百毫秒的 EAP 与 RADIUS 交互)</strong>，并将四次握手塞进 802.11 Re-Association 帧中。这才是企业网能提供“无感漫游”的底层真理。
+            </p>
+        </div>
+    </section>
+
+    <footer class="text-center py-8 text-slate-500 text-sm border-t border-slate-800">
+        Designed by Your Network & Security Architect
+    </footer>
+
+    <!-- Simple Scroll Reveal Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            const revealOnScroll = () => {
+                const windowHeight = window.innerHeight;
+                const elementVisible = 100;
+                
+                reveals.forEach((reveal) => {
+                    const elementTop = reveal.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - elementVisible) {
+                        reveal.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', revealOnScroll);
+            revealOnScroll(); // Trigger once on load
+        });
+    </script>
+</body>
+</html>
