@@ -8,25 +8,19 @@ layout: false
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>802.1X EAP-TLS Authentication Sequence — Cisco ISE</title>
     <style>
-        /* ========================================
-           CSS Custom Properties — Dual Theme
-           ======================================== */
         :root {
-            /* Shared brand colors */
             --cisco-blue: #049fd9;
             --cisco-teal: #00bceb;
             --cisco-green: #6cc04a;
             --cisco-orange: #ff7300;
             --cisco-purple: #7b61ff;
             --cisco-red: #cf2030;
-
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             --transition-theme: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
         }
 
-        /* ---------- DARK ---------- */
         [data-theme="dark"] {
             --bg-body: #0a0f1a;
             --bg-header: linear-gradient(135deg, #1a2332 0%, #0d1b2a 100%);
@@ -49,17 +43,22 @@ layout: false
             --phase3-border: rgba(123,97,255,0.12);
             --phase4-bg: rgba(108,192,74,0.03);
             --phase4-border: rgba(108,192,74,0.12);
-            --note-bg: rgba(255, 115, 0, 0.04);
-            --note-border: rgba(255, 115, 0, 0.1);
-            --note-icon-bg: rgba(255, 115, 0, 0.1);
-            --code-bg: rgba(4, 159, 217, 0.1);
-            --code-color: var(--cisco-teal);
+            --note-bg: rgba(255,115,0,0.04);
+            --note-border: rgba(255,115,0,0.1);
+            --note-icon-bg: rgba(255,115,0,0.1);
+            --code-bg: rgba(4,159,217,0.1);
+            --code-color: #00bceb;
             --svg-lifeline: #2a3650;
             --toggle-bg: #2a3650;
             --toggle-knob: #f0f4f8;
+            --svg-blue: #049fd9;
+            --svg-green: #6cc04a;
+            --svg-orange: #ff7300;
+            --svg-purple: #7b61ff;
+            --svg-text-sec: #94a3b8;
+            --svg-text-mut: #64748b;
         }
 
-        /* ---------- LIGHT ---------- */
         [data-theme="light"] {
             --bg-body: #f4f6fa;
             --bg-header: linear-gradient(135deg, #ffffff 0%, #eef2f7 100%);
@@ -71,9 +70,9 @@ layout: false
             --text-secondary: #4b5c73;
             --text-muted: #8896a8;
             --border: #d8dee8;
-            --border-glow: rgba(4, 159, 217, 0.25);
+            --border-glow: rgba(4,159,217,0.25);
             --shadow-card: 0 2px 12px rgba(0,0,0,0.07);
-            --shadow-glow: 0 0 16px rgba(4, 159, 217, 0.1);
+            --shadow-glow: 0 0 16px rgba(4,159,217,0.1);
             --phase1-bg: rgba(4,159,217,0.05);
             --phase1-border: rgba(4,159,217,0.2);
             --phase2-bg: rgba(255,115,0,0.04);
@@ -82,25 +81,22 @@ layout: false
             --phase3-border: rgba(123,97,255,0.18);
             --phase4-bg: rgba(108,192,74,0.04);
             --phase4-border: rgba(108,192,74,0.18);
-            --note-bg: rgba(255, 115, 0, 0.05);
-            --note-border: rgba(255, 115, 0, 0.18);
-            --note-icon-bg: rgba(255, 115, 0, 0.12);
-            --code-bg: rgba(4, 159, 217, 0.08);
+            --note-bg: rgba(255,115,0,0.05);
+            --note-border: rgba(255,115,0,0.18);
+            --note-icon-bg: rgba(255,115,0,0.12);
+            --code-bg: rgba(4,159,217,0.08);
             --code-color: #0380ad;
             --svg-lifeline: #c8d0dc;
             --toggle-bg: #d8dee8;
             --toggle-knob: #ffffff;
-
-            --cisco-blue: #0378a6;
-            --cisco-teal: #0098c0;
-            --cisco-green: #4a8c34;
-            --cisco-orange: #d46200;
-            --cisco-purple: #5c45cc;
+            --svg-blue: #0378a6;
+            --svg-green: #3d8a28;
+            --svg-orange: #d46200;
+            --svg-purple: #5c45cc;
+            --svg-text-sec: #4b5c73;
+            --svg-text-mut: #7a8898;
         }
 
-        /* ========================================
-           Reset & Base
-           ======================================== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -114,502 +110,237 @@ layout: false
             overflow-x: hidden;
         }
 
-        /* ========================================
-           Header
-           ======================================== */
         .page-header {
-            position: relative;
-            z-index: 10;
+            position: relative; z-index: 10;
             background: var(--bg-header);
             border-bottom: 1px solid var(--border);
             padding: 32px 0 28px;
             margin-bottom: 40px;
             transition: var(--transition-theme);
         }
-
         .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--cisco-blue), var(--cisco-teal), var(--cisco-purple));
+            content: ''; position: absolute;
+            bottom: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, #049fd9, #00bceb, #7b61ff);
         }
-
         .header-inner {
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 0 clamp(20px, 4vw, 44px);
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 20px;
-            flex-wrap: wrap;
+            max-width: 1440px; margin: 0 auto;
+            padding: 0 clamp(20px,4vw,44px);
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 20px; flex-wrap: wrap;
         }
-
         .header-left { flex: 1; min-width: 0; }
-
-        .header-top {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
+        .header-top { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
         .cisco-logo {
-            font-size: clamp(24px, 3vw, 32px);
-            font-weight: 800;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, var(--cisco-blue), var(--cisco-teal));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: clamp(24px,3vw,32px); font-weight: 800; letter-spacing: 2px;
+            background: linear-gradient(135deg, #049fd9, #00bceb);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-
         .header-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(4, 159, 217, 0.12);
-            border: 1px solid rgba(4, 159, 217, 0.25);
-            color: var(--cisco-teal);
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 14px;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            white-space: nowrap;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(4,159,217,0.12); border: 1px solid rgba(4,159,217,0.25);
+            color: #00bceb; font-size: 12px; font-weight: 600;
+            padding: 4px 14px; border-radius: 20px;
+            letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
         }
-
         .header-badge::before {
-            content: '';
-            width: 6px; height: 6px;
-            background: var(--cisco-green);
-            border-radius: 50%;
-            animation: pulse-dot 2s infinite;
+            content: ''; width: 6px; height: 6px;
+            background: #6cc04a; border-radius: 50%; animation: pulse-dot 2s infinite;
         }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .page-title {
-            font-size: clamp(20px, 3vw, 30px);
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.3px;
-            transition: var(--transition-theme);
+            font-size: clamp(20px,3vw,30px); font-weight: 700;
+            color: var(--text-primary); letter-spacing: -0.3px; transition: var(--transition-theme);
         }
-
         .page-subtitle {
-            font-size: clamp(13px, 1.6vw, 16px);
-            color: var(--text-secondary);
-            margin-top: 6px;
-            transition: var(--transition-theme);
+            font-size: clamp(13px,1.6vw,16px); color: var(--text-secondary);
+            margin-top: 6px; transition: var(--transition-theme);
         }
 
-        /* ---------- Theme Toggle ---------- */
         .theme-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-            padding-top: 6px;
+            display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-top: 6px; cursor: pointer;
         }
-
         .theme-toggle-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            user-select: none;
-            transition: var(--transition-theme);
+            font-size: 13px; color: var(--text-secondary); user-select: none; transition: var(--transition-theme);
         }
-
         .toggle-track {
-            position: relative;
-            width: 52px;
-            height: 28px;
-            background: var(--toggle-bg);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: var(--transition-theme);
-            border: 1px solid var(--border);
+            position: relative; width: 52px; height: 28px;
+            background: var(--toggle-bg); border-radius: 14px;
+            transition: var(--transition-theme); border: 1px solid var(--border);
         }
-
         .toggle-track::after {
-            content: '';
-            position: absolute;
-            top: 3px; left: 3px;
-            width: 20px; height: 20px;
-            background: var(--toggle-knob);
-            border-radius: 50%;
-            transition: transform 0.3s ease, background 0.3s ease;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 20px; height: 20px; background: var(--toggle-knob);
+            border-radius: 50%; transition: transform 0.3s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
         }
+        [data-theme="light"] .toggle-track::after { transform: translateX(24px); }
+        .toggle-icon { font-size: 16px; line-height: 1; }
 
-        [data-theme="light"] .toggle-track::after {
-            transform: translateX(24px);
-        }
-
-        .toggle-icon {
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        /* ========================================
-           Container
-           ======================================== */
         .container {
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 0 clamp(16px, 4vw, 44px) 60px;
+            max-width: 1440px; margin: 0 auto;
+            padding: 0 clamp(16px,4vw,44px) 60px;
         }
 
-        /* ========================================
-           Intro Cards
-           ======================================== */
         .intro-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px; margin-bottom: 40px;
         }
-
         .intro-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 26px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 26px;
             transition: var(--transition-theme), transform 0.25s ease, box-shadow 0.25s ease;
         }
-
-        .intro-card:hover {
-            border-color: var(--border-glow);
-            box-shadow: var(--shadow-glow);
-            transform: translateY(-2px);
-        }
-
+        .intro-card:hover { border-color: var(--border-glow); box-shadow: var(--shadow-glow); transform: translateY(-2px); }
         .intro-card-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            margin-bottom: 14px;
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 14px;
         }
-
         .intro-card:nth-child(1) .intro-card-icon { background: rgba(4,159,217,0.12); }
         .intro-card:nth-child(2) .intro-card-icon { background: rgba(108,192,74,0.12); }
         .intro-card:nth-child(3) .intro-card-icon { background: rgba(123,97,255,0.12); }
-
         .intro-card h3 {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            transition: var(--transition-theme);
+            font-size: 17px; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 8px; transition: var(--transition-theme);
         }
-
         .intro-card p {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            transition: var(--transition-theme);
+            font-size: 15px; color: var(--text-secondary);
+            line-height: 1.7; transition: var(--transition-theme);
         }
 
-        /* ========================================
-           Diagram
-           ======================================== */
         .diagram-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: clamp(20px, 4vw, 44px);
-            margin-bottom: 40px;
-            overflow-x: auto;
-            box-shadow: var(--shadow-card);
-            transition: var(--transition-theme);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: clamp(20px,4vw,44px);
+            margin-bottom: 40px; overflow-x: auto;
+            box-shadow: var(--shadow-card); transition: var(--transition-theme);
         }
-
         .diagram-title {
-            font-size: clamp(18px, 2.2vw, 22px);
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-            transition: var(--transition-theme);
+            font-size: clamp(18px,2.2vw,22px); font-weight: 700;
+            color: var(--text-primary); margin-bottom: 6px; transition: var(--transition-theme);
         }
-
         .diagram-desc {
-            font-size: 15px;
-            color: var(--text-secondary);
-            margin-bottom: 28px;
-            transition: var(--transition-theme);
+            font-size: 15px; color: var(--text-secondary);
+            margin-bottom: 28px; transition: var(--transition-theme);
         }
-
         .legend-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 24px;
-            padding: 14px 20px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            transition: var(--transition-theme);
+            display: flex; flex-wrap: wrap; gap: 20px;
+            margin-bottom: 24px; padding: 14px 20px;
+            background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); transition: var(--transition-theme);
         }
-
         .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            transition: var(--transition-theme);
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; color: var(--text-secondary); transition: var(--transition-theme);
         }
+        .legend-line { width: 30px; height: 3px; border-radius: 2px; }
 
-        .legend-line {
-            width: 30px; height: 3px;
-            border-radius: 2px;
-        }
+        .svg-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .seq-diagram { width: 100%; min-width: 920px; height: auto; display: block; }
 
-        .svg-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .seq-diagram {
-            width: 100%;
-            min-width: 920px;
-            height: auto;
-        }
-
-        /* ========================================
-           Phase Cards
-           ======================================== */
         .phases-section { margin-bottom: 40px; }
-
         .phases-title {
-            font-size: clamp(18px, 2.5vw, 24px);
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: var(--transition-theme);
+            font-size: clamp(18px,2.5vw,24px); font-weight: 700;
+            color: var(--text-primary); margin-bottom: 24px;
+            display: flex; align-items: center; gap: 12px; transition: var(--transition-theme);
         }
-
         .phases-title::before {
-            content: '';
-            width: 5px; height: 28px;
-            background: linear-gradient(180deg, var(--cisco-blue), var(--cisco-teal));
-            border-radius: 4px;
-            flex-shrink: 0;
+            content: ''; width: 5px; height: 28px;
+            background: linear-gradient(180deg, #049fd9, #00bceb);
+            border-radius: 4px; flex-shrink: 0;
         }
-
         .phase-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 22px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 22px;
         }
-
         .phase-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 28px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 28px;
             transition: var(--transition-theme), transform 0.25s ease, box-shadow 0.25s ease;
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
         }
-
         .phase-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 4px; height: 100%;
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
         }
-
-        .phase-card:hover {
-            border-color: var(--border-glow);
-            box-shadow: var(--shadow-glow);
-            transform: translateY(-2px);
-        }
-
-        .phase-card.phase-1::before { background: linear-gradient(180deg, var(--cisco-blue), var(--cisco-teal)); }
-        .phase-card.phase-2::before { background: linear-gradient(180deg, var(--cisco-orange), #ff9a44); }
-        .phase-card.phase-3::before { background: linear-gradient(180deg, var(--cisco-purple), #a78bfa); }
-        .phase-card.phase-4::before { background: linear-gradient(180deg, var(--cisco-green), #86efac); }
-
+        .phase-card:hover { border-color: var(--border-glow); box-shadow: var(--shadow-glow); transform: translateY(-2px); }
+        .phase-card.phase-1::before { background: linear-gradient(180deg, #049fd9, #00bceb); }
+        .phase-card.phase-2::before { background: linear-gradient(180deg, #ff7300, #ff9a44); }
+        .phase-card.phase-3::before { background: linear-gradient(180deg, #7b61ff, #a78bfa); }
+        .phase-card.phase-4::before { background: linear-gradient(180deg, #6cc04a, #86efac); }
         .phase-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 50%; font-size: 15px; font-weight: 700; margin-bottom: 12px;
         }
-
-        .phase-1 .phase-number { background: rgba(4,159,217,0.15); color: var(--cisco-teal); }
-        .phase-2 .phase-number { background: rgba(255,115,0,0.15); color: var(--cisco-orange); }
-        .phase-3 .phase-number { background: rgba(123,97,255,0.15); color: var(--cisco-purple); }
-        .phase-4 .phase-number { background: rgba(108,192,74,0.15); color: var(--cisco-green); }
-
+        .phase-1 .phase-number { background: rgba(4,159,217,0.15); color: #00bceb; }
+        .phase-2 .phase-number { background: rgba(255,115,0,0.15); color: #ff7300; }
+        .phase-3 .phase-number { background: rgba(123,97,255,0.15); color: #7b61ff; }
+        .phase-4 .phase-number { background: rgba(108,192,74,0.15); color: #6cc04a; }
         .phase-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 10px;
-            transition: var(--transition-theme);
+            font-size: 18px; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 10px; transition: var(--transition-theme);
         }
-
         .phase-card > p {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.75;
-            margin-bottom: 16px;
-            transition: var(--transition-theme);
+            font-size: 15px; color: var(--text-secondary);
+            line-height: 1.75; margin-bottom: 16px; transition: var(--transition-theme);
         }
-
         .phase-detail-list { list-style: none; }
-
         .phase-detail-list li {
-            font-size: 14px;
-            color: var(--text-secondary);
-            padding: 5px 0 5px 22px;
-            position: relative;
-            line-height: 1.7;
-            transition: var(--transition-theme);
+            font-size: 14px; color: var(--text-secondary); padding: 5px 0 5px 22px;
+            position: relative; line-height: 1.7; transition: var(--transition-theme);
         }
-
         .phase-detail-list li::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
-            color: var(--cisco-teal);
-            font-size: 13px;
+            content: '▸'; position: absolute; left: 0; color: #00bceb; font-size: 13px;
         }
-
         .phase-detail-list code {
-            background: var(--code-bg);
-            color: var(--code-color);
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: 'Fira Code', 'SF Mono', 'Consolas', monospace;
-            transition: var(--transition-theme);
+            background: var(--code-bg); color: var(--code-color);
+            padding: 2px 7px; border-radius: 4px; font-size: 13px;
+            font-family: 'Fira Code','SF Mono','Consolas',monospace; transition: var(--transition-theme);
         }
 
-        /* ========================================
-           Notes
-           ======================================== */
         .notes-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 30px;
-            margin-bottom: 40px;
-            transition: var(--transition-theme);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 30px;
+            margin-bottom: 40px; transition: var(--transition-theme);
         }
-
         .notes-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--cisco-orange);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 20px; font-weight: 700; color: var(--cisco-orange);
+            margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
         }
-
         .notes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 16px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;
         }
-
         .note-item {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            padding: 18px;
-            background: var(--note-bg);
-            border: 1px solid var(--note-border);
-            border-radius: var(--radius-sm);
-            transition: var(--transition-theme);
+            display: flex; gap: 14px; align-items: flex-start; padding: 18px;
+            background: var(--note-bg); border: 1px solid var(--note-border);
+            border-radius: var(--radius-sm); transition: var(--transition-theme);
         }
-
         .note-icon {
-            flex-shrink: 0;
-            width: 38px; height: 38px;
-            border-radius: 9px;
-            background: var(--note-icon-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
+            flex-shrink: 0; width: 38px; height: 38px; border-radius: 9px;
+            background: var(--note-icon-bg); display: flex; align-items: center;
+            justify-content: center; font-size: 17px;
         }
-
         .note-item p {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            transition: var(--transition-theme);
+            font-size: 15px; color: var(--text-secondary); line-height: 1.7; transition: var(--transition-theme);
         }
-
-        .note-item strong {
-            color: var(--text-primary);
-            transition: var(--transition-theme);
-        }
-
+        .note-item strong { color: var(--text-primary); transition: var(--transition-theme); }
         .note-item code {
-            background: var(--code-bg);
-            color: var(--code-color);
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: 'Fira Code', 'SF Mono', 'Consolas', monospace;
+            background: var(--code-bg); color: var(--code-color);
+            padding: 1px 6px; border-radius: 4px; font-size: 13px;
+            font-family: 'Fira Code','SF Mono','Consolas',monospace;
         }
 
-        /* ========================================
-           Footer
-           ======================================== */
         .page-footer {
-            text-align: center;
-            padding: 32px 20px;
+            text-align: center; padding: 32px 20px;
             border-top: 1px solid var(--border);
-            color: var(--text-muted);
-            font-size: 14px;
-            transition: var(--transition-theme);
+            color: var(--text-muted); font-size: 14px; transition: var(--transition-theme);
         }
+        .page-footer span { color: #049fd9; }
 
-        .page-footer span { color: var(--cisco-blue); }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .animate-in { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+        .animate-in:nth-child(1){animation-delay:.05s}
+        .animate-in:nth-child(2){animation-delay:.1s}
+        .animate-in:nth-child(3){animation-delay:.15s}
+        .animate-in:nth-child(4){animation-delay:.2s}
 
-        /* ========================================
-           Animations
-           ======================================== */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-in {
-            animation: fadeInUp 0.5s ease forwards;
-            opacity: 0;
-        }
-        .animate-in:nth-child(1) { animation-delay: 0.05s; }
-        .animate-in:nth-child(2) { animation-delay: 0.1s; }
-        .animate-in:nth-child(3) { animation-delay: 0.15s; }
-        .animate-in:nth-child(4) { animation-delay: 0.2s; }
-
-        /* ========================================
-           Responsive
-           ======================================== */
         @media (max-width: 768px) {
             .header-inner { flex-direction: column; }
             .theme-toggle { align-self: flex-start; }
@@ -627,7 +358,6 @@ layout: false
 </head>
 <body>
 
-<!-- ==================== HEADER ==================== -->
 <header class="page-header">
     <div class="header-inner">
         <div class="header-left">
@@ -636,7 +366,7 @@ layout: false
                 <div class="header-badge">ISE · RADIUS</div>
             </div>
             <h1 class="page-title">802.1X EAP-TLS Authentication Sequence Diagram</h1>
-            <p class="page-subtitle">AGV Supplicant ↔ Catalyst AP / Switch (Authenticator) ↔ Cisco ISE (RADIUS Server) — 完整交互时序</p>
+            <p class="page-subtitle">AGV Supplicant ↔ Catalyst AP / Switch (Authenticator) ↔ Cisco ISE (RADIUS Server)</p>
         </div>
         <div class="theme-toggle" role="switch" aria-label="Toggle theme" tabindex="0">
             <span class="toggle-icon">🌙</span>
@@ -647,10 +377,8 @@ layout: false
     </div>
 </header>
 
-<!-- ==================== MAIN ==================== -->
 <main class="container">
 
-    <!-- Intro Cards -->
     <section class="intro-section">
         <div class="intro-card animate-in">
             <div class="intro-card-icon">🤖</div>
@@ -669,253 +397,279 @@ layout: false
         </div>
     </section>
 
-    <!-- Sequence Diagram -->
     <section class="diagram-container animate-in">
         <h2 class="diagram-title">交互时序图 — 完整 EAP-TLS 流程</h2>
         <p class="diagram-desc">包含 802.11 关联、EAP 身份协商、TLS 双向握手及最终授权四个阶段</p>
 
         <div class="legend-bar">
-            <div class="legend-item"><div class="legend-line" style="background:var(--cisco-blue);"></div>Layer 2 (EAPOL)</div>
-            <div class="legend-item"><div class="legend-line" style="background:var(--cisco-green);"></div>RADIUS (UDP 1812)</div>
-            <div class="legend-item"><div class="legend-line" style="background:var(--cisco-orange);"></div>TLS Handshake</div>
-            <div class="legend-item"><div class="legend-line" style="background:var(--cisco-purple);"></div>Authorization Result</div>
+            <div class="legend-item"><div class="legend-line" style="background:#049fd9"></div>Layer 2 (EAPOL)</div>
+            <div class="legend-item"><div class="legend-line" style="background:#6cc04a"></div>RADIUS (UDP 1812)</div>
+            <div class="legend-item"><div class="legend-line" style="background:#ff7300"></div>TLS Handshake</div>
+            <div class="legend-item"><div class="legend-line" style="background:#7b61ff"></div>Authorization Result</div>
         </div>
 
         <div class="svg-wrapper">
-            <svg id="seqDiagram" class="seq-diagram" viewBox="0 0 1100 1620" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
-                <defs>
-                    <!-- RIGHT-POINTING arrows (→) -->
-                    <marker id="a-r-blue" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8Z" fill="var(--cisco-blue)"/></marker>
-                    <marker id="a-r-green" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8Z" fill="var(--cisco-green)"/></marker>
-                    <marker id="a-r-orange" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8Z" fill="var(--cisco-orange)"/></marker>
-                    <!-- LEFT-POINTING arrows (←) -->
-                    <marker id="a-l-blue" markerWidth="10" markerHeight="8" refX="0" refY="4" orient="auto"><path d="M10,0 L0,4 L10,8Z" fill="var(--cisco-blue)"/></marker>
-                    <marker id="a-l-green" markerWidth="10" markerHeight="8" refX="0" refY="4" orient="auto"><path d="M10,0 L0,4 L10,8Z" fill="var(--cisco-green)"/></marker>
-                    <marker id="a-l-orange" markerWidth="10" markerHeight="8" refX="0" refY="4" orient="auto"><path d="M10,0 L0,4 L10,8Z" fill="var(--cisco-orange)"/></marker>
-                    <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                </defs>
+            <!--
+                KEY FIX: Each marker uses a FIXED hex color (no CSS var).
+                orient="auto" makes the arrowhead follow the line direction automatically.
+                So we only need ONE marker per color. The arrow always points toward x2,y2.
+                → lines: x1 (left entity) < x2 (right entity)
+                ← lines: x1 (right entity) > x2 (left entity)
+            -->
+            <svg id="seqSvg" class="seq-diagram" viewBox="0 0 1100 1640" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <marker id="ab" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0.5 L9,4 L0,7.5" fill="#049fd9" stroke="none"/>
+                </marker>
+                <marker id="ag" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0.5 L9,4 L0,7.5" fill="#6cc04a" stroke="none"/>
+                </marker>
+                <marker id="ao" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0.5 L9,4 L0,7.5" fill="#ff7300" stroke="none"/>
+                </marker>
+                <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
 
-                <!-- ============ Entity Boxes ============ -->
-                <rect x="55" y="14" width="200" height="70" rx="10" fill="var(--bg-card-alt)" stroke="var(--cisco-blue)" stroke-width="1.5"/>
-                <text x="155" y="42" text-anchor="middle" fill="var(--cisco-blue)" font-size="16" font-weight="700">🤖 AGV</text>
-                <text x="155" y="66" text-anchor="middle" fill="var(--text-secondary)" font-size="13">Supplicant</text>
+            <style>
+                #seqSvg text { font-family: Inter, system-ui, sans-serif; }
+                #seqSvg .head-box-d { fill: #132035; }
+                #seqSvg .head-box-l { fill: #f0f3f8; }
+                #seqSvg .lbl-bg-d  { fill: #0d1b2a; }
+                #seqSvg .lbl-bg-l  { fill: #eef1f6; }
+                #seqSvg .ll-d { stroke: #2a3650; }
+                #seqSvg .ll-l { stroke: #c8d0dc; }
+                #seqSvg .tsec-d { fill: #94a3b8; }
+                #seqSvg .tsec-l { fill: #4b5c73; }
+                #seqSvg .tmut-d { fill: #64748b; }
+                #seqSvg .tmut-l { fill: #7a8898; }
+                #seqSvg .note-bg-d { fill: rgba(255,115,0,0.06); }
+                #seqSvg .note-bg-l { fill: rgba(255,115,0,0.08); }
+                #seqSvg .p1bg-d{fill:rgba(4,159,217,0.04)} .p1bg-l{fill:rgba(4,159,217,0.06)}
+                #seqSvg .p2bg-d{fill:rgba(255,115,0,0.03)} .p2bg-l{fill:rgba(255,115,0,0.05)}
+                #seqSvg .p3bg-d{fill:rgba(123,97,255,0.03)} .p3bg-l{fill:rgba(123,97,255,0.05)}
+                #seqSvg .p4bg-d{fill:rgba(108,192,74,0.03)} .p4bg-l{fill:rgba(108,192,74,0.05)}
+                #seqSvg .p1bd-d{stroke:rgba(4,159,217,0.15)} .p1bd-l{stroke:rgba(4,159,217,0.25)}
+                #seqSvg .p2bd-d{stroke:rgba(255,115,0,0.12)} .p2bd-l{stroke:rgba(255,115,0,0.22)}
+                #seqSvg .p3bd-d{stroke:rgba(123,97,255,0.12)} .p3bd-l{stroke:rgba(123,97,255,0.22)}
+                #seqSvg .p4bd-d{stroke:rgba(108,192,74,0.12)} .p4bd-l{stroke:rgba(108,192,74,0.22)}
+                #seqSvg .cblue{fill:#049fd9} .cgreen{fill:#6cc04a} .corange{fill:#ff7300} .cpurple{fill:#7b61ff}
+                #seqSvg .step-circ-d{fill:#0d1b2a} .step-circ-l{fill:#eef1f6}
+                #seqSvg .term-d{fill:#2a3650} .term-l{fill:#c8d0dc}
+            </style>
 
-                <rect x="445" y="14" width="210" height="70" rx="10" fill="var(--bg-card-alt)" stroke="var(--cisco-green)" stroke-width="1.5"/>
-                <text x="550" y="42" text-anchor="middle" fill="var(--cisco-green)" font-size="16" font-weight="700">📡 AP / Switch</text>
-                <text x="550" y="66" text-anchor="middle" fill="var(--text-secondary)" font-size="13">Authenticator</text>
+            <!-- Entities -->
+            <rect class="head-box" x="55" y="14" width="200" height="70" rx="10" stroke="#049fd9" stroke-width="1.5"/>
+            <text x="155" y="43" text-anchor="middle" class="cblue" font-size="16" font-weight="700">🤖 AGV</text>
+            <text x="155" y="66" text-anchor="middle" class="txt-sec" font-size="13">Supplicant</text>
 
-                <rect x="840" y="14" width="210" height="70" rx="10" fill="var(--bg-card-alt)" stroke="var(--cisco-purple)" stroke-width="1.5"/>
-                <text x="945" y="42" text-anchor="middle" fill="var(--cisco-purple)" font-size="16" font-weight="700">🛡️ Cisco ISE</text>
-                <text x="945" y="66" text-anchor="middle" fill="var(--text-secondary)" font-size="13">RADIUS Server</text>
+            <rect class="head-box" x="445" y="14" width="210" height="70" rx="10" stroke="#6cc04a" stroke-width="1.5"/>
+            <text x="550" y="43" text-anchor="middle" class="cgreen" font-size="16" font-weight="700">📡 AP / Switch</text>
+            <text x="550" y="66" text-anchor="middle" class="txt-sec" font-size="13">Authenticator</text>
 
-                <!-- Lifelines -->
-                <line x1="155" y1="84" x2="155" y2="1580" stroke="var(--svg-lifeline)" stroke-width="1.5" stroke-dasharray="6,4"/>
-                <line x1="550" y1="84" x2="550" y2="1580" stroke="var(--svg-lifeline)" stroke-width="1.5" stroke-dasharray="6,4"/>
-                <line x1="945" y1="84" x2="945" y2="1580" stroke="var(--svg-lifeline)" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <rect class="head-box" x="840" y="14" width="210" height="70" rx="10" stroke="#7b61ff" stroke-width="1.5"/>
+            <text x="945" y="43" text-anchor="middle" class="cpurple" font-size="16" font-weight="700">🛡️ Cisco ISE</text>
+            <text x="945" y="66" text-anchor="middle" class="txt-sec" font-size="13">RADIUS Server</text>
 
-                <!-- ====================================================
-                     PHASE 1 — 802.11 Association & EAP Initiation
-                     ==================================================== -->
-                <rect x="18" y="108" width="1065" height="138" rx="8" fill="var(--phase1-bg)" stroke="var(--phase1-border)" stroke-width="1"/>
-                <text x="40" y="132" fill="var(--cisco-blue)" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 1 — 802.11 ASSOCIATION &amp; EAP INITIATION</text>
+            <!-- Lifelines -->
+            <line class="lifeline" x1="155" y1="84" x2="155" y2="1600" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <line class="lifeline" x1="550" y1="84" x2="550" y2="1600" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <line class="lifeline" x1="945" y1="84" x2="945" y2="1600" stroke-width="1.5" stroke-dasharray="6,4"/>
 
-                <!-- 1  AGV → AP : 802.11 Association Request -->
-                <circle cx="155" cy="162" r="12" fill="var(--phase1-bg)" stroke="var(--cisco-blue)" stroke-width="1"/>
-                <text x="155" y="167" text-anchor="middle" fill="var(--cisco-blue)" font-size="11" font-weight="700">1</text>
-                <line x1="172" y1="162" x2="540" y2="162" stroke="var(--cisco-blue)" stroke-width="2" marker-end="url(#a-r-blue)"/>
-                <rect x="235" y="145" width="230" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="350" y="162" text-anchor="middle" fill="var(--cisco-blue)" font-size="13" font-weight="600">802.11 Association Request</text>
+            <!-- ==================== PHASE 1 ==================== -->
+            <rect class="phase-bg p1" x="18" y="108" width="1065" height="138" rx="8" stroke-width="1"/>
+            <text x="40" y="132" class="cblue" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 1 — 802.11 ASSOCIATION &amp; EAP INITIATION</text>
 
-                <!-- 2  AGV → AP : EAPOL-Start -->
-                <circle cx="155" cy="208" r="12" fill="var(--phase1-bg)" stroke="var(--cisco-blue)" stroke-width="1"/>
-                <text x="155" y="213" text-anchor="middle" fill="var(--cisco-blue)" font-size="11" font-weight="700">2</text>
-                <line x1="172" y1="208" x2="540" y2="208" stroke="var(--cisco-blue)" stroke-width="2" marker-end="url(#a-r-blue)"/>
-                <rect x="300" y="191" width="120" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="208" text-anchor="middle" fill="var(--cisco-blue)" font-size="13" font-weight="600">EAPOL-Start</text>
+            <!-- 1 → AGV → AP -->
+            <circle class="step-circ" cx="155" cy="162" r="12" stroke="#049fd9" stroke-width="1"/>
+            <text x="155" y="167" text-anchor="middle" class="cblue" font-size="11" font-weight="700">1</text>
+            <line x1="172" y1="162" x2="540" y2="162" stroke="#049fd9" stroke-width="2" marker-end="url(#ab)"/>
+            <rect class="lbl-bg" x="235" y="145" width="230" height="24" rx="4"/>
+            <text x="350" y="162" text-anchor="middle" class="cblue" font-size="13" font-weight="600">802.11 Association Request</text>
 
-                <!-- ====================================================
-                     PHASE 2 — EAP Identity Exchange
-                     ==================================================== -->
-                <rect x="18" y="264" width="1065" height="310" rx="8" fill="var(--phase2-bg)" stroke="var(--phase2-border)" stroke-width="1"/>
-                <text x="40" y="288" fill="var(--cisco-orange)" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 2 — EAP IDENTITY EXCHANGE</text>
+            <!-- 2 → AGV → AP -->
+            <circle class="step-circ" cx="155" cy="208" r="12" stroke="#049fd9" stroke-width="1"/>
+            <text x="155" y="213" text-anchor="middle" class="cblue" font-size="11" font-weight="700">2</text>
+            <line x1="172" y1="208" x2="540" y2="208" stroke="#049fd9" stroke-width="2" marker-end="url(#ab)"/>
+            <rect class="lbl-bg" x="305" y="191" width="110" height="24" rx="4"/>
+            <text x="360" y="208" text-anchor="middle" class="cblue" font-size="13" font-weight="600">EAPOL-Start</text>
 
-                <!-- 3  AP → ISE : RADIUS Access-Request (EAPOL) -->
-                <circle cx="550" cy="318" r="12" fill="var(--phase2-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="550" y="323" text-anchor="middle" fill="var(--cisco-green)" font-size="11" font-weight="700">3</text>
-                <line x1="567" y1="318" x2="935" y2="318" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-r-green)"/>
-                <rect x="620" y="301" width="280" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="760" y="318" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">RADIUS Access-Request (EAPOL)</text>
+            <!-- ==================== PHASE 2 ==================== -->
+            <rect class="phase-bg p2" x="18" y="264" width="1065" height="310" rx="8" stroke-width="1"/>
+            <text x="40" y="288" class="corange" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 2 — EAP IDENTITY EXCHANGE</text>
 
-                <!-- 4  ISE → AP : Access-Challenge (EAP-Request/Identity) -->
-                <circle cx="945" cy="364" r="12" fill="var(--phase2-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="945" y="369" text-anchor="middle" fill="var(--cisco-green)" font-size="11" font-weight="700">4</text>
-                <line x1="935" y1="364" x2="567" y2="364" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-l-green)"/>
-                <rect x="595" y="347" width="340" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="765" y="364" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Challenge (EAP-Request/Identity)</text>
+            <!-- 3 → AP → ISE -->
+            <circle class="step-circ" cx="550" cy="318" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="550" y="323" text-anchor="middle" class="cgreen" font-size="11" font-weight="700">3</text>
+            <line x1="567" y1="318" x2="935" y2="318" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="620" y="301" width="280" height="24" rx="4"/>
+            <text x="760" y="318" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">RADIUS Access-Request (EAPOL)</text>
 
-                <!-- 5  AP → AGV : EAP-Request/Identity -->
-                <circle cx="550" cy="410" r="12" fill="var(--phase2-bg)" stroke="var(--cisco-blue)" stroke-width="1"/>
-                <text x="550" y="415" text-anchor="middle" fill="var(--cisco-blue)" font-size="11" font-weight="700">5</text>
-                <line x1="540" y1="410" x2="172" y2="410" stroke="var(--cisco-blue)" stroke-width="2" marker-end="url(#a-l-blue)"/>
-                <rect x="260" y="393" width="200" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="410" text-anchor="middle" fill="var(--cisco-blue)" font-size="13" font-weight="600">EAP-Request / Identity</text>
+            <!-- 4 ← ISE → AP -->
+            <circle class="step-circ" cx="945" cy="364" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="945" y="369" text-anchor="middle" class="cgreen" font-size="11" font-weight="700">4</text>
+            <line x1="933" y1="364" x2="560" y2="364" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="595" y="347" width="340" height="24" rx="4"/>
+            <text x="765" y="364" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Challenge (EAP-Request/Identity)</text>
 
-                <!-- 6  AGV → AP : EAP-Response/Identity -->
-                <circle cx="155" cy="460" r="12" fill="var(--phase2-bg)" stroke="var(--cisco-blue)" stroke-width="1"/>
-                <text x="155" y="465" text-anchor="middle" fill="var(--cisco-blue)" font-size="11" font-weight="700">6</text>
-                <line x1="172" y1="460" x2="540" y2="460" stroke="var(--cisco-blue)" stroke-width="2" marker-end="url(#a-r-blue)"/>
-                <rect x="210" y="440" width="300" height="30" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="456" text-anchor="middle" fill="var(--cisco-blue)" font-size="13" font-weight="600">EAP-Response / Identity</text>
-                <text x="360" y="472" text-anchor="middle" fill="var(--text-muted)" font-size="12">Identity = SYLYD03301</text>
+            <!-- 5 ← AP → AGV -->
+            <circle class="step-circ" cx="550" cy="410" r="12" stroke="#049fd9" stroke-width="1"/>
+            <text x="550" y="415" text-anchor="middle" class="cblue" font-size="11" font-weight="700">5</text>
+            <line x1="538" y1="410" x2="168" y2="410" stroke="#049fd9" stroke-width="2" marker-end="url(#ab)"/>
+            <rect class="lbl-bg" x="255" y="393" width="200" height="24" rx="4"/>
+            <text x="355" y="410" text-anchor="middle" class="cblue" font-size="13" font-weight="600">EAP-Request / Identity</text>
 
-                <!-- 7  AP → ISE : Access-Request (EAP Identity) -->
-                <circle cx="550" cy="516" r="12" fill="var(--phase2-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="550" y="521" text-anchor="middle" fill="var(--cisco-green)" font-size="11" font-weight="700">7</text>
-                <line x1="567" y1="516" x2="935" y2="516" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-r-green)"/>
-                <rect x="635" y="499" width="240" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="755" y="516" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Request (EAP Identity)</text>
+            <!-- 6 → AGV → AP -->
+            <circle class="step-circ" cx="155" cy="462" r="12" stroke="#049fd9" stroke-width="1"/>
+            <text x="155" y="467" text-anchor="middle" class="cblue" font-size="11" font-weight="700">6</text>
+            <line x1="172" y1="462" x2="540" y2="462" stroke="#049fd9" stroke-width="2" marker-end="url(#ab)"/>
+            <rect class="lbl-bg" x="210" y="442" width="300" height="30" rx="4"/>
+            <text x="360" y="458" text-anchor="middle" class="cblue" font-size="13" font-weight="600">EAP-Response / Identity</text>
+            <text x="360" y="474" text-anchor="middle" class="txt-mut" font-size="12">Identity = SYLYD03301</text>
 
-                <!-- ====================================================
-                     PHASE 3 — TLS 1.2 Mutual Authentication Handshake
-                     ==================================================== -->
-                <rect x="18" y="592" width="1065" height="660" rx="8" fill="var(--phase3-bg)" stroke="var(--phase3-border)" stroke-width="1"/>
-                <text x="40" y="616" fill="var(--cisco-purple)" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 3 — TLS 1.2 MUTUAL AUTHENTICATION HANDSHAKE</text>
+            <!-- 7 → AP → ISE -->
+            <circle class="step-circ" cx="550" cy="518" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="550" y="523" text-anchor="middle" class="cgreen" font-size="11" font-weight="700">7</text>
+            <line x1="567" y1="518" x2="935" y2="518" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="635" y="501" width="240" height="24" rx="4"/>
+            <text x="755" y="518" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Request (EAP Identity)</text>
 
-                <!-- 8  ISE → AP : Access-Challenge (EAP-Request/EAP-TLS) -->
-                <circle cx="945" cy="646" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="945" y="651" text-anchor="middle" fill="var(--cisco-purple)" font-size="11" font-weight="700">8</text>
-                <line x1="935" y1="646" x2="567" y2="646" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-l-green)"/>
-                <rect x="600" y="629" width="330" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="765" y="646" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Challenge (EAP-Request / EAP-TLS)</text>
+            <!-- ==================== PHASE 3 ==================== -->
+            <rect class="phase-bg p3" x="18" y="592" width="1065" height="660" rx="8" stroke-width="1"/>
+            <text x="40" y="616" class="cpurple" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 3 — TLS 1.2 MUTUAL AUTHENTICATION HANDSHAKE</text>
 
-                <!-- 9  AP → AGV : EAP-Request (TLS Start) -->
-                <circle cx="550" cy="692" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-orange)" stroke-width="1"/>
-                <text x="550" y="697" text-anchor="middle" fill="var(--cisco-orange)" font-size="11" font-weight="700">9</text>
-                <line x1="540" y1="692" x2="172" y2="692" stroke="var(--cisco-orange)" stroke-width="2" marker-end="url(#a-l-orange)"/>
-                <rect x="268" y="675" width="195" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="365" y="692" text-anchor="middle" fill="var(--cisco-orange)" font-size="13" font-weight="600">EAP-Request (TLS Start)</text>
+            <!-- 8 ← ISE → AP -->
+            <circle class="step-circ" cx="945" cy="646" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="945" y="651" text-anchor="middle" class="cpurple" font-size="11" font-weight="700">8</text>
+            <line x1="933" y1="646" x2="560" y2="646" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="600" y="629" width="330" height="24" rx="4"/>
+            <text x="765" y="646" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Challenge (EAP-Request / EAP-TLS)</text>
 
-                <!-- 10  AGV → AP : EAP-Response (TLS ClientHello) -->
-                <circle cx="155" cy="742" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-orange)" stroke-width="1"/>
-                <text x="155" y="747" text-anchor="middle" fill="var(--cisco-orange)" font-size="11" font-weight="700">10</text>
-                <line x1="172" y1="742" x2="540" y2="742" stroke="var(--cisco-orange)" stroke-width="2" marker-end="url(#a-r-orange)"/>
-                <rect x="195" y="722" width="330" height="30" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="738" text-anchor="middle" fill="var(--cisco-orange)" font-size="13" font-weight="600">EAP-Response (TLS ClientHello)</text>
-                <text x="360" y="754" text-anchor="middle" fill="var(--text-muted)" font-size="12">TLS 1.2 · Cipher Suites · SNI</text>
+            <!-- 9 ← AP → AGV -->
+            <circle class="step-circ" cx="550" cy="692" r="12" stroke="#ff7300" stroke-width="1"/>
+            <text x="550" y="697" text-anchor="middle" class="corange" font-size="11" font-weight="700">9</text>
+            <line x1="538" y1="692" x2="168" y2="692" stroke="#ff7300" stroke-width="2" marker-end="url(#ao)"/>
+            <rect class="lbl-bg" x="262" y="675" width="196" height="24" rx="4"/>
+            <text x="360" y="692" text-anchor="middle" class="corange" font-size="13" font-weight="600">EAP-Request (TLS Start)</text>
 
-                <!-- 11  AP → ISE : Access-Request (TLS ClientHello) -->
-                <circle cx="550" cy="794" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="550" y="799" text-anchor="middle" fill="var(--cisco-green)" font-size="11" font-weight="700">11</text>
-                <line x1="567" y1="794" x2="935" y2="794" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-r-green)"/>
-                <rect x="625" y="777" width="260" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="755" y="794" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Request (TLS ClientHello)</text>
+            <!-- 10 → AGV → AP -->
+            <circle class="step-circ" cx="155" cy="744" r="12" stroke="#ff7300" stroke-width="1"/>
+            <text x="155" y="749" text-anchor="middle" class="corange" font-size="11" font-weight="700">10</text>
+            <line x1="172" y1="744" x2="540" y2="744" stroke="#ff7300" stroke-width="2" marker-end="url(#ao)"/>
+            <rect class="lbl-bg" x="195" y="724" width="330" height="30" rx="4"/>
+            <text x="360" y="740" text-anchor="middle" class="corange" font-size="13" font-weight="600">EAP-Response (TLS ClientHello)</text>
+            <text x="360" y="756" text-anchor="middle" class="txt-mut" font-size="12">TLS 1.2 · Cipher Suites · SNI</text>
 
-                <!-- 12  ISE → AP : Access-Challenge (ServerHello + Cert + Done) -->
-                <circle cx="945" cy="846" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="945" y="851" text-anchor="middle" fill="var(--cisco-purple)" font-size="11" font-weight="700">12</text>
-                <line x1="935" y1="846" x2="567" y2="846" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-l-green)"/>
-                <rect x="570" y="826" width="365" height="32" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="752" y="842" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Challenge</text>
-                <text x="752" y="858" text-anchor="middle" fill="var(--text-muted)" font-size="12">ServerHello · Certificate · CertificateRequest · ServerHelloDone</text>
+            <!-- 11 → AP → ISE -->
+            <circle class="step-circ" cx="550" cy="796" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="550" y="801" text-anchor="middle" class="cgreen" font-size="11" font-weight="700">11</text>
+            <line x1="567" y1="796" x2="935" y2="796" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="625" y="779" width="260" height="24" rx="4"/>
+            <text x="755" y="796" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Request (TLS ClientHello)</text>
 
-                <!-- 13  AP → AGV : EAP-Request (TLS Server Params) -->
-                <circle cx="550" cy="900" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-orange)" stroke-width="1"/>
-                <text x="550" y="905" text-anchor="middle" fill="var(--cisco-orange)" font-size="11" font-weight="700">13</text>
-                <line x1="540" y1="900" x2="172" y2="900" stroke="var(--cisco-orange)" stroke-width="2" marker-end="url(#a-l-orange)"/>
-                <rect x="188" y="880" width="350" height="32" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="363" y="896" text-anchor="middle" fill="var(--cisco-orange)" font-size="13" font-weight="600">EAP-Request (TLS)</text>
-                <text x="363" y="912" text-anchor="middle" fill="var(--text-muted)" font-size="12">ServerHello · ISE Certificate · CertificateRequest</text>
+            <!-- 12 ← ISE → AP -->
+            <circle class="step-circ" cx="945" cy="848" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="945" y="853" text-anchor="middle" class="cpurple" font-size="11" font-weight="700">12</text>
+            <line x1="933" y1="848" x2="560" y2="848" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="570" y="828" width="365" height="32" rx="4"/>
+            <text x="752" y="844" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Challenge</text>
+            <text x="752" y="860" text-anchor="middle" class="txt-mut" font-size="12">ServerHello · Certificate · CertificateRequest · ServerHelloDone</text>
 
-                <!-- Note: AGV validates ISE cert -->
-                <rect x="8" y="932" width="155" height="40" rx="6" fill="var(--phase2-bg)" stroke="var(--cisco-orange)" stroke-width="1" stroke-dasharray="4,2"/>
-                <text x="85" y="950" text-anchor="middle" fill="var(--cisco-orange)" font-size="12" font-weight="600">AGV 验证 ISE</text>
-                <text x="85" y="966" text-anchor="middle" fill="var(--cisco-orange)" font-size="12" font-weight="600">服务器证书链 ✓</text>
+            <!-- 13 ← AP → AGV -->
+            <circle class="step-circ" cx="550" cy="902" r="12" stroke="#ff7300" stroke-width="1"/>
+            <text x="550" y="907" text-anchor="middle" class="corange" font-size="11" font-weight="700">13</text>
+            <line x1="538" y1="902" x2="168" y2="902" stroke="#ff7300" stroke-width="2" marker-end="url(#ao)"/>
+            <rect class="lbl-bg" x="188" y="882" width="350" height="32" rx="4"/>
+            <text x="363" y="898" text-anchor="middle" class="corange" font-size="13" font-weight="600">EAP-Request (TLS)</text>
+            <text x="363" y="914" text-anchor="middle" class="txt-mut" font-size="12">ServerHello · ISE Certificate · CertificateRequest</text>
 
-                <!-- 14  AGV → AP : EAP-Response (ClientKeyExchange etc) -->
-                <circle cx="155" cy="1000" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-orange)" stroke-width="1"/>
-                <text x="155" y="1005" text-anchor="middle" fill="var(--cisco-orange)" font-size="11" font-weight="700">14</text>
-                <line x1="172" y1="1000" x2="540" y2="1000" stroke="var(--cisco-orange)" stroke-width="2" marker-end="url(#a-r-orange)"/>
-                <rect x="178" y="978" width="365" height="34" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="994" text-anchor="middle" fill="var(--cisco-orange)" font-size="13" font-weight="600">EAP-Response (TLS)</text>
-                <text x="360" y="1011" text-anchor="middle" fill="var(--text-muted)" font-size="12">Cert · ClientKeyExchange · CertVerify · ChangeCipherSpec · Finished</text>
+            <!-- Note: AGV validates -->
+            <rect class="note-box" x="8" y="934" width="155" height="40" rx="6" stroke="#ff7300" stroke-width="1" stroke-dasharray="4,2"/>
+            <text x="85" y="952" text-anchor="middle" class="corange" font-size="12" font-weight="600">AGV 验证 ISE</text>
+            <text x="85" y="968" text-anchor="middle" class="corange" font-size="12" font-weight="600">服务器证书链 ✓</text>
 
-                <!-- 15  AP → ISE : Access-Request (TLS Finished) -->
-                <circle cx="550" cy="1052" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="550" y="1057" text-anchor="middle" fill="var(--cisco-green)" font-size="11" font-weight="700">15</text>
-                <line x1="567" y1="1052" x2="935" y2="1052" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-r-green)"/>
-                <rect x="635" y="1035" width="240" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="755" y="1052" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Request (TLS Finished)</text>
+            <!-- 14 → AGV → AP -->
+            <circle class="step-circ" cx="155" cy="1004" r="12" stroke="#ff7300" stroke-width="1"/>
+            <text x="155" y="1009" text-anchor="middle" class="corange" font-size="11" font-weight="700">14</text>
+            <line x1="172" y1="1004" x2="540" y2="1004" stroke="#ff7300" stroke-width="2" marker-end="url(#ao)"/>
+            <rect class="lbl-bg" x="178" y="982" width="365" height="34" rx="4"/>
+            <text x="360" y="998" text-anchor="middle" class="corange" font-size="13" font-weight="600">EAP-Response (TLS)</text>
+            <text x="360" y="1015" text-anchor="middle" class="txt-mut" font-size="12">Cert · ClientKeyExchange · CertVerify · ChangeCipherSpec · Finished</text>
 
-                <!-- Note: ISE validates AGV cert -->
-                <rect x="957" y="1074" width="155" height="40" rx="6" fill="var(--phase3-bg)" stroke="var(--cisco-purple)" stroke-width="1" stroke-dasharray="4,2"/>
-                <text x="1034" y="1092" text-anchor="middle" fill="var(--cisco-purple)" font-size="12" font-weight="600">ISE 验证 AGV</text>
-                <text x="1034" y="1108" text-anchor="middle" fill="var(--cisco-purple)" font-size="12" font-weight="600">客户端证书链 ✓</text>
+            <!-- 15 → AP → ISE -->
+            <circle class="step-circ" cx="550" cy="1056" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="550" y="1061" text-anchor="middle" class="cgreen" font-size="11" font-weight="700">15</text>
+            <line x1="567" y1="1056" x2="935" y2="1056" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="635" y="1039" width="240" height="24" rx="4"/>
+            <text x="755" y="1056" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Request (TLS Finished)</text>
 
-                <!-- 16  ISE → AP : Access-Challenge (ChangeCipherSpec + Finished) -->
-                <circle cx="945" cy="1140" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-green)" stroke-width="1"/>
-                <text x="945" y="1145" text-anchor="middle" fill="var(--cisco-purple)" font-size="11" font-weight="700">16</text>
-                <line x1="935" y1="1140" x2="567" y2="1140" stroke="var(--cisco-green)" stroke-width="2" marker-end="url(#a-l-green)"/>
-                <rect x="615" y="1120" width="305" height="32" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="767" y="1136" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="600">Access-Challenge</text>
-                <text x="767" y="1152" text-anchor="middle" fill="var(--text-muted)" font-size="12">ChangeCipherSpec · Finished</text>
+            <!-- Note: ISE validates -->
+            <rect class="note-box" x="957" y="1078" width="155" height="40" rx="6" stroke="#7b61ff" stroke-width="1" stroke-dasharray="4,2"/>
+            <text x="1034" y="1096" text-anchor="middle" class="cpurple" font-size="12" font-weight="600">ISE 验证 AGV</text>
+            <text x="1034" y="1112" text-anchor="middle" class="cpurple" font-size="12" font-weight="600">客户端证书链 ✓</text>
 
-                <!-- 17  AP → AGV : EAP-Request (Encrypted) -->
-                <circle cx="550" cy="1190" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-orange)" stroke-width="1"/>
-                <text x="550" y="1195" text-anchor="middle" fill="var(--cisco-orange)" font-size="11" font-weight="700">17</text>
-                <line x1="540" y1="1190" x2="172" y2="1190" stroke="var(--cisco-orange)" stroke-width="2" marker-end="url(#a-l-orange)"/>
-                <rect x="225" y="1173" width="270" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="1190" text-anchor="middle" fill="var(--cisco-orange)" font-size="13" font-weight="600">EAP-Request (Encrypted App Data)</text>
+            <!-- 16 ← ISE → AP -->
+            <circle class="step-circ" cx="945" cy="1142" r="12" stroke="#6cc04a" stroke-width="1"/>
+            <text x="945" y="1147" text-anchor="middle" class="cpurple" font-size="11" font-weight="700">16</text>
+            <line x1="933" y1="1142" x2="560" y2="1142" stroke="#6cc04a" stroke-width="2" marker-end="url(#ag)"/>
+            <rect class="lbl-bg" x="615" y="1122" width="305" height="32" rx="4"/>
+            <text x="767" y="1138" text-anchor="middle" class="cgreen" font-size="13" font-weight="600">Access-Challenge</text>
+            <text x="767" y="1154" text-anchor="middle" class="txt-mut" font-size="12">ChangeCipherSpec · Finished</text>
 
-                <!-- 18  AGV → AP : EAP-Response (Encrypted) -->
-                <circle cx="155" cy="1230" r="12" fill="var(--phase3-bg)" stroke="var(--cisco-orange)" stroke-width="1"/>
-                <text x="155" y="1235" text-anchor="middle" fill="var(--cisco-orange)" font-size="11" font-weight="700">18</text>
-                <line x1="172" y1="1230" x2="540" y2="1230" stroke="var(--cisco-orange)" stroke-width="2" marker-end="url(#a-r-orange)"/>
-                <rect x="218" y="1213" width="285" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="360" y="1230" text-anchor="middle" fill="var(--cisco-orange)" font-size="13" font-weight="600">EAP-Response (Encrypted App Data)</text>
+            <!-- 17 ← AP → AGV -->
+            <circle class="step-circ" cx="550" cy="1192" r="12" stroke="#ff7300" stroke-width="1"/>
+            <text x="550" y="1197" text-anchor="middle" class="corange" font-size="11" font-weight="700">17</text>
+            <line x1="538" y1="1192" x2="168" y2="1192" stroke="#ff7300" stroke-width="2" marker-end="url(#ao)"/>
+            <rect class="lbl-bg" x="220" y="1175" width="280" height="24" rx="4"/>
+            <text x="360" y="1192" text-anchor="middle" class="corange" font-size="13" font-weight="600">EAP-Request (Encrypted App Data)</text>
 
-                <!-- ====================================================
-                     PHASE 4 — Authorization & Port Open
-                     ==================================================== -->
-                <rect x="18" y="1272" width="1065" height="280" rx="8" fill="var(--phase4-bg)" stroke="var(--phase4-border)" stroke-width="1"/>
-                <text x="40" y="1296" fill="var(--cisco-green)" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 4 — AUTHORIZATION &amp; PORT OPEN</text>
+            <!-- 18 → AGV → AP -->
+            <circle class="step-circ" cx="155" cy="1232" r="12" stroke="#ff7300" stroke-width="1"/>
+            <text x="155" y="1237" text-anchor="middle" class="corange" font-size="11" font-weight="700">18</text>
+            <line x1="172" y1="1232" x2="540" y2="1232" stroke="#ff7300" stroke-width="2" marker-end="url(#ao)"/>
+            <rect class="lbl-bg" x="215" y="1215" width="290" height="24" rx="4"/>
+            <text x="360" y="1232" text-anchor="middle" class="corange" font-size="13" font-weight="600">EAP-Response (Encrypted App Data)</text>
 
-                <!-- Note: ISE Policy -->
-                <rect x="878" y="1310" width="168" height="58" rx="6" fill="var(--phase4-bg)" stroke="var(--cisco-green)" stroke-width="1" stroke-dasharray="4,2"/>
-                <text x="962" y="1328" text-anchor="middle" fill="var(--cisco-green)" font-size="12" font-weight="600">ISE 策略评估</text>
-                <text x="962" y="1344" text-anchor="middle" fill="var(--text-secondary)" font-size="11">AuthZ Policy Match</text>
-                <text x="962" y="1360" text-anchor="middle" fill="var(--text-secondary)" font-size="11">VLAN / dACL / SGT</text>
+            <!-- ==================== PHASE 4 ==================== -->
+            <rect class="phase-bg p4" x="18" y="1272" width="1065" height="296" rx="8" stroke-width="1"/>
+            <text x="40" y="1296" class="cgreen" font-size="13" font-weight="700" letter-spacing="0.8">PHASE 4 — AUTHORIZATION &amp; PORT OPEN</text>
 
-                <!-- 19  ISE → AP : Access-Accept -->
-                <circle cx="945" cy="1398" r="12" fill="var(--phase4-bg)" stroke="var(--cisco-green)" stroke-width="1.5"/>
-                <text x="945" y="1403" text-anchor="middle" fill="var(--cisco-green)" font-size="11" font-weight="700">19</text>
-                <line x1="935" y1="1398" x2="567" y2="1398" stroke="var(--cisco-green)" stroke-width="2.5" marker-end="url(#a-l-green)" filter="url(#glow)"/>
-                <rect x="585" y="1376" width="340" height="34" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="755" y="1392" text-anchor="middle" fill="var(--cisco-green)" font-size="13" font-weight="700">✅ Access-Accept (EAP-Success)</text>
-                <text x="755" y="1409" text-anchor="middle" fill="var(--text-muted)" font-size="12">AuthZ: VLAN · dACL · SGT · Session-Timeout</text>
+            <!-- Note: ISE Policy -->
+            <rect class="note-box" x="878" y="1310" width="168" height="58" rx="6" stroke="#6cc04a" stroke-width="1" stroke-dasharray="4,2"/>
+            <text x="962" y="1328" text-anchor="middle" class="cgreen" font-size="12" font-weight="600">ISE 策略评估</text>
+            <text x="962" y="1344" text-anchor="middle" class="txt-sec" font-size="11">AuthZ Policy Match</text>
+            <text x="962" y="1360" text-anchor="middle" class="txt-sec" font-size="11">VLAN / dACL / SGT</text>
 
-                <!-- 20  AP → AGV : EAP-Success / Port Authorized -->
-                <circle cx="550" cy="1448" r="12" fill="var(--phase4-bg)" stroke="var(--cisco-blue)" stroke-width="1.5"/>
-                <text x="550" y="1453" text-anchor="middle" fill="var(--cisco-blue)" font-size="11" font-weight="700">20</text>
-                <line x1="540" y1="1448" x2="172" y2="1448" stroke="var(--cisco-blue)" stroke-width="2.5" marker-end="url(#a-l-blue)" filter="url(#glow)"/>
-                <rect x="225" y="1432" width="260" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="355" y="1449" text-anchor="middle" fill="var(--cisco-blue)" font-size="13" font-weight="700">✅ EAP-Success · Port Authorized</text>
+            <!-- 19 ← ISE → AP -->
+            <circle class="step-circ" cx="945" cy="1398" r="12" stroke="#6cc04a" stroke-width="1.5"/>
+            <text x="945" y="1403" text-anchor="middle" class="cgreen" font-size="11" font-weight="700">19</text>
+            <line x1="933" y1="1398" x2="560" y2="1398" stroke="#6cc04a" stroke-width="2.5" marker-end="url(#ag)" filter="url(#glow)"/>
+            <rect class="lbl-bg" x="585" y="1378" width="340" height="34" rx="4"/>
+            <text x="755" y="1394" text-anchor="middle" class="cgreen" font-size="13" font-weight="700">✅ Access-Accept (EAP-Success)</text>
+            <text x="755" y="1411" text-anchor="middle" class="txt-mut" font-size="12">AuthZ: VLAN · dACL · SGT · Session-Timeout</text>
 
-                <!-- 21  AGV → AP : Data Traffic -->
-                <circle cx="155" cy="1498" r="12" fill="var(--phase4-bg)" stroke="var(--cisco-blue)" stroke-width="1"/>
-                <text x="155" y="1503" text-anchor="middle" fill="var(--cisco-blue)" font-size="11" font-weight="700">21</text>
-                <line x1="172" y1="1498" x2="540" y2="1498" stroke="var(--cisco-blue)" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#a-r-blue)"/>
-                <rect x="270" y="1482" width="185" height="24" rx="4" fill="var(--bg-svg-label)"/>
-                <text x="362" y="1499" text-anchor="middle" fill="var(--text-secondary)" font-size="13" font-weight="600">🚀 Data Traffic Flows</text>
+            <!-- 20 ← AP → AGV -->
+            <circle class="step-circ" cx="550" cy="1450" r="12" stroke="#049fd9" stroke-width="1.5"/>
+            <text x="550" y="1455" text-anchor="middle" class="cblue" font-size="11" font-weight="700">20</text>
+            <line x1="538" y1="1450" x2="168" y2="1450" stroke="#049fd9" stroke-width="2.5" marker-end="url(#ab)" filter="url(#glow)"/>
+            <rect class="lbl-bg" x="220" y="1434" width="265" height="24" rx="4"/>
+            <text x="352" y="1451" text-anchor="middle" class="cblue" font-size="13" font-weight="700">✅ EAP-Success · Port Authorized</text>
 
-                <!-- Terminators -->
-                <rect x="145" y="1556" width="20" height="20" rx="3" fill="var(--svg-lifeline)"/>
-                <rect x="540" y="1556" width="20" height="20" rx="3" fill="var(--svg-lifeline)"/>
-                <rect x="935" y="1556" width="20" height="20" rx="3" fill="var(--svg-lifeline)"/>
+            <!-- 21 → AGV → AP data -->
+            <circle class="step-circ" cx="155" cy="1502" r="12" stroke="#049fd9" stroke-width="1"/>
+            <text x="155" y="1507" text-anchor="middle" class="cblue" font-size="11" font-weight="700">21</text>
+            <line x1="172" y1="1502" x2="540" y2="1502" stroke="#049fd9" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#ab)"/>
+            <rect class="lbl-bg" x="275" y="1486" width="175" height="24" rx="4"/>
+            <text x="362" y="1503" text-anchor="middle" class="txt-sec" font-size="13" font-weight="600">🚀 Data Traffic Flows</text>
+
+            <!-- Terminators -->
+            <rect class="term" x="145" y="1570" width="20" height="20" rx="3"/>
+            <rect class="term" x="540" y="1570" width="20" height="20" rx="3"/>
+            <rect class="term" x="935" y="1570" width="20" height="20" rx="3"/>
             </svg>
         </div>
     </section>
 
-    <!-- Phase Detail Cards -->
+    <!-- Phase Cards -->
     <section class="phases-section">
         <h2 class="phases-title">各阶段详细说明</h2>
         <div class="phase-grid">
@@ -999,53 +753,96 @@ layout: false
             </div>
         </div>
     </section>
+
 </main>
 
-<!-- Footer -->
 <footer class="page-footer">
     <p>802.1X EAP-TLS Sequence Diagram — <span>Cisco ISE</span> · Catalyst 9800 WLC · Industrial AGV</p>
     <p style="margin-top:5px;">Generated for reference · Cisco Validated Design</p>
 </footer>
 
 <script>
-    // ========== Theme Toggle ==========
+(function(){
     const html = document.documentElement;
     const toggle = document.getElementById('themeToggle');
     const label = document.getElementById('themeLabel');
 
-    // Restore saved preference
-    const saved = localStorage.getItem('theme');
-    if (saved) {
-        html.setAttribute('data-theme', saved);
-        label.textContent = saved === 'dark' ? 'Dark' : 'Light';
+    function applyTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+        updateSVG(theme);
+        localStorage.setItem('theme', theme);
     }
 
-    toggle.addEventListener('click', () => {
-        const current = html.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        label.textContent = next === 'dark' ? 'Dark' : 'Light';
-        localStorage.setItem('theme', next);
-    });
+    function updateSVG(theme) {
+        const svg = document.getElementById('seqSvg');
+        if (!svg) return;
+        const d = theme === 'dark';
 
-    // Keyboard accessibility
-    toggle.parentElement.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggle.click();
-        }
-    });
-
-    // ========== Scroll Animation ==========
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animationPlayState = 'running';
-            }
+        // Head boxes
+        svg.querySelectorAll('.head-box').forEach(el => {
+            el.setAttribute('fill', d ? '#132035' : '#f0f3f8');
         });
-    }, { threshold: 0.1 });
+        // Label backgrounds
+        svg.querySelectorAll('.lbl-bg').forEach(el => {
+            el.setAttribute('fill', d ? '#0d1b2a' : '#eef1f6');
+        });
+        // Lifelines
+        svg.querySelectorAll('.lifeline').forEach(el => {
+            el.setAttribute('stroke', d ? '#2a3650' : '#c8d0dc');
+        });
+        // Step circles
+        svg.querySelectorAll('.step-circ').forEach(el => {
+            el.setAttribute('fill', d ? '#0d1b2a' : '#eef1f6');
+        });
+        // Text secondary
+        svg.querySelectorAll('.txt-sec').forEach(el => {
+            el.setAttribute('fill', d ? '#94a3b8' : '#4b5c73');
+        });
+        // Text muted
+        svg.querySelectorAll('.txt-mut').forEach(el => {
+            el.setAttribute('fill', d ? '#64748b' : '#7a8898');
+        });
+        // Note boxes
+        svg.querySelectorAll('.note-box').forEach(el => {
+            el.setAttribute('fill', d ? 'rgba(255,115,0,0.06)' : 'rgba(255,115,0,0.08)');
+        });
+        // Phase backgrounds
+        const phases = {p1:['rgba(4,159,217,0.04)','rgba(4,159,217,0.06)','rgba(4,159,217,0.15)','rgba(4,159,217,0.25)'],
+                        p2:['rgba(255,115,0,0.03)','rgba(255,115,0,0.05)','rgba(255,115,0,0.12)','rgba(255,115,0,0.22)'],
+                        p3:['rgba(123,97,255,0.03)','rgba(123,97,255,0.05)','rgba(123,97,255,0.12)','rgba(123,97,255,0.22)'],
+                        p4:['rgba(108,192,74,0.03)','rgba(108,192,74,0.05)','rgba(108,192,74,0.12)','rgba(108,192,74,0.22)']};
+        Object.keys(phases).forEach(cls => {
+            svg.querySelectorAll('.phase-bg.' + cls).forEach(el => {
+                el.setAttribute('fill', d ? phases[cls][0] : phases[cls][1]);
+                el.setAttribute('stroke', d ? phases[cls][2] : phases[cls][3]);
+            });
+        });
+        // Terminators
+        svg.querySelectorAll('.term').forEach(el => {
+            el.setAttribute('fill', d ? '#2a3650' : '#c8d0dc');
+        });
+    }
 
-    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+    // Init
+    const saved = localStorage.getItem('theme') || 'dark';
+    applyTheme(saved);
+
+    toggle.addEventListener('click', () => {
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+    });
+
+    toggle.parentElement.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle.click(); }
+    });
+
+    // Scroll animation
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.style.animationPlayState = 'running'; });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.animate-in').forEach(el => obs.observe(el));
+})();
 </script>
 
 </body>
