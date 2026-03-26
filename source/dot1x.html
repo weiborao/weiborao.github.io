@@ -1,0 +1,3528 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>802.1X EAP-TLS Authentication Sequence — Technical Reference</title>
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES — LIGHT & DARK THEMES
+   ============================================================ */
+:root {
+  /* Light theme (default) */
+  --bg-primary: #f4f6f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e8ecf1;
+  --bg-code: #f0f2f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #3a3a5c;
+  --text-muted: #6b7280;
+  --accent-1: #0d6efd;
+  --accent-2: #049fd9;       /* Cisco blue */
+  --accent-3: #00bceb;       /* Cisco light blue */
+  --accent-green: #00c853;
+  --accent-orange: #ff9100;
+  --accent-red: #e53935;
+  --accent-purple: #7c3aed;
+  --border-color: #d1d5db;
+  --border-light: #e5e7eb;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --gradient-hero: linear-gradient(135deg, #049fd9 0%, #0d6efd 50%, #7c3aed 100%);
+  --svg-bg: #ffffff;
+  --svg-line: #333;
+  --svg-text: #1a1a2e;
+  --svg-arrow: #049fd9;
+  --svg-phase-bg-1: rgba(4,159,217,0.07);
+  --svg-phase-bg-2: rgba(13,110,253,0.07);
+  --svg-phase-bg-3: rgba(124,58,237,0.07);
+  --svg-phase-bg-4: rgba(0,200,83,0.07);
+  --tag-bg: rgba(4,159,217,0.1);
+  --tag-text: #049fd9;
+  --table-header-bg: #f0f4f8;
+  --table-stripe: #f8fafc;
+  --tooltip-bg: #1a1a2e;
+  --tooltip-text: #fff;
+  --nav-bg: rgba(255,255,255,0.85);
+  --nav-border: rgba(209,213,219,0.6);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d2e;
+  --bg-tertiary: #252839;
+  --bg-code: #1e2235;
+  --text-primary: #e4e6f0;
+  --text-secondary: #b0b4c8;
+  --text-muted: #7a7f96;
+  --accent-1: #4d9fff;
+  --accent-2: #00bceb;
+  --accent-3: #5ce0d8;
+  --accent-green: #66ffa6;
+  --accent-orange: #ffb74d;
+  --accent-red: #ff6b6b;
+  --accent-purple: #a78bfa;
+  --border-color: #2d3148;
+  --border-light: #252839;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+  --gradient-hero: linear-gradient(135deg, #0a1628 0%, #1a1d2e 50%, #1e1340 100%);
+  --svg-bg: #1a1d2e;
+  --svg-line: #b0b4c8;
+  --svg-text: #e4e6f0;
+  --svg-arrow: #00bceb;
+  --svg-phase-bg-1: rgba(0,188,235,0.08);
+  --svg-phase-bg-2: rgba(77,159,255,0.08);
+  --svg-phase-bg-3: rgba(167,139,250,0.08);
+  --svg-phase-bg-4: rgba(102,255,166,0.08);
+  --tag-bg: rgba(0,188,235,0.15);
+  --tag-text: #00bceb;
+  --table-header-bg: #252839;
+  --table-stripe: #1e2133;
+  --tooltip-bg: #e4e6f0;
+  --tooltip-text: #0f1117;
+  --nav-bg: rgba(15,17,23,0.88);
+  --nav-border: rgba(45,49,72,0.6);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  transition: background 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3, h4, h5 {
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 0.5em; }
+h3 { font-size: clamp(1.15rem, 2.5vw, 1.5rem); margin-bottom: 0.4em; }
+h4 { font-size: clamp(1rem, 2vw, 1.2rem); margin-bottom: 0.3em; }
+
+p { margin-bottom: 1em; color: var(--text-secondary); }
+a { color: var(--accent-2); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--accent-3); text-decoration: underline; }
+
+code, .mono {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent-purple);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding: 60px 0;
+}
+
+.section + .section {
+  border-top: 1px solid var(--border-light);
+}
+
+/* ============================================================
+   STICKY NAV
+   ============================================================ */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--nav-border);
+  padding: 0 24px;
+  transition: background 0.3s;
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  gap: 12px;
+}
+
+.nav-brand {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1;
+  justify-content: center;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+
+.nav-links a {
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.nav-links a:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.nav-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-toggle:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  background: var(--gradient-hero);
+  padding: 80px 24px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .hero {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  color: #fff;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+  color: rgba(255,255,255,0.88) !important;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  max-width: 700px;
+  margin: 0 auto 24px;
+}
+
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ============================================================
+   PHASE CARDS
+   ============================================================ */
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.phase-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.phase-1 .phase-number { background: var(--accent-2); }
+.phase-2 .phase-number { background: var(--accent-1); }
+.phase-3 .phase-number { background: var(--accent-purple); }
+.phase-4 .phase-number { background: var(--accent-green); }
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-color);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.card-title .icon { font-size: 1.2rem; }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.table-wrap {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th {
+  background: var(--table-header-bg);
+  font-weight: 700;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+}
+
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+tr:nth-child(even) td {
+  background: var(--table-stripe);
+}
+
+/* ============================================================
+   SEQUENCE DIAGRAM CONTAINER
+   ============================================================ */
+.diagram-container {
+  background: var(--svg-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  overflow-x: auto;
+  box-shadow: var(--shadow-md);
+  margin: 24px 0;
+}
+
+.diagram-container svg {
+  display: block;
+  margin: 0 auto;
+  min-width: 750px;
+}
+
+/* ============================================================
+   MESSAGE FLOW STEP LISTS
+   ============================================================ */
+.flow-steps {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+.flow-step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--border-light);
+  align-items: flex-start;
+}
+.flow-step:last-child { border-bottom: none; }
+
+.step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  flex-shrink: 0;
+}
+
+.step-content { flex: 1; }
+
+.step-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.step-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.step-dir {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  margin-bottom: 2px;
+}
+
+/* ============================================================
+   TAGS & BADGES
+   ============================================================ */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  margin-right: 4px;
+}
+.tag-green { background: rgba(0,200,83,0.1); color: var(--accent-green); }
+.tag-orange { background: rgba(255,145,0,0.1); color: var(--accent-orange); }
+.tag-red { background: rgba(229,57,53,0.1); color: var(--accent-red); }
+.tag-purple { background: rgba(124,58,237,0.1); color: var(--accent-purple); }
+
+.ref {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ============================================================
+   CALLOUT BOXES
+   ============================================================ */
+.callout {
+  border-left: 4px solid var(--accent-2);
+  background: var(--bg-tertiary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+.callout-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+.callout.info { border-left-color: var(--accent-1, #0078d4); }
+.callout.warning { border-left-color: var(--accent-orange); }
+.callout.success { border-left-color: var(--accent-green); }
+.callout.danger { border-left-color: var(--accent-red); }
+
+/* ============================================================
+   GLOSSARY
+   ============================================================ */
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.glossary-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+}
+
+.glossary-term {
+  font-weight: 700;
+  color: var(--accent-2);
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.glossary-def {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  text-align: center;
+  padding: 40px 24px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .container { padding: 0 16px; }
+  .section { padding: 44px 0; }
+  .card { padding: 22px; }
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero { padding: 60px 16px 44px; }
+  .section { padding: 36px 0; }
+  .card { padding: 18px; }
+  .phase-header { gap: 12px; }
+  .phase-number { width: 40px; height: 40px; font-size: 1rem; }
+  .glossary-grid { grid-template-columns: 1fr; }
+  table { font-size: 0.82rem; }
+  th, td { padding: 8px 10px; }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 15px; }
+  .hero { padding: 48px 12px 36px; }
+  .hero-tag { font-size: 0.7rem; padding: 3px 10px; }
+  .card { padding: 14px; }
+  .flow-step { gap: 10px; }
+  .btn-toggle { padding: 5px 8px; font-size: 0.74rem; }
+}
+
+/* ============================================================
+   i18n VISIBILITY
+   ============================================================ */
+[data-lang="en"] .zh { display: none !important; }
+[data-lang="zh"] .en { display: none !important; }
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print {
+  .nav, .nav-controls { display: none !important; }
+  .hero { background: #049fd9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-size: 11pt; }
+}
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav class="nav" role="navigation">
+  <div class="nav-inner">
+    <div class="nav-brand">🔐 802.1X EAP-TLS</div>
+    <div class="nav-links">
+      <a href="#diagram" class="en">Sequence Diagram</a>
+      <a href="#diagram" class="zh">时序图</a>
+      <a href="#phase1" class="en">Phase 1</a>
+      <a href="#phase1" class="zh">阶段 1</a>
+      <a href="#phase2" class="en">Phase 2</a>
+      <a href="#phase2" class="zh">阶段 2</a>
+      <a href="#phase3" class="en">Phase 3</a>
+      <a href="#phase3" class="zh">阶段 3</a>
+      <a href="#phase4" class="en">Phase 4</a>
+      <a href="#phase4" class="zh">阶段 4</a>
+      <a href="#deployment" class="en">Deployment</a>
+      <a href="#deployment" class="zh">部署</a>
+      <a href="#glossary" class="en">Glossary</a>
+      <a href="#glossary" class="zh">术语表</a>
+    </div>
+    <div class="nav-controls">
+      <button class="btn-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span id="themeIcon">🌙</span>
+      </button>
+      <button class="btn-toggle" id="langToggle" aria-label="Toggle language">
+        <span id="langLabel">中文</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<header class="hero">
+  <div class="hero-content">
+    <h1>
+      <span class="en">802.1X EAP-TLS Authentication Sequence</span>
+      <span class="zh">802.1X EAP-TLS 认证时序详解</span>
+    </h1>
+    <p class="hero-subtitle">
+      <span class="en">A comprehensive visual and technical reference for port-based network access control using EAP-TLS mutual certificate authentication — with Cisco ISE and industrial AGV deployments.</span>
+      <span class="zh">基于端口的网络访问控制 EAP-TLS 双向证书认证的完整可视化技术参考 — 涵盖 Cisco ISE 与工业 AGV 部署场景。</span>
+    </p>
+    <div class="hero-tags">
+      <span class="hero-tag">IEEE 802.1X-2020</span>
+      <span class="hero-tag">RFC 5216 (EAP-TLS)</span>
+      <span class="hero-tag">RFC 9190 (EAP-TLS 1.3)</span>
+      <span class="hero-tag">Cisco ISE</span>
+      <span class="hero-tag">TLS 1.2 / 1.3</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     OVERVIEW
+     ============================================================ -->
+<section class="section" id="overview">
+  <div class="container">
+    <h2>
+      <span class="en">🔎 Overview</span>
+      <span class="zh">🔎 概述</span>
+    </h2>
+
+    <div class="card">
+      <p class="en">
+        <strong>802.1X</strong> is the IEEE standard for <em>Port-Based Network Access Control</em> (IEEE 802.1X-2020, Clause 6). It defines an architecture comprising three roles: the <strong>Supplicant</strong> (the endpoint requesting access, e.g., an AGV), the <strong>Authenticator</strong> (the network device enforcing access, e.g., an AP or switch), and the <strong>Authentication Server</strong> (the policy engine, e.g., Cisco ISE). Communication between the Supplicant and Authenticator uses <strong>EAPOL</strong> (EAP over LAN, EtherType <code>0x888E</code>), while the Authenticator relays EAP messages to the Authentication Server via <strong>RADIUS</strong> (RFC 2865 / RFC 3579).
+      </p>
+      <p class="zh">
+        <strong>802.1X</strong> 是 IEEE 制定的<em>基于端口的网络访问控制</em>标准（IEEE 802.1X-2020，第6章）。它定义了三个角色：<strong>请求者（Supplicant）</strong>（请求接入的终端，如 AGV）、<strong>认证者（Authenticator）</strong>（执行访问控制的网络设备，如 AP 或交换机）和<strong>认证服务器（Authentication Server）</strong>（策略引擎，如 Cisco ISE）。请求者与认证者之间使用 <strong>EAPOL</strong>（EAP over LAN，以太类型 <code>0x888E</code>）通信，认证者通过 <strong>RADIUS</strong>（RFC 2865 / RFC 3579）将 EAP 消息中继到认证服务器。
+      </p>
+
+      <p class="en">
+        <strong>EAP-TLS</strong> (EAP Type 13, defined in RFC 5216 and updated by RFC 9190 for TLS 1.3) is the gold-standard EAP method. It provides <strong>mutual authentication</strong> using X.509 certificates on both sides — no passwords are transmitted. The TLS handshake establishes a secure tunnel, derives keying material (<strong>MSK</strong> and <strong>EMSK</strong>), and upon success, the Authenticator opens the controlled port, granting the Supplicant network access.
+      </p>
+      <p class="zh">
+        <strong>EAP-TLS</strong>（EAP 类型 13，由 RFC 5216 定义，RFC 9190 更新以支持 TLS 1.3）是业界公认的最高安全级别 EAP 方法。它使用双方的 X.509 证书进行<strong>双向认证</strong>——不传输密码。TLS 握手建立安全隧道，派生密钥材料（<strong>MSK</strong> 和 <strong>EMSK</strong>），认证成功后，认证者开放受控端口，授予请求者网络访问权限。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title en">🏭 Industrial Context: AGV Deployments</div>
+        <div class="callout-title zh">🏭 工业场景：AGV 部署</div>
+        <p class="en" style="margin:0">
+          Automated Guided Vehicles (AGVs) in warehouses and factories require secure, seamless wireless authentication. EAP-TLS with Cisco ISE ensures that each AGV is uniquely identified by its device certificate, enabling fine-grained authorization policies (VLAN assignment, dACL, SGT) while supporting fast roaming across APs.
+        </p>
+        <p class="zh" style="margin:0">
+          仓库和工厂中的自动导引车（AGV）需要安全、无缝的无线认证。使用 Cisco ISE 的 EAP-TLS 确保每台 AGV 通过其设备证书被唯一识别，支持细粒度授权策略（VLAN 分配、dACL、SGT），同时支持跨 AP 快速漫游。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PHASE 1
+     ============================================================ -->
+<section class="section phase-1" id="phase1">
+  <div class="container">
+    <div class="phase-header">
+      <div class="phase-number">1</div>
+      <div>
+        <h2 style="margin-bottom:2px">
+          <span class="en">Phase 1 — 802.11 Association & EAPOL Start</span>
+          <span class="zh">阶段 1 — 802.11 关联与 EAPOL 启动</span>
+        </h2>
+        <p class="ref">
+          <span class="en">IEEE 802.1X-2020 §11.3, §6.3.2 | IEEE 802.11-2020 §12.3</span>
+          <span class="zh">IEEE 802.1X-2020 §11.3, §6.3.2 | IEEE 802.11-2020 §12.3</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Wireless Association Sub-Card -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">📡</span>
+        <span class="en">802.11 Open System Authentication & Association</span>
+        <span class="zh">802.11 开放系统认证与关联</span>
+      </div>
+      <p class="en">
+        Before 802.1X begins, the AGV (wireless supplicant) must first establish a Layer-2 802.11 association with the Access Point (AP). This is a prerequisite — the EAPOL exchange runs <em>on top of</em> the 802.11 association. With WPA2/WPA3-Enterprise, the AP advertises an RSN Information Element in its Beacons/Probe Responses indicating that 802.1X authentication is required. The association process is:
+      </p>
+      <p class="zh">
+        在 802.1X 开始之前，AGV（无线请求者）必须首先与接入点（AP）建立第 2 层 802.11 关联。这是前提条件——EAPOL 交换在 802.11 关联<em>之上</em>运行。在 WPA2/WPA3-Enterprise 模式下，AP 在其 Beacon/Probe Response 帧中通告 RSN 信息元素，表明需要 802.1X 认证。关联过程如下：
+      </p>
+
+      <ol class="flow-steps">
+        <li class="flow-step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <div class="step-dir">AGV → AP</div>
+            <div class="step-label en">Probe Request</div>
+            <div class="step-label zh">Probe Request（探测请求）</div>
+            <p class="step-desc en">The AGV scans channels and sends a Probe Request to discover available networks (SSIDs). In an AGV deployment, the SSID is typically pre-configured.</p>
+            <p class="step-desc zh">AGV 扫描信道并发送 Probe Request 以发现可用网络（SSID）。在 AGV 部署中，SSID 通常已预配置。</p>
+          </div>
+        </li>
+        <li class="flow-step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <div class="step-dir">AP → AGV</div>
+            <div class="step-label en">Probe Response</div>
+            <div class="step-label zh">Probe Response（探测响应）</div>
+            <p class="step-desc en">AP responds with supported rates, RSN IE (cipher suites: AES-CCMP / AES-GCMP, AKM: 802.1X), and capability information.</p>
+            <p class="step-desc zh">AP 回复支持的速率、RSN IE（加密套件：AES-CCMP / AES-GCMP，AKM：802.1X）和能力信息。</p>
+          </div>
+        </li>
+        <li class="flow-step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <div class="step-dir">AGV → AP</div>
+            <div class="step-label en">802.11 Authentication (Open System)</div>
+            <div class="step-label zh">802.11 认证（开放系统）</div>
+            <p class="step-desc en">A simple two-frame exchange (Authentication Request → Authentication Response, status=0). This is <em>not</em> the actual security authentication — that happens via 802.1X/EAP.</p>
+            <p class="step-desc zh">简单的两帧交换（认证请求 → 认证响应，status=0）。这<em>不是</em>真正的安全认证——安全认证通过 802.1X/EAP 进行。</p>
+          </div>
+        </li>
+        <li class="flow-step">
+          <span class="step-num">4</span>
+          <div class="step-content">
+            <div class="step-dir">AGV ↔ AP</div>
+            <div class="step-label en">Association Request / Response</div>
+            <div class="step-label zh">关联请求 / 关联响应</div>
+            <p class="step-desc en">AGV sends Association Request with its RSN IE (matching cipher/AKM), and AP responds with Association Response (Association ID assigned). At this point, the AGV has a Layer-2 link but the <strong>controlled port remains blocked</strong> — no data traffic is permitted until 802.1X succeeds.</p>
+            <p class="step-desc zh">AGV 发送关联请求及其 RSN IE（匹配加密/AKM），AP 回复关联响应（分配关联 ID）。此时，AGV 拥有第 2 层链路，但<strong>受控端口仍然处于阻塞状态</strong>——在 802.1X 成功之前不允许数据流量通过。</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- EAPOL Start Sub-Card -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🚀</span>
+        <span class="en">EAPOL-Start</span>
+        <span class="zh">EAPOL-Start（EAPOL 启动）</span>
+      </div>
+
+      <p class="en">
+        Once associated, the AGV initiates the 802.1X authentication by sending an <strong>EAPOL-Start</strong> frame on the uncontrolled port. Per IEEE 802.1X-2020 §11.3, the EAPOL frame format is:
+      </p>
+      <p class="zh">
+        关联完成后，AGV 通过在非受控端口上发送 <strong>EAPOL-Start</strong> 帧来启动 802.1X 认证。根据 IEEE 802.1X-2020 §11.3，EAPOL 帧格式如下：
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><span class="en">Field</span><span class="zh">字段</span></th>
+              <th><span class="en">Size</span><span class="zh">大小</span></th>
+              <th><span class="en">Value</span><span class="zh">值</span></th>
+              <th><span class="en">Description</span><span class="zh">说明</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Destination MAC</code></td>
+              <td>6 B</td>
+              <td><code>01:80:C2:00:00:03</code></td>
+              <td>
+                <span class="en">IEEE 802.1X PAE group address (IEEE 802.1X-2020 §11.1.1)</span>
+                <span class="zh">IEEE 802.1X PAE 组播地址（IEEE 802.1X-2020 §11.1.1）</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>EtherType</code></td>
+              <td>2 B</td>
+              <td><code>0x888E</code></td>
+              <td>
+                <span class="en">EAPOL EtherType identifier</span>
+                <span class="zh">EAPOL 以太类型标识</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>Protocol Version</code></td>
+              <td>1 B</td>
+              <td><code>0x03</code></td>
+              <td>
+                <span class="en">802.1X-2020 (version 3)</span>
+                <span class="zh">802.1X-2020（版本 3）</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>Packet Type</code></td>
+              <td>1 B</td>
+              <td><code>0x01</code></td>
+              <td>
+                <span class="en">EAPOL-Start</span>
+                <span class="zh">EAPOL-Start（启动）</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>Packet Body Length</code></td>
+              <td>2 B</td>
+              <td><code>0x0000</code></td>
+              <td>
+                <span class="en">No body — Start is a signal frame</span>
+                <span class="zh">无消息体——Start 为信号帧</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title en">📌 Controlled vs. Uncontrolled Port</div>
+        <div class="callout-title zh">📌 受控端口与非受控端口</div>
+        <p class="en" style="margin:0">
+          IEEE 802.1X-2020 §6.3.2 defines the PAE (Port Access Entity) as having two virtual access points: the <strong>Uncontrolled Port</strong> (always open, carries only EAPOL/MKA traffic) and the <strong>Controlled Port</strong> (initially blocked, opened only after successful authentication). This separation ensures that authentication frames can always transit even when the network is "locked."
+        </p>
+        <p class="zh" style="margin:0">
+          IEEE 802.1X-2020 §6.3.2 定义 PAE（端口访问实体）具有两个虚拟接入点：<strong>非受控端口</strong>（始终开放，仅承载 EAPOL/MKA 流量）和<strong>受控端口</strong>（初始阻塞，仅在认证成功后开放）。这种分离确保即使网络被"锁定"，认证帧也能始终通过。
+        </p>
+      </div>
+
+      <p class="en">
+        <strong>Authenticator behavior:</strong> Upon receiving EAPOL-Start, the Authenticator's PACP (Port Access Control Protocol) state machine transitions from <code>DISCONNECTED</code> → <code>CONNECTING</code> and sends an <code>EAP-Request/Identity</code> to the Supplicant (IEEE 802.1X-2020 §8.2). Alternatively, the Authenticator may proactively send an <code>EAP-Request/Identity</code> upon detecting link-up, without waiting for EAPOL-Start.
+      </p>
+      <p class="zh">
+        <strong>认证者行为：</strong>收到 EAPOL-Start 后，认证者的 PACP（端口访问控制协议）状态机从 <code>DISCONNECTED</code> → <code>CONNECTING</code> 转换，并向请求者发送 <code>EAP-Request/Identity</code>（IEEE 802.1X-2020 §8.2）。另外，认证者也可能在检测到链路连接后主动发送 <code>EAP-Request/Identity</code>，无需等待 EAPOL-Start。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PHASE 2
+     ============================================================ -->
+<section class="section phase-2" id="phase2">
+  <div class="container">
+    <div class="phase-header">
+      <div class="phase-number">2</div>
+      <div>
+        <h2 style="margin-bottom:2px">
+          <span class="en">Phase 2 — EAP Identity Exchange</span>
+          <span class="zh">阶段 2 — EAP 身份交换</span>
+        </h2>
+        <p class="ref">
+          <span class="en">RFC 3748 §5.1 | RFC 5216 §2.1.1 | IEEE 802.1X-2020 §8.2</span>
+          <span class="zh">RFC 3748 §5.1 | RFC 5216 §2.1.1 | IEEE 802.1X-2020 §8.2</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🆔</span>
+        <span class="en">EAP-Request/Identity & EAP-Response/Identity</span>
+        <span class="zh">EAP-Request/Identity 与 EAP-Response/Identity</span>
+      </div>
+
+      <p class="en">
+        The identity exchange is the first EAP method-independent step. It allows the Authentication Server to learn <em>who</em> is requesting access. The exchange involves two messages:
+      </p>
+      <p class="zh">
+        身份交换是第一个与 EAP 方法无关的步骤。它允许认证服务器了解<em>谁</em>正在请求访问。交换涉及两条消息：
+      </p>
+
+      <ol class="flow-steps">
+        <li class="flow-step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <div class="step-dir">AP/Switch → AGV (EAPOL) </div>
+            <div class="step-label"><code>EAP-Request/Identity</code></div>
+            <p class="step-desc en">
+              The Authenticator sends an EAP-Request with Type=1 (Identity). EAP packet structure: <code>Code=1 (Request), Identifier=N, Length, Type=1 (Identity)</code>. The Identifier field is used for retransmission matching (RFC 3748 §4.1).
+            </p>
+            <p class="step-desc zh">
+              认证者发送类型为 1（Identity）的 EAP-Request。EAP 包结构：<code>Code=1（请求），Identifier=N，Length，Type=1（Identity）</code>。Identifier 字段用于重传匹配（RFC 3748 §4.1）。
+            </p>
+          </div>
+        </li>
+        <li class="flow-step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <div class="step-dir">AGV → AP/Switch (EAPOL) → Cisco ISE (RADIUS)</div>
+            <div class="step-label"><code>EAP-Response/Identity</code></div>
+            <p class="step-desc en">
+              The AGV replies with its identity string. In an EAP-TLS deployment, this is typically the <strong>Common Name (CN)</strong> or <strong>Subject Alternative Name (SAN)</strong> from the device certificate, e.g., <code>agv-0042@factory.example.com</code>. The Authenticator encapsulates this EAP-Response inside a <code>RADIUS Access-Request</code> message (RADIUS attribute type 79: <code>EAP-Message</code>) and forwards it to Cisco ISE.
+            </p>
+            <p class="step-desc zh">
+              AGV 回复其身份字符串。在 EAP-TLS 部署中，通常是设备证书中的<strong>通用名称（CN）</strong>或<strong>主体备用名称（SAN）</strong>，例如 <code>agv-0042@factory.example.com</code>。认证者将此 EAP-Response 封装在 <code>RADIUS Access-Request</code> 消息中（RADIUS 属性类型 79：<code>EAP-Message</code>）并转发给 Cisco ISE。
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🔒</span>
+        <span class="en">Identity Privacy & Anonymous NAI</span>
+        <span class="zh">身份隐私与匿名 NAI</span>
+      </div>
+      <p class="en">
+        Sending the real identity in cleartext during Phase 2 is a privacy concern — a passive eavesdropper can learn the Supplicant's identity. Two mitigations exist:
+      </p>
+      <p class="zh">
+        在阶段 2 以明文发送真实身份存在隐私问题——被动窃听者可以获知请求者的身份。有两种缓解方式：
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><span class="en">Approach</span><span class="zh">方式</span></th>
+              <th><span class="en">TLS Version</span><span class="zh">TLS 版本</span></th>
+              <th><span class="en">Description</span><span class="zh">说明</span></th>
+              <th><span class="en">Reference</span><span class="zh">参考</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag">Anonymous NAI</span></td>
+              <td>TLS 1.2</td>
+              <td>
+                <span class="en">Supplicant sends an anonymous outer identity like <code>anonymous@factory.example.com</code>. The real identity is conveyed inside the TLS tunnel via the client certificate. Configured on the supplicant.</span>
+                <span class="zh">请求者发送匿名外部身份，如 <code>anonymous@factory.example.com</code>。真实身份通过 TLS 隧道内的客户端证书传递。在请求者上配置。</span>
+              </td>
+              <td class="ref">RFC 5216 §2.1.4</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">TLS 1.3 Encrypted Certs</span></td>
+              <td>TLS 1.3</td>
+              <td>
+                <span class="en">In TLS 1.3, all certificates are sent <strong>encrypted</strong> (after ServerHello). The peer identity is <em>never</em> disclosed to eavesdroppers. This is a significant privacy improvement over TLS 1.2. An anonymous NAI is still RECOMMENDED for the outer identity.</span>
+                <span class="zh">在 TLS 1.3 中，所有证书在 ServerHello 之后<strong>加密</strong>发送。对等方的身份<em>永远不会</em>被窃听者看到。这是相对于 TLS 1.2 的重大隐私改进。外部身份仍然建议使用匿名 NAI。</span>
+              </td>
+              <td class="ref">RFC 9190 §2.1.4</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-title en">⚠️ RADIUS Relay Mechanics</div>
+        <div class="callout-title zh">⚠️ RADIUS 中继机制</div>
+        <p class="en" style="margin:0">
+          The Authenticator (AP/Switch) acts as a <strong>pass-through</strong> for EAP messages. It does NOT interpret EAP methods — it simply wraps EAP payloads into RADIUS <code>EAP-Message</code> attributes (Type 79, RFC 3579 §3.1) within <code>Access-Request</code> packets and unwraps them from <code>Access-Challenge</code> / <code>Access-Accept</code> / <code>Access-Reject</code> responses from ISE. The RADIUS shared secret protects the RADIUS transport, but the EAP payload inside is opaque to the Authenticator.
+        </p>
+        <p class="zh" style="margin:0">
+          认证者（AP/交换机）充当 EAP 消息的<strong>透传</strong>角色。它不解析 EAP 方法——只是将 EAP 载荷封装到 RADIUS <code>EAP-Message</code> 属性（类型 79，RFC 3579 §3.1）中的 <code>Access-Request</code> 包中，并从 ISE 的 <code>Access-Challenge</code> / <code>Access-Accept</code> / <code>Access-Reject</code> 响应中解封装。RADIUS 共享密钥保护 RADIUS 传输，但其中的 EAP 载荷对认证者来说是不透明的。
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">⚡</span>
+        <span class="en">EAP-TLS Method Selection</span>
+        <span class="zh">EAP-TLS 方法选择</span>
+      </div>
+      <p class="en">
+        Upon receiving the EAP-Response/Identity, Cisco ISE looks up its authentication policy to determine which EAP method to use. When the policy specifies <strong>EAP-TLS</strong>, ISE responds with a <code>RADIUS Access-Challenge</code> containing an <code>EAP-Request</code> with <strong>Type=13 (EAP-TLS)</strong> and the <code>TLS Start</code> flag set (<code>S=1</code>). This transitions the conversation from the generic EAP identity phase into the TLS handshake (Phase 3).
+      </p>
+      <p class="zh">
+        收到 EAP-Response/Identity 后，Cisco ISE 查找其认证策略以确定使用哪种 EAP 方法。当策略指定 <strong>EAP-TLS</strong> 时，ISE 以 <code>RADIUS Access-Challenge</code> 响应，其中包含一个类型为 <strong>13（EAP-TLS）</strong>、且设置了 <code>TLS Start</code> 标志（<code>S=1</code>）的 <code>EAP-Request</code>。这将会话从通用 EAP 身份阶段过渡到 TLS 握手（阶段 3）。
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><span class="en">EAP-TLS Flag</span><span class="zh">EAP-TLS 标志</span></th>
+              <th><span class="en">Bit</span><span class="zh">位</span></th>
+              <th><span class="en">Meaning</span><span class="zh">含义</span></th>
+              <th><span class="en">Reference</span><span class="zh">参考</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>L</code> (Length included)</td>
+              <td>Bit 7</td>
+              <td>
+                <span class="en">TLS Message Length field is present (used when message is fragmented)</span>
+                <span class="zh">TLS 消息长度字段存在（用于消息分片时）</span>
+              </td>
+              <td class="ref">RFC 5216 §3.1</td>
+            </tr>
+            <tr>
+              <td><code>M</code> (More fragments)</td>
+              <td>Bit 6</td>
+              <td>
+                <span class="en">More TLS fragments follow — recipient must wait for complete message</span>
+                <span class="zh">后续还有 TLS 分片——接收方需等待完整消息</span>
+              </td>
+              <td class="ref">RFC 5216 §3.1</td>
+            </tr>
+            <tr>
+              <td><code>S</code> (Start)</td>
+              <td>Bit 5</td>
+              <td>
+                <span class="en">EAP-TLS Start — sent only by the server to initiate TLS handshake</span>
+                <span class="zh">EAP-TLS 启动——仅由服务器发送以启动 TLS 握手</span>
+              </td>
+              <td class="ref">RFC 5216 §3.1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCRIPTS (placed here so the DOM is ready for interaction;
+     remaining content continues in Part 2)
+     ============================================================ -->
+<script>
+/* -------- Theme Toggle -------- */
+(function(){
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+
+  // Respect system preference on first load
+  const stored = localStorage.getItem('theme');
+  if (stored) {
+    html.setAttribute('data-theme', stored);
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    html.setAttribute('data-theme', 'dark');
+  }
+  updateIcon();
+
+  btn.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateIcon();
+  });
+
+  function updateIcon() {
+    icon.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  }
+})();
+
+/* -------- Language Toggle -------- */
+(function(){
+  const html  = document.documentElement;
+  const btn   = document.getElementById('langToggle');
+  const label = document.getElementById('langLabel');
+
+  const stored = localStorage.getItem('lang');
+  if (stored) html.setAttribute('data-lang', stored);
+  updateLabel();
+
+  btn.addEventListener('click', () => {
+    const next = html.getAttribute('data-lang') === 'en' ? 'zh' : 'en';
+    html.setAttribute('data-lang', next);
+    localStorage.setItem('lang', next);
+    updateLabel();
+  });
+
+  function updateLabel() {
+    label.textContent = html.getAttribute('data-lang') === 'en' ? '中文' : 'EN';
+  }
+})();
+</script>
+
+<!-- ============================================================
+                 PHASE 3 — TLS 1.2 MUTUAL AUTHENTICATION HANDSHAKE
+                 ============================================================ -->
+<section class="section phase-3" id="phase3">
+<div class="container">
+
+<div class="phase-header">
+<div class="phase-number">3</div>
+<div>
+<h2 style="margin-bottom:2px">
+<span class="en">Phase 3 — TLS 1.2 Mutual Authentication Handshake</span>
+<span class="zh">阶段 3 — TLS 1.2 双向认证握手</span>
+</h2>
+<p class="ref" style="margin-top:0">RFC 5216 §2.1.1, §3 | RFC 9190 §2.1.1</p>
+</div>
+</div>
+
+<div class="card">
+
+                <p class="en">
+                    This is the core of EAP-TLS: a full TLS handshake carried inside EAP messages, providing mutual
+                    certificate-based authentication between the supplicant (AGV) and the authentication server (Cisco ISE).
+                    Unlike web HTTPS where only the server is authenticated, EAP-TLS <strong>requires both sides</strong>
+                    to present X.509 certificates. The handshake follows RFC 5246 (TLS 1.2) encapsulated per RFC 5216 §3.
+                </p>
+                <p class="zh">
+                    这是 EAP-TLS 的核心：在 EAP 消息内部承载完整的 TLS 握手，实现请求方（AGV）与认证服务器（Cisco ISE）之间
+                    基于证书的双向认证。与 Web HTTPS 仅验证服务器不同，EAP-TLS <strong>要求双方</strong>都出示 X.509 证书。
+                    握手遵循 RFC 5246（TLS 1.2），并按 RFC 5216 §3 进行封装。
+                </p>
+
+                <!-- ── Step 3a: ClientHello ── -->
+                <h3>
+                    <span class="en">3a. ClientHello</span>
+                    <span class="zh">3a. ClientHello（客户端问候）</span>
+                </h3>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">→</div>
+                        <div class="step-content">
+                            <strong class="en">Supplicant → Authenticator → RADIUS (ISE)</strong>
+                            <strong class="zh">请求方 → 认证者 → RADIUS（ISE）</strong>
+                            <p class="en">
+                                The supplicant constructs a TLS ClientHello and sends it inside an <code>EAP-Response/EAP-TLS</code>
+                                message (Type 13). The EAP-TLS <strong>S (Start) bit is NOT set</strong> on this message — only the
+                                server sets the S bit in its initial EAP-Request/EAP-TLS. The authenticator relays this in a
+                                <code>RADIUS Access-Request</code> (EAP-Message attribute, Type 79).
+                            </p>
+                            <p class="zh">
+                                请求方构造 TLS ClientHello，并封装在 <code>EAP-Response/EAP-TLS</code>（Type 13）消息中发送。
+                                此消息中 EAP-TLS 的 <strong>S（Start）位不置位</strong>——仅服务器在初始 EAP-Request/EAP-TLS 中设置 S 位。
+                                认证者将其转发至 <code>RADIUS Access-Request</code>（EAP-Message 属性，Type 79）。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <table>
+                    <caption>
+                        <span class="en">ClientHello Key Fields</span>
+                        <span class="zh">ClientHello 关键字段</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">Field</span><span class="zh">字段</span></th>
+                            <th><span class="en">Value / Description</span><span class="zh">值 / 描述</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>ProtocolVersion</code></td>
+                            <td>
+                                <span class="en">TLS 1.2 = <code>0x0303</code></span>
+                                <span class="zh">TLS 1.2 = <code>0x0303</code></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Random</code></td>
+                            <td>
+                                <span class="en">32 bytes — 4-byte timestamp + 28-byte cryptographic random (used in key derivation)</span>
+                                <span class="zh">32 字节 — 4 字节时间戳 + 28 字节加密随机数（用于密钥派生）</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>SessionID</code></td>
+                            <td>
+                                <span class="en">Empty (new session) or cached value (TLS session resumption / abbreviated handshake)</span>
+                                <span class="zh">空（新会话）或缓存值（TLS 会话恢复 / 简短握手）</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>CipherSuites</code></td>
+                            <td>
+                                <span class="en">Ordered list of supported cipher suites. RFC 5216 §2.4 mandates at least
+                                <code>TLS_RSA_WITH_3DES_EDE_CBC_SHA</code>; modern deployments prefer AES-GCM suites.</span>
+                                <span class="zh">按优先级排列的支持密码套件列表。RFC 5216 §2.4 要求至少支持
+                                <code>TLS_RSA_WITH_3DES_EDE_CBC_SHA</code>；现代部署推荐 AES-GCM 套件。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>CompressionMethods</code></td>
+                            <td>
+                                <span class="en"><code>null</code> (0x00) — compression MUST NOT be used in EAP-TLS per RFC 5216 §5.3</span>
+                                <span class="zh"><code>null</code> (0x00) — 根据 RFC 5216 §5.3，EAP-TLS 中不得使用压缩</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Extensions</code></td>
+                            <td>
+                                <span class="en"><code>signature_algorithms</code>, <code>supported_groups</code> (for ECDHE),
+                                <code>server_name</code> (SNI — optional), <code>status_request</code> (OCSP stapling)</span>
+                                <span class="zh"><code>signature_algorithms</code>、<code>supported_groups</code>（用于 ECDHE）、
+                                <code>server_name</code>（SNI — 可选）、<code>status_request</code>（OCSP 装订）</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ── Step 3b: ServerHello + Certificates ── -->
+                <h3>
+                    <span class="en">3b. ServerHello + Certificate + CertificateRequest + ServerHelloDone</span>
+                    <span class="zh">3b. ServerHello + Certificate + CertificateRequest + ServerHelloDone</span>
+                </h3>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">←</div>
+                        <div class="step-content">
+                            <strong class="en">RADIUS (ISE) → Authenticator → Supplicant</strong>
+                            <strong class="zh">RADIUS（ISE）→ 认证者 → 请求方</strong>
+                            <p class="en">
+                                Cisco ISE responds with multiple TLS handshake messages, typically bundled in a single TLS record
+                                flight and carried inside one or more <code>RADIUS Access-Challenge</code> packets
+                                (each containing an <code>EAP-Message</code> attribute). Due to the large size of server
+                                certificates, <strong>EAP-TLS fragmentation</strong> is almost always required here (see §3h below).
+                            </p>
+                            <p class="zh">
+                                Cisco ISE 回复多个 TLS 握手消息，通常打包在单个 TLS 记录飞行中，通过一个或多个
+                                <code>RADIUS Access-Challenge</code> 报文承载（每个包含 <code>EAP-Message</code> 属性）。
+                                由于服务器证书体积较大，此处几乎总是需要 <strong>EAP-TLS 分片</strong>（参见下文 §3h）。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <table>
+                    <caption>
+                        <span class="en">Server Flight Messages</span>
+                        <span class="zh">服务器飞行消息</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">TLS Message</span><span class="zh">TLS 消息</span></th>
+                            <th><span class="en">Description</span><span class="zh">描述</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>ServerHello</code></td>
+                            <td>
+                                <span class="en">Selects TLS version (0x0303), cipher suite, compression method (null),
+                                and provides 32-byte server <code>Random</code>. Also contains a <code>SessionID</code> for
+                                potential future resumption.</span>
+                                <span class="zh">选择 TLS 版本（0x0303）、密码套件、压缩方法（null），并提供 32 字节服务器
+                                <code>Random</code>。还包含 <code>SessionID</code> 用于未来的会话恢复。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Certificate</code></td>
+                            <td>
+                                <span class="en">ISE's X.509 certificate chain: ISE server certificate → Intermediate CA → Root CA.
+                                The supplicant must validate this chain (see §3c).</span>
+                                <span class="zh">ISE 的 X.509 证书链：ISE 服务器证书 → 中间 CA → 根 CA。
+                                请求方必须验证此证书链（参见 §3c）。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>ServerKeyExchange</code></td>
+                            <td>
+                                <span class="en">Only present for DHE/ECDHE cipher suites. Contains the server's ephemeral
+                                DH/ECDH public key, signed with the server's private key. Not sent for RSA key exchange.</span>
+                                <span class="zh">仅在 DHE/ECDHE 密码套件中存在。包含服务器的临时 DH/ECDH 公钥，
+                                由服务器私钥签名。RSA 密钥交换时不发送。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>CertificateRequest</code></td>
+                            <td>
+                                <span class="en"><strong>Critical for EAP-TLS</strong>: requests the client (AGV) certificate.
+                                Specifies acceptable <code>certificate_types</code> (RSA, ECDSA),
+                                <code>supported_signature_algorithms</code>, and optionally
+                                <code>certificate_authorities</code> (list of acceptable CA DNs).</span>
+                                <span class="zh"><strong>EAP-TLS 的关键消息</strong>：请求客户端（AGV）证书。指定可接受的
+                                <code>certificate_types</code>（RSA、ECDSA）、<code>supported_signature_algorithms</code>
+                                以及可选的 <code>certificate_authorities</code>（可接受的 CA DN 列表）。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>ServerHelloDone</code></td>
+                            <td>
+                                <span class="en">Signals the end of the server's hello-phase messages. The supplicant
+                                can now process all received messages and prepare its response flight.</span>
+                                <span class="zh">标志服务器问候阶段消息结束。请求方现在可以处理所有收到的消息并准备其响应飞行。</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ── Step 3c: Server Certificate Chain Validation ── -->
+                <h3>
+                    <span class="en">3c. Server Certificate Chain Validation (by Supplicant)</span>
+                    <span class="zh">3c. 服务器证书链验证（由请求方执行）</span>
+                </h3>
+
+                <p class="en">
+                    Before proceeding, the supplicant (AGV's 802.1X software) <strong>MUST</strong> validate the ISE server
+                    certificate chain. This is a critical security step — failure to properly validate opens the door to
+                    man-in-the-middle attacks. The validation follows standard X.509 path validation (RFC 5280).
+                </p>
+                <p class="zh">
+                    在继续之前，请求方（AGV 的 802.1X 软件）<strong>必须</strong>验证 ISE 服务器证书链。这是关键的安全步骤——
+                    验证不当将导致中间人攻击风险。验证遵循标准 X.509 路径验证（RFC 5280）。
+                </p>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong class="en">Chain Building</strong>
+                            <strong class="zh">证书链构建</strong>
+                            <p class="en">
+                                Build the chain: <code>ISE Server Cert</code> → <code>Intermediate CA</code> → <code>Root CA</code>.
+                                Each certificate's <code>Issuer</code> field must match the next certificate's <code>Subject</code>,
+                                and the <code>Authority Key Identifier</code> must match the issuer's <code>Subject Key Identifier</code>.
+                            </p>
+                            <p class="zh">
+                                构建证书链：<code>ISE 服务器证书</code> → <code>中间 CA</code> → <code>根 CA</code>。
+                                每个证书的 <code>Issuer</code> 字段必须与下一个证书的 <code>Subject</code> 匹配，
+                                <code>Authority Key Identifier</code> 必须与签发者的 <code>Subject Key Identifier</code> 匹配。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong class="en">Root CA Trust Anchor</strong>
+                            <strong class="zh">根 CA 信任锚</strong>
+                            <p class="en">
+                                The root CA certificate must exist in the supplicant's local trust store. In industrial AGV
+                                deployments, this is typically provisioned during initial device setup or via MDM/SCEP enrollment.
+                            </p>
+                            <p class="zh">
+                                根 CA 证书必须存在于请求方的本地信任存储中。在工业 AGV 部署中，通常在初始设备配置或通过
+                                MDM/SCEP 注册时预置。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong class="en">Signature Verification</strong>
+                            <strong class="zh">签名验证</strong>
+                            <p class="en">
+                                Verify each certificate's digital signature using the issuer's public key. The Root CA
+                                is self-signed (its own public key verifies its own signature).
+                            </p>
+                            <p class="zh">
+                                使用签发者的公钥验证每个证书的数字签名。根 CA 是自签名的（其自身公钥验证其自身签名）。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong class="en">Validity Period & Revocation Check</strong>
+                            <strong class="zh">有效期与吊销检查</strong>
+                            <p class="en">
+                                Check that each certificate's <code>notBefore</code> ≤ current time ≤ <code>notAfter</code>.
+                                Perform revocation checking via CRL (Certificate Revocation List) or OCSP (Online Certificate
+                                Status Protocol). OCSP stapling (<code>status_request</code> extension) reduces latency.
+                            </p>
+                            <p class="zh">
+                                检查每个证书的 <code>notBefore</code> ≤ 当前时间 ≤ <code>notAfter</code>。
+                                通过 CRL（证书吊销列表）或 OCSP（在线证书状态协议）执行吊销检查。
+                                OCSP 装订（<code>status_request</code> 扩展）可降低延迟。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <strong class="en">Server Identity Verification</strong>
+                            <strong class="zh">服务器身份验证</strong>
+                            <p class="en">
+                                Optionally verify the ISE server's identity by checking the certificate's
+                                <code>Subject CN</code> or <code>Subject Alternative Name (SAN)</code> against a configured
+                                expected server name. This prevents rogue RADIUS server attacks.
+                            </p>
+                            <p class="zh">
+                                可选地验证 ISE 服务器身份：检查证书的 <code>Subject CN</code> 或
+                                <code>Subject Alternative Name (SAN)</code> 是否与配置的预期服务器名称匹配。
+                                此步骤可防止恶意 RADIUS 服务器攻击。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-warning">
+                    <span class="en">
+                        <strong>⚠ Security Warning:</strong> Many industrial supplicants have a "Do not validate server certificate"
+                        option. This <strong>MUST</strong> be disabled in production. Without server certificate validation,
+                        an attacker can present a rogue RADIUS server with a self-signed certificate and capture client credentials
+                        (though in EAP-TLS this means capturing the client certificate exchange, which still requires the private key).
+                        However, disabling validation also enables TLS downgrade attacks.
+                    </span>
+                    <span class="zh">
+                        <strong>⚠ 安全警告：</strong>许多工业请求方有"不验证服务器证书"选项。在生产环境中<strong>必须禁用此选项</strong>。
+                        如果不验证服务器证书，攻击者可使用自签名证书的恶意 RADIUS 服务器捕获客户端凭据（虽然在 EAP-TLS 中这意味着
+                        捕获客户端证书交换，仍需私钥）。此外，禁用验证还会导致 TLS 降级攻击风险。
+                    </span>
+                </div>
+
+                <!-- ── Step 3d: Client Certificate Flight ── -->
+                <h3>
+                    <span class="en">3d. Client Certificate + ClientKeyExchange + CertificateVerify + ChangeCipherSpec + Finished</span>
+                    <span class="zh">3d. 客户端证书 + ClientKeyExchange + CertificateVerify + ChangeCipherSpec + Finished</span>
+                </h3>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">→</div>
+                        <div class="step-content">
+                            <strong class="en">Supplicant → Authenticator → RADIUS (ISE)</strong>
+                            <strong class="zh">请求方 → 认证者 → RADIUS（ISE）</strong>
+                            <p class="en">
+                                The supplicant responds with its own flight of TLS messages, again carried inside
+                                <code>EAP-Response/EAP-TLS</code> and relayed via <code>RADIUS Access-Request</code>.
+                                This flight is also large (contains the client certificate chain) and typically requires fragmentation.
+                            </p>
+                            <p class="zh">
+                                请求方回复自己的 TLS 消息飞行，同样封装在 <code>EAP-Response/EAP-TLS</code> 中，
+                                通过 <code>RADIUS Access-Request</code> 转发。此飞行也较大（包含客户端证书链），通常需要分片。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <table>
+                    <caption>
+                        <span class="en">Client Flight Messages</span>
+                        <span class="zh">客户端飞行消息</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">TLS Message</span><span class="zh">TLS 消息</span></th>
+                            <th><span class="en">Description</span><span class="zh">描述</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Certificate</code></td>
+                            <td>
+                                <span class="en">The AGV's X.509 client certificate chain. In industrial deployments, typically:
+                                AGV device cert (CN = serial number or MAC) → Intermediate CA → Root CA. The Root CA should
+                                be the same PKI hierarchy trusted by ISE, or a cross-certified CA.</span>
+                                <span class="zh">AGV 的 X.509 客户端证书链。在工业部署中通常为：
+                                AGV 设备证书（CN = 序列号或 MAC）→ 中间 CA → 根 CA。根 CA 应与 ISE 信任的 PKI 层次结构相同，
+                                或为交叉认证的 CA。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>ClientKeyExchange</code></td>
+                            <td>
+                                <span class="en">For <strong>RSA</strong>: contains the Pre-Master Secret (PMS) — 48 bytes,
+                                encrypted with the server's public key. For <strong>ECDHE</strong>: contains the client's
+                                ephemeral ECDH public key. The PMS is then computed as the shared ECDH secret.</span>
+                                <span class="zh">对于 <strong>RSA</strong>：包含预主密钥（PMS）— 48 字节，
+                                用服务器公钥加密。对于 <strong>ECDHE</strong>：包含客户端的临时 ECDH 公钥。
+                                PMS 则计算为共享的 ECDH 密钥。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>CertificateVerify</code></td>
+                            <td>
+                                <span class="en"><strong>Proves possession of the private key</strong>: the supplicant signs a hash
+                                of all handshake messages exchanged so far using its private key. ISE verifies this signature
+                                with the client certificate's public key. This is the cryptographic proof of identity.</span>
+                                <span class="zh"><strong>证明私钥持有权</strong>：请求方使用其私钥对迄今为止交换的所有握手消息的哈希进行签名。
+                                ISE 使用客户端证书的公钥验证此签名。这是身份的密码学证明。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>ChangeCipherSpec</code></td>
+                            <td>
+                                <span class="en">Signals that all subsequent messages from the client will be encrypted using
+                                the negotiated cipher suite and keys derived from the master secret. (This is technically a
+                                protocol message, not a handshake message.)</span>
+                                <span class="zh">指示客户端后续所有消息将使用协商的密码套件和从主密钥派生的密钥加密。
+                                （这在技术上是协议消息，不是握手消息。）</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Finished</code></td>
+                            <td>
+                                <span class="en">The first encrypted message. Contains a <code>verify_data</code> value —
+                                a PRF hash over the master secret and all handshake messages. ISE decrypts and verifies this
+                                to confirm the handshake integrity and that both sides derived the same keys.</span>
+                                <span class="zh">第一条加密消息。包含 <code>verify_data</code> 值——对主密钥和所有握手消息
+                                的 PRF 哈希。ISE 解密并验证此值以确认握手完整性及双方派生了相同的密钥。</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ── Step 3e: Client Certificate Validation by ISE ── -->
+                <h3>
+                    <span class="en">3e. Client Certificate Validation (by Cisco ISE)</span>
+                    <span class="zh">3e. 客户端证书验证（由 Cisco ISE 执行）</span>
+                </h3>
+
+                <p class="en">
+                    Upon receiving the client's certificate flight, Cisco ISE performs comprehensive validation before
+                    completing the handshake. ISE's certificate validation is configured under
+                    <strong>Administration → Certificates → Certificate Store</strong> and
+                    <strong>Policy → Authentication Policy</strong>.
+                </p>
+                <p class="zh">
+                    收到客户端证书飞行后，Cisco ISE 在完成握手前执行全面验证。ISE 的证书验证在
+                    <strong>Administration → Certificates → Certificate Store</strong> 和
+                    <strong>Policy → Authentication Policy</strong> 下配置。
+                </p>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong class="en">Certificate Chain Validation</strong>
+                            <strong class="zh">证书链验证</strong>
+                            <p class="en">
+                                Same chain-building and signature verification as §3c, but now ISE validates the
+                                <em>client</em> certificate chain against its trusted certificate store.
+                            </p>
+                            <p class="zh">
+                                与 §3c 相同的证书链构建和签名验证，但此处 ISE 根据其信任的证书存储验证<em>客户端</em>证书链。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong class="en">CN / SAN Identity Check</strong>
+                            <strong class="zh">CN / SAN 身份检查</strong>
+                            <p class="en">
+                                ISE extracts the client identity from the certificate's <code>Subject CN</code>,
+                                <code>Subject Alternative Name</code> (e.g., DNS name, email, or custom OID), or
+                                other configurable fields. This identity is matched against ISE's identity sources
+                                (internal database, LDAP, Active Directory) for authorization policy lookup.
+                            </p>
+                            <p class="zh">
+                                ISE 从证书的 <code>Subject CN</code>、<code>Subject Alternative Name</code>
+                                （如 DNS 名称、邮箱或自定义 OID）或其他可配置字段中提取客户端身份。此身份与 ISE 的身份源
+                                （内部数据库、LDAP、Active Directory）匹配以进行授权策略查找。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong class="en">Validity Period Check</strong>
+                            <strong class="zh">有效期检查</strong>
+                            <p class="en">
+                                Verify <code>notBefore</code> ≤ current time ≤ <code>notAfter</code> for all certificates
+                                in the chain. Expired or not-yet-valid certificates cause authentication failure.
+                            </p>
+                            <p class="zh">
+                                验证链中所有证书的 <code>notBefore</code> ≤ 当前时间 ≤ <code>notAfter</code>。
+                                过期或尚未生效的证书将导致认证失败。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong class="en">CRL / OCSP Revocation Check</strong>
+                            <strong class="zh">CRL / OCSP 吊销检查</strong>
+                            <p class="en">
+                                ISE checks whether the client certificate has been revoked. Configured under
+                                <strong>Administration → Certificates → OCSP Client Profile</strong> or CRL distribution points.
+                                If the revocation check fails or the certificate is revoked, ISE sends
+                                <code>Access-Reject</code> with an <code>EAP-Failure</code>.
+                            </p>
+                            <p class="zh">
+                                ISE 检查客户端证书是否已被吊销。在 <strong>Administration → Certificates → OCSP Client Profile</strong>
+                                或 CRL 分发点下配置。如果吊销检查失败或证书已吊销，ISE 发送
+                                <code>Access-Reject</code> 及 <code>EAP-Failure</code>。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <strong class="en">CertificateVerify Signature Validation</strong>
+                            <strong class="zh">CertificateVerify 签名验证</strong>
+                            <p class="en">
+                                ISE verifies the <code>CertificateVerify</code> message signature using the client certificate's
+                                public key. This cryptographically proves the supplicant possesses the corresponding private key
+                                — the definitive proof of identity in EAP-TLS.
+                            </p>
+                            <p class="zh">
+                                ISE 使用客户端证书的公钥验证 <code>CertificateVerify</code> 消息签名。这从密码学上证明
+                                请求方持有对应的私钥——这是 EAP-TLS 中身份的最终证明。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Step 3f: Server ChangeCipherSpec + Finished ── -->
+                <h3>
+                    <span class="en">3f. Server ChangeCipherSpec + Finished → TLS Tunnel Established</span>
+                    <span class="zh">3f. 服务器 ChangeCipherSpec + Finished → TLS 隧道建立</span>
+                </h3>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">←</div>
+                        <div class="step-content">
+                            <strong class="en">RADIUS (ISE) → Authenticator → Supplicant</strong>
+                            <strong class="zh">RADIUS（ISE）→ 认证者 → 请求方</strong>
+                            <p class="en">
+                                If all validations pass, ISE sends its own <code>ChangeCipherSpec</code> and encrypted
+                                <code>Finished</code> message (containing <code>verify_data</code>). The supplicant verifies
+                                this to confirm the server also derived the same keys. At this point, the <strong>TLS tunnel
+                                is fully established</strong> and both sides have been mutually authenticated.
+                            </p>
+                            <p class="zh">
+                                如果所有验证通过，ISE 发送自己的 <code>ChangeCipherSpec</code> 和加密的
+                                <code>Finished</code> 消息（包含 <code>verify_data</code>）。请求方验证此消息以确认
+                                服务器也派生了相同的密钥。此时，<strong>TLS 隧道完全建立</strong>，双方已完成双向认证。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="en">
+                        <strong>ℹ Note:</strong> In EAP-TLS (unlike HTTPS), no application data is exchanged over the TLS tunnel
+                        in TLS 1.2. The tunnel is established solely for the purpose of mutual authentication and key derivation.
+                        Once the handshake completes, the TLS session is used only to derive keying material (MSK/EMSK).
+                        In TLS 1.3, a single <code>0x00</code> byte of application data is sent as a protected success
+                        indication (RFC 9190 §2.5).
+                    </span>
+                    <span class="zh">
+                        <strong>ℹ 说明：</strong>在 EAP-TLS 中（与 HTTPS 不同），TLS 1.2 不会在 TLS 隧道上交换应用数据。
+                        隧道的建立仅用于双向认证和密钥派生。握手完成后，TLS 会话仅用于派生密钥材料（MSK/EMSK）。
+                        在 TLS 1.3 中，会发送一个 <code>0x00</code> 字节的应用数据作为受保护的成功指示（RFC 9190 §2.5）。
+                    </span>
+                </div>
+
+                <!-- ── Step 3g: Key Derivation ── -->
+                <h3>
+                    <span class="en">3g. Key Derivation — MSK &amp; EMSK</span>
+                    <span class="zh">3g. 密钥派生 — MSK 与 EMSK</span>
+                </h3>
+
+                <p class="en">
+                    After the TLS handshake completes, EAP-TLS derives keying material from the TLS master secret.
+                    These keys are <strong>NOT</strong> the TLS session keys — they are additional key material exported
+                    from the TLS session for use by the 802.1X/802.11 infrastructure.
+                </p>
+                <p class="zh">
+                    TLS 握手完成后，EAP-TLS 从 TLS 主密钥派生密钥材料。这些密钥<strong>不是</strong> TLS 会话密钥——
+                    它们是从 TLS 会话中导出的额外密钥材料，供 802.1X/802.11 基础设施使用。
+                </p>
+
+                <h4>
+                    <span class="en">TLS 1.2 Key Derivation (RFC 5216 §2.3)</span>
+                    <span class="zh">TLS 1.2 密钥派生（RFC 5216 §2.3）</span>
+                </h4>
+
+                <div class="code-block">
+Key_Material = TLS-PRF-128(master_secret,
+                           "client EAP encryption",
+                           client.random || server.random)
+
+MSK  = Key_Material[0..63]     // First  64 octets (512 bits)
+EMSK = Key_Material[64..127]   // Next   64 octets (512 bits)
+
+Session-Id = 0x0D || client.random || server.random
+// 0x0D = EAP-TLS Type code (13)
+                </div>
+
+                <table>
+                    <caption>
+                        <span class="en">EAP-TLS 1.2 Derived Keys</span>
+                        <span class="zh">EAP-TLS 1.2 派生密钥</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">Key</span><span class="zh">密钥</span></th>
+                            <th><span class="en">Size</span><span class="zh">大小</span></th>
+                            <th><span class="en">Purpose</span><span class="zh">用途</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>MSK</strong> <span class="en">(Master Session Key)</span><span class="zh">（主会话密钥）</span></td>
+                            <td>64 <span class="en">bytes</span><span class="zh">字节</span></td>
+                            <td>
+                                <span class="en">Sent from RADIUS server to authenticator in <code>MS-MPPE-Recv-Key</code>
+                                and <code>MS-MPPE-Send-Key</code> attributes within the <code>Access-Accept</code>.
+                                Used as the PMK (Pairwise Master Key) in 802.11i — input to the 4-Way Handshake to derive
+                                PTK (Pairwise Transient Key) for wireless encryption.</span>
+                                <span class="zh">通过 <code>Access-Accept</code> 中的 <code>MS-MPPE-Recv-Key</code>
+                                和 <code>MS-MPPE-Send-Key</code> 属性从 RADIUS 服务器发送至认证者。
+                                在 802.11i 中用作 PMK（成对主密钥）——作为四次握手的输入以派生 PTK（成对临时密钥）用于无线加密。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>EMSK</strong> <span class="en">(Extended MSK)</span><span class="zh">（扩展主会话密钥）</span></td>
+                            <td>64 <span class="en">bytes</span><span class="zh">字节</span></td>
+                            <td>
+                                <span class="en">Reserved for future use and additional key derivation. Not sent to the
+                                authenticator. Can be used for domain-specific keys per RFC 5295.</span>
+                                <span class="zh">保留用于未来使用和额外密钥派生。不发送至认证者。可根据 RFC 5295 用于特定域密钥。</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>
+                    <span class="en">TLS 1.3 Key Derivation (RFC 9190 §2.3)</span>
+                    <span class="zh">TLS 1.3 密钥派生（RFC 9190 §2.3）</span>
+                </h4>
+
+                <div class="code-block">
+// TLS 1.3 uses TLS-Exporter (RFC 8446 §7.5)
+
+MSK  = TLS-Exporter("EXPORTER_EAP_TLS_Key_Material",
+                     "", 128)     // 128 octets → first 64 = MSK, next 64 = EMSK
+// Actually:
+Key_Material = TLS-Exporter("EXPORTER_EAP_TLS_Key_Material", "", 128)
+MSK  = Key_Material[0..63]
+EMSK = Key_Material[64..127]
+
+Method-Id = TLS-Exporter("EXPORTER_EAP_TLS_Method-Id", "", 64)
+Session-Id = 0x0D || Method-Id
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="en">
+                        <strong>ℹ TLS 1.3 Key Derivation Difference:</strong> TLS 1.3 does not use the <code>TLS-PRF</code>
+                        function. Instead, it uses <code>TLS-Exporter</code> (RFC 8446 §7.5) with specific labels.
+                        The <code>client.random</code> and <code>server.random</code> values are NOT directly used in the
+                        exporter; the TLS 1.3 key schedule (HKDF-based) provides the exporter master secret internally.
+                        The Session-Id also differs — it uses an exported Method-Id rather than concatenated randoms.
+                    </span>
+                    <span class="zh">
+                        <strong>ℹ TLS 1.3 密钥派生差异：</strong>TLS 1.3 不使用 <code>TLS-PRF</code> 函数，
+                        而是使用 <code>TLS-Exporter</code>（RFC 8446 §7.5）及特定标签。
+                        <code>client.random</code> 和 <code>server.random</code> 值不直接用于导出器；
+                        TLS 1.3 密钥调度（基于 HKDF）内部提供导出器主密钥。
+                        Session-Id 也不同——使用导出的 Method-Id 而非拼接的随机数。
+                    </span>
+                </div>
+
+                <!-- ── Step 3h: Cipher Suite Recommendations ── -->
+                <h3>
+                    <span class="en">3h. Cipher Suite Recommendations</span>
+                    <span class="zh">3h. 密码套件推荐</span>
+                </h3>
+
+                <table>
+                    <caption>
+                        <span class="en">Recommended Cipher Suites for EAP-TLS</span>
+                        <span class="zh">EAP-TLS 推荐密码套件</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">TLS Version</span><span class="zh">TLS 版本</span></th>
+                            <th><span class="en">Cipher Suite</span><span class="zh">密码套件</span></th>
+                            <th><span class="en">Notes</span><span class="zh">备注</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>TLS 1.2</td>
+                            <td><code>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</code></td>
+                            <td>
+                                <span class="en">Preferred — PFS via ECDHE, AEAD encryption</span>
+                                <span class="zh">推荐 — 通过 ECDHE 实现前向保密，AEAD 加密</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TLS 1.2</td>
+                            <td><code>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</code></td>
+                            <td>
+                                <span class="en">Preferred for ECDSA certificates — strongest PFS + AEAD</span>
+                                <span class="zh">ECDSA 证书推荐 — 最强前向保密 + AEAD</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TLS 1.2</td>
+                            <td><code>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</code></td>
+                            <td>
+                                <span class="en">Good balance of security and performance</span>
+                                <span class="zh">安全性与性能的良好平衡</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TLS 1.2</td>
+                            <td><code>TLS_RSA_WITH_3DES_EDE_CBC_SHA</code></td>
+                            <td>
+                                <span class="en">RFC 5216 §2.4 mandatory minimum — <strong>NOT recommended</strong> for production;
+                                no PFS, weak cipher</span>
+                                <span class="zh">RFC 5216 §2.4 强制最低要求 — <strong>不推荐</strong>用于生产；无前向保密，弱密码</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TLS 1.3</td>
+                            <td><code>TLS_AES_256_GCM_SHA384</code></td>
+                            <td>
+                                <span class="en">RFC 8446 §9 mandatory — all TLS 1.3 suites have PFS (ECDHE/DHE built-in)</span>
+                                <span class="zh">RFC 8446 §9 强制 — 所有 TLS 1.3 套件内置前向保密（ECDHE/DHE）</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TLS 1.3</td>
+                            <td><code>TLS_AES_128_GCM_SHA256</code></td>
+                            <td>
+                                <span class="en">RFC 8446 §9 mandatory — good for resource-constrained AGV devices</span>
+                                <span class="zh">RFC 8446 §9 强制 — 适用于资源受限的 AGV 设备</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TLS 1.3</td>
+                            <td><code>TLS_CHACHA20_POLY1305_SHA256</code></td>
+                            <td>
+                                <span class="en">Excellent for software-only implementations (no AES-NI needed)</span>
+                                <span class="zh">适合纯软件实现（无需 AES-NI 硬件加速）</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ── Step 3i: TLS 1.3 Differences ── -->
+                <h3>
+                    <span class="en">3i. TLS 1.3 Handshake Differences (RFC 9190)</span>
+                    <span class="zh">3i. TLS 1.3 握手差异（RFC 9190）</span>
+                </h3>
+
+                <p class="en">
+                    RFC 9190 updates EAP-TLS for TLS 1.3, introducing significant changes to the handshake flow.
+                    The fundamental authentication model remains the same (mutual certificate authentication), but the
+                    handshake mechanics differ substantially.
+                </p>
+                <p class="zh">
+                    RFC 9190 将 EAP-TLS 更新为支持 TLS 1.3，引入了握手流程的重大变化。
+                    基本认证模型保持不变（双向证书认证），但握手机制有显著差异。
+                </p>
+
+                <table>
+                    <caption>
+                        <span class="en">TLS 1.2 vs TLS 1.3 in EAP-TLS — Key Differences</span>
+                        <span class="zh">EAP-TLS 中 TLS 1.2 与 TLS 1.3 的关键差异</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">Aspect</span><span class="zh">方面</span></th>
+                            <th>TLS 1.2 (RFC 5216)</th>
+                            <th>TLS 1.3 (RFC 9190)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="en">Handshake Round Trips</span><span class="zh">握手往返次数</span></td>
+                            <td>2-RTT</td>
+                            <td>
+                                <span class="en">1-RTT (server flight combines Hello + encrypted extensions + certificate)</span>
+                                <span class="zh">1-RTT（服务器飞行合并 Hello + 加密扩展 + 证书）</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Certificate Encryption</span><span class="zh">证书加密</span></td>
+                            <td>
+                                <span class="en">Certificates sent in <strong>cleartext</strong></span>
+                                <span class="zh">证书以<strong>明文</strong>发送</span>
+                            </td>
+                            <td>
+                                <span class="en">Certificates sent <strong>encrypted</strong> (after ServerHello + key exchange)</span>
+                                <span class="zh">证书<strong>加密</strong>发送（在 ServerHello + 密钥交换之后）</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Identity Privacy</span><span class="zh">身份隐私</span></td>
+                            <td>
+                                <span class="en">Client certificate visible to eavesdroppers; requires Anonymous NAI workaround</span>
+                                <span class="zh">客户端证书对窃听者可见；需要匿名 NAI 变通方案</span>
+                            </td>
+                            <td>
+                                <span class="en">Client certificate encrypted — native identity privacy</span>
+                                <span class="zh">客户端证书加密——原生身份隐私保护</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>CertificateRequest</code></td>
+                            <td>
+                                <span class="en">Sent in cleartext as part of server's first flight</span>
+                                <span class="zh">以明文发送，作为服务器第一飞行的一部分</span>
+                            </td>
+                            <td>
+                                <span class="en">Sent <strong>encrypted</strong> after ServerHello</span>
+                                <span class="zh">在 ServerHello 之后<strong>加密</strong>发送</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Key Exchange</span><span class="zh">密钥交换</span></td>
+                            <td>
+                                <span class="en">RSA, DHE, or ECDHE (configurable)</span>
+                                <span class="zh">RSA、DHE 或 ECDHE（可配置）</span>
+                            </td>
+                            <td>
+                                <span class="en"><strong>ECDHE or DHE only</strong> — PFS is mandatory</span>
+                                <span class="zh"><strong>仅 ECDHE 或 DHE</strong>——前向保密为强制要求</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Key Derivation</span><span class="zh">密钥派生</span></td>
+                            <td><code>TLS-PRF</code></td>
+                            <td><code>TLS-Exporter</code> (HKDF-based)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Session Resumption</span><span class="zh">会话恢复</span></td>
+                            <td>
+                                <span class="en">Session ID or Session Ticket</span>
+                                <span class="zh">Session ID 或 Session Ticket</span>
+                            </td>
+                            <td>
+                                <span class="en">PSK-based resumption (NewSessionTicket). <strong>RFC 9190 §5.7 prohibits
+                                resumption</strong> for EAP-TLS 1.3 — each authentication MUST be a full handshake.</span>
+                                <span class="zh">基于 PSK 的恢复（NewSessionTicket）。<strong>RFC 9190 §5.7 禁止
+                                EAP-TLS 1.3 的会话恢复</strong>——每次认证必须是完整握手。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Success Indication</span><span class="zh">成功指示</span></td>
+                            <td>
+                                <span class="en">Empty EAP-TLS response (no TLS data) after server Finished</span>
+                                <span class="zh">服务器 Finished 后发送空 EAP-TLS 响应（无 TLS 数据）</span>
+                            </td>
+                            <td>
+                                <span class="en">Server sends protected <code>0x00</code> application data; client
+                                sends empty response. This confirms TLS 1.3 tunnel intact (RFC 9190 §2.5).</span>
+                                <span class="zh">服务器发送受保护的 <code>0x00</code> 应用数据；客户端发送空响应。
+                                这确认 TLS 1.3 隧道完整（RFC 9190 §2.5）。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>ChangeCipherSpec</code></td>
+                            <td>
+                                <span class="en">Explicit protocol message before Finished</span>
+                                <span class="zh">在 Finished 之前的显式协议消息</span>
+                            </td>
+                            <td>
+                                <span class="en"><strong>Removed</strong> in TLS 1.3 (may appear as compatibility middlebox artifact)</span>
+                                <span class="zh">在 TLS 1.3 中<strong>已移除</strong>（可能作为兼容性中间盒工件出现）</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-warning">
+                    <span class="en">
+                        <strong>⚠ RFC 9190 §5.7 — No Resumption:</strong> Unlike web TLS 1.3, EAP-TLS 1.3 explicitly
+                        <strong>prohibits TLS session resumption</strong>. Servers MUST NOT send <code>NewSessionTicket</code>
+                        messages, and clients MUST NOT offer PSK-based resumption in ClientHello. Each EAP-TLS authentication
+                        MUST perform a full handshake. This is because EAP-TLS resumption is handled at the EAP layer
+                        (PMKSA caching, not TLS layer resumption).
+                    </span>
+                    <span class="zh">
+                        <strong>⚠ RFC 9190 §5.7 — 禁止恢复：</strong>与 Web TLS 1.3 不同，EAP-TLS 1.3 明确
+                        <strong>禁止 TLS 会话恢复</strong>。服务器不得发送 <code>NewSessionTicket</code> 消息，
+                        客户端不得在 ClientHello 中提供基于 PSK 的恢复。每次 EAP-TLS 认证必须执行完整握手。
+                        这是因为 EAP-TLS 的恢复在 EAP 层处理（PMKSA 缓存，而非 TLS 层恢复）。
+                    </span>
+                </div>
+
+                <!-- ── Step 3j: EAP-TLS Fragmentation ── -->
+                <h3>
+                    <span class="en">3j. EAP-TLS Fragmentation (RFC 5216 §2.1.5)</span>
+                    <span class="zh">3j. EAP-TLS 分片（RFC 5216 §2.1.5）</span>
+                </h3>
+
+                <p class="en">
+                    TLS handshake messages — especially certificate chains — often exceed the EAP MTU
+                    (typically 1020 bytes for RADIUS, limited by the 4096-byte RADIUS packet size minus overhead).
+                    EAP-TLS handles this with its own fragmentation mechanism, independent of IP fragmentation.
+                </p>
+                <p class="zh">
+                    TLS 握手消息——尤其是证书链——通常超过 EAP MTU（对于 RADIUS 通常为 1020 字节，
+                    受限于 4096 字节 RADIUS 包大小减去开销）。EAP-TLS 通过自己的分片机制处理此问题，独立于 IP 分片。
+                </p>
+
+                <table>
+                    <caption>
+                        <span class="en">EAP-TLS Fragmentation Flags (RFC 5216 §3.1)</span>
+                        <span class="zh">EAP-TLS 分片标志（RFC 5216 §3.1）</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">Flag</span><span class="zh">标志</span></th>
+                            <th><span class="en">Bit</span><span class="zh">位</span></th>
+                            <th><span class="en">Meaning</span><span class="zh">含义</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>L</strong> (Length included)</td>
+                            <td>Bit 7</td>
+                            <td>
+                                <span class="en">Set on the <strong>first fragment</strong> — indicates the 4-byte
+                                <code>TLS Message Length</code> field is present, giving the total unfragmented TLS data length.</span>
+                                <span class="zh">在<strong>第一个分片</strong>上设置——指示存在 4 字节
+                                <code>TLS Message Length</code> 字段，给出未分片的 TLS 数据总长度。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>M</strong> (More fragments)</td>
+                            <td>Bit 6</td>
+                            <td>
+                                <span class="en">Set on all fragments <strong>except the last one</strong>.
+                                The receiver knows reassembly is complete when it receives a fragment without M set.</span>
+                                <span class="zh">在<strong>除最后一个以外</strong>的所有分片上设置。
+                                接收方在收到未设置 M 的分片时知道重组完成。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>S</strong> (Start)</td>
+                            <td>Bit 5</td>
+                            <td>
+                                <span class="en">Set only by the server in the initial <code>EAP-Request/EAP-TLS</code>
+                                to signal the start of the EAP-TLS conversation. Not related to fragmentation per se.</span>
+                                <span class="zh">仅由服务器在初始 <code>EAP-Request/EAP-TLS</code> 中设置，
+                                以信号 EAP-TLS 对话开始。与分片本身无直接关系。</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong class="en">Sender fragments TLS data</strong>
+                            <strong class="zh">发送方对 TLS 数据分片</strong>
+                            <p class="en">
+                                The sender (ISE or supplicant) splits the TLS record into chunks that fit within the EAP MTU.
+                                The first chunk has L+M flags set (and includes TLS Message Length). Middle chunks have only M set.
+                                The last chunk has neither L nor M set.
+                            </p>
+                            <p class="zh">
+                                发送方（ISE 或请求方）将 TLS 记录拆分为适合 EAP MTU 的块。
+                                第一个块设置 L+M 标志（并包含 TLS 消息长度）。中间块仅设置 M。
+                                最后一个块不设置 L 和 M。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong class="en">Receiver acknowledges each fragment</strong>
+                            <strong class="zh">接收方确认每个分片</strong>
+                            <p class="en">
+                                For each fragment received (except the last), the receiver sends an <strong>empty
+                                EAP-Response/EAP-TLS</strong> (or EAP-Request/EAP-TLS for server-to-client direction) —
+                                a message with Type 13 but zero-length TLS data. This serves as a fragment acknowledgment,
+                                triggering the sender to transmit the next fragment.
+                            </p>
+                            <p class="zh">
+                                对于收到的每个分片（最后一个除外），接收方发送一个<strong>空的
+                                EAP-Response/EAP-TLS</strong>（或服务器到客户端方向的 EAP-Request/EAP-TLS）——
+                                Type 13 但 TLS 数据长度为零的消息。这充当分片确认，触发发送方发送下一个分片。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong class="en">Reassembly and processing</strong>
+                            <strong class="zh">重组与处理</strong>
+                            <p class="en">
+                                After receiving the final fragment (no M flag), the receiver reassembles the complete TLS
+                                record and processes the TLS handshake message(s) within. The receiver then responds with
+                                its own TLS data (which may also need fragmentation).
+                            </p>
+                            <p class="zh">
+                                收到最终分片（无 M 标志）后，接收方重组完整的 TLS 记录并处理其中的 TLS 握手消息。
+                                然后接收方回复自己的 TLS 数据（可能也需要分片）。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="en">
+                        <strong>ℹ Fragmentation Impact on Performance:</strong> A typical EAP-TLS handshake with 2048-bit RSA
+                        certificates requires 8–12 EAP round trips due to fragmentation. With 4096-bit certificates or long
+                        chains, this can exceed 15 round trips. In industrial wireless environments with AGVs, each round trip
+                        adds ~2–5 ms latency (Wi-Fi) + ~1–3 ms (RADIUS). Total authentication time can reach
+                        <strong>50–150 ms</strong>, which matters for time-sensitive AGV roaming. Using ECDSA certificates
+                        (smaller keys) and minimizing the certificate chain length significantly reduces fragmentation.
+                    </span>
+                    <span class="zh">
+                        <strong>ℹ 分片对性能的影响：</strong>使用 2048 位 RSA 证书的典型 EAP-TLS 握手由于分片需要 8–12 次
+                        EAP 往返。使用 4096 位证书或较长的证书链时可能超过 15 次往返。在 AGV 工业无线环境中，每次往返
+                        增加约 2–5 ms 延迟（Wi-Fi）+ 约 1–3 ms（RADIUS）。总认证时间可达
+                        <strong>50–150 ms</strong>，这对时间敏感的 AGV 漫游很重要。使用 ECDSA 证书（更小的密钥）
+                        和最小化证书链长度可显著减少分片。
+                    </span>
+                </div>
+</div><!-- /.card (last Phase 3 card) -->
+</div><!-- /.container -->
+            </section>
+            <!-- END PHASE 3 -->
+
+
+            <!-- ============================================================
+                 PHASE 4 — AUTHORIZATION & PORT ENABLEMENT
+                 ============================================================ -->
+<section class="section phase-4" id="phase4">
+<div class="container">
+
+<div class="phase-header">
+<div class="phase-number">4</div>
+<div>
+<h2 style="margin-bottom:2px">
+<span class="en">Phase 4 — Authorization & Session Activation</span>
+<span class="zh">阶段 4 — 授权与会话激活</span>
+</h2>
+<p class="ref" style="margin-top:0">RFC 3748 §4.2 | IEEE 802.1X-2020 §12.7</p>
+</div>
+</div>
+
+<div class="card">
+
+                <p class="en">
+                    With the TLS handshake complete and mutual authentication successful, the EAP method concludes
+                    and Cisco ISE makes an authorization decision. This phase transitions the network port from
+                    <strong>Unauthorized</strong> to <strong>Authorized</strong> state, applying appropriate network
+                    access policies to the authenticated AGV.
+                </p>
+                <p class="zh">
+                    TLS 握手完成且双向认证成功后，EAP 方法结束，Cisco ISE 做出授权决策。此阶段将网络端口从
+                    <strong>未授权</strong>状态转换为<strong>已授权</strong>状态，并对已认证的 AGV 应用相应的网络访问策略。
+                </p>
+
+                <!-- ── Step 4a: EAP-Success & RADIUS Access-Accept ── -->
+                <h3>
+                    <span class="en">4a. EAP-Success &amp; RADIUS Access-Accept</span>
+                    <span class="zh">4a. EAP-Success 与 RADIUS Access-Accept</span>
+                </h3>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">←</div>
+                        <div class="step-content">
+                            <strong class="en">RADIUS (ISE) → Authenticator</strong>
+                            <strong class="zh">RADIUS（ISE）→ 认证者</strong>
+                            <p class="en">
+                                Cisco ISE sends a <code>RADIUS Access-Accept</code> (Code 2) message to the authenticator.
+                                This message contains:
+                            </p>
+                            <p class="zh">
+                                Cisco ISE 向认证者发送 <code>RADIUS Access-Accept</code>（Code 2）消息。此消息包含：
+                            </p>
+                            <ul>
+                                <li>
+                                    <span class="en"><code>EAP-Message</code> attribute (Type 79) containing the
+                                    <code>EAP-Success</code> packet (Code 3, Identifier matching the last EAP exchange)</span>
+                                    <span class="zh"><code>EAP-Message</code> 属性（Type 79），包含
+                                    <code>EAP-Success</code> 数据包（Code 3，Identifier 与最后一次 EAP 交换匹配）</span>
+                                </li>
+                                <li>
+                                    <span class="en"><code>MS-MPPE-Send-Key</code> (Type 16) and <code>MS-MPPE-Recv-Key</code>
+                                    (Type 17) — vendor-specific attributes carrying the <strong>MSK</strong>
+                                    (split into two 32-byte halves), encrypted with the RADIUS shared secret</span>
+                                    <span class="zh"><code>MS-MPPE-Send-Key</code>（Type 16）和 <code>MS-MPPE-Recv-Key</code>
+                                    （Type 17）—— 厂商特定属性，承载 <strong>MSK</strong>（分为两个 32 字节的半部分），
+                                    用 RADIUS 共享密钥加密</span>
+                                </li>
+                                <li>
+                                    <span class="en">Authorization attributes (see §4b below)</span>
+                                    <span class="zh">授权属性（参见下文 §4b）</span>
+                                </li>
+                                <li>
+                                    <span class="en"><code>Message-Authenticator</code> attribute (HMAC-MD5 integrity check, RFC 3579 §3.2)</span>
+                                    <span class="zh"><code>Message-Authenticator</code> 属性（HMAC-MD5 完整性检查，RFC 3579 §3.2）</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">←</div>
+                        <div class="step-content">
+                            <strong class="en">Authenticator → Supplicant</strong>
+                            <strong class="zh">认证者 → 请求方</strong>
+                            <p class="en">
+                                The authenticator (AP/Switch) extracts the <code>EAP-Success</code> from the RADIUS message
+                                and forwards it to the supplicant via <code>EAPOL-EAP</code> (Packet Type 0x00, EtherType 0x888E).
+                                The MSK is <strong>NOT</strong> forwarded to the supplicant — both sides derived it independently
+                                from the TLS handshake.
+                            </p>
+                            <p class="zh">
+                                认证者（AP/交换机）从 RADIUS 消息中提取 <code>EAP-Success</code>，
+                                通过 <code>EAPOL-EAP</code>（Packet Type 0x00，EtherType 0x888E）转发至请求方。
+                                MSK <strong>不会</strong>转发至请求方——双方从 TLS 握手中独立派生了 MSK。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="en">
+                        <strong>ℹ TLS 1.3 Protected Success Indication (RFC 9190 §2.5):</strong>
+                        Before the final <code>EAP-Success</code>, the TLS 1.3 EAP-TLS server sends an application data
+                        record containing a single <code>0x00</code> byte through the encrypted TLS tunnel. The client
+                        MUST receive and validate this byte (it must be exactly <code>0x00</code>; any other value is a
+                        fatal error). The client then responds with an empty EAP-Response, and only then does ISE send the
+                        RADIUS Access-Accept with EAP-Success. This mechanism ensures the TLS 1.3 tunnel was properly
+                        established and prevents certain truncation attacks.
+                    </span>
+                    <span class="zh">
+                        <strong>ℹ TLS 1.3 受保护的成功指示（RFC 9190 §2.5）：</strong>
+                        在最终 <code>EAP-Success</code> 之前，TLS 1.3 EAP-TLS 服务器通过加密的 TLS 隧道发送包含单个
+                        <code>0x00</code> 字节的应用数据记录。客户端必须接收并验证此字节（必须恰好为 <code>0x00</code>；
+                        任何其他值均为致命错误）。然后客户端回复空的 EAP-Response，之后 ISE 才发送包含 EAP-Success 的
+                        RADIUS Access-Accept。此机制确保 TLS 1.3 隧道正确建立，防止某些截断攻击。
+                    </span>
+                </div>
+
+                <!-- ── Step 4b: Authorization Attributes ── -->
+                <h3>
+                    <span class="en">4b. Authorization Attributes</span>
+                    <span class="zh">4b. 授权属性</span>
+                </h3>
+
+                <p class="en">
+                    The <code>RADIUS Access-Accept</code> carries authorization attributes that instruct the authenticator
+                    how to treat the authenticated session. These are configured in Cisco ISE's
+                    <strong>Policy → Authorization Policy</strong> and matched based on identity, certificate attributes,
+                    device type, location, and other conditions.
+                </p>
+                <p class="zh">
+                    <code>RADIUS Access-Accept</code> 携带授权属性，指示认证者如何处理已认证的会话。这些属性在 Cisco ISE 的
+                    <strong>Policy → Authorization Policy</strong> 中配置，根据身份、证书属性、设备类型、位置和其他条件匹配。
+                </p>
+
+                <table>
+                    <caption>
+                        <span class="en">Common RADIUS Authorization Attributes for AGV Deployments</span>
+                        <span class="zh">AGV 部署中常见的 RADIUS 授权属性</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">Attribute</span><span class="zh">属性</span></th>
+                            <th><span class="en">RADIUS Type</span><span class="zh">RADIUS 类型</span></th>
+                            <th><span class="en">Purpose &amp; Example</span><span class="zh">用途与示例</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Tunnel-Type</code></td>
+                            <td>Type 64</td>
+                            <td>
+                                <span class="en">Value = <code>VLAN</code> (13) — specifies that the tunnel attribute
+                                assigns a VLAN</span>
+                                <span class="zh">值 = <code>VLAN</code> (13) — 指定隧道属性分配 VLAN</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Tunnel-Medium-Type</code></td>
+                            <td>Type 65</td>
+                            <td>
+                                <span class="en">Value = <code>802</code> (6) — IEEE 802 media type</span>
+                                <span class="zh">值 = <code>802</code> (6) — IEEE 802 媒体类型</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Tunnel-Private-Group-ID</code></td>
+                            <td>Type 81</td>
+                            <td>
+                                <span class="en">VLAN name or number (e.g., <code>"AGV_PRODUCTION"</code> or <code>"100"</code>).
+                                The AGV is placed into this VLAN upon successful authentication.</span>
+                                <span class="zh">VLAN 名称或编号（如 <code>"AGV_PRODUCTION"</code> 或 <code>"100"</code>）。
+                                认证成功后 AGV 被放入此 VLAN。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Filter-Id</code></td>
+                            <td>Type 11</td>
+                            <td>
+                                <span class="en">References a named ACL on the authenticator (e.g., <code>"AGV-ACL"</code>).
+                                The switch/WLC applies this ACL to the port/session.</span>
+                                <span class="zh">引用认证者上的命名 ACL（如 <code>"AGV-ACL"</code>）。
+                                交换机/WLC 将此 ACL 应用于端口/会话。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="en"><strong>dACL</strong> (Downloadable ACL)</span>
+                                <span class="zh"><strong>dACL</strong>（可下载 ACL）</span>
+                            </td>
+                            <td>
+                                <span class="en">Cisco VSA (cisco-av-pair)</span>
+                                <span class="zh">Cisco VSA (cisco-av-pair)</span>
+                            </td>
+                            <td>
+                                <span class="en">ACL content is pushed from ISE to the authenticator via
+                                <code>cisco-av-pair = "ip:inacl#..."</code> or via named dACL reference
+                                (<code>ACS:CiscoSecure-Defined-ACL</code>). Provides fine-grained per-session access control
+                                without pre-configuring ACLs on every switch/AP. Example: permit only AGV fleet management
+                                server IPs and deny all other traffic.</span>
+                                <span class="zh">ACL 内容通过 <code>cisco-av-pair = "ip:inacl#..."</code> 或命名 dACL 引用
+                                （<code>ACS:CiscoSecure-Defined-ACL</code>）从 ISE 推送至认证者。提供细粒度的逐会话访问控制，
+                                无需在每个交换机/AP 上预配置 ACL。示例：仅允许 AGV 车队管理服务器 IP，拒绝所有其他流量。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="en"><strong>SGT</strong> (Security Group Tag)</span>
+                                <span class="zh"><strong>SGT</strong>（安全组标签）</span>
+                            </td>
+                            <td>
+                                <span class="en">Cisco VSA (cisco-av-pair)</span>
+                                <span class="zh">Cisco VSA (cisco-av-pair)</span>
+                            </td>
+                            <td>
+                                <span class="en"><code>cisco-av-pair = "cts:security-group-tag=0010-00"</code> —
+                                Assigns a TrustSec SGT (e.g., tag 16 = "AGV_Devices"). Used for scalable group-based
+                                policy enforcement via SGACL (Security Group ACL) across the Cisco SD-Access fabric.
+                                More scalable than per-session dACLs in large AGV fleets.</span>
+                                <span class="zh"><code>cisco-av-pair = "cts:security-group-tag=0010-00"</code> —
+                                分配 TrustSec SGT（如标签 16 = "AGV_Devices"）。用于通过 Cisco SD-Access 架构中的
+                                SGACL（安全组 ACL）实现可扩展的基于组的策略执行。在大型 AGV 车队中比逐会话 dACL 更具可扩展性。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Session-Timeout</code></td>
+                            <td>Type 27</td>
+                            <td>
+                                <span class="en">Session duration in seconds before re-authentication is required.
+                                Example: <code>3600</code> (1 hour). After timeout, the authenticator initiates re-authentication.</span>
+                                <span class="zh">需要重新认证前的会话持续时间（秒）。示例：<code>3600</code>（1 小时）。
+                                超时后认证者发起重新认证。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>Termination-Action</code></td>
+                            <td>Type 29</td>
+                            <td>
+                                <span class="en">Value = <code>RADIUS-Request</code> (1) — upon session timeout,
+                                the authenticator performs re-authentication (not disconnection). This allows seamless
+                                re-auth without disrupting AGV network connectivity.</span>
+                                <span class="zh">值 = <code>RADIUS-Request</code> (1) — 会话超时时，
+                                认证者执行重新认证（而非断开连接）。这允许无缝重新认证而不中断 AGV 网络连接。</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ── Step 4c: Port State Transition ── -->
+                <h3>
+                    <span class="en">4c. Port State Transition → Authorized</span>
+                    <span class="zh">4c. 端口状态转换 → 已授权</span>
+                </h3>
+
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong class="en">Controlled Port Opens</strong>
+                            <strong class="zh">受控端口打开</strong>
+                            <p class="en">
+                                The authenticator's PAE (Port Access Entity) transitions the <strong>controlled port</strong>
+                                from <code>Unauthorized</code> to <code>Authorized</code> state
+                                (IEEE 802.1X-2020 §6.3.2, §12.3). Data traffic from the AGV can now flow through the
+                                controlled port, subject to any applied VLAN assignment, dACL, or SGT policy.
+                            </p>
+                            <p class="zh">
+                                认证者的 PAE（端口访问实体）将<strong>受控端口</strong>从 <code>未授权</code> 转换为
+                                <code>已授权</code> 状态（IEEE 802.1X-2020 §6.3.2、§12.3）。AGV 的数据流量现在可以通过
+                                受控端口传输，受已应用的 VLAN 分配、dACL 或 SGT 策略约束。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong class="en">802.11 4-Way Handshake (Wireless Only)</strong>
+                            <strong class="zh">802.11 四次握手（仅无线）</strong>
+                            <p class="en">
+                                For wireless AGV connections via Cisco Catalyst 9800 WLC, the MSK derived from EAP-TLS
+                                becomes the <strong>PMK (Pairwise Master Key)</strong>. The AP and supplicant then perform
+                                the <strong>IEEE 802.11i 4-Way Handshake</strong> to derive the PTK (Pairwise Transient Key)
+                                and GTK (Group Temporal Key) for wireless frame encryption (AES-CCMP / GCMP).
+                            </p>
+                            <p class="zh">
+                                对于通过 Cisco Catalyst 9800 WLC 的无线 AGV 连接，从 EAP-TLS 派生的 MSK 成为
+                                <strong>PMK（成对主密钥）</strong>。AP 和请求方随后执行
+                                <strong>IEEE 802.11i 四次握手</strong>以派生 PTK（成对临时密钥）和 GTK（组临时密钥），
+                                用于无线帧加密（AES-CCMP / GCMP）。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong class="en">PMKSA Caching (for Fast Roaming)</strong>
+                            <strong class="zh">PMKSA 缓存（用于快速漫游）</strong>
+                            <p class="en">
+                                The PMK and its associated PMKID are cached as a <strong>PMKSA (PMK Security Association)</strong>
+                                at both the supplicant and the authenticator (AP/WLC). On subsequent associations to the same
+                                AP or within the same mobility domain, the supplicant can reference the PMKID in the
+                                (Re)Association Request to skip the full EAP-TLS handshake, performing only the 4-Way Handshake.
+                                See also: <strong>802.11r Fast Transition (FT)</strong> and <strong>OKC (Opportunistic Key Caching)</strong>
+                                in the Deployment Notes section.
+                            </p>
+                            <p class="zh">
+                                PMK 及其关联的 PMKID 作为 <strong>PMKSA（PMK 安全关联）</strong>被缓存在请求方和认证者（AP/WLC）双方。
+                                在后续关联到相同 AP 或同一移动域内时，请求方可在（重新）关联请求中引用 PMKID 以跳过完整的
+                                EAP-TLS 握手，仅执行四次握手。另见部署说明部分的 <strong>802.11r 快速转换（FT）</strong>和
+                                <strong>OKC（机会性密钥缓存）</strong>。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong class="en">AGV Network Access Active</strong>
+                            <strong class="zh">AGV 网络访问已激活</strong>
+                            <p class="en">
+                                The AGV now has full network access according to its authorization policy. It can communicate
+                                with fleet management servers, receive navigation commands, report telemetry data, and
+                                coordinate with other AGVs — all within the security boundaries defined by the VLAN, dACL,
+                                and/or SGT policies pushed by Cisco ISE.
+                            </p>
+                            <p class="zh">
+                                AGV 现在根据其授权策略拥有完整的网络访问权限。它可以与车队管理服务器通信、
+                                接收导航命令、报告遥测数据，并与其他 AGV 协调——所有操作均在 Cisco ISE 推送的
+                                VLAN、dACL 和/或 SGT 策略定义的安全边界内。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Step 4d: Re-Authentication ── -->
+                <h3>
+                    <span class="en">4d. Session Maintenance &amp; Re-Authentication</span>
+                    <span class="zh">4d. 会话维护与重新认证</span>
+                </h3>
+
+                <p class="en">
+                    The authenticated session is not permanent. Several mechanisms manage session lifecycle:
+                </p>
+                <p class="zh">
+                    已认证的会话不是永久的。以下几种机制管理会话生命周期：
+                </p>
+
+                <table>
+                    <caption>
+                        <span class="en">Session Lifecycle Mechanisms</span>
+                        <span class="zh">会话生命周期机制</span>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th><span class="en">Mechanism</span><span class="zh">机制</span></th>
+                            <th><span class="en">Description</span><span class="zh">描述</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="en">Session-Timeout Re-auth</span><span class="zh">Session-Timeout 重新认证</span></td>
+                            <td>
+                                <span class="en">When <code>Session-Timeout</code> (Type 27) expires and <code>Termination-Action</code>
+                                = <code>RADIUS-Request</code> (1), the authenticator sends a new <code>EAP-Request/Identity</code>
+                                to the supplicant, initiating a fresh EAP-TLS handshake transparently (no link disruption).</span>
+                                <span class="zh">当 <code>Session-Timeout</code>（Type 27）到期且 <code>Termination-Action</code>
+                                = <code>RADIUS-Request</code> (1) 时，认证者向请求方发送新的 <code>EAP-Request/Identity</code>，
+                                透明地发起新的 EAP-TLS 握手（不中断链路）。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">RADIUS CoA (Change of Authorization)</span><span class="zh">RADIUS CoA（授权变更）</span></td>
+                            <td>
+                                <span class="en">Cisco ISE can send a <code>CoA-Request</code> (RFC 5176) to the authenticator
+                                to dynamically change the AGV's authorization (e.g., change VLAN, apply a quarantine ACL)
+                                or force re-authentication (<code>CoA-Reauthenticate</code>). Used for posture-based or
+                                threat-based policy changes.</span>
+                                <span class="zh">Cisco ISE 可向认证者发送 <code>CoA-Request</code>（RFC 5176）以动态更改
+                                AGV 的授权（如更改 VLAN、应用隔离 ACL）或强制重新认证
+                                （<code>CoA-Reauthenticate</code>）。用于基于合规性或基于威胁的策略变更。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">EAPOL-Logoff</span><span class="zh">EAPOL-Logoff</span></td>
+                            <td>
+                                <span class="en">The supplicant sends an <code>EAPOL-Logoff</code> (Packet Type 0x02) when
+                                intentionally disconnecting, causing the authenticator to transition the port back to
+                                Unauthorized state immediately.</span>
+                                <span class="zh">请求方在有意断开连接时发送 <code>EAPOL-Logoff</code>（Packet Type 0x02），
+                                导致认证者立即将端口转换回未授权状态。</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="en">Link Down</span><span class="zh">链路断开</span></td>
+                            <td>
+                                <span class="en">If the physical or wireless link drops, the authenticator immediately
+                                transitions the port to Unauthorized and clears the session. The next association
+                                triggers a full EAP-TLS authentication (or PMKSA-based fast reconnect if cached).</span>
+                                <span class="zh">如果物理或无线链路断开，认证者立即将端口转换为未授权并清除会话。
+                                下一次关联触发完整的 EAP-TLS 认证（如果有缓存则基于 PMKSA 的快速重连）。</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-info">
+                    <span class="en">
+                        <strong>ℹ Recommendation for AGV Deployments:</strong> Set <code>Session-Timeout ≥ 3600</code>
+                        (1 hour) with <code>Termination-Action = RADIUS-Request</code>. This balances security
+                        (periodic certificate re-validation, CRL/OCSP re-check) with operational continuity
+                        (AGVs should not experience authentication-related downtime during production shifts).
+                        For environments requiring continuous operation, consider <code>7200</code> (2 hours) or longer,
+                        combined with RADIUS CoA for immediate policy enforcement when needed.
+                    </span>
+                    <span class="zh">
+                        <strong>ℹ AGV 部署建议：</strong>设置 <code>Session-Timeout ≥ 3600</code>
+                        （1 小时），<code>Termination-Action = RADIUS-Request</code>。这在安全性
+                        （定期证书重新验证、CRL/OCSP 重新检查）和运营连续性
+                        （AGV 在生产班次中不应经历认证相关的停机）之间取得平衡。
+                        对于需要持续运行的环境，考虑 <code>7200</code>（2 小时）或更长，
+                        结合 RADIUS CoA 在需要时进行即时策略执行。
+                    </span>
+                </div>
+</div><!-- /.card (last Phase 4 card) -->
+</div><!-- /.container -->
+</section><!-- /phase-4 -->
+            <!-- END PHASE 4 -->
+            <!-- ============================================================
+     PART 3 — SVG Sequence Diagram, Deployment Notes, Glossary,
+               Footer & Closing Tags
+     ============================================================ -->
+
+<!-- ── Additional CSS needed for Part 2 elements & Part 3 ── -->
+<style>
+/* Code block style (used in Part 2, defined here) */
+.code-block {
+  background: var(--bg-code, #f5f5f5);
+  padding: 16px 20px;
+  border-radius: var(--radius-sm, 6px);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 12px 0;
+  line-height: 1.6;
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+/* SVG Sequence Diagram Styles */
+.diagram-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 24px 0;
+  padding: 12px 0;
+}
+.diagram-container svg {
+  min-width: 750px;
+  display: block;
+  margin: 0 auto;
+}
+.diagram-container svg text {
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+}
+.diagram-container svg .lifeline {
+  stroke: var(--svg-lifeline, #94a3b8);
+  stroke-width: 1.5;
+  stroke-dasharray: 6, 4;
+}
+.diagram-container svg .entity-box {
+  fill: var(--svg-entity-bg, #e2e8f0);
+  stroke: var(--svg-entity-border, #64748b);
+  stroke-width: 1.5;
+  rx: 6;
+  ry: 6;
+}
+.diagram-container svg .entity-text {
+  fill: var(--svg-entity-text, #1e293b);
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.diagram-container svg .entity-sub {
+  fill: var(--svg-entity-text, #1e293b);
+  font-size: 10px;
+  font-weight: 400;
+  text-anchor: middle;
+  opacity: 0.7;
+}
+.diagram-container svg .phase-bg {
+  opacity: 0.12;
+  rx: 6;
+  ry: 6;
+}
+.diagram-container svg .phase-bg-1 { fill: var(--svg-phase-bg-1, #3b82f6); }
+.diagram-container svg .phase-bg-2 { fill: var(--svg-phase-bg-2, #06b6d4); }
+.diagram-container svg .phase-bg-3 { fill: var(--svg-phase-bg-3, #8b5cf6); }
+.diagram-container svg .phase-bg-4 { fill: var(--svg-phase-bg-4, #10b981); }
+.diagram-container svg .phase-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.diagram-container svg .phase-label-1 { fill: var(--accent-2, #3b82f6); }
+.diagram-container svg .phase-label-2 { fill: var(--accent-1, #06b6d4); }
+.diagram-container svg .phase-label-3 { fill: var(--accent-purple, #8b5cf6); }
+.diagram-container svg .phase-label-4 { fill: var(--accent-green, #10b981); }
+.diagram-container svg .msg-arrow {
+  stroke: var(--text-secondary, #475569);
+  stroke-width: 1.5;
+  marker-end: url(#arrowhead);
+}
+.diagram-container svg .msg-arrow-rev {
+  stroke: var(--text-secondary, #475569);
+  stroke-width: 1.5;
+  marker-end: url(#arrowhead);
+}
+.diagram-container svg .msg-label {
+  fill: var(--text-primary, #1e293b);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+.diagram-container svg .msg-sub-label {
+  fill: var(--text-tertiary, #64748b);
+  font-size: 9px;
+  font-weight: 400;
+}
+.diagram-container svg .note-box {
+  fill: var(--bg-card, #fff);
+  stroke: var(--border-light, #e2e8f0);
+  stroke-width: 1;
+  rx: 4;
+  ry: 4;
+}
+.diagram-container svg .note-text {
+  fill: var(--text-secondary, #475569);
+  font-size: 9.5px;
+  font-style: italic;
+}
+.diagram-container svg .self-arrow {
+  stroke: var(--text-secondary, #475569);
+  stroke-width: 1.2;
+  fill: none;
+  marker-end: url(#arrowhead-sm);
+}
+
+/* Deployment notes */
+.deploy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+.deploy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md, 10px);
+  padding: 24px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.deploy-card:hover {
+  border-color: var(--accent-1, #06b6d4);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.deploy-card h4 {
+  margin: 0 0 12px 0;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+.deploy-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.deploy-card li {
+  margin-bottom: 6px;
+  line-height: 1.55;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+.deploy-card code {
+  background: var(--bg-code, #f1f5f9);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+/* Glossary grid refinements */
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.glossary-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md, 10px);
+  padding: 18px 20px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.glossary-item:hover {
+  border-color: var(--accent-1, #06b6d4);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.glossary-item dt {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent-1, #06b6d4);
+  margin-bottom: 4px;
+}
+.glossary-item dd {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Footer */
+.site-footer {
+  background: var(--bg-secondary, #f8fafc);
+  border-top: 1px solid var(--border-light);
+  padding: 32px 0;
+  margin-top: 48px;
+  text-align: center;
+  color: var(--text-tertiary, #94a3b8);
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.site-footer a {
+  color: var(--accent-1, #06b6d4);
+  text-decoration: none;
+}
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .deploy-grid {
+    grid-template-columns: 1fr;
+  }
+  .glossary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<!-- ============================================================
+     SECTION: INTERACTIVE SVG SEQUENCE DIAGRAM
+     ============================================================ -->
+<section class="section" id="diagram">
+  <div class="container">
+    <h2>
+      <span class="en">📊 Interactive Sequence Diagram — 802.1X EAP-TLS Full Flow</span>
+      <span class="zh">📊 交互式序列图 — 802.1X EAP-TLS 完整流程</span>
+    </h2>
+    <p style="margin-bottom: 8px;">
+      <span class="en">The following diagram illustrates the complete 4-phase EAP-TLS mutual authentication sequence between the AGV supplicant, the Catalyst 9800&nbsp;WLC / Catalyst Switch authenticator, and Cisco ISE RADIUS server. Scroll horizontally on smaller screens.</span>
+      <span class="zh">下图展示了 AGV 申请方、Catalyst 9800 WLC / Catalyst 交换机认证方和 Cisco ISE RADIUS 服务器之间完整的四阶段 EAP-TLS 双向认证序列。在小屏幕上可横向滚动。</span>
+    </p>
+
+    <div class="diagram-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 1920" width="820" height="1920" role="img"
+           aria-label="802.1X EAP-TLS Authentication Sequence Diagram">
+        <title>802.1X EAP-TLS Sequence Diagram</title>
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="var(--text-secondary, #475569)"/>
+          </marker>
+          <marker id="arrowhead-sm" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <path d="M0,0 L6,2.5 L0,5 Z" fill="var(--text-secondary, #475569)"/>
+          </marker>
+        </defs>
+
+        <!-- === Column positions === -->
+        <!-- AGV (Supplicant): x=130 -->
+        <!-- AP/Switch (Authenticator): x=410 -->
+        <!-- Cisco ISE (RADIUS): x=690 -->
+
+        <!-- ── Entity Boxes (Top) ── -->
+        <rect class="entity-box" x="50" y="10" width="160" height="52"/>
+        <text class="entity-text" x="130" y="33">
+          <tspan class="en">AGV Supplicant</tspan>
+          <tspan class="zh">AGV 申请方</tspan>
+        </text>
+        <text class="entity-sub" x="130" y="50">802.1X Client</text>
+
+        <rect class="entity-box" x="310" y="10" width="200" height="52"/>
+        <text class="entity-text" x="410" y="33">
+          <tspan class="en">AP / Switch</tspan>
+          <tspan class="zh">AP / 交换机</tspan>
+        </text>
+        <text class="entity-sub" x="410" y="50">
+          <tspan class="en">Authenticator</tspan>
+          <tspan class="zh">认证方</tspan>
+        </text>
+
+        <rect class="entity-box" x="610" y="10" width="160" height="52"/>
+        <text class="entity-text" x="690" y="33">Cisco ISE</text>
+        <text class="entity-sub" x="690" y="50">RADIUS Server</text>
+
+        <!-- ── Entity Boxes (Bottom – repeated) ── -->
+        <rect class="entity-box" x="50" y="1855" width="160" height="52"/>
+        <text class="entity-text" x="130" y="1878">
+          <tspan class="en">AGV Supplicant</tspan>
+          <tspan class="zh">AGV 申请方</tspan>
+        </text>
+        <text class="entity-sub" x="130" y="1895">802.1X Client</text>
+
+        <rect class="entity-box" x="310" y="1855" width="200" height="52"/>
+        <text class="entity-text" x="410" y="1878">
+          <tspan class="en">AP / Switch</tspan>
+          <tspan class="zh">AP / 交换机</tspan>
+        </text>
+        <text class="entity-sub" x="410" y="1895">
+          <tspan class="en">Authenticator</tspan>
+          <tspan class="zh">认证方</tspan>
+        </text>
+
+        <rect class="entity-box" x="610" y="1855" width="160" height="52"/>
+        <text class="entity-text" x="690" y="1878">Cisco ISE</text>
+        <text class="entity-sub" x="690" y="1895">RADIUS Server</text>
+
+        <!-- ── Lifelines ── -->
+        <line class="lifeline" x1="130" y1="62" x2="130" y2="1855"/>
+        <line class="lifeline" x1="410" y1="62" x2="410" y2="1855"/>
+        <line class="lifeline" x1="690" y1="62" x2="690" y2="1855"/>
+
+        <!-- ═══════════════════════════════════════════════════
+             PHASE 1 — 802.11 Association & EAPOL Start
+             y: 80 → 310
+             ═══════════════════════════════════════════════════ -->
+        <rect class="phase-bg phase-bg-1" x="20" y="80" width="780" height="230"/>
+        <text class="phase-label phase-label-1" x="30" y="98">
+          <tspan class="en">PHASE 1 — 802.11 Association &amp; EAPOL Start</tspan>
+          <tspan class="zh">阶段 1 — 802.11 关联 &amp; EAPOL 启动</tspan>
+        </text>
+
+        <!-- 1. Probe Request / Association -->
+        <line class="msg-arrow" x1="130" y1="120" x2="405" y2="120"/>
+        <text class="msg-label" x="268" y="115">
+          <tspan class="en">802.11 Probe Req / Auth / Assoc Req</tspan>
+          <tspan class="zh">802.11 探测/认证/关联请求</tspan>
+        </text>
+
+        <!-- 2. Probe Response / Association Response -->
+        <line class="msg-arrow" x1="410" y1="150" x2="135" y2="150"/>
+        <text class="msg-label" x="268" y="145">
+          <tspan class="en">802.11 Probe Resp / Auth / Assoc Resp</tspan>
+          <tspan class="zh">802.11 探测/认证/关联响应</tspan>
+        </text>
+
+        <!-- Note: Controlled port blocked -->
+        <rect class="note-box" x="420" y="163" width="175" height="28"/>
+        <text class="note-text" x="507" y="181" text-anchor="middle">
+          <tspan class="en">Controlled port BLOCKED</tspan>
+          <tspan class="zh">受控端口被阻塞</tspan>
+        </text>
+
+        <!-- 3. EAPOL-Start -->
+        <line class="msg-arrow" x1="130" y1="210" x2="405" y2="210"/>
+        <text class="msg-label" x="268" y="205">EAPOL-Start</text>
+        <text class="msg-sub-label" x="268" y="220">
+          <tspan class="en">EtherType 0x888E</tspan>
+          <tspan class="zh">以太类型 0x888E</tspan>
+        </text>
+
+        <!-- 4. EAP-Request/Identity -->
+        <line class="msg-arrow" x1="410" y1="250" x2="135" y2="250"/>
+        <text class="msg-label" x="268" y="245">EAP-Request/Identity</text>
+
+        <!-- 5. EAP-Response/Identity -->
+        <line class="msg-arrow" x1="130" y1="290" x2="405" y2="290"/>
+        <text class="msg-label" x="268" y="285">EAP-Response/Identity</text>
+        <text class="msg-sub-label" x="268" y="300">
+          <tspan class="en">ID = AGV certificate CN/SAN</tspan>
+          <tspan class="zh">ID = AGV 证书 CN/SAN</tspan>
+        </text>
+
+        <!-- ═══════════════════════════════════════════════════
+             PHASE 2 — EAP Identity & Method Selection
+             y: 320 → 510
+             ═══════════════════════════════════════════════════ -->
+        <rect class="phase-bg phase-bg-2" x="20" y="320" width="780" height="190"/>
+        <text class="phase-label phase-label-2" x="30" y="338">
+          <tspan class="en">PHASE 2 — EAP Identity Relay &amp; Method Selection</tspan>
+          <tspan class="zh">阶段 2 — EAP 身份中继 &amp; 方法选择</tspan>
+        </text>
+
+        <!-- 6. RADIUS Access-Request (Identity) -->
+        <line class="msg-arrow" x1="410" y1="360" x2="685" y2="360"/>
+        <text class="msg-label" x="548" y="355">RADIUS Access-Request</text>
+        <text class="msg-sub-label" x="548" y="370">
+          <tspan class="en">EAP-Message = EAP-Response/Identity</tspan>
+          <tspan class="zh">EAP-Message = EAP-Response/Identity</tspan>
+        </text>
+
+        <!-- 7. RADIUS Access-Challenge (EAP-TLS Start) -->
+        <line class="msg-arrow" x1="690" y1="405" x2="415" y2="405"/>
+        <text class="msg-label" x="548" y="400">RADIUS Access-Challenge</text>
+        <text class="msg-sub-label" x="548" y="415">
+          <tspan class="en">EAP-Request/EAP-TLS (Start, S=1)</tspan>
+          <tspan class="zh">EAP-Request/EAP-TLS（启动，S=1）</tspan>
+        </text>
+
+        <!-- 8. EAP-Request/EAP-TLS (Start) to Supplicant -->
+        <line class="msg-arrow" x1="410" y1="445" x2="135" y2="445"/>
+        <text class="msg-label" x="268" y="440">EAP-Request/EAP-TLS (Start)</text>
+        <text class="msg-sub-label" x="268" y="455">
+          <tspan class="en">Type=13, Flags: S=1</tspan>
+          <tspan class="zh">类型=13，标志：S=1</tspan>
+        </text>
+
+        <!-- Note: EAP-TLS negotiation begins -->
+        <rect class="note-box" x="28" y="470" width="185" height="28"/>
+        <text class="note-text" x="120" y="488" text-anchor="middle">
+          <tspan class="en">EAP-TLS method selected</tspan>
+          <tspan class="zh">EAP-TLS 方法已选定</tspan>
+        </text>
+
+        <!-- ═══════════════════════════════════════════════════
+             PHASE 3 — TLS Mutual Authentication Handshake
+             y: 520 → 1450
+             ═══════════════════════════════════════════════════ -->
+        <rect class="phase-bg phase-bg-3" x="20" y="520" width="780" height="930"/>
+        <text class="phase-label phase-label-3" x="30" y="538">
+          <tspan class="en">PHASE 3 — TLS 1.2 Mutual Authentication Handshake</tspan>
+          <tspan class="zh">阶段 3 — TLS 1.2 双向认证握手</tspan>
+        </text>
+
+        <!-- ── 3a. ClientHello ── -->
+        <line class="msg-arrow" x1="130" y1="565" x2="405" y2="565"/>
+        <text class="msg-label" x="268" y="558">EAP-Response / TLS ClientHello</text>
+
+        <line class="msg-arrow" x1="410" y1="595" x2="685" y2="595"/>
+        <text class="msg-label" x="548" y="590">RADIUS Access-Request</text>
+        <text class="msg-sub-label" x="548" y="605">
+          <tspan class="en">EAP-Message = ClientHello</tspan>
+          <tspan class="zh">EAP-Message = ClientHello</tspan>
+        </text>
+
+        <!-- ── 3b. Server Flight: ServerHello + Cert + CertReq + Done ── -->
+        <line class="msg-arrow" x1="690" y1="645" x2="415" y2="645"/>
+        <text class="msg-label" x="548" y="638">RADIUS Access-Challenge</text>
+
+        <line class="msg-arrow" x1="410" y1="680" x2="135" y2="680"/>
+        <text class="msg-label" x="268" y="670">EAP-Request / TLS Server Flight</text>
+        <text class="msg-sub-label" x="268" y="685">
+          <tspan class="en">ServerHello + Certificate + CertificateRequest + ServerHelloDone</tspan>
+          <tspan class="zh">ServerHello + 证书 + 证书请求 + ServerHelloDone</tspan>
+        </text>
+
+        <!-- Note: Fragments may span multiple EAP messages -->
+        <rect class="note-box" x="420" y="695" width="200" height="28"/>
+        <text class="note-text" x="520" y="713" text-anchor="middle">
+          <tspan class="en">⟵ May be fragmented (L,M flags)</tspan>
+          <tspan class="zh">⟵ 可能分片（L,M 标志）</tspan>
+        </text>
+
+        <!-- ── 3c. Supplicant validates Server Certificate ── -->
+        <!-- Self-arrow on AGV lifeline -->
+        <path class="self-arrow" d="M130,745 C70,745 70,790 130,790"/>
+        <text class="msg-label" x="48" y="770" text-anchor="middle">
+          <tspan class="en">Validate</tspan>
+          <tspan class="zh">验证</tspan>
+        </text>
+        <text class="msg-sub-label" x="48" y="783" text-anchor="middle">
+          <tspan class="en">Server Cert</tspan>
+          <tspan class="zh">服务器证书</tspan>
+        </text>
+
+        <!-- Note box for cert validation -->
+        <rect class="note-box" x="28" y="798" width="195" height="42"/>
+        <text class="note-text" x="125" y="814" text-anchor="middle">
+          <tspan class="en">Chain → Root CA trust</tspan>
+          <tspan class="zh">证书链 → 根 CA 信任</tspan>
+        </text>
+        <text class="note-text" x="125" y="830" text-anchor="middle">
+          <tspan class="en">Signature, Validity, CRL/OCSP</tspan>
+          <tspan class="zh">签名、有效期、CRL/OCSP</tspan>
+        </text>
+
+        <!-- ── 3d. Client Flight: Cert + ClientKeyExchange + CertVerify + CCS + Finished ── -->
+        <line class="msg-arrow" x1="130" y1="870" x2="405" y2="870"/>
+        <text class="msg-label" x="268" y="860">EAP-Response / TLS Client Flight</text>
+        <text class="msg-sub-label" x="268" y="878">
+          <tspan class="en">Certificate + ClientKeyExchange + CertificateVerify + CCS + Finished</tspan>
+          <tspan class="zh">证书 + 客户端密钥交换 + 证书验证 + CCS + Finished</tspan>
+        </text>
+
+        <line class="msg-arrow" x1="410" y1="905" x2="685" y2="905"/>
+        <text class="msg-label" x="548" y="900">RADIUS Access-Request</text>
+        <text class="msg-sub-label" x="548" y="915">
+          <tspan class="en">EAP-Message = Client Flight (fragmented)</tspan>
+          <tspan class="zh">EAP-Message = 客户端飞行数据（分片）</tspan>
+        </text>
+
+        <!-- ── 3e. ISE validates Client Certificate ── -->
+        <path class="self-arrow" d="M690,945 C750,945 750,995 690,995"/>
+        <text class="msg-label" x="772" y="965" text-anchor="middle">
+          <tspan class="en">Validate</tspan>
+          <tspan class="zh">验证</tspan>
+        </text>
+        <text class="msg-sub-label" x="772" y="980" text-anchor="middle">
+          <tspan class="en">Client Cert</tspan>
+          <tspan class="zh">客户端证书</tspan>
+        </text>
+
+        <rect class="note-box" x="608" y="1003" width="180" height="56"/>
+        <text class="note-text" x="698" y="1019" text-anchor="middle">
+          <tspan class="en">Chain validation, CN/SAN</tspan>
+          <tspan class="zh">链验证、CN/SAN</tspan>
+        </text>
+        <text class="note-text" x="698" y="1033" text-anchor="middle">
+          <tspan class="en">Validity, CRL/OCSP check</tspan>
+          <tspan class="zh">有效期、CRL/OCSP 检查</tspan>
+        </text>
+        <text class="note-text" x="698" y="1047" text-anchor="middle">
+          <tspan class="en">CertificateVerify signature ✓</tspan>
+          <tspan class="zh">CertificateVerify 签名 ✓</tspan>
+        </text>
+
+        <!-- ── 3f. Server CCS + Finished ── -->
+        <line class="msg-arrow" x1="690" y1="1085" x2="415" y2="1085"/>
+        <text class="msg-label" x="548" y="1078">RADIUS Access-Challenge</text>
+        <text class="msg-sub-label" x="548" y="1095">
+          <tspan class="en">EAP-Request/EAP-TLS (CCS + Finished)</tspan>
+          <tspan class="zh">EAP-Request/EAP-TLS（CCS + Finished）</tspan>
+        </text>
+
+        <line class="msg-arrow" x1="410" y1="1120" x2="135" y2="1120"/>
+        <text class="msg-label" x="268" y="1113">EAP-Request / TLS CCS + Finished</text>
+
+        <!-- TLS Tunnel Established note -->
+        <rect class="note-box" x="185" y="1138" width="240" height="28" style="stroke: var(--accent-green, #10b981); stroke-width:1.5;"/>
+        <text class="note-text" x="305" y="1156" text-anchor="middle" style="fill: var(--accent-green, #10b981); font-weight:600;">
+          <tspan class="en">🔒 TLS Tunnel Established</tspan>
+          <tspan class="zh">🔒 TLS 隧道已建立</tspan>
+        </text>
+
+        <!-- ── 3g. Empty EAP-Response (TLS handshake complete ACK) ── -->
+        <line class="msg-arrow" x1="130" y1="1190" x2="405" y2="1190"/>
+        <text class="msg-label" x="268" y="1185">EAP-Response / EAP-TLS (empty)</text>
+        <text class="msg-sub-label" x="268" y="1200">
+          <tspan class="en">TLS handshake complete ACK</tspan>
+          <tspan class="zh">TLS 握手完成确认</tspan>
+        </text>
+
+        <line class="msg-arrow" x1="410" y1="1225" x2="685" y2="1225"/>
+        <text class="msg-label" x="548" y="1220">RADIUS Access-Request</text>
+        <text class="msg-sub-label" x="548" y="1235">
+          <tspan class="en">EAP-Message = empty TLS data</tspan>
+          <tspan class="zh">EAP-Message = 空 TLS 数据</tspan>
+        </text>
+
+        <!-- Key Derivation note -->
+        <rect class="note-box" x="248" y="1260" width="310" height="42"/>
+        <text class="note-text" x="403" y="1276" text-anchor="middle">
+          <tspan class="en">Key Derivation: TLS master_secret → PRF →</tspan>
+          <tspan class="zh">密钥推导：TLS master_secret → PRF →</tspan>
+        </text>
+        <text class="note-text" x="403" y="1292" text-anchor="middle">
+          <tspan class="en">MSK (64B) + EMSK (64B)  [RFC 5216 §2.3]</tspan>
+          <tspan class="zh">MSK（64B）+ EMSK（64B）[RFC 5216 §2.3]</tspan>
+        </text>
+
+        <!-- ═══════════════════════════════════════════════════
+             PHASE 4 — Authorization & Port Enablement
+             y: 1460 → 1840
+             ═══════════════════════════════════════════════════ -->
+        <rect class="phase-bg phase-bg-4" x="20" y="1460" width="780" height="380"/>
+        <text class="phase-label phase-label-4" x="30" y="1478">
+          <tspan class="en">PHASE 4 — Authorization &amp; Port Enablement</tspan>
+          <tspan class="zh">阶段 4 — 授权 &amp; 端口启用</tspan>
+        </text>
+
+        <!-- RADIUS Access-Accept -->
+        <line class="msg-arrow" x1="690" y1="1505" x2="415" y2="1505"/>
+        <text class="msg-label" x="548" y="1498">RADIUS Access-Accept</text>
+        <text class="msg-sub-label" x="548" y="1515">
+          <tspan class="en">EAP-Success + MS-MPPE-Keys + AuthZ attrs</tspan>
+          <tspan class="zh">EAP-Success + MS-MPPE-Keys + 授权属性</tspan>
+        </text>
+
+        <!-- EAP-Success to Supplicant -->
+        <line class="msg-arrow" x1="410" y1="1545" x2="135" y2="1545"/>
+        <text class="msg-label" x="268" y="1540">EAP-Success</text>
+
+        <!-- AuthZ attributes note -->
+        <rect class="note-box" x="420" y="1555" width="250" height="56"/>
+        <text class="note-text" x="545" y="1571" text-anchor="middle">
+          <tspan class="en">AuthZ: VLAN, dACL, SGT</tspan>
+          <tspan class="zh">授权：VLAN、dACL、SGT</tspan>
+        </text>
+        <text class="note-text" x="545" y="1585" text-anchor="middle">
+          <tspan class="en">Session-Timeout, Termination-Action</tspan>
+          <tspan class="zh">Session-Timeout、Termination-Action</tspan>
+        </text>
+        <text class="note-text" x="545" y="1599" text-anchor="middle">
+          <tspan class="en">Filter-Id / Airespace-ACL-Name</tspan>
+          <tspan class="zh">Filter-Id / Airespace-ACL-Name</tspan>
+        </text>
+
+        <!-- Controlled port opens -->
+        <rect class="note-box" x="325" y="1625" width="170" height="28" style="stroke: var(--accent-green, #10b981); stroke-width:1.5;"/>
+        <text class="note-text" x="410" y="1643" text-anchor="middle" style="fill: var(--accent-green, #10b981); font-weight:600;">
+          <tspan class="en">✅ Controlled Port OPEN</tspan>
+          <tspan class="zh">✅ 受控端口已开放</tspan>
+        </text>
+
+        <!-- 4-Way Handshake (wireless) -->
+        <line class="msg-arrow" x1="410" y1="1680" x2="135" y2="1680"/>
+        <text class="msg-label" x="268" y="1675">
+          <tspan class="en">802.11i 4-Way Handshake (Msg 1)</tspan>
+          <tspan class="zh">802.11i 四次握手（消息 1）</tspan>
+        </text>
+
+        <line class="msg-arrow" x1="130" y1="1705" x2="405" y2="1705"/>
+        <text class="msg-label" x="268" y="1700">
+          <tspan class="en">4-Way Handshake (Msg 2)</tspan>
+          <tspan class="zh">四次握手（消息 2）</tspan>
+        </text>
+
+        <line class="msg-arrow" x1="410" y1="1730" x2="135" y2="1730"/>
+        <text class="msg-label" x="268" y="1725">
+          <tspan class="en">4-Way Handshake (Msg 3)</tspan>
+          <tspan class="zh">四次握手（消息 3）</tspan>
+        </text>
+
+        <line class="msg-arrow" x1="130" y1="1755" x2="405" y2="1755"/>
+        <text class="msg-label" x="268" y="1750">
+          <tspan class="en">4-Way Handshake (Msg 4)</tspan>
+          <tspan class="zh">四次握手（消息 4）</tspan>
+        </text>
+
+        <!-- PMKSA cached note -->
+        <rect class="note-box" x="28" y="1770" width="195" height="28"/>
+        <text class="note-text" x="125" y="1788" text-anchor="middle">
+          <tspan class="en">PMKSA cached for fast roaming</tspan>
+          <tspan class="zh">PMKSA 已缓存用于快速漫游</tspan>
+        </text>
+
+        <!-- AGV network access active -->
+        <rect class="note-box" x="175" y="1810" width="280" height="32" style="stroke: var(--accent-green, #10b981); stroke-width:2;"/>
+        <text class="note-text" x="315" y="1830" text-anchor="middle" style="fill: var(--accent-green, #10b981); font-weight:700; font-size:11px;">
+          <tspan class="en">🚗 AGV Full Network Access Active</tspan>
+          <tspan class="zh">🚗 AGV 完全网络接入已激活</tspan>
+        </text>
+
+      </svg>
+    </div><!-- /.diagram-container -->
+  </div><!-- /.container -->
+</section>
+
+
+<!-- ============================================================
+     SECTION: DEPLOYMENT NOTES
+     ============================================================ -->
+<section class="section" id="deployment">
+  <div class="container">
+    <h2>
+      <span class="en">🏭 Deployment Notes — Industrial AGV with Cisco ISE</span>
+      <span class="zh">🏭 部署注意事项 — 工业 AGV 与 Cisco ISE</span>
+    </h2>
+    <p>
+      <span class="en">The following operational guidelines address certificate lifecycle, roaming performance, session management, cipher selection, revocation checking, and RADIUS infrastructure design for AGV 802.1X EAP-TLS deployments.</span>
+      <span class="zh">以下运营指南涵盖 AGV 802.1X EAP-TLS 部署中的证书生命周期、漫游性能、会话管理、密码套件选择、吊销检查和 RADIUS 基础设施设计。</span>
+    </p>
+
+    <div class="deploy-grid">
+
+      <!-- 📜 Certificate Management -->
+      <div class="deploy-card">
+        <h4>📜 <span class="en">Certificate Management</span><span class="zh">证书管理</span></h4>
+        <ul>
+          <li>
+            <span class="en">Use <strong>SCEP</strong> (Simple Certificate Enrollment Protocol) or <strong>EST</strong> (Enrollment over Secure Transport, RFC 7030) for automated AGV certificate enrollment and renewal.</span>
+            <span class="zh">使用 <strong>SCEP</strong>（简单证书注册协议）或 <strong>EST</strong>（安全传输注册，RFC 7030）实现 AGV 证书的自动注册和续期。</span>
+          </li>
+          <li>
+            <span class="en">Ensure the <strong>CA trust chain</strong> is consistent across all AGVs, ISE nodes, and authenticators. Import intermediate CA certificates into the ISE Trusted Certificates store.</span>
+            <span class="zh">确保所有 AGV、ISE 节点和认证方之间的 <strong>CA 信任链</strong> 一致。将中间 CA 证书导入 ISE 受信任证书库。</span>
+          </li>
+          <li>
+            <span class="en">Set certificate validity to <strong>1–2 years</strong> for device certificates; automate renewal 30 days before expiry to prevent authentication failures during AGV operation.</span>
+            <span class="zh">设备证书有效期设为 <strong>1–2 年</strong>；在到期前 30 天自动续期，防止 AGV 运行期间认证失败。</span>
+          </li>
+          <li>
+            <span class="en">Use <strong>SAN (Subject Alternative Name)</strong> fields (dNSName or iPAddress) for machine identity; avoid relying solely on CN for certificate matching in ISE policies.</span>
+            <span class="zh">使用 <strong>SAN（主题备用名称）</strong> 字段（dNSName 或 iPAddress）标识设备身份；避免在 ISE 策略中仅依赖 CN 进行证书匹配。</span>
+          </li>
+          <li>
+            <span class="en">Store private keys in a <strong>TPM</strong> (Trusted Platform Module) or hardware secure element on the AGV where possible to prevent key extraction.</span>
+            <span class="zh">尽可能将私钥存储在 AGV 的 <strong>TPM</strong>（可信平台模块）或硬件安全元件中，以防止密钥被提取。</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ⚡ Low-Latency & Roaming -->
+      <div class="deploy-card">
+        <h4>⚡ <span class="en">Low-Latency Requirements &amp; Roaming</span><span class="zh">低延迟要求和漫游</span></h4>
+        <ul>
+          <li>
+            <span class="en">Enable <strong>PMKSA Caching</strong> on the Catalyst 9800 WLC to allow AGVs to skip full EAP-TLS re-authentication when roaming between APs within the same mobility domain.</span>
+            <span class="zh">在 Catalyst 9800 WLC 上启用 <strong>PMKSA 缓存</strong>，使 AGV 在同一移动域内的 AP 之间漫游时跳过完整的 EAP-TLS 重新认证。</span>
+          </li>
+          <li>
+            <span class="en">Configure <strong>OKC (Opportunistic Key Caching)</strong> as a fallback for PMKSA distribution across WLC-managed APs.</span>
+            <span class="zh">配置 <strong>OKC（机会性密钥缓存）</strong> 作为 WLC 管理的 AP 之间 PMKSA 分发的备用方案。</span>
+          </li>
+          <li>
+            <span class="en">Deploy <strong>802.11r (Fast BSS Transition)</strong> for sub-50ms roaming. Ensure over-the-DS mode is used in dense industrial RF environments for reliability.</span>
+            <span class="zh">部署 <strong>802.11r（快速 BSS 转换）</strong> 实现低于 50ms 的漫游。在密集的工业 RF 环境中使用 over-the-DS 模式以提高可靠性。</span>
+          </li>
+          <li>
+            <span class="en">Full EAP-TLS handshake typically takes <strong>6–12 round trips</strong> (100–500ms on WLAN). Target roaming scenarios should use PMKSA/OKC/FT to avoid this latency.</span>
+            <span class="zh">完整的 EAP-TLS 握手通常需要 <strong>6–12 次往返</strong>（WLAN 上 100–500ms）。漫游场景应使用 PMKSA/OKC/FT 来避免此延迟。</span>
+          </li>
+          <li>
+            <span class="en">Consider <strong>pre-authentication</strong> (802.11i) to neighboring APs when AGV travel paths are predictable in warehouse/factory floor layouts.</span>
+            <span class="zh">当 AGV 在仓库/工厂车间的行驶路径可预测时，考虑对邻近 AP 进行 <strong>预认证</strong>（802.11i）。</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 🔄 Re-authentication & Session -->
+      <div class="deploy-card">
+        <h4>🔄 <span class="en">Re-authentication &amp; Session Management</span><span class="zh">重新认证和会话管理</span></h4>
+        <ul>
+          <li>
+            <span class="en">Set <code>Session-Timeout ≥ 3600</code> seconds in the ISE Authorization Profile to minimize re-authentication frequency for continuously operating AGVs.</span>
+            <span class="zh">在 ISE 授权配置文件中设置 <code>Session-Timeout ≥ 3600</code> 秒，以减少持续运行的 AGV 的重新认证频率。</span>
+          </li>
+          <li>
+            <span class="en">Set <code>Termination-Action = RADIUS-Request (1)</code> to ensure re-authentication occurs via a new RADIUS exchange rather than session teardown.</span>
+            <span class="zh">设置 <code>Termination-Action = RADIUS-Request (1)</code>，确保通过新的 RADIUS 交换进行重新认证而非终止会话。</span>
+          </li>
+          <li>
+            <span class="en">Leverage <strong>RADIUS CoA (Change of Authorization)</strong> for dynamic policy updates (e.g., moving an AGV to quarantine VLAN upon security alert) without requiring re-authentication.</span>
+            <span class="zh">利用 <strong>RADIUS CoA（授权变更）</strong> 实现动态策略更新（例如在安全警报时将 AGV 移至隔离 VLAN），无需重新认证。</span>
+          </li>
+          <li>
+            <span class="en">Monitor <code>EAPOL-Logoff</code> frames; AGVs powering down should trigger session cleanup on the authenticator and ISE.</span>
+            <span class="zh">监控 <code>EAPOL-Logoff</code> 帧；AGV 关机时应触发认证方和 ISE 上的会话清理。</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 🔐 Cipher Suite Selection -->
+      <div class="deploy-card">
+        <h4>🔐 <span class="en">Cipher Suite Selection</span><span class="zh">密码套件选择</span></h4>
+        <ul>
+          <li>
+            <span class="en"><strong>TLS 1.2 Preferred</strong>: <code>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</code> or <code>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</code> for optimal balance of security and performance on embedded AGV hardware.</span>
+            <span class="zh"><strong>TLS 1.2 首选</strong>：<code>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</code> 或 <code>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</code>，在嵌入式 AGV 硬件上实现安全性和性能的最佳平衡。</span>
+          </li>
+          <li>
+            <span class="en"><strong>TLS 1.3 Preferred</strong>: <code>TLS_AES_256_GCM_SHA384</code> for maximum security; <code>TLS_AES_128_GCM_SHA256</code> for resource-constrained AGV controllers.</span>
+            <span class="zh"><strong>TLS 1.3 首选</strong>：<code>TLS_AES_256_GCM_SHA384</code> 提供最大安全性；<code>TLS_AES_128_GCM_SHA256</code> 适用于资源受限的 AGV 控制器。</span>
+          </li>
+          <li>
+            <span class="en">Disable legacy cipher suites: CBC-mode ciphers, RC4, 3DES, SHA-1-based MACs, and static RSA key exchange must be disabled on both ISE and supplicant.</span>
+            <span class="zh">禁用旧版密码套件：必须在 ISE 和申请方上禁用 CBC 模式密码、RC4、3DES、基于 SHA-1 的 MAC 和静态 RSA 密钥交换。</span>
+          </li>
+          <li>
+            <span class="en">For AGVs with <strong>hardware crypto acceleration</strong> (AES-NI equivalent), prefer AES-256-GCM. For software-only TLS stacks, AES-128-GCM offers lower CPU overhead.</span>
+            <span class="zh">对于具有 <strong>硬件加密加速</strong>（AES-NI 等效）的 AGV，优先使用 AES-256-GCM。对于仅软件 TLS 栈，AES-128-GCM 提供更低的 CPU 开销。</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 📋 CRL / OCSP -->
+      <div class="deploy-card">
+        <h4>📋 <span class="en">CRL / OCSP Revocation Checking</span><span class="zh">CRL / OCSP 吊销检查</span></h4>
+        <ul>
+          <li>
+            <span class="en">Configure ISE to check <strong>OCSP (Online Certificate Status Protocol)</strong> as the primary revocation method for real-time status. Set <strong>CRL</strong> as fallback.</span>
+            <span class="zh">配置 ISE 使用 <strong>OCSP（在线证书状态协议）</strong> 作为主要吊销检查方法以获取实时状态。将 <strong>CRL</strong> 设为备用。</span>
+          </li>
+          <li>
+            <span class="en">Set CRL <strong>download interval</strong> appropriately (e.g., every 4–8 hours) to balance freshness against ISE resource usage. Cache CRL in ISE local store.</span>
+            <span class="zh">适当设置 CRL <strong>下载间隔</strong>（例如每 4–8 小时），以平衡新鲜度和 ISE 资源使用。在 ISE 本地存储中缓存 CRL。</span>
+          </li>
+          <li>
+            <span class="en">Enable <strong>OCSP Nonce</strong> to prevent replay attacks if the OCSP responder supports it. If not, use short-lived OCSP response caching (≤ 5 min).</span>
+            <span class="zh">如果 OCSP 响应程序支持，启用 <strong>OCSP Nonce</strong> 以防止重放攻击。否则，使用短期 OCSP 响应缓存（≤ 5 分钟）。</span>
+          </li>
+          <li>
+            <span class="en">In <strong>ISE → Administration → Certificates → Certificate Store</strong>, configure the OCSP responder URL and CRL Distribution Point (CDP) for each trusted CA.</span>
+            <span class="zh">在 <strong>ISE → 管理 → 证书 → 证书库</strong> 中，为每个受信任的 CA 配置 OCSP 响应程序 URL 和 CRL 分发点（CDP）。</span>
+          </li>
+          <li>
+            <span class="en">Decide ISE behavior when revocation check is unreachable: <strong>"Allow"</strong> (less secure, more available) vs. <strong>"Reject"</strong> (more secure, risk of false negatives). For safety-critical AGV operations, consider "Reject" with RADIUS redundancy.</span>
+            <span class="zh">决定吊销检查不可达时的 ISE 行为：<strong>"允许"</strong>（安全性较低，可用性更高）vs. <strong>"拒绝"</strong>（安全性更高，存在误判风险）。对于安全关键的 AGV 操作，建议配合 RADIUS 冗余使用"拒绝"。</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 🌐 RADIUS Redundancy -->
+      <div class="deploy-card">
+        <h4>🌐 <span class="en">RADIUS Redundancy &amp; Infrastructure</span><span class="zh">RADIUS 冗余与基础设施</span></h4>
+        <ul>
+          <li>
+            <span class="en">Deploy at least <strong>two ISE PSN (Policy Service Nodes)</strong> — primary and secondary — for RADIUS high availability. Configure on the WLC / switch using <code>radius server</code> groups with failover.</span>
+            <span class="zh">部署至少 <strong>两个 ISE PSN（策略服务节点）</strong> — 主节点和备用节点 — 以实现 RADIUS 高可用性。在 WLC / 交换机上使用 <code>radius server</code> 组配置故障转移。</span>
+          </li>
+          <li>
+            <span class="en">Use <strong>RADIUS load balancing</strong> on the Catalyst 9800 WLC (<code>radius-server load-balance method least-outstanding</code>) to distribute authentication requests across PSNs.</span>
+            <span class="zh">在 Catalyst 9800 WLC 上使用 <strong>RADIUS 负载均衡</strong>（<code>radius-server load-balance method least-outstanding</code>）将认证请求分配到各 PSN。</span>
+          </li>
+          <li>
+            <span class="en">Set RADIUS <strong>dead-server detection</strong> with appropriate timeout (e.g., <code>radius-server dead-criteria time 5 tries 3</code>) to quickly failover without impacting AGV connectivity.</span>
+            <span class="zh">设置 RADIUS <strong>死服务器检测</strong>（例如 <code>radius-server dead-criteria time 5 tries 3</code>），以便快速故障转移而不影响 AGV 连接。</span>
+          </li>
+          <li>
+            <span class="en">Ensure <strong>RADIUS shared secrets</strong> are strong (≥ 22 characters, mixed case + symbols) and unique per authenticator/ISE pair. Use RADIUS/DTLS (RFC 7360) where supported for transport encryption.</span>
+            <span class="zh">确保 <strong>RADIUS 共享密钥</strong> 强度足够（≥ 22 个字符，大小写混合 + 符号）且每对认证方/ISE 唯一。在支持的设备上使用 RADIUS/DTLS（RFC 7360）进行传输加密。</span>
+          </li>
+          <li>
+            <span class="en">Place ISE PSN nodes <strong>local to the factory/warehouse site</strong> to minimize RADIUS round-trip latency. Avoid WAN-dependent RADIUS paths for real-time AGV authentication.</span>
+            <span class="zh">将 ISE PSN 节点部署在 <strong>工厂/仓库站点本地</strong>，以最小化 RADIUS 往返延迟。避免实时 AGV 认证依赖 WAN 的 RADIUS 路径。</span>
+          </li>
+        </ul>
+      </div>
+
+    </div><!-- /.deploy-grid -->
+  </div><!-- /.container -->
+</section>
+
+
+<!-- ============================================================
+     SECTION: GLOSSARY
+     ============================================================ -->
+<section class="section" id="glossary">
+  <div class="container">
+    <h2>
+      <span class="en">📖 Glossary</span>
+      <span class="zh">📖 术语表</span>
+    </h2>
+
+    <div class="glossary-grid">
+
+      <dl class="glossary-item">
+        <dt>802.1X</dt>
+        <dd>
+          <span class="en">IEEE standard for port-based Network Access Control (PNAC). Defines three roles: supplicant, authenticator, and authentication server. Current revision: IEEE 802.1X-2020.</span>
+          <span class="zh">IEEE 基于端口的网络访问控制 (PNAC) 标准。定义三个角色：申请方、认证方和认证服务器。当前版本：IEEE 802.1X-2020。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>EAP</dt>
+        <dd>
+          <span class="en">Extensible Authentication Protocol (RFC 3748). A flexible framework that transports authentication methods between supplicant and authentication server via the authenticator.</span>
+          <span class="zh">可扩展认证协议（RFC 3748）。一种灵活框架，通过认证方在申请方和认证服务器之间传输认证方法。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>EAP-TLS</dt>
+        <dd>
+          <span class="en">EAP Transport Layer Security (RFC 5216 for TLS 1.2, RFC 9190 for TLS 1.3). Provides mutual certificate-based authentication — both client and server present X.509 certificates. Considered the gold standard for EAP security.</span>
+          <span class="zh">EAP 传输层安全（TLS 1.2 为 RFC 5216，TLS 1.3 为 RFC 9190）。提供基于证书的双向认证——客户端和服务器均出示 X.509 证书。被认为是 EAP 安全性的最高标准。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>EAPOL</dt>
+        <dd>
+          <span class="en">EAP over LAN (IEEE 802.1X). Layer 2 encapsulation protocol for carrying EAP frames between supplicant and authenticator using EtherType <code>0x888E</code>. Includes Start, Logoff, Key, and Packet frame types.</span>
+          <span class="zh">局域网上的 EAP（IEEE 802.1X）。第 2 层封装协议，使用以太类型 <code>0x888E</code> 在申请方和认证方之间传输 EAP 帧。包括 Start、Logoff、Key 和 Packet 帧类型。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>
+          <span class="en">Supplicant</span>
+          <span class="zh">申请方 (Supplicant)</span>
+        </dt>
+        <dd>
+          <span class="en">The entity (AGV, endpoint device) seeking network access. Runs 802.1X client software that initiates EAPOL exchanges and provides credentials (certificates in EAP-TLS).</span>
+          <span class="zh">寻求网络访问的实体（AGV、终端设备）。运行 802.1X 客户端软件，发起 EAPOL 交换并提供凭据（EAP-TLS 中为证书）。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>
+          <span class="en">Authenticator</span>
+          <span class="zh">认证方 (Authenticator)</span>
+        </dt>
+        <dd>
+          <span class="en">The network access device (Catalyst 9800 WLC AP or Catalyst Switch) that enforces access control. Relays EAP messages between supplicant and authentication server; controls the port state (blocked/authorized).</span>
+          <span class="zh">执行访问控制的网络接入设备（Catalyst 9800 WLC AP 或 Catalyst 交换机）。在申请方和认证服务器之间中继 EAP 消息；控制端口状态（阻塞/授权）。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>RADIUS</dt>
+        <dd>
+          <span class="en">Remote Authentication Dial-In User Service (RFC 2865). Client-server protocol used between the authenticator and ISE for AAA (Authentication, Authorization, Accounting). Carries EAP messages in RADIUS attributes.</span>
+          <span class="zh">远程认证拨入用户服务（RFC 2865）。认证方与 ISE 之间用于 AAA（认证、授权、计费）的客户端-服务器协议。在 RADIUS 属性中承载 EAP 消息。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>ISE</dt>
+        <dd>
+          <span class="en">Cisco Identity Services Engine. A centralized policy platform providing AAA, posture assessment, profiling, guest access, and BYOD management. Serves as the RADIUS/EAP authentication server in 802.1X deployments.</span>
+          <span class="zh">Cisco 身份服务引擎。提供 AAA、合规评估、设备分析、访客访问和 BYOD 管理的集中策略平台。在 802.1X 部署中充当 RADIUS/EAP 认证服务器。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>dACL</dt>
+        <dd>
+          <span class="en">Downloadable Access Control List. An ACL pushed from ISE to the authenticator via RADIUS during authorization. Provides per-session, per-user/device granular traffic filtering. Referenced by the <code>Filter-Id</code> or <code>cisco-av-pair</code> RADIUS attribute.</span>
+          <span class="zh">可下载访问控制列表。在授权期间通过 RADIUS 从 ISE 推送到认证方的 ACL。提供按会话、按用户/设备的精细流量过滤。通过 <code>Filter-Id</code> 或 <code>cisco-av-pair</code> RADIUS 属性引用。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>SGT</dt>
+        <dd>
+          <span class="en">Scalable Group Tag (Cisco TrustSec). A 16-bit security label assigned during authorization that enables software-defined segmentation. SGT-based policies (SGACLs) enforce access between groups without traditional ACLs.</span>
+          <span class="zh">可扩展组标签（Cisco TrustSec）。在授权期间分配的 16 位安全标签，实现软件定义的网络分段。基于 SGT 的策略（SGACL）无需传统 ACL 即可在组之间实施访问控制。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>PMKSA</dt>
+        <dd>
+          <span class="en">Pairwise Master Key Security Association. Cached result of a successful 802.1X/EAP authentication in wireless networks. Allows fast reconnection and roaming by skipping full EAP re-authentication. Identified by PMKID.</span>
+          <span class="zh">成对主密钥安全关联。无线网络中成功 802.1X/EAP 认证的缓存结果。通过跳过完整的 EAP 重新认证实现快速重连和漫游。由 PMKID 标识。</span>
+        </dd>
+      </dl>
+
+      <dl class="glossary-item">
+        <dt>802.11r (FT)</dt>
+        <dd>
+          <span class="en">IEEE 802.11r — Fast BSS Transition. An amendment to 802.11 that enables fast, secure handoffs between APs by pre-distributing PMK-R1 keys. Targets &lt; 50 ms roaming for latency-sensitive applications like AGV navigation.</span>
+          <span class="zh">IEEE 802.11r — 快速 BSS 转换。802.11 的修订版，通过预分发 PMK-R1 密钥实现 AP 之间的快速安全切换。目标漫游时间 &lt; 50ms，适用于 AGV 导航等延迟敏感应用。</span>
+        </dd>
+      </dl>
+
+    </div><!-- /.glossary-grid -->
+  </div><!-- /.container -->
+</section>
+
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      <span class="en"><strong>References:</strong></span>
+      <span class="zh"><strong>参考文献：</strong></span>
+    </p>
+    <p>
+      <span class="en">
+        IEEE 802.1X-2020 — Port-Based Network Access Control &nbsp;|&nbsp;
+        RFC 3748 — Extensible Authentication Protocol (EAP) &nbsp;|&nbsp;
+        RFC 5216 — The EAP-TLS Authentication Protocol &nbsp;|&nbsp;
+        RFC 9190 — EAP-TLS 1.3: Using the Extensible Authentication Protocol with TLS 1.3 &nbsp;|&nbsp;
+        RFC 8446 — The Transport Layer Security (TLS) Protocol Version 1.3 &nbsp;|&nbsp;
+        RFC 2865 — Remote Authentication Dial In User Service (RADIUS) &nbsp;|&nbsp;
+        RFC 5280 — Internet X.509 PKI Certificate and CRL Profile &nbsp;|&nbsp;
+        RFC 7030 — Enrollment over Secure Transport (EST) &nbsp;|&nbsp;
+        Cisco ISE Administrator Guide &nbsp;|&nbsp;
+        Cisco Catalyst 9800 Series WLC Configuration Guide
+      </span>
+      <span class="zh">
+        IEEE 802.1X-2020 — 基于端口的网络访问控制 &nbsp;|&nbsp;
+        RFC 3748 — 可扩展认证协议 (EAP) &nbsp;|&nbsp;
+        RFC 5216 — EAP-TLS 认证协议 &nbsp;|&nbsp;
+        RFC 9190 — EAP-TLS 1.3：将 EAP 与 TLS 1.3 配合使用 &nbsp;|&nbsp;
+        RFC 8446 — 传输层安全 (TLS) 协议版本 1.3 &nbsp;|&nbsp;
+        RFC 2865 — 远程认证拨入用户服务 (RADIUS) &nbsp;|&nbsp;
+        RFC 5280 — 互联网 X.509 PKI 证书和 CRL 配置文件 &nbsp;|&nbsp;
+        RFC 7030 — 安全传输注册 (EST) &nbsp;|&nbsp;
+        Cisco ISE 管理员指南 &nbsp;|&nbsp;
+        Cisco Catalyst 9800 系列 WLC 配置指南
+      </span>
+    </p>
+    <hr style="border: none; border-top: 1px solid var(--border-light); margin: 16px 0;"/>
+    <p>
+      <span class="en">© 2026 — 802.1X EAP-TLS Authentication Sequence — Industrial AGV Deployment Reference with Cisco ISE</span>
+      <span class="zh">© 2026 — 802.1X EAP-TLS 认证序列 — 工业 AGV 部署参考（Cisco ISE）</span>
+    </p>
+    <p style="font-size: 0.78rem; margin-top: 4px;">
+      <span class="en">This document is for educational and reference purposes. Always consult official Cisco documentation and your organization's security policies for production deployments.</span>
+      <span class="zh">本文档仅供学习和参考。生产部署请始终参阅 Cisco 官方文档和贵组织的安全策略。</span>
+    </p>
+  </div>
+</footer>
+
+
+<!-- ── Close any open wrappers from Parts 1 & 2 ── -->
+</div><!-- /.container or main wrapper if open -->
+
+</body>
+</html>
