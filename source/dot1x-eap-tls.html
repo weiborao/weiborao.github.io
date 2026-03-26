@@ -348,6 +348,83 @@ layout: false
             .notes-grid { grid-template-columns: 1fr; }
             .intro-section { grid-template-columns: 1fr; }
         }
+        /* ===== Glossary Section ===== */
+        .glossary-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            margin-bottom: 40px;
+            transition: var(--transition-theme);
+        }
+
+        .glossary-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--cisco-blue);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .glossary-title::before {
+            content: '';
+            width: 5px; height: 24px;
+            background: linear-gradient(180deg, var(--cisco-blue), var(--cisco-purple));
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 14px;
+        }
+
+        .glossary-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px 18px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: var(--transition-theme), transform 0.2s ease;
+        }
+
+        .glossary-item:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-1px);
+        }
+
+        .glossary-abbr {
+            flex-shrink: 0;
+            min-width: 90px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--cisco-teal);
+            font-family: 'Fira Code', 'SF Mono', 'Consolas', monospace;
+            padding: 3px 10px;
+            background: var(--code-bg);
+            border-radius: 5px;
+            text-align: center;
+            line-height: 1.6;
+            transition: var(--transition-theme);
+        }
+
+        .glossary-def {
+            font-size: 14.5px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            transition: var(--transition-theme);
+        }
+
+        .glossary-def strong {
+            color: var(--text-primary);
+            font-weight: 600;
+            transition: var(--transition-theme);
+        }        
     </style>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 
@@ -753,7 +830,60 @@ layout: false
             </div>
         </div>
     </section>
-
+<!-- Glossary / 术语表 -->
+<section class="glossary-section animate-in">
+    <h3 class="glossary-title">📖 术语表（Glossary）</h3>
+    <div class="glossary-grid">
+        <div class="glossary-item">
+            <div class="glossary-abbr">802.1X</div>
+            <div class="glossary-def"><strong>IEEE 802.1X</strong> — 基于端口的网络访问控制（Port-Based Network Access Control）标准。设备接入网络时必须先通过身份认证，认证通过后端口才被授权放行流量。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">EAP</div>
+            <div class="glossary-def"><strong>Extensible Authentication Protocol</strong> — 可扩展认证协议，802.1X 的认证框架。本身不定义具体认证方法，而是承载 EAP-TLS、PEAP 等具体方法。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">EAP-TLS</div>
+            <div class="glossary-def"><strong>EAP-Transport Layer Security</strong> — 基于 TLS 证书的 EAP 认证方法，要求客户端和服务器双向出示证书，是安全性最高的 EAP 类型之一。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">EAPOL</div>
+            <div class="glossary-def"><strong>EAP over LAN</strong> — 将 EAP 报文封装在以太网二层帧中传输的协议（EtherType 0x888E），用于 Supplicant 与 Authenticator 之间的通信。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">Supplicant</div>
+            <div class="glossary-def"><strong>请求者</strong> — 发起 802.1X 认证的客户端设备（本场景中为 AGV），运行 Supplicant 软件，持有客户端证书或凭据。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">Authenticator</div>
+            <div class="glossary-def"><strong>认证者</strong> — 位于 Supplicant 和 Authentication Server 之间的网络设备（AP 或交换机），负责转发 EAP 报文，控制端口的授权/未授权状态。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">RADIUS</div>
+            <div class="glossary-def"><strong>Remote Authentication Dial-In User Service</strong> — 远程认证拨号用户服务协议（UDP 1812/1813），Authenticator 将 EAP 报文封装为 RADIUS 发送给 ISE。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">ISE</div>
+            <div class="glossary-def"><strong>Cisco Identity Services Engine</strong> — Cisco 统一身份与策略管理平台，同时充当 RADIUS Server、策略决策点（PDP）和策略管理点。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">dACL</div>
+            <div class="glossary-def"><strong>Downloadable ACL</strong> — ISE 认证通过后下发给交换机/WLC 的访问控制列表，动态限制该端口允许的流量范围。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">SGT</div>
+            <div class="glossary-def"><strong>Security Group Tag</strong> — Cisco TrustSec 安全组标签，ISE 根据身份/策略为流量打标，用于全网微分段（Micro-Segmentation）。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">PMKSA</div>
+            <div class="glossary-def"><strong>Pairwise Master Key Security Association</strong> — 无线网络中缓存的主密钥关联，支持快速重连和漫游，避免重复完整 EAP 认证。</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-abbr">802.11r (FT)</div>
+            <div class="glossary-def"><strong>Fast BSS Transition</strong> — IEEE 802.11r 快速漫游标准，预先在目标 AP 完成密钥协商，将漫游切换时延降至毫秒级，适合 AGV 等移动场景。</div>
+        </div>
+    </div>
+</section>
 </main>
 
 <footer class="page-footer">
