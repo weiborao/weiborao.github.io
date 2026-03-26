@@ -1,0 +1,1243 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco ISE BYOD 端到端架构知识地图</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --accent: #049fd9;
+    --accent-dark: #0371a0;
+    --accent-light: #e6f6fd;
+    --border: #e0e4ec;
+    --green: #00b894;
+    --orange: #fdcb6e;
+    --red: #d63031;
+    --purple: #6c5ce7;
+    --teal: #00cec9;
+    --radius: 14px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+    --container: 1100px;
+    --font: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { font-size: 18px; scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ===== HEADER ===== */
+  .hero {
+    background: linear-gradient(135deg, #049fd9 0%, #6c5ce7 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; right: 0;
+    height: 48px;
+    background: var(--bg);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .hero h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+  .hero p { font-size: 1.15rem; opacity: 0.92; max-width: 720px; margin: 0 auto; }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.22);
+    backdrop-filter: blur(6px);
+    padding: 6px 18px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  /* ===== NAV / TOC ===== */
+  .toc-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .toc-bar .container {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    scrollbar-width: none;
+  }
+  .toc-bar .container::-webkit-scrollbar { display:none; }
+  .toc-link {
+    white-space: nowrap;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .toc-link:hover, .toc-link:focus {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ===== SECTIONS ===== */
+  .section { padding: 52px 0 32px; }
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .section-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    padding-left: 56px;
+  }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .card h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 20px 0 10px;
+    color: var(--accent-dark);
+  }
+  .card p, .card li {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.85;
+  }
+  .card ul, .card ol {
+    padding-left: 1.4em;
+    margin-bottom: 12px;
+  }
+  .card li { margin-bottom: 6px; }
+
+  .highlight-box {
+    background: var(--accent-light);
+    border-left: 5px solid var(--accent);
+    padding: 20px 24px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 20px 0;
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--text);
+  }
+  .highlight-box strong { color: var(--accent-dark); }
+
+  .warn-box {
+    background: #fff9e6;
+    border-left: 5px solid var(--orange);
+    padding: 18px 24px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 20px 0;
+    font-size: 0.95rem;
+    color: #7d6608;
+  }
+
+  .ref {
+    display: inline-block;
+    background: #eee;
+    color: #666;
+    font-size: 0.78rem;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-weight: 600;
+  }
+
+  /* ===== GRID ===== */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media(max-width:768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  /* portal cards */
+  .portal-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 28px;
+    border: 1px solid var(--border);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .portal-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .portal-card .icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+    color: #fff;
+  }
+  .portal-card h4 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text); }
+  .portal-card p { font-size: 0.92rem; color: var(--text-secondary); }
+
+  /* ===== PHASE TIMELINE ===== */
+  .timeline { position: relative; padding-left: 40px; margin: 20px 0; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 14px; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--accent), var(--purple));
+    border-radius: 4px;
+  }
+  .timeline-item { position: relative; margin-bottom: 32px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -33px; top: 6px;
+    width: 18px; height: 18px;
+    background: var(--accent);
+    border: 4px solid var(--card);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--accent);
+  }
+  .timeline-item:nth-child(2)::before { background: var(--teal); box-shadow: 0 0 0 3px var(--teal); }
+  .timeline-item:nth-child(3)::before { background: var(--purple); box-shadow: 0 0 0 3px var(--purple); }
+  .timeline-item:nth-child(4)::before { background: var(--green); box-shadow: 0 0 0 3px var(--green); }
+  .timeline-item:nth-child(5)::before { background: var(--orange); box-shadow: 0 0 0 3px var(--orange); }
+  .phase-tag {
+    display: inline-block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+  .phase-tag.p1 { background: var(--accent); }
+  .phase-tag.p2 { background: var(--teal); }
+  .phase-tag.p3 { background: var(--purple); }
+  .phase-tag.p4 { background: var(--green); }
+  .phase-tag.p5 { background: var(--orange); color: #333; }
+
+  .timeline-item h4 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+  .timeline-item p, .timeline-item li { font-size: 0.98rem; color: var(--text-secondary); }
+
+  /* ===== TABLE ===== */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  th {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 700;
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  tr:nth-child(even) td { background: #f9fafc; }
+  code {
+    background: #eef2f7;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+    color: var(--accent-dark);
+  }
+
+  /* ===== SVG FLOW CHART ===== */
+  .svg-wrap {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 36px 24px;
+    margin: 28px 0;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .svg-wrap svg { display: block; margin: 0 auto; }
+  .svg-wrap svg text {
+    font-family: var(--font);
+  }
+
+  /* ===== ATTRIBUTE TABLE ===== */
+  .attr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .attr-item {
+    background: #f7f8fc;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+  }
+  .attr-item .label {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .attr-item .value {
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .attr-item .desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    text-align: center;
+    padding: 40px 0;
+    color: #999;
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:600px) {
+    html { font-size: 16px; }
+    .hero h1 { font-size: 1.7rem; }
+    .card { padding: 22px 18px; }
+    .section { padding: 36px 0 20px; }
+    .timeline { padding-left: 32px; }
+    .timeline-item::before { left: -25px; width: 14px; height: 14px; }
+    .svg-wrap { padding: 16px 8px; }
+  }
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+
+<!-- ================== HERO ================== -->
+<header class="hero">
+  <div class="container">
+    <div class="badge">CISCO ISE 架构深度解析</div>
+    <h1>BYOD 端到端架构知识地图</h1>
+    <p>从第一性原理出发，以 Story Telling 的方式，完整拆解 Cisco ISE BYOD 的业务需求、六大 Portal、端到端消息流与配置架构</p>
+  </div>
+</header>
+
+<!-- ================== TOC BAR ================== -->
+<nav class="toc-bar">
+  <div class="container">
+    <a class="toc-link" href="#s1">① 为什么需要 BYOD</a>
+    <a class="toc-link" href="#s2">② 六大 Portal 全景</a>
+    <a class="toc-link" href="#s3">③ 端到端五阶段流程</a>
+    <a class="toc-link" href="#s4">④ 端点属性状态机</a>
+    <a class="toc-link" href="#s5">⑤ SVG 消息流图</a>
+    <a class="toc-link" href="#s6">⑥ ISE 配置架构</a>
+    <a class="toc-link" href="#s7">⑦ WLC 配置要点</a>
+    <a class="toc-link" href="#s8">⑧ 设备生命周期管理</a>
+    <a class="toc-link" href="#s9">⑨ 监控与报告</a>
+  </div>
+</nav>
+
+<!-- ================== MAIN ================== -->
+<main>
+
+<!-- ===== S1: WHY BYOD ===== -->
+<section class="section" id="s1">
+<div class="container">
+  <div class="section-title"><span class="num">1</span>为什么企业需要 BYOD 策略</div>
+  <div class="section-subtitle">从第一性原理出发：安全与用户体验的终极平衡</div>
+
+  <div class="card">
+    <h3>🎯 核心矛盾：不受信任的设备 vs 企业数据安全</h3>
+    <p>当员工携带个人手机、平板、笔记本电脑接入企业网络时，企业面临一个根本性的矛盾：</p>
+    <ul>
+      <li><strong>员工诉求</strong>：用自己最熟悉的设备办公，提升效率和满意度。</li>
+      <li><strong>安全诉求</strong>：这些设备没有预装企业安全软件、可能携带恶意软件、一旦丢失可能泄露企业数据。</li>
+    </ul>
+    <div class="highlight-box">
+      <strong>文档原文：</strong>"When supporting personal devices on a corporate network, you must protect network services and enterprise data by <strong>authenticating and authorizing users (employees, contractors, and guests) and their devices</strong>. Cisco ISE provides the tools you need to allow employees to securely use personal devices on a corporate network."
+      <span class="ref">b_ISE_admin_byod.pdf · P1 · Personal Devices on a Corporate Network</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>❌ 体验妥协方案：PEAP + 密码</h3>
+      <p>让用户用 AD 域账号密码连接 Wi-Fi。优点是简单；缺点是密码可被共享泄露，离职换密码时所有设备断连，且无法绑定到具体设备。</p>
+    </div>
+    <div class="card">
+      <h3>✅ ISE BYOD 方案：EAP-TLS + 自动证书</h3>
+      <p>使用数字证书进行认证是最安全的方式——证书可嵌入设备 MAC 地址和用户名，且不怕密码泄露。</p>
+      <div class="highlight-box">
+        <strong>ISE BYOD 的核心价值</strong>："将复杂的 PKI 证书申请过程自动化"。ISE 通过 BYOD Portal + Native Supplicant 向导，自动为终端签发证书、配置 Wi-Fi 配置文件，实现了<strong>高级别安全与傻瓜式体验的完美平衡</strong>。
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== S2: SIX PORTALS ===== -->
+<section class="section" id="s2">
+<div class="container">
+  <div class="section-title"><span class="num">2</span>Cisco ISE 六大设备 Portal 全景图</div>
+  <div class="section-subtitle">ISE 提供了完整的 Portal 矩阵，覆盖 BYOD 生命周期的每一个环节 <span class="ref">b_ISE_admin_byod.pdf · P2 · Personal Device Portals</span></div>
+
+  <div class="grid-2">
+    <!-- Portal 1 -->
+    <div class="portal-card">
+      <div class="icon" style="background:var(--accent)">📱</div>
+      <h4>BYOD Portal</h4>
+      <p><strong>用途</strong>：员工<strong>不直接访问</strong>此门户，而是在首次接入时被自动重定向到此门户，完成设备注册与 Native Supplicant 配置。</p>
+      <p><strong>关键细节</strong>：支持 iOS 的 OTA 配置文件推送、Windows/macOS 的 NSA 下载、Android 的 Google Play NSA App 下载。</p>
+      <div class="warn-box">⚠️ "BYOD flow is not supported when a device is connected to a network using Network Access Manager (NAM)." <span class="ref">P4</span></div>
+    </div>
+    <!-- Portal 2 -->
+    <div class="portal-card">
+      <div class="icon" style="background:var(--green)">🖥️</div>
+      <h4>My Devices Portal</h4>
+      <p><strong>用途</strong>：员工<strong>直接访问</strong>此门户，管理所有已注册的个人设备——添加 MAC 认证设备（如打印机、物联网设备）、标记丢失/被盗设备、重新激活设备。</p>
+      <p><strong>关键细节</strong>：当同一设备有有线和无线两个 MAC 地址时，ISE 的 Profiler 会通过 hostname 合并为一条记录。</p>
+      <div class="highlight-box">"Employees can add and manage new devices by entering the MAC address for the device. When employees add devices using the My Devices portal, Cisco ISE adds the devices to the Endpoints window as members of the <strong>RegisteredDevices</strong> endpoint identity group." <span class="ref">P5</span></div>
+    </div>
+    <!-- Portal 3 -->
+    <div class="portal-card">
+      <div class="icon" style="background:var(--red)">🚫</div>
+      <h4>Blocked List Portal</h4>
+      <p><strong>用途</strong>：员工<strong>不直接访问</strong>。当丢失/被盗的设备被加入黑名单后，如果有人试图用该设备接入网络，会被重定向至此门户，提示设备已被阻止。</p>
+      <p><strong>关键细节</strong>：默认端口 8444，支持 IPv4 和 IPv6。如果设备找回，员工可在 My Devices Portal 恢复 (reinstate)，无需重新注册。<span class="ref">P3</span></p>
+    </div>
+    <!-- Portal 4 -->
+    <div class="portal-card">
+      <div class="icon" style="background:var(--purple)">📜</div>
+      <h4>Certificate Provisioning Portal</h4>
+      <p><strong>用途</strong>：员工<strong>直接访问</strong>。为无法走 BYOD 流程的设备（如 POS 收银终端）手动申请证书。支持单个或批量 CSV 请求。</p>
+      <p><strong>访问权限</strong>：Super Admin / ERS Admin 角色可为他人申请；普通用户仅能为自己申请。<span class="ref">P3 · P18</span></p>
+    </div>
+    <!-- Portal 5 -->
+    <div class="portal-card">
+      <div class="icon" style="background:var(--teal)">🛡️</div>
+      <h4>Client Provisioning Portal</h4>
+      <p><strong>用途</strong>：员工<strong>不直接访问</strong>。在接入网络前，设备被重定向至此门户，下载 Posture Agent 进行合规检查（如杀毒软件、操作系统版本）。</p>
+      <p><strong>关键细节</strong>：除了常规的 8443 端口，还使用 8905 和 8909 端口。支持 IPv4/IPv6。<span class="ref">P4</span></p>
+    </div>
+    <!-- Portal 6 -->
+    <div class="portal-card">
+      <div class="icon" style="background:#e17055">📲</div>
+      <h4>MDM Portal</h4>
+      <p><strong>用途</strong>：员工<strong>不直接访问</strong>，被重定向至此门户注册外部 MDM 系统（如 Microsoft Intune、VMware Workspace ONE 等）。</p>
+      <p><strong>关键细节</strong>：ISE 允许为所有 MDM 系统配置统一门户，也可以为每个 MDM 系统单独创建门户。支持 IPv4/IPv6。<span class="ref">P4-5</span></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:24px;">
+    <h3>📐 分布式架构中的角色分工</h3>
+    <div class="highlight-box">
+      <strong>PAN（Policy Administration Node）</strong>：所有 Portal 配置写入 PAN。<br>
+      <strong>PSN（Policy Service Node）</strong>：Portal 实际运行在 PSN 上，处理所有会话流量（网络访问、Client Provisioning、Guest 服务、Posture、Profiling）。PSN 节点组中某节点故障时，其他节点检测故障并重置挂起会话。<br>
+      <strong>MnT（Monitoring Node）</strong>：收集、聚合、报告用户和设备在 My Devices、Sponsor、Guest Portal 上的活动数据。主 MnT 故障时，备 MnT 自动接管。
+      <span class="ref">P1-2 · End-User Device Portals in a Distributed Environment</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== S3: FIVE PHASES ===== -->
+<section class="section" id="s3">
+<div class="container">
+  <div class="section-title"><span class="num">3</span>单 SSID BYOD 端到端五阶段流程</div>
+  <div class="section-subtitle">以 Single-SSID 部署为例，完整还原从"一台全新个人手机"到"获得完整网络权限"的毫秒级时间线 <span class="ref">P6-8 · BYOD Deployment Options and Status Flow</span></div>
+
+  <div class="card">
+    <div class="timeline">
+
+      <!-- Phase 1 -->
+      <div class="timeline-item">
+        <span class="phase-tag p1">Phase 1</span>
+        <h4>初次连接 — The Unknown State</h4>
+        <ol>
+          <li><strong>802.11 关联 & EAP 认证</strong>：员工使用个人手机连接企业 SSID（如 <code>Corp-WiFi</code>），输入 AD 域账号和密码，使用 PEAP-MSCHAPv2 完成首次认证。</li>
+          <li><strong>ISE 策略匹配</strong>：ISE 收到 RADIUS Access-Request，认证成功后进入 Authorization Policy。</li>
+          <li><strong>状态判定</strong>：ISE 检查内部数据库，发现该设备 MAC 地址对应的 <code>BYODRegistration</code> 属性为 <code>Unknown</code>（未注册）。</li>
+          <li><strong>下发重定向</strong>：ISE 命中 BYOD Onboarding 规则，返回 <code>RADIUS Access-Accept</code>，携带两个关键属性：
+            <ul>
+              <li><code>url-redirect</code> = 指向 ISE BYOD Portal 的 URL</li>
+              <li><code>url-redirect-acl</code> = WLC 本地的拦截 ACL（如 <code>NSP-ACL</code>）</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="timeline-item">
+        <span class="phase-tag p2">Phase 2</span>
+        <h4>BYOD Portal — 重定向与自服务登记</h4>
+        <ol>
+          <li><strong>流量劫持</strong>：设备获取受限 IP 后，打开浏览器。HTTP 请求命中 WLC 上 <code>NSP-ACL</code> 的 Deny 规则，WLC 返回 HTTP 302 重定向到 ISE BYOD Portal。</li>
+          <li><strong>SSO 单点登录</strong>：由于之前已完成 802.1X PEAP 认证，ISE 实现 SSO，用户无需再次输入账号。</li>
+          <li><strong>设备登记 & AUP</strong>：用户在 Portal 上确认设备信息（MAC 地址已预填），可输入设备名称和描述（如 "Bob 的个人 iPad"），同意《可接受使用协议》(AUP)。</li>
+        </ol>
+        <div class="highlight-box">"The first time employees attempt to access the network using a personal device, they may be prompted to manually download and launch the Network Setup Assistant (NSA) wizard and be guided through registering and installing the native supplicant." <span class="ref">P4</span></div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="timeline-item">
+        <span class="phase-tag p3">Phase 3</span>
+        <h4>证书签发与 Supplicant Provisioning（按 OS 分流）</h4>
+        <p>ISE 的 Client Provisioning 引擎根据探针识别的操作系统，下发不同的配置资源：</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>操作系统</th><th>配置方式</th><th>详细说明</th></tr>
+            <tr>
+              <td><strong>Apple iOS / iPadOS</strong></td>
+              <td>OTA 配置文件</td>
+              <td>ISE 利用苹果原生 Over-The-Air API，生成包含 SCEP 载荷的 <code>.mobileconfig</code> 推送。用户点击安装后，iOS 后台自动生成密钥对、通过 SCEP 向 ISE Internal CA 申请证书，并自动将 Wi-Fi 配置修改为 EAP-TLS。签发的证书嵌入 MAC 地址和用户名。<span class="ref">P6-7</span></td>
+            </tr>
+            <tr>
+              <td><strong>Windows / macOS</strong></td>
+              <td>NSA 下载安装</td>
+              <td>ISE 提示用户下载 Network Setup Assistant (NSA) 小程序。NSA 自动完成 CSR 生成、证书拉取、网卡配置文件修改。<br><strong>注意</strong>：macOS 10.15+ 用户必须手动允许 SPW 下载。Windows 设备用户必须有管理员权限才能安装 NSA；否则需要使用 GPO 推送证书。<span class="ref">P6</span></td>
+            </tr>
+            <tr>
+              <td><strong>Android</strong></td>
+              <td>Google Play NSA App</td>
+              <td>ISE 提示并路由用户到 Google Play Store 下载 Cisco NSA App。安装后打开 App 运行设置向导，完成证书拉取和 Supplicant 配置。<span class="ref">P7</span></td>
+            </tr>
+          </table>
+        </div>
+        <div class="warn-box">
+          ⚠️ <strong>Android 10 特殊处理</strong>："Because Android 10 generates a random MAC address whenever a new connection profile is created, you must modify the default rule to remove <code>BYOD_is_Registered</code> and <code>MAC_in_SAN</code> conditions from the authorization profile for the BYOD flow to work with Android clients." <span class="ref">P7</span><br><br>
+          ⚠️ <strong>iOS 单/双 SSID 注意</strong>："Check the <em>Enable if Target Network is Hidden</em> check box only when the actual Wi-Fi network is hidden. Otherwise, Wi-Fi network configuration may not be provisioned properly for certain iOS devices, especially in the single SSID flow." <span class="ref">P7</span>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="timeline-item">
+        <span class="phase-tag p4">Phase 4</span>
+        <h4>重新连接与动态提权 — CoA & EAP-TLS</h4>
+        <ol>
+          <li><strong>触发重连</strong>：证书安装完毕后，NSA/iOS 配置文件自动断开当前连接，或 ISE 主动发送 <strong>RADIUS CoA (Change of Authorization)</strong> 迫使设备断线。</li>
+          <li><strong>EAP-TLS 高级认证</strong>：设备使用刚刚获得的 CA 签发证书，发起 EAP-TLS 认证。</li>
+          <li><strong>ISE 提权放行</strong>：ISE 校验终端证书成功，检查数据库发现 <code>BYODRegistration = Yes</code>，命中最高权限规则，向 WLC 下发 <code>PermitAccess</code>（完整网络权限、指定 VLAN 或 SGT）。</li>
+        </ol>
+        <div class="highlight-box">"After the user goes through the onboarding flow, Cisco ISE initiates a Change of Authorization (CoA). This causes the macOS, Windows, and Android devices to reconnect to the secure 802.1X network. For single SSID, iOS devices also connect automatically, but for dual SSID, the wizard prompts iOS users to manually connect to the new network." <span class="ref">P7</span></div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="timeline-item">
+        <span class="phase-tag p5">Phase 5</span>
+        <h4>持续管理 — 设备生命周期</h4>
+        <ul>
+          <li><strong>My Devices Portal</strong>：员工随时可管理名下所有设备。</li>
+          <li><strong>丢失 / 被盗标记</strong>：标记为 Stolen 时，ISE 立即吊销证书、将 MAC 移入 Blocked List、触发 CoA 踢下线。标记为 Lost 时，设备进入 Blocked List 但证书不被吊销。</li>
+          <li><strong>找回恢复</strong>：恢复后状态变为 Not Registered，需要删除后重新添加以触发 onboarding。</li>
+          <li><strong>设备数量限制</strong>：默认每人最多注册 5 台设备，可配置为 1~999。<span class="ref">P2 · P8 · P26</span></li>
+        </ul>
+      </div>
+
+    </div><!-- /.timeline -->
+  </div>
+</div>
+</section>
+
+<!-- ===== S4: ENDPOINT ATTRIBUTES ===== -->
+<section class="section" id="s4">
+<div class="container">
+  <div class="section-title"><span class="num">4</span>端点属性状态机详解</div>
+  <div class="section-subtitle">理解 BYODRegistration 和 DeviceRegistrationStatus 两个核心属性的状态转换是精确编写授权策略的基础 <span class="ref">P7-8</span></div>
+
+  <div class="card">
+    <h3>🔑 BYODRegistration 属性状态</h3>
+    <div class="attr-grid">
+      <div class="attr-item">
+        <div class="label">Unknown</div>
+        <div class="value">未知</div>
+        <div class="desc">设备从未经历过 BYOD 流程。这是初始默认状态。</div>
+      </div>
+      <div class="attr-item">
+        <div class="label">Yes</div>
+        <div class="value">已注册</div>
+        <div class="desc">设备已成功完成 BYOD 流程并注册。</div>
+      </div>
+      <div class="attr-item">
+        <div class="label">No</div>
+        <div class="value">未注册（曾注册后被删除）</div>
+        <div class="desc">设备曾经历过 BYOD 流程，但已从 My Devices 删除或被标记为丢失/被盗。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 DeviceRegistrationStatus 属性状态</h3>
+    <div class="attr-grid">
+      <div class="attr-item">
+        <div class="label">Not Registered</div>
+        <div class="value">未注册</div>
+        <div class="desc">默认状态，设备从未经历 BYOD 流程。</div>
+      </div>
+      <div class="attr-item">
+        <div class="label">Pending</div>
+        <div class="value">待确认</div>
+        <div class="desc">设备已完成 BYOD 流程并注册，但 ISE 尚未在网络上检测到该设备。存在约 20 分钟的延迟后转为 Registered。</div>
+      </div>
+      <div class="attr-item">
+        <div class="label">Registered</div>
+        <div class="value">已注册</div>
+        <div class="desc">设备完成 BYOD 流程，且 ISE 已在网络上检测到它。</div>
+      </div>
+      <div class="attr-item">
+        <div class="label">Stolen</div>
+        <div class="value">被盗</div>
+        <div class="desc">用户在 My Devices Portal 标记为 Stolen。ISE 吊销证书 + 加入 Blocked List。</div>
+      </div>
+      <div class="attr-item">
+        <div class="label">Lost</div>
+        <div class="value">丢失</div>
+        <div class="desc">用户在 My Devices Portal 标记为 Lost。设备加入 Blocked List，但证书不被吊销。BYODRegistration 设为 No。</div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      ⚠️ <strong>Lost 设备默认仍有网络访问</strong>：必须手动创建授权策略阻止丢失设备。例如：<br>
+      <code>IF Endpoint Identity Group = Blocked List AND EndPoints:BYODRegistration = No THEN BYOD_Redirect</code><br>
+      或更精细地加上 <code>NetworkAccess:EAPAuthenticationMethod = PEAP/EAP-TLS</code> 和 <code>InternalUser:IdentityGroup</code> 条件。<span class="ref">P8</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== S5: SVG MESSAGE FLOW ===== -->
+<section class="section" id="s5">
+<div class="container">
+  <div class="section-title"><span class="num">5</span>端到端消息流图（Message Flow Chart）</div>
+  <div class="section-subtitle">以 SVG 图形呈现单 SSID BYOD 流程中 Employee Device / WLC / ISE 三方的精密协同</div>
+
+  <div class="svg-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1340" width="100%" height="auto" style="max-width:1050px;min-width:680px;">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" fill="#049fd9">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+        <marker id="arrow-g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" fill="#00b894">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+        <marker id="arrow-p" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" fill="#6c5ce7">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+        <marker id="arrow-r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" fill="#d63031">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+        <linearGradient id="hg" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#049fd9"/>
+          <stop offset="100%" stop-color="#6c5ce7"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Column headers -->
+      <rect x="40" y="16" width="220" height="56" rx="12" fill="#049fd9"/>
+      <text x="150" y="52" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">Employee Device</text>
+
+      <rect x="400" y="16" width="220" height="56" rx="12" fill="#00b894"/>
+      <text x="510" y="52" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">Cisco WLC 9800</text>
+
+      <rect x="770" y="16" width="240" height="56" rx="12" fill="#6c5ce7"/>
+      <text x="890" y="52" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">Cisco ISE (PDP &amp; CA)</text>
+
+      <!-- Vertical lifelines -->
+      <line x1="150" y1="80" x2="150" y2="1300" stroke="#ccc" stroke-width="2" stroke-dasharray="8,5"/>
+      <line x1="510" y1="80" x2="510" y2="1300" stroke="#ccc" stroke-width="2" stroke-dasharray="8,5"/>
+      <line x1="890" y1="80" x2="890" y2="1300" stroke="#ccc" stroke-width="2" stroke-dasharray="8,5"/>
+
+      <!-- ========== Phase 1 ========== -->
+      <rect x="20" y="100" width="1010" height="28" rx="6" fill="#e6f6fd"/>
+      <text x="525" y="120" text-anchor="middle" fill="#049fd9" font-size="14" font-weight="700">── Phase 1: 初次连接 (The Unknown State) ──</text>
+
+      <!-- Msg 1 -->
+      <line x1="155" y1="152" x2="885" y2="152" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <rect x="280" y="134" width="460" height="24" rx="5" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+      <text x="510" y="152" text-anchor="middle" fill="#049fd9" font-size="13" font-weight="600">① 802.11 Assoc + EAP (PEAP + AD 域账号密码)</text>
+
+      <!-- ISE note -->
+      <rect x="780" y="170" width="230" height="40" rx="8" fill="#f3f0ff" stroke="#6c5ce7" stroke-width="1"/>
+      <text x="895" y="186" text-anchor="middle" fill="#6c5ce7" font-size="11.5" font-weight="600">ISE 认证成功</text>
+      <text x="895" y="202" text-anchor="middle" fill="#6c5ce7" font-size="11.5" font-weight="600">检测 BYODRegistration = Unknown</text>
+
+      <!-- Msg 2 -->
+      <line x1="885" y1="232" x2="155" y2="232" stroke="#6c5ce7" stroke-width="2.5" marker-end="url(#arrow-p)"/>
+      <rect x="240" y="214" width="530" height="24" rx="5" fill="#fff" stroke="#6c5ce7" stroke-width="1"/>
+      <text x="505" y="232" text-anchor="middle" fill="#6c5ce7" font-size="13" font-weight="600">② Access-Accept (url-redirect + url-redirect-acl=NSP-ACL)</text>
+
+      <!-- ========== Phase 2 ========== -->
+      <rect x="20" y="272" width="1010" height="28" rx="6" fill="#e0fcf8"/>
+      <text x="525" y="292" text-anchor="middle" fill="#00b894" font-size="14" font-weight="700">── Phase 2: BYOD Portal 重定向与自服务登记 ──</text>
+
+      <!-- Msg 3 -->
+      <line x1="155" y1="322" x2="505" y2="322" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <rect x="215" y="304" width="210" height="24" rx="5" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+      <text x="320" y="322" text-anchor="middle" fill="#049fd9" font-size="13" font-weight="600">③ HTTP GET (cisco.com)</text>
+
+      <!-- Msg 4 -->
+      <line x1="505" y1="358" x2="155" y2="358" stroke="#00b894" stroke-width="2.5" marker-end="url(#arrow-g)"/>
+      <rect x="195" y="340" width="290" height="24" rx="5" fill="#fff" stroke="#00b894" stroke-width="1"/>
+      <text x="340" y="358" text-anchor="middle" fill="#00b894" font-size="13" font-weight="600">④ HTTP 302 Redirect (WLC 拦截)</text>
+
+      <!-- Msg 5 -->
+      <line x1="155" y1="398" x2="885" y2="398" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <rect x="270" y="380" width="480" height="24" rx="5" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+      <text x="510" y="398" text-anchor="middle" fill="#049fd9" font-size="13" font-weight="600">⑤ TLS 会话 (TCP 8443) → 登录 BYOD Portal，SSO 免密</text>
+
+      <!-- ISE note -->
+      <rect x="780" y="416" width="230" height="28" rx="8" fill="#f3f0ff" stroke="#6c5ce7" stroke-width="1"/>
+      <text x="895" y="436" text-anchor="middle" fill="#6c5ce7" font-size="12" font-weight="600">用户同意 AUP，设备登记完成</text>
+
+      <!-- ========== Phase 3 ========== -->
+      <rect x="20" y="462" width="1010" height="28" rx="6" fill="#f3f0ff"/>
+      <text x="525" y="482" text-anchor="middle" fill="#6c5ce7" font-size="14" font-weight="700">── Phase 3: 证书签发 &amp; Supplicant Provisioning ──</text>
+
+      <!-- Msg 6 -->
+      <line x1="885" y1="512" x2="155" y2="512" stroke="#6c5ce7" stroke-width="2.5" marker-end="url(#arrow-p)"/>
+      <rect x="220" y="494" width="520" height="24" rx="5" fill="#fff" stroke="#6c5ce7" stroke-width="1"/>
+      <text x="480" y="512" text-anchor="middle" fill="#6c5ce7" font-size="13" font-weight="600">⑥ 下发 NSA / iOS .mobileconfig (TCP 8905)</text>
+
+      <!-- Device note -->
+      <rect x="35" y="534" width="230" height="42" rx="8" fill="#e6f6fd" stroke="#049fd9" stroke-width="1"/>
+      <text x="150" y="552" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600">设备本地生成密钥对 (Key Pair)</text>
+      <text x="150" y="568" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600">准备 CSR 证书签名请求</text>
+
+      <!-- Msg 7 -->
+      <line x1="155" y1="598" x2="885" y2="598" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <rect x="290" y="580" width="430" height="24" rx="5" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+      <text x="505" y="598" text-anchor="middle" fill="#049fd9" font-size="13" font-weight="600">⑦ SCEP CSR Request (设备→ISE Internal CA)</text>
+
+      <!-- Msg 8 -->
+      <line x1="885" y1="638" x2="155" y2="638" stroke="#6c5ce7" stroke-width="2.5" marker-end="url(#arrow-p)"/>
+      <rect x="260" y="620" width="490" height="24" rx="5" fill="#fff" stroke="#6c5ce7" stroke-width="1"/>
+      <text x="505" y="638" text-anchor="middle" fill="#6c5ce7" font-size="13" font-weight="600">⑧ SCEP Response (CA 签发证书，嵌入 MAC+用户名)</text>
+
+      <!-- Device note -->
+      <rect x="35" y="660" width="230" height="28" rx="8" fill="#e6f6fd" stroke="#049fd9" stroke-width="1"/>
+      <text x="150" y="680" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600">安装证书，配置 EAP-TLS Profile</text>
+
+      <!-- ========== Phase 4 ========== -->
+      <rect x="20" y="710" width="1010" height="28" rx="6" fill="#e8fdf5"/>
+      <text x="525" y="730" text-anchor="middle" fill="#00b894" font-size="14" font-weight="700">── Phase 4: 重新连接与动态提权 (CoA &amp; EAP-TLS) ──</text>
+
+      <!-- Msg 9 -->
+      <line x1="885" y1="762" x2="515" y2="762" stroke="#d63031" stroke-width="2.5" marker-end="url(#arrow-r)"/>
+      <rect x="570" y="744" width="290" height="24" rx="5" fill="#fff" stroke="#d63031" stroke-width="1"/>
+      <text x="715" y="762" text-anchor="middle" fill="#d63031" font-size="13" font-weight="600">⑨ RADIUS CoA (Port Bounce)</text>
+
+      <!-- Msg 10 -->
+      <line x1="505" y1="798" x2="155" y2="798" stroke="#d63031" stroke-width="2.5" marker-end="url(#arrow-r)"/>
+      <rect x="230" y="780" width="230" height="24" rx="5" fill="#fff" stroke="#d63031" stroke-width="1"/>
+      <text x="345" y="798" text-anchor="middle" fill="#d63031" font-size="13" font-weight="600">⑩ Deauth — 强制断连</text>
+
+      <!-- Msg 11 -->
+      <line x1="155" y1="842" x2="885" y2="842" stroke="#00b894" stroke-width="2.5" marker-end="url(#arrow-g)"/>
+      <rect x="250" y="824" width="510" height="24" rx="5" fill="#fff" stroke="#00b894" stroke-width="1"/>
+      <text x="505" y="842" text-anchor="middle" fill="#00b894" font-size="13" font-weight="600">⑪ 802.11 Re-Assoc + EAP-TLS (使用新签发的证书)</text>
+
+      <!-- ISE note -->
+      <rect x="780" y="860" width="230" height="40" rx="8" fill="#e8fdf5" stroke="#00b894" stroke-width="1"/>
+      <text x="895" y="876" text-anchor="middle" fill="#00b894" font-size="11.5" font-weight="600">ISE 验证证书成功</text>
+      <text x="895" y="892" text-anchor="middle" fill="#00b894" font-size="11.5" font-weight="600">BYODRegistration = Yes ✓</text>
+
+      <!-- Msg 12 -->
+      <line x1="885" y1="920" x2="155" y2="920" stroke="#00b894" stroke-width="3" marker-end="url(#arrow-g)"/>
+      <rect x="230" y="902" width="540" height="24" rx="5" fill="#e8fdf5" stroke="#00b894" stroke-width="1.5"/>
+      <text x="500" y="920" text-anchor="middle" fill="#00b894" font-size="13" font-weight="700">⑫ Access-Accept (PermitAccess + Full VLAN/SGT)</text>
+
+      <!-- ========== Phase 5 ========== -->
+      <rect x="20" y="960" width="1010" height="28" rx="6" fill="#fef9e7"/>
+      <text x="525" y="980" text-anchor="middle" fill="#e17055" font-size="14" font-weight="700">── Phase 5: 持续管理 — 设备生命周期 ──</text>
+
+      <!-- Success banner -->
+      <rect x="60" y="1004" width="930" height="52" rx="14" fill="url(#hg)" opacity="0.12"/>
+      <rect x="60" y="1004" width="930" height="52" rx="14" fill="none" stroke="url(#hg)" stroke-width="2"/>
+      <text x="525" y="1036" text-anchor="middle" fill="#049fd9" font-size="17" font-weight="800">🎉 员工获得完整企业网络安全访问权限</text>
+
+      <!-- Lifecycle icons -->
+      <rect x="80" y="1080" width="260" height="70" rx="10" fill="#fff" stroke="#049fd9" stroke-width="1.5"/>
+      <text x="210" y="1108" text-anchor="middle" fill="#049fd9" font-size="13" font-weight="700">📱 My Devices Portal</text>
+      <text x="210" y="1132" text-anchor="middle" fill="#666" font-size="12">查看/管理名下所有设备</text>
+
+      <rect x="390" y="1080" width="260" height="70" rx="10" fill="#fff" stroke="#d63031" stroke-width="1.5"/>
+      <text x="520" y="1108" text-anchor="middle" fill="#d63031" font-size="13" font-weight="700">🚨 标记 Lost / Stolen</text>
+      <text x="520" y="1132" text-anchor="middle" fill="#666" font-size="12">加入 Blocked List + 吊销证书</text>
+
+      <rect x="700" y="1080" width="260" height="70" rx="10" fill="#fff" stroke="#00b894" stroke-width="1.5"/>
+      <text x="830" y="1108" text-anchor="middle" fill="#00b894" font-size="13" font-weight="700">🔄 找回恢复 / 续期</text>
+      <text x="830" y="1132" text-anchor="middle" fill="#666" font-size="12">恢复后需重新 Onboarding</text>
+
+      <!-- Legend -->
+      <rect x="60" y="1180" width="930" height="100" rx="12" fill="#f7f8fc" stroke="#e0e4ec" stroke-width="1"/>
+      <text x="100" y="1210" fill="#333" font-size="14" font-weight="700">图例说明：</text>
+      <line x1="100" y1="1235" x2="180" y2="1235" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <text x="195" y="1240" fill="#555" font-size="12">Device → ISE 方向</text>
+      <line x1="340" y1="1235" x2="420" y2="1235" stroke="#6c5ce7" stroke-width="2.5" marker-end="url(#arrow-p)"/>
+      <text x="435" y="1240" fill="#555" font-size="12">ISE → Device 方向</text>
+      <line x1="580" y1="1235" x2="660" y2="1235" stroke="#d63031" stroke-width="2.5" marker-end="url(#arrow-r)"/>
+      <text x="675" y="1240" fill="#555" font-size="12">CoA / Deauth 强制操作</text>
+      <line x1="840" y1="1235" x2="920" y2="1235" stroke="#00b894" stroke-width="2.5" marker-end="url(#arrow-g)"/>
+      <text x="935" y="1240" fill="#555" font-size="12">成功</text>
+
+      <text x="100" y="1268" fill="#888" font-size="11.5">来源：b_ISE_admin_byod.pdf · P6-8 · BYOD Deployment Options and Status Flow；结合 CVD 最佳实践编制</text>
+    </svg>
+  </div>
+</div>
+</section>
+
+<!-- ===== S6: ISE CONFIG ===== -->
+<section class="section" id="s6">
+<div class="container">
+  <div class="section-title"><span class="num">6</span>ISE 配置架构深度拆解</div>
+  <div class="section-subtitle">要实现上述流程，ISE 的策略逻辑需要像齿轮一样精密咬合——以下是四大必须配置的模块</div>
+
+  <!-- 6.1 -->
+  <div class="card">
+    <h3>6.1 全局设置 (Global Settings)</h3>
+    <p>路径：<code>Administration > Device Portal Management > Settings</code> <span class="ref">P2</span></p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>参数</th><th>说明</th><th>默认值</th></tr>
+        <tr>
+          <td><strong>Employee Registered Devices</strong></td>
+          <td>限制每位员工可注册的最大设备数，范围 1~999，此限制跨所有 Portal 生效</td>
+          <td>5 台</td>
+        </tr>
+        <tr>
+          <td><strong>Retry URL</strong></td>
+          <td>设备在 onboarding 过程中遇到问题时，自动重新连接互联网时将使用此 URL 重定向回 ISE 以重新启动注册流程</td>
+          <td>192.0.2.123</td>
+        </tr>
+      </table>
+    </div>
+    <div class="highlight-box">"Once you configure these general settings, they apply to <strong>all BYOD and My Devices portals</strong> that you set up for your company." <span class="ref">P2</span></div>
+  </div>
+
+  <!-- 6.2 -->
+  <div class="card">
+    <h3>6.2 证书配置 (Certificates / SCEP)</h3>
+    <p>路径：<code>Administration > System > Certificates > System Certificates</code> <span class="ref">P12</span></p>
+    <ol>
+      <li>确保 ISE Internal CA 已启用，用于为 BYOD 签发终端证书。</li>
+      <li>添加系统证书并分配 Certificate Group Tag（默认为 <code>Default Portal Certificate Group</code>）。</li>
+      <li>在创建/编辑 Portal 时，选择对应的 Certificate Group Tag。</li>
+    </ol>
+    <div class="warn-box">
+      ⚠️ <strong>"BYOD does not support certificate chains longer than three certificates."</strong> <span class="ref">P12</span><br>
+      ⚠️ "During BYOD onboarding, certificates are issued twice for iOS devices." <span class="ref">P12</span><br>
+      ⚠️ "The Subject Alternative Name field for BYOD certificates must include <strong>both the DNS name and the IP address</strong>." <span class="ref">P6</span>
+    </div>
+  </div>
+
+  <!-- 6.3 -->
+  <div class="card">
+    <h3>6.3 Identity 配置三件套</h3>
+
+    <h4>① 外部身份源 (External Identity Sources) <span class="ref">P13</span></h4>
+    <p>路径：<code>Administration > Identity Management > External Identity Sources</code></p>
+    <p>支持的外部身份源类型包括：</p>
+    <ul>
+      <li><strong>Active Directory</strong>（最常见的 BYOD 场景）</li>
+      <li>LDAP、RADIUS Token、RSA SecurID</li>
+      <li>Certificate Authentication Profile（证书认证必需）</li>
+      <li>SAML IdP（如 Oracle Access Manager）</li>
+      <li>Social Login（如 Facebook）</li>
+      <li>REST ID Store（如 Microsoft Entra ID）</li>
+    </ul>
+
+    <h4>② 身份源序列 (Identity Source Sequences) <span class="ref">P13-14</span></h4>
+    <p>路径：<code>Administration > Identity Management > Identity Source Sequences > Add</code></p>
+    <ul>
+      <li>定义 ISE 搜索身份源的优先顺序。</li>
+      <li>可勾选 <strong>Certificate Authentication Profile</strong> 用于 EAP-TLS 场景。</li>
+      <li>当某身份存储不可达时，有两个选项：停止搜索并返回 ProcessError，或视为"用户未找到"并继续搜索下一个存储。</li>
+    </ul>
+
+    <h4>③ 端点身份组 (Endpoint Identity Groups) <span class="ref">P14</span></h4>
+    <p>路径：<code>Administration > Identity Management > Groups > Endpoint Identity Groups</code></p>
+    <p>ISE 预定义了多个系统身份组（不可删除，仅可编辑描述），关键组包括：</p>
+    <ul>
+      <li><code>RegisteredDevices</code>：通过 My Devices Portal 或 BYOD Portal 注册的设备默认加入此组。</li>
+      <li><code>Blocked List</code>（原 Blacklist）：被标记为 Lost/Stolen 的设备被移入此组。</li>
+      <li>你可以创建自定义组并关联到特定 Portal。</li>
+    </ul>
+  </div>
+
+  <!-- 6.4 -->
+  <div class="card">
+    <h3>6.4 授权策略 (Authorization Profile & Policy)</h3>
+
+    <h4>① 创建授权配置文件 (Authorization Profile) <span class="ref">P23-24</span></h4>
+    <p>路径：<code>Policy > Policy Elements > Results > Authorization > Authorization Profiles</code></p>
+    <ul>
+      <li>创建 <code>NSP_Redirect_Profile</code>：配置 Web Authentication 类型为 Supplicant Provisioning，关联 BYOD Portal 名称，ACL 填入 WLC 上的 <code>NSP-ACL</code> 名称。</li>
+      <li>创建 <code>PermitAccess</code> 或自定义 Profile：用于最终放行（分配 VLAN/SGT）。</li>
+    </ul>
+
+    <h4>② 创建授权策略规则 (Authorization Policy Rules) <span class="ref">P24</span></h4>
+    <p>路径：<code>Policy > Policy Sets</code>（在 Standard Policies 下创建规则）</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>优先级</th><th>规则名称</th><th>条件 (IF)</th><th>结果 (THEN)</th></tr>
+        <tr>
+          <td>Rule 1</td>
+          <td><strong>BYOD-Success</strong></td>
+          <td><code>EAPAuthentication = EAP-TLS</code> AND <code>BYODRegistration = Yes</code></td>
+          <td><code>PermitAccess</code>（完整网络权限）</td>
+        </tr>
+        <tr>
+          <td>Rule 2</td>
+          <td><strong>BYOD-Blocked</strong></td>
+          <td><code>Endpoint Identity Group = Blocked List</code></td>
+          <td><code>DenyAccess</code> 或重定向至 Blocked List Portal</td>
+        </tr>
+        <tr>
+          <td>Rule 3</td>
+          <td><strong>BYOD-Onboarding</strong></td>
+          <td><code>EAPAuthentication = PEAP</code> AND <code>BYODRegistration = Unknown</code></td>
+          <td><code>NSP_Redirect_Profile</code>（重定向至 BYOD Portal）</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="highlight-box">
+      <strong>策略顺序至关重要</strong>：ISE 自顶向下匹配规则，一旦命中即停止。因此已注册成功的设备（Rule 1）必须排在 Onboarding 规则（Rule 3）之上，否则已完成注册的设备每次都会被重新重定向。
+    </div>
+
+    <div class="warn-box">
+      ⚠️ "While creating an authorization condition using a dictionary attribute with the <strong>MAC option enabled</strong>, such as <code>RADIUS.Calling-Station-ID</code>, you must use a <strong>Mac operator</strong> (for example, <code>Mac_equals</code>) to support different MAC formats." <span class="ref">P25</span>
+    </div>
+  </div>
+
+  <!-- 6.5 -->
+  <div class="card">
+    <h3>6.5 各 Portal 配置任务矩阵</h3>
+    <p>以下表格总结了配置各 Portal 所需的必选 (Required) 与可选 (Optional) 任务：<span class="ref">P10-11</span></p>
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>配置任务</th>
+          <th>Blocked List</th>
+          <th>BYOD</th>
+          <th>Client Provisioning</th>
+          <th>MDM</th>
+          <th>My Devices</th>
+        </tr>
+        <tr><td>Enable Policy Services</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td></tr>
+        <tr><td>Add Certificates</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td></tr>
+        <tr><td>External Identity Sources</td><td>不需要</td><td>不需要</td><td>不需要</td><td>不需要</td><td>✅ 必需</td></tr>
+        <tr><td>Identity Source Sequences</td><td>不需要</td><td>不需要</td><td>不需要</td><td>不需要</td><td>✅ 必需</td></tr>
+        <tr><td>Endpoint Identity Groups</td><td>不需要</td><td>✅ 必需</td><td>不需要</td><td>✅ 必需</td><td>✅ 必需</td></tr>
+        <tr><td>Create Authorization Profiles</td><td>不适用</td><td>✅ 必需</td><td>✅ 必需</td><td>✅ 必需</td><td>不需要</td></tr>
+        <tr><td>Customize Portal</td><td>⚙️ 可选</td><td>⚙️ 可选</td><td>⚙️ 可选</td><td>⚙️ 可选</td><td>⚙️ 可选</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== S7: WLC CONFIG ===== -->
+<section class="section" id="s7">
+<div class="container">
+  <div class="section-title"><span class="num">7</span>WLC 侧配置要点 (The Enforcement Point)</div>
+  <div class="section-subtitle">WLC 是底层执行器——如果配置不完美，重定向根本无法生效</div>
+
+  <div class="card">
+    <h3>7.1 Portal 端口规划 <span class="ref">P15-16</span></h3>
+    <p>所有 Portal 的 HTTPS 端口必须在 <strong>8000~8999</strong> 范围内。相同端口 + 相同接口的 Portal 必须使用相同的 Certificate Group Tag。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Portal</th><th>默认端口</th><th>备注</th></tr>
+        <tr><td>BYOD / My Devices / MDM / Client Provisioning / Certificate Provisioning</td><td>8443</td><td>—</td></tr>
+        <tr><td>Blocked List Portal</td><td>8444</td><td>唯一默认不同端口</td></tr>
+        <tr><td>Client Provisioning (Posture)</td><td>8905, 8909</td><td>仅 Posture 评估使用</td></tr>
+      </table>
+    </div>
+    <div class="highlight-box"><strong>"We recommend that you use interface 0 for Guest services for best performance."</strong> 可使用 <code>ip host</code> CLI 命令将 hostname/FQDN 映射到 interface 0 的 IP。<span class="ref">P16</span></div>
+  </div>
+
+  <div class="card">
+    <h3>7.2 Redirect ACL (重定向访问控制列表)</h3>
+    <p>这是最容易出错的地方。当设备获得 IP 但还没拿到证书时，WLC 必须拦截 HTTP/HTTPS 流量以触发 302 重定向。在 C9800 上创建 Extended ACL（如 <code>NSP-ACL</code>）：</p>
+    <div style="background:#1a1a2e; border-radius:10px; padding:20px 24px; margin:16px 0; overflow-x:auto;">
+      <pre style="color:#e0e0e0; font-size:0.92rem; line-height:1.7; margin:0; font-family:'SFMono-Regular','Consolas',monospace;">
+<span style="color:#888;">! 第一性原理：放行基础设施通信，阻断其他所有以触发重定向</span>
+<span style="color:#00b894;">10 permit</span> udp any any eq bootpc bootps domain  <span style="color:#888;">! 必须放行 DHCP 和 DNS</span>
+<span style="color:#00b894;">20 permit</span> ip any host &lt;ISE-PSN-IP&gt;             <span style="color:#888;">! 放行去往 ISE (8443, 8905) 的流量</span>
+<span style="color:#00b894;">30 permit</span> ip any host &lt;Google-Play-IPs&gt;         <span style="color:#888;">! (仅安卓) 放行 Google Play 下载 NSA</span>
+<span style="color:#00b894;">40 permit</span> icmp any any                           <span style="color:#888;">! (可选) 允许 ping 测试</span>
+<span style="color:#d63031;">50 deny</span>   tcp any any eq www                     <span style="color:#888;">! 核心：拦截 HTTP(80) 触发重定向</span>
+<span style="color:#d63031;">60 deny</span>   tcp any any eq 443                     <span style="color:#888;">! 拦截 HTTPS(443)</span>
+<span style="color:#d63031;">70 deny</span>   ip any any                              <span style="color:#888;">! 阻断去往内网的任何其他流量</span>
+      </pre>
+    </div>
+    <div class="warn-box">⚠️ CVD 最佳实践：由于 Apple CNA 和 Google Play 的 IP 经常变动，现代 WLC 广泛使用 URL/DNS ACL 放行域名（如 <code>*.apple.com</code>、<code>play.google.com</code>）。</div>
+  </div>
+
+  <div class="card">
+    <h3>7.3 WLAN Profile 关键配置</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>配置项</th><th>要求</th><th>原因</th></tr>
+        <tr>
+          <td><strong>Layer 2 Security</strong></td>
+          <td>WPA2/WPA3 + 802.1X</td>
+          <td>BYOD 基于 802.1X 认证框架</td>
+        </tr>
+        <tr>
+          <td><strong>AAA Override</strong></td>
+          <td><strong>必须开启</strong></td>
+          <td>允许 ISE 通过 RADIUS 属性动态覆盖 WLAN 默认权限（ACL、VLAN）</td>
+        </tr>
+        <tr>
+          <td><strong>NAC State</strong></td>
+          <td><strong>必须设为 ISE NAC (RADIUS NAC)</strong></td>
+          <td>如果不开启，ISE 发送 CoA 踢用户下线时 WLC 无法响应，导致设备卡在死循环</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>7.4 Allowed Interfaces（Portal 接口选择） <span class="ref">P16</span></h3>
+    <ul>
+      <li>选择 PSN 的哪些接口可以运行 Portal。Ethernet 接口必须使用<strong>不同子网</strong>的 IP 地址。</li>
+      <li>这些接口必须在<strong>所有 PSN（包括 VM）</strong>上可用（因为任何 PSN 都可能被用于重定向）。</li>
+      <li>Portal 证书的 Subject Name 或 SAN 必须解析到接口 IP 地址。使用 <code>ip host x.x.x.x yyy.domain.com</code> CLI 命令映射辅助接口 IP 到 FQDN。</li>
+      <li><strong>NIC Teaming/Bonding</strong>：如果物理 NIC 和 Bonded NIC 同时配置，PSN 优先使用 Bond 接口。若 Bond 未建立，则回退到物理接口。</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ===== S8: LIFECYCLE ===== -->
+<section class="section" id="s8">
+<div class="container">
+  <div class="section-title"><span class="num">8</span>设备生命周期管理</div>
+  <div class="section-subtitle">员工注册的个人设备需要持续管理——理解完整生命周期是运维的关键 <span class="ref">P25-27</span></div>
+
+  <div class="card">
+    <h3>8.1 查看员工名下的设备</h3>
+    <p>路径：<code>Work Centers > Network Access > Identities > Endpoints</code></p>
+    <ol>
+      <li>点击端点列表右上角的 Settings 图标。</li>
+      <li>启用 <strong>Portal User</strong> 列的显示。</li>
+      <li>使用 Quick Filter，在 Portal User 字段输入员工用户名，即可筛选出该员工名下所有设备。</li>
+    </ol>
+    <div class="highlight-box">"When two MAC addresses from one device are entered into the My Devices portal by a user, profiling determines that they have the same hostname, and they are <strong>merged together as a single entry</strong> in Cisco ISE." <span class="ref">P5</span></div>
+  </div>
+
+  <div class="card">
+    <h3>8.2 常见运维场景与处理方式</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>场景</th><th>处理方式</th><th>注意事项</th></tr>
+        <tr>
+          <td><strong>设备被盗 (Stolen)</strong></td>
+          <td>员工在 My Devices Portal 标记为 Stolen → ISE 吊销证书 + 将 MAC 加入 Blocked List + CoA 踢下线</td>
+          <td>找回后状态变为 Not Registered，必须删除后重新添加设备以重新 onboarding</td>
+        </tr>
+        <tr>
+          <td><strong>设备丢失 (Lost)</strong></td>
+          <td>员工标记为 Lost → 加入 Blocked List，但<strong>证书不吊销</strong>，BYODRegistration 设为 No</td>
+          <td>默认仍有网络访问！必须创建授权策略明确阻止 Blocked List 组的设备</td>
+        </tr>
+        <tr>
+          <td><strong>员工删除设备</strong></td>
+          <td>从 My Devices Portal 删除 → 设备从员工列表消失，但<strong>仍保留在 ISE Endpoints 数据库中</strong></td>
+          <td>管理员需要在 <code>Work Centers > Endpoints</code> 中永久删除 <span class="ref">P26</span></td>
+        </tr>
+        <tr>
+          <td><strong>设备已被其他人注册</strong></td>
+          <td>新员工无法添加已在数据库中的设备</td>
+          <td>推荐通过 BYOD Portal（而非 My Devices Portal）添加，可覆盖注册信息；MAB 设备（如打印机）需管理员先从数据库删除 <span class="ref">P26</span></td>
+        </tr>
+        <tr>
+          <td><strong>Context Visibility 导入的端点</strong></td>
+          <td>不自动关联到 BYOD 用户账户</td>
+          <td>"They must follow the usual BYOD registration process to be added to the My Devices portal." <span class="ref">P5</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>8.3 通过 Credentialed Guest Portal 注册设备 <span class="ref">P9</span></h3>
+    <p>员工也可以通过 Credentialed Guest Portal 完成 BYOD 注册。启用方式：</p>
+    <ol>
+      <li>路径：<code>Work Centers > Guest Access > Portals &amp; Components > Guest Portals</code></li>
+      <li>选择目标 Credentialed Guest Portal → Edit → Portal Behavior and Flow Settings</li>
+      <li>在 <strong>BYOD Settings</strong> 下勾选 <strong>"Allow employees to use personal devices on the network"</strong></li>
+    </ol>
+    <p><strong>前提条件</strong>：必须先创建好 Native Supplicant Profile。</p>
+  </div>
+</div>
+</section>
+
+<!-- ===== S9: MONITORING ===== -->
+<section class="section" id="s9">
+<div class="container">
+  <div class="section-title"><span class="num">9</span>监控与报告</div>
+  <div class="section-subtitle">Cisco ISE 提供丰富的报告系统，覆盖设备注册活动和用户操作审计 <span class="ref">P27-28</span></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>📊 My Devices 登录和审计报告</h3>
+      <p>路径：<code>Operations > Reports > Reports > Guest > My Devices Login and Audit</code></p>
+      <p>这是一份<strong>合并报告</strong>，同时追踪：</p>
+      <ul>
+        <li>员工在 My Devices Portal 的<strong>登录活动</strong></li>
+        <li>员工在 Portal 中执行的<strong>设备操作</strong>（添加、删除、标记丢失/被盗等）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>📊 已注册端点报告</h3>
+      <p>路径：<code>Operations > Reports > Reports > Endpoints and Users > Registered Endpoints</code></p>
+      <p>提供所有由员工注册的端点的详细信息，支持按以下属性过滤：</p>
+      <ul>
+        <li>Identity（用户身份）</li>
+        <li>Endpoint ID（端点 ID）</li>
+        <li>Identity Group（身份组）</li>
+        <li>Endpoint Profile（端点配置文件）</li>
+      </ul>
+      <p>还可以查询 <code>Portal User ≠ null</code> 的端点来获取特定用户的注册记录。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📋 报告的运行方式</h3>
+    <ul>
+      <li>支持<strong>按需运行</strong>或<strong>定时调度</strong>。</li>
+      <li>使用 <strong>Filters</strong> 下拉列表选择搜索数据维度。</li>
+      <li>使用 <strong>Time Range</strong> 选择时间窗口。</li>
+      <li>点击 <strong>Run</strong> 生成报告。</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ===== SUMMARY ===== -->
+<section class="section" id="summary">
+<div class="container">
+  <div class="section-title"><span class="num">★</span>架构全景总结</div>
+
+  <div class="card" style="background: linear-gradient(135deg, #e6f6fd 0%, #f3f0ff 100%); border: 2px solid var(--accent);">
+    <h3 style="text-align:center; font-size:1.4rem; margin-bottom:20px;">🏛️ Cisco ISE BYOD 架构核心公式</h3>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px; text-align:center;">
+      <div style="background:#fff; border-radius:12px; padding:20px; box-shadow:var(--shadow);">
+        <div style="font-size:2rem; margin-bottom:8px;">🔐</div>
+        <div style="font-weight:700; font-size:1.05rem; color:var(--accent-dark);">安全层</div>
+        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:6px;">EAP-TLS 证书认证<br>自动 SCEP 签发<br>证书嵌入 MAC + 用户名</p>
+      </div>
+      <div style="background:#fff; border-radius:12px; padding:20px; box-shadow:var(--shadow);">
+        <div style="font-size:2rem; margin-bottom:8px;">🎯</div>
+        <div style="font-weight:700; font-size:1.05rem; color:var(--accent-dark);">策略层</div>
+        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:6px;">ISE Authorization Policy<br>BYODRegistration 状态机<br>CoA 动态提权</p>
+      </div>
+      <div style="background:#fff; border-radius:12px; padding:20px; box-shadow:var(--shadow);">
+        <div style="font-size:2rem; margin-bottom:8px;">🖥️</div>
+        <div style="font-weight:700; font-size:1.05rem; color:var(--accent-dark);">Portal 层</div>
+        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:6px;">BYOD / My Devices / Blocked List<br>Certificate / Client Provisioning / MDM<br>六大 Portal 全生命周期覆盖</p>
+      </div>
+      <div style="background:#fff; border-radius:12px; padding:20px; box-shadow:var(--shadow);">
+        <div style="font-size:2rem; margin-bottom:8px;">📡</div>
+        <div style="font-weight:700; font-size:1.05rem; color:var(--accent-dark);">执行层</div>
+        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:6px;">WLC Redirect ACL<br>AAA Override + RADIUS NAC<br>HTTP 302 重定向引擎</p>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:24px; text-align:center; font-size:1.05rem;">
+      <strong>一句话总结</strong>：Cisco ISE BYOD 的本质，是通过 <strong>RADIUS 协议编排策略 + SCEP 自动签发证书 + Portal 引导用户体验</strong>，在 WLC 执行点上实现了<strong>"不受信任的个人设备 → 证书级安全的企业接入"</strong>这一优雅的身份转换。
+    </div>
+  </div>
+</div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>本知识地图基于 <strong>b_ISE_admin_byod.pdf</strong> 官方文档编制 · 结合 Cisco Validated Design (CVD) 最佳实践</p>
+    <p style="margin-top:6px;">© 2026 · Cisco ISE BYOD Architecture Knowledge Map</p>
+  </div>
+</footer>
+
+</body>
+</html>
