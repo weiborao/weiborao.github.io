@@ -1,0 +1,3064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco WLAN 配置参数指南及最佳实践</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 18px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f4f6f9;
+    color: #2d3748;
+    line-height: 1.8;
+  }
+
+  /* ===== Container ===== */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    background: linear-gradient(135deg, #049fd9 0%, #06335b 100%);
+    color: #fff;
+    padding: 64px 24px 56px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+    margin-bottom: 16px;
+  }
+  .hero .subtitle {
+    font-size: 1.15rem;
+    opacity: .92;
+    max-width: 680px;
+    margin: 0 auto 24px;
+    line-height: 1.7;
+  }
+  .hero .badge {
+    display: inline-block;
+    background: rgba(255,255,255,.18);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: .92rem;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ===== TOC ===== */
+  .toc-section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    margin: -36px auto 48px;
+    padding: 36px 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .toc-section h2 {
+    font-size: 1.45rem;
+    margin-bottom: 20px;
+    color: #06335b;
+  }
+  .toc-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+  @media (max-width: 640px) {
+    .toc-list { grid-template-columns: 1fr; }
+  }
+  .toc-list li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #2d3748;
+    padding: 10px 14px;
+    border-radius: 10px;
+    transition: background .2s, color .2s;
+    font-size: 1.05rem;
+  }
+  .toc-list li a:hover {
+    background: #e6f6fd;
+    color: #049fd9;
+  }
+  .toc-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: #049fd9;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: .92rem;
+    flex-shrink: 0;
+  }
+
+  /* ===== Chapter ===== */
+  .chapter {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    margin-bottom: 48px;
+    padding: 44px 40px;
+  }
+  @media (max-width: 640px) {
+    .chapter { padding: 28px 18px; }
+    .toc-section { padding: 24px 18px; }
+  }
+  .chapter h2 {
+    font-size: 1.7rem;
+    color: #06335b;
+    border-left: 5px solid #049fd9;
+    padding-left: 16px;
+    margin-bottom: 28px;
+  }
+  .chapter h3 {
+    font-size: 1.3rem;
+    color: #1a6b8a;
+    margin: 32px 0 14px;
+  }
+  .chapter h4 {
+    font-size: 1.1rem;
+    color: #2d6a4f;
+    margin: 22px 0 10px;
+  }
+  .chapter p, .chapter li {
+    font-size: 1.08rem;
+    margin-bottom: 14px;
+  }
+  .chapter ul, .chapter ol {
+    padding-left: 1.6em;
+    margin-bottom: 18px;
+  }
+  .chapter ul li { list-style: disc; }
+  .chapter ol li { list-style: decimal; }
+
+  /* ===== Callout Boxes ===== */
+  .callout {
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 1.05rem;
+  }
+  .callout.insight {
+    background: #eef7ff;
+    border-left: 5px solid #049fd9;
+  }
+  .callout.warning {
+    background: #fff8e6;
+    border-left: 5px solid #e6a817;
+  }
+  .callout.tip {
+    background: #eafaf1;
+    border-left: 5px solid #2d6a4f;
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  /* ===== Analogy Card ===== */
+  .analogy-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin: 28px 0;
+  }
+  .analogy-card .analogy-icon {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+  .analogy-card p {
+    font-size: 1.08rem;
+    color: #1e40af;
+  }
+
+  /* ===== Table ===== */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 1.02rem;
+  }
+  .data-table th {
+    background: #06335b;
+    color: #fff;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .data-table th:first-child { border-radius: 10px 0 0 0; }
+  .data-table th:last-child { border-radius: 0 10px 0 0; }
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .data-table tr:nth-child(even) td { background: #f8fafc; }
+  .data-table tr:last-child td:first-child { border-radius: 0 0 0 10px; }
+  .data-table tr:last-child td:last-child { border-radius: 0 0 10px 0; }
+
+  /* ===== Formula Box ===== */
+  .formula-box {
+    background: #f1f5f9;
+    border: 2px dashed #94a3b8;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    text-align: center;
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: .02em;
+  }
+
+  /* ===== SVG Diagram wrapper ===== */
+  .svg-wrap {
+    text-align: center;
+    margin: 32px 0;
+  }
+  .svg-wrap svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ===== Code block ===== */
+  .code-block {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    font-size: .98rem;
+    line-height: 1.7;
+    margin: 24px 0;
+  }
+  .code-block .cmd { color: #7dd3fc; }
+  .code-block .comment { color: #64748b; }
+
+  /* ===== Footer ===== */
+  .page-footer {
+    background: #06335b;
+    color: #cbd5e1;
+    padding: 40px 24px;
+    font-size: .95rem;
+    line-height: 1.8;
+  }
+  .page-footer h3 { color: #7dd3fc; margin-bottom: 12px; font-size: 1.1rem; }
+  .page-footer a { color: #7dd3fc; text-decoration: underline; }
+  .ref-list { list-style: none; padding: 0; }
+  .ref-list li { margin-bottom: 6px; padding-left: 1.2em; text-indent: -1.2em; }
+  .ref-list li::before { content: "[" attr(data-ref) "] "; font-weight: 700; color: #7dd3fc; }
+
+  /* ===== Glossary ===== */
+  .glossary-table td:first-child {
+    font-weight: 700;
+    color: #049fd9;
+    white-space: nowrap;
+  }
+
+  /* ===== Sticky back-to-top ===== */
+  .back-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 48px; height: 48px;
+    background: #049fd9;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(4,159,217,.4);
+    display: none;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .back-top.show { display: flex; }
+
+  /* ===== Highlight Number ===== */
+  .big-num {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #049fd9;
+    line-height: 1;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin: 28px 0;
+  }
+  .stat-card {
+    background: #f0f9ff;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .stat-card .label {
+    font-size: .95rem;
+    color: #64748b;
+    margin-top: 8px;
+  }
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<!-- ======================== HERO ======================== -->
+<header class="hero">
+  <div class="container">
+    <h1>Cisco WLAN 功率 · 漫游 · 设计<br>配置参数指南及最佳实践</h1>
+    <p class="subtitle">
+      从第一性原理出发，用 8 个章节带你吃透企业无线网络设计——<br>
+      信号传播 → 功率对称 → 信道规划 → 漫游切换 → 9800 实战配置 → Wi-Fi 7 前瞻
+    </p>
+    <span class="badge">基于 Cisco CVD · IEEE 802.11be · Catalyst 9800 · 2025/2026</span>
+  </div>
+</header>
+
+<!-- ======================== TOC ======================== -->
+<div class="container">
+  <nav class="toc-section">
+    <h2>📑 本文结构导航</h2>
+    <ul class="toc-list">
+      <li><a href="#ch0"><span class="toc-num">0</span>开篇 · 为什么"基本功"最重要？</a></li>
+      <li><a href="#ch1"><span class="toc-num">1</span>无线信号的第一性原理</a></li>
+      <li><a href="#ch2"><span class="toc-num">2</span>功率设计：对称功率法则</a></li>
+      <li><a href="#ch3"><span class="toc-num">3</span>信道与频宽规划</a></li>
+      <li><a href="#ch4"><span class="toc-num">4</span>数据速率与覆盖策略</a></li>
+      <li><a href="#ch5"><span class="toc-num">5</span>漫游机制深度拆解</a></li>
+      <li><a href="#ch6"><span class="toc-num">6</span>Catalyst 9800 标签与配置模型</a></li>
+      <li><a href="#ch7"><span class="toc-num">7</span>6 GHz 与 Wi-Fi 7 前瞻</a></li>
+      <li><a href="#ch8"><span class="toc-num">8</span>总结 · 设计检查清单</a></li>
+      <li><a href="#glossary"><span class="toc-num">G</span>术语表</a></li>
+    </ul>
+  </nav>
+
+  <!-- ======================== CHAPTER 0 ======================== -->
+  <section class="chapter" id="ch0">
+    <h2>0 &nbsp; 开篇 · 为什么"基本功"最重要？</h2>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🏗️</div>
+      <p><strong>类比：盖房子</strong> —— 你见过哪栋高楼是在松软地基上拔地而起的？企业无线网络也一样。再花哨的 Wi-Fi 7、再智能的 AI 射频优化，都建立在"信号能不能传到终端、终端能不能回传给 AP"这一最朴素的物理事实之上。所有 Wi-Fi 体验问题——掉线、卡顿、漫游慢——追根溯源都是 <strong>功率、信道、速率、漫游</strong> 这四根柱子没立稳。</p>
+    </div>
+
+    <p>本指南基于六份核心 Cisco 技术文档（见页脚参考文献），将这些散落在不同手册里的"基本功"整合成一份 <strong>从原理到配置</strong> 的完整路线图。无论你是刚入行的无线工程师，还是准备为工厂、医院、办公园区做 WLAN 设计的架构师，本文都力求让你读完后——</p>
+
+    <ol>
+      <li><strong>看得懂原理</strong>：信号为什么衰减？功率为什么要"对称"？漫游为什么有快有慢？</li>
+      <li><strong>拿得出方案</strong>：5 GHz 功率设多少？数据速率怎么选？802.11r 开不开？</li>
+      <li><strong>配得了设备</strong>：在 Catalyst 9800 上如何用 Tags & Profiles 模型落地所有设计意图？</li>
+    </ol>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 阅读建议</div>
+      <p>如果你赶时间，可以跳到 <a href="#ch8">第 8 章 · 设计检查清单</a> 快速抓重点，然后按需回看对应章节。但如果时间允许，强烈建议从头读——因为 <strong>理解"为什么"远比记住"怎么配"重要</strong>。</p>
+    </div>
+  </section>
+
+  <!-- ======================== CHAPTER 1 ======================== -->
+  <section class="chapter" id="ch1">
+    <h2>1 &nbsp; 无线信号的第一性原理</h2>
+
+    <p>在谈任何配置之前，我们先回到物理世界。Wi-Fi 的本质是 <strong>电磁波在空间中的传播</strong>。一切设计决策——功率、信道、天线选型、AP 布放——都是在与物理定律打交道。理解了这些，你才能从"抄配置模板"升级为"用原理做设计"。</p>
+
+    <h3>1.1 &nbsp; dBm、dBi、EIRP —— 无线世界的"度量衡"</h3>
+
+    <p>我们日常用"公斤"量体重、用"米"量身高。在无线世界里，度量衡是以下三个：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>单位</th>
+          <th>含义</th>
+          <th>通俗类比</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>dBm</strong></td>
+          <td>以 1 毫瓦为基准的绝对功率。0 dBm = 1 mW。</td>
+          <td>就像温度的"摄氏度"，它告诉你 <em>实际有多热</em>。</td>
+        </tr>
+        <tr>
+          <td><strong>dBi</strong></td>
+          <td>天线增益，相对于理想全向天线的聚焦能力。</td>
+          <td>想象一个灯泡（全向天线）vs 手电筒（定向天线），手电筒并没有让灯泡更亮，而是把光"集中"到一个方向。</td>
+        </tr>
+        <tr>
+          <td><strong>EIRP</strong></td>
+          <td>等效全向辐射功率 = 发射功率 + 天线增益。</td>
+          <td>这是信号"出门"时的实际音量。你的嗓门（Tx Power）+ 喇叭（天线增益）= 别人听到的声音大小。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 3 dB 法则 —— 无线工程师的"乘法表"</div>
+      <p>dB 是对数单位，掌握以下两条你就能心算大部分问题：</p>
+      <ul>
+        <li><strong>+3 dB = 功率翻倍</strong>（20 dBm → 23 dBm 意味着从 100 mW → 200 mW）</li>
+        <li><strong>+6 dB ≈ 距离翻倍</strong>（在自由空间中，覆盖半径约扩大一倍）</li>
+        <li>反过来：<strong>−3 dB = 功率减半，−10 dB = 功率变为 1/10</strong></li>
+      </ul>
+    </div>
+
+    <h3>1.2 &nbsp; RSSI 公式 —— 信号从 AP 到手机经历了什么？</h3>
+
+    <p>RSSI（接收信号强度指示）是衡量"手机端收到了多强的信号"的指标。它的完整公式是：</p>
+
+    <div class="formula-box">
+      RSSI = EIRP（发射功率 + 天线增益）− 路径损耗 − 障碍物衰减 + 接收端天线增益
+    </div>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">📢</div>
+      <p><strong>类比：在广场上喊话</strong> —— 你站在广场一端（AP）用喇叭喊话（EIRP），声音穿越空气会越来越小（路径损耗），遇到一堵墙还会再衰减一截（障碍物衰减），对面的人如果用助听器（接收天线增益），最终听到的音量就是 RSSI。<br><br>
+      好的 Wi-Fi 设计，就是确保"对面的人"在任何位置都能 <strong>听清楚你的话，同时你也能听清楚他的回答</strong>。</p>
+    </div>
+
+    <h4>路径损耗（FSPL）—— 距离是信号的头号杀手</h4>
+
+    <p>自由空间路径损耗公式：<code>FSPL(dB) = 20·log₁₀(d) + 20·log₁₀(f) + 32.44</code>，其中 d 为距离（米），f 为频率（MHz）。关键推论：</p>
+
+    <ul>
+      <li><strong>频率越高，同距离衰减越大。</strong>这就是为什么 6 GHz 的覆盖范围天然小于 5 GHz，5 GHz 小于 2.4 GHz。</li>
+      <li><strong>距离翻倍，信号衰减约 6 dB。</strong>所以"AP 离用户远一点无所谓"是最常见的设计误区。</li>
+    </ul>
+
+    <p>除了自由空间传播，实际环境中还有各种障碍物：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>障碍物类型</th>
+          <th>典型衰减 (dB)</th>
+          <th>实际影响</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>石膏板墙</td><td>3 – 5</td><td>约等于距离翻倍</td></tr>
+        <tr><td>砖墙</td><td>6 – 10</td><td>信号显著减弱</td></tr>
+        <tr><td>混凝土/承重墙</td><td>10 – 15</td><td>基本等于"信号坟墓"</td></tr>
+        <tr><td>电梯井/金属</td><td>20 – 30+</td><td>完全隔离</td></tr>
+        <tr><td>人体</td><td>3 – 5</td><td>高密场景中显著</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.3 &nbsp; SNR —— 不只听到声音，还要听清内容</h3>
+
+    <p>光有信号强度还不够，如果周围"噪声"太大，一样无法通信。<strong>SNR（信噪比）= 信号强度 − 噪底</strong>，单位 dB。</p>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🎵</div>
+      <p><strong>类比：音乐会 vs 图书馆</strong> —— 在图书馆里（噪底低，如 −95 dBm），你小声说话也能被听到；在演唱会现场（噪底高，如 −80 dBm），你需要扯着嗓子喊。RSSI 只是"你说话有多大声"，SNR 才是"别人能不能听清"。</p>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>SNR</th>
+          <th>体验等级</th>
+          <th>可支撑的典型速率</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>≥ 25 dB</strong></td><td>优秀</td><td>最高速率，如 256/1024-QAM</td></tr>
+        <tr><td>20 – 25 dB</td><td>良好</td><td>中高速率，视频会议流畅</td></tr>
+        <tr><td>15 – 20 dB</td><td>可用</td><td>基本浏览/邮件</td></tr>
+        <tr><td>&lt; 15 dB</td><td>差</td><td>频繁掉包，几乎不可用</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.4 &nbsp; RSSI 的"红绿灯" —— 什么信号强度算合格？</h3>
+
+    <p>Cisco 文档给出了清晰的判断标准：</p>
+
+    <!-- SVG: RSSI Traffic Light -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" width="720" height="280">
+        <!-- Background bar -->
+        <defs>
+          <linearGradient id="rssiGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#16a34a"/>
+            <stop offset="35%" style="stop-color:#65a30d"/>
+            <stop offset="60%" style="stop-color:#eab308"/>
+            <stop offset="80%" style="stop-color:#ea580c"/>
+            <stop offset="100%" style="stop-color:#dc2626"/>
+          </linearGradient>
+        </defs>
+        <rect x="40" y="60" width="640" height="50" rx="12" fill="url(#rssiGrad)" opacity=".85"/>
+        <!-- Labels -->
+        <text x="80" y="48" font-size="15" font-weight="700" fill="#16a34a">-40 dBm</text>
+        <text x="235" y="48" font-size="15" font-weight="700" fill="#65a30d">-60 dBm</text>
+        <text x="400" y="48" font-size="15" font-weight="700" fill="#b45309">-67 dBm</text>
+        <text x="530" y="48" font-size="15" font-weight="700" fill="#ea580c">-75 dBm</text>
+        <text x="620" y="48" font-size="15" font-weight="700" fill="#dc2626">-80 dBm</text>
+        <!-- Desc lines -->
+        <text x="60" y="140" font-size="14" fill="#16a34a" font-weight="600">📶 极佳</text>
+        <text x="60" y="162" font-size="13" fill="#475569">离 AP 很近，最高速率</text>
+        <text x="210" y="140" font-size="14" fill="#65a30d" font-weight="600">✅ 良好（目标值）</text>
+        <text x="210" y="162" font-size="13" fill="#475569">设计覆盖边缘应 ≥ -60 dBm</text>
+        <text x="400" y="140" font-size="14" fill="#b45309" font-weight="600">⚠️ VoIP 最低门槛</text>
+        <text x="400" y="162" font-size="13" fill="#475569">语音勉强可用</text>
+        <text x="560" y="140" font-size="14" fill="#ea580c" font-weight="600">🟠 较差</text>
+        <text x="560" y="162" font-size="13" fill="#475569">丢包/重传频繁</text>
+        <!-- -80 dBm warning -->
+        <rect x="40" y="190" width="640" height="60" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="60" y="218" font-size="16" fill="#dc2626" font-weight="700">🚫 -80 dBm 及以下 = "灾难配方"（Recipe for Failure）</text>
+        <text x="60" y="240" font-size="13" fill="#991b1b">客户端几乎无法维持连接，漫游判断失误，体验极差 — TECEWN-2234 原话</text>
+      </svg>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ 常见误区："我的 RSSI 有 -70，应该够用了吧？"</div>
+      <p><strong>不一定。</strong>RSSI 只是硬币的一面。如果此时噪底是 −85 dBm，你的 SNR 只有 15 dB——仅够浏览网页。而如果噪底是 −95 dBm，SNR 就有 25 dB，体验截然不同。因此，<strong>设计时要同时关注 RSSI 和 SNR</strong>，而不是只看信号格数。</p>
+    </div>
+
+    <h3>1.5 &nbsp; 频段特性对比 —— 2.4G / 5G / 6G</h3>
+
+    <p>当前企业 Wi-Fi 可用三个频段，各有性格：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>2.4 GHz</th>
+          <th>5 GHz</th>
+          <th>6 GHz</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>可用信道</strong></td>
+          <td>3 个不重叠（1, 6, 11）</td>
+          <td>约 25 个（含 DFS）</td>
+          <td>59 个（20MHz），最大 7 个 320MHz</td>
+        </tr>
+        <tr>
+          <td><strong>穿墙能力</strong></td>
+          <td>最好</td>
+          <td>中等</td>
+          <td>最弱（FSPL 更大）</td>
+        </tr>
+        <tr>
+          <td><strong>干扰情况</strong></td>
+          <td>极拥挤（微波炉、蓝牙等）</td>
+          <td>较少</td>
+          <td>干净（仅 Wi-Fi 6E/7 设备）</td>
+        </tr>
+        <tr>
+          <td><strong>最大信道宽度</strong></td>
+          <td>40 MHz（不推荐）</td>
+          <td>80 / 160 MHz</td>
+          <td>320 MHz（Wi-Fi 7）</td>
+        </tr>
+        <tr>
+          <td><strong>安全要求</strong></td>
+          <td>WPA2/WPA3</td>
+          <td>WPA2/WPA3</td>
+          <td><strong>强制 WPA3/OWE</strong></td>
+        </tr>
+        <tr>
+          <td><strong>适用场景</strong></td>
+          <td>IoT、传感器、兼容旧设备</td>
+          <td>主力频段</td>
+          <td>高密高带宽（AR/VR、4K 视频）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 设计启示</div>
+      <p>6 GHz 的 FSPL 比 5 GHz 更大，因此 Cisco 建议 <strong>6 GHz AP 的发射功率应比 5 GHz 至少高 3 dB</strong>（即功率翻倍），以补偿额外的路径损耗，从而保持近似的覆盖面积。<br>
+      <em>— 出自：Cisco Catalyst 9800 功率与漫游配置指南</em></p>
+    </div>
+
+    <h3>1.6 &nbsp; 小结：第一性原理的四条核心推论</h3>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="big-num">①</div>
+        <div class="label">信号必然随距离和障碍衰减，无法逃避物理定律</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">②</div>
+        <div class="label">频率越高覆盖越小，但带宽越宽速率越快——设计即权衡</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">③</div>
+        <div class="label">光有信号不够，还要信噪比（SNR）足够高</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">④</div>
+        <div class="label">设计的目标是 RSSI ≥ −60 dBm + SNR ≥ 25 dB 覆盖</div>
+      </div>
+    </div>
+
+    <p>带着这四条核心推论，我们接下来进入 <strong>功率设计</strong>——也就是"AP 和手机之间的功率该怎么匹配"这个关键问题。</p>
+
+  </section>
+
+
+<!-- Back to top -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0})">↑</button>
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('backTop').classList.toggle('show', window.scrollY > 600);
+  });
+</script>
+
+<!-- ======================== CHAPTER 2 ======================== -->
+  <section class="chapter" id="ch2">
+    <h2>2 &nbsp; 功率设计：对称功率法则</h2>
+
+    <p>如果说第 1 章是"听懂无线世界的语言"，那么第 2 章就是这门语言中 <strong>最重要的一条语法规则</strong>——<strong>对称功率（Symmetric Power）</strong>。它是几乎所有 Wi-Fi 体验问题的隐藏根因，也是 Cisco 在多份最佳实践文档中反复强调的第一设计原则。</p>
+
+    <h3>2.1 &nbsp; 什么是"不对称功率"问题？</h3>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">📣</div>
+      <p><strong>类比：大喇叭 vs 小嗓门</strong> —— 想象你在一个体育场。AP 就像场边架着的专业扩音器，功率开到最大（比如 23 dBm / 200 mW），声音能传到看台最后一排。但坐在最后一排的观众（手机）想回话时，只有普通人的嗓门（大约 14 dBm / 25 mW）。结果就是：<br><br>
+      <strong>你听得见 AP 的声音，但 AP 听不见你的回答。</strong><br><br>
+      这就是"不对称功率"。手机显示满格信号（因为它收到了 AP 的强信号），用户以为连接很好，但实际上数据根本发不回去——丢包、卡顿、断流。</p>
+    </div>
+
+    <!-- SVG: Asymmetric Power Diagram -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340" width="720" height="340">
+        <!-- AP -->
+        <rect x="40" y="50" width="120" height="80" rx="14" fill="#06335b"/>
+        <text x="100" y="85" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">AP</text>
+        <text x="100" y="110" text-anchor="middle" fill="#7dd3fc" font-size="12">Tx: 23 dBm</text>
+        <!-- Client -->
+        <rect x="540" y="50" width="130" height="80" rx="14" fill="#475569"/>
+        <text x="605" y="85" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">📱 手机</text>
+        <text x="605" y="110" text-anchor="middle" fill="#fbbf24" font-size="12">Tx: 14 dBm</text>
+        <!-- Forward arrow (strong) -->
+        <line x1="160" y1="75" x2="535" y2="75" stroke="#16a34a" stroke-width="4" marker-end="url(#arrowGreen)"/>
+        <text x="340" y="65" text-anchor="middle" fill="#16a34a" font-size="13" font-weight="600">下行：信号强 ✅ （RSSI 好）</text>
+        <!-- Return arrow (weak) -->
+        <line x1="535" y1="105" x2="165" y2="105" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="8 5" marker-end="url(#arrowRed)"/>
+        <text x="340" y="125" text-anchor="middle" fill="#dc2626" font-size="13" font-weight="600">上行：信号弱 ❌ （AP 听不到回复）</text>
+        <!-- Arrows defs -->
+        <defs>
+          <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/>
+          </marker>
+          <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/>
+          </marker>
+        </defs>
+        <!-- Problem zone -->
+        <rect x="30" y="160" width="660" height="160" rx="14" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+        <text x="50" y="190" font-size="15" fill="#dc2626" font-weight="700">❌ 不对称功率的后果</text>
+        <text x="50" y="218" font-size="14" fill="#7f1d1d">1. 手机显示"满格信号"，但数据传不回去 → 用户投诉"有信号没网速"</text>
+        <text x="50" y="244" font-size="14" fill="#7f1d1d">2. 客户端粘在远端 AP（Sticky Client），不愿漫游到更近的 AP</text>
+        <text x="50" y="270" font-size="14" fill="#7f1d1d">3. AP 覆盖半径被人为拉大，相邻 AP 同频干扰（CCI）加剧</text>
+        <text x="50" y="296" font-size="14" fill="#7f1d1d">4. 上行丢包 → TCP 重传 → 时延飙升 → 应用体验崩溃</text>
+      </svg>
+    </div>
+
+    <h3>2.2 &nbsp; 对称功率法则：AP 功率应匹配最弱客户端</h3>
+
+    <p>Cisco 功率与漫游配置指南中明确指出：</p>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 核心原则</div>
+      <p><strong>"AP 的发射功率应匹配网络中功率最低的客户端设备，以确保对称通信。"</strong><br>
+      <em>— Cisco Catalyst 9800 功率与漫游配置参数指南</em></p>
+    </div>
+
+    <p>这句话的意思很直接：<strong>别看 AP 能发多大功率，要看手机能发多大功率</strong>。两边功率匹配了，覆盖范围才是"真实"的——AP 能到达的地方，手机也能回得来。</p>
+
+    <h4>不同客户端的典型发射功率</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>设备类型</th>
+          <th>2.4 GHz 典型 Tx</th>
+          <th>5 GHz 典型 Tx</th>
+          <th>6 GHz 典型 Tx</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>iPhone / 高端手机</td><td>18 – 20 dBm</td><td>14 – 16 dBm</td><td>12 – 14 dBm</td></tr>
+        <tr><td>笔记本电脑</td><td>18 – 20 dBm</td><td>16 – 18 dBm</td><td>14 – 16 dBm</td></tr>
+        <tr><td>IoT / 传感器</td><td>10 – 15 dBm</td><td>—</td><td>—</td></tr>
+        <tr><td>工业手持终端</td><td>16 – 18 dBm</td><td>14 – 16 dBm</td><td>—</td></tr>
+        <tr><td>VoIP 话机</td><td>15 – 17 dBm</td><td>14 – 15 dBm</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ 关键发现：5 GHz 客户端通常只有 14–17 dBm</div>
+      <p>而 Cisco AP 在 5 GHz 上的最大发射功率可达 <strong>23 dBm（200 mW）</strong>甚至更高。如果你不限制 AP 功率，AP 和手机之间就有 <strong>6–9 dB 的功率差</strong>——相当于 4–8 倍的功率差异！这就是为什么 Cisco 建议在 RF Profile 中设置 TPC Max。</p>
+    </div>
+
+    <h3>2.3 &nbsp; TPC（发射功率控制）配置实战</h3>
+
+    <p>Catalyst 9800 使用 <strong>RRM（Radio Resource Management）</strong> 自动调节 AP 功率。但你需要设置功率的 <strong>上限（Max）和下限（Min）</strong>，让自动调节在合理范围内工作。</p>
+
+    <h4>推荐功率设置</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>频段</th>
+          <th>TPC Max（推荐）</th>
+          <th>TPC Min（推荐）</th>
+          <th>设计理由</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2.4 GHz</strong></td>
+          <td>11 – 14 dBm</td>
+          <td>2 – 5 dBm</td>
+          <td>2.4G 只有 3 个不重叠信道，功率越大干扰越严重。在企业环境中 2.4G 应作为"兜底"频段，小功率即可。</td>
+        </tr>
+        <tr>
+          <td><strong>5 GHz</strong></td>
+          <td>14 – 17 dBm</td>
+          <td>5 – 8 dBm</td>
+          <td>匹配主流手机 / 笔记本的 Tx 功率。对于高密场景可降至 11–14 dBm。</td>
+        </tr>
+        <tr>
+          <td><strong>6 GHz</strong></td>
+          <td>17 – 20 dBm</td>
+          <td>8 – 11 dBm</td>
+          <td>需比 5 GHz 高 ≥3 dB 以补偿 FSPL。LPI 模式下受限于法规上限。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>CLI 配置示例</h4>
+
+    <div class="code-block">
+<span class="comment">! ——— 5 GHz TPC 设置 ———</span>
+<span class="cmd">ap dot11 5ghz rrm txpower</span>
+ <span class="cmd">max 17</span>        <span class="comment">! 限制最大功率为 17 dBm，匹配客户端</span>
+ <span class="cmd">min 5</span>         <span class="comment">! 最小功率 5 dBm，防止 RRM 降到太低</span>
+
+<span class="comment">! ——— 2.4 GHz TPC 设置 ———</span>
+<span class="cmd">ap dot11 24ghz rrm txpower</span>
+ <span class="cmd">max 11</span>        <span class="comment">! 2.4G 尽量压低</span>
+ <span class="cmd">min 2</span>
+
+<span class="comment">! ——— 6 GHz TPC 设置（需 17.9+ 支持）———</span>
+<span class="cmd">ap dot11 6ghz rrm txpower</span>
+ <span class="cmd">max 20</span>        <span class="comment">! 比 5G 高 3 dB 补偿 FSPL</span>
+ <span class="cmd">min 8</span>
+
+<span class="comment">! 也可以在 RF Profile 中精细化控制（推荐）</span>
+<span class="cmd">ap dot11 5ghz rf-profile HIGH-DENSITY-5G</span>
+ <span class="cmd">tx-power-max 14</span>
+ <span class="cmd">tx-power-min 5</span>
+    </div>
+
+    <h3>2.4 &nbsp; 为什么"小蜂窝"胜过"大功率"？</h3>
+
+    <p>很多人的第一直觉是"AP 功率越大越好，一个 AP 覆盖越广越省钱"。但从第一性原理推导，这是错误的：</p>
+
+    <!-- SVG: Small Cell vs Big Cell -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 320" width="720" height="320">
+        <!-- Left: Big Cell (Bad) -->
+        <text x="180" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">❌ 大功率 · 少 AP</text>
+        <circle cx="180" cy="165" r="120" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4"/>
+        <circle cx="180" cy="165" r="5" fill="#06335b"/>
+        <text x="180" y="182" text-anchor="middle" font-size="11" fill="#06335b" font-weight="600">AP</text>
+        <!-- Users scattered -->
+        <text x="100" y="120" font-size="16">📱</text>
+        <text x="250" y="220" font-size="16">📱</text>
+        <text x="140" y="250" font-size="16">📱</text>
+        <text x="230" y="110" font-size="16">📱</text>
+        <text x="280" y="170" font-size="12" fill="#dc2626">← 边缘用户<br/>上行失败</text>
+        <!-- Shared label -->
+        <text x="120" y="305" font-size="12" fill="#991b1b">所有用户共享同一信道时间</text>
+
+        <!-- Right: Small Cells (Good) -->
+        <text x="540" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#16a34a">✅ 适中功率 · 多 AP</text>
+        <circle cx="470" cy="135" r="65" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4"/>
+        <circle cx="610" cy="135" r="65" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4"/>
+        <circle cx="540" cy="230" r="65" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4"/>
+        <circle cx="470" cy="135" r="4" fill="#06335b"/>
+        <circle cx="610" cy="135" r="4" fill="#06335b"/>
+        <circle cx="540" cy="230" r="4" fill="#06335b"/>
+        <text x="470" y="150" text-anchor="middle" font-size="10" fill="#06335b" font-weight="600">AP1</text>
+        <text x="610" y="150" text-anchor="middle" font-size="10" fill="#06335b" font-weight="600">AP2</text>
+        <text x="540" y="245" text-anchor="middle" font-size="10" fill="#06335b" font-weight="600">AP3</text>
+        <text x="435" y="118" font-size="14">📱</text>
+        <text x="590" y="118" font-size="14">📱</text>
+        <text x="515" y="218" font-size="14">📱</text>
+        <text x="430" y="305" font-size="12" fill="#15803d">每个 AP 服务更少用户，带宽翻倍</text>
+      </svg>
+    </div>
+
+    <p>"小蜂窝"设计的三大优势：</p>
+
+    <ol>
+      <li><strong>功率对称</strong>：AP 功率低 → 覆盖范围与客户端匹配 → 上行下行都能通</li>
+      <li><strong>容量翻倍</strong>：每个 AP 覆盖的面积更小 → 每个 AP 连接的客户端更少 → 每人分到的无线时间更多</li>
+      <li><strong>干扰降低</strong>：AP 功率低 → 信号不会"溢出"到相邻区域 → 同频干扰（CCI）大幅减少</li>
+    </ol>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 TECEWN-2234 的黄金法则</div>
+      <p><strong>"避免使用最大功率。小蜂窝设计永远优于大功率设计。"</strong> 因为 Wi-Fi 是共享介质（半双工），信道时间是最宝贵的资源——你的 AP 覆盖范围越大，同时竞争信道时间的设备就越多，<strong>每个人分到的"说话机会"就越少</strong>。<br>
+      <em>— 出自 TECEWN-2234 Demystify Wi-Fi</em></p>
+    </div>
+
+    <h3>2.5 &nbsp; 功率设计决策流程图</h3>
+
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" width="720" height="480">
+        <!-- Step 1 -->
+        <rect x="220" y="10" width="280" height="56" rx="12" fill="#049fd9"/>
+        <text x="360" y="44" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">① 确认网络中功率最低的客户端</text>
+        <line x1="360" y1="66" x2="360" y2="96" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 2 -->
+        <rect x="220" y="96" width="280" height="56" rx="12" fill="#0284c7"/>
+        <text x="360" y="118" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">② 将该功率值设为 TPC Max</text>
+        <text x="360" y="138" text-anchor="middle" fill="#bae6fd" font-size="12">例：手机 5G Tx = 15 dBm → Max = 15</text>
+        <line x1="360" y1="152" x2="360" y2="182" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 3 -->
+        <rect x="220" y="182" width="280" height="56" rx="12" fill="#0369a1"/>
+        <text x="360" y="206" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">③ 天线增益补偿</text>
+        <text x="360" y="226" text-anchor="middle" fill="#bae6fd" font-size="12">外接高增益天线？需降低 Tx 以保持 EIRP 对称</text>
+        <line x1="360" y1="238" x2="360" y2="268" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 4 -->
+        <rect x="220" y="268" width="280" height="56" rx="12" fill="#075985"/>
+        <text x="360" y="292" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">④ 6 GHz 额外 +3 dB</text>
+        <text x="360" y="312" text-anchor="middle" fill="#bae6fd" font-size="12">补偿更高频段的 FSPL</text>
+        <line x1="360" y1="324" x2="360" y2="354" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 5 -->
+        <rect x="220" y="354" width="280" height="56" rx="12" fill="#164e63"/>
+        <text x="360" y="378" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">⑤ 验证：站点勘测确认覆盖</text>
+        <text x="360" y="398" text-anchor="middle" fill="#bae6fd" font-size="12">RSSI ≥ -65 dBm，SNR ≥ 25 dB</text>
+        <line x1="360" y1="410" x2="360" y2="440" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Result -->
+        <rect x="240" y="440" width="240" height="36" rx="10" fill="#16a34a"/>
+        <text x="360" y="464" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">✅ 对称功率设计完成</text>
+        <defs>
+          <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>2.6 &nbsp; RRM 自动功率调节 —— 让 WLC 帮你微调</h3>
+
+    <p>设置好 TPC Max / Min 之后，Catalyst 9800 的 <strong>RRM（Radio Resource Management）</strong> 会在这个范围内自动调节每个 AP 的实际功率。它通过以下机制工作：</p>
+
+    <ol>
+      <li><strong>邻居发现</strong>：每个 AP 监听相邻 AP 的信号强度。</li>
+      <li><strong>TPC 算法</strong>：如果相邻 AP 信号过强（干扰风险），自动降低功率；如果存在覆盖漏洞，适当提高功率。</li>
+      <li><strong>目标</strong>：维持第三个最强邻居的 RSSI 在目标阈值（默认 −65 dBm 左右），从而实现"刚好覆盖、互不干扰"的平衡。</li>
+    </ol>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ RRM 不是万能的</div>
+      <p>RRM 只能在你设定的 Max/Min 范围内调节。如果 Max 设得太高（比如默认的 23 dBm），RRM 的"天花板"太高，仍可能导致不对称。<strong>人为设定合理的 TPC Max 是前提，RRM 的自动调节是锦上添花。</strong><br>
+      <em>— 出自 Cisco Catalyst 9800 功率与漫游配置参数指南</em></p>
+    </div>
+
+  </section>
+
+  <!-- ======================== CHAPTER 3 ======================== -->
+  <section class="chapter" id="ch3">
+    <h2>3 &nbsp; 信道与频宽规划</h2>
+
+    <p>如果说功率决定了"每个 AP 的覆盖半径有多大"，那么信道规划就决定了"相邻 AP 之间会不会互相打架"。</p>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🛣️</div>
+      <p><strong>类比：高速公路车道</strong> —— 频段是高速公路，信道是车道，数据包是车。<br>
+      2.4 GHz 就像一条只有 <strong>3 车道</strong> 的老公路，挤满了各种车辆（蓝牙、微波炉、ZigBee……）；<br>
+      5 GHz 是一条 <strong>25 车道</strong> 的新公路，车少路宽；<br>
+      6 GHz 则是一条刚修好的 <strong>59 车道</strong> 超级高速路，只允许最新款的车（Wi-Fi 6E/7 设备）上路——空旷且高速。<br><br>
+      而信道宽度就是"把几条车道合并成一条更宽的车道"，车道越宽单车跑得越快，但可用车道数就越少。</p>
+    </div>
+
+    <h3>3.1 &nbsp; 2.4 GHz 信道规划 —— 只有 3 条车道</h3>
+
+    <!-- SVG: 2.4GHz Channel Layout -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200">
+        <!-- Spectrum background -->
+        <rect x="40" y="60" width="640" height="60" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+        <!-- Channel 1 -->
+        <rect x="60" y="55" width="180" height="70" rx="10" fill="#16a34a" opacity=".2" stroke="#16a34a" stroke-width="2"/>
+        <text x="150" y="96" text-anchor="middle" font-size="18" font-weight="800" fill="#16a34a">CH 1</text>
+        <!-- Channel 6 -->
+        <rect x="270" y="55" width="180" height="70" rx="10" fill="#0284c7" opacity=".2" stroke="#0284c7" stroke-width="2"/>
+        <text x="360" y="96" text-anchor="middle" font-size="18" font-weight="800" fill="#0284c7">CH 6</text>
+        <!-- Channel 11 -->
+        <rect x="480" y="55" width="180" height="70" rx="10" fill="#7c3aed" opacity=".2" stroke="#7c3aed" stroke-width="2"/>
+        <text x="570" y="96" text-anchor="middle" font-size="18" font-weight="800" fill="#7c3aed">CH 11</text>
+        <!-- Labels -->
+        <text x="150" y="155" text-anchor="middle" font-size="13" fill="#475569">2.412 GHz</text>
+        <text x="360" y="155" text-anchor="middle" font-size="13" fill="#475569">2.437 GHz</text>
+        <text x="570" y="155" text-anchor="middle" font-size="13" fill="#475569">2.462 GHz</text>
+        <text x="360" y="185" text-anchor="middle" font-size="14" fill="#dc2626" font-weight="600">⚠️ 只有这 3 个信道完全不重叠（间隔 25 MHz &gt; 22 MHz 带宽）</text>
+        <text x="360" y="38" text-anchor="middle" font-size="15" fill="#06335b" font-weight="700">2.4 GHz 频段 — 20 MHz 信道宽度</text>
+      </svg>
+    </div>
+
+    <p><strong>2.4 GHz 规划要点：</strong></p>
+
+    <ul>
+      <li><strong>仅使用信道 1、6、11</strong>，这是全球通用的 3 个不重叠信道。使用其他信道（如 2、3、4…）会导致相邻信道干扰（ACI），比同频干扰更难处理。</li>
+      <li><strong>信道宽度：固定 20 MHz</strong>。绝不要在 2.4 GHz 使用 40 MHz——只有 3 个信道，40 MHz 会让两个信道重叠，干扰灾难。</li>
+      <li><strong>功率尽量压低</strong>（见第 2 章），减小每个 AP 的覆盖半径，从而让相同信道的 AP 之间距离更远，降低 CCI。</li>
+      <li><strong>在企业环境中，2.4 GHz 的角色是"兜底"</strong>——服务那些只支持 2.4G 的 IoT 设备。主力业务应引导到 5 GHz 或 6 GHz。</li>
+    </ul>
+
+    <h3>3.2 &nbsp; 5 GHz 信道规划 —— 主力频段，注意 DFS</h3>
+
+    <p>5 GHz 有丰富得多的信道资源，但需要注意 <strong>DFS（动态频率选择）</strong>信道的特殊性。</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>子频段</th>
+          <th>信道号</th>
+          <th>DFS？</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>UNII-1</td><td>36, 40, 44, 48</td><td>否</td><td>最常用，室内优先。</td></tr>
+        <tr><td>UNII-2</td><td>52, 56, 60, 64</td><td><strong>是</strong></td><td>检测到雷达信号需立即退避，AP 静默 30 分钟。</td></tr>
+        <tr><td>UNII-2e</td><td>100 – 144</td><td><strong>是</strong></td><td>大量信道，但 DFS 风险更高（机场、气象雷达附近）。</td></tr>
+        <tr><td>UNII-3</td><td>149, 153, 157, 161, 165</td><td>否</td><td>高功率允许，适合室外或大空间。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ DFS 信道的"陷阱"</div>
+      <p>DFS 信道并非不能用，而是要 <strong>了解风险</strong>：当 AP 检测到雷达信号（如机场附近、气象雷达），必须在 <strong>10 秒内</strong> 退出该信道，然后等待 <strong>30 分钟</strong> 才能重新使用。这段时间内，AP 会跳到其他信道，导致短暂的服务中断。<br><br>
+      <strong>决策建议</strong>：如果你的环境是普通办公楼，DFS 信道通常安全可用；但如果在机场、港口、军事基地附近，应在 RF Profile 中排除 DFS 信道。</p>
+    </div>
+
+    <h4>5 GHz 信道宽度选择</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>信道宽度</th>
+          <th>速率提升</th>
+          <th>可用信道数（约）</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>20 MHz</strong></td>
+          <td>基准</td>
+          <td>25 个</td>
+          <td>超高密度（体育馆、会议中心）</td>
+        </tr>
+        <tr>
+          <td><strong>40 MHz</strong></td>
+          <td>~2x</td>
+          <td>12 个</td>
+          <td>高密度办公</td>
+        </tr>
+        <tr>
+          <td><strong>80 MHz ⭐</strong></td>
+          <td>~4x</td>
+          <td>6 个</td>
+          <td>大多数企业环境的最优平衡点</td>
+        </tr>
+        <tr>
+          <td><strong>160 MHz</strong></td>
+          <td>~8x</td>
+          <td>2–3 个</td>
+          <td>仅特殊高带宽场景，信道复用困难</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 Cisco 推荐</div>
+      <p>对于绝大多数企业部署，<strong>5 GHz 推荐使用 80 MHz 信道宽度</strong>——它在速率和信道复用之间取得最佳平衡。<br>
+      对于高密场景（每 AP 超过 30 个活跃客户端），建议降至 <strong>40 MHz</strong> 以获得更多不重叠信道。<br>
+      <em>— 综合自 TECEWN-2234 与 Cisco Catalyst 9800 配置最佳实践</em></p>
+    </div>
+
+    <h3>3.3 &nbsp; 6 GHz 信道规划 —— Wi-Fi 6E/7 的新大陆</h3>
+
+    <p>6 GHz 频段（5.925 – 7.125 GHz）是 Wi-Fi 历史上最大的一次频谱扩容，提供了 <strong>1200 MHz</strong> 的连续带宽。</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="big-num">59</div>
+        <div class="label">20 MHz 信道</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">29</div>
+        <div class="label">40 MHz 信道</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">14</div>
+        <div class="label">80 MHz 信道</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">7</div>
+        <div class="label">160 MHz 信道</div>
+      </div>
+    </div>
+
+    <p>Wi-Fi 7 更进一步，支持 <strong>320 MHz 信道</strong>——在 6 GHz 中最多可划出 <strong>3 个 320 MHz 信道</strong>。</p>
+
+    <h4>6 GHz 功率等级</h4>
+
+    <p>6 GHz 的使用受到比 5 GHz 更严格的功率管制。Cisco 的 RF 参考指南详细区分了两种功率等级：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>功率等级</th>
+          <th>全称</th>
+          <th>EIRP 限制</th>
+          <th>要求</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>LPI</strong></td>
+          <td>Low Power Indoor</td>
+          <td>5 dBm/MHz（约 30 dBm EIRP @160MHz）</td>
+          <td>无需 AFC，仅限室内</td>
+          <td><strong>绝大多数企业室内部署</strong></td>
+        </tr>
+        <tr>
+          <td><strong>SP</strong></td>
+          <td>Standard Power</td>
+          <td>更高 EIRP（因地区而异）</td>
+          <td><strong>必须接入 AFC 服务 + GPS/GNSS 定位</strong></td>
+          <td>室外或需要大覆盖的场景</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 AFC 是什么？</div>
+      <p><strong>AFC（Automated Frequency Coordination）</strong> 是一个云端数据库服务。AP 将自己的 GPS 位置发送给 AFC 服务器，服务器根据该位置查询附近是否有需要保护的在位用户（如微波回传链路），然后告诉 AP 可以使用哪些信道和最大功率。<br><br>
+      对于大多数室内企业部署，<strong>LPI 模式即可满足需求，无需 AFC，部署更简单</strong>。只有室外覆盖或需要更大功率时才考虑 SP 模式。<br>
+      <em>— 出自 Wireless RF Reference Guide</em></p>
+    </div>
+
+    <h3>3.4 &nbsp; RRM 自动信道分配 —— 让 WLC 帮你选信道</h3>
+
+    <p>手动为每个 AP 选信道在大规模部署中不现实。Catalyst 9800 的 <strong>RRM DCA（Dynamic Channel Assignment）</strong> 会自动为每个 AP 选择最优信道。你需要做的是：</p>
+
+    <ol>
+      <li><strong>定义可用信道列表</strong>：在 RF Profile 或全局设置中排除不想用的信道（如 DFS 信道）。</li>
+      <li><strong>设定信道宽度</strong>：告诉 RRM 使用 20/40/80/160 MHz。</li>
+      <li><strong>让 RRM 运行</strong>：默认每 600 秒（10 分钟）评估一次，有需要时自动切换信道。</li>
+    </ol>
+
+    <div class="code-block">
+<span class="comment">! ——— 5 GHz DCA 配置示例 ———</span>
+<span class="cmd">ap dot11 5ghz rrm channel</span>
+ <span class="cmd">dca chan-width 80</span>    <span class="comment">! 使用 80 MHz 信道宽度</span>
+ <span class="cmd">dca interval 600</span>    <span class="comment">! 每 10 分钟评估一次</span>
+
+<span class="comment">! 排除特定 DFS 信道（如果在雷达区域附近）</span>
+<span class="cmd">ap dot11 5ghz rrm channel dca remove 120 124 128</span>
+
+<span class="comment">! ——— 在 RF Profile 中配置（推荐方式）———</span>
+<span class="cmd">ap dot11 5ghz rf-profile OFFICE-5G</span>
+ <span class="cmd">channel width 80</span>
+ <span class="cmd">channel add 36 40 44 48 52 56 60 64 149 153 157 161</span>
+    </div>
+
+    <h3>3.5 &nbsp; 信道规划小结</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>频段</th>
+          <th>推荐信道宽度</th>
+          <th>核心策略</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2.4 GHz</strong></td>
+          <td>20 MHz（固定）</td>
+          <td>仅用 1/6/11，低功率，服务 IoT 和兜底</td>
+        </tr>
+        <tr>
+          <td><strong>5 GHz</strong></td>
+          <td>80 MHz（企业标准）<br>40 MHz（高密）</td>
+          <td>主力频段，利用 UNII-1/3 + 评估 DFS 可用性</td>
+        </tr>
+        <tr>
+          <td><strong>6 GHz</strong></td>
+          <td>80/160 MHz（LPI）<br>160/320 MHz（SP + Wi-Fi 7）</td>
+          <td>新建网络优先，LPI 免 AFC，功率 >5G +3dB</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 一句话总结</div>
+      <p><strong>信道规划的本质是"空间频率复用"</strong>——用尽可能少的频率重叠，让尽可能多的 AP 同时独立工作。功率控制缩小覆盖半径，信道规划减少频率冲突，两者协同才能释放 Wi-Fi 网络的真正容量。</p>
+    </div>
+
+  </section>
+  <!-- ======================== CHAPTER 4 ======================== -->
+  <section class="chapter" id="ch4">
+    <h2>4 &nbsp; 数据速率与覆盖策略</h2>
+
+    <p>前面我们讲了"声音有多大"（功率）和"用哪条车道"（信道）。现在来聊第三根柱子——<strong>数据速率（Data Rate）</strong>。它直接决定了两件事：<strong>你的 AP 覆盖范围有多大</strong>，以及 <strong>每个用户能分到多少带宽</strong>。</p>
+
+    <h3>4.1 &nbsp; 数据速率与覆盖的"跷跷板"</h3>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🎙️</div>
+      <p><strong>类比：说话的速度 vs 听众能听清的距离</strong> —— 想象你在演讲：<br><br>
+      如果你 <strong>慢慢说</strong>（低数据速率，如 1 Mbps），声音小、语速慢，但站得远的人也能听清——覆盖范围大；<br>
+      如果你 <strong>飞快地说</strong>（高数据速率，如 300 Mbps），必须对方站得非常近、环境非常安静才能跟上——覆盖范围小。<br><br>
+      Wi-Fi 的调制方式完全遵循这个规律：<strong>更高的数据速率需要更高的 SNR，而高 SNR 只有在离 AP 足够近的时候才能获得</strong>。</p>
+    </div>
+
+    <h4>调制方式与所需 SNR 的对应关系</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>调制方式</th>
+          <th>每符号编码位数</th>
+          <th>所需最低 SNR (约)</th>
+          <th>典型覆盖距离</th>
+          <th>通俗描述</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>BPSK</td><td>1 bit</td><td>~6 dB</td><td>最远</td><td>说话极慢，站很远也能听到</td></tr>
+        <tr><td>QPSK</td><td>2 bits</td><td>~10 dB</td><td>远</td><td>稍快一点</td></tr>
+        <tr><td>16-QAM</td><td>4 bits</td><td>~16 dB</td><td>中等</td><td>正常语速</td></tr>
+        <tr><td>64-QAM</td><td>6 bits</td><td>~22 dB</td><td>较近</td><td>快速朗读</td></tr>
+        <tr><td>256-QAM</td><td>8 bits</td><td>~28 dB</td><td>近</td><td>绕口令速度</td></tr>
+        <tr><td>1024-QAM (Wi-Fi 6)</td><td>10 bits</td><td>~34 dB</td><td>很近</td><td>拍卖师的语速</td></tr>
+        <tr><td><strong>4096-QAM (Wi-Fi 7)</strong></td><td><strong>12 bits</strong></td><td><strong>~38 dB</strong></td><td><strong>极近</strong></td><td><strong>接近极限的超高速</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 关键推论</div>
+      <p>Wi-Fi 7 的 4096-QAM 虽然单符号能编码 12 位（比 Wi-Fi 6 的 10 位多 20%），但它需要 <strong>38 dB 以上的 SNR</strong>——这意味着客户端必须 <strong>非常靠近 AP、且环境极其干净</strong> 才能用到。4096-QAM 的真正价值不在于"全覆盖区域都快"，而在于"近距离时峰值更高"。<br>
+      <em>— 出自 80211be-2024.pdf 与 TECEWN-2234</em></p>
+    </div>
+
+    <h3>4.2 &nbsp; 最低强制速率（Mandatory Data Rate）—— 覆盖范围的"开关"</h3>
+
+    <p>在 Catalyst 9800 上，你可以为每个频段配置数据速率为三种状态：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>速率状态</th>
+          <th>含义</th>
+          <th>影响</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Mandatory（强制）</strong></td>
+          <td>AP 必须支持此速率，客户端也必须能使用才能关联</td>
+          <td>定义了 AP 的 <strong>最大覆盖范围</strong>——AP 会用最低的 Mandatory 速率来发送 Beacon 和管理帧</td>
+        </tr>
+        <tr>
+          <td><strong>Supported（支持）</strong></td>
+          <td>AP 可以使用此速率，但不强制客户端必须支持</td>
+          <td>提供更高速率选项给能力强的客户端</td>
+        </tr>
+        <tr>
+          <td><strong>Disabled（禁用）</strong></td>
+          <td>AP 完全不使用此速率</td>
+          <td>禁用低速率可以"缩小"覆盖半径，同时减少低速客户端占用信道时间</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 核心机制：最低 Mandatory 速率 = 覆盖边界</div>
+      <p>AP 的 Beacon 帧（每 100ms 一次的"广播信标"）总是以 <strong>最低的 Mandatory 速率</strong> 发送。如果最低 Mandatory 速率是 1 Mbps（BPSK），Beacon 能传到很远 → 覆盖范围非常大；如果最低 Mandatory 速率是 24 Mbps（16-QAM），Beacon 只能传到中等距离 → 覆盖范围显著缩小。<br><br>
+      <strong>通过提高最低 Mandatory 速率，你实际上在"画一个更小的圆"来定义 AP 的覆盖区域。</strong></p>
+    </div>
+
+    <!-- SVG: Data Rate defines cell size -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" width="720" height="300">
+        <!-- Left: Low Mandatory Rate -->
+        <text x="180" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#dc2626">最低 Mandatory = 1 Mbps</text>
+        <circle cx="180" cy="165" r="120" fill="#fecaca" opacity=".4" stroke="#dc2626" stroke-width="2"/>
+        <circle cx="180" cy="165" r="70" fill="#bbf7d0" opacity=".4" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <circle cx="180" cy="165" r="5" fill="#06335b"/>
+        <text x="180" y="180" text-anchor="middle" font-size="11" fill="#06335b" font-weight="600">AP</text>
+        <text x="180" y="220" text-anchor="middle" font-size="11" fill="#dc2626">← 巨大覆盖 但边缘极慢</text>
+        <text x="145" y="135" font-size="10" fill="#16a34a">高速区</text>
+
+        <!-- Right: Higher Mandatory Rate -->
+        <text x="540" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#16a34a">最低 Mandatory = 12 Mbps</text>
+        <circle cx="540" cy="165" r="75" fill="#bbf7d0" opacity=".4" stroke="#16a34a" stroke-width="2"/>
+        <circle cx="540" cy="165" r="5" fill="#06335b"/>
+        <text x="540" y="180" text-anchor="middle" font-size="11" fill="#06335b" font-weight="600">AP</text>
+        <text x="540" y="220" text-anchor="middle" font-size="11" fill="#16a34a">覆盖适中 全域速率可用</text>
+
+        <!-- Arrow -->
+        <line x1="330" y1="165" x2="430" y2="165" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arrowGray)"/>
+        <text x="380" y="155" text-anchor="middle" font-size="12" fill="#64748b" font-weight="600">优化</text>
+
+        <!-- Bottom legend -->
+        <rect x="100" y="275" width="14" height="14" rx="3" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+        <text x="120" y="287" font-size="12" fill="#475569">1 Mbps 覆盖范围（低速，浪费信道时间）</text>
+        <rect x="400" y="275" width="14" height="14" rx="3" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/>
+        <text x="420" y="287" font-size="12" fill="#475569">12 Mbps 覆盖范围（高效，速率有保障）</text>
+      </svg>
+    </div>
+
+    <h3>4.3 &nbsp; Cisco 推荐的数据速率配置</h3>
+
+    <p>Cisco 功率与漫游配置指南给出了明确的推荐方案：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>频段</th>
+          <th>推荐最低 Mandatory</th>
+          <th>禁用的速率</th>
+          <th>理由</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2.4 GHz</strong></td>
+          <td><strong>12 Mbps</strong></td>
+          <td>1, 2, 5.5, 6, 9, 11 Mbps</td>
+          <td>禁用所有 802.11b 速率（1/2/5.5/11 Mbps），消除"b protection"机制带来的性能惩罚。12 Mbps 作为最低门槛定义合理的覆盖边界。</td>
+        </tr>
+        <tr>
+          <td><strong>5 GHz</strong></td>
+          <td><strong>12 Mbps</strong></td>
+          <td>6, 9 Mbps</td>
+          <td>5 GHz 无 802.11b 速率，但禁用 6/9 Mbps 可进一步缩小覆盖范围、提高整体效率。对大多数企业网络来说 12 Mbps 是最佳平衡点。</td>
+        </tr>
+        <tr>
+          <td><strong>6 GHz</strong></td>
+          <td>由标准决定（MCS 0 起步）</td>
+          <td>不需要手动配置</td>
+          <td>6 GHz 仅支持 Wi-Fi 6E/7 设备，无历史兼容负担，速率机制更简洁。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+<span class="comment">! ——— 2.4 GHz 数据速率配置 ———</span>
+<span class="comment">! 禁用所有 802.11b 速率 + 6/9 Mbps，将 12 Mbps 设为 Mandatory</span>
+<span class="cmd">ap dot11 24ghz rate RATE_1M disable</span>
+<span class="cmd">ap dot11 24ghz rate RATE_2M disable</span>
+<span class="cmd">ap dot11 24ghz rate RATE_5_5M disable</span>
+<span class="cmd">ap dot11 24ghz rate RATE_6M disable</span>
+<span class="cmd">ap dot11 24ghz rate RATE_9M disable</span>
+<span class="cmd">ap dot11 24ghz rate RATE_11M disable</span>
+<span class="cmd">ap dot11 24ghz rate RATE_12M mandatory</span>
+<span class="cmd">ap dot11 24ghz rate RATE_18M supported</span>
+<span class="cmd">ap dot11 24ghz rate RATE_24M supported</span>
+<span class="cmd">ap dot11 24ghz rate RATE_36M supported</span>
+<span class="cmd">ap dot11 24ghz rate RATE_48M supported</span>
+<span class="cmd">ap dot11 24ghz rate RATE_54M supported</span>
+
+<span class="comment">! ——— 5 GHz 数据速率配置 ———</span>
+<span class="cmd">ap dot11 5ghz rate RATE_6M disable</span>
+<span class="cmd">ap dot11 5ghz rate RATE_9M disable</span>
+<span class="cmd">ap dot11 5ghz rate RATE_12M mandatory</span>
+<span class="cmd">ap dot11 5ghz rate RATE_18M supported</span>
+<span class="cmd">ap dot11 5ghz rate RATE_24M supported</span>
+<span class="cmd">ap dot11 5ghz rate RATE_36M supported</span>
+<span class="cmd">ap dot11 5ghz rate RATE_48M supported</span>
+<span class="cmd">ap dot11 5ghz rate RATE_54M supported</span>
+    </div>
+
+    <h3>4.4 &nbsp; "慢车占道"效应 —— 为什么低速率的危害这么大？</h3>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🚛</div>
+      <p><strong>类比：高速公路上的拖拉机</strong> —— Wi-Fi 是共享介质，就像只有一条车道的公路。当一辆拖拉机（使用 1 Mbps 的旧设备）上了高速，它传同样大小的数据包需要的时间是跑车（使用 300 Mbps 的新手机）的 <strong>300 倍</strong>。在这段时间里，所有其他车辆都必须等它走完——因为 Wi-Fi 是"一次只能一个人说话"的半双工机制。<br><br>
+      <strong>一个 1 Mbps 的设备可以拖慢整个 AP 上所有用户的体验。</strong>这就是为什么禁用低速率如此重要。</p>
+    </div>
+
+    <!-- SVG: Slow Client Effect -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" width="720" height="220">
+        <!-- Timeline bar -->
+        <rect x="40" y="80" width="640" height="40" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+        <text x="360" y="70" text-anchor="middle" font-size="14" fill="#06335b" font-weight="700">信道时间轴 （共享介质）</text>
+        <!-- Slow client takes huge time -->
+        <rect x="45" y="85" width="400" height="30" rx="6" fill="#dc2626" opacity=".7"/>
+        <text x="245" y="106" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">📱 旧设备 @ 1 Mbps — 传输 1 个数据包（占用大量时间）</text>
+        <!-- Fast clients squeeze -->
+        <rect x="450" y="85" width="70" height="30" rx="6" fill="#16a34a" opacity=".7"/>
+        <text x="485" y="106" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">📱 快</text>
+        <rect x="525" y="85" width="70" height="30" rx="6" fill="#0284c7" opacity=".7"/>
+        <text x="560" y="106" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">💻 快</text>
+        <rect x="600" y="85" width="70" height="30" rx="6" fill="#7c3aed" opacity=".7"/>
+        <text x="635" y="106" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">📱 快</text>
+        <!-- Labels -->
+        <text x="245" y="150" text-anchor="middle" font-size="13" fill="#dc2626" font-weight="600">62% 的信道时间被 1 个慢设备占用！</text>
+        <text x="560" y="150" text-anchor="middle" font-size="13" fill="#16a34a" font-weight="600">3 个快设备抢剩下的 38%</text>
+        <!-- Bottom note -->
+        <rect x="80" y="175" width="560" height="36" rx="8" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+        <text x="360" y="198" text-anchor="middle" font-size="13" fill="#991b1b" font-weight="600">禁用 1/2/5.5/11 Mbps 后，"拖拉机"被迫下高速 → 所有人都更快</text>
+      </svg>
+    </div>
+
+    <h3>4.5 &nbsp; 覆盖策略总结：三环模型</h3>
+
+    <p>综合功率和数据速率的设计，一个 AP 的覆盖实际上形成三个同心环：</p>
+
+    <!-- SVG: Three-Ring Coverage Model -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" width="720" height="380">
+        <!-- Outer ring -->
+        <circle cx="280" cy="200" r="160" fill="#fef9c3" opacity=".5" stroke="#eab308" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="280" y="46" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">低速区（12–24 Mbps）· RSSI −67~−75 dBm</text>
+        <!-- Mid ring -->
+        <circle cx="280" cy="200" r="100" fill="#dcfce7" opacity=".5" stroke="#16a34a" stroke-width="2"/>
+        <text x="420" y="158" font-size="12" fill="#166534" font-weight="600">中速区（36–54 Mbps）</text>
+        <text x="420" y="175" font-size="12" fill="#166534">RSSI −55~−67 dBm</text>
+        <!-- Inner ring -->
+        <circle cx="280" cy="200" r="50" fill="#dbeafe" opacity=".6" stroke="#2563eb" stroke-width="2"/>
+        <text x="280" y="195" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="700">高速区</text>
+        <text x="280" y="212" text-anchor="middle" font-size="11" fill="#1e3a8a">MCS 8–11</text>
+        <text x="280" y="226" text-anchor="middle" font-size="11" fill="#1e3a8a">RSSI ≥ −55</text>
+        <!-- AP dot -->
+        <circle cx="280" cy="200" r="6" fill="#06335b"/>
+        <text x="280" y="250" text-anchor="middle" font-size="10" fill="#06335b">AP</text>
+
+        <!-- Right side legend -->
+        <rect x="470" y="200" width="220" height="150" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="490" y="225" font-size="13" fill="#06335b" font-weight="700">🎯 设计目标</text>
+        <text x="490" y="250" font-size="12" fill="#475569">• 办公区域全覆盖 ≥ −65 dBm</text>
+        <text x="490" y="272" font-size="12" fill="#475569">• VoIP 区域 ≥ −67 dBm + SNR ≥ 25</text>
+        <text x="490" y="294" font-size="12" fill="#475569">• 相邻 AP 重叠区 15–20%</text>
+        <text x="490" y="316" font-size="12" fill="#475569">• 边缘速率 ≥ 12 Mbps（Mandatory）</text>
+        <text x="490" y="338" font-size="12" fill="#475569">• 漫游触发区在 −67~−70 dBm</text>
+      </svg>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 第 4 章核心要点</div>
+      <p><strong>数据速率配置不仅仅影响"速度"，它本质上是你在画 AP 的覆盖边界。</strong>将最低 Mandatory 速率从 1 Mbps 提升到 12 Mbps，等效于大幅缩小覆盖圆、清除低速设备对信道时间的霸占、并让覆盖边缘与漫游触发区更好地对齐。<br>
+      <em>— 综合自 Cisco Catalyst 9800 功率与漫游配置参数指南、TECEWN-2234</em></p>
+    </div>
+  </section>
+
+  <!-- ======================== CHAPTER 5 ======================== -->
+  <section class="chapter" id="ch5">
+    <h2>5 &nbsp; 漫游机制深度拆解</h2>
+
+    <p>如果前四章讲的是"怎么让每个 AP 覆盖得好"，那么第 5 章解决的是"<strong>当用户从一个 AP 走到另一个 AP 时，如何保证不掉线、不卡顿</strong>"。这就是 <strong>漫游（Roaming）</strong>。</p>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🚄</div>
+      <p><strong>类比：高铁换基站</strong> —— 你坐高铁打电话时，手机会不断地从一个基站切换到另一个基站，但你完全感觉不到中断。Wi-Fi 漫游的目标也一样——用户带着手机从会议室走到工位，应该 <strong>无感切换</strong>。但现实中 Wi-Fi 漫游比蜂窝网络复杂得多，因为：<br>
+      1️⃣ <strong>漫游决策权在客户端</strong>，不在网络侧（蜂窝网络是基站控制切换）<br>
+      2️⃣ 漫游涉及 <strong>重新认证</strong>（安全握手），耗时可能从几毫秒到几秒不等<br>
+      3️⃣ 不同厂商的客户端漫游行为差异巨大</p>
+    </div>
+
+    <h3>5.1 &nbsp; 漫游的第一条铁律：决策权在客户端</h3>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ 最重要的一句话</div>
+      <p><strong>"Roaming is always the client's decision."（漫游永远是客户端的决定。）</strong><br>
+      AP 和 WLC <strong>不能</strong> 强制一个客户端断开并连到另一个 AP。网络侧能做的只是"建议"和"引导"。这就是为什么即使你的网络配置完美，某些"固执"的客户端仍然会粘在原来的 AP 上不走——这被称为 <strong>Sticky Client（粘滞客户端）</strong> 问题。<br>
+      <em>— 出自 cat9800-ser-primer-enterprise-wlan-guide.pdf</em></p>
+    </div>
+
+    <p>既然我们无法控制客户端的漫游决策，就需要通过 <strong>三种协议标准</strong> 来"引导"客户端做出更好的决策、并加速漫游过程。它们分别是：</p>
+
+    <!-- SVG: 11k/v/r Overview -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" width="720" height="330">
+        <defs>
+          <filter id="shadow1" x="-4%" y="-4%" width="108%" height="112%">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".08"/>
+          </filter>
+        </defs>
+        <!-- Header -->
+        <text x="360" y="30" text-anchor="middle" font-size="17" fill="#06335b" font-weight="800">漫游三件套：802.11k / 802.11v / 802.11r</text>
+
+        <!-- Card 1: 11k -->
+        <rect x="20" y="55" width="215" height="250" rx="14" fill="#fff" filter="url(#shadow1)" stroke="#049fd9" stroke-width="2"/>
+        <rect x="20" y="55" width="215" height="50" rx="14" fill="#049fd9"/>
+        <rect x="20" y="85" width="215" height="20" fill="#049fd9"/>
+        <text x="127" y="85" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">📍 802.11k</text>
+        <text x="127" y="103" text-anchor="middle" fill="#bae6fd" font-size="11">邻居列表（Neighbor List）</text>
+        <text x="40" y="135" font-size="12.5" fill="#334155" font-weight="600">解决什么问题？</text>
+        <text x="40" y="155" font-size="12" fill="#475569">客户端不知道附近有哪些 AP，</text>
+        <text x="40" y="172" font-size="12" fill="#475569">盲目扫描所有信道浪费时间。</text>
+        <text x="40" y="198" font-size="12.5" fill="#334155" font-weight="600">怎么解决？</text>
+        <text x="40" y="218" font-size="12" fill="#475569">AP 主动告诉客户端："你附近</text>
+        <text x="40" y="235" font-size="12" fill="#475569">有这些 AP，在这些信道上。"</text>
+        <text x="40" y="260" font-size="12.5" fill="#16a34a" font-weight="600">✅ 效果：扫描时间从秒级 → 毫秒级</text>
+        <text x="40" y="280" font-size="11" fill="#64748b">客户端无需逐信道扫描</text>
+
+        <!-- Card 2: 11v -->
+        <rect x="253" y="55" width="215" height="250" rx="14" fill="#fff" filter="url(#shadow1)" stroke="#0d9488" stroke-width="2"/>
+        <rect x="253" y="55" width="215" height="50" rx="14" fill="#0d9488"/>
+        <rect x="253" y="85" width="215" height="20" fill="#0d9488"/>
+        <text x="360" y="85" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">🔀 802.11v</text>
+        <text x="360" y="103" text-anchor="middle" fill="#ccfbf1" font-size="11">BSS 转换管理</text>
+        <text x="273" y="135" font-size="12.5" fill="#334155" font-weight="600">解决什么问题？</text>
+        <text x="273" y="155" font-size="12" fill="#475569">客户端信号已经很差，但就是</text>
+        <text x="273" y="172" font-size="12" fill="#475569">不愿意漫游（Sticky Client）。</text>
+        <text x="273" y="198" font-size="12.5" fill="#334155" font-weight="600">怎么解决？</text>
+        <text x="273" y="218" font-size="12" fill="#475569">AP 发送 BTM Request："建议</text>
+        <text x="273" y="235" font-size="12" fill="#475569">你切换到更好的 AP-X 去。"</text>
+        <text x="273" y="260" font-size="12.5" fill="#16a34a" font-weight="600">✅ 效果：网络引导客户端漫游决策</text>
+        <text x="273" y="280" font-size="11" fill="#64748b">客户端可以接受或拒绝建议</text>
+
+        <!-- Card 3: 11r -->
+        <rect x="486" y="55" width="215" height="250" rx="14" fill="#fff" filter="url(#shadow1)" stroke="#7c3aed" stroke-width="2"/>
+        <rect x="486" y="55" width="215" height="50" rx="14" fill="#7c3aed"/>
+        <rect x="486" y="85" width="215" height="20" fill="#7c3aed"/>
+        <text x="593" y="85" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">⚡ 802.11r</text>
+        <text x="593" y="103" text-anchor="middle" fill="#ede9fe" font-size="11">快速 BSS 转换（FT）</text>
+        <text x="506" y="135" font-size="12.5" fill="#334155" font-weight="600">解决什么问题？</text>
+        <text x="506" y="155" font-size="12" fill="#475569">漫游时需要重新做 802.1X</text>
+        <text x="506" y="172" font-size="12" fill="#475569">认证 + 4次握手，耗时数百毫秒。</text>
+        <text x="506" y="198" font-size="12.5" fill="#334155" font-weight="600">怎么解决？</text>
+        <text x="506" y="218" font-size="12" fill="#475569">在漫游前预先完成密钥协商，</text>
+        <text x="506" y="235" font-size="12" fill="#475569">漫游时只需 2 帧即完成切换。</text>
+        <text x="506" y="260" font-size="12.5" fill="#16a34a" font-weight="600">✅ 效果：漫游时间 4–50 毫秒 🚀</text>
+        <text x="506" y="280" font-size="11" fill="#64748b">语音/视频通话零感知切换</text>
+      </svg>
+    </div>
+
+    <h3>5.2 &nbsp; 802.11k —— 邻居列表：给客户端一张"地图"</h3>
+
+    <p>没有 802.11k 的时候，客户端要漫游首先得知道"附近有哪些 AP"。怎么知道？只能 <strong>逐个信道扫描</strong>——从信道 1 扫到信道 165，每个信道停留几十毫秒等 Beacon。5 GHz 有 25 个信道，这一轮扫描下来可能耗时 <strong>数百毫秒甚至几秒</strong>——在此期间，数据传输暂停。</p>
+
+    <p>802.11k 的解决方案非常优雅：</p>
+
+    <ol>
+      <li>客户端向当前关联的 AP 发送一个 <strong>Neighbor Report Request</strong>（邻居报告请求）。</li>
+      <li>AP（通过 WLC 的全局视图）回复一个 <strong>Neighbor Report Response</strong>，包含附近 AP 的 BSSID、信道、PHY 类型等信息。</li>
+      <li>客户端拿到"地图"后，只需要 <strong>针对性地扫描几个信道</strong>，而不是盲扫所有信道。</li>
+    </ol>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 实际效果</div>
+      <p>启用 802.11k 后，扫描时间通常从 <strong>1–5 秒降至 100–300 毫秒</strong>。对于实时业务（语音、视频）来说，这是质的飞跃。<br>
+      <em>— 出自 Cisco Catalyst 9800 功率与漫游配置参数指南</em></p>
+    </div>
+
+    <h3>5.3 &nbsp; 802.11v —— BSS 转换管理：网络端的"温柔劝导"</h3>
+
+    <p>802.11k 帮客户端画了地图，但客户端 <strong>什么时候决定走</strong> 仍然是它自己的事。如果一个手机"固执"地不想漫游呢？802.11v 提供了网络端"建议"客户端漫游的机制：</p>
+
+    <ol>
+      <li>AP 检测到客户端的 RSSI 已经低于阈值（比如 −70 dBm）。</li>
+      <li>AP 向客户端发送 <strong>BSS Transition Management Request</strong>（BTM 请求），告诉客户端："你现在的信号不太好，建议你切换到 AP-X（信道 44），那里信号更强。"</li>
+      <li>客户端收到后，<strong>可以接受（大多数现代设备会接受），也可以拒绝</strong>。</li>
+    </ol>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ 802.11v 不是"踢人"</div>
+      <p>BTM Request 是 <strong>建议</strong>，不是命令。客户端完全有权忽略它。但 Apple、Samsung 等主流设备的现代驱动程序通常都会尊重这个建议——所以实际效果很好。<br>
+      需要注意的是，某些旧版工业终端可能不支持 802.11v，此时该功能不会起作用，但也不会造成负面影响。<br>
+      <em>— 出自 cat9800-ser-primer-enterprise-wlan-guide.pdf</em></p>
+    </div>
+
+    <h3>5.4 &nbsp; 802.11r —— 快速 BSS 转换：漫游的"高速公路"</h3>
+
+    <p>802.11k 和 11v 解决了"知道去哪里"和"什么时候走"的问题。<strong>802.11r 解决的是"到了新 AP 之后，怎么最快地完成入住手续"</strong>。</p>
+
+    <h4>漫游时到底发生了什么？</h4>
+
+    <p>当客户端从 AP-A 漫游到 AP-B 时，安全层面需要重新建立加密密钥。标准流程：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>漫游方式</th>
+          <th>认证步骤</th>
+          <th>典型耗时</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>完整重认证</strong>（无优化）</td>
+          <td>802.1X 全流程 + 4 次握手</td>
+          <td><strong>300 ms – 2 秒+</strong></td>
+          <td>最差情况。语音必断。</td>
+        </tr>
+        <tr>
+          <td><strong>OKC / CCKM</strong></td>
+          <td>跳过 802.1X，仅 4 次握手</td>
+          <td><strong>50 – 100 ms</strong></td>
+          <td>改善明显，但仍不够快。</td>
+        </tr>
+        <tr>
+          <td><strong>802.11r（FT）</strong></td>
+          <td>预先派发密钥，漫游时仅 <strong>2 帧交互</strong></td>
+          <td><strong>4 – 50 ms 🚀</strong></td>
+          <td>语音/视频无感漫游。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- SVG: Roaming Time Comparison -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200">
+        <text x="360" y="25" text-anchor="middle" font-size="15" fill="#06335b" font-weight="700">漫游耗时对比</text>
+        <!-- Bar 1 -->
+        <rect x="180" y="45" width="500" height="34" rx="6" fill="#dc2626" opacity=".8"/>
+        <text x="170" y="67" text-anchor="end" font-size="13" fill="#334155" font-weight="600">无优化</text>
+        <text x="440" y="67" text-anchor="middle" font-size="13" fill="#fff" font-weight="600">300 ms – 2000+ ms</text>
+        <!-- Bar 2 -->
+        <rect x="180" y="92" width="120" height="34" rx="6" fill="#eab308" opacity=".8"/>
+        <text x="170" y="114" text-anchor="end" font-size="13" fill="#334155" font-weight="600">OKC</text>
+        <text x="240" y="114" text-anchor="middle" font-size="13" fill="#fff" font-weight="600">50–100 ms</text>
+        <!-- Bar 3 -->
+        <rect x="180" y="139" width="35" height="34" rx="6" fill="#16a34a" opacity=".9"/>
+        <text x="170" y="161" text-anchor="end" font-size="13" fill="#334155" font-weight="600">802.11r</text>
+        <text x="230" y="161" font-size="13" fill="#16a34a" font-weight="700">4–50 ms ⚡</text>
+        <!-- VoIP threshold -->
+        <line x1="235" y1="40" x2="235" y2="185" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="238" y="195" font-size="11" fill="#7c3aed" font-weight="600">← 150 ms（VoIP 可容忍上限）</text>
+      </svg>
+    </div>
+
+    <h4>802.11r 的两种模式</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>模式</th>
+          <th>全称</th>
+          <th>工作方式</th>
+          <th>使用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Over-the-Air (OTA)</strong></td>
+          <td>空口快速转换</td>
+          <td>客户端直接通过空口与目标 AP 交换 FT 认证帧</td>
+          <td>最常见，适合大多数企业部署</td>
+        </tr>
+        <tr>
+          <td><strong>Over-the-DS (ODS)</strong></td>
+          <td>通过分布式系统转换</td>
+          <td>客户端通过当前 AP → 有线骨干网 → 目标 AP 完成密钥协商</td>
+          <td>AP 之间无线可达性差时使用</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>5.5 &nbsp; 802.11r 配置实战：Mixed Mode（混合模式）</h3>
+
+    <p>802.11r 非常好，但有一个 <strong>兼容性风险</strong>：如果 WLAN 只配置了 FT（Fast Transition）AKM，那些不支持 802.11r 的旧设备就无法连接。解决方案是——</p>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 Cisco 推荐：802.11r Mixed Mode（混合模式）</div>
+      <p>在同一个 WLAN 上 <strong>同时启用 FT AKM 和非 FT AKM</strong>。支持 11r 的设备使用 FT 快速漫游；不支持的设备仍然可以用传统方式连接。两全其美。<br>
+      <em>— 出自 Cisco Catalyst 9800 功率与漫游配置参数指南："Set Fast Transition to enabled and select both FT and non-FT AKM."</em></p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">! ——— 802.11r Mixed Mode 配置（802.1X 认证）———</span>
+<span class="cmd">wlan CORP-WIFI</span>
+ <span class="cmd">security wpa pairwise-cipher aes</span>
+ <span class="cmd">security wpa akm ft dot1x</span>          <span class="comment">! FT AKM（支持 11r 的设备用这个）</span>
+ <span class="cmd">security wpa akm dot1x</span>              <span class="comment">! 非 FT AKM（不支持 11r 的设备用这个）</span>
+ <span class="cmd">security ft</span>                          <span class="comment">! 启用 Fast Transition</span>
+ <span class="cmd">security ft over-the-ds</span>             <span class="comment">! 可选：同时启用 Over-the-DS</span>
+
+<span class="comment">! ——— 802.11r Mixed Mode 配置（PSK 认证）———</span>
+<span class="cmd">wlan GUEST-WIFI</span>
+ <span class="cmd">security wpa pairwise-cipher aes</span>
+ <span class="cmd">security wpa akm ft psk</span>              <span class="comment">! FT + PSK</span>
+ <span class="cmd">security wpa akm psk</span>                 <span class="comment">! 非 FT + PSK</span>
+ <span class="cmd">security ft</span>
+
+<span class="comment">! ——— 同时启用 802.11k 和 802.11v ———</span>
+<span class="cmd">wlan CORP-WIFI</span>
+ <span class="cmd">dot11k neighbor-list</span>                 <span class="comment">! 启用 11k 邻居列表</span>
+ <span class="cmd">bss-transition</span>                       <span class="comment">! 启用 11v BSS 转换管理</span>
+    </div>
+
+    <h3>5.6 &nbsp; 漫游类型：控制器内 vs 控制器间</h3>
+
+    <p>根据 AP 归属的 WLC 是否相同，漫游分为不同类型，复杂度和耗时差异很大：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>漫游类型</th>
+          <th>场景</th>
+          <th>IP 地址</th>
+          <th>耗时</th>
+          <th>复杂度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>控制器内漫游（Intra-controller）</strong></td>
+          <td>源 AP 和目标 AP 在同一 WLC</td>
+          <td>保持不变</td>
+          <td>最快（4–50 ms with FT）</td>
+          <td>⭐ 低</td>
+        </tr>
+        <tr>
+          <td><strong>控制器间 L2 漫游</strong></td>
+          <td>AP 在不同 WLC，但同一 VLAN/子网</td>
+          <td>保持不变</td>
+          <td>较快（需 WLC 间同步 PMK）</td>
+          <td>⭐⭐ 中</td>
+        </tr>
+        <tr>
+          <td><strong>控制器间 L3 漫游</strong></td>
+          <td>AP 在不同 WLC，且不同子网</td>
+          <td>通过隧道保持原 IP</td>
+          <td>较慢（Anchor/Foreign 架构）</td>
+          <td>⭐⭐⭐ 高</td>
+        </tr>
+        <tr>
+          <td><strong>跨架构漫游（IRCM）</strong></td>
+          <td>AireOS 与 C9800 之间</td>
+          <td>通过隧道</td>
+          <td>始终为 L3 漫游</td>
+          <td>⭐⭐⭐⭐ 很高</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 设计启示</div>
+      <p><strong>尽可能将同一物理区域的 AP 放在同一个 WLC 下</strong>，让大多数漫游都是控制器内漫游——这是最快、最可靠的。<br><br>
+      如果必须跨控制器，确保两个 WLC 加入同一个 <strong>Mobility Group</strong>，并且 Mobility Tunnel 正常建立，PMK 能够同步。<br>
+      <em>— 出自 cat9800-ser-primer-enterprise-wlan-guide.pdf</em></p>
+    </div>
+
+    <h3>5.7 &nbsp; Optimized Roaming（优化漫游）—— 建议关闭</h3>
+
+    <p>Catalyst 9800 有一个功能叫 <strong>Optimized Roaming</strong>，它的设计初衷是在客户端 RSSI 低于阈值时主动断开连接，迫使其去连更好的 AP。听起来不错？但实际上——</p>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ Cisco 建议：保持 Optimized Roaming 为 DISABLED</div>
+      <p>原因如下：<br>
+      1️⃣ 现代客户端（Apple、Samsung、Intel）已经内置了优秀的漫游算法，配合 802.11k/v/r 已足够<br>
+      2️⃣ Optimized Roaming 是 "强制断开"，不是"温柔建议"——这可能导致语音通话中断<br>
+      3️⃣ 某些客户端被强制断开后可能进入扫描循环，反而更糟<br><br>
+      <strong>让 802.11k/v/r 做该做的事，不要越俎代庖。</strong><br>
+      <em>— 出自 Cisco Catalyst 9800 功率与漫游配置参数指南："Cisco recommends keeping this DISABLED as modern devices use 11k/v/r."</em></p>
+    </div>
+
+    <h3>5.8 &nbsp; 漫游设计的完整流程图</h3>
+
+    <!-- SVG: Roaming Design Decision Flow -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" width="720" height="520">
+        <!-- Step 1: Coverage -->
+        <rect x="200" y="10" width="320" height="52" rx="12" fill="#049fd9"/>
+        <text x="360" y="42" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">① 确保重叠覆盖区 15–20%（RSSI ≥ −67）</text>
+        <line x1="360" y1="62" x2="360" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 2: 11k -->
+        <rect x="200" y="85" width="320" height="52" rx="12" fill="#0284c7"/>
+        <text x="360" y="107" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">② 启用 802.11k Neighbor List</text>
+        <text x="360" y="125" text-anchor="middle" fill="#bae6fd" font-size="11">加速客户端扫描，减少发现时间</text>
+        <line x1="360" y1="137" x2="360" y2="160" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 3: 11v -->
+        <rect x="200" y="160" width="320" height="52" rx="12" fill="#0d9488"/>
+        <text x="360" y="182" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">③ 启用 802.11v BSS Transition</text>
+        <text x="360" y="200" text-anchor="middle" fill="#ccfbf1" font-size="11">引导 Sticky Client 漫游到更优 AP</text>
+        <line x1="360" y1="212" x2="360" y2="235" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 4: 11r -->
+        <rect x="200" y="235" width="320" height="52" rx="12" fill="#7c3aed"/>
+        <text x="360" y="257" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">④ 启用 802.11r Mixed Mode</text>
+        <text x="360" y="275" text-anchor="middle" fill="#ede9fe" font-size="11">FT + 非 FT AKM 并存，兼容所有设备</text>
+        <line x1="360" y1="287" x2="360" y2="310" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 5: Disable Optimized Roaming -->
+        <rect x="200" y="310" width="320" height="52" rx="12" fill="#475569"/>
+        <text x="360" y="332" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">⑤ 关闭 Optimized Roaming</text>
+        <text x="360" y="350" text-anchor="middle" fill="#cbd5e1" font-size="11">信任 11k/v/r + 客户端自身算法</text>
+        <line x1="360" y1="362" x2="360" y2="385" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Step 6: Validate -->
+        <rect x="200" y="385" width="320" height="52" rx="12" fill="#164e63"/>
+        <text x="360" y="407" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">⑥ 测试验证：不同设备实地漫游测试</text>
+        <text x="360" y="425" text-anchor="middle" fill="#bae6fd" font-size="11">用 Apple / Android / 工业终端分别验证</text>
+        <line x1="360" y1="437" x2="360" y2="460" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+        <!-- Result -->
+        <rect x="240" y="460" width="240" height="40" rx="10" fill="#16a34a"/>
+        <text x="360" y="486" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">✅ 漫游设计完成</text>
+      </svg>
+    </div>
+
+    <h3>5.9 &nbsp; 漫游章节小结</h3>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="big-num">11k</div>
+        <div class="label">给客户端画地图<br>"去哪里"更清楚</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">11v</div>
+        <div class="label">温柔劝导客户端<br>"什么时候走"</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">11r</div>
+        <div class="label">极速办理入住<br>"到了之后"秒切换</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">Mixed</div>
+        <div class="label">FT + 非FT 混合模式<br>兼容一切设备</div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 一句话总结</div>
+      <p>漫游是一个 <strong>客户端驱动、网络辅助</strong> 的过程。网络侧的工作是：<br>
+      ① 用功率和数据速率画好覆盖圆，确保重叠区存在；<br>
+      ② 用 802.11k 给客户端"地图"；<br>
+      ③ 用 802.11v "建议"客户端在合适时机漫游；<br>
+      ④ 用 802.11r 让漫游过程快到用户完全无感。<br>
+      <strong>四者缺一不可，组合使用才是完整的漫游设计。</strong></p>
+    </div>
+
+  </section>
+  <!-- ======================== CHAPTER 6 ======================== -->
+  <section class="chapter" id="ch6">
+    <h2>6 &nbsp; Catalyst 9800 标签与配置模型</h2>
+
+    <p>前五章我们从物理层讲到了协议层——功率、信道、速率、漫游。现在进入 <strong>落地实施</strong> 环节：如何在 Cisco Catalyst 9800 无线控制器上把这些设计意图变成真实配置？</p>
+
+    <p>如果你从 AireOS 迁移过来，可能习惯了"Interface → WLAN → AP Group"的配置思路。C9800 采用了一套全新的架构——<strong>Tags & Profiles（标签与配置文件）</strong>模型。它的设计哲学更加模块化、灵活，但初次接触时也更容易迷路。让我们用类比来拆解。</p>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🏨</div>
+      <p><strong>类比：经营一家连锁酒店</strong><br><br>
+      想象你是一家连锁酒店的总经理（WLC），管理着分布在全城各处的房间（AP）。你的管理体系分三层：<br><br>
+      🏷️ <strong>Site Tag（站点标签）</strong> = 酒店分店。决定"这个 AP 属于哪个分店"，以及该分店连接到哪个中央管理系统（WNCD 进程）。<br>
+      📋 <strong>Policy Tag（策略标签）</strong> = 分店的服务菜单。决定"这个分店提供哪些 Wi-Fi 服务（WLAN）"以及"每种服务适用什么政策（Policy Profile）"。<br>
+      📡 <strong>RF Tag（射频标签）</strong> = 分店的装修标准。决定"这个分店的 AP 用什么功率、什么信道、什么数据速率"。<br><br>
+      每个 AP 被"贴上"这三种标签，就完整定义了它的身份和行为。</p>
+    </div>
+
+    <h3>6.1 &nbsp; 三种标签（Tags）详解</h3>
+
+    <!-- SVG: Tags & Profiles Architecture -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" width="720" height="440">
+        <defs>
+          <filter id="shadow2" x="-3%" y="-3%" width="106%" height="110%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity=".07"/>
+          </filter>
+        </defs>
+        <!-- AP Icon -->
+        <rect x="290" y="10" width="140" height="50" rx="12" fill="#06335b" filter="url(#shadow2)"/>
+        <text x="360" y="42" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">📡 AP</text>
+        <!-- Three arrows down -->
+        <line x1="310" y1="60" x2="140" y2="110" stroke="#049fd9" stroke-width="2.5"/>
+        <line x1="360" y1="60" x2="360" y2="110" stroke="#0d9488" stroke-width="2.5"/>
+        <line x1="410" y1="60" x2="580" y2="110" stroke="#7c3aed" stroke-width="2.5"/>
+
+        <!-- Site Tag -->
+        <rect x="40" y="110" width="200" height="310" rx="14" fill="#fff" filter="url(#shadow2)" stroke="#049fd9" stroke-width="2"/>
+        <rect x="40" y="110" width="200" height="48" rx="14" fill="#049fd9"/>
+        <rect x="40" y="138" width="200" height="20" fill="#049fd9"/>
+        <text x="140" y="140" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">🏷️ Site Tag</text>
+        <text x="60" y="185" font-size="12" fill="#334155" font-weight="600">关联对象：</text>
+        <text x="60" y="205" font-size="12" fill="#475569">• AP Join Profile</text>
+        <text x="60" y="225" font-size="12" fill="#475569">• Flex Profile（可选）</text>
+        <text x="60" y="255" font-size="12" fill="#334155" font-weight="600">核心作用：</text>
+        <text x="60" y="275" font-size="12" fill="#475569">• 决定 AP 归属哪个 WNCD</text>
+        <text x="60" y="295" font-size="12" fill="#475569">• 定义 Local / FlexConnect 模式</text>
+        <text x="60" y="315" font-size="12" fill="#475569">• 影响控制器内漫游域</text>
+        <text x="60" y="345" font-size="12" fill="#dc2626" font-weight="600">⚠️ 不要用 default-site-tag</text>
+        <text x="60" y="365" font-size="11" fill="#991b1b">默认标签会导致所有 AP 挤在</text>
+        <text x="60" y="382" font-size="11" fill="#991b1b">同一个 WNCD 实例，负载不均</text>
+        <text x="60" y="405" font-size="11" fill="#16a34a" font-weight="600">✅ 约 500 AP / Site Tag</text>
+
+        <!-- Policy Tag -->
+        <rect x="260" y="110" width="200" height="310" rx="14" fill="#fff" filter="url(#shadow2)" stroke="#0d9488" stroke-width="2"/>
+        <rect x="260" y="110" width="200" height="48" rx="14" fill="#0d9488"/>
+        <rect x="260" y="138" width="200" height="20" fill="#0d9488"/>
+        <text x="360" y="140" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">📋 Policy Tag</text>
+        <text x="280" y="185" font-size="12" fill="#334155" font-weight="600">关联对象：</text>
+        <text x="280" y="205" font-size="12" fill="#475569">• WLAN Profile（SSID 定义）</text>
+        <text x="280" y="225" font-size="12" fill="#475569">• Policy Profile（策略定义）</text>
+        <text x="280" y="255" font-size="12" fill="#334155" font-weight="600">核心作用：</text>
+        <text x="280" y="275" font-size="12" fill="#475569">• 将 SSID 与策略绑定</text>
+        <text x="280" y="295" font-size="12" fill="#475569">• VLAN 分配</text>
+        <text x="280" y="315" font-size="12" fill="#475569">• ACL / QoS / AAA 策略</text>
+        <text x="280" y="335" font-size="12" fill="#475569">• Session Timeout（推荐 8h）</text>
+        <text x="280" y="365" font-size="12" fill="#334155" font-weight="600">映射关系：</text>
+        <text x="280" y="385" font-size="12" fill="#475569">WLAN Profile ↔ Policy Profile</text>
+        <text x="280" y="405" font-size="12" fill="#475569">多对多关系</text>
+
+        <!-- RF Tag -->
+        <rect x="480" y="110" width="200" height="310" rx="14" fill="#fff" filter="url(#shadow2)" stroke="#7c3aed" stroke-width="2"/>
+        <rect x="480" y="110" width="200" height="48" rx="14" fill="#7c3aed"/>
+        <rect x="480" y="138" width="200" height="20" fill="#7c3aed"/>
+        <text x="580" y="140" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">📡 RF Tag</text>
+        <text x="500" y="185" font-size="12" fill="#334155" font-weight="600">关联对象：</text>
+        <text x="500" y="205" font-size="12" fill="#475569">• 2.4G RF Profile</text>
+        <text x="500" y="225" font-size="12" fill="#475569">• 5G RF Profile</text>
+        <text x="500" y="245" font-size="12" fill="#475569">• 6G RF Profile</text>
+        <text x="500" y="275" font-size="12" fill="#334155" font-weight="600">核心作用：</text>
+        <text x="500" y="295" font-size="12" fill="#475569">• TPC Max / Min（功率）</text>
+        <text x="500" y="315" font-size="12" fill="#475569">• 信道宽度</text>
+        <text x="500" y="335" font-size="12" fill="#475569">• DCA 可用信道列表</text>
+        <text x="500" y="355" font-size="12" fill="#475569">• 数据速率（Mandatory/Disabled）</text>
+        <text x="500" y="385" font-size="12" fill="#334155" font-weight="600">按场景分组：</text>
+        <text x="500" y="405" font-size="12" fill="#475569">办公区 / 高密区 / 仓库区…</text>
+      </svg>
+    </div>
+
+    <h3>6.2 &nbsp; WNCD 进程与 Site Tag 的关系 —— 负载均衡的关键</h3>
+
+    <p>C9800 的数据面由多个 <strong>WNCD（Wireless Network Control Daemon）</strong> 进程承载，每个 WNCD 绑定一个 CPU 核心。不同型号的 WNCD 数量不同：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>控制器型号</th>
+          <th>WNCD 实例数</th>
+          <th>最大 AP 数</th>
+          <th>80% 推荐上限</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>C9800-80</strong></td><td>8</td><td>6,000</td><td>4,800</td></tr>
+        <tr><td><strong>C9800-40</strong></td><td>5</td><td>2,000</td><td>1,600</td></tr>
+        <tr><td><strong>C9800-L</strong></td><td>3</td><td>500</td><td>400</td></tr>
+        <tr><td><strong>C9800-CL（虚拟化）</strong></td><td>取决于 vCPU</td><td>视配置</td><td>80%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ 关键机制：同一 Site Tag 下的 AP 由同一 WNCD 处理</div>
+      <p>如果你把 3000 个 AP 都放在 <code>default-site-tag</code> 下，它们会全部落在 <strong>同一个 WNCD 实例</strong> 上——一个 CPU 核心扛 3000 个 AP，其他核心空闲。结果：CPU 飙升、AP 掉线、客户端体验崩溃。<br><br>
+      <strong>正确做法</strong>：创建多个自定义 Site Tag，每个 Tag 约 <strong>500 个 AP</strong>（C9800-80 的场景），WLC 会自动将不同 Tag 分配到不同 WNCD 实例上，实现负载均衡。<br>
+      <em>— 出自 Cisco Catalyst 9800 Series Configuration Best Practices</em></p>
+    </div>
+
+    <!-- SVG: WNCD Load Balancing -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" width="720" height="280">
+        <!-- Bad: all in one -->
+        <text x="180" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">❌ 全部用 default-site-tag</text>
+        <rect x="40" y="40" width="280" height="100" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+        <rect x="55" y="55" width="250" height="30" rx="6" fill="#dc2626" opacity=".8"/>
+        <text x="180" y="76" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">WNCD-0: 3000 AP 🔥🔥🔥 CPU 100%</text>
+        <rect x="55" y="95" width="50" height="20" rx="4" fill="#e2e8f0"/>
+        <text x="80" y="110" text-anchor="middle" font-size="9" fill="#94a3b8">WNCD-1: 空闲</text>
+        <rect x="115" y="95" width="50" height="20" rx="4" fill="#e2e8f0"/>
+        <text x="140" y="110" text-anchor="middle" font-size="9" fill="#94a3b8">WNCD-2: 空闲</text>
+        <rect x="175" y="95" width="50" height="20" rx="4" fill="#e2e8f0"/>
+        <text x="200" y="110" text-anchor="middle" font-size="9" fill="#94a3b8">WNCD-3: 空闲</text>
+        <text x="180" y="165" text-anchor="middle" font-size="12" fill="#991b1b">一个核心累死，其他核心看戏</text>
+
+        <!-- Good: distributed -->
+        <text x="540" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="#16a34a">✅ 自定义多 Site Tag</text>
+        <rect x="400" y="40" width="280" height="130" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+        <rect x="415" y="55" width="250" height="22" rx="4" fill="#16a34a" opacity=".7"/>
+        <text x="540" y="72" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">WNCD-0: Site-A (500 AP) ✅</text>
+        <rect x="415" y="82" width="250" height="22" rx="4" fill="#22c55e" opacity=".7"/>
+        <text x="540" y="99" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">WNCD-1: Site-B (500 AP) ✅</text>
+        <rect x="415" y="109" width="250" height="22" rx="4" fill="#4ade80" opacity=".7"/>
+        <text x="540" y="126" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">WNCD-2: Site-C (500 AP) ✅</text>
+        <rect x="415" y="136" width="250" height="22" rx="4" fill="#86efac" opacity=".7"/>
+        <text x="540" y="153" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">WNCD-3: Site-D (500 AP) ✅</text>
+        <text x="540" y="195" text-anchor="middle" font-size="12" fill="#166534">均匀分布，每核心负载可控</text>
+
+        <!-- Bottom tip -->
+        <rect x="120" y="220" width="480" height="44" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+        <text x="360" y="248" text-anchor="middle" font-size="13" fill="#1e40af" font-weight="600">💡 监控命令：show wireless loadbalance tag affinity 查看 Tag → WNCD 映射</text>
+      </svg>
+    </div>
+
+    <h3>6.3 &nbsp; Profiles 详解：四大配置文件</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Profile 类型</th>
+          <th>配什么</th>
+          <th>关键参数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>WLAN Profile</strong></td>
+          <td>SSID 的"身份证"</td>
+          <td>SSID 名称、安全类型（WPA2/WPA3）、AKM（PSK/802.1X/FT）、802.11k/v 开关、Band Select</td>
+        </tr>
+        <tr>
+          <td><strong>Policy Profile</strong></td>
+          <td>SSID 的"运营规则"</td>
+          <td>VLAN、ACL、QoS、Session Timeout（推荐 28800s=8h）、RADIUS 服务器、AAA Override</td>
+        </tr>
+        <tr>
+          <td><strong>AP Join Profile</strong></td>
+          <td>AP 的"入职手续"</td>
+          <td>AP 连接参数、CAPWAP 隧道设置、LED 策略、AP 国家码</td>
+        </tr>
+        <tr>
+          <td><strong>RF Profile</strong></td>
+          <td>AP 的"射频指标"</td>
+          <td>TPC Max/Min、信道宽度、数据速率、DCA 信道列表、RRM 参数</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>6.4 &nbsp; 完整配置示例：从零搭建一个企业办公 WLAN</h3>
+
+    <div class="code-block">
+<span class="comment">! =====================================================</span>
+<span class="comment">!   STEP 1: 创建 RF Profiles（射频配置文件）</span>
+<span class="comment">! =====================================================</span>
+
+<span class="comment">! --- 5 GHz RF Profile ---</span>
+<span class="cmd">ap dot11 5ghz rf-profile RF-OFFICE-5G</span>
+ <span class="cmd">description "办公区 5GHz 射频配置"</span>
+ <span class="cmd">tx-power-max 17</span>
+ <span class="cmd">tx-power-min 5</span>
+ <span class="cmd">channel width 80</span>
+ <span class="cmd">rate RATE_6M disable</span>
+ <span class="cmd">rate RATE_9M disable</span>
+ <span class="cmd">rate RATE_12M mandatory</span>
+ <span class="cmd">rate RATE_18M supported</span>
+ <span class="cmd">rate RATE_24M supported</span>
+ <span class="cmd">no shutdown</span>
+
+<span class="comment">! --- 2.4 GHz RF Profile ---</span>
+<span class="cmd">ap dot11 24ghz rf-profile RF-OFFICE-24G</span>
+ <span class="cmd">description "办公区 2.4GHz 射频配置"</span>
+ <span class="cmd">tx-power-max 11</span>
+ <span class="cmd">tx-power-min 2</span>
+ <span class="cmd">rate RATE_1M disable</span>
+ <span class="cmd">rate RATE_2M disable</span>
+ <span class="cmd">rate RATE_5_5M disable</span>
+ <span class="cmd">rate RATE_6M disable</span>
+ <span class="cmd">rate RATE_9M disable</span>
+ <span class="cmd">rate RATE_11M disable</span>
+ <span class="cmd">rate RATE_12M mandatory</span>
+ <span class="cmd">rate RATE_18M supported</span>
+ <span class="cmd">rate RATE_24M supported</span>
+ <span class="cmd">no shutdown</span>
+
+<span class="comment">! =====================================================</span>
+<span class="comment">!   STEP 2: 创建 WLAN Profile（SSID 定义）</span>
+<span class="comment">! =====================================================</span>
+<span class="cmd">wlan CORP-OFFICE 1 CORP-OFFICE</span>
+ <span class="cmd">security wpa wpa2</span>
+ <span class="cmd">security wpa wpa2 ciphers aes</span>
+ <span class="cmd">security wpa akm dot1x</span>
+ <span class="cmd">security wpa akm ft dot1x</span>           <span class="comment">! 802.11r FT（Mixed Mode）</span>
+ <span class="cmd">security ft</span>
+ <span class="cmd">security ft over-the-ds</span>
+ <span class="cmd">dot11k neighbor-list</span>                 <span class="comment">! 802.11k</span>
+ <span class="cmd">bss-transition</span>                       <span class="comment">! 802.11v</span>
+ <span class="cmd">no shutdown</span>
+
+<span class="comment">! =====================================================</span>
+<span class="comment">!   STEP 3: 创建 Policy Profile（策略定义）</span>
+<span class="comment">! =====================================================</span>
+<span class="cmd">wireless profile policy POL-CORP</span>
+ <span class="cmd">description "企业员工策略"</span>
+ <span class="cmd">vlan VLAN100</span>
+ <span class="cmd">session-timeout 28800</span>               <span class="comment">! 8 小时（Cisco 推荐）</span>
+ <span class="cmd">idle-timeout 3600</span>
+ <span class="cmd">aaa-override</span>                         <span class="comment">! 允许 RADIUS 覆盖 VLAN</span>
+ <span class="cmd">no shutdown</span>
+
+<span class="comment">! =====================================================</span>
+<span class="comment">!   STEP 4: 创建 Tags（标签）</span>
+<span class="comment">! =====================================================</span>
+
+<span class="comment">! --- Policy Tag: 绑定 WLAN ↔ Policy ---</span>
+<span class="cmd">wireless tag policy TAG-POL-OFFICE</span>
+ <span class="cmd">wlan CORP-OFFICE policy POL-CORP</span>
+
+<span class="comment">! --- RF Tag: 绑定 RF Profiles ---</span>
+<span class="cmd">wireless tag rf TAG-RF-OFFICE</span>
+ <span class="cmd">24ghz-rf-policy RF-OFFICE-24G</span>
+ <span class="cmd">5ghz-rf-policy RF-OFFICE-5G</span>
+
+<span class="comment">! --- Site Tag: 定义站点 ---</span>
+<span class="cmd">wireless tag site TAG-SITE-BLDG-A</span>
+ <span class="cmd">description "A 栋办公楼"</span>
+ <span class="cmd">ap-profile AP-JOIN-DEFAULT</span>
+
+<span class="comment">! =====================================================</span>
+<span class="comment">!   STEP 5: 将标签分配给 AP</span>
+<span class="comment">! =====================================================</span>
+<span class="cmd">ap ABCD.EF12.3456</span>                     <span class="comment">! AP 的以太网 MAC</span>
+ <span class="cmd">policy-tag TAG-POL-OFFICE</span>
+ <span class="cmd">site-tag TAG-SITE-BLDG-A</span>
+ <span class="cmd">rf-tag TAG-RF-OFFICE</span>
+
+<span class="comment">! 对于大批量 AP，推荐使用 AP Tag Persistency</span>
+<span class="cmd">ap tag persistency enable</span>           <span class="comment">! 17.6+ 推荐开启</span>
+    </div>
+
+    <h3>6.5 &nbsp; 高可用（HA SSO）最佳实践</h3>
+
+    <p>对于生产环境，C9800 支持 <strong>HA SSO（Stateful Switch Over）</strong> 双机热备。核心要点：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>配置项</th>
+          <th>推荐</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>RMI 接口</strong></td><td>必须配置</td><td>Redundancy Management Interface，用于 Active/Standby 之间的心跳和数据同步。使用直连线缆或专用 VLAN。</td></tr>
+        <tr><td><strong>RP 接口</strong></td><td>必须直连</td><td>Redundancy Port，物理直连，用于状态同步。C9800-80/40 使用背板或专用端口。</td></tr>
+        <tr><td><strong>AP SSO</strong></td><td>启用</td><td>确保主机故障时 AP 不重启，客户端不断线。</td></tr>
+        <tr><td><strong>版本一致</strong></td><td>强制</td><td>Active 和 Standby 必须运行完全相同的 IOS-XE 版本。</td></tr>
+        <tr><td><strong>负载 80% 原则</strong></td><td>遵守</td><td>确保单台 WLC 能承受全量 AP——因为故障切换后只有一台在工作。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 第 6 章核心要点</div>
+      <p>C9800 的 Tags & Profiles 模型看起来层级多，但逻辑清晰：<br>
+      <strong>AP = Site Tag + Policy Tag + RF Tag</strong><br>
+      <strong>Site Tag</strong> → 决定"AP 在哪"（WNCD 分配、Local/Flex 模式）<br>
+      <strong>Policy Tag</strong> → 决定"AP 提供什么服务"（WLAN × Policy 映射）<br>
+      <strong>RF Tag</strong> → 决定"AP 射频怎么配"（功率、信道、速率）<br><br>
+      记住两条铁律：<strong>① 不用 default-site-tag ② 每 Site Tag ≈ 500 AP</strong>。<br>
+      <em>— 出自 Cisco Catalyst 9800 Series Configuration Best Practices</em></p>
+    </div>
+
+  </section>
+
+  <!-- ======================== CHAPTER 7 ======================== -->
+  <section class="chapter" id="ch7">
+    <h2>7 &nbsp; 6 GHz 与 Wi-Fi 7 前瞻</h2>
+
+    <p>如果前六章是"当下的最佳实践"，那第七章是"面向未来的技术储备"。Wi-Fi 7（802.11be）是 2024 年正式发布的最新标准，它不是简单的速度升级，而是 Wi-Fi 架构的一次 <strong>范式变革</strong>。</p>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🚀</div>
+      <p><strong>类比：从单车道高速到立体交通枢纽</strong><br><br>
+      以前的 Wi-Fi 就像一条高速公路——再宽也只是一条路（单频段通信）。<br>
+      Wi-Fi 7 的 MLO（多链路操作）就像建了一个 <strong>立体交通枢纽</strong>——你的车可以同时走地面道路（2.4G）、高架桥（5G）和地下隧道（6G），根据实时路况自动选择最快的那条路，甚至三条路同时走。<br><br>
+      这不是快了一点点，是从"选一条路走"变成"所有路同时走"。</p>
+    </div>
+
+    <h3>7.1 &nbsp; Wi-Fi 7 的五大核心特性</h3>
+
+    <!-- SVG: Wi-Fi 7 Five Pillars -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" width="720" height="360">
+        <text x="360" y="28" text-anchor="middle" font-size="17" fill="#06335b" font-weight="800">Wi-Fi 7 (802.11be) — 五大核心特性</text>
+        <!-- Pillar 1 -->
+        <rect x="20" y="50" width="126" height="290" rx="12" fill="#fff" stroke="#049fd9" stroke-width="2"/>
+        <rect x="20" y="50" width="126" height="44" rx="12" fill="#049fd9"/>
+        <rect x="20" y="76" width="126" height="18" fill="#049fd9"/>
+        <text x="83" y="78" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">320 MHz</text>
+        <text x="83" y="120" text-anchor="middle" font-size="26" font-weight="800" fill="#049fd9">2×</text>
+        <text x="83" y="145" text-anchor="middle" font-size="11" fill="#475569">信道宽度翻倍</text>
+        <text x="83" y="165" text-anchor="middle" font-size="11" fill="#475569">（vs Wi-Fi 6 160MHz）</text>
+        <text x="83" y="195" text-anchor="middle" font-size="11" fill="#64748b">仅在 6 GHz 可用</text>
+        <text x="83" y="225" text-anchor="middle" font-size="11" fill="#64748b">带宽 = 速度的基础</text>
+        <text x="83" y="310" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">✅ 峰值吞吐翻倍</text>
+        <!-- Pillar 2 -->
+        <rect x="158" y="50" width="126" height="290" rx="12" fill="#fff" stroke="#7c3aed" stroke-width="2"/>
+        <rect x="158" y="50" width="126" height="44" rx="12" fill="#7c3aed"/>
+        <rect x="158" y="76" width="126" height="18" fill="#7c3aed"/>
+        <text x="221" y="78" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">4096-QAM</text>
+        <text x="221" y="120" text-anchor="middle" font-size="26" font-weight="800" fill="#7c3aed">12</text>
+        <text x="221" y="145" text-anchor="middle" font-size="11" fill="#475569">每符号 12 位</text>
+        <text x="221" y="165" text-anchor="middle" font-size="11" fill="#475569">（vs Wi-Fi 6 的 10 位）</text>
+        <text x="221" y="195" text-anchor="middle" font-size="11" fill="#64748b">+20% 频谱效率</text>
+        <text x="221" y="225" text-anchor="middle" font-size="11" fill="#64748b">需 SNR ≥ 38 dB</text>
+        <text x="221" y="310" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">✅ 近距离峰值更高</text>
+        <!-- Pillar 3 -->
+        <rect x="296" y="50" width="126" height="290" rx="12" fill="#fff" stroke="#0d9488" stroke-width="2"/>
+        <rect x="296" y="50" width="126" height="44" rx="12" fill="#0d9488"/>
+        <rect x="296" y="76" width="126" height="18" fill="#0d9488"/>
+        <text x="359" y="78" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">MLO</text>
+        <text x="359" y="120" text-anchor="middle" font-size="20" font-weight="800" fill="#0d9488">多链路</text>
+        <text x="359" y="145" text-anchor="middle" font-size="11" fill="#475569">Multi-Link Operation</text>
+        <text x="359" y="175" text-anchor="middle" font-size="11" fill="#64748b">2.4G + 5G + 6G</text>
+        <text x="359" y="195" text-anchor="middle" font-size="11" fill="#64748b">同时聚合/冗余</text>
+        <text x="359" y="225" text-anchor="middle" font-size="11" fill="#64748b">定义性特性 🌟</text>
+        <text x="359" y="310" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">✅ 低延迟+高吞吐</text>
+        <!-- Pillar 4 -->
+        <rect x="434" y="50" width="126" height="290" rx="12" fill="#fff" stroke="#ea580c" stroke-width="2"/>
+        <rect x="434" y="50" width="126" height="44" rx="12" fill="#ea580c"/>
+        <rect x="434" y="76" width="126" height="18" fill="#ea580c"/>
+        <text x="497" y="78" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">前导码打孔</text>
+        <text x="497" y="120" text-anchor="middle" font-size="16" font-weight="800" fill="#ea580c">Preamble</text>
+        <text x="497" y="142" text-anchor="middle" font-size="16" font-weight="800" fill="#ea580c">Puncturing</text>
+        <text x="497" y="175" text-anchor="middle" font-size="11" fill="#64748b">320MHz 信道中</text>
+        <text x="497" y="195" text-anchor="middle" font-size="11" fill="#64748b">部分频段有干扰？</text>
+        <text x="497" y="215" text-anchor="middle" font-size="11" fill="#64748b">"挖掉"坏的部分</text>
+        <text x="497" y="235" text-anchor="middle" font-size="11" fill="#64748b">继续用好的部分</text>
+        <text x="497" y="310" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">✅ 宽信道更实用</text>
+        <!-- Pillar 5 -->
+        <rect x="572" y="50" width="126" height="290" rx="12" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+        <rect x="572" y="50" width="126" height="44" rx="12" fill="#2563eb"/>
+        <rect x="572" y="76" width="126" height="18" fill="#2563eb"/>
+        <text x="635" y="78" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Multi-RU</text>
+        <text x="635" y="120" text-anchor="middle" font-size="16" font-weight="800" fill="#2563eb">多资源</text>
+        <text x="635" y="142" text-anchor="middle" font-size="16" font-weight="800" fill="#2563eb">单元分配</text>
+        <text x="635" y="175" text-anchor="middle" font-size="11" fill="#64748b">一个用户可获得</text>
+        <text x="635" y="195" text-anchor="middle" font-size="11" fill="#64748b">多个不连续的 RU</text>
+        <text x="635" y="225" text-anchor="middle" font-size="11" fill="#64748b">频谱碎片化利用</text>
+        <text x="635" y="310" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">✅ 频谱效率最大化</text>
+      </svg>
+    </div>
+
+    <h3>7.2 &nbsp; MLO（多链路操作）—— Wi-Fi 7 的灵魂</h3>
+
+    <p>MLO 是 802.11be 标准中最具变革意义的特性。它引入了一个全新的概念——<strong>MLD（Multi-Link Device，多链路设备）</strong>。</p>
+
+    <h4>MLD 是什么？</h4>
+
+    <p>在 Wi-Fi 7 之前，一个客户端在某一时刻只能关联到 AP 的一个频段（一个 BSS）。即使你的手机同时有 2.4G 和 5G 两个射频模块，它也只能选一个用。</p>
+
+    <p>Wi-Fi 7 的 MLD 打破了这个限制：AP MLD 和 STA MLD <strong>在逻辑上是一个实体，在物理上可以同时使用多条链路</strong>。</p>
+
+    <!-- SVG: MLO Concept -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" width="720" height="300">
+        <!-- AP MLD -->
+        <rect x="40" y="60" width="180" height="200" rx="14" fill="#f0f9ff" stroke="#049fd9" stroke-width="2"/>
+        <text x="130" y="50" text-anchor="middle" font-size="15" fill="#06335b" font-weight="700">AP MLD（多链路 AP）</text>
+        <rect x="60" y="90" width="140" height="36" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="130" y="114" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">Link 1: 2.4 GHz CH 6</text>
+        <rect x="60" y="140" width="140" height="36" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="130" y="164" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="600">Link 2: 5 GHz CH 44</text>
+        <rect x="60" y="190" width="140" height="36" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="130" y="214" text-anchor="middle" font-size="12" fill="#4c1d95" font-weight="600">Link 3: 6 GHz CH 37</text>
+
+        <!-- STA MLD -->
+        <rect x="500" y="60" width="180" height="200" rx="14" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+        <text x="590" y="50" text-anchor="middle" font-size="15" fill="#06335b" font-weight="700">📱 STA MLD（手机）</text>
+        <rect x="520" y="90" width="140" height="36" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="590" y="114" text-anchor="middle" font-size="12" fill="#92400e" font-weight="600">Radio 1: 2.4 GHz</text>
+        <rect x="520" y="140" width="140" height="36" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="590" y="164" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="600">Radio 2: 5 GHz</text>
+        <rect x="520" y="190" width="140" height="36" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="590" y="214" text-anchor="middle" font-size="12" fill="#4c1d95" font-weight="600">Radio 3: 6 GHz</text>
+
+        <!-- Links -->
+        <line x1="200" y1="108" x2="520" y2="108" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6 3"/>
+        <line x1="200" y1="158" x2="520" y2="158" stroke="#3b82f6" stroke-width="2.5"/>
+        <line x1="200" y1="208" x2="520" y2="208" stroke="#7c3aed" stroke-width="2.5"/>
+
+        <!-- Center label -->
+        <rect x="280" y="120" width="160" height="70" rx="10" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="360" y="143" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">三条链路同时工作</text>
+        <text x="360" y="162" text-anchor="middle" font-size="11" fill="#16a34a">聚合 / 冗余 / 转向</text>
+        <text x="360" y="180" text-anchor="middle" font-size="11" fill="#64748b">= 更高吞吐 + 更低延迟</text>
+      </svg>
+    </div>
+
+    <h4>MLO 的三种工作模式</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>模式</th>
+          <th>工作方式</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>聚合（Aggregation）</strong></td>
+          <td>数据流同时在多条链路上传输，类似 LACP 链路聚合</td>
+          <td>需要极高吞吐的场景（4K/8K 视频、大文件传输）</td>
+        </tr>
+        <tr>
+          <td><strong>冗余（Redundancy）</strong></td>
+          <td>同一份数据在多条链路上重复传输，任一条成功即可</td>
+          <td>需要极低延迟和极高可靠性的场景（工业控制、AR/VR）</td>
+        </tr>
+        <tr>
+          <td><strong>转向（Steering）</strong></td>
+          <td>根据链路质量动态将流量切换到最优链路</td>
+          <td>日常使用，自动选择最佳频段</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>EMLSR 与 EMLMR</h4>
+
+    <p>802.11be 标准进一步细化了多链路的射频实现方式：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>模式</th>
+          <th>全称</th>
+          <th>原理</th>
+          <th>硬件要求</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EMLSR</strong></td>
+          <td>Enhanced Multi-Link Single Radio</td>
+          <td>用单个射频模块在多条链路间 <strong>快速切换监听</strong>，哪条链路有数据就切过去收发</td>
+          <td>低——适合手机等成本敏感设备</td>
+        </tr>
+        <tr>
+          <td><strong>EMLMR</strong></td>
+          <td>Enhanced Multi-Link Multi-Radio</td>
+          <td>多个射频模块 <strong>真正同时</strong> 在多条链路上收发</td>
+          <td>高——需要多射频链路，适合 AP 和高端笔记本</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 MLO 对漫游的革命性影响</div>
+      <p>在 Wi-Fi 7 之前，漫游意味着"断开旧链路 → 连接新链路"，即使用了 802.11r 也有 4–50 ms 的中断。<br><br>
+      有了 MLO，漫游可以变成 <strong>"在保持一条链路通信的同时，在另一条链路上完成新 AP 的关联"</strong>——理论上实现 <strong>零中断漫游</strong>。这对工业场景（AGV 小车、机械臂控制）意义重大。<br>
+      <em>— 出自 80211be-2024.pdf：MLO defines a set of procedures allowing communication over one or more links between MLDs.</em></p>
+    </div>
+
+    <h3>7.3 &nbsp; 6 GHz 部署要点回顾</h3>
+
+    <p>Wi-Fi 7 的很多高级特性（320 MHz、MLO 的第三条链路）依赖 6 GHz 频段。部署 6 GHz 时需注意：</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>要点</th>
+          <th>详细说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>安全强制 WPA3</strong></td>
+          <td>6 GHz 频段不允许 Open 或 WPA2。必须使用 WPA3-Personal、WPA3-Enterprise 或 OWE（增强型开放）。</td>
+        </tr>
+        <tr>
+          <td><strong>Probe Request 不存在</strong></td>
+          <td>6 GHz 不支持传统的主动扫描（Probe Request/Response）。客户端发现 AP 依赖 <strong>FILS Discovery</strong> 和 <strong>Unsolicited Probe Response (UPR)</strong>——AP 主动广播自己的存在。</td>
+        </tr>
+        <tr>
+          <td><strong>功率补偿 +3 dB</strong></td>
+          <td>6 GHz 的 FSPL 更大，AP 功率需比 5 GHz 至少高 3 dB 以维持相似覆盖。</td>
+        </tr>
+        <tr>
+          <td><strong>LPI vs SP</strong></td>
+          <td>室内优先使用 LPI（免 AFC）。需要更大覆盖或室外使用时考虑 SP（需 AFC + GPS）。</td>
+        </tr>
+        <tr>
+          <td><strong>客户端兼容</strong></td>
+          <td>目前支持 6 GHz 的终端仍在快速增长中。设计时 <strong>5 GHz 仍是主力</strong>，6 GHz 作为增强层。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>7.4 &nbsp; Preamble Puncturing —— 让宽信道更实用</h3>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🧩</div>
+      <p><strong>类比：一块拼图缺了一块</strong> —— 想象你占了一条 320 MHz 的"超宽车道"，但其中有一小段 20 MHz 被雷达或其他系统占用了。<br><br>
+      Wi-Fi 6 的做法：整条 320 MHz 都不能用了，降回 160 或 80 MHz。<br>
+      Wi-Fi 7 的做法：把被占用的那 20 MHz "挖掉"（打孔），<strong>剩下的 300 MHz 继续用</strong>。<br><br>
+      这就是 Preamble Puncturing——让宽信道在不完美的射频环境中依然可以使用，极大提高了 320 MHz 信道的实际可用性。</p>
+    </div>
+
+    <!-- SVG: Preamble Puncturing -->
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" width="720" height="180">
+        <text x="360" y="25" text-anchor="middle" font-size="15" fill="#06335b" font-weight="700">Preamble Puncturing 示意</text>
+        <!-- Full 320 MHz channel -->
+        <rect x="40" y="45" width="640" height="40" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="360" y="71" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="600">320 MHz 信道</text>
+        <!-- Punctured sub-channel -->
+        <rect x="280" y="45" width="60" height="40" rx="4" fill="#fecaca" stroke="#dc2626" stroke-width="2"/>
+        <text x="310" y="71" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="700">干扰!</text>
+        <!-- Result -->
+        <rect x="40" y="110" width="235" height="36" rx="8" fill="#bbf7d0" stroke="#16a34a" stroke-width="1.5"/>
+        <text x="157" y="134" text-anchor="middle" font-size="12" fill="#166534" font-weight="600">✅ 可用 (240 MHz)</text>
+        <rect x="280" y="110" width="60" height="36" rx="4" fill="#fecaca" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="310" y="134" text-anchor="middle" font-size="11" fill="#dc2626">打孔</text>
+        <rect x="345" y="110" width="335" height="36" rx="8" fill="#bbf7d0" stroke="#16a34a" stroke-width="1.5"/>
+        <text x="512" y="134" text-anchor="middle" font-size="12" fill="#166534" font-weight="600">✅ 可用 (剩余部分继续工作)</text>
+        <text x="360" y="170" text-anchor="middle" font-size="13" fill="#475569">Wi-Fi 6：整条 320MHz 不可用 ❌ → Wi-Fi 7：只跳过坏的 20MHz，其余正常 ✅</text>
+      </svg>
+    </div>
+
+    <h3>7.5 &nbsp; BSS Coloring —— 空间复用的"隐形斗篷"</h3>
+
+    <p>BSS Coloring 在 Wi-Fi 6（802.11ax）中引入，在 Wi-Fi 7 中进一步增强。它解决的问题是——</p>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🍽️</div>
+      <p><strong>类比：嘈杂餐厅里的对话</strong> —— TECEWN-2234 用了一个精彩的比喻：<br><br>
+      在一个繁忙的餐厅里，你能听到其他桌的谈话声，但你 <strong>不会因此停下自己的对话</strong>——因为你知道那些声音跟你无关。<br><br>
+      传统 Wi-Fi 不是这样。当你的 AP 听到同信道上任何其他 AP 的信号（即使是很远的、跟你无关的），它也会认为"信道被占用"而等待——这叫做 CCA（Clear Channel Assessment）。这导致大量不必要的等待。<br><br>
+      BSS Coloring 给每个 BSS 分配一个"颜色"（6-bit ID，0-63）。AP 和客户端在收到信号时，先看颜色：<strong>同色 = 自己人，认真听；异色 = 别人桌的对话，忽略它继续说。</strong><br>
+      <em>— TECEWN-2234："BSS Coloring works like a busy restaurant: ignore other tables and keep talking."</em></p>
+    </div>
+
+    <h3>7.6 &nbsp; Wi-Fi 7 速率一览</h3>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="big-num">&gt;30</div>
+        <div class="label">Gbps 最大吞吐<br>（MAC SAP 层）</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">320</div>
+        <div class="label">MHz 最大信道宽度<br>（仅 6 GHz）</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">16</div>
+        <div class="label">空间流（最大）<br>16×16 MIMO</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-num">4096</div>
+        <div class="label">QAM 调制阶数<br>12 bits/符号</div>
+      </div>
+    </div>
+
+    <h3>7.7 &nbsp; Cisco Wi-Fi 7 硬件</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>型号</th>
+          <th>定位</th>
+          <th>Wi-Fi 7 特性</th>
+          <th>天线</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>CW9176I</strong></td>
+          <td>旗舰室内</td>
+          <td>三频 MLO, 320MHz, 4K-QAM</td>
+          <td>内置全向</td>
+        </tr>
+        <tr>
+          <td><strong>CW9178I</strong></td>
+          <td>高密室内</td>
+          <td>三频 MLO, 320MHz, 4K-QAM</td>
+          <td>内置/外接 DART</td>
+        </tr>
+        <tr>
+          <td><strong>C9166</strong></td>
+          <td>Wi-Fi 6E 室内旗舰</td>
+          <td>三频（含 6G），为 Wi-Fi 7 做准备</td>
+          <td>内置全向</td>
+        </tr>
+        <tr>
+          <td><strong>C9136</strong></td>
+          <td>Wi-Fi 6E 外接天线</td>
+          <td>三频，支持 DART 连接器</td>
+          <td>外接 SIA 天线</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 SIA 天线识别</div>
+      <p><strong>SIA（Self-Identifying Antenna）</strong> 是 Cisco 的智能天线技术。天线上有一圈 <strong>紫色标识带</strong>，内部集成了芯片，通过 DART 连接器自动将天线增益、类型、方向图等信息传递给 AP。AP 无需手动配置天线参数，RRM 自动适配。<br>
+      <em>— 出自 Wireless RF Reference Guide："SIA use a purple band to indicate circuitry for auto-configuration."</em></p>
+    </div>
+
+    <h3>7.8 &nbsp; Wi-Fi 7 部署建议</h3>
+
+    <div class="callout tip">
+      <div class="callout-title">🔑 现阶段的务实建议</div>
+      <ul>
+        <li><strong>新建网络</strong>：直接选择 Wi-Fi 7 AP（CW917x 系列），即使当前客户端不支持 Wi-Fi 7，AP 也向后兼容 Wi-Fi 6/6E/5。投资保护最大化。</li>
+        <li><strong>存量升级</strong>：优先升级高密度、高带宽需求区域（如会议室、研发区、培训中心）。</li>
+        <li><strong>5 GHz 仍是主力</strong>：6 GHz 客户端渗透率仍在增长，5 GHz 会在相当长时间内承载主要流量。</li>
+        <li><strong>WLC 版本</strong>：确保 C9800 运行 17.12+ 版本以获得完整的 Wi-Fi 7 功能支持。</li>
+        <li><strong>安全升级</strong>：6 GHz 强制 WPA3，提前在 ISE 和客户端侧做好 WPA3 兼容性测试。</li>
+      </ul>
+    </div>
+
+  </section>
+  <!-- ======================== CHAPTER 8 ======================== -->
+  <section class="chapter" id="ch8">
+    <h2>8 &nbsp; 总结 · 设计检查清单</h2>
+
+    <p>八个章节，从电磁波的物理本质到 Wi-Fi 7 的多链路操作，我们走完了企业 WLAN 设计的全部核心环节。现在，让我们把所有设计决策 <strong>浓缩成一张可执行的检查清单</strong>，你可以打印出来贴在工位上，每次做项目时逐条核对。</p>
+
+    <h3>8.1 &nbsp; 设计哲学：三句话回顾</h3>
+
+    <div class="svg-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" width="720" height="220">
+        <defs>
+          <filter id="shadow3" x="-3%" y="-3%" width="106%" height="110%">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".07"/>
+          </filter>
+        </defs>
+        <!-- Card 1 -->
+        <rect x="20" y="20" width="215" height="180" rx="16" fill="#fff" filter="url(#shadow3)" stroke="#049fd9" stroke-width="2"/>
+        <text x="127" y="58" text-anchor="middle" font-size="36">🎯</text>
+        <text x="127" y="95" text-anchor="middle" font-size="15" fill="#06335b" font-weight="800">对称是基石</text>
+        <text x="127" y="120" text-anchor="middle" font-size="12" fill="#475569">AP 功率必须匹配</text>
+        <text x="127" y="138" text-anchor="middle" font-size="12" fill="#475569">最弱客户端的功率</text>
+        <text x="127" y="160" text-anchor="middle" font-size="12" fill="#475569">听得见 ≠ 回得来</text>
+        <text x="127" y="185" text-anchor="middle" font-size="11" fill="#049fd9" font-weight="600">→ 第 2 章</text>
+
+        <!-- Card 2 -->
+        <rect x="253" y="20" width="215" height="180" rx="16" fill="#fff" filter="url(#shadow3)" stroke="#0d9488" stroke-width="2"/>
+        <text x="360" y="58" text-anchor="middle" font-size="36">📐</text>
+        <text x="360" y="95" text-anchor="middle" font-size="15" fill="#06335b" font-weight="800">小蜂窝胜大功率</text>
+        <text x="360" y="120" text-anchor="middle" font-size="12" fill="#475569">覆盖范围越小</text>
+        <text x="360" y="138" text-anchor="middle" font-size="12" fill="#475569">干扰越少 · 容量越大</text>
+        <text x="360" y="160" text-anchor="middle" font-size="12" fill="#475569">速率越有保障</text>
+        <text x="360" y="185" text-anchor="middle" font-size="11" fill="#0d9488" font-weight="600">→ 第 2、3、4 章</text>
+
+        <!-- Card 3 -->
+        <rect x="486" y="20" width="215" height="180" rx="16" fill="#fff" filter="url(#shadow3)" stroke="#7c3aed" stroke-width="2"/>
+        <text x="593" y="58" text-anchor="middle" font-size="36">🤝</text>
+        <text x="593" y="95" text-anchor="middle" font-size="15" fill="#06335b" font-weight="800">漫游靠协作</text>
+        <text x="593" y="120" text-anchor="middle" font-size="12" fill="#475569">11k 画地图 · 11v 做引导</text>
+        <text x="593" y="138" text-anchor="middle" font-size="12" fill="#475569">11r 秒切换</text>
+        <text x="593" y="160" text-anchor="middle" font-size="12" fill="#475569">三者缺一不可</text>
+        <text x="593" y="185" text-anchor="middle" font-size="11" fill="#7c3aed" font-weight="600">→ 第 5 章</text>
+      </svg>
+    </div>
+
+    <h3>8.2 &nbsp; 完整设计检查清单</h3>
+
+    <p>以下清单按照项目实施的时间线排列——从前期设计到配置部署到验收测试。每一条都对应前文的详细章节，方便回查。</p>
+
+    <h4>🔷 阶段一：射频设计（RF Design）</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:50px">✓</th>
+          <th>检查项</th>
+          <th>推荐值 / 操作</th>
+          <th>出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>确认最低功率客户端的 Tx Power</td>
+          <td>5G 通常 14–17 dBm；6G 通常 12–14 dBm</td>
+          <td>第 2 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>设置 5G TPC Max ≤ 客户端 Tx Power</td>
+          <td>14–17 dBm（办公）；11–14 dBm（高密）</td>
+          <td>第 2 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>设置 2.4G TPC Max</td>
+          <td>11–14 dBm（尽量压低）</td>
+          <td>第 2 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>设置 6G TPC Max</td>
+          <td>≥ 5G TPC Max + 3 dB</td>
+          <td>第 2 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>5G 信道宽度</td>
+          <td>80 MHz（标准）；40 MHz（高密）</td>
+          <td>第 3 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>2.4G 信道宽度</td>
+          <td>固定 20 MHz，仅用 1/6/11</td>
+          <td>第 3 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>6G 信道宽度</td>
+          <td>80/160 MHz（LPI）；160/320 MHz（SP）</td>
+          <td>第 3 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>评估 DFS 信道可用性</td>
+          <td>非雷达区可用；雷达区在 RF Profile 中排除</td>
+          <td>第 3 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>6G 功率模式选择</td>
+          <td>室内 = LPI（免 AFC）；室外/大覆盖 = SP（需 AFC+GPS）</td>
+          <td>第 3、7 章</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>🔷 阶段二：数据速率配置</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:50px">✓</th>
+          <th>检查项</th>
+          <th>推荐值 / 操作</th>
+          <th>出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>2.4G 禁用所有 802.11b 速率</td>
+          <td>Disable 1, 2, 5.5, 11 Mbps</td>
+          <td>第 4 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>2.4G 禁用低速 OFDM 速率</td>
+          <td>Disable 6, 9 Mbps</td>
+          <td>第 4 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>2.4G 设最低 Mandatory</td>
+          <td><strong>12 Mbps</strong> = Mandatory</td>
+          <td>第 4 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>5G 禁用低速 OFDM 速率</td>
+          <td>Disable 6, 9 Mbps</td>
+          <td>第 4 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>5G 设最低 Mandatory</td>
+          <td><strong>12 Mbps</strong> = Mandatory</td>
+          <td>第 4 章</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>🔷 阶段三：漫游配置</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:50px">✓</th>
+          <th>检查项</th>
+          <th>推荐值 / 操作</th>
+          <th>出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>启用 802.11k Neighbor List</td>
+          <td><code>dot11k neighbor-list</code></td>
+          <td>第 5 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>启用 802.11v BSS Transition</td>
+          <td><code>bss-transition</code></td>
+          <td>第 5 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>启用 802.11r Mixed Mode</td>
+          <td>同时配置 <code>akm ft dot1x</code> 和 <code>akm dot1x</code></td>
+          <td>第 5 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>关闭 Optimized Roaming</td>
+          <td>保持 Disabled（信任 11k/v/r）</td>
+          <td>第 5 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>确保 AP 覆盖重叠 15–20%</td>
+          <td>重叠区 RSSI ≥ −67 dBm</td>
+          <td>第 4、5 章</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>🔷 阶段四：9800 架构配置</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:50px">✓</th>
+          <th>检查项</th>
+          <th>推荐值 / 操作</th>
+          <th>出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>使用自定义 Site Tag（禁用 default）</td>
+          <td>每 Site Tag ≈ 500 AP</td>
+          <td>第 6 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>监控 WNCD 负载均衡</td>
+          <td><code>show wireless loadbalance tag affinity</code></td>
+          <td>第 6 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>WLC 总负载不超过 80%</td>
+          <td>9800-80: ≤4800 AP；9800-40: ≤1600 AP</td>
+          <td>第 6 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Session Timeout</td>
+          <td><strong>28800 秒（8 小时）</strong></td>
+          <td>第 6 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>AP Tag Persistency</td>
+          <td><code>ap tag persistency enable</code>（17.6+）</td>
+          <td>第 6 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>HA SSO 配置（生产环境）</td>
+          <td>RMI 接口 + RP 直连 + 版本一致</td>
+          <td>第 6 章</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>🔷 阶段五：6 GHz / Wi-Fi 7 就绪</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:50px">✓</th>
+          <th>检查项</th>
+          <th>推荐值 / 操作</th>
+          <th>出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>6 GHz WLAN 安全</td>
+          <td>强制 WPA3/OWE（标准要求）</td>
+          <td>第 7 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>WLC 版本</td>
+          <td>17.12+ 以获完整 Wi-Fi 7 支持</td>
+          <td>第 7 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>新建网络优先选 Wi-Fi 7 AP</td>
+          <td>CW9176I / CW9178I（向后兼容 Wi-Fi 6/5）</td>
+          <td>第 7 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>ISE 侧 WPA3 兼容测试</td>
+          <td>提前验证 RADIUS + 证书链</td>
+          <td>第 7 章</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>🔷 阶段六：验收测试</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:50px">✓</th>
+          <th>检查项</th>
+          <th>目标值</th>
+          <th>出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>覆盖区 RSSI</td>
+          <td>≥ −65 dBm（办公区）；≥ −67 dBm（VoIP 区）</td>
+          <td>第 1、4 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>SNR</td>
+          <td>≥ 25 dB</td>
+          <td>第 1 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>漫游耗时（11r 启用）</td>
+          <td>≤ 50 ms</td>
+          <td>第 5 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>无 Sticky Client 问题</td>
+          <td>11v BTM 被正确接受</td>
+          <td>第 5 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>WNCD CPU 均衡</td>
+          <td>单核 ≤ 70%</td>
+          <td>第 6 章</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>多终端实地漫游测试</td>
+          <td>Apple / Android / 工业终端分别验证</td>
+          <td>第 5 章</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>8.3 &nbsp; 最后的话</h3>
+
+    <div class="analogy-card">
+      <div class="analogy-icon">🏁</div>
+      <p>我们在开篇说过："再花哨的 Wi-Fi 7，都建立在功率、信道、速率、漫游这四根柱子之上。" 读完全文，你应该已经理解了 <strong>为什么</strong> 这四根柱子重要、它们 <strong>如何</strong> 相互影响、以及 <strong>怎样</strong> 在 Catalyst 9800 上落地实施。<br><br>
+      技术在迭代，但第一性原理不会变。<strong>电磁波依然以光速传播、依然遵守自由空间路径损耗定律、依然在穿越混凝土墙时被大幅衰减。</strong>掌握了这些不变的"地基"，无论未来 Wi-Fi 8、Wi-Fi 9 带来什么新特性，你都能从容应对。<br><br>
+      <strong>逻辑让人信服，但实践让人成长。</strong> 带着这份检查清单，去做你的下一个无线项目吧。祝你信号满格、漫游无感！📶</p>
+    </div>
+  </section>
+
+  <!-- ======================== GLOSSARY ======================== -->
+  <section class="chapter" id="glossary">
+    <h2>G &nbsp; 术语表</h2>
+
+    <p>按字母顺序排列。点击右侧"出处"列可回到对应章节了解更多。</p>
+
+    <table class="data-table glossary-table">
+      <thead>
+        <tr>
+          <th style="width:160px">术语</th>
+          <th>全称 / 中文</th>
+          <th>释义</th>
+          <th style="width:60px">出处</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ACI</td>
+          <td>Adjacent Channel Interference / 相邻信道干扰</td>
+          <td>使用部分重叠信道的 AP 之间产生的干扰，比同频干扰更难处理。</td>
+          <td><a href="#ch3">Ch3</a></td>
+        </tr>
+        <tr>
+          <td>AFC</td>
+          <td>Automated Frequency Coordination / 自动频率协调</td>
+          <td>云端数据库服务，用于 6 GHz Standard Power 模式下判断可用信道和功率。</td>
+          <td><a href="#ch3">Ch3</a></td>
+        </tr>
+        <tr>
+          <td>AKM</td>
+          <td>Authentication and Key Management</td>
+          <td>定义认证方式的框架，如 PSK、802.1X、FT、SAE 等。</td>
+          <td><a href="#ch5">Ch5</a></td>
+        </tr>
+        <tr>
+          <td>BSS</td>
+          <td>Basic Service Set / 基本服务集</td>
+          <td>由一个 AP 和其关联的所有客户端组成的无线网络基本单元。</td>
+          <td><a href="#ch5">Ch5</a></td>
+        </tr>
+        <tr>
+          <td>BSS Coloring</td>
+          <td>BSS 着色</td>
+          <td>802.11ax 引入的空间复用机制，用 6-bit 颜色标识区分同频 BSS，降低不必要的退避等待。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>BTM</td>
+          <td>BSS Transition Management</td>
+          <td>802.11v 中 AP 向客户端发送漫游"建议"的帧类型。</td>
+          <td><a href="#ch5">Ch5</a></td>
+        </tr>
+        <tr>
+          <td>CCA</td>
+          <td>Clear Channel Assessment / 空闲信道评估</td>
+          <td>设备在发送前检测信道是否被占用的机制。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>CCI</td>
+          <td>Co-Channel Interference / 同频干扰</td>
+          <td>使用相同信道的 AP 之间产生的干扰。</td>
+          <td><a href="#ch2">Ch2</a></td>
+        </tr>
+        <tr>
+          <td>DART</td>
+          <td>Digital + Analog Radio Termination</td>
+          <td>Cisco 专有的天线连接器，支持数字信号传输和 SIA 天线自动识别。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>dBi</td>
+          <td>Decibels relative to isotropic</td>
+          <td>天线增益单位，表示相对于理想全向天线的信号聚焦能力。</td>
+          <td><a href="#ch1">Ch1</a></td>
+        </tr>
+        <tr>
+          <td>dBm</td>
+          <td>Decibels relative to milliwatt</td>
+          <td>绝对功率单位。0 dBm = 1 mW。</td>
+          <td><a href="#ch1">Ch1</a></td>
+        </tr>
+        <tr>
+          <td>DCA</td>
+          <td>Dynamic Channel Assignment / 动态信道分配</td>
+          <td>RRM 的子功能，自动为 AP 选择最优信道。</td>
+          <td><a href="#ch3">Ch3</a></td>
+        </tr>
+        <tr>
+          <td>DFS</td>
+          <td>Dynamic Frequency Selection / 动态频率选择</td>
+          <td>在 5 GHz UNII-2/2e 频段，AP 必须检测并避让雷达信号的机制。</td>
+          <td><a href="#ch3">Ch3</a></td>
+        </tr>
+        <tr>
+          <td>EHT</td>
+          <td>Extremely High Throughput / 极高吞吐量</td>
+          <td>802.11be (Wi-Fi 7) 标准的官方技术名称。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>EIRP</td>
+          <td>Equivalent Isotropically Radiated Power</td>
+          <td>等效全向辐射功率 = Tx Power + 天线增益。信号"出门"时的实际功率。</td>
+          <td><a href="#ch1">Ch1</a></td>
+        </tr>
+        <tr>
+          <td>EMLMR</td>
+          <td>Enhanced Multi-Link Multi-Radio</td>
+          <td>Wi-Fi 7 MLO 的多射频实现，多个射频模块同时在多条链路上收发。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>EMLSR</td>
+          <td>Enhanced Multi-Link Single Radio</td>
+          <td>Wi-Fi 7 MLO 的单射频实现，单个射频在多条链路间快速切换监听。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>FSPL</td>
+          <td>Free Space Path Loss / 自由空间路径损耗</td>
+          <td>电磁波在自由空间中传播时因距离和频率造成的功率衰减。</td>
+          <td><a href="#ch1">Ch1</a></td>
+        </tr>
+        <tr>
+          <td>FT</td>
+          <td>Fast Transition / 快速转换</td>
+          <td>802.11r 定义的快速漫游机制，预先协商密钥，漫游仅需 2 帧交互。</td>
+          <td><a href="#ch5">Ch5</a></td>
+        </tr>
+        <tr>
+          <td>HA SSO</td>
+          <td>High Availability Stateful Switchover</td>
+          <td>C9800 双机热备方案，主机故障时备机接管，AP 和客户端不中断。</td>
+          <td><a href="#ch6">Ch6</a></td>
+        </tr>
+        <tr>
+          <td>LPI</td>
+          <td>Low Power Indoor / 低功率室内</td>
+          <td>6 GHz 的室内功率等级，免 AFC，EIRP 限于 5 dBm/MHz。</td>
+          <td><a href="#ch3">Ch3</a></td>
+        </tr>
+        <tr>
+          <td>MLD</td>
+          <td>Multi-Link Device / 多链路设备</td>
+          <td>Wi-Fi 7 中能同时使用多条射频链路的逻辑设备实体（AP MLD 或 STA MLD）。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>MLO</td>
+          <td>Multi-Link Operation / 多链路操作</td>
+          <td>Wi-Fi 7 的定义性特性，允许设备同时使用 2.4G + 5G + 6G 进行聚合/冗余/转向。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>MRU</td>
+          <td>Multiple Resource Unit / 多资源单元</td>
+          <td>Wi-Fi 7 允许一个用户使用多个不连续的 RU，提高频谱碎片利用率。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>OFDMA</td>
+          <td>Orthogonal Frequency Division Multiple Access</td>
+          <td>Wi-Fi 6 引入的多址接入技术，允许一个 PPDU 内同时服务多个用户。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>OKC</td>
+          <td>Opportunistic Key Caching</td>
+          <td>一种密钥缓存机制，漫游时跳过 802.1X 认证，仅做 4 次握手。</td>
+          <td><a href="#ch5">Ch5</a></td>
+        </tr>
+        <tr>
+          <td>OWE</td>
+          <td>Opportunistic Wireless Encryption</td>
+          <td>增强型开放网络，无需密码但提供加密。6 GHz 强制要求 WPA3 或 OWE。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>PMK</td>
+          <td>Pairwise Master Key</td>
+          <td>802.1X 认证成功后生成的主密钥，用于派生会话密钥（PTK）。</td>
+          <td><a href="#ch5">Ch5</a></td>
+        </tr>
+        <tr>
+          <td>QAM</td>
+          <td>Quadrature Amplitude Modulation / 正交振幅调制</td>
+          <td>通过同时改变信号的幅度和相位来编码更多比特的调制方式。数字越大，每符号编码的位数越多。</td>
+          <td><a href="#ch4">Ch4</a></td>
+        </tr>
+        <tr>
+          <td>RRM</td>
+          <td>Radio Resource Management / 射频资源管理</td>
+          <td>C9800 内置功能，自动调节 AP 的功率（TPC）和信道（DCA）。</td>
+          <td><a href="#ch2">Ch2</a></td>
+        </tr>
+        <tr>
+          <td>RSSI</td>
+          <td>Received Signal Strength Indicator / 接收信号强度</td>
+          <td>客户端收到的信号强度指标，单位 dBm。设计目标 ≥ −65 dBm。</td>
+          <td><a href="#ch1">Ch1</a></td>
+        </tr>
+        <tr>
+          <td>SIA</td>
+          <td>Self-Identifying Antenna / 自识别天线</td>
+          <td>Cisco 智能外接天线，通过 DART 连接器自动将增益/方向图等参数传递给 AP。紫色标识带。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>SNR</td>
+          <td>Signal-to-Noise Ratio / 信噪比</td>
+          <td>信号强度与噪底的差值（dB）。设计目标 ≥ 25 dB。</td>
+          <td><a href="#ch1">Ch1</a></td>
+        </tr>
+        <tr>
+          <td>SP</td>
+          <td>Standard Power / 标准功率</td>
+          <td>6 GHz 的高功率等级，需 AFC + GPS，允许更高 EIRP。</td>
+          <td><a href="#ch3">Ch3</a></td>
+        </tr>
+        <tr>
+          <td>TPC</td>
+          <td>Transmit Power Control / 发射功率控制</td>
+          <td>RRM 的子功能，自动调节 AP 发射功率。需设置 Max/Min 范围。</td>
+          <td><a href="#ch2">Ch2</a></td>
+        </tr>
+        <tr>
+          <td>TWT</td>
+          <td>Target Wake Time / 目标唤醒时间</td>
+          <td>Wi-Fi 6 引入的省电机制，AP 与客户端约定唤醒时间，减少无效监听。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+        <tr>
+          <td>WNCD</td>
+          <td>Wireless Network Control Daemon</td>
+          <td>C9800 数据面进程，每个实例绑定一个 CPU 核心。Site Tag 决定 AP → WNCD 的映射。</td>
+          <td><a href="#ch6">Ch6</a></td>
+        </tr>
+        <tr>
+          <td>WPA3</td>
+          <td>Wi-Fi Protected Access 3</td>
+          <td>最新一代 Wi-Fi 安全标准。6 GHz 强制要求。SAE 取代 PSK，PMF 强制开启。</td>
+          <td><a href="#ch7">Ch7</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div><!-- /.container -->
+
+<!-- ======================== FOOTER ======================== -->
+<footer class="page-footer">
+  <div class="container">
+
+    <h3>📚 参考文献</h3>
+    <ul class="ref-list">
+      <li data-ref="1"><strong>TECEWN-2234 Demystify Wi-Fi — Because Fundamentals Matter</strong>. Federico Ziliotto, Kamel Cherif-Zahar, Hafida Barhoun. Cisco Live Presentation. — 第 1、2、4、7 章核心引用来源。</li>
+      <li data-ref="2"><strong>IEEE Std 802.11be™-2024</strong> — Amendment 2: Enhancements for Extremely High Throughput (EHT). IEEE. — 第 7 章 Wi-Fi 7 技术规范来源。</li>
+      <li data-ref="3"><strong>Cisco Catalyst 9800 无线局域网控制器功率与漫游配置参数指南及最佳实践</strong>（中英双语）. Cisco. — 第 2、4、5 章功率/速率/漫游配置核心来源。</li>
+      <li data-ref="4"><strong>Cisco Catalyst 9800 Series Configuration Best Practices</strong> (Updated Dec 2025). Cisco. — 第 6 章 Tags & Profiles 模型、WNCD、HA SSO 核心来源。</li>
+      <li data-ref="5"><strong>Wireless RF Reference Guide</strong>. Cisco / Meraki. — 第 1、3、7 章频段特性、天线技术、6 GHz 功率等级来源。</li>
+      <li data-ref="6"><strong>Catalyst 9800 Series Primer for Enterprise WLAN (Roaming Guide)</strong>. Cisco. — 第 5 章漫游类型、密钥管理、802.11r 细节来源。</li>
+    </ul>
+
+    <br>
+    <p style="opacity:.7; font-size:.88rem;">
+      本文由 CircuIT 基于 Cisco 官方技术文档综合整理，仅供学习和设计参考。具体部署请结合实际场景并参考 Cisco 最新发布的 CVD 和 Release Notes。<br>
+      生成时间：2026 年 3 月 · 版本 1.0
+    </p>
+
+  </div>
+</footer>
+
+<!-- Back to top button (already defined in Part 1, kept here for completeness) -->
+<button class="back-top" id="backTop2" onclick="window.scrollTo({top:0})" style="position:fixed;bottom:32px;right:32px;width:48px;height:48px;background:#049fd9;color:#fff;border:none;border-radius:50%;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 14px rgba(4,159,217,.4);display:none;z-index:100;align-items:center;justify-content:center;">↑</button>
+<script>
+  // Merge with previous back-top if needed
+  window.addEventListener('scroll', () => {
+    const btns = document.querySelectorAll('.back-top');
+    btns.forEach(btn => {
+      btn.style.display = window.scrollY > 600 ? 'flex' : 'none';
+    });
+  });
+</script>
+</body>
+</html>
