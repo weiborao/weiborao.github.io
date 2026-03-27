@@ -6,7 +6,7 @@ layout: false
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 认知地图 | AI Cognitive Map 2026</title>
+    <title>AI 认知地图 | AI Cognitive Map</title>
     <style>
         :root {
             --bg-primary: #f8f9fa;
@@ -37,6 +37,7 @@ layout: false
             --radius-sm: 8px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         [data-theme="dark"] {
             --bg-primary: #0f0f1a;
             --bg-secondary: #1a1a2e;
@@ -49,8 +50,17 @@ layout: false
             --shadow: 0 4px 24px rgba(0,0,0,0.3);
             --shadow-hover: 0 8px 40px rgba(0,0,0,0.5);
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html { scroll-behavior: smooth; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Roboto, sans-serif;
             background: var(--bg-primary);
@@ -59,225 +69,673 @@ layout: false
             transition: var(--transition);
         }
 
-        /* ===== NAVBAR ===== */
+        /* ===== NAVIGATION ===== */
         .navbar {
-            position: fixed; top:0; left:0; right:0; z-index:1000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
             background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             transition: var(--transition);
         }
-        [data-theme="dark"] .navbar { background: rgba(15,15,26,0.85); }
+
+        [data-theme="dark"] .navbar {
+            background: rgba(15,15,26,0.85);
+        }
+
         .nav-inner {
-            max-width:1400px; margin:0 auto; padding:0 24px;
-            display:flex; align-items:center; justify-content:space-between; height:64px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
         }
+
         .nav-logo {
-            font-size:1.3rem; font-weight:800;
+            font-size: 1.3rem;
+            font-weight: 800;
             background: var(--gradient-hero);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
         }
-        .nav-controls { display:flex; align-items:center; gap:8px; }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .nav-btn {
-            padding:6px 14px; border:1px solid var(--border); border-radius:20px;
-            background:var(--bg-secondary); color:var(--text-secondary);
-            font-size:0.8rem; font-weight:600; cursor:pointer; transition:var(--transition);
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
         }
-        .nav-btn:hover { border-color:var(--accent-1); color:var(--accent-1); }
-        .nav-btn.active { background:var(--accent-1); color:#fff; border-color:var(--accent-1); }
-        .nav-links { display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; }
-        .nav-links::-webkit-scrollbar { display:none; }
+
+        .nav-btn:hover {
+            border-color: var(--accent-1);
+            color: var(--accent-1);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-1);
+            color: #fff;
+            border-color: var(--accent-1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            display: none;
+        }
+
         .nav-link {
-            padding:6px 12px; border-radius:20px; color:var(--text-muted);
-            font-size:0.78rem; font-weight:500; text-decoration:none; white-space:nowrap;
-            transition:var(--transition);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 500;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: var(--transition);
         }
-        .nav-link:hover { color:var(--accent-1); background:rgba(99,102,241,0.1); }
+
+        .nav-link:hover {
+            color: var(--accent-1);
+            background: rgba(99,102,241,0.1);
+        }
 
         /* ===== HERO ===== */
         .hero {
-            padding:120px 24px 60px; text-align:center; position:relative; overflow:hidden;
+            padding: 120px 24px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
         .hero::before {
-            content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
             background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
                         radial-gradient(ellipse at 70% 50%, rgba(139,92,246,0.06) 0%, transparent 50%);
             animation: float 20s ease-in-out infinite;
         }
+
         @keyframes float {
-            0%,100%{transform:translate(0,0) rotate(0deg);}
-            33%{transform:translate(30px,-30px) rotate(1deg);}
-            66%{transform:translate(-20px,20px) rotate(-1deg);}
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(1deg); }
+            66% { transform: translate(-20px, 20px) rotate(-1deg); }
         }
-        .hero-content { position:relative; z-index:1; max-width:900px; margin:0 auto; }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
         .hero-badge {
-            display:inline-flex; align-items:center; gap:6px; padding:6px 16px;
-            background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2);
-            border-radius:20px; font-size:0.8rem; font-weight:600; color:var(--accent-1); margin-bottom:24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-1);
+            margin-bottom: 24px;
         }
+
         .hero h1 {
-            font-size:clamp(2rem,5vw,3.5rem); font-weight:900; line-height:1.2; letter-spacing:-1px; margin-bottom:16px;
-            background:linear-gradient(135deg, var(--text-primary) 0%, var(--accent-1) 50%, var(--accent-2) 100%);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-1) 50%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .hero p { font-size:clamp(1rem,2vw,1.2rem); color:var(--text-secondary); max-width:700px; margin:0 auto 32px; }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
 
         /* ===== OVERVIEW MAP ===== */
-        .overview-map { max-width:1200px; margin:0 auto 60px; padding:0 24px; }
+        .overview-map {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 24px;
+        }
+
         .map-container {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
-            padding:40px; box-shadow:var(--shadow); overflow-x:auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
         }
-        .map-title { text-align:center; font-size:1.4rem; font-weight:800; margin-bottom:32px; }
-        .map-grid { display:grid; grid-template-columns:1fr; gap:16px; min-width:700px; }
-        .map-layer { display:grid; grid-template-columns:160px 1fr; gap:16px; align-items:stretch; }
+
+        .map-title {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 32px;
+            color: var(--text-primary);
+        }
+
+        .map-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            min-width: 700px;
+        }
+
+        .map-layer {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 16px;
+            align-items: stretch;
+        }
+
         .map-layer-label {
-            display:flex; align-items:center; justify-content:center; padding:16px; border-radius:var(--radius-sm);
-            font-weight:700; font-size:0.85rem; color:#fff; text-align:center; letter-spacing:0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            text-align: center;
+            letter-spacing: 0.5px;
         }
-        .map-layer-content { display:flex; gap:12px; flex-wrap:wrap; }
+
+        .map-layer-content {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
         .map-node {
-            flex:1; min-width:140px; padding:14px 18px; background:var(--bg-secondary);
-            border:1px solid var(--border); border-radius:var(--radius-sm);
-            font-size:0.82rem; font-weight:600; color:var(--text-secondary); text-align:center;
-            cursor:pointer; transition:var(--transition);
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 18px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
         }
-        .map-node:hover { transform:translateY(-2px); box-shadow:var(--shadow-hover); border-color:var(--accent-1); color:var(--accent-1); }
-        .map-node small { display:block; font-weight:400; font-size:0.72rem; color:var(--text-muted); margin-top:4px; }
-        .map-arrow { text-align:center; font-size:1.5rem; color:var(--text-muted); line-height:1; padding:4px 0; }
+
+        .map-node:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent-1);
+            color: var(--accent-1);
+        }
+
+        .map-node small {
+            display: block;
+            font-weight: 400;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .map-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            line-height: 1;
+            padding: 4px 0;
+        }
 
         /* ===== SECTIONS ===== */
-        .section { max-width:1200px; margin:0 auto 48px; padding:0 24px; }
+        .section {
+            max-width: 1200px;
+            margin: 0 auto 48px;
+            padding: 0 24px;
+        }
+
         .section-header {
-            display:flex; align-items:center; gap:16px; margin-bottom:24px;
-            padding-bottom:16px; border-bottom:2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
         }
+
         .section-icon {
-            width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-            font-size:1.4rem; color:#fff; flex-shrink:0;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            flex-shrink: 0;
         }
-        .section-header h2 { font-size:clamp(1.3rem,3vw,1.8rem); font-weight:800; letter-spacing:-0.5px; }
-        .section-header h2 span { font-size:0.8rem; font-weight:500; color:var(--text-muted); display:block; }
+
+        .section-header h2 {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .section-header h2 span {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: block;
+        }
 
         /* ===== CARDS ===== */
-        .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:20px; }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
         .card {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); transition:var(--transition); position:relative; overflow:hidden;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
-        .card:hover { transform:translateY(-4px); box-shadow:var(--shadow-hover); }
-        .card h3 { font-size:1.1rem; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-        .card p, .card li { font-size:0.9rem; color:var(--text-secondary); line-height:1.8; }
-        .card ul { padding-left:20px; }
-        .card ul li { margin-bottom:6px; }
-        .card-bar { position:absolute; top:0; left:0; right:0; height:4px; border-radius:var(--radius) var(--radius) 0 0; }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card p, .card li {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .card ul {
+            padding-left: 20px;
+        }
+
+        .card ul li {
+            margin-bottom: 6px;
+        }
+
         .tag {
-            display:inline-flex; padding:3px 10px; border-radius:12px;
-            font-size:0.7rem; font-weight:600; margin-right:4px; margin-bottom:4px;
+            display: inline-flex;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 4px;
+            margin-bottom: 4px;
         }
-        .tag-purple { background:rgba(139,92,246,0.12); color:#8b5cf6; }
-        .tag-blue { background:rgba(59,130,246,0.12); color:#3b82f6; }
-        .tag-green { background:rgba(16,185,129,0.12); color:#10b981; }
-        .tag-amber { background:rgba(245,158,11,0.12); color:#f59e0b; }
-        .tag-red { background:rgba(239,68,68,0.12); color:#ef4444; }
-        .tag-cyan { background:rgba(6,182,212,0.12); color:#06b6d4; }
+
+        .tag-purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+        .tag-blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+        .tag-green { background: rgba(16,185,129,0.12); color: #10b981; }
+        .tag-amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .tag-red { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .tag-cyan { background: rgba(6,182,212,0.12); color: #06b6d4; }
 
         /* ===== FLOW DIAGRAM ===== */
         .flow-container {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); overflow-x:auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
         }
-        .flow-steps { display:flex; align-items:flex-start; gap:0; min-width:800px; }
-        .flow-step { flex:1; text-align:center; position:relative; padding:0 8px; }
-        .flow-step-number {
-            width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-            font-weight:800; font-size:1rem; color:#fff; margin:0 auto 12px;
-        }
-        .flow-step h4 { font-size:0.85rem; font-weight:700; margin-bottom:6px; }
-        .flow-step p { font-size:0.76rem; color:var(--text-muted); line-height:1.5; }
-        .flow-arrow { display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--text-muted); min-width:28px; padding-top:10px; }
 
-        /* ===== TABLE ===== */
+        .flow-steps {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            min-width: 900px;
+        }
+
+        .flow-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 0 8px;
+        }
+
+        .flow-step-number {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+            margin: 0 auto 12px;
+        }
+
+        .flow-step h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .flow-step p {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            min-width: 28px;
+            padding-top: 10px;
+        }
+
+        /* ===== COMPARISON TABLE ===== */
         .table-wrapper {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
-            box-shadow:var(--shadow); overflow-x:auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
         }
-        .comp-table { width:100%; border-collapse:collapse; min-width:700px; }
+
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
         .comp-table thead th {
-            background:var(--bg-secondary); padding:14px 18px; font-size:0.82rem; font-weight:700;
-            text-align:left; border-bottom:2px solid var(--border); white-space:nowrap;
+            background: var(--bg-secondary);
+            padding: 14px 18px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
         }
+
         .comp-table tbody td {
-            padding:12px 18px; font-size:0.82rem; color:var(--text-secondary);
-            border-bottom:1px solid var(--border); vertical-align:top;
+            padding: 12px 18px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
         }
-        .comp-table tbody tr:hover { background:rgba(99,102,241,0.04); }
+
+        .comp-table tbody tr:hover {
+            background: rgba(99,102,241,0.04);
+        }
 
         /* ===== HIGHLIGHT BOX ===== */
-        .highlight-box { padding:24px 28px; border-radius:var(--radius); border-left:4px solid; margin:20px 0; }
-        .highlight-box.insight { background:rgba(99,102,241,0.06); border-color:var(--accent-1); }
-        .highlight-box.warning { background:rgba(245,158,11,0.06); border-color:var(--accent-5); }
-        .highlight-box.success { background:rgba(16,185,129,0.06); border-color:var(--accent-4); }
-        .highlight-box h4 { font-size:0.95rem; font-weight:700; margin-bottom:8px; }
-        .highlight-box p { font-size:0.88rem; color:var(--text-secondary); }
+        .highlight-box {
+            padding: 24px 28px;
+            border-radius: var(--radius);
+            border-left: 4px solid;
+            margin: 20px 0;
+        }
 
-        /* ===== METRIC ===== */
-        .metric-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin:20px 0; }
+        .highlight-box.insight {
+            background: rgba(99,102,241,0.06);
+            border-color: var(--accent-1);
+        }
+
+        .highlight-box.warning {
+            background: rgba(245,158,11,0.06);
+            border-color: var(--accent-5);
+        }
+
+        .highlight-box.success {
+            background: rgba(16,185,129,0.06);
+            border-color: var(--accent-4);
+        }
+
+        .highlight-box h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .highlight-box p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== METRIC CARDS ===== */
+        .metric-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
         .metric-card {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm);
-            padding:20px; text-align:center; box-shadow:var(--shadow);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
         }
-        .metric-value { font-size:2rem; font-weight:900; line-height:1.1; margin-bottom:4px; }
-        .metric-label { font-size:0.78rem; color:var(--text-muted); font-weight:500; }
 
-        /* ===== SUBSECTION TITLE ===== */
-        .sub-title {
-            font-size:1.1rem; font-weight:800; margin:32px 0 16px; padding-left:14px;
-            border-left:4px solid var(--accent-1); line-height:1.4;
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 4px;
         }
-        .sub-title span { font-size:0.78rem; font-weight:500; color:var(--text-muted); display:block; }
 
-        /* ===== DETAIL BLOCK ===== */
-        .detail-block {
-            background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:20px;
+        .metric-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
         }
-        .detail-block h4 { font-size:0.95rem; font-weight:700; margin-bottom:12px; }
-        .detail-block p { font-size:0.88rem; color:var(--text-secondary); margin-bottom:10px; }
-        .detail-block ul { padding-left:20px; margin-bottom:10px; }
-        .detail-block li { font-size:0.88rem; color:var(--text-secondary); margin-bottom:6px; }
 
-        /* ===== DIVIDER ===== */
-        .section-divider {
-            max-width:1200px; margin:48px auto; padding:0 24px;
-            border:none; border-top:1px dashed var(--border);
+        /* ===== COLLAPSIBLE ===== */
+        .collapsible {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .collapsible-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .collapsible-header:hover {
+            background: rgba(99,102,241,0.04);
+        }
+
+        .collapsible-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible.open .collapsible-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .collapsible.open .collapsible-body {
+            max-height: 2000px;
+        }
+
+        .collapsible-content {
+            padding: 0 20px 20px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .collapsible-content p {
+            margin-bottom: 10px;
+        }
+
+        .collapsible-content ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .collapsible-content li {
+            margin-bottom: 4px;
         }
 
         /* ===== FOOTER ===== */
         .footer {
-            max-width:1200px; margin:80px auto 0; padding:32px 24px;
-            border-top:1px solid var(--border); text-align:center; color:var(--text-muted); font-size:0.8rem;
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
         }
 
         /* ===== RESPONSIVE ===== */
-        @media(max-width:1024px) { .map-layer { grid-template-columns:120px 1fr; } }
-        @media(max-width:768px) {
-            .nav-links { display:none; }
-            .nav-inner { height:56px; }
-            .hero { padding:90px 16px 40px; }
-            .section { padding:0 16px; }
-            .card-grid { grid-template-columns:1fr; }
-            .map-layer { grid-template-columns:1fr; }
-            .map-layer-label { border-radius:var(--radius-sm) var(--radius-sm) 0 0; }
-            .map-container, .flow-container { padding:20px; }
-            .metric-row { grid-template-columns:repeat(2,1fr); }
+        @media (max-width: 1024px) {
+            .map-layer {
+                grid-template-columns: 120px 1fr;
+            }
         }
-        @media(max-width:480px) { .metric-row { grid-template-columns:1fr; } }
-        [id] { scroll-margin-top:80px; }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .nav-inner {
+                height: 56px;
+            }
+            .hero {
+                padding: 90px 16px 40px;
+            }
+            .section {
+                padding: 0 16px;
+            }
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            .map-layer {
+                grid-template-columns: 1fr;
+            }
+            .map-layer-label {
+                border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            }
+            .map-container {
+                padding: 20px;
+            }
+            .flow-container {
+                padding: 20px;
+            }
+            .metric-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metric-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Smooth scroll offset for fixed nav */
+        [id] {
+            scroll-margin-top: 80px;
+        }
 
         /* Animations */
-        .fade-in { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease, transform 0.6s ease; }
-        .fade-in.visible { opacity:1; transform:translateY(0); }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -288,7 +746,7 @@ layout: false
 </head>
 <body>
 
-<!-- ==================== NAVBAR ==================== -->
+<!-- NAVBAR -->
 <nav class="navbar">
     <div class="nav-inner">
         <div class="nav-logo">🧠 AI Cognitive Map</div>
@@ -297,10 +755,9 @@ layout: false
             <a class="nav-link" href="#token" data-i18n="nav_token">Token</a>
             <a class="nav-link" href="#llm" data-i18n="nav_llm">LLM</a>
             <a class="nav-link" href="#rag" data-i18n="nav_rag">RAG</a>
-            <a class="nav-link" href="#cosmos" data-i18n="nav_cosmos">物理AI</a>
             <a class="nav-link" href="#infra" data-i18n="nav_infra">算力基础设施</a>
             <a class="nav-link" href="#network" data-i18n="nav_network">数据中心网络</a>
-            <a class="nav-link" href="#conclusion" data-i18n="nav_conclusion">结语</a>
+            <a class="nav-link" href="#cosmos" data-i18n="nav_cosmos">物理AI</a>
         </div>
         <div class="nav-controls">
             <button class="nav-btn" id="langBtn" onclick="toggleLang()">EN</button>
@@ -309,7 +766,7 @@ layout: false
     </div>
 </nav>
 
-<!-- ==================== HERO ==================== -->
+<!-- HERO -->
 <header class="hero">
     <div class="hero-content">
         <div class="hero-badge">📅 2026 <span data-i18n="hero_badge">深度研究报告</span></div>
@@ -318,590 +775,762 @@ layout: false
     </div>
 </header>
 
-<!-- ==================== OVERVIEW MAP ==================== -->
+<!-- OVERVIEW MAP -->
 <div class="overview-map" id="overview">
     <div class="map-container fade-in">
         <div class="map-title" data-i18n="map_title">🗺️ AI 技术栈全景架构图</div>
         <div class="map-grid">
+            <!-- Layer 7: Application -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-4);" data-i18n="map_l7">应用层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-4);" data-i18n="map_l7">应用层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">NotebookLM<small>Agentic 研究助手</small></div>
-                    <div class="map-node">Deep Research<small>自主研究链式推理</small></div>
-                    <div class="map-node">Physical AI<small>自动驾驶 / 人形机器人</small></div>
-                    <div class="map-node">Audio / Video<small>多模态内容生成</small></div>
+                    <div class="map-node" onclick="scrollToSection('rag')">NotebookLM<small data-i18n="map_n_notebook">Agentic 研究助手</small></div>
+                    <div class="map-node" onclick="scrollToSection('rag')">Deep Research<small data-i18n="map_n_deep">自主研究链式推理</small></div>
+                    <div class="map-node" onclick="scrollToSection('cosmos')">Physical AI<small data-i18n="map_n_physical">自动驾驶 / 人形机器人</small></div>
+                    <div class="map-node">Audio / Video<small data-i18n="map_n_av">多模态内容生成</small></div>
                 </div>
             </div>
             <div class="map-arrow">⬇</div>
+            <!-- Layer 6: Cognitive Engine -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-1);" data-i18n="map_l6">认知引擎层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-1);" data-i18n="map_l6">认知引擎层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">Agentic RAG<small>自主检索 + 工具调用</small></div>
-                    <div class="map-node">Advanced RAG<small>查询重写 / 重排序</small></div>
-                    <div class="map-node">Naive RAG<small>向量检索 + 生成</small></div>
-                    <div class="map-node">Evaluation<small>RAGAS / CRAG / LegalBench</small></div>
+                    <div class="map-node" onclick="scrollToSection('rag')">Agentic RAG<small data-i18n="map_n_arag">自主检索 + 工具调用</small></div>
+                    <div class="map-node" onclick="scrollToSection('rag')">Advanced RAG<small data-i18n="map_n_advrag">查询重写 / 重排序</small></div>
+                    <div class="map-node" onclick="scrollToSection('rag')">Naive RAG<small data-i18n="map_n_nrag">向量检索 + 生成</small></div>
+                    <div class="map-node" onclick="scrollToSection('rag')">Evaluation<small>RAGAS / CRAG / LegalBench</small></div>
                 </div>
             </div>
             <div class="map-arrow">⬇</div>
+            <!-- Layer 5: Model -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-5);" data-i18n="map_l5">模型层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-5);" data-i18n="map_l5">模型层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">Transformer<small>Self-Attention / Decoder-only</small></div>
-                    <div class="map-node">Training<small>预训练 → SFT → RLHF</small></div>
-                    <div class="map-node">Inference<small>Prefill → Decode (KV Cache)</small></div>
-                    <div class="map-node">Cosmos WFM<small>世界基础模型</small></div>
+                    <div class="map-node" onclick="scrollToSection('llm')">Transformer<small data-i18n="map_n_tf">Self-Attention / Decoder-only</small></div>
+                    <div class="map-node" onclick="scrollToSection('llm')">Training<small data-i18n="map_n_train">预训练 → SFT → RLHF</small></div>
+                    <div class="map-node" onclick="scrollToSection('llm')">Inference<small data-i18n="map_n_infer">Prefill → Decode (KV Cache)</small></div>
+                    <div class="map-node" onclick="scrollToSection('cosmos')">Cosmos WFM<small data-i18n="map_n_wfm">世界基础模型</small></div>
                 </div>
             </div>
             <div class="map-arrow">⬇</div>
+            <!-- Layer 4: Data -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-2);" data-i18n="map_l4">数据层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-2);" data-i18n="map_l4">数据层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">Tokenization<small>BPE / WordPiece</small></div>
-                    <div class="map-node">Embeddings<small>高维语义向量</small></div>
-                    <div class="map-node">Vector DB<small>向量数据库 / 余弦相似度</small></div>
-                    <div class="map-node">Cosmos Tokenizer<small>视觉Token化 / 8×压缩</small></div>
+                    <div class="map-node" onclick="scrollToSection('token')">Tokenization<small>BPE / WordPiece</small></div>
+                    <div class="map-node" onclick="scrollToSection('token')">Embeddings<small data-i18n="map_n_embed">高维语义向量</small></div>
+                    <div class="map-node" onclick="scrollToSection('token')">Vector DB<small data-i18n="map_n_vdb">向量数据库 / 余弦相似度</small></div>
+                    <div class="map-node" onclick="scrollToSection('cosmos')">Cosmos Tokenizer<small data-i18n="map_n_ct">视觉Token化 / 8×压缩</small></div>
                 </div>
             </div>
             <div class="map-arrow">⬇</div>
+            <!-- Layer 3: Software -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-3);" data-i18n="map_l3">软件调度层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-3);" data-i18n="map_l3">软件调度层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">Kubernetes<small>弹性调度 / Run:ai</small></div>
-                    <div class="map-node">CUDA<small>并行计算平台</small></div>
-                    <div class="map-node">NCCL<small>集合通信库</small></div>
-                    <div class="map-node">NVIDIA AI Enterprise<small>全栈软件</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">Kubernetes<small data-i18n="map_n_k8s">弹性调度 / Run:ai</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">CUDA<small data-i18n="map_n_cuda">并行计算平台</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">NCCL<small data-i18n="map_n_nccl">集合通信库</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">NVIDIA AI Enterprise<small data-i18n="map_n_nae">全栈软件</small></div>
                 </div>
             </div>
             <div class="map-arrow">⬇</div>
+            <!-- Layer 2: Compute -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-6);" data-i18n="map_l2">算力层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-6);" data-i18n="map_l2">算力层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">Blackwell Ultra B300<small>2080亿晶体管 / 15 PFLOPS</small></div>
-                    <div class="map-node">GB300 NVL72<small>72 GPU / 37TB 统一内存</small></div>
-                    <div class="map-node">NVLink 5<small>1.8 TB/s per GPU</small></div>
-                    <div class="map-node">HBM3e<small>288 GB / 8 TB/s</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">Blackwell Ultra B300<small>2080亿晶体管 / 15 PFLOPS</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">GB300 NVL72<small data-i18n="map_n_nvl72">72 GPU / 37TB 统一内存</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">NVLink 5<small>1.8 TB/s per GPU</small></div>
+                    <div class="map-node" onclick="scrollToSection('infra')">HBM3e<small>288 GB / 8 TB/s</small></div>
                 </div>
             </div>
             <div class="map-arrow">⬇</div>
+            <!-- Layer 1: Network -->
             <div class="map-layer">
-                <div class="map-layer-label" style="background:var(--gradient-card-7);" data-i18n="map_l1">网络层</div>
+                <div class="map-layer-label" style="background: var(--gradient-card-7);" data-i18n="map_l1">网络层</div>
                 <div class="map-layer-content">
-                    <div class="map-node">UEC 1.0<small>超以太网联盟规范</small></div>
-                    <div class="map-node">InfiniBand<small>信用流控 / CCA</small></div>
-                    <div class="map-node">RoCEv2 / DCQCN<small>PFC + ECN</small></div>
-                    <div class="map-node">Packet Spraying + DDP<small>逐包喷洒 + 直接放置</small></div>
+                    <div class="map-node" onclick="scrollToSection('network')">UEC 1.0<small data-i18n="map_n_uec">超以太网联盟规范</small></div>
+                    <div class="map-node" onclick="scrollToSection('network')">InfiniBand<small data-i18n="map_n_ib">信用流控 / CCA</small></div>
+                    <div class="map-node" onclick="scrollToSection('network')">RoCEv2 / DCQCN<small data-i18n="map_n_roce">PFC + ECN</small></div>
+                    <div class="map-node" onclick="scrollToSection('network')">Packet Spraying + DDP<small data-i18n="map_n_spray">逐包喷洒 + 直接放置</small></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ==================== SECTION 1: TOKEN ==================== -->
+<!-- SECTION 1: TOKEN -->
 <section class="section" id="token">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-card-2);">🔤</div>
+        <div class="section-icon" style="background: var(--gradient-card-2);">🔤</div>
         <h2 data-i18n="s1_title">Token 与向量表示 <span>The Atomic Unit of AI Language</span></h2>
     </div>
+
     <div class="card-grid">
-        <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-2);"></div>
-            <h3>🧩 什么是 Token？</h3>
-            <p>Token（令牌）是大语言模型处理文本的<strong>最基本单位</strong>。LLM 无法直接"阅读"人类文字，输入前必须经过 <strong>Token化（Tokenization）</strong>过程，将文本切分为不可再分的微小单元：可以是一个字、一个词、一个词根（subword）甚至单个字符。</p>
+        <div class="card fade-in" style="--card-accent: var(--accent-3);">
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient-card-2);border-radius:var(--radius) var(--radius) 0 0;"></div>
+            <h3>🧩 <span data-i18n="s1_c1_title">什么是 Token？</span></h3>
+            <p data-i18n="s1_c1_body">Token（令牌）是大语言模型处理文本的<strong>最基本单位</strong>。LLM 无法直接"阅读"人类文字，输入前必须经过 <strong>Token化（Tokenization）</strong>过程，将文本切分为不可再分的微小单元：可以是一个字、一个词、一个词根（subword）甚至单个字符。</p>
             <div style="margin-top:12px;">
                 <span class="tag tag-blue">BPE</span>
                 <span class="tag tag-purple">WordPiece</span>
                 <span class="tag tag-green">SentencePiece</span>
             </div>
         </div>
-        <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-5);"></div>
-            <h3>📐 Embeddings（向量嵌入）</h3>
-            <p>Token 被转换为数字 ID 后，通过嵌入层（Embedding Layer）转化为包含<strong>多维语义特征</strong>的高维数字向量。语义关联被转化为数学空间中的几何距离——含义越接近，向量距离越短。这为注意力机制计算奠定了基础。</p>
+
+        <div class="card fade-in" style="--card-accent: var(--accent-4);">
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient-card-5);border-radius:var(--radius) var(--radius) 0 0;"></div>
+            <h3>📐 <span data-i18n="s1_c2_title">Embeddings（向量嵌入）</span></h3>
+            <p data-i18n="s1_c2_body">Token 被转换为数字 ID 后，通过嵌入层（Embedding Layer）转化为包含<strong>多维语义特征</strong>的高维数字向量。语义关联被转化为数学空间中的几何距离——含义越接近，向量距离越短。这为注意力机制计算奠定了基础。</p>
         </div>
-        <div class="card fade-in">
-            <div class="card-bar" style="background:linear-gradient(135deg,#06b6d4,#6366f1);"></div>
-            <h3>🗄️ 向量数据库（Vector Database）</h3>
-            <p>专门用于高效存储、管理和查询高维向量表示的数据库。与传统数据库的精确关键字匹配不同，向量数据库支持<strong>"语义相似性搜索"</strong>——通过计算余弦相似度等距离度量，找出含义最接近的文档片段。这是 RAG 技术的关键基座。</p>
+
+        <div class="card fade-in" style="--card-accent: var(--accent-3);">
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(135deg, #06b6d4, #6366f1);border-radius:var(--radius) var(--radius) 0 0;"></div>
+            <h3>🗄️ <span data-i18n="s1_c3_title">向量数据库（Vector Database）</span></h3>
+            <p data-i18n="s1_c3_body">专门用于高效存储、管理和查询高维向量表示的数据库。与传统数据库的精确关键字匹配不同，向量数据库支持<strong>"语义相似性搜索"</strong>——通过计算余弦相似度等距离度量，找出含义最接近的文档片段。这是 RAG 技术的关键基座。</p>
         </div>
     </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ==================== SECTION 2: LLM ==================== -->
+<!-- SECTION 2: LLM -->
 <section class="section" id="llm">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-card-1);">🧠</div>
+        <div class="section-icon" style="background: var(--gradient-card-1);">🧠</div>
         <h2 data-i18n="s2_title">大语言模型（LLM）<span>From Neurons to Emergent Intelligence</span></h2>
     </div>
 
     <div class="highlight-box insight fade-in">
-        <h4>💡 核心洞见：涌现能力（Emergent Abilities）</h4>
-        <p>随着参数量和训练数据量的急剧扩大，大模型展现出惊人的"涌现能力"——不仅能完成翻译、摘要等基础任务，还能进行逻辑推理与上下文学习（In-context Learning）。这标志着 AI 从"模式匹配"到"类认知推理"的质变。LLM 本质上就是一个规模庞大到极致的<strong>深度神经网络</strong>（绝大多数基于 Transformer 架构），其"参数"即为所有神经元之间连接的权重和偏差总和。</p>
+        <h4 data-i18n="s2_insight_title">💡 核心洞见：涌现能力（Emergent Abilities）</h4>
+        <p data-i18n="s2_insight_body">随着参数量和训练数据量的急剧扩大，大模型展现出惊人的"涌现能力"——不仅能完成翻译、摘要等基础任务，还能进行逻辑推理与上下文学习（In-context Learning）。这标志着 AI 从"模式匹配"到"类认知推理"的质变。</p>
     </div>
 
-    <!-- 2.1 Transformer -->
-    <div class="sub-title">⚙️ Transformer 架构与注意力机制 <span>The Soul of Modern LLMs</span></div>
-    <div class="detail-block fade-in">
-        <p>目前几乎所有主流 LLM（GPT 系列、Gemini、LLaMA 等）都基于 <strong>Transformer 架构</strong>。其核心灵魂在于<strong>自注意力机制（Self-Attention）</strong>：模型在处理当前 Token 时，并行计算输入序列中所有其他 Token 的权重，从而精准捕捉长距离依赖关系和深层上下文语境。</p>
-        <p>现代生成式模型大多采用<strong>仅解码器（Decoder-only）</strong>架构，通过自回归方式根据前文不断计算词表中所有词的概率分布，进而预测下一个最可能的 Token。</p>
-        <ul>
-            <li><strong>多头注意力（Multi-Head Attention）</strong>：从多个维度并行解析语言特征</li>
-            <li><strong>KV Cache（键值缓存）</strong>：存储注意力中间状态，避免重复计算</li>
-            <li><strong>自回归生成</strong>：每次仅预测一个 Token，循环至结束符</li>
-        </ul>
-    </div>
-
-    <!-- 2.2 Training Lifecycle -->
-    <div class="sub-title">🎓 模型的生命周期：从预训练到偏好对齐 <span>Pre-training → SFT → RLHF</span></div>
-    <div class="flow-container fade-in" style="margin-bottom:24px;">
-        <div class="flow-steps">
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--gradient-card-2);">1</div>
-                <h4>数据准备</h4>
-                <p>收集互联网海量数据，去重、过滤有害/偏见内容、隐私脱敏</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--gradient-card-1);">2</div>
-                <h4>无监督预训练</h4>
-                <p>"预测下一个词"目标函数，在海量文本上获取广泛的"世界知识"</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--gradient-card-5);">3</div>
-                <h4>监督微调（SFT）</h4>
-                <p>使用高质量"指令-输出"对话，让模型学会遵从人类命令</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--gradient-card-3);">4</div>
-                <h4>RLHF 对齐</h4>
-                <p>基于人类反馈的强化学习，引导生成"有用、诚实、无害"的内容</p>
+    <!-- Collapsible: Transformer Architecture -->
+    <div class="collapsible fade-in open" id="coll-transformer">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-transformer')">
+            <span>⚙️ <span data-i18n="s2_col1_title">Transformer 架构与注意力机制</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s2_col1_p1">目前几乎所有主流 LLM（GPT 系列、Gemini、LLaMA 等）都基于 <strong>Transformer 架构</strong>。其核心灵魂在于<strong>自注意力机制（Self-Attention）</strong>：模型在处理当前 Token 时，并行计算输入序列中所有其他 Token 的权重，从而精准捕捉长距离依赖关系和深层上下文语境。</p>
+                <p data-i18n="s2_col1_p2">现代生成式模型大多采用<strong>仅解码器（Decoder-only）</strong>架构，通过自回归方式根据前文不断计算词表中所有词的概率分布，进而预测下一个最可能的 Token。</p>
+                <ul>
+                    <li data-i18n="s2_col1_li1"><strong>多头注意力（Multi-Head Attention）</strong>：从多个维度并行解析语言特征</li>
+                    <li data-i18n="s2_col1_li2"><strong>KV Cache（键值缓存）</strong>：存储注意力中间状态，避免重复计算</li>
+                    <li data-i18n="s2_col1_li3"><strong>自回归生成</strong>：每次仅预测一个 Token，循环至结束符</li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <!-- 2.3 Inference Pipeline -->
-    <div class="sub-title">⚡ 推理流水线：从 Prompt 到逐字输出 <span>The Typewriter Effect Explained</span></div>
-    <div class="detail-block fade-in">
-        <p>屏幕上"打字机效果"不是刻意延迟，而是模型底层数学原理的真实体现——每一次光标闪烁的背后，是 <strong>Kubernetes 调度 → CUDA 指挥 GPU 核心执行矩阵乘法 → NCCL 驱动数据在 NVLink 上穿梭同步</strong>的完整链路。</p>
-    </div>
-    <div class="flow-container fade-in" style="margin-bottom:24px;">
-        <div class="flow-steps" style="min-width:1000px;">
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--accent-1);">①</div>
-                <h4>Token化</h4>
-                <p>分词器将文本切分为 Token 并转换为数字 ID</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--accent-3);">②</div>
-                <h4>预填充（Prefill）</h4>
-                <p>并行处理所有输入 Token，生成 KV Cache</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--accent-4);">③</div>
-                <h4>解码（Decode）</h4>
-                <p>自回归循环，每次预测 1 个 Token → TTFT / ITL</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--accent-5);">④</div>
-                <h4>GPU 协同</h4>
-                <p>CUDA 矩阵乘法 + NCCL AllGather + NVLink 传输</p>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-step">
-                <div class="flow-step-number" style="background:var(--accent-6);">⑤</div>
-                <h4>去分词</h4>
-                <p>数字 ID 转回人类可读文本并流式呈现</p>
+    <!-- Collapsible: Training Lifecycle -->
+    <div class="collapsible fade-in" id="coll-training">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-training')">
+            <span>🎓 <span data-i18n="s2_col2_title">模型的生命周期：从预训练到偏好对齐</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="flow-container" style="margin-bottom: 16px;">
+                    <div class="flow-steps" style="min-width: 800px;">
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--gradient-card-2);">1</div>
+                            <h4 data-i18n="s2_fs1_title">数据准备</h4>
+                            <p data-i18n="s2_fs1_body">收集互联网海量数据，去重、过滤有害/偏见内容、隐私脱敏</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--gradient-card-1);">2</div>
+                            <h4 data-i18n="s2_fs2_title">无监督预训练</h4>
+                            <p data-i18n="s2_fs2_body">"预测下一个词"目标函数，在海量文本上获取广泛的"世界知识"</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--gradient-card-5);">3</div>
+                            <h4 data-i18n="s2_fs3_title">监督微调（SFT）</h4>
+                            <p data-i18n="s2_fs3_body">使用高质量"指令-输出"对话，让模型学会遵从人类命令</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--gradient-card-3);">4</div>
+                            <h4 data-i18n="s2_fs4_title">RLHF 对齐</h4>
+                            <p data-i18n="s2_fs4_body">基于人类反馈的强化学习，引导生成"有用、诚实、无害"的内容</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 2.4 LLM as a File -->
-    <div class="sub-title">📦 LLM 作为"文件"，究竟是什么？ <span>Parameters, Precision & Quantization</span></div>
-    <div class="detail-block fade-in">
-        <p>从计算机视角看，LLM 本质上是一个<strong>巨大的数据文件</strong>，主要包含：</p>
-        <ul>
-            <li><strong>模型架构配置：</strong>描述网络如何搭建（层数、头数、隐藏层维度等）</li>
-            <li><strong>预训练参数权重：</strong>占文件 99% 以上体积——数十亿/数千亿个浮点数字（权重和偏差矩阵），是模型阅读数万亿字文本后计算并固化下来的"知识结晶"</li>
-        </ul>
-        <p>使用 16位浮点数（FP16/BF16）时，每个参数占 2 字节。一个 1200亿参数（120B）的模型约 240 GB。为在显存有限的设备运行，可进行<strong>量化（Quantization）</strong>——压缩至 8位（INT8）甚至 4位格式以缩小体积。</p>
+    <!-- Collapsible: Inference Pipeline -->
+    <div class="collapsible fade-in" id="coll-inference">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-inference')">
+            <span>⚡ <span data-i18n="s2_col3_title">推理流水线：从 Prompt 到逐字输出</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s2_col3_p1">屏幕上"打字机效果"不是刻意延迟，而是模型底层数学原理的真实体现——每一次光标闪烁的背后，是 Kubernetes 调度 → CUDA 指挥 GPU 核心执行矩阵乘法 → NCCL 驱动数据在 NVLink 上穿梭同步的完整链路。</p>
+                <div class="flow-container" style="margin-top:16px;">
+                    <div class="flow-steps" style="min-width: 1000px;">
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--accent-1);">①</div>
+                            <h4>Token化</h4>
+                            <p data-i18n="s2_inf1">分词器将文本切分为 Token 并转换为数字 ID</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--accent-3);">②</div>
+                            <h4 data-i18n="s2_inf2_t">预填充（Prefill）</h4>
+                            <p data-i18n="s2_inf2">并行处理所有输入 Token，生成 KV Cache</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--accent-4);">③</div>
+                            <h4 data-i18n="s2_inf3_t">解码（Decode）</h4>
+                            <p data-i18n="s2_inf3">自回归循环，每次预测 1 个 Token → TTFT / ITL</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--accent-5);">④</div>
+                            <h4 data-i18n="s2_inf4_t">GPU 协同</h4>
+                            <p data-i18n="s2_inf4">CUDA 矩阵乘法 + NCCL AllGather + NVLink 传输</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <div class="flow-step-number" style="background: var(--accent-6);">⑤</div>
+                            <h4 data-i18n="s2_inf5_t">去分词</h4>
+                            <p data-i18n="s2_inf5">数字 ID 转回人类可读文本并流式呈现</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 2.5 LLM Evaluation -->
-    <div class="sub-title">📊 如何评价 LLM？主流基准与指标 <span>Benchmarks & Metrics</span></div>
-    <div class="table-wrapper fade-in" style="margin-bottom:24px;">
-        <table class="comp-table">
-            <thead><tr><th>类别</th><th>基准</th><th>测试内容</th></tr></thead>
-            <tbody>
-                <tr><td>综合能力</td><td>MMLU</td><td>57 学科广泛世界知识与问题解决</td></tr>
-                <tr><td></td><td>GLUE / SuperGLUE</td><td>核心自然语言理解能力集合</td></tr>
-                <tr><td>数学推理</td><td>GSM8K / MATH</td><td>小学到高中的数学推理</td></tr>
-                <tr><td>代码生成</td><td>HumanEval / MBPP</td><td>根据描述编写正确代码 (Pass@1)</td></tr>
-                <tr><td>生成质量</td><td>BLEU / ROUGE / BERTScore</td><td>开放式生成任务准确度</td></tr>
-            </tbody>
-        </table>
+    <!-- Collapsible: LLM Evaluation -->
+    <div class="collapsible fade-in" id="coll-llmeval">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-llmeval')">
+            <span>📊 <span data-i18n="s2_col4_title">如何评价 LLM？主流基准与指标</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="table-wrapper" style="margin-bottom: 12px;">
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="eval_cat">类别</th>
+                                <th data-i18n="eval_bench">基准</th>
+                                <th data-i18n="eval_what">测试内容</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-i18n="eval_r1c1">综合能力</td>
+                                <td>MMLU</td>
+                                <td data-i18n="eval_r1c3">57 学科广泛世界知识与问题解决</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>GLUE / SuperGLUE</td>
+                                <td data-i18n="eval_r2c3">核心自然语言理解能力集合</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="eval_r3c1">数学推理</td>
+                                <td>GSM8K / MATH</td>
+                                <td data-i18n="eval_r3c3">小学到高中的数学推理</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="eval_r4c1">代码生成</td>
+                                <td>HumanEval / MBPP</td>
+                                <td data-i18n="eval_r4c3">根据描述编写正确代码 (Pass@1)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="eval_r5c1">生成质量</td>
+                                <td>BLEU / ROUGE / BERTScore</td>
+                                <td data-i18n="eval_r5c3">开放式生成任务准确度</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ==================== SECTION 3: RAG ==================== -->
+<!-- SECTION 3: RAG -->
 <section class="section" id="rag">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-card-5);">🔍</div>
-        <h2>检索增强生成（RAG）与 Agentic AI <span>From Passive Retrieval to Autonomous Cognition</span></h2>
+        <div class="section-icon" style="background: var(--gradient-card-5);">🔍</div>
+        <h2 data-i18n="s3_title">检索增强生成（RAG）与 Agentic AI <span>From Passive Retrieval to Autonomous Cognition</span></h2>
     </div>
 
     <div class="highlight-box warning fade-in">
-        <h4>⚠️ 为什么需要 RAG？</h4>
-        <p>LLM 存在致命弱点：容易产生<strong>"幻觉（Hallucination）"</strong>、知识冻结于训练截止日期无法实时更新、且无法访问企业内部私有数据。RAG 通过将 LLM 的内在参数化知识与外部动态知识库结合，完美弥补了这一缺陷。</p>
+        <h4 data-i18n="s3_warn_title">⚠️ 为什么需要 RAG？</h4>
+        <p data-i18n="s3_warn_body">LLM 存在致命弱点：容易产生<strong>"幻觉（Hallucination）"</strong>、知识冻结于训练截止日期无法实时更新、且无法访问企业内部私有数据。RAG 通过将 LLM 的内在参数化知识与外部动态知识库结合，完美弥补了这一缺陷。</p>
     </div>
 
-    <!-- RAG Architecture Cards -->
-    <div class="sub-title">📐 RAG 架构演进：从 Naive 到 Agentic <span>Architecture Evolution</span></div>
-    <div class="card-grid" style="margin-bottom:24px;">
+    <!-- RAG Architecture Evolution -->
+    <div class="card-grid" style="margin-bottom: 24px;">
         <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-2);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background: var(--gradient-card-2);border-radius:var(--radius) var(--radius) 0 0;"></div>
             <h3>📦 Naive RAG</h3>
-            <p>经典的单循环"检索-阅读"管线：文档切块 → 嵌入向量化 → 向量数据库存储 → 用户查询向量化 → 余弦相似度召回 Top-K → 拼接 Prompt → LLM 生成。对简单关键词问答有效，但面对跨文档、多跳推理时容易召回大量无关噪音。</p>
+            <p data-i18n="s3_naive_body">经典的单循环"检索-阅读"管线：文档切块 → 嵌入向量化 → 向量数据库存储 → 用户查询向量化 → 余弦相似度召回 Top-K → 拼接 Prompt → LLM 生成。对简单关键词问答有效，但面对跨文档、多跳推理时容易召回大量无关噪音。</p>
             <div style="margin-top:10px;"><span class="tag tag-green">Indexing</span><span class="tag tag-blue">Retrieval</span><span class="tag tag-purple">Generation</span></div>
         </div>
         <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-1);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background: var(--gradient-card-1);border-radius:var(--radius) var(--radius) 0 0;"></div>
             <h3>🚀 Advanced RAG</h3>
-            <p>在检索前后引入优化层：<strong>查询重写（Query Rewrite）</strong>修正歧义 → 多阶段混合检索（稀疏 + 稠密） → <strong>重排模型（Reranker）</strong>二次过滤排序 → 上下文自动合并与剪裁。显著提高了复杂场景下的检索精度。</p>
+            <p data-i18n="s3_adv_body">在检索前后引入优化层：<strong>查询重写（Query Rewrite）</strong>修正歧义 → 多阶段混合检索（稀疏 + 稠密） → <strong>重排模型（Reranker）</strong>二次过滤排序 → 上下文自动合并与剪裁。显著提高了复杂场景下的检索精度。</p>
             <div style="margin-top:10px;"><span class="tag tag-amber">Query Rewrite</span><span class="tag tag-cyan">Hybrid Search</span><span class="tag tag-red">Reranker</span></div>
         </div>
         <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-4);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background: var(--gradient-card-4);border-radius:var(--radius) var(--radius) 0 0;"></div>
             <h3>🤖 Agentic RAG</h3>
-            <p>2026 年代表行业最高水平。以 LLM 为中央推理引擎（ReAct 框架），彻底打破线性逻辑：自主分解子任务 → 动态调用工具（向量库 / 网络搜索 / SQL / 计算器） → 自我评估信息完整性 → 规划新检索策略 → 综合输出。引入 Mem0 等持久记忆层实现跨会话深度上下文。</p>
+            <p data-i18n="s3_agent_body">2026 年代表行业最高水平。以 LLM 为中央推理引擎（ReAct 框架），彻底打破线性逻辑：自主分解子任务 → 动态调用工具（向量库 / 网络搜索 / SQL / 计算器） → 自我评估信息完整性 → 规划新检索策略 → 综合输出。引入 Mem0 等持久记忆层实现跨会话深度上下文。</p>
             <div style="margin-top:10px;"><span class="tag tag-purple">ReAct</span><span class="tag tag-blue">Tool Calling</span><span class="tag tag-green">Mem0</span><span class="tag tag-amber">Self-Eval</span></div>
         </div>
     </div>
 
     <!-- NotebookLM -->
-    <div class="sub-title">📓 Google NotebookLM：从静态工具到 Agentic 研究员 <span>The Cognitive Engine in Practice</span></div>
-    <div class="detail-block fade-in">
-        <h4>核心设计哲学："严格溯源（Source-grounding）"</h4>
-        <p>所有回答必须且只能基于用户上传的参考资料，并提供精确到特定段落的引用（Inline citations）。</p>
-        <ul>
-            <li><strong>深度研究（Deep Research）</strong>：从"静态 RAG 工具"蜕变为"智能体研究员"。系统将宏观问题分解为多个子查询路径，并行爬取数百个网页和数据库，动态调整检索关键词，最终综合为带严谨引用的深度简报。外部来源可一键导入 Notebook，实现知识库的动态自生长。</li>
-            <li><strong>音频概要（Audio Overviews）</strong>：多模型级联——核心 LLM 提取论点 → 对话脚本生成 → 内部评论模型审阅 → 注入人类自然对话中的停顿与不流利语（Disfluencies） → TPU v5e 以快于实时 40 倍的速度超实时语音合成。四大模式：深度解析、简报、批改、辩论。</li>
-            <li><strong>视频概述（Video Overviews）</strong>：利用 Imagen 3 将研究笔记自动转换为演示文稿，配合语音解说与关键图表的动态展示。</li>
-            <li><strong>交互模式（Interactive Mode）</strong>：用户在收听过程中可直接"加入"播客提出问题，模型即时生成回答并引导主持人恢复主线。</li>
-            <li><strong>迈向任务执行</strong>：随着 Gemini 3 模型深度整合与 Google Workspace API 全面打通，NotebookLM 正跨越"知识分析"边界，向"任务执行"终端迈进——自动识别待办事项、起草跟进邮件、生成微型应用程序。</li>
-        </ul>
+    <div class="collapsible fade-in" id="coll-notebook">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-notebook')">
+            <span>📓 <span data-i18n="s3_nb_title">Google NotebookLM：从静态工具到 Agentic 研究员</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s3_nb_p1"><strong>核心设计哲学："严格溯源（Source-grounding）"</strong>——所有回答必须且只能基于用户上传的参考资料，并提供精确到特定段落的引用。</p>
+                <ul>
+                    <li data-i18n="s3_nb_li1"><strong>深度研究（Deep Research）</strong>：从"静态 RAG 工具"蜕变为"智能体研究员"。系统将宏观问题分解为多个子查询路径，并行爬取数百个网页和数据库，动态调整检索关键词，最终综合为带严谨引用的深度简报。</li>
+                    <li data-i18n="s3_nb_li2"><strong>音频概要（Audio Overviews）</strong>：多模型级联——核心 LLM 提取论点 → 对话脚本生成 → 内部评论模型审阅 → 注入人类自然对话中的停顿与不流利语（Disfluencies） → TPU v5e 超实时语音合成。</li>
+                    <li data-i18n="s3_nb_li3"><strong>视频概述（Video Overviews）</strong>：利用 Imagen 3 将研究笔记自动转换为演示文稿，并配合语音解说与关键图表的动态展示。</li>
+                    <li data-i18n="s3_nb_li4"><strong>交互模式（Interactive Mode）</strong>：用户在收听过程中可直接"加入"播客提出问题，模型即时生成回答并引导主持人恢复主线。</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <!-- RAG Evaluation -->
-    <div class="sub-title">📏 RAG 评估体系：核心分数与工业级基准 <span>Quality Scores & Benchmarks</span></div>
-    <div class="detail-block fade-in">
-        <p>评价 RAG 必须将<strong>检索质量</strong>与<strong>生成质量</strong>剥离审视。RAGAS 框架开创了无参考评估的先河：</p>
-        <div class="metric-row">
-            <div class="metric-card"><div class="metric-value" style="color:var(--accent-1);">📌</div><div class="metric-label">上下文精确度/相关性<br>Context Precision</div></div>
-            <div class="metric-card"><div class="metric-value" style="color:var(--accent-3);">📥</div><div class="metric-label">上下文召回率<br>Context Recall</div></div>
-            <div class="metric-card"><div class="metric-value" style="color:var(--accent-4);">✅</div><div class="metric-label">回答忠实度<br>Answer Faithfulness</div></div>
-            <div class="metric-card"><div class="metric-value" style="color:var(--accent-5);">🎯</div><div class="metric-label">回答相关性<br>Answer Relevance</div></div>
+    <div class="collapsible fade-in" id="coll-rageval">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-rageval')">
+            <span>📏 <span data-i18n="s3_eval_title">RAG 评估体系：核心分数与工业级基准</span></span>
+            <span class="collapsible-icon">▼</span>
         </div>
-        <p style="margin-top:16px;"><strong>四项关键抗压能力：</strong>噪音鲁棒性（不被无关文档干扰）、拒绝能力（主动承认"我不知道"）、信息整合能力（从多份文档综合回答）、反事实鲁棒性（识别并忽略文档中的已知错误）。</p>
-    </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s3_eval_p1" style="margin-bottom:16px;">评价 RAG 必须将<strong>检索质量</strong>与<strong>生成质量</strong>剥离审视。RAGAS 框架开创了无参考评估的先河：</p>
+                <div class="metric-row">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-1);">📌</div>
+                        <div class="metric-label" data-i18n="s3_m1">上下文精确度/相关性<br>Context Precision</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-3);">📥</div>
+                        <div class="metric-label" data-i18n="s3_m2">上下文召回率<br>Context Recall</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-4);">✅</div>
+                        <div class="metric-label" data-i18n="s3_m3">回答忠实度<br>Answer Faithfulness</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-5);">🎯</div>
+                        <div class="metric-label" data-i18n="s3_m4">回答相关性<br>Answer Relevance</div>
+                    </div>
+                </div>
 
-    <div class="highlight-box insight fade-in">
-        <h4>🔬 CRAG 与 LegalBench-RAG 的关键发现</h4>
-        <p><strong>CRAG (Meta)</strong>：即使最先进的 LLM 直接回答准确率仅 34%，标准 RAG 也仅提升至 44%。<strong>LegalBench-RAG</strong> 更揭示了一个颠覆性洞见：<em>在高度专业的 RAG 部署中，信息检索的质量才是决定系统性能天花板的首要驱动力，而非 LLM 本身的推理能力。</em>使用领域微调的嵌入模型比通用顶级 LLM 配普通嵌入高出约 17 个百分点。<strong>绝大多数被归咎于"大模型幻觉"的致命错误，其根本原因实际上是第一阶段检索系统的失败。</strong>这一结论在 2026 年彻底改变了企业的资源分配策略。</p>
+                <div class="highlight-box insight" style="margin-top: 20px;">
+                    <h4 data-i18n="s3_crag_title">🔬 CRAG 与 LegalBench-RAG 的关键发现</h4>
+                    <p data-i18n="s3_crag_body"><strong>CRAG (Meta)</strong>：即使最先进的 LLM 直接回答准确率仅 34%，标准 RAG 也仅提升至 44%。<strong>LegalBench-RAG</strong> 更揭示了一个颠覆性洞见：<em>在高度专业的 RAG 部署中，信息检索的质量才是决定系统性能天花板的首要驱动力，而非 LLM 本身的推理能力。</em>使用领域微调的嵌入模型比通用顶级 LLM 配普通嵌入高出约 17 个百分点。<strong>绝大多数被归咎于"大模型幻觉"的致命错误，其根本原因实际上是第一阶段检索系统的失败。</strong></p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ==================== SECTION 4: COSMOS ==================== -->
+<!-- SECTION 4: Physical AI / Cosmos -->
 <section class="section" id="cosmos">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-card-3);">🌍</div>
-        <h2>物理 AI 与 NVIDIA Cosmos <span>World Foundation Models for Embodied Intelligence</span></h2>
+        <div class="section-icon" style="background: var(--gradient-card-3);">🌍</div>
+        <h2 data-i18n="s4_title">物理 AI 与 NVIDIA Cosmos <span>World Foundation Models for Embodied Intelligence</span></h2>
     </div>
 
     <div class="highlight-box success fade-in">
-        <h4>🌐 从数字文本到三维空间</h4>
-        <p>如果说 NotebookLM 和 Agentic RAG 是人类数字知识与文本逻辑的认知引擎，那么 AI 的下一个大航海时代必然是走向三维空间——构建理解并能改造现实世界的"物理人工智能"。自动驾驶、人形机器人和复杂工业自动化需要 AI 对重力、光影、物体恒存性和时空因果关系具备深刻直觉。</p>
+        <h4 data-i18n="s4_insight_title">🌐 从数字文本到三维空间</h4>
+        <p data-i18n="s4_insight_body">如果说 NotebookLM 和 Agentic RAG 是人类数字知识与文本逻辑的认知引擎，那么 AI 的下一个大航海时代必然是走向三维空间——构建理解并能改造现实世界的"物理人工智能"。自动驾驶、人形机器人和复杂工业自动化需要 AI 对重力、光影、物体恒存性和时空因果关系具备深刻直觉。</p>
     </div>
 
-    <!-- Cosmos Data Pipeline -->
-    <div class="sub-title">🔧 Cosmos 全栈数据管线与视觉 Tokenizer <span>NeMo Curator & Visual Tokenization</span></div>
-    <div class="detail-block fade-in">
-        <p>Cosmos 并非单一模型，而是一个为开发者打造的<strong>全栈数据处理与生成的完整生态系统</strong>。</p>
-        <ul>
-            <li><strong>NeMo Curator 数据管线：</strong>运行在 Blackwell 平台上，能在 14 天内处理、清洗并精标注高达 2000 万小时的庞大视频数据量（传统 CPU 集群需要一年以上）。</li>
-            <li><strong>Cosmos Tokenizer（视觉分词器）：</strong>将连续图像和高帧率视频帧压缩转化为供神经网络处理的视觉 Token。在维持最高视觉保真度的同时，实现比世界主流方法<strong>高出 8 倍的压缩率</strong>，处理速度提升 12 倍。这使得处理十亿级视频 Token 成为可能。</li>
-        </ul>
-    </div>
-
-    <!-- Cosmos Models -->
-    <div class="sub-title">🧬 三大基础模型矩阵 <span>Predict · Transfer · Reason</span></div>
-    <div class="card-grid" style="margin-bottom:24px;">
+    <div class="card-grid">
         <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-3);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient-card-3);border-radius:var(--radius) var(--radius) 0 0;"></div>
             <h3>🔮 Cosmos Predict</h3>
-            <p><strong>世界生成与状态预测。</strong>40亿～140亿参数的自回归基础模型（基于 9000 亿 Token 训练）。输入当前环境状态（图像/雷达/传感器），精准预测未来长达 30 秒的动态演化视频。自动驾驶系统可在"脑海"中推演避让策略的连带反应。</p>
+            <p data-i18n="s4_predict_body"><strong>世界生成与状态预测。</strong>40亿～140亿参数的自回归基础模型。输入当前环境状态（图像/雷达/传感器），精准预测未来长达 30 秒的动态演化视频。自动驾驶系统可在"脑海"中推演避让策略的连带反应。</p>
         </div>
         <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-5);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient-card-5);border-radius:var(--radius) var(--radius) 0 0;"></div>
             <h3>🔄 Cosmos Transfer</h3>
-            <p><strong>跨模态转换，弥合 Sim-to-Real Gap。</strong>基于扩散架构，将 3D 仿真引擎的"卡通"渲染瞬间转换为符合现实世界光影、纹理甚至镜头畸变的照片级真实视频。可命令系统衍生"暴雨中的黄昏"等环境变体，实现合成数据的几何级扩增。</p>
+            <p data-i18n="s4_transfer_body"><strong>跨模态转换，弥合 Sim-to-Real Gap。</strong>基于扩散架构，将 3D 仿真引擎的"卡通"渲染瞬间转换为符合现实世界光影、纹理甚至镜头畸变的照片级真实视频。可命令系统衍生"暴雨中的黄昏"等环境变体，实现合成数据的几何级扩增。</p>
         </div>
         <div class="card fade-in">
-            <div class="card-bar" style="background:var(--gradient-card-1);"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient-card-1);border-radius:var(--radius) var(--radius) 0 0;"></div>
             <h3>🧩 Cosmos Reason</h3>
-            <p><strong>物理常识与逻辑推理。</strong>专门针对物理世界常识优化的大模型，让机器人和视觉分析智能体能够像人类一样通过<strong>长链思维（Chain-of-thought）</strong>理解复杂环境中的因果逻辑，并做出符合物理规律的决策判断。</p>
+            <p data-i18n="s4_reason_body"><strong>物理常识与逻辑推理。</strong>专门针对物理世界常识优化的大模型，让机器人和视觉分析智能体能够像人类一样通过<strong>长链思维（Chain-of-thought）</strong>理解复杂环境中的因果逻辑，并做出符合物理规律的决策判断。</p>
         </div>
     </div>
 
-    <div class="highlight-box insight fade-in">
-        <h4>🔑 Cosmos ≠ Sora：评价标准截然不同</h4>
-        <p>Cosmos 的生成目标不是为了制作艺术美感的超高清娱乐视频。其核心价值在于<strong>对物理定律的绝对忠实</strong>——3D 空间一致性、物体恒存性（Object Permanence）和复杂物理交互对齐度。这才是训练安全可靠的具身智能所必需的"教材"。到 2026 年，Waabi、Wayve、波士顿动力、LG 等行业巨头已深度整合 Cosmos 与 Omniverse/GR00T 平台。</p>
+    <div class="highlight-box insight fade-in" style="margin-top:20px;">
+        <h4 data-i18n="s4_diff_title">🔑 Cosmos ≠ Sora：评价标准截然不同</h4>
+        <p data-i18n="s4_diff_body">Cosmos 的生成目标不是为了制作艺术美感的超高清娱乐视频。其核心价值在于<strong>对物理定律的绝对忠实</strong>——3D 空间一致性、物体恒存性和复杂物理交互对齐度。这才是训练安全可靠的具身智能所必需的"教材"。</p>
     </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ==================== SECTION 5: INFRASTRUCTURE ==================== -->
+<!-- SECTION 5: Infrastructure -->
 <section class="section" id="infra">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-card-6);">⚡</div>
-        <h2>算力基础设施与 AI 工厂 <span>NVIDIA Blackwell Ultra B300 & GB300 NVL72</span></h2>
+        <div class="section-icon" style="background: var(--gradient-card-6);">⚡</div>
+        <h2 data-i18n="s5_title">算力基础设施与 AI 工厂 <span>NVIDIA Blackwell Ultra B300 & GB300 NVL72</span></h2>
     </div>
 
     <!-- Why GPU Cluster -->
-    <div class="sub-title">🏭 为什么需要 GPU 集群与加速计算？ <span>The Fundamental Physics of AI Training</span></div>
-    <div class="detail-block fade-in">
-        <p>把"训练 LLM"比作"阅读全世界所有的书并总结出人类知识规律"——传统 CPU 像是一位博士每次只能一页一页看书，而 GPU 集群则是拥有几万名超级速读助手的"超级工厂"。</p>
-        <ul>
-            <li><strong>装不下：</strong>GPT-3 的 1750 亿参数仅存储就需约 350GB 显存，而单张 H100 仅有 80GB。模型必须"大卸八块"分散到成百上千张 GPU 上。</li>
-            <li><strong>算不完：</strong>不并行处理，单张 GPU 可能需要几十年才能完成一次训练。</li>
-            <li><strong>致命瓶颈：</strong>几万张 GPU 同时工作时，约 20%~50% 时间花在网络数据交换（All-Reduce 等集合通信）上——木桶效应下，一根链路卡顿就导致所有 GPU 停工。</li>
-        </ul>
-    </div>
-
-    <!-- Accelerated Computing -->
-    <div class="sub-title">🚀 NVIDIA 加速计算的四大支柱 <span>Reinventing the Data Center</span></div>
-    <div class="card-grid" style="margin-bottom:24px;">
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🔗 NVLink & NVSwitch</h3>
-            <p>GPU 之间直接通过专用"立交桥"相连，带宽高达 1.8 TB/s，彻底绕开 CPU 瓶颈。配合 NVSwitch 让几十上百个 GPU 共享内存，如同大脑融为一体。</p>
+    <div class="collapsible fade-in open" id="coll-whygpu">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-whygpu')">
+            <span>🏭 <span data-i18n="s5_why_title">为什么需要 GPU 集群与加速计算？</span></span>
+            <span class="collapsible-icon">▼</span>
         </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>📡 RDMA 直达网络</h3>
-            <p>InfiniBand 或 RoCEv2 技术让一台机器的 GPU 直接跨网线读写另一台 GPU 内存，完全不经过 CPU 或操作系统——实现"零拷贝"超低延迟。</p>
-        </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🧠 NCCL 通信库</h3>
-            <p>NVIDIA 集合通信库，自动为几万个 GPU 规划最高效的数据交换路线（环形/树形拓扑），确保全网数据流动最快最不拥堵。</p>
-        </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>⚙️ SHARP 网内计算</h3>
-            <p>让网络交换机芯片拥有计算能力——GPU 发到交换机的数据在传输途中就顺手完成汇总计算（All-Reduce），网络传输负担直接减半。</p>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s5_why_p1">把"训练 LLM"比作"阅读全世界所有的书并总结出人类知识规律"——传统 CPU 像是一位博士每次只能一页一页看书，而 GPU 集群则是拥有几万名超级速读助手的"超级工厂"。</p>
+                <ul>
+                    <li data-i18n="s5_why_li1"><strong>装不下：</strong>GPT-3 的 1750 亿参数仅存储就需约 350GB 显存，而单张 H100 仅有 80GB。模型必须"大卸八块"分散到成百上千张 GPU 上。</li>
+                    <li data-i18n="s5_why_li2"><strong>算不完：</strong>不并行处理，单张 GPU 可能需要几十年才能完成一次训练。</li>
+                    <li data-i18n="s5_why_li3"><strong>致命瓶颈：</strong>几万张 GPU 同时工作时，约 20%~50% 时间花在网络数据交换（All-Reduce 等集合通信）上——木桶效应下，一根链路卡顿就导致所有 GPU 停工。</li>
+                </ul>
+            </div>
         </div>
     </div>
 
     <!-- B300 Architecture -->
-    <div class="sub-title">🔥 Blackwell Ultra B300 微架构革命 <span>The Chip Powering the AI Factory Era</span></div>
-    <div class="metric-row fade-in">
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-6);">2080亿</div><div class="metric-label">晶体管数量<br>(Hopper 的 2.6×)</div></div>
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-1);">15 PF</div><div class="metric-label">NVFP4 算力<br>(Hopper 的 7.5×)</div></div>
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-4);">288 GB</div><div class="metric-label">HBM3e 显存<br>(12-Hi 堆叠)</div></div>
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-5);">8 TB/s</div><div class="metric-label">显存带宽<br>(H100: 3.35 TB/s)</div></div>
-    </div>
-    <div class="detail-block fade-in">
-        <ul>
-            <li><strong>双光刻（Dual-reticle）统一架构：</strong>TSMC 4NP 工艺，两颗达到光刻面积上限的超大 Die 通过 10 TB/s NV-HBI 无缝拼接，软件层表现为统一 CUDA 加速器节点，大幅降低跨 Die 并行编程难度。</li>
-            <li><strong>NVFP4 精度突破：</strong>第二代张量核心全面支持微缩放（Micro-tensor scaling）格式，4 位浮点数在维持近 FP8 模型精度的前提下，将参数存储足迹缩小近 1.8 倍。</li>
-            <li><strong>突破"内存墙"的 HBM3e：</strong>采用最先进的 12-Hi 堆叠工艺，单卡显存达 288 GB、总带宽 8 TB/s。超大 MoE 模型可紧凑部署在更少节点甚至单节点内，最大限度消除跨节点网络通信的沉没开销。</li>
-        </ul>
+    <div class="collapsible fade-in" id="coll-b300">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-b300')">
+            <span>🔥 <span data-i18n="s5_b300_title">Blackwell Ultra B300 微架构革命</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="metric-row">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-6);">2080亿</div>
+                        <div class="metric-label" data-i18n="s5_b300_m1">晶体管数量<br>(Hopper 的 2.6×)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-1);">15 PF</div>
+                        <div class="metric-label" data-i18n="s5_b300_m2">NVFP4 算力<br>(Hopper 的 7.5×)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-4);">288 GB</div>
+                        <div class="metric-label" data-i18n="s5_b300_m3">HBM3e 显存<br>(12-Hi 堆叠)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-5);">8 TB/s</div>
+                        <div class="metric-label" data-i18n="s5_b300_m4">显存带宽<br>(H100: 3.35 TB/s)</div>
+                    </div>
+                </div>
+                <ul style="margin-top:16px;">
+                    <li data-i18n="s5_b300_li1"><strong>双光刻（Dual-reticle）统一架构：</strong>TSMC 4NP 工艺，两颗超大 Die 通过 10 TB/s NV-HBI 无缝拼接，软件层表现为统一 CUDA 加速器节点。</li>
+                    <li data-i18n="s5_b300_li2"><strong>NVFP4 精度突破：</strong>4 位微缩放浮点数在维持近 FP8 模型精度的前提下，将参数存储足迹缩小近 1.8 倍。</li>
+                    <li data-i18n="s5_b300_li3"><strong>突破"内存墙"：</strong>12-Hi HBM3e 堆叠使单卡显存达 288 GB，使超大 MoE 模型可紧凑部署在更少节点。</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <!-- GB300 NVL72 -->
-    <div class="sub-title">🏗️ GB300 NVL72：机架级 AI 工厂的性能经济学 <span>50× Output Leap</span></div>
-    <div class="detail-block fade-in">
-        <p>72 颗 Blackwell Ultra GPU + 36 颗 Grace CPU 紧密耦合在一个液冷机架中。9 台物理 NVLink 交换机将 72 颗 GPU 完全无阻塞连接，聚合带宽达 <strong>130 TB/s</strong>，共享 <strong>37 TB</strong> 超级统一内存池（含 HBM3e 与 CPU 内存）。在这 72 颗 GPU 之间传输模型分片和对齐梯度的速度与在同一芯片内部几乎没有区别。</p>
-    </div>
-    <div class="metric-row fade-in">
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-6);">50×</div><div class="metric-label">AI 工厂推理产出飞跃<br>(vs Hopper 系统)</div></div>
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-4);">35×</div><div class="metric-label">每百万 Token 推理<br>成本骤降</div></div>
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-1);">10×</div><div class="metric-label">TPS/用户提升<br>（交互体验）</div></div>
-        <div class="metric-card"><div class="metric-value" style="color:var(--accent-5);">120 kW</div><div class="metric-label">单机架功耗<br>（强制液冷）</div></div>
-    </div>
-    <div class="highlight-box insight fade-in" style="margin-top:16px;">
-        <h4>💰 成本坍塌效应</h4>
-        <p>每生成一百万个推理 Token 的成本骤降达 <strong>35 倍</strong>。这种成本坍塌正是支撑未来数以百亿计的全天候 AI 智能体在云端上神不知鬼不觉地运作、而不会引发企业 IT 预算崩溃的核心物质基础。</p>
+    <div class="collapsible fade-in" id="coll-nvl72">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-nvl72')">
+            <span>🏗️ <span data-i18n="s5_nvl72_title">GB300 NVL72：机架级 AI 工厂的性能经济学</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s5_nvl72_p1">72 颗 Blackwell Ultra GPU + 36 颗 Grace CPU 紧密耦合在一个液冷机架中。9 台 NVLink 交换机将 72 颗 GPU 完全无阻塞连接，聚合带宽达 <strong>130 TB/s</strong>，共享 <strong>37 TB</strong> 超级统一内存池。</p>
+                <div class="metric-row">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-6);">50×</div>
+                        <div class="metric-label" data-i18n="s5_nvl72_m1">AI 工厂推理产出飞跃<br>(vs Hopper 系统)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-4);">35×</div>
+                        <div class="metric-label" data-i18n="s5_nvl72_m2">每百万 Token 推理<br>成本骤降</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-1);">10×</div>
+                        <div class="metric-label" data-i18n="s5_nvl72_m3">TPS/用户提升<br>（交互体验）</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-5);">120 kW</div>
+                        <div class="metric-label" data-i18n="s5_nvl72_m4">单机架功耗<br>（强制液冷）</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- AI Factory Components -->
-    <div class="sub-title">🏭 AI 工厂的四大核心组成 <span>Hardware · Network · Storage · Software</span></div>
-    <div class="card-grid" style="margin-bottom:24px;">
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🔧 GPU 算力</h3>
-            <p>核心生产线。GPU 由成千上万个微小核心组成，擅长并行矩阵乘法。单节点通常塞入 8 张顶级 GPU，通过 NVLink 融合为超级大脑。</p>
+    <div class="collapsible fade-in" id="coll-factory">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-factory')">
+            <span>🏭 <span data-i18n="s5_fac_title">AI 工厂的四大核心组成</span></span>
+            <span class="collapsible-icon">▼</span>
         </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🌐 网络</h3>
-            <p>严格分工的物流系统：<strong>后端网络</strong>（GPU↔GPU 集合通信专网，无损/超高带宽）、<strong>前端网络</strong>（连接外部世界）、<strong>存储网络</strong>（数据高速输送通道）。</p>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="card-grid" style="margin-bottom: 12px;">
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>🔧 GPU 算力</h3>
+                        <p data-i18n="s5_fac_gpu">核心生产线。GPU 由成千上万个微小核心组成，擅长并行矩阵乘法。单节点通常塞入 8 张顶级 GPU，通过 NVLink 融合为超级大脑。</p>
+                    </div>
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>🌐 网络</h3>
+                        <p data-i18n="s5_fac_net">严格分工的物流系统：<strong>后端网络</strong>（GPU↔GPU 集合通信专网，无损/超高带宽）、<strong>前端网络</strong>（连接外部世界）、<strong>存储网络</strong>（数据高速输送通道）。</p>
+                    </div>
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>💾 存储</h3>
+                        <p data-i18n="s5_fac_store">全闪存 NVMe 并行文件系统（WEKA / VAST / DDN），支持海量并发读写，防止 GPU "等米下锅"。</p>
+                    </div>
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>🧑‍💼 软件调度</h3>
+                        <p data-i18n="s5_fac_soft">Kubernetes + Run:ai 将整个数据中心"池化"为灵活资源池。CUDA 唤醒 GPU 执行并行计算，NCCL 优化多 GPU 间通信路径。</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>💾 存储</h3>
-            <p>全闪存 NVMe 并行文件系统（WEKA / VAST / DDN），支持海量并发读写，防止 GPU "等米下锅"。训练过程中高频的 Checkpoint 写入会产生极高的突发写入洪峰。</p>
-        </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🧑‍💼 软件调度</h3>
-            <p><strong>Kubernetes + Run:ai</strong> 将整个数据中心"池化"为灵活资源池。<strong>CUDA</strong> 唤醒 GPU 执行并行计算，<strong>NCCL</strong> 优化多 GPU 间通信路径。推理阶段 K8s 可自动扩缩容并将一张物理 GPU 切碎为多个 Fractional GPU 以最大化 ROI。</p>
-        </div>
-    </div>
-
-    <!-- Training vs Inference GPU -->
-    <div class="sub-title">🔄 训练 vs 推理：GPU 工作特征对比 <span>Two Fundamentally Different Workloads</span></div>
-    <div class="table-wrapper fade-in" style="margin-bottom:24px;">
-        <table class="comp-table">
-            <thead><tr><th>维度</th><th>训练（Training）</th><th>推理（Inference）</th></tr></thead>
-            <tbody>
-                <tr><td>模式</td><td>离线批处理，高度同步</td><td>在线实时响应，非同步</td></tr>
-                <tr><td>并行方式</td><td>数据并行 + 张量并行 + 流水线并行</td><td>多数可在单节点内完成（8 GPU NVLink）</td></tr>
-                <tr><td>核心操作</td><td>计算→交换→规约循环（All-Reduce）</td><td>Prefill + 自回归 Decode（KV Cache 密集）</td></tr>
-                <tr><td>瓶颈</td><td>网络带宽 + 尾部延迟（木桶效应）</td><td>显存容量（KV Cache）+ 首字延迟（TTFT）</td></tr>
-                <tr><td>核心指标</td><td>任务完成时间（JCT）、扩展效率</td><td>TTFT、ITL、吞吐量、并发用户数</td></tr>
-            </tbody>
-        </table>
     </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ==================== SECTION 6: NETWORK ==================== -->
+<!-- SECTION 6: Network -->
 <section class="section" id="network">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-card-7);">🌐</div>
-        <h2>数据中心网络与 UEC 1.0 <span>Ultra Ethernet Consortium — Redefining AI-Scale Networking</span></h2>
+        <div class="section-icon" style="background: var(--gradient-card-7);">🌐</div>
+        <h2 data-i18n="s6_title">数据中心网络与 UEC 1.0 <span>Ultra Ethernet Consortium — Redefining AI-Scale Networking</span></h2>
     </div>
 
     <!-- Network Requirements -->
-    <div class="sub-title">📡 训练 vs 推理：对网络的不同要求 <span>East-West & North-South</span></div>
-    <div class="table-wrapper fade-in" style="margin-bottom:24px;">
-        <table class="comp-table">
-            <thead><tr><th>维度</th><th>训练（Training）</th><th>推理（Inference）</th></tr></thead>
-            <tbody>
-                <tr><td>同步性</td><td>高度同步的"计算-交换-规约"循环，木桶效应</td><td>非同步、实时响应</td></tr>
-                <tr><td>东西向网络</td><td>无损、极高带宽（400G/800G per GPU）、RDMA、逐包负载均衡</td><td>超低延迟（微秒级），小包 Token 传输敏感</td></tr>
-                <tr><td>南北向网络</td><td>极高吞吐用于数据摄取和 Checkpoint 读写；严格 QoS 优先级</td><td>接收用户 Prompt、连接向量数据库（RAG）、负载均衡、高可用</td></tr>
-                <tr><td>核心指标</td><td>任务完成时间（JCT）、扩展效率</td><td>首字延迟（TTFT）、吞吐量、并发用户数</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- RoCEv2 Problem -->
-    <div class="sub-title">🚨 传统 RoCEv2 在 AI 流量下的崩溃 <span>Why Standard Ethernet Fails at AI Scale</span></div>
-    <div class="detail-block fade-in">
-        <p>RoCEv2 继承了传统以太网的两个致命缺陷：</p>
-        <ul>
-            <li><strong>ECMP 静态哈希导致"大象流"热点：</strong>AI 训练中的数据流高度密集且突发，传统 ECMP 强制"同一条数据流（Flow）的所有包必须走同一条路径"，极易导致多条大流被塞入同一条链路，其他链路却处于闲置。由于"木桶效应"，整个万卡集群会因一根链路的堵塞而被迫停工等待。</li>
-            <li><strong>PFC "急刹车"引发连锁反应：</strong>为满足 RDMA 对无损的要求，RoCEv2 只能依赖 PFC（基于优先级的流量控制）——交换机缓存将满时向上游发送暂停帧，强制停止整条链路的该优先级流量。这极易引发队头阻塞（HoL blocking）、拥塞树蔓延甚至全网死锁。</li>
-        </ul>
-    </div>
-
-    <!-- Protocol Comparison -->
-    <div class="sub-title">⚖️ RoCEv2 vs InfiniBand vs UEC 1.0 全面对比 <span>Three Generations of AI Networking</span></div>
-    <div class="table-wrapper fade-in" style="margin-bottom:24px;">
-        <table class="comp-table">
-            <thead><tr><th>特性</th><th>RoCEv2</th><th>InfiniBand</th><th>UEC 1.0</th></tr></thead>
-            <tbody>
-                <tr><td>网络模型</td><td>以太网上模拟无损</td><td>原生无损网络</td><td>尽力而为以太网 + 端侧保障</td></tr>
-                <tr><td>拥塞控制</td><td>PFC + ECN (DCQCN)</td><td>信用流控 + CCA (FECN/BECN)</td><td>Packet Trimming + 端到端 UET-CC</td></tr>
-                <tr><td>负载均衡</td><td>ECMP（按 Flow 哈希）</td><td>自适应路由（子网管理器）</td><td>逐包喷洒（Per-packet Spraying）</td></tr>
-                <tr><td>乱序容忍</td><td>❌ 灾难性（Go-Back-N 重传）</td><td>❌ 严格按序</td><td>✅ DDP 直接内存放置</td></tr>
-                <tr><td>状态管理</td><td>基于连接（QP），线性膨胀</td><td>基于连接（QP）</td><td>无连接（libfabric API），不随集群扩大</td></tr>
-                <tr><td>生态</td><td>开放但调优复杂</td><td>单一厂商主导，闭环生态</td><td>多厂商开放标准（Cisco/Broadcom/AMD…）</td></tr>
-                <tr><td>网内计算</td><td>❌</td><td>✅ SHARP</td><td>✅ INC (In-Network Collectives)</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- UEC Core Mechanisms -->
-    <div class="sub-title">🚀 UEC 1.0 核心机制深度解析 <span>Packet Spraying · DDP · Trimming · INC</span></div>
-    <div class="detail-block fade-in">
-        <p>UEC 的核心设计哲学：<strong>"利用端侧（NIC）极度丰富的计算能力，换取中间交换机网络架构的极致简洁与高速运转"</strong>。放弃对绝对无损环境的强行依赖，引入全新的<strong>超以太网传输协议（UET）</strong>。</p>
-    </div>
-    <div class="card-grid" style="margin-bottom:24px;">
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>📦 逐包喷洒（Per-Packet Spraying）</h3>
-            <p>SuperNIC 在<strong>逐个数据包</strong>层面进行动态路由决策，将庞大 AI 消息的海量数据包均匀"喷洒"到所有等价路径上。完美打散"大象流"，确保每根线缆利用率达 <strong>100% 绝对均衡</strong>，彻底消除哈希冲突造成的网络热点。</p>
+    <div class="collapsible fade-in open" id="coll-netreq">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-netreq')">
+            <span>📡 <span data-i18n="s6_req_title">训练 vs 推理：对网络的不同要求</span></span>
+            <span class="collapsible-icon">▼</span>
         </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🎯 DDP 直接数据放置（Direct Data Placement）</h3>
-            <p>每个被喷洒的数据包都携带目标 GPU <strong>物理内存地址标签（Memory Tags）</strong>。乱序到达的数据包如散弹一样到达接收端网卡时，无需在缓冲区等待重组——网卡硬件直接将 Payload 精准放置到正确内存位置。对上层 NCCL 等通信库<strong>完全透明</strong>。</p>
-        </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>✂️ 数据包裁剪（Packet Trimming）</h3>
-            <p>当微突发导致交换机缓存溢出时，不直接丢弃整个数据包，而是<strong>"裁剪"</strong>掉大载荷，仅保留微小报头（Header）快速转发给接收端。实现微秒级丢包检测与精确微量重传，而不影响大局吞吐。</p>
-        </div>
-        <div class="card fade-in" style="box-shadow:none; border:1px solid var(--border);">
-            <h3>🧮 网络内计算（INC）</h3>
-            <p>支持 INC 的交换机 ASIC 在传输数据的过程中顺手完成 AI 梯度数据的聚合计算（如 All-Reduce 求和），将节点间需要跨网络传输的原始数据量<strong>削减一半以上</strong>，最大加速超大规模集群的同步循环。</p>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="table-wrapper">
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="s6_t_dim">维度</th>
+                                <th data-i18n="s6_t_train">训练（Training）</th>
+                                <th data-i18n="s6_t_infer">推理（Inference）</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-i18n="s6_t_r1c1">同步性</td>
+                                <td data-i18n="s6_t_r1c2">高度同步的"计算-交换-规约"循环，木桶效应</td>
+                                <td data-i18n="s6_t_r1c3">非同步、实时响应</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_t_r2c1">东西向网络</td>
+                                <td data-i18n="s6_t_r2c2">无损、极高带宽（400G/800G per GPU）、RDMA</td>
+                                <td data-i18n="s6_t_r2c3">超低延迟（微秒级），小包 Token 传输敏感</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_t_r3c1">南北向网络</td>
+                                <td data-i18n="s6_t_r3c2">极高吞吐用于数据摄取和 Checkpointing</td>
+                                <td data-i18n="s6_t_r3c3">接收用户 Prompt、连接向量数据库（RAG）</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_t_r4c1">核心指标</td>
+                                <td data-i18n="s6_t_r4c2">任务完成时间（JCT）、扩展效率</td>
+                                <td data-i18n="s6_t_r4c3">首字延迟（TTFT）、吞吐量、并发用户数</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- UEC NIC Requirements -->
-    <div class="sub-title">🔌 UEC 对网络设备与网卡的要求 <span>Profiles & Hardware Offload</span></div>
-    <div class="detail-block fade-in">
-        <h4>对交换机的要求（大部分可选/推荐）</h4>
-        <ul>
-            <li><strong>基础（必选）：</strong>标准 IP 路由/以太网转发、ECMP、ECN 标记、独立流量分类（DSCP）</li>
-            <li><strong>高级（可选）：</strong>Packet Trimming、链路层重传（LLR）、基于信用的流量控制（CBFC）</li>
-        </ul>
-        <h4 style="margin-top:16px;">对网卡（SuperNIC / Fabric Endpoint）的要求（核心创新）</h4>
-        <ul>
-            <li>硬件级<strong>乱序重组与直接内存放置</strong>（DDP）</li>
-            <li>硬件实现 <strong>UET-CC 端到端拥塞控制算法</strong>（响应 ECN + Trimmed packets）</li>
-            <li><strong>无连接状态管理</strong>——放弃 QP 模式，基于 JobID 的临时包交付上下文（PDC），状态表不随集群扩大而线性爆炸</li>
-            <li>三种灵活配置文件（Profiles）：<strong>AI Base</strong>（基础需求）、<strong>AI Full</strong>（精确匹配 + CCL 优化）、<strong>HPC</strong>（通配符标签匹配 + MPI 支持）</li>
-        </ul>
+    <!-- RoCEv2 vs IB vs UEC -->
+    <div class="collapsible fade-in" id="coll-protocols">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-protocols')">
+            <span>⚖️ <span data-i18n="s6_proto_title">RoCEv2 vs InfiniBand vs UEC 1.0 对比</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="table-wrapper">
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="s6_p_feature">特性</th>
+                                <th>RoCEv2</th>
+                                <th>InfiniBand</th>
+                                <th>UEC 1.0</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-i18n="s6_p_r1">网络模型</td>
+                                <td data-i18n="s6_p_r1c2">以太网上模拟无损</td>
+                                <td data-i18n="s6_p_r1c3">原生无损网络</td>
+                                <td data-i18n="s6_p_r1c4">尽力而为以太网 + 端侧保障</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_p_r2">拥塞控制</td>
+                                <td>PFC + ECN (DCQCN)</td>
+                                <td data-i18n="s6_p_r2c3">信用流控 + CCA (FECN/BECN)</td>
+                                <td data-i18n="s6_p_r2c4">Packet Trimming + 端到端 UET-CC</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_p_r3">负载均衡</td>
+                                <td data-i18n="s6_p_r3c2">ECMP（按 Flow 哈希）</td>
+                                <td data-i18n="s6_p_r3c3">自适应路由（子网管理器）</td>
+                                <td data-i18n="s6_p_r3c4">逐包喷洒（Per-packet Spraying）</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_p_r4">乱序容忍</td>
+                                <td data-i18n="s6_p_r4c2">❌ 灾难性（Go-Back-N）</td>
+                                <td data-i18n="s6_p_r4c3">❌ 严格按序</td>
+                                <td data-i18n="s6_p_r4c4">✅ DDP 直接内存放置</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_p_r5">状态管理</td>
+                                <td data-i18n="s6_p_r5c2">基于连接（QP）</td>
+                                <td data-i18n="s6_p_r5c3">基于连接（QP）</td>
+                                <td data-i18n="s6_p_r5c4">无连接（libfabric API）</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_p_r6">生态</td>
+                                <td data-i18n="s6_p_r6c2">开放但调优复杂</td>
+                                <td data-i18n="s6_p_r6c3">单一厂商主导</td>
+                                <td data-i18n="s6_p_r6c4">多厂商开放标准（Cisco/Broadcom/AMD…）</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="s6_p_r7">网内计算</td>
+                                <td>❌</td>
+                                <td>✅ SHARP</td>
+                                <td data-i18n="s6_p_r7c4">✅ INC (In-Network Collectives)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Load Balancing Comparison -->
-    <div class="sub-title">🔀 负载均衡方案全景对比 <span>From ECMP to Per-Packet Spraying</span></div>
-    <div class="table-wrapper fade-in" style="margin-bottom:24px;">
-        <table class="comp-table">
-            <thead><tr><th>方案</th><th>粒度</th><th>乱序风险</th><th>均衡度</th></tr></thead>
-            <tbody>
-                <tr><td>Static ECMP</td><td>Per-Flow（五元组哈希）</td><td>无</td><td>差（大象流冲突）</td></tr>
-                <tr><td>Enhanced ECMP / QP Scaling</td><td>Per-Flow（扩展 QP/BTH 哈希因子）</td><td>无</td><td>中</td></tr>
-                <tr><td>Flowlet DLB</td><td>Per-Flowlet（流片段）</td><td>极低</td><td>高</td></tr>
-                <tr><td><strong>Packet Spraying (UEC)</strong></td><td><strong>Per-Packet（逐包）</strong></td><td>高（DDP 解决）</td><td><strong>极致（100% 链路利用）</strong></td></tr>
-                <tr><td>Centralized TE</td><td>Per-Flow（中央控制器下发）</td><td>无</td><td>高（但有控制面延迟）</td></tr>
-                <tr><td>Global LB (GLB)</td><td>Per-Flow（感知下一跳/下下一跳拥塞）</td><td>无</td><td>高（宏观避开深层热点）</td></tr>
-            </tbody>
-        </table>
+    <!-- UEC Deep Dive -->
+    <div class="collapsible fade-in" id="coll-uec">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-uec')">
+            <span>🚀 <span data-i18n="s6_uec_title">UEC 1.0 核心机制深度解析</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <p data-i18n="s6_uec_p1" style="margin-bottom: 16px;">UEC 的核心设计哲学：<strong>"利用端侧（NIC）极度丰富的计算能力，换取中间交换机网络架构的极致简洁与高速运转"</strong>。</p>
+
+                <div class="card-grid" style="margin-bottom:16px;">
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>📦 <span data-i18n="s6_uec_c1_t">逐包喷洒</span></h3>
+                        <p data-i18n="s6_uec_c1">SuperNIC 在逐个数据包层面进行动态路由决策，将庞大 AI 消息的海量数据包均匀"喷洒"到所有等价路径上。完美打散"大象流"，确保每根线缆利用率达 100% 绝对均衡。</p>
+                    </div>
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>🎯 <span data-i18n="s6_uec_c2_t">DDP 直接数据放置</span></h3>
+                        <p data-i18n="s6_uec_c2">每个被喷洒的数据包都携带目标 GPU 物理内存地址标签。乱序到达的数据包无需在缓冲区等待重组，网卡硬件直接将 Payload 精准放置到正确内存位置。对上层 NCCL 等通信库完全透明。</p>
+                    </div>
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>✂️ <span data-i18n="s6_uec_c3_t">数据包裁剪</span></h3>
+                        <p data-i18n="s6_uec_c3">当微突发导致交换机缓存溢出时，不直接丢弃整个数据包，而是"裁剪"掉大载荷，仅保留微小报头快速转发给接收端。实现微秒级丢包检测与精确微量重传，不影响大局。</p>
+                    </div>
+                    <div class="card" style="box-shadow:none;border:1px solid var(--border);">
+                        <h3>🧮 <span data-i18n="s6_uec_c4_t">网络内计算（INC）</span></h3>
+                        <p data-i18n="s6_uec_c4">支持 INC 的交换机 ASIC 在传输数据的过程中顺手完成 AI 梯度数据的聚合计算（如 All-Reduce 求和），将节点间需要跨网络传输的原始数据量削减一半以上。</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box success">
+                    <h4 data-i18n="s6_uec_future_title">🔮 UEC 的战略意义</h4>
+                    <p data-i18n="s6_uec_future_body">凭借其高度特裁的多厂商生态、消除供应商锁定风险的开放性，以及天然兼容现存数据中心协议的巨大优势，超以太网正势不可挡地成为支撑未来万亿参数集群扩展的核心网络骨干。随着 Broadcom、AMD 等厂商开始量产基于该规范的高速交换芯片与网卡，UEC 架构正在快速拉平以太网与 InfiniBand 之间在无损传输和最低延迟上的鸿沟。</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="highlight-box success fade-in">
-        <h4>🔮 UEC 的战略意义</h4>
-        <p>凭借其高度特裁的多厂商生态、消除供应商锁定风险的开放性，以及天然兼容现存数据中心协议的巨大优势，超以太网正势不可挡地成为支撑未来万亿参数集群扩展的核心网络骨干。随着 Broadcom、AMD 等厂商开始量产基于该规范的高速网络交换芯片与网卡，加之 400G/Lane 和共封装光学（CPO）等物理层技术的突破，UEC 架构正在快速拉平以太网与 InfiniBand 之间在无损传输和最低延迟上的鸿沟。</p>
+    <!-- Packet Spraying & Adaptive Routing -->
+    <div class="collapsible fade-in" id="coll-spray">
+        <div class="collapsible-header" onclick="toggleCollapsible('coll-spray')">
+            <span>🔀 <span data-i18n="s6_spray_title">Adaptive Routing、Packet Spraying 与负载均衡方案对比</span></span>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-body">
+            <div class="collapsible-content">
+                <div class="table-wrapper" style="margin-bottom:16px;">
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="s6_lb_scheme">方案</th>
+                                <th data-i18n="s6_lb_granularity">粒度</th>
+                                <th data-i18n="s6_lb_ooo">乱序风险</th>
+                                <th data-i18n="s6_lb_balance">均衡度</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Static ECMP</td>
+                                <td data-i18n="s6_lb_r1c2">Per-Flow（五元组哈希）</td>
+                                <td data-i18n="s6_lb_r1c3">无</td>
+                                <td data-i18n="s6_lb_r1c4">差（大象流冲突）</td>
+                            </tr>
+                            <tr>
+                                <td>Enhanced ECMP / QP Scaling</td>
+                                <td data-i18n="s6_lb_r2c2">Per-Flow（扩展 QP 哈希因子）</td>
+                                <td data-i18n="s6_lb_r2c3">无</td>
+                                <td data-i18n="s6_lb_r2c4">中</td>
+                            </tr>
+                            <tr>
+                                <td>Flowlet DLB</td>
+                                <td data-i18n="s6_lb_r3c2">Per-Flowlet（流片段）</td>
+                                <td data-i18n="s6_lb_r3c3">极低</td>
+                                <td data-i18n="s6_lb_r3c4">高</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Packet Spraying</strong></td>
+                                <td data-i18n="s6_lb_r4c2"><strong>Per-Packet</strong>（逐包）</td>
+                                <td data-i18n="s6_lb_r4c3">高（需 DDP 解决）</td>
+                                <td data-i18n="s6_lb_r4c4"><strong>极致（100% 链路利用）</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Centralized TE</td>
+                                <td data-i18n="s6_lb_r5c2">Per-Flow（中央控制器下发）</td>
+                                <td data-i18n="s6_lb_r5c3">无</td>
+                                <td data-i18n="s6_lb_r5c4">高（但有控制面延迟）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<hr class="section-divider">
-
-<!-- ==================== SECTION 7: CONCLUSION ==================== -->
+<!-- CONCLUSION -->
 <section class="section" id="conclusion">
     <div class="section-header fade-in">
-        <div class="section-icon" style="background:var(--gradient-hero);">✨</div>
-        <h2>结语：全链路无缝嵌合的系统级工程创新 <span>The Age of Full-Stack AI System Engineering</span></h2>
+        <div class="section-icon" style="background: var(--gradient-hero);">✨</div>
+        <h2 data-i18n="s7_title">结语：全链路无缝嵌合的系统级工程创新 <span>The Age of Full-Stack AI System Engineering</span></h2>
     </div>
-    <div class="card fade-in" style="border:2px solid var(--accent-1);">
-        <div class="card-bar" style="background:var(--gradient-hero);"></div>
-        <p style="font-size:0.95rem; line-height:2;">
+    <div class="card fade-in" style="border: 2px solid var(--accent-1);">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient-hero);border-radius:var(--radius) var(--radius) 0 0;"></div>
+        <p data-i18n="s7_body" style="font-size: 0.95rem; line-height: 2;">
         2026 年的人工智能生态系统已展现出前所未有的垂直整合深度。<strong>从最高应用层看</strong>，如 Google NotebookLM 这样基于 Agentic RAG 架构的系统，正在将 AI 的角色从被动的"信息总结器"转化为具备多模态交互、自主执行链式研究以及微型应用生成的"认知控制中枢"。<strong>支撑这种知识跃迁的</strong>，是底层针对最小精确段落检索而优化的先进检索管道——正如 LegalBench-RAG 和 CRAG 基准测试所深刻揭示的那样，高质量的检索与严肃的评估体系是消除机器幻觉、构建可信企业级 AI 的唯一步径。<br><br>
         <strong>在认知维度跨入物理世界边界的进程中</strong>，NVIDIA Cosmos 拓展了 AI 理解时空与因果关系的深度，一举打破了自动驾驶与具身智能落地进程中的合成数据壁垒。<strong>而所有这些从文本逻辑到现实物理的算法级创新，最终都汇聚为对底层算力和信息输送网络的极端渴求。</strong>NVIDIA GB300 NVL72 系统通过突破性的 NVFP4 张量节点与 NVLink 5 铜缆立交桥的极致软硬协同，实现了惊人的 50 倍 AI 工厂推理产出飞跃，打破了大规模智能体部署的成本屏障。同时，在跨越数据中心机架互联的宏观层面，<strong>超以太网联盟（UEC 1.0）</strong>通过全新的无连接 API、逐包喷洒与直接内存放置（DDP）技术，彻底重塑了海量高带宽 AI 流量的拥塞控制范式，铸就了支撑数百万个端点无缝横向扩展的无阻塞大动脉。<br><br>
         <em>综上所述，当代人工智能的发展早已不再是单纯追求大模型参数规模的线性游戏。正是这种从逻辑算法机制、物理仿真评估，下探至硅的高带宽内存互联，再延伸至开放以太网通讯协议的自上而下、全链路无缝嵌合的系统级工程创新，共同铸就了新一代 AI 的持续迭代与坚实基石。</em>
@@ -909,54 +1538,333 @@ layout: false
     </div>
 </section>
 
-<!-- ==================== FOOTER ==================== -->
+<!-- FOOTER -->
 <footer class="footer">
     <p>🧠 AI Cognitive Map — <span data-i18n="footer_text">基于 2026 年人工智能生态系统深度研究报告构建</span></p>
-    <p style="margin-top:8px;font-size:0.72rem;color:var(--text-muted);">本认知地图内容基于所提供的研究文档。所有技术数据均引用自原始来源。</p>
+    <p style="margin-top:8px;font-size:0.72rem;color:var(--text-muted);" data-i18n="footer_disclaimer">本认知地图内容基于所提供的研究文档。所有技术数据均引用自原始来源。</p>
 </footer>
 
-<!-- ==================== SCRIPTS ==================== -->
 <script>
-// ===== THEME =====
-function toggleTheme(){
-    const b=document.body, t=document.getElementById('themeBtn');
-    if(b.getAttribute('data-theme')==='dark'){b.removeAttribute('data-theme');t.textContent='🌙';}
-    else{b.setAttribute('data-theme','dark');t.textContent='☀️';}
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        btn.textContent = '🌙';
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        btn.textContent = '☀️';
+    }
 }
 
-// ===== LANGUAGE =====
-let currentLang='zh';
-const translations={en:{
-    nav_overview:'Overview',nav_token:'Token',nav_llm:'LLM',nav_rag:'RAG',nav_cosmos:'Physical AI',
-    nav_infra:'Infrastructure',nav_network:'DC Network',nav_conclusion:'Conclusion',
-    hero_badge:'Deep Research Report',
-    hero_title:'Cognitive Engines & Physical Infrastructure<br>AI Cognitive Map 2026',
-    hero_desc:'From Token to Transformer, from RAG to Agentic AI, from GPU to Data Center Networking — an interactive cognitive map visualizing the complete AI technology stack.',
-    map_title:'🗺️ AI Technology Stack — Full Architecture Overview',
-    map_l7:'Application',map_l6:'Cognitive Engine',map_l5:'Model Layer',map_l4:'Data Layer',
-    map_l3:'Software / Orchestration',map_l2:'Compute',map_l1:'Network',
-    footer_text:'Built upon the 2026 AI Ecosystem Deep Research Report'
-}};
-const origTexts={};
-function toggleLang(){
-    const btn=document.getElementById('langBtn');
-    if(currentLang==='zh'){currentLang='en';btn.textContent='中文';btn.classList.add('active');applyTr('en');}
-    else{currentLang='zh';btn.textContent='EN';btn.classList.remove('active');revertTr();}
+// ===== LANGUAGE TOGGLE =====
+let currentLang = 'zh';
+
+const translations = {
+    en: {
+        nav_overview: 'Overview',
+        nav_token: 'Token',
+        nav_llm: 'LLM',
+        nav_rag: 'RAG',
+        nav_infra: 'Infrastructure',
+        nav_network: 'DC Network',
+        nav_cosmos: 'Physical AI',
+        hero_badge: 'Deep Research Report',
+        hero_title: 'Cognitive Engines & Physical Infrastructure<br>AI Cognitive Map 2026',
+        hero_desc: 'From Token to Transformer, from RAG to Agentic AI, from GPU to Data Center Networking — an interactive cognitive map visualizing the complete AI technology stack.',
+        map_title: '🗺️ AI Technology Stack — Full Architecture Overview',
+        map_l7: 'Application',
+        map_l6: 'Cognitive Engine',
+        map_l5: 'Model Layer',
+        map_l4: 'Data Layer',
+        map_l3: 'Software / Orchestration',
+        map_l2: 'Compute',
+        map_l1: 'Network',
+        map_n_notebook: 'Agentic Research Assistant',
+        map_n_deep: 'Autonomous Chain-of-Research',
+        map_n_physical: 'Autonomous Driving / Humanoid Robots',
+        map_n_av: 'Multimodal Content Generation',
+        map_n_arag: 'Autonomous Retrieval + Tool Calling',
+        map_n_advrag: 'Query Rewrite / Reranking',
+        map_n_nrag: 'Vector Retrieval + Generation',
+        map_n_tf: 'Self-Attention / Decoder-only',
+        map_n_train: 'Pre-train → SFT → RLHF',
+        map_n_infer: 'Prefill → Decode (KV Cache)',
+        map_n_wfm: 'World Foundation Models',
+        map_n_embed: 'High-dimensional Semantic Vectors',
+        map_n_vdb: 'Vector DB / Cosine Similarity',
+        map_n_ct: 'Visual Tokenization / 8× Compression',
+        map_n_k8s: 'Elastic Scheduling / Run:ai',
+        map_n_cuda: 'Parallel Computing Platform',
+        map_n_nccl: 'Collective Communication Library',
+        map_n_nae: 'Full-Stack Software',
+        map_n_nvl72: '72 GPUs / 37TB Unified Memory',
+        map_n_uec: 'Ultra Ethernet Consortium Spec',
+        map_n_ib: 'Credit Flow Control / CCA',
+        map_n_roce: 'PFC + ECN',
+        map_n_spray: 'Per-packet Spraying + Direct Placement',
+        s1_title: 'Token & Vector Representation <span>The Atomic Unit of AI Language</span>',
+        s1_c1_title: 'What is a Token?',
+        s1_c1_body: 'A Token is the <strong>fundamental unit</strong> that LLMs use to process text. LLMs cannot directly "read" human text; input must undergo <strong>Tokenization</strong>, splitting text into atomic units: a character, word, subword, or even a single symbol. Common algorithms include BPE (Byte Pair Encoding) and WordPiece.',
+        s1_c2_title: 'Embeddings',
+        s1_c2_body: 'After conversion to numeric IDs, tokens pass through an Embedding Layer to become <strong>high-dimensional semantic vectors</strong>. Semantic associations become geometric distances in mathematical space — the closer the meaning, the shorter the vector distance. This lays the foundation for attention mechanism computation.',
+        s1_c3_title: 'Vector Database',
+        s1_c3_body: 'A database designed for efficient storage, management, and querying of high-dimensional vector representations. Unlike traditional keyword matching, vector databases support <strong>"semantic similarity search"</strong> — using cosine similarity to find the most semantically relevant document fragments. This is the critical foundation for RAG technology.',
+        s2_title: 'Large Language Models (LLM) <span>From Neurons to Emergent Intelligence</span>',
+        s2_insight_title: '💡 Core Insight: Emergent Abilities',
+        s2_insight_body: 'As parameter counts and training data scale dramatically, LLMs exhibit stunning "Emergent Abilities" — moving beyond translation and summarization to logical reasoning and In-context Learning. This marks a qualitative shift from "pattern matching" to "quasi-cognitive reasoning."',
+        s2_col1_title: 'Transformer Architecture & Attention Mechanism',
+        s2_col1_p1: 'Virtually all mainstream LLMs (GPT series, Gemini, LLaMA, etc.) are built on the <strong>Transformer architecture</strong>. Its soul is <strong>Self-Attention</strong>: when processing the current Token, the model simultaneously computes weights for all other Tokens in the input sequence, capturing long-range dependencies and deep contextual semantics.',
+        s2_col1_p2: 'Modern generative models mostly use <strong>Decoder-only</strong> architecture, autoregressively predicting the next most probable Token based on preceding context.',
+        s2_col1_li1: '<strong>Multi-Head Attention</strong>: Parse linguistic features from multiple dimensions in parallel',
+        s2_col1_li2: '<strong>KV Cache</strong>: Store attention intermediate states to avoid redundant computation',
+        s2_col1_li3: '<strong>Autoregressive Generation</strong>: Predict one Token at a time, looping until end-of-sequence',
+        s2_col2_title: 'Model Lifecycle: From Pre-training to Alignment',
+        s2_fs1_title: 'Data Prep',
+        s2_fs1_body: 'Collect massive internet data; deduplicate, filter harmful/biased content, anonymize PII',
+        s2_fs2_title: 'Pre-training',
+        s2_fs2_body: '"Next token prediction" objective function — acquire broad "world knowledge" from massive text',
+        s2_fs3_title: 'SFT',
+        s2_fs3_body: 'Use high-quality "instruction-output" pairs to teach the model to follow human commands',
+        s2_fs4_title: 'RLHF Alignment',
+        s2_fs4_body: 'Reinforcement learning from human feedback — guide generation toward "helpful, honest, harmless" outputs',
+        s2_col3_title: 'Inference Pipeline: From Prompt to Token-by-Token Output',
+        s2_col3_p1: 'The "typewriter effect" on screen is not deliberate delay — it is the true manifestation of the model\'s mathematical principles. Every cursor blink represents: K8s orchestration → CUDA directing thousands of GPU cores in matrix multiplication → NCCL driving data across NVLink at extreme bandwidth.',
+        s2_inf1: 'Tokenizer splits text into Tokens and converts to numeric IDs',
+        s2_inf2_t: 'Prefill',
+        s2_inf2: 'Process all input Tokens in parallel, generate KV Cache',
+        s2_inf3_t: 'Decode',
+        s2_inf3: 'Autoregressive loop, predict 1 Token per step → TTFT / ITL',
+        s2_inf4_t: 'GPU Coordination',
+        s2_inf4: 'CUDA matrix multiplication + NCCL AllGather + NVLink transfer',
+        s2_inf5_t: 'De-tokenize',
+        s2_inf5: 'Convert numeric IDs back to human-readable text, stream to user',
+        s2_col4_title: 'How to Evaluate LLMs? Key Benchmarks & Metrics',
+        eval_cat: 'Category',
+        eval_bench: 'Benchmark',
+        eval_what: 'What It Tests',
+        eval_r1c1: 'General',
+        eval_r1c3: 'Broad world knowledge across 57 disciplines',
+        eval_r2c3: 'Core NLU capabilities collection',
+        eval_r3c1: 'Math Reasoning',
+        eval_r3c3: 'Elementary to high-school math reasoning',
+        eval_r4c1: 'Code Gen',
+        eval_r4c3: 'Write correct code from descriptions (Pass@1)',
+        eval_r5c1: 'Gen Quality',
+        eval_r5c3: 'Open-ended generation task accuracy',
+        s3_title: 'RAG & Agentic AI <span>From Passive Retrieval to Autonomous Cognition</span>',
+        s3_warn_title: '⚠️ Why RAG?',
+        s3_warn_body: 'LLMs have fatal weaknesses: prone to <strong>"Hallucination"</strong>, knowledge frozen at training cutoff, and unable to access enterprise private data. RAG bridges LLM\'s parametric knowledge with external dynamic knowledge bases, perfectly addressing these deficiencies.',
+        s3_naive_body: 'Classic single-loop "Retrieve-Read" pipeline: Chunk documents → Embed into vectors → Store in vector DB → Vectorize user query → Cosine similarity recall Top-K → Concatenate Prompt → LLM generates. Effective for simple keyword QA but struggles with cross-document, multi-hop reasoning.',
+        s3_adv_body: 'Introduces optimization layers before and after retrieval: <strong>Query Rewrite</strong> corrects ambiguity → Multi-stage hybrid retrieval (sparse + dense) → <strong>Reranker</strong> for secondary filtering → Context auto-merge and pruning. Significantly improves retrieval precision for complex scenarios.',
+        s3_agent_body: '2026 state-of-the-art. Uses LLM as central reasoning engine (ReAct framework), completely breaking linear logic: autonomously decompose sub-tasks → dynamically call tools (vector DB / web search / SQL / calculator) → self-evaluate information completeness → plan new retrieval strategies → synthesize output. Integrates Mem0 persistent memory for deep cross-session context.',
+        s3_nb_title: 'Google NotebookLM: From Static Tool to Agentic Researcher',
+        s3_nb_p1: '<strong>Core Design Philosophy: "Source-grounding"</strong> — all answers must be and can only be based on user-uploaded reference materials, with precise paragraph-level inline citations.',
+        s3_nb_li1: '<strong>Deep Research</strong>: Evolved from "static RAG tool" to "agentic researcher." System decomposes macro questions into multiple sub-query paths, crawls hundreds of web pages in parallel, dynamically adjusts search keywords, and synthesizes a comprehensive briefing with rigorous citations.',
+        s3_nb_li2: '<strong>Audio Overviews</strong>: Multi-model cascade — core LLM extracts arguments → dialog script generation → internal critique model review → inject natural human conversational disfluencies → TPU v5e faster-than-real-time speech synthesis.',
+        s3_nb_li3: '<strong>Video Overviews</strong>: Using Imagen 3 to auto-convert research notes into slide decks with voice narration and dynamic key chart display.',
+        s3_nb_li4: '<strong>Interactive Mode</strong>: Users can "join" the podcast mid-listen to ask questions; model responds instantly and guides hosts back to the main thread.',
+        s3_eval_title: 'RAG Evaluation System: Core Scores & Industrial Benchmarks',
+        s3_eval_p1: 'Evaluating RAG requires separately examining <strong>Retrieval Quality</strong> and <strong>Generation Quality</strong>. The RAGAS framework pioneered reference-free evaluation:',
+        s3_m1: 'Context Precision /<br>Relevance',
+        s3_m2: 'Context Recall',
+        s3_m3: 'Answer Faithfulness',
+        s3_m4: 'Answer Relevance',
+        s3_crag_title: '🔬 Key Findings from CRAG & LegalBench-RAG',
+        s3_crag_body: '<strong>CRAG (Meta)</strong>: Even the most advanced LLMs achieve only 34% accuracy in direct answering; standard RAG lifts this to just 44%. <strong>LegalBench-RAG</strong> reveals a disruptive insight: <em>In highly specialized RAG deployments, retrieval quality is the primary driver determining system performance ceiling — not LLM reasoning capability.</em> Domain-tuned embedding models outperform generic top-tier LLMs with generic embeddings by ~17 percentage points. <strong>The vast majority of errors attributed to "LLM hallucination" actually originate from first-stage retrieval system failures.</strong>',
+        s4_title: 'Physical AI & NVIDIA Cosmos <span>World Foundation Models for Embodied Intelligence</span>',
+        s4_insight_title: '🌐 From Digital Text to 3D Space',
+        s4_insight_body: 'If NotebookLM and Agentic RAG are the cognitive engines for digital knowledge and textual logic, AI\'s next frontier is the three-dimensional physical world — building "Physical AI" that understands and can reshape reality. Autonomous driving, humanoid robots, and industrial automation require deep intuition about gravity, shadows, object permanence, and spatiotemporal causality.',
+        s4_predict_body: '<strong>World generation & state prediction.</strong> 4B–14B parameter autoregressive foundation models. Given current environment state (image/lidar/sensors), precisely predict dynamic evolution videos up to 30 seconds into the future. AV systems can mentally simulate evasive maneuver consequences.',
+        s4_transfer_body: '<strong>Cross-modal conversion, bridging the Sim-to-Real Gap.</strong> Diffusion-based architecture that instantly converts 3D simulator "cartoon" renders into photorealistic video matching real-world lighting, textures, and lens distortion. Can generate "rainy dusk" and other environment variants for geometric-scale synthetic data augmentation.',
+        s4_reason_body: '<strong>Physical common sense & logical reasoning.</strong> Large model optimized specifically for physical world common sense, enabling robots and visual analysis agents to understand causal logic in complex environments through <strong>Chain-of-thought</strong> reasoning and make physics-compliant decisions.',
+        s4_diff_title: '🔑 Cosmos ≠ Sora: Fundamentally Different Evaluation Criteria',
+        s4_diff_body: 'Cosmos does not aim to create artistically beautiful ultra-HD entertainment videos. Its core value lies in <strong>absolute fidelity to physical laws</strong> — 3D spatial consistency, object permanence, and complex physical interaction alignment. This is the essential "curriculum" for training safe, reliable embodied intelligence.',
+        s5_title: 'Compute Infrastructure & AI Factory <span>NVIDIA Blackwell Ultra B300 & GB300 NVL72</span>',
+        s5_why_title: 'Why GPU Clusters & Accelerated Computing?',
+        s5_why_p1: 'Think of "training an LLM" as "reading every book in the world and distilling human knowledge patterns" — a traditional CPU is like a PhD scholar reading one page at a time, while a GPU cluster is a "super factory" with tens of thousands of speed-reading assistants.',
+        s5_why_li1: '<strong>Won\'t fit:</strong> GPT-3\'s 175B parameters require ~350GB of memory just for storage, but a single H100 has only 80GB. Models must be sharded across hundreds or thousands of GPUs.',
+        s5_why_li2: '<strong>Won\'t finish:</strong> Without parallelization, a single GPU might take decades to complete one training run.',
+        s5_why_li3: '<strong>Fatal bottleneck:</strong> With tens of thousands of GPUs working simultaneously, ~20-50% of time is spent on network data exchange (All-Reduce collective communication) — under the barrel effect, one congested link stalls ALL GPUs.',
+        s5_b300_title: 'Blackwell Ultra B300 Micro-Architecture Revolution',
+        s5_b300_m1: 'Transistors<br>(2.6× Hopper)',
+        s5_b300_m2: 'NVFP4 Compute<br>(7.5× Hopper)',
+        s5_b300_m3: 'HBM3e Memory<br>(12-Hi Stack)',
+        s5_b300_m4: 'Memory Bandwidth<br>(H100: 3.35 TB/s)',
+        s5_b300_li1: '<strong>Dual-reticle unified architecture:</strong> TSMC 4NP process, two reticle-limit dies seamlessly joined via 10 TB/s NV-HBI, appearing as a single CUDA accelerator node to software.',
+        s5_b300_li2: '<strong>NVFP4 precision breakthrough:</strong> 4-bit micro-tensor scaling floats maintain near-FP8 model accuracy while shrinking parameter storage footprint by ~1.8×.',
+        s5_b300_li3: '<strong>Breaking the "memory wall":</strong> 12-Hi HBM3e stacking delivers 288 GB per GPU, enabling ultra-large MoE models to deploy on fewer nodes.',
+        s5_nvl72_title: 'GB300 NVL72: Rack-Scale AI Factory Performance Economics',
+        s5_nvl72_p1: '72 Blackwell Ultra GPUs + 36 Grace CPUs tightly coupled in a liquid-cooled rack. 9 NVLink switches connect all 72 GPUs in a fully non-blocking fabric at <strong>130 TB/s</strong> aggregate bandwidth, sharing a <strong>37 TB</strong> unified super memory pool.',
+        s5_nvl72_m1: 'AI Factory Inference<br>Output Leap (vs Hopper)',
+        s5_nvl72_m2: 'Cost Per Million<br>Inference Tokens ↓',
+        s5_nvl72_m3: 'TPS/User Improvement<br>(Interactive Experience)',
+        s5_nvl72_m4: 'Per-Rack Power<br>(Mandatory Liquid Cooling)',
+        s5_fac_title: 'Four Core Components of an AI Factory',
+        s5_fac_gpu: 'The core production line. GPUs contain thousands of tiny cores optimized for parallel matrix multiplication. A single node typically houses 8 top-tier GPUs fused via NVLink into one super-brain.',
+        s5_fac_net: 'A strictly divided logistics system: <strong>Backend network</strong> (GPU↔GPU collective comm, lossless/ultra-high BW), <strong>Frontend network</strong> (external connectivity), <strong>Storage network</strong> (high-speed data pipeline).',
+        s5_fac_store: 'All-flash NVMe parallel file systems (WEKA / VAST / DDN) supporting massive concurrent reads/writes to prevent GPUs from starving for data.',
+        s5_fac_soft: 'Kubernetes + Run:ai "pool" the entire data center into a flexible resource pool. CUDA awakens GPUs for parallel compute; NCCL optimizes multi-GPU communication paths.',
+        s6_title: 'Data Center Networks & UEC 1.0 <span>Ultra Ethernet Consortium — Redefining AI-Scale Networking</span>',
+        s6_req_title: 'Training vs Inference: Different Network Requirements',
+        s6_t_dim: 'Dimension',
+        s6_t_train: 'Training',
+        s6_t_infer: 'Inference',
+        s6_t_r1c1: 'Synchrony',
+        s6_t_r1c2: 'Highly synchronous compute-exchange-reduce cycle, barrel effect',
+        s6_t_r1c3: 'Asynchronous, real-time response',
+        s6_t_r2c1: 'East-West Network',
+        s6_t_r2c2: 'Lossless, ultra-high BW (400G/800G per GPU), RDMA',
+        s6_t_r2c3: 'Ultra-low latency (microsecond), small-packet Token transmission sensitive',
+        s6_t_r3c1: 'North-South Network',
+        s6_t_r3c2: 'Extreme throughput for data ingestion & checkpointing',
+        s6_t_r3c3: 'Receive user prompts, connect vector DBs (RAG)',
+        s6_t_r4c1: 'Key Metrics',
+        s6_t_r4c2: 'Job Completion Time (JCT), scaling efficiency',
+        s6_t_r4c3: 'TTFT, throughput, concurrent users',
+        s6_proto_title: 'RoCEv2 vs InfiniBand vs UEC 1.0 Comparison',
+        s6_p_feature: 'Feature',
+        s6_p_r1: 'Network Model',
+        s6_p_r1c2: 'Simulated lossless over Ethernet',
+        s6_p_r1c3: 'Native lossless network',
+        s6_p_r1c4: 'Best-effort Ethernet + endpoint guarantees',
+        s6_p_r2: 'Congestion Control',
+        s6_p_r2c3: 'Credit flow control + CCA (FECN/BECN)',
+        s6_p_r2c4: 'Packet Trimming + E2E UET-CC',
+        s6_p_r3: 'Load Balancing',
+        s6_p_r3c2: 'ECMP (per-flow hash)',
+        s6_p_r3c3: 'Adaptive routing (subnet manager)',
+        s6_p_r3c4: 'Per-packet Spraying',
+        s6_p_r4: 'OoO Tolerance',
+        s6_p_r4c2: '❌ Catastrophic (Go-Back-N)',
+        s6_p_r4c3: '❌ Strict in-order',
+        s6_p_r4c4: '✅ DDP direct memory placement',
+        s6_p_r5: 'State Model',
+        s6_p_r5c2: 'Connection-based (QP)',
+        s6_p_r5c3: 'Connection-based (QP)',
+        s6_p_r5c4: 'Connectionless (libfabric API)',
+        s6_p_r6: 'Ecosystem',
+        s6_p_r6c2: 'Open but complex tuning',
+        s6_p_r6c3: 'Single-vendor dominated',
+        s6_p_r6c4: 'Multi-vendor open standard (Cisco/Broadcom/AMD…)',
+        s6_p_r7: 'In-Network Compute',
+        s6_p_r7c4: '✅ INC (In-Network Collectives)',
+        s6_uec_title: 'UEC 1.0 Core Mechanisms Deep Dive',
+        s6_uec_p1: 'UEC\'s core design philosophy: <strong>"Leverage the extremely rich computing power at the endpoints (NIC) to exchange for extreme simplicity and high-speed forwarding in the middle network switches."</strong>',
+        s6_uec_c1_t: 'Per-Packet Spraying',
+        s6_uec_c1: 'SuperNIC makes dynamic routing decisions at the per-packet level, "spraying" the massive data packets of AI messages evenly across all equal-cost paths. Perfectly disperses "elephant flows," ensuring every cable achieves 100% utilization.',
+        s6_uec_c2_t: 'DDP Direct Data Placement',
+        s6_uec_c2: 'Each sprayed packet carries the target GPU physical memory address tag. Out-of-order arriving packets don\'t need to wait in buffers for reassembly — NIC hardware directly places the payload at the correct memory location. Completely transparent to upper-layer NCCL communication libraries.',
+        s6_uec_c3_t: 'Packet Trimming',
+        s6_uec_c3: 'When microbursts cause switch buffer overflow, instead of dropping the entire packet, the switch "trims" the large payload and forwards only the tiny header to the receiver. Achieves microsecond-level loss detection and precise micro-retransmission without affecting the overall operation.',
+        s6_uec_c4_t: 'In-Network Collectives (INC)',
+        s6_uec_c4: 'INC-capable switch ASICs perform AI gradient data aggregation computation (e.g., All-Reduce summation) in-flight during data transit, reducing the raw data volume that must traverse the network between nodes by more than half.',
+        s6_uec_future_title: '🔮 Strategic Significance of UEC',
+        s6_uec_future_body: 'With its highly customizable multi-vendor ecosystem, elimination of vendor lock-in risk through openness, and inherent compatibility with existing data center protocols, Ultra Ethernet is unstoppably becoming the core network backbone supporting future trillion-parameter cluster scaling. As Broadcom, AMD and others begin mass-producing chips and NICs based on this specification, the UEC architecture is rapidly closing the gap between Ethernet and InfiniBand in lossless transport and minimum latency.',
+        s6_spray_title: 'Adaptive Routing, Packet Spraying & Load Balancing Comparison',
+        s6_lb_scheme: 'Scheme',
+        s6_lb_granularity: 'Granularity',
+        s6_lb_ooo: 'OoO Risk',
+        s6_lb_balance: 'Balance Quality',
+        s6_lb_r1c2: 'Per-Flow (5-tuple hash)',
+        s6_lb_r1c3: 'None',
+        s6_lb_r1c4: 'Poor (elephant flow collision)',
+        s6_lb_r2c2: 'Per-Flow (extended QP hash)',
+        s6_lb_r2c3: 'None',
+        s6_lb_r2c4: 'Medium',
+        s6_lb_r3c2: 'Per-Flowlet',
+        s6_lb_r3c3: 'Very low',
+        s6_lb_r3c4: 'High',
+        s6_lb_r4c2: '<strong>Per-Packet</strong>',
+        s6_lb_r4c3: 'High (solved by DDP)',
+        s6_lb_r4c4: '<strong>Extreme (100% link utilization)</strong>',
+        s6_lb_r5c2: 'Per-Flow (central controller)',
+        s6_lb_r5c3: 'None',
+        s6_lb_r5c4: 'High (but control plane latency)',
+        s7_title: 'Conclusion: Full-Stack System Engineering Innovation <span>The Age of Full-Stack AI System Engineering</span>',
+        s7_body: 'The 2026 AI ecosystem demonstrates unprecedented vertical integration depth. <strong>From the application layer</strong>, systems like Google NotebookLM built on Agentic RAG architecture are transforming AI\'s role from passive "information summarizer" to a "cognitive control hub" capable of multimodal interaction, autonomous chain-of-research, and micro-application generation. <strong>Supporting this knowledge leap</strong> is an advanced retrieval pipeline optimized for precise paragraph-level retrieval — as LegalBench-RAG and CRAG benchmarks profoundly reveal, high-quality retrieval and rigorous evaluation systems are the only path to eliminating machine hallucination and building trustworthy enterprise AI.<br><br><strong>As the cognitive dimension crosses into the physical world</strong>, NVIDIA Cosmos extends AI\'s understanding of spatiotemporal causality, breaking through the synthetic data barrier in autonomous driving and embodied intelligence deployment. <strong>All these algorithmic innovations from textual logic to physical reality ultimately converge</strong> into extreme demand for underlying compute power and information delivery networks. The NVIDIA GB300 NVL72 system achieves a stunning 50× AI factory inference output leap through breakthrough NVFP4 tensor nodes and NVLink 5 copper fabric, shattering the cost barriers for large-scale agent deployment. Meanwhile, at the macro level of cross-rack data center interconnection, <strong>the Ultra Ethernet Consortium (UEC 1.0)</strong> thoroughly reshapes congestion control paradigms for massive high-bandwidth AI traffic through connectionless APIs, per-packet spraying, and Direct Data Placement (DDP), forging a non-blocking backbone supporting seamless horizontal scaling across millions of endpoints.<br><br><em>In summary, contemporary AI development has long transcended the linear game of simply scaling model parameters. It is precisely this top-to-bottom, full-stack seamless integration of system-level engineering innovation — from logical algorithm mechanisms and physical simulation evaluation, down to silicon high-bandwidth memory interconnect, and extending to open Ethernet communication protocols — that together forge the foundation for the next generation of AI\'s sustained iteration and solid bedrock.</em>',
+        footer_text: 'Built upon the 2026 AI Ecosystem Deep Research Report',
+        footer_disclaimer: 'This cognitive map is based on the provided research documents. All technical data is cited from original sources.'
+    }
+};
+
+function toggleLang() {
+    const btn = document.getElementById('langBtn');
+    if (currentLang === 'zh') {
+        currentLang = 'en';
+        btn.textContent = '中文';
+        btn.classList.add('active');
+        applyTranslations('en');
+    } else {
+        currentLang = 'zh';
+        btn.textContent = 'EN';
+        btn.classList.remove('active');
+        revertTranslations();
+    }
 }
-function applyTr(l){const d=translations[l];if(!d)return;document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(!origTexts[k])origTexts[k]=el.innerHTML;if(d[k])el.innerHTML=d[k];});}
-function revertTr(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(origTexts[k])el.innerHTML=origTexts[k];});}
 
-// ===== SCROLL TO =====
-function scrollToSection(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});}
+const originalTexts = {};
 
-// ===== FADE IN =====
-document.addEventListener('DOMContentLoaded',()=>{
-    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
-    document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
-    if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){
-        document.body.setAttribute('data-theme','dark');document.getElementById('themeBtn').textContent='☀️';
+function applyTranslations(lang) {
+    const dict = translations[lang];
+    if (!dict) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (!originalTexts[key]) {
+            originalTexts[key] = el.innerHTML;
+        }
+        if (dict[key]) {
+            el.innerHTML = dict[key];
+        }
+    });
+}
+
+function revertTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (originalTexts[key]) {
+            el.innerHTML = originalTexts[key];
+        }
+    });
+}
+
+// ===== COLLAPSIBLE =====
+function toggleCollapsible(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+}
+
+// ===== SCROLL TO SECTION =====
+function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ===== FADE IN ON SCROLL =====
+function handleFadeIn() {
+    const elements = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    elements.forEach(el => observer.observe(el));
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+    handleFadeIn();
+    // Detect system dark mode preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeBtn').textContent = '☀️';
     }
 });
 </script>
+
 </body>
 </html>
