@@ -14,11 +14,11 @@ layout: false
 
     <meta name="keywords" content="802.1X, 无线漫游, Wireless Roaming, 802.11r, Fast Transition, WPA2-Enterprise, EAP-TLS, PEAP, WLC, Cisco ISE, 4-Way Handshake, 四次握手, PMK, 漫游延迟">
 
-    <meta name="revised" content="Wednesday, March 25th, 2026, 12:00 pm" />
+    <meta name="revised" content="Wednesday, March 27th, 2026, 16:00 pm" />
     <meta property="og:title" content="802.1X 无线漫游：第一性原理拆解 | 802.1X Wireless Roaming">
     <meta property="og:description" content="用显微镜级别的手术刀，逐一拆解终端从离开 AP-A 到接入 AP-B 的 10 个硬核漫游步骤，探究无感漫游的底层真理。">
     <meta property="og:type" content="article">
-    <meta property="og:updated_time" content="2026-03-25T12:00:00+08:00" />
+    <meta property="og:updated_time" content="2026-03-27T16:00:00+08:00" />
 
     <script type="application/ld+json">
     {
@@ -26,8 +26,8 @@ layout: false
     "@type": "TechArticle",
     "headline": "802.1X 无线漫游：第一性原理拆解 | First Principles of 802.1X Wireless Roaming",
     "description": "深入拆解 802.1X 无线漫游的 10 个硬核步骤，解析 WPA2-Enterprise 基线场景下终端、WLC 与 ISE 的 EAP 认证与四次握手。A detailed breakdown of 802.1X wireless roaming steps and EAP authentication.",
-    "datePublished": "2026-02-15T10:00:00+08:00",
-    "dateModified": "2026-03-25T12:00:00+08:00",
+    "datePublished": "2026-02-25T10:00:00+08:00",
+    "dateModified": "2026-03-27T16:00:00+08:00",
     "proficiencyLevel": "Expert",
     "author": { 
         "@type": "Person", 
@@ -36,1447 +36,2229 @@ layout: false
     "keywords": "802.1X, 无线漫游, 802.11r, WPA2-Enterprise, EAP-TLS, WLC, ISE, 四次握手"
     }
     </script>
-    
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --cisco-dark: #0d1b2a;
-    --cisco-blue: #049fd9;
-    --cisco-teal: #00bceb;
-    --cisco-green: #6cc04a;
-    --cisco-red: #cf2030;
-    --cisco-orange: #ff8200;
-    --cisco-purple: #7f5bd5;
-    --cisco-yellow: #ffcc00;
-    --bg-primary: #0a0f1a;
-    --bg-card: #111827;
-    --bg-card-alt: #161f32;
-    --border-subtle: rgba(4, 159, 217, 0.15);
-    --border-glow: rgba(0, 188, 235, 0.3);
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --text-bright: #f8fafc;
-    --radius-lg: 16px;
-    --radius-md: 10px;
-    --radius-sm: 6px;
-    --shadow-card: 0 4px 24px rgba(0,0,0,0.4), 0 0 1px rgba(4,159,217,0.1);
-    --shadow-glow: 0 0 30px rgba(0, 188, 235, 0.08);
+    --bg: #F8F9FC;
+    --surface: #FFFFFF;
+    --surface-alt: #F0F4FF;
+    --border: #E2E8F0;
+    --text: #1E293B;
+    --text-secondary: #475569;
+    --text-light: #94A3B8;
+    --accent: #3B82F6;
+    --accent-dark: #1D4ED8;
+    --accent-light: #DBEAFE;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --orange: #F59E0B;
+    --orange-light: #FEF3C7;
+    --red: #EF4444;
+    --red-light: #FEE2E2;
+    --purple: #8B5CF6;
+    --purple-light: #EDE9FE;
+    --teal: #14B8A6;
+    --teal-light: #CCFBF1;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.03);
+    --font-sans: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; font-size: 18px; }
 
   body {
-    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    line-height: 1.9;
-    font-size: 16px;
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
     -webkit-font-smoothing: antialiased;
   }
 
+  /* ===== Container ===== */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ===== Hero ===== */
   .hero {
-    position: relative;
-    padding: 80px 40px 60px;
+    background: linear-gradient(135deg, #1E3A5F 0%, #0F172A 50%, #1E293B 100%);
+    color: #fff;
+    padding: 80px 24px 60px;
     text-align: center;
+    position: relative;
     overflow: hidden;
-    background: linear-gradient(170deg, #0d1b2a 0%, #0f2942 50%, #0d1b2a 100%);
-    border-bottom: 1px solid var(--border-subtle);
   }
   .hero::before {
     content: '';
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(0,188,235,0.07) 0%, transparent 60%);
-    pointer-events: none;
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 40%, rgba(59,130,246,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(139,92,246,0.1) 0%, transparent 50%);
+    animation: heroFloat 20s ease-in-out infinite;
   }
+  @keyframes heroFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-2%, 1%) rotate(1deg); }
+  }
+  .hero > * { position: relative; z-index: 1; }
   .hero-badge {
     display: inline-block;
-    background: rgba(4,159,217,0.1);
-    border: 1px solid rgba(4,159,217,0.3);
-    color: var(--cisco-teal);
+    background: rgba(59,130,246,0.2);
+    border: 1px solid rgba(59,130,246,0.4);
+    color: #93C5FD;
     font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 6px 20px;
-    border-radius: 30px;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 50px;
+    letter-spacing: 0.5px;
     margin-bottom: 24px;
+    text-transform: uppercase;
   }
   .hero h1 {
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    font-weight: 900;
-    color: var(--text-bright);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
     line-height: 1.25;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
   }
-  .hero h1 span { color: var(--cisco-teal); }
-  .hero p {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    max-width: 750px;
-    margin: 0 auto 30px;
-    line-height: 1.8;
+  .hero h1 .highlight {
+    background: linear-gradient(90deg, #60A5FA, #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  .hero-stats {
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: #CBD5E1;
+    max-width: 700px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+  .hero-meta {
     display: flex;
     justify-content: center;
-    gap: 48px;
+    gap: 32px;
     flex-wrap: wrap;
-    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #94A3B8;
   }
-  .hero-stat { text-align: center; }
-  .hero-stat-val { font-size: 2rem; font-weight: 900; color: var(--cisco-teal); font-family: 'JetBrains Mono', monospace; }
-  .hero-stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta svg { width: 16px; height: 16px; }
 
-  .main-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 28px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin: 70px 0 34px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .section-header .phase-tag {
-    background: linear-gradient(135deg, var(--cisco-blue), var(--cisco-teal));
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 5px 16px;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-  .section-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-bright);
-  }
-
-  .step-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: 40px 44px;
-    margin-bottom: 28px;
-    box-shadow: var(--shadow-card);
+  /* ===== Table of Contents ===== */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    margin: -36px auto 48px;
+    max-width: 760px;
     position: relative;
-    overflow: hidden;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    z-index: 2;
+    box-shadow: var(--shadow-lg);
   }
-  .step-card:hover {
-    border-color: var(--border-glow);
-    box-shadow: var(--shadow-card), var(--shadow-glow);
-  }
-  .step-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; width: 5px; height: 100%;
-    border-radius: 4px 0 0 4px;
-  }
-  .step-card.color-blue::before { background: var(--cisco-blue); }
-  .step-card.color-teal::before { background: var(--cisco-teal); }
-  .step-card.color-green::before { background: var(--cisco-green); }
-  .step-card.color-orange::before { background: var(--cisco-orange); }
-  .step-card.color-purple::before { background: var(--cisco-purple); }
-  .step-card.color-red::before { background: var(--cisco-red); }
-  .step-card.color-yellow::before { background: var(--cisco-yellow); }
-
-  .step-top {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 22px;
-  }
-  .step-number {
-    flex-shrink: 0;
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #fff;
-  }
-  .color-blue .step-number { background: linear-gradient(135deg, #049fd9, #037fb3); }
-  .color-teal .step-number { background: linear-gradient(135deg, #00bceb, #009dc2); }
-  .color-green .step-number { background: linear-gradient(135deg, #6cc04a, #4a9e2f); }
-  .color-orange .step-number { background: linear-gradient(135deg, #ff8200, #e06c00); }
-  .color-purple .step-number { background: linear-gradient(135deg, #7f5bd5, #6341b0); }
-  .color-red .step-number { background: linear-gradient(135deg, #cf2030, #a51a28); }
-  .color-yellow .step-number { background: linear-gradient(135deg, #ffcc00, #daa800); color: #1a1a2e; }
-
-  .step-title-block h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-bright);
-    line-height: 1.35;
-  }
-  .step-title-block .step-subtitle {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    margin-top: 3px;
-  }
-  .step-body p, .step-body li {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    line-height: 1.9;
-  }
-  .step-body strong { color: var(--text-bright); font-weight: 600; }
-
-  .detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 18px;
-    margin-top: 22px;
-  }
-  .detail-box {
-    background: var(--bg-card-alt);
-    border: 1px solid rgba(255,255,255,0.04);
-    border-radius: var(--radius-md);
-    padding: 22px 24px;
-  }
-  .detail-box h4 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--cisco-teal);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
+  .toc h2 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .detail-box h4 .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--cisco-teal);
-    display: inline-block;
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
   }
-  .detail-box p, .detail-box li {
-    font-size: 0.95rem;
+  .toc-grid a {
     color: var(--text-secondary);
-    line-height: 1.8;
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 6px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    transition: color 0.2s;
   }
-  .detail-box ul { padding-left: 18px; list-style: none; }
-  .detail-box ul li::before {
-    content: '▸';
-    color: var(--cisco-blue);
-    margin-right: 8px;
+  .toc-grid a:hover { color: var(--accent); }
+  .toc-grid a .toc-num {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.8rem;
+    min-width: 28px;
   }
 
+  /* ===== Section ===== */
+  section { margin-bottom: 56px; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    background: var(--accent-light);
+    padding: 5px 14px;
+    border-radius: 50px;
+  }
+
+  h2.section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 32px 0 12px;
+    line-height: 1.35;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin: 24px 0 8px;
+  }
+
+  p {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.85;
+  }
+
+  strong { color: var(--text); font-weight: 700; }
+
+  /* ===== Cards ===== */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-icon svg { width: 24px; height: 24px; }
+  .card-icon.blue { background: var(--accent-light); color: var(--accent); }
+  .card-icon.green { background: var(--green-light); color: var(--green); }
+  .card-icon.orange { background: var(--orange-light); color: var(--orange); }
+  .card-icon.red { background: var(--red-light); color: var(--red); }
+  .card-icon.purple { background: var(--purple-light); color: var(--purple); }
+  .card-icon.teal { background: var(--teal-light); color: var(--teal); }
+
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .card-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  /* ===== Callout boxes ===== */
   .callout {
-    background: rgba(4, 159, 217, 0.06);
-    border-left: 3px solid var(--cisco-blue);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    padding: 18px 22px;
-    margin: 18px 0;
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-size: 1rem;
+    line-height: 1.75;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .callout-icon {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    margin-top: 2px;
+  }
+  .callout.info { background: #EFF6FF; border-left: 4px solid var(--accent); }
+  .callout.info .callout-icon { background: var(--accent-light); }
+  .callout.warning { background: #FFFBEB; border-left: 4px solid var(--orange); }
+  .callout.warning .callout-icon { background: var(--orange-light); }
+  .callout.danger { background: #FEF2F2; border-left: 4px solid var(--red); }
+  .callout.danger .callout-icon { background: var(--red-light); }
+  .callout.success { background: #ECFDF5; border-left: 4px solid var(--green); }
+  .callout.success .callout-icon { background: var(--green-light); }
+  .callout.purple-c { background: #F5F3FF; border-left: 4px solid var(--purple); }
+  .callout.purple-c .callout-icon { background: var(--purple-light); }
+
+  /* ===== Analogy block ===== */
+  .analogy {
+    background: linear-gradient(135deg, #F0F4FF 0%, #EDE9FE 100%);
+    border: 1px solid #C7D2FE;
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin: 20px 0;
+  }
+  .analogy-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--purple);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .analogy p { color: var(--text); margin-bottom: 0; }
+
+  /* ===== Threshold comparison ===== */
+  .threshold-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .threshold-card {
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .threshold-card .brand {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .threshold-card .brand .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .threshold-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .threshold-card li {
     font-size: 0.95rem;
     color: var(--text-secondary);
-    line-height: 1.8;
+    padding: 4px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    line-height: 1.6;
   }
-  .callout strong { color: var(--cisco-teal); }
-  .callout.warn {
-    background: rgba(255,130,0,0.06);
-    border-left-color: var(--cisco-orange);
+  .threshold-card li::before {
+    content: '›';
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.1rem;
   }
-  .callout.warn strong { color: var(--cisco-orange); }
-  .callout.danger {
-    background: rgba(207,32,48,0.06);
-    border-left-color: var(--cisco-red);
-  }
-  .callout.danger strong { color: var(--cisco-red); }
 
-  .svg-diagram-wrap {
-    background: var(--bg-card-alt);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 28px 20px;
-    margin: 26px 0;
-    overflow-x: auto;
+  /* ===== Step indicator ===== */
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #fff;
+    flex-shrink: 0;
   }
-  .svg-diagram-wrap svg { display: block; margin: 0 auto; }
-  .svg-diagram-wrap .diagram-caption {
+  .step-badge.blue-bg { background: var(--accent); }
+  .step-badge.green-bg { background: var(--green); }
+  .step-badge.orange-bg { background: var(--orange); }
+  .step-badge.red-bg { background: var(--red); }
+  .step-badge.purple-bg { background: var(--purple); }
+  .step-badge.teal-bg { background: var(--teal); }
+
+  /* ===== SVG figure containers ===== */
+  .svg-figure {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 28px 0;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+  }
+  .svg-figure svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .svg-caption {
     text-align: center;
     font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 14px;
+    color: var(--text-light);
+    margin-top: 12px;
     font-style: italic;
   }
 
-  .scenario-tabs {
-    display: flex;
-    gap: 10px;
-    margin: 22px 0 18px;
+  /* ===== Timeline ===== */
+  .timeline {
+    position: relative;
+    padding-left: 36px;
+    margin: 24px 0;
   }
-  .scenario-tab {
-    padding: 10px 22px;
-    border-radius: var(--radius-sm);
-    font-size: 0.88rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--border-subtle);
-    background: transparent;
-    color: var(--text-secondary);
-    transition: all 0.25s ease;
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--purple), var(--green));
+    border-radius: 2px;
   }
-  .scenario-tab:hover { border-color: var(--cisco-blue); color: var(--text-primary); }
-  .scenario-tab.active {
-    background: rgba(4,159,217,0.12);
-    border-color: var(--cisco-blue);
-    color: var(--cisco-teal);
+  .timeline-item {
+    position: relative;
+    padding: 12px 0 24px 24px;
   }
-  .scenario-content { display: none; }
-  .scenario-content.active { display: block; }
-
-  .info-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 18px 0;
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px; top: 18px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+  }
+  .timeline-item .tl-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .timeline-item .tl-desc {
     font-size: 0.95rem;
-  }
-  .info-table th {
-    text-align: left;
-    padding: 12px 16px;
-    background: rgba(4,159,217,0.08);
-    color: var(--cisco-teal);
-    font-weight: 600;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .info-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
     color: var(--text-secondary);
-    vertical-align: top;
-  }
-  .info-table code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    background: rgba(0,0,0,0.3);
-    padding: 2px 8px;
-    border-radius: 4px;
-    color: var(--cisco-teal);
+    line-height: 1.7;
   }
 
-  .msc-section {
-    background: linear-gradient(170deg, #0f1f35 0%, var(--bg-card) 100%);
-    border: 1px solid var(--border-glow);
-    border-radius: var(--radius-lg);
-    padding: 44px 28px;
-    margin: 70px 0 44px;
-    box-shadow: var(--shadow-glow);
+  /* ===== Ordered list styled ===== */
+  ol.styled {
+    counter-reset: ol-counter;
+    list-style: none;
+    padding: 0;
   }
-  .msc-section h2 {
-    text-align: center;
-    font-size: 1.6rem;
-    color: var(--text-bright);
-    margin-bottom: 8px;
+  ol.styled > li {
+    counter-increment: ol-counter;
+    padding: 10px 0 10px 48px;
+    position: relative;
+    font-size: 1.02rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
   }
-  .msc-section .msc-sub {
-    text-align: center;
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin-bottom: 34px;
-  }
-
-  .conclusion-card {
-    background: linear-gradient(135deg, rgba(4,159,217,0.08) 0%, rgba(108,192,74,0.05) 100%);
-    border: 1px solid var(--border-glow);
-    border-radius: var(--radius-lg);
-    padding: 44px;
-    text-align: center;
-    margin: 44px 0;
-  }
-  .conclusion-card h2 { font-size: 1.5rem; color: var(--text-bright); margin-bottom: 18px; }
-  .conclusion-card p { color: var(--text-secondary); max-width: 750px; margin: 0 auto; font-size: 1.05rem; line-height: 1.85; }
-
-  footer {
-    text-align: center;
-    padding: 44px 20px;
-    border-top: 1px solid var(--border-subtle);
+  ol.styled > li::before {
+    content: counter(ol-counter);
+    position: absolute;
+    left: 0; top: 10px;
+    width: 32px; height: 32px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 800;
     font-size: 0.85rem;
-    color: var(--text-muted);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .step-body code, .detail-box code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88em;
-    background: rgba(0,0,0,0.35);
-    padding: 2px 7px;
-    border-radius: 4px;
-    color: var(--cisco-teal);
+  /* ===== Unordered list ===== */
+  ul.bullet {
+    list-style: none;
+    padding: 0;
+  }
+  ul.bullet > li {
+    padding: 6px 0 6px 24px;
+    position: relative;
+    font-size: 1.02rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+  ul.bullet > li::before {
+    content: '';
+    position: absolute;
+    left: 4px; top: 16px;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
   }
 
-  @media (max-width: 700px) {
-    .hero { padding: 50px 20px 40px; }
-    .main-container { padding: 20px 14px; }
-    .step-card { padding: 26px 22px; }
-    .detail-grid { grid-template-columns: 1fr; }
-    .hero-stats { gap: 24px; }
+  /* ===== Code ===== */
+  code {
+    font-family: var(--font-mono);
+    background: #F1F5F9;
+    color: #0F172A;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    border: 1px solid #E2E8F0;
   }
 
-  .step-card {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.5s ease forwards;
+  /* ===== Inline badge ===== */
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 50px;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
   }
-  @keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
+  .badge.time { background: var(--red-light); color: var(--red); }
+  .badge.ok { background: var(--green-light); color: var(--green); }
+  .badge.warn { background: var(--orange-light); color: #92400E; }
+
+  /* ===== Divider ===== */
+  .divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 48px 0;
   }
-  .step-card:nth-child(1) { animation-delay: 0.05s; }
-  .step-card:nth-child(2) { animation-delay: 0.1s; }
-  .step-card:nth-child(3) { animation-delay: 0.15s; }
-  .step-card:nth-child(4) { animation-delay: 0.2s; }
-  .step-card:nth-child(5) { animation-delay: 0.25s; }
+
+  /* ===== Footer ===== */
+  .footer-refs {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin: 48px 0 24px;
+  }
+  .footer-refs h3 {
+    font-size: 1rem;
+    color: var(--accent);
+    margin: 0 0 12px;
+  }
+  .footer-refs ol {
+    padding-left: 20px;
+  }
+  .footer-refs li {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin-bottom: 4px;
+    line-height: 1.6;
+  }
+
+  footer.site-footer {
+    text-align: center;
+    padding: 32px 24px 48px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    html { font-size: 16px; }
+    .hero { padding: 60px 20px 48px; }
+    .hero h1 { font-size: 1.8rem; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .threshold-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 16px; }
+    .card { padding: 20px 22px; }
+    .toc { padding: 24px 20px; margin: -28px 16px 40px; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-meta { flex-direction: column; gap: 8px; }
+  }
 </style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 </head>
 <body>
 
-<!-- ==================== HERO ==================== -->
-<section class="hero">
-  <div class="hero-badge">Cisco Validated Design — Baseline Analysis</div>
-  <h1>Full 802.1X 漫游基线<br><span>显微镜级拆解</span></h1>
-  <p>剥离 802.11r / OKC / CCKM 所有优化，回到第一性原理。在最严苛的 WPA2-Enterprise 基线场景下，用手术刀拆解每一次漫游中发生的 10 个关键步骤。</p>
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="hero-stat-val">10</div>
-      <div class="hero-stat-label">关键步骤</div>
+<!-- ============================== HERO ============================== -->
+<header class="hero">
+  <div class="hero-badge">📡 深度技术解析</div>
+  <h1>802.1X 无线漫游<br><span class="highlight">显微镜级全拆解</span></h1>
+  <p class="hero-subtitle">
+    从第一性原理出发，剥离所有快速漫游优化，<br>
+    用 10 个步骤带你看清每一毫秒里发生了什么。
+  </p>
+  <div class="hero-meta">
+    <span>
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+      阅读约 25 分钟
+    </span>
+    <span>
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V15a1 1 0 11-2 0V4.804z"/></svg>
+      基于 4 份技术文档
+    </span>
+    <span>
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      Cisco 9800 / ISE / 802.11be
+    </span>
+  </div>
+</header>
+
+<!-- ============================== TOC ============================== -->
+<div class="container">
+<nav class="toc">
+  <h2>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+    目录导航
+  </h2>
+  <div class="toc-grid">
+    <a href="#prologue"><span class="toc-num">00</span> 为什么要回到第一性原理？</a>
+    <a href="#step1"><span class="toc-num">01</span> 漫游决策 — 谁按下了开关？</a>
+    <a href="#step2"><span class="toc-num">02</span> 扫描信道 — 在黑暗中找路</a>
+    <a href="#step3"><span class="toc-num">03</span> 802.11 认证与关联</a>
+    <a href="#step4"><span class="toc-num">04</span> EAP 认证启动 — 大门紧锁</a>
+    <a href="#step5"><span class="toc-num">05</span> 完整 EAP 认证 — 漫长的隧道</a>
+    <a href="#step6"><span class="toc-num">06</span> WLC ↔ ISE 通信细节</a>
+    <a href="#step7"><span class="toc-num">07</span> ISE → AD/CA 后端验证</a>
+    <a href="#step8"><span class="toc-num">08</span> PMK 生成 — 安全的种子</a>
+    <a href="#step9"><span class="toc-num">09</span> 四次握手 — 锻造临时钥匙</a>
+    <a href="#step10"><span class="toc-num">10</span> 数据恢复 — 终于能上网了</a>
+    <a href="#msc"><span class="toc-num">⏱️</span> 端到端消息流图</a>
+    <a href="#kvr"><span class="toc-num">🚀</span> 802.11k/v/r 为何不可或缺</a>
+    <a href="#compare"><span class="toc-num">📊</span> 漫游方案对比总览</a>
+  </div>
+</nav>
+
+<!-- ============================== PROLOGUE ============================== -->
+<section id="prologue">
+  <div class="section-label">序章</div>
+  <h2 class="section-title">为什么要回到第一性原理？</h2>
+
+  <p>在企业无线网络中，<strong>"漫游"是万恶之源，也是体验之基。</strong></p>
+
+  <p>
+    当你拿着手机从会议室走到茶水间，手机信号从一个 AP 切换到另一个 AP — 这个看似毫不起眼的瞬间，背后发生了一系列复杂得令人咋舌的协议交互。如果一切顺利，你甚至不会注意到它的存在；但一旦出了问题，通话断续、视频卡顿、VPN 断连，都可能是漫游在作祟。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      想象你正在高速公路上开车，需要从一个收费站（AP-A）切换到下一个收费站（AP-B）。<strong>问题是：在基线场景下，你必须先在第一个收费站完全停车、退出高速，然后重新排队进入下一个收费站、重新验证身份、重新缴费。</strong>这就是没有任何快速漫游优化时的"Full 802.1X 漫游"—— 一场每次都从零开始的身份验证马拉松。
+    </p>
+  </div>
+
+  <p>
+    很多网络工程师在排查无线问题时，习惯性地依赖 802.11r（快速 BSS 切换）或 OKC（机会密钥缓存）这些"黑盒"优化机制。但如果你连<strong>最基础的完整重认证流程</strong>都没有彻底搞懂，当面对复杂的认证超时或莫名其妙的掉线问题时，就会无从下手。
+  </p>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div>
+      <strong>我们今天的任务：</strong>剥离所有的高级优化（无 802.11r、无 OKC、无 CCKM），在最严苛的 WPA2-Enterprise 基线场景下，用"显微镜级别的手术刀"，把漫游过程中的 <strong>10 个关键步骤</strong> 逐一拆解。只有看清了最慢的基线，你才能真正理解快速漫游为什么快、快在哪里。
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat-val">300ms–3s</div>
-      <div class="hero-stat-label">基线漫游耗时</div>
+  </div>
+
+  <p>准备好了吗？让我们开始这场无线漫游的深度之旅。</p>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== STEP 1 ============================== -->
+<section id="step1">
+  <div class="section-label">Step 1 / 10</div>
+  <h2 class="section-title">漫游决策 — 谁按下了"切换"开关？</h2>
+
+  <p>
+    漫游的本质是一个 <strong>"先断后连"（Break-before-Make）</strong> 的过程。你的手机只有一个 Wi-Fi 射频模块，不可能同时跟两个 AP 通信。所以它必须<strong>先跟旧 AP 断开，再跟新 AP 建立连接</strong>。在这两者之间，就存在一个不可避免的"空窗期"。
+  </p>
+
+  <h3>🎯 铁律：漫游始终是终端的自主决策</h3>
+
+  <p>
+    这是一条很多人忽略的基本事实：<strong>无论你的 WLC（无线控制器）多么聪明，AP 信号多么强劲，最终按下"切换"按钮的永远是终端设备自己。</strong>基础设施可以"建议"甚至"逼迫"终端漫游（通过 802.11v），但发起连接请求的一定是终端。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      你的手机就像一位固执的出租车乘客 —— 即使司机（AP）说"前面堵车了，建议换条路"，最终下不下车、换不换车，完全是乘客自己的决定。手机并没有加速度计触发漫游的机制，它完全基于<strong>射频信号质量</strong>来做判断。
+    </p>
+  </div>
+
+  <h3>📊 终端是如何判断"该走了"？</h3>
+
+  <p>
+    终端通常基于以下几个射频指标来决定是否发起漫游：<strong>RSSI</strong>（接收信号强度）、<strong>SNR</strong>（信噪比）、<strong>Beacon 丢失</strong>（通常超过 2 秒未收到信标帧）、以及<strong>重传率</strong>（最大重试次数）。但每家厂商的漫游算法都是黑盒的，且各不相同：
+  </p>
+
+  <div class="threshold-grid">
+    <div class="threshold-card">
+      <div class="brand">
+        <span class="dot" style="background:#333"></span>
+        Apple iOS / macOS
+      </div>
+      <ul>
+        <li>RSSI 低于 <strong>−70 dBm</strong>（iOS）或 <strong>−75 dBm</strong>（macOS）时开始后台扫描</li>
+        <li>有数据传输时：新 AP 需比当前好 <strong>8 dB</strong></li>
+        <li>设备空闲时：新 AP 需比当前好 <strong>12 dB</strong></li>
+        <li>Apple 对漫游非常保守 — 倾向于"粘"在当前 AP</li>
+      </ul>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat-val">&lt;150ms</div>
-      <div class="hero-stat-label">语音容忍极限</div>
+    <div class="threshold-card">
+      <div class="brand">
+        <span class="dot" style="background:#0DA65C"></span>
+        Samsung / Android
+      </div>
+      <ul>
+        <li>RSSI 低于 <strong>−75 dBm</strong> 时开始扫描</li>
+        <li>信道利用率 &gt; 70% 且 RSSI &lt; −65 dBm 时也会触发</li>
+        <li>新 AP 需比当前好 <strong>10 dB</strong> 才会漫游</li>
+        <li>相比 Apple 更"激进"一些</li>
+      </ul>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat-val">4</div>
-      <div class="hero-stat-label">交互实体</div>
+  </div>
+
+  <h3>🧭 没有 802.11k/v 的困境：在黑暗中摸索</h3>
+
+  <p>
+    在我们今天的基线场景中（没有 11k/v），终端做出漫游决策后，就像是蒙着眼睛走进一个陌生的大楼 — <strong>它不知道哪个方向有 AP，不知道该去哪个信道寻找</strong>。这会直接导致下一步"扫描信道"耗费大量时间。
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div>
+      <strong>粘性客户端（Sticky Client）问题：</strong>如果没有 802.11v，有些终端会"死抱"当前 AP 不放，即使信号已经差到 −80 dBm 以下，仍然不愿意漫游。结果就是：用户明明走到了新 AP 旁边，手机却还连着走廊另一头那个信号微弱的旧 AP，体验极差。802.11v 的 BSS Transition Management 就是为了解决这个问题而生的。
     </div>
   </div>
 </section>
 
-<div class="main-container">
+<hr class="divider">
 
-  <!-- ========== ARCHITECTURE OVERVIEW SVG ========== -->
-  <div class="svg-diagram-wrap" style="margin-top:44px;">
-    <svg viewBox="0 0 960 240" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:960px;">
+<!-- ============================== STEP 2 ============================== -->
+<section id="step2">
+  <div class="section-label">Step 2 / 10</div>
+  <h2 class="section-title">扫描信道 — 在黑暗中寻找下一个 AP</h2>
+
+  <p>
+    终端决定要漫游了，但它还不知道目标 AP 在哪个信道上。于是，<strong>扫描</strong>阶段开始了 — 这是整个漫游过程中<strong>最容易被低估、却最可能造成巨大延迟的环节</strong>。
+  </p>
+
+  <h3>🔍 两种扫描方式</h3>
+
+  <div class="threshold-grid">
+    <div class="threshold-card" style="border-left: 4px solid var(--teal);">
+      <div class="brand" style="color: var(--teal);">
+        <span class="dot" style="background:var(--teal)"></span>
+        被动扫描（Passive Scan）
+      </div>
+      <ul>
+        <li>终端只听不说，静静停留在某个信道上，等待 AP 广播 Beacon 信标帧</li>
+        <li>Beacon 间隔约 <strong>102ms</strong>（每秒约 10 次）</li>
+        <li>优点：最省电</li>
+        <li>缺点：<strong>耗时极长</strong> — 每个信道至少等 100ms+</li>
+        <li>适用场景：DFS 信道（法规强制）、省电模式</li>
+      </ul>
+    </div>
+    <div class="threshold-card" style="border-left: 4px solid var(--accent);">
+      <div class="brand" style="color: var(--accent);">
+        <span class="dot" style="background:var(--accent)"></span>
+        主动扫描（Active Scan）
+      </div>
+      <ul>
+        <li>终端切换到某信道，<strong>主动广播 Probe Request</strong></li>
+        <li>AP 收到后<strong>立即</strong>回复 Probe Response（约 10ms 内）</li>
+        <li>优点：<strong>速度极快</strong>，是漫游时最常用的方式</li>
+        <li>缺点：耗电，且在 DFS 信道受限</li>
+        <li>适用场景：非 DFS 信道的常规漫游</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>🌐 全信道扫描 vs 子集扫描：差距有多大？</h3>
+
+  <p>
+    5GHz 频段在中国有多达 <strong>20+ 个可用信道</strong>，加上 2.4GHz 的 3 个不重叠信道，终端如果需要逐一扫描所有信道，每个信道停留（Dwell Time）约 10~100ms，<strong>总扫描时间可能高达数百毫秒甚至几秒</strong>。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      想象你在一栋 20 层的大楼里找人，但你不知道对方在哪一层。没有 802.11k 时，你只能<strong>从 1 楼到 20 楼逐层敲门</strong>，每层花 100ms。有了 802.11k，AP 直接告诉你"你要找的人在 6 楼和 11 楼"，你直接按电梯过去就行 — <strong>扫描时间可能从 2 秒缩短到不到 100ms</strong>。
+    </p>
+  </div>
+
+  <h3>💣 DFS 信道：扫描中的"雷区"</h3>
+
+  <p>
+    在 5GHz 频段中，U-NII-2 和 U-NII-2e 频段属于 <strong>DFS（动态频率选择）</strong>信道。这些信道需要与军用雷达共享频谱，因此法规有一条硬性规定：
+  </p>
+
+  <div class="callout danger">
+    <div class="callout-icon">🚫</div>
+    <div>
+      <strong>法规禁令：</strong>终端<strong>严禁</strong>在 DFS 信道上主动发送 Probe Request，除非终端已经（通过被动方式）收到了该信道上 AP 的 Beacon，证明该信道没有雷达在使用。这意味着终端在 DFS 信道上<strong>只能使用被动扫描</strong>，每个信道至少等待一个 Beacon 周期（约 102ms）。
+    </div>
+  </div>
+
+  <p>
+    如果你的网络大量使用 DFS 信道（信道 52~144），漫游时扫描延迟会显著增加。这也是为什么在对延迟敏感的部署中（如语音、实时视频），<strong>网络工程师会倾向于使用非 DFS 信道</strong>（36、40、44、48、149、153、157、161、165）。
+  </p>
+
+  <h3>⏱️ 扫描阶段的延迟代价</h3>
+
+  <div class="callout warning">
+    <div class="callout-icon">⏱️</div>
+    <div>
+      <strong>延迟估算：</strong>全信道扫描可能导致 <strong>200ms ~ 2000ms+</strong> 的延迟。对于要求切换延迟 <strong>&lt;150ms</strong> 的语音应用（如 Cisco Jabber、Microsoft Teams 通话）来说，<strong>光是扫描这一步就已经超标了</strong>。这就是 802.11k Neighbor Report 的核心价值所在。<span class="badge time">高延迟风险</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== STEP 3 ============================== -->
+<section id="step3">
+  <div class="section-label">Step 3 / 10</div>
+  <h2 class="section-title">802.11 认证与关联 — 在新 AP 门口敲门</h2>
+
+  <p>
+    终端扫描到了 AP-B，确认它的信号更好、SSID 匹配。现在，终端需要完成底层的 <strong>802.11 状态机连接</strong> — 这是 Wi-Fi 协议栈最基础的"敲门"仪式。
+  </p>
+
+  <h3>🔓 第一步：Open System Authentication（开放系统认证）</h3>
+
+  <p>
+    这里有一个让很多人困惑的点：<strong>即使你的网络使用的是 WPA2-Enterprise（最高级别的安全认证），802.11 层面的第一步仍然是"开放系统认证"</strong> — 本质上就是一个"空密码"的握手。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      这就好比你走进一栋安保严格的大楼。门卫（AP）先让你进了大门（802.11 Auth = 开放系统），但你被拦在了安检口（802.1X = 实际身份验证）。进大门只是个形式，<strong>真正的身份检查在后面</strong>。
+    </p>
+  </div>
+
+  <p>
+    具体流程非常简单：
+  </p>
+
+  <ol class="styled">
+    <li>终端发送 <code>Authentication Request</code>（认证请求）给 AP-B</li>
+    <li>AP-B 回复 <code>Authentication Response (Status: Success)</code> — 几乎不会拒绝</li>
+  </ol>
+
+  <p>整个过程约 <strong>3~5ms</strong>，几乎可以忽略不计。</p>
+
+  <h3>🤝 第二步：Reassociation（重关联）</h3>
+
+  <p>
+    因为这是<strong>漫游</strong>（不是首次连接），终端发送的是 <code>Reassociation Request</code>（重关联请求），而不是普通的 <code>Association Request</code>。这个帧非常重要，其中包含了几个关键字段：
+  </p>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Reassociation Request 关键字段</div>
+        <div class="card-subtitle">终端在此帧中"声明"自己的安全需求</div>
+      </div>
+    </div>
+    <ul class="bullet">
+      <li><strong>SSID</strong>：目标网络名称，必须与当前一致</li>
+      <li><strong>Supported Rates</strong>：终端支持的数据速率列表</li>
+      <li><strong>Current AP Address</strong>：旧 AP-A 的 MAC 地址（告诉 AP-B 我是从哪来的）</li>
+      <li>
+        <strong>RSN IE（Robust Security Network Information Element）</strong>：<br>
+        <span style="color:var(--text-secondary)">这是安全协商的核心字段。终端在此声明：</span>
+        <ul class="bullet" style="margin-top:8px;">
+          <li>加密套件：<code>CCMP (AES)</code></li>
+          <li>AKM 类型：<code>00:0f:ac:1</code> = 标准 802.1X 认证</li>
+          <li>是否支持 PMF（管理帧保护）等能力信息</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h3>🖥️ WLC（无线控制器）在背后做了什么？</h3>
+
+  <p>
+    在 Local Mode（本地模式）部署中，AP 是"轻量级"的 — 它不直接做决策，而是充当 WLC 的"遥控手臂"。AP-B 收到终端的 Reassociation Request 后，会：
+  </p>
+
+  <ol class="styled">
+    <li>将该 802.11 帧封装进 <strong>CAPWAP 控制隧道</strong>，发送给 WLC</li>
+    <li>WLC 内部的 <strong>WNCd 进程</strong>（Wireless Network Controller daemon）处理关联逻辑</li>
+    <li>WLC 生成 <code>Reassociation Response</code> 并通过 CAPWAP 隧道发回 AP-B</li>
+    <li>AP-B 将响应帧发送给终端</li>
+  </ol>
+
+  <p>此步骤约 <strong>3~5ms</strong>。至此，终端在 802.11 层面已经与 AP-B"连上了"，但 — </p>
+
+  <div class="callout danger">
+    <div class="callout-icon">🔒</div>
+    <div>
+      <strong>别高兴太早！</strong>此时终端只是完成了 Layer 2 层面的"握手"。WLC 立刻发现这个 SSID 配置了 WPA2-Enterprise，于是将终端的端口置于 <strong>"受控状态（Port-Unauthorized）"</strong>。这意味着：除了 EAPOL（认证协议帧）之外，<strong>所有其他数据流量（DHCP、DNS、HTTP 等）全部被阻断</strong>。你的手机此时虽然"关联"了，但依然无法上网。
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== STEP 4 ============================== -->
+<section id="step4">
+  <div class="section-label">Step 4 / 10</div>
+  <h2 class="section-title">EAP 认证启动 — 大门紧锁，请出示身份</h2>
+
+  <p>
+    终端已经在新 AP 门口坐下了，但大门紧锁。WLC 现在扮演的角色叫做 <strong>Authenticator（认证者）</strong>，它是终端和后端认证服务器（ISE）之间的"翻译官"。整个 802.1X 的 EAP 对话由此开始。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      你已经走进了大楼的大门（802.11 Auth/Assoc），但安检口前有一面钢化玻璃门（端口受控）。保安（WLC）隔着玻璃问你："你是谁？请出示证件。" 你递上身份信息后，保安不会自己验证 — 而是拿起电话，把你的信息转述给楼上的安全指挥中心（ISE）。ISE 才是真正做决定的人。
+    </p>
+  </div>
+
+  <h3>📨 四步启动序列</h3>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="tl-title">① EAPOL-Start（可选）</div>
+      <div class="tl-desc">
+        这是一个<strong>可选帧</strong>，由急于上网的终端主动发起，告诉 WLC："我准备好了，别磨蹭，开始认证吧！"不是所有终端都会发这个帧 — 如果终端不发，WLC 也会在关联完成后主动发起下一步。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">② EAP-Request / Identity</div>
+      <div class="tl-desc">
+        WLC（Authenticator）向终端发送请求："请告诉我你的身份标识（用户名）。"这个帧通过空口以 <strong>EAPOL</strong>（EAP over LAN）格式传输。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">③ EAP-Response / Identity</div>
+      <div class="tl-desc">
+        终端回复自己的身份信息，例如 <code>DOMAIN\bob</code>（域用户名）或 <code>anonymous</code>（匿名标识，常见于 PEAP 的外层身份保护）。WLC 收到后，<strong>不做任何验证</strong>，而是将其封装进 <strong>RADIUS Access-Request</strong> 报文中，通过有线网络发送给 ISE。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">④ EAP 方法协商</div>
+      <div class="tl-desc">
+        ISE 收到身份信息后，根据自己的认证策略，下发它期望使用的 EAP 方法。例如发送 <code>EAP-Request / EAP-TLS</code>（要求证书认证）。如果终端支持，就继续；如果不支持，终端回复 <code>Nak</code>（否定确认），<strong>双方进行"讨价还价"</strong>，直到就某个 EAP 方法（EAP-TLS 或 PEAP）达成一致。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">📌</div>
+    <div>
+      <strong>关键点：</strong>在整个 EAP 对话中，WLC 始终只是一个"透明转发"的中间人。它看不懂 EAP 载荷的内容（TLS 证书、密码哈希等），只是把终端发来的 EAPOL 帧剥壳后塞进 RADIUS 报文发给 ISE，再把 ISE 的 RADIUS 回复拆包后以 EAPOL 帧发回终端。这就是 802.1X 架构中 <strong>"三角色模型"</strong> 的精髓：
+      <br><br>
+      <strong>Supplicant（请求者）</strong>= 终端 &nbsp;↔&nbsp; <strong>Authenticator（认证者）</strong>= WLC &nbsp;↔&nbsp; <strong>Authentication Server（认证服务器）</strong>= ISE
+    </div>
+  </div>
+
+  <p>
+    到这里，序幕已经拉开。接下来的 Step 5 将进入<strong>最耗时的环节</strong> — 完整的 EAP-TLS 或 PEAP 认证流程。这是漫游延迟的"头号杀手"。
+  </p>
+</section>
+
+<hr class="divider">
+<!-- ============================== STEP 5 ============================== -->
+<section id="step5">
+  <div class="section-label">Step 5 / 10</div>
+  <h2 class="section-title">完整 EAP 认证 — 漫长的隧道穿越</h2>
+
+  <p>
+    现在进入整个漫游过程中<strong>最耗时、最复杂</strong>的环节。因为没有任何快速漫游机制（无 OKC、无 802.11r），终端和 ISE 必须<strong>从头到尾重新执行一次完整的 EAP 认证</strong>。每一次漫游都是一场"身份验证马拉松"。
+  </p>
+
+  <div class="callout danger">
+    <div class="callout-icon">⏱️</div>
+    <div>
+      <strong>时间杀手：</strong>这一步通常消耗 <strong>200ms ~ 1000ms+</strong>，是整个漫游延迟的<strong>绝对主力</strong>。证书分片传输、广域网 RADIUS 延迟、AD 数据库查询，每一环都在叠加延迟。<span class="badge time">最高延迟环节</span>
+    </div>
+  </div>
+
+  <!-- === EAP-TLS === -->
+  <h3>🔐 场景 A：EAP-TLS — 双向证书认证（最高安全级别）</h3>
+
+  <p>
+    EAP-TLS 是企业安全的"黄金标准" — 终端和服务器<strong>双方都出示数字证书</strong>来互相验证身份，不使用任何密码。安全级别最高，但也是<strong>最耗时</strong>的，原因在于证书文件很大（通常 2200~8000 字节），必须在 EAP 帧中进行分片（Fragmentation）传输，导致多次网络往返。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      想象两个国家的大使互相交换国书。每份国书有几十页，但信使每次只能携带一页。于是信使要在两个大使馆之间<strong>来回跑十几趟</strong>，才能把完整的国书送完。这就是 EAP-TLS 证书分片的本质 — 文件太大，通道太窄，只能分批传输。
+    </p>
+  </div>
+
+  <div class="svg-figure">
+    <svg viewBox="0 0 880 520" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+      <!-- Background -->
+      <rect width="880" height="520" rx="12" fill="#FAFBFF"/>
+
+      <!-- Title -->
+      <text x="440" y="32" text-anchor="middle" font-size="16" font-weight="700" fill="#1E293B">EAP-TLS 完整交互流程（7 步）</text>
+
+      <!-- Column headers -->
+      <rect x="80" y="52" width="140" height="36" rx="8" fill="#DBEAFE"/>
+      <text x="150" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#1D4ED8">终端 (Supplicant)</text>
+
+      <rect x="370" y="52" width="140" height="36" rx="8" fill="#FEF3C7"/>
+      <text x="440" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">WLC (中转)</text>
+
+      <rect x="660" y="52" width="140" height="36" rx="8" fill="#D1FAE5"/>
+      <text x="730" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">ISE (Auth Server)</text>
+
+      <!-- Vertical lifelines -->
+      <line x1="150" y1="92" x2="150" y2="500" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="440" y1="92" x2="440" y2="500" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="730" y1="92" x2="730" y2="500" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6,4"/>
+
+      <!-- Step 1: EAP-TLS Start -->
+      <g>
+        <circle cx="68" cy="120" r="14" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+        <text x="68" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#3B82F6">1</text>
+        <line x1="730" y1="120" x2="160" y2="120" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+        <rect x="320" y="106" width="240" height="26" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+        <text x="440" y="123" text-anchor="middle" font-size="11" fill="#1D4ED8">EAP-Request / EAP-TLS Start</text>
+      </g>
+
+      <!-- Step 2: Client Hello -->
+      <g>
+        <circle cx="68" cy="170" r="14" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+        <text x="68" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="#3B82F6">2</text>
+        <line x1="150" y1="170" x2="720" y2="170" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+        <rect x="290" y="156" width="300" height="26" rx="6" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+        <text x="440" y="173" text-anchor="middle" font-size="11" fill="#6D28D9">EAP-Response / TLS Client Hello</text>
+      </g>
+
+      <!-- Step 3: Server Cert (big!) -->
+      <g>
+        <circle cx="68" cy="225" r="14" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+        <text x="68" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">3</text>
+        <line x1="730" y1="220" x2="160" y2="220" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <rect x="220" y="206" width="440" height="26" rx="6" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+        <text x="440" y="223" text-anchor="middle" font-size="11" fill="#92400E">Server Hello + Certificate + CertRequest + HelloDone</text>
+        <!-- Fragment indicator -->
+        <rect x="700" y="238" width="80" height="20" rx="4" fill="#FEE2E2"/>
+        <text x="740" y="252" text-anchor="middle" font-size="9" font-weight="700" fill="#DC2626">⚡ 多次分片</text>
+      </g>
+
+      <!-- Step 4: Client Cert (big!) -->
+      <g>
+        <circle cx="68" cy="290" r="14" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+        <text x="68" y="295" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">4</text>
+        <line x1="150" y1="285" x2="720" y2="285" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <rect x="200" y="271" width="480" height="26" rx="6" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+        <text x="440" y="288" text-anchor="middle" font-size="11" fill="#92400E">Client Cert + KeyExchange + CertVerify + ChangeCipher + Finished</text>
+        <rect x="100" y="303" width="80" height="20" rx="4" fill="#FEE2E2"/>
+        <text x="140" y="317" text-anchor="middle" font-size="9" font-weight="700" fill="#DC2626">⚡ 多次分片</text>
+      </g>
+
+      <!-- Step 5: Server Finished -->
+      <g>
+        <circle cx="68" cy="355" r="14" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+        <text x="68" y="360" text-anchor="middle" font-size="11" font-weight="700" fill="#3B82F6">5</text>
+        <line x1="730" y1="355" x2="160" y2="355" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+        <rect x="290" y="341" width="300" height="26" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+        <text x="440" y="358" text-anchor="middle" font-size="11" fill="#1D4ED8">EAP-Request / ChangeCipherSpec + Finished</text>
+      </g>
+
+      <!-- Step 6: Empty Response -->
+      <g>
+        <circle cx="68" cy="405" r="14" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="2"/>
+        <text x="68" y="410" text-anchor="middle" font-size="11" font-weight="700" fill="#8B5CF6">6</text>
+        <line x1="150" y1="405" x2="720" y2="405" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+        <rect x="340" y="391" width="200" height="26" rx="6" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+        <text x="440" y="408" text-anchor="middle" font-size="11" fill="#6D28D9">EAP-Response（空确认）</text>
+      </g>
+
+      <!-- Step 7: EAP-Success -->
+      <g>
+        <circle cx="68" cy="455" r="14" fill="#D1FAE5" stroke="#10B981" stroke-width="2"/>
+        <text x="68" y="460" text-anchor="middle" font-size="11" font-weight="700" fill="#065F46">7</text>
+        <line x1="730" y1="455" x2="160" y2="455" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+        <rect x="340" y="441" width="200" height="26" rx="6" fill="#D1FAE5" stroke="#6EE7B7" stroke-width="1"/>
+        <text x="440" y="458" text-anchor="middle" font-size="11" font-weight="700" fill="#065F46">🎉 EAP-Success</text>
+      </g>
+
+      <!-- Time annotation -->
+      <rect x="20" y="480" width="840" height="28" rx="6" fill="#FEF2F2"/>
+      <text x="440" y="499" text-anchor="middle" font-size="12" font-weight="600" fill="#DC2626">⏱️ 由于双向证书分片传输，EAP-TLS 通常需要 10~20+ 个报文往返，耗时 300ms ~ 1000ms+</text>
+
+      <!-- Arrow markers -->
       <defs>
-        <linearGradient id="gBox" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#1a2744"/>
-          <stop offset="100%" stop-color="#111827"/>
-        </linearGradient>
-        <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#049fd9"/></marker>
-        <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6cc04a"/></marker>
-        <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ff8200"/></marker>
+        <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#3B82F6"/></marker>
+        <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#8B5CF6"/></marker>
+        <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#F59E0B"/></marker>
+        <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#10B981"/></marker>
       </defs>
-
-      <!-- Client -->
-      <rect x="20" y="45" width="155" height="130" rx="12" fill="url(#gBox)" stroke="#049fd9" stroke-width="1.5"/>
-      <text x="97" y="88" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Noto Sans SC, sans-serif">📱 终端</text>
-      <text x="97" y="110" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="Noto Sans SC, sans-serif">Supplicant</text>
-      <text x="97" y="130" text-anchor="middle" fill="#64748b" font-size="10.5" font-family="JetBrains Mono, monospace">802.1X Client</text>
-      <text x="97" y="158" text-anchor="middle" fill="#049fd9" font-size="10.5" font-family="JetBrains Mono, monospace">RSSI / SNR 决策</text>
-
-      <!-- AP-B / WLC -->
-      <rect x="280" y="45" width="195" height="130" rx="12" fill="url(#gBox)" stroke="#00bceb" stroke-width="1.5"/>
-      <text x="377" y="83" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Noto Sans SC, sans-serif">📡 AP-B / WLC</text>
-      <text x="377" y="105" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="Noto Sans SC, sans-serif">Authenticator (NAD)</text>
-      <text x="377" y="127" text-anchor="middle" fill="#64748b" font-size="10.5" font-family="JetBrains Mono, monospace">C9800 + CAPWAP</text>
-      <text x="377" y="158" text-anchor="middle" fill="#00bceb" font-size="10.5" font-family="JetBrains Mono, monospace">EAP ↔ RADIUS 翻译</text>
-
-      <!-- ISE -->
-      <rect x="575" y="45" width="160" height="130" rx="12" fill="url(#gBox)" stroke="#6cc04a" stroke-width="1.5"/>
-      <text x="655" y="88" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Noto Sans SC, sans-serif">🛡️ Cisco ISE</text>
-      <text x="655" y="110" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="Noto Sans SC, sans-serif">Authentication Server</text>
-      <text x="655" y="130" text-anchor="middle" fill="#64748b" font-size="10.5" font-family="JetBrains Mono, monospace">RADIUS + 策略引擎</text>
-      <text x="655" y="158" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-family="JetBrains Mono, monospace">AuthC / AuthZ</text>
-
-      <!-- AD/CA -->
-      <rect x="835" y="45" width="110" height="130" rx="12" fill="url(#gBox)" stroke="#ff8200" stroke-width="1.5"/>
-      <text x="890" y="88" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Noto Sans SC, sans-serif">🏛 AD/CA</text>
-      <text x="890" y="110" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Noto Sans SC, sans-serif">Identity Store</text>
-      <text x="890" y="130" text-anchor="middle" fill="#64748b" font-size="10.5" font-family="JetBrains Mono, monospace">LDAP/CRL/OCSP</text>
-
-      <!-- Arrows -->
-      <line x1="175" y1="95" x2="278" y2="95" stroke="#049fd9" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowBlue)" filter="url(#glow)"/>
-      <text x="226" y="86" text-anchor="middle" fill="#049fd9" font-size="10.5" font-family="JetBrains Mono, monospace">EAPOL / 802.11</text>
-
-      <line x1="475" y1="110" x2="573" y2="110" stroke="#6cc04a" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowGreen)" filter="url(#glow)"/>
-      <text x="524" y="101" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-family="JetBrains Mono, monospace">RADIUS:1812</text>
-
-      <line x1="735" y1="110" x2="833" y2="110" stroke="#ff8200" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowOrange)" filter="url(#glow)"/>
-      <text x="784" y="101" text-anchor="middle" fill="#ff8200" font-size="10.5" font-family="JetBrains Mono, monospace">LDAP/RPC</text>
-
-      <!-- Phase labels -->
-      <text x="226" y="205" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Noto Sans SC, sans-serif">空口 (Over-the-Air)</text>
-      <text x="524" y="205" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Noto Sans SC, sans-serif">有线 (Wired Infra)</text>
-      <text x="784" y="205" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Noto Sans SC, sans-serif">后端 (Backend)</text>
     </svg>
-    <div class="diagram-caption">图 1：Full 802.1X 漫游四大交互实体架构总览</div>
+    <div class="svg-caption">图 1：EAP-TLS 完整交互流程 — 双向证书认证导致大量分片往返</div>
   </div>
 
-  <!-- ========== PHASE A ========== -->
-  <div class="section-header">
-    <span class="phase-tag">Phase A</span>
-    <h2>射频决策与信道扫描</h2>
-  </div>
+  <!-- === PEAP === -->
+  <h3>🔑 场景 B：PEAP-MSCHAPv2 — 用户名密码认证</h3>
 
-  <!-- Step 1 -->
-  <div class="step-card color-blue">
-    <div class="step-top">
-      <div class="step-number">01</div>
-      <div class="step-title-block">
-        <h3>终端离开 AP-A 覆盖（漫游决策期）</h3>
-        <div class="step-subtitle">Break-before-Make — 漫游的第一性原理</div>
+  <p>
+    PEAP 是企业中更常见的选择，因为它<strong>不需要为每台终端部署客户端证书</strong>，只需要在 ISE 上安装服务器证书即可。PEAP 分为"内外两层"（Two-Phase）：
+  </p>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Phase 1：外层 TLS 隧道（保护通道）</div>
+        <div class="card-subtitle">只有 ISE 出示证书，终端不需要证书</div>
       </div>
     </div>
-    <div class="step-body">
-      <p>漫游的本质是一个 <strong>"先断后连"</strong> 的过程。在标准终端（手机/电脑）上，客户端必须先切换信道，再发起对新 AP 的连接。记住铁律：<strong>漫游始终是终端（Client）的自主决策</strong>，基础设施只能建议或强制踢人。终端基于射频指标而非加速度计来触发扫描。</p>
-
-      <div class="callout">
-        <strong>💡 核心原则：</strong>终端并不会因为"你在移动"而扫描。所有漫游判断均来自射频环境的变化。
-      </div>
-
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot"></span>决策指标与阈值</h4>
-          <ul>
-            <li><strong>Apple iOS/macOS：</strong> RSSI 低于 <code>-70 dBm</code>（iOS）或 <code>-75 dBm</code>（macOS）开始后台扫描。新 AP 需好 <code>8 dB</code>（传输中）或 <code>12 dB</code>（空闲时）</li>
-            <li><strong>Android/Samsung：</strong> 通常低于 <code>-75 dBm</code>，或信道利用率 &gt;70% 且 RSSI &lt; -65 dBm。新 AP 需好 <code>10 dB</code></li>
-          </ul>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>802.11k / 802.11v 辅助</h4>
-          <ul>
-            <li><strong>802.11k (Neighbor Report)：</strong>AP 返回邻居列表（信道+BSSID），终端缩小扫描范围，<strong>极大减少延迟</strong></li>
-            <li><strong>802.11v (BSS Transition)：</strong>AP 可主动发送建议列表，甚至通过 Disassociation Imminent 强制漫游，解决<strong>粘性客户端</strong>问题</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- SVG: Roaming Decision -->
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:820px;">
-          <circle cx="200" cy="110" r="95" fill="none" stroke="#cf2030" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
-          <circle cx="200" cy="110" r="58" fill="none" stroke="#cf2030" stroke-width="1.5" opacity="0.6"/>
-          <text x="200" y="60" text-anchor="middle" fill="#cf2030" font-size="13" font-weight="700" font-family="Noto Sans SC">AP-A 覆盖</text>
-          <text x="200" y="115" text-anchor="middle" fill="#e2e8f0" font-size="24">📡</text>
-          <text x="200" y="140" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="JetBrains Mono">RSSI: -45 dBm</text>
-
-          <text x="320" y="115" text-anchor="middle" fill="#e2e8f0" font-size="22">📱</text>
-          <text x="320" y="138" text-anchor="middle" fill="#ffcc00" font-size="11" font-weight="700" font-family="JetBrains Mono">RSSI: -72 dBm ⚠️</text>
-          <text x="320" y="155" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">触发后台扫描</text>
-
-          <line x1="245" y1="108" x2="298" y2="108" stroke="#ffcc00" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="271" y="98" text-anchor="middle" fill="#ffcc00" font-size="10" font-family="Noto Sans SC">移动方向 →</text>
-
-          <circle cx="540" cy="110" r="95" fill="none" stroke="#6cc04a" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
-          <circle cx="540" cy="110" r="58" fill="none" stroke="#6cc04a" stroke-width="1.5" opacity="0.6"/>
-          <text x="540" y="60" text-anchor="middle" fill="#6cc04a" font-size="13" font-weight="700" font-family="Noto Sans SC">AP-B 覆盖</text>
-          <text x="540" y="115" text-anchor="middle" fill="#e2e8f0" font-size="24">📡</text>
-          <text x="540" y="140" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="JetBrains Mono">RSSI: -40 dBm</text>
-
-          <rect x="350" y="68" width="100" height="66" rx="6" fill="rgba(255,204,0,0.08)" stroke="#ffcc00" stroke-width="0.8" stroke-dasharray="3,3"/>
-          <text x="400" y="88" text-anchor="middle" fill="#ffcc00" font-size="10.5" font-weight="600" font-family="Noto Sans SC">重叠区域</text>
-          <text x="400" y="106" text-anchor="middle" fill="#ffcc00" font-size="10" font-family="Noto Sans SC">漫游决策发生在此</text>
-          <text x="400" y="124" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">ΔdB ≥ 8~12 dB</text>
-
-          <rect x="655" y="65" width="150" height="95" rx="6" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
-          <text x="668" y="85" fill="#94a3b8" font-size="11" font-weight="600" font-family="Noto Sans SC">判断因素：</text>
-          <text x="674" y="104" fill="#64748b" font-size="10.5" font-family="Noto Sans SC">▸ RSSI（接收信号强度）</text>
-          <text x="674" y="121" fill="#64748b" font-size="10.5" font-family="Noto Sans SC">▸ SNR（信噪比）</text>
-          <text x="674" y="138" fill="#64748b" font-size="10.5" font-family="Noto Sans SC">▸ Beacon 丢失 &gt;2s</text>
-          <text x="674" y="155" fill="#64748b" font-size="10.5" font-family="Noto Sans SC">▸ Max Retry Count</text>
-        </svg>
-        <div class="diagram-caption">图 2：漫游决策触发 — 终端从 AP-A 到 AP-B 的射频判断</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step 2 -->
-  <div class="step-card color-blue">
-    <div class="step-top">
-      <div class="step-number">02</div>
-      <div class="step-title-block">
-        <h3>扫描信道（寻找 AP-B）</h3>
-        <div class="step-subtitle">Active / Passive Scan — 全信道扫描 vs 子集扫描</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p>终端决定要漫游后，必须通过空口扫描找到目标 AP-B。扫描方式的选择直接决定了漫游的延迟上限。</p>
-
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot"></span>被动扫描 (Passive Scan)</h4>
-          <p>终端只听不说，停留在某个信道上等待 AP 每 <code>~102ms</code> 发送一次的 Beacon 帧。<strong>最省电，但耗时最长。</strong></p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>主动扫描 (Active Scan)</h4>
-          <p>终端切换信道后广播 Probe Request，AP 在 <code>~10ms</code> 内回复 Probe Response。<strong>耗电，但极快</strong>，漫游最常用。</p>
-        </div>
-      </div>
-
-      <div class="callout warn">
-        <strong>⚠️ DFS 信道雷区：</strong>5GHz U-NII-2/2e 属 DFS 信道。法规严禁终端在 DFS 信道主动发包（Probe Request），终端必须先"被动"听到 Beacon 证明无雷达，导致扫描延迟显著增加。
-      </div>
-      <div class="callout danger">
-        <strong>🔴 延迟代价：</strong>每信道 Dwell Time 约 10-100ms。无 802.11k 时全信道扫描可达<strong>数百毫秒至几秒</strong>，远超语音 &lt;150ms 容忍极限。
-      </div>
-
-      <!-- SVG: Channel Scan -->
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 840 210" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:840px;">
-          <text x="22" y="28" fill="#94a3b8" font-size="12" font-weight="600" font-family="Noto Sans SC">5 GHz 信道扫描示意</text>
-
-          <g><rect x="22" y="48" width="60" height="46" rx="5" fill="rgba(4,159,217,0.15)" stroke="#049fd9" stroke-width="1"/>
-          <text x="52" y="68" text-anchor="middle" fill="#049fd9" font-size="12" font-weight="600" font-family="JetBrains Mono">Ch36</text>
-          <text x="52" y="84" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">~10ms</text></g>
-
-          <g><rect x="92" y="48" width="60" height="46" rx="5" fill="rgba(4,159,217,0.15)" stroke="#049fd9" stroke-width="1"/>
-          <text x="122" y="68" text-anchor="middle" fill="#049fd9" font-size="12" font-weight="600" font-family="JetBrains Mono">Ch40</text>
-          <text x="122" y="84" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">~10ms</text></g>
-
-          <g><rect x="162" y="48" width="60" height="46" rx="5" fill="rgba(4,159,217,0.15)" stroke="#049fd9" stroke-width="1"/>
-          <text x="192" y="68" text-anchor="middle" fill="#049fd9" font-size="12" font-weight="600" font-family="JetBrains Mono">Ch44</text>
-          <text x="192" y="84" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">~10ms</text></g>
-
-          <!-- DFS -->
-          <g><rect x="238" y="48" width="60" height="46" rx="5" fill="rgba(207,32,48,0.12)" stroke="#cf2030" stroke-width="1.5"/>
-          <text x="268" y="68" text-anchor="middle" fill="#cf2030" font-size="12" font-weight="700" font-family="JetBrains Mono">Ch52</text>
-          <text x="268" y="84" text-anchor="middle" fill="#cf2030" font-size="9" font-family="JetBrains Mono">DFS 102ms+</text></g>
-
-          <g><rect x="308" y="48" width="60" height="46" rx="5" fill="rgba(207,32,48,0.12)" stroke="#cf2030" stroke-width="1.5"/>
-          <text x="338" y="68" text-anchor="middle" fill="#cf2030" font-size="12" font-weight="700" font-family="JetBrains Mono">Ch100</text>
-          <text x="338" y="84" text-anchor="middle" fill="#cf2030" font-size="9" font-family="JetBrains Mono">DFS 102ms+</text></g>
-
-          <g><rect x="378" y="48" width="60" height="46" rx="5" fill="rgba(207,32,48,0.12)" stroke="#cf2030" stroke-width="1.5"/>
-          <text x="408" y="68" text-anchor="middle" fill="#cf2030" font-size="12" font-weight="700" font-family="JetBrains Mono">Ch140</text>
-          <text x="408" y="84" text-anchor="middle" fill="#cf2030" font-size="9" font-family="JetBrains Mono">DFS 102ms+</text></g>
-
-          <!-- Target -->
-          <g><rect x="454" y="48" width="60" height="46" rx="5" fill="rgba(108,192,74,0.15)" stroke="#6cc04a" stroke-width="1.5"/>
-          <text x="484" y="68" text-anchor="middle" fill="#6cc04a" font-size="12" font-weight="700" font-family="JetBrains Mono">Ch149</text>
-          <text x="484" y="84" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="JetBrains Mono">目标! ✓</text></g>
-
-          <g><rect x="524" y="48" width="60" height="46" rx="5" fill="rgba(4,159,217,0.15)" stroke="#049fd9" stroke-width="1"/>
-          <text x="554" y="68" text-anchor="middle" fill="#049fd9" font-size="12" font-weight="600" font-family="JetBrains Mono">Ch153</text>
-          <text x="554" y="84" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">~10ms</text></g>
-
-          <line x1="32" y1="112" x2="564" y2="112" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,3" marker-end="url(#arrowBlue)"/>
-          <text x="298" y="130" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">← 无 802.11k：逐个信道遍历（全信道扫描） →</text>
-
-          <rect x="605" y="42" width="220" height="120" rx="8" fill="rgba(108,192,74,0.06)" stroke="#6cc04a" stroke-width="0.8"/>
-          <text x="618" y="64" fill="#6cc04a" font-size="12" font-weight="700" font-family="Noto Sans SC">✅ 有 802.11k Neighbor Report</text>
-          <text x="624" y="86" fill="#94a3b8" font-size="11" font-family="Noto Sans SC">终端仅扫描邻居列表中的信道</text>
-          <text x="624" y="106" fill="#94a3b8" font-size="11" font-family="JetBrains Mono">Ch36 → Ch149 (2 个信道)</text>
-          <text x="624" y="128" fill="#6cc04a" font-size="11.5" font-weight="600" font-family="Noto Sans SC">延迟：~20ms ✓</text>
-          <text x="624" y="152" fill="#cf2030" font-size="10.5" font-family="Noto Sans SC">❌ 无 11k 全扫描延迟：~500ms+</text>
-        </svg>
-        <div class="diagram-caption">图 3：信道扫描流程 — DFS 信道对漫游延迟的致命影响</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== PHASE B ========== -->
-  <div class="section-header">
-    <span class="phase-tag">Phase B</span>
-    <h2>底层 802.11 关联与 EAP 触发</h2>
-  </div>
-
-  <!-- Step 3 -->
-  <div class="step-card color-teal">
-    <div class="step-top">
-      <div class="step-number">03</div>
-      <div class="step-title-block">
-        <h3>与 AP-B 进行 802.11 Authentication & Association</h3>
-        <div class="step-subtitle">Open System Auth → Reassociation — MAC 层的历史遗留握手</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p>找到 AP-B 后，终端必须完成底层的 802.11 状态机连接。此时双方仅仅是 Layer 2 握手，<strong>还不具备数据转发能力</strong>。</p>
-
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot"></span>Open System Authentication</h4>
-          <p>历史遗留的"空密码"认证。即使是 WPA2-Enterprise，第一步也必须走此过程：终端发送 Auth Request，AP 回复 Auth Response (Status: Success)。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>Reassociation Request</h4>
-          <p>因为是<strong>漫游</strong>，发送的是 <code>Reassociation Request</code>（非 Association）。关键字段：</p>
-          <ul>
-            <li><code>SSID</code> + <code>Supported Rates</code></li>
-            <li><strong>RSN IE：</strong>声明期望的安全策略（CCMP/AES + 802.1X AKM <code>00:0f:ac:1</code>）</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="callout">
-        <strong>💡 WLC 介入：</strong>Local Mode 下 AP 是轻量级的，将 802.11 帧封装进 CAPWAP 控制隧道发给 WLC（C9800 WNCd 进程）。WLC 处理关联逻辑并回复 Reassociation Response。
-      </div>
-
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 660 230" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:660px;">
-          <text x="90" y="24" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">📱 终端</text>
-          <text x="380" y="24" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">📡 AP-B</text>
-          <text x="560" y="24" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">WLC (C9800)</text>
-          <line x1="90" y1="36" x2="90" y2="220" stroke="#94a3b8" stroke-width="0.8"/>
-          <line x1="380" y1="36" x2="380" y2="220" stroke="#94a3b8" stroke-width="0.8"/>
-          <line x1="560" y1="36" x2="560" y2="220" stroke="#94a3b8" stroke-width="0.8"/>
-
-          <rect x="400" y="40" width="140" height="170" rx="6" fill="none" stroke="#64748b" stroke-width="0.8" stroke-dasharray="4,4"/>
-          <text x="470" y="56" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">CAPWAP Tunnel</text>
-
-          <line x1="92" y1="80" x2="378" y2="80" stroke="#00bceb" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="235" y="72" text-anchor="middle" fill="#00bceb" font-size="11.5" font-weight="600" font-family="JetBrains Mono">Auth Request (Open System)</text>
-
-          <line x1="378" y1="110" x2="92" y2="110" stroke="#00bceb" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="235" y="102" text-anchor="middle" fill="#00bceb" font-size="11.5" font-weight="600" font-family="JetBrains Mono">Auth Response (Success)</text>
-          <text x="235" y="127" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">~5 ms</text>
-
-          <line x1="92" y1="150" x2="378" y2="150" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="235" y="142" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600" font-family="JetBrains Mono">Reassociation Request (RSN IE)</text>
-
-          <line x1="378" y1="185" x2="92" y2="185" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="235" y="177" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600" font-family="JetBrains Mono">Reassociation Response</text>
-          <text x="235" y="205" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">~5 ms | WLC 决策</text>
-        </svg>
-        <div class="diagram-caption">图 4：802.11 Open System Auth + Reassociation 交互（经 CAPWAP 至 WLC）</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step 4 -->
-  <div class="step-card color-teal">
-    <div class="step-top">
-      <div class="step-number">04</div>
-      <div class="step-title-block">
-        <h3>触发 802.1X / EAP 认证</h3>
-        <div class="step-subtitle">Port-Unauthorized — EAPOL 闸门开启</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p>关联成功后，WLC 发现 SSID 配置了 WPA2-Enterprise，将终端置于 <strong>"端口受控状态（Port-Unauthorized）"</strong>，只允许 EAPOL 报文通过，<strong>阻断所有其他数据（DHCP、IP 等）</strong>。</p>
-
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot"></span>EAPOL-Start</h4>
-          <p>终端主动发起（可选），表明"我准备好了，开始认证吧"。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>EAP-Request / Identity</h4>
-          <p>WLC（Authenticator）向终端询问身份。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>EAP-Response / Identity</h4>
-          <p>终端回复用户名（如 <code>DOMAIN\bob</code> 或匿名标识 <code>anonymous</code>）。WLC 封装进 RADIUS 发送给 ISE。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>方法协商</h4>
-          <p>ISE 提议 EAP 方法（如 EAP-TLS），终端如不支持则回复 <code>Nak</code>，直到双方就方法达成一致。</p>
-        </div>
-      </div>
-
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 660 150" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:660px;">
-          <rect x="20" y="25" width="115" height="60" rx="8" fill="rgba(4,159,217,0.1)" stroke="#049fd9" stroke-width="1"/>
-          <text x="77" y="52" text-anchor="middle" fill="#e2e8f0" font-size="12.5" font-weight="600" font-family="Noto Sans SC">📱 终端</text>
-          <text x="77" y="72" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">Supplicant</text>
-
-          <rect x="178" y="20" width="155" height="78" rx="8" fill="rgba(207,32,48,0.08)" stroke="#cf2030" stroke-width="1.5"/>
-          <text x="255" y="44" text-anchor="middle" fill="#cf2030" font-size="12" font-weight="700" font-family="Noto Sans SC">🔒 端口受控</text>
-          <text x="255" y="62" text-anchor="middle" fill="#cf2030" font-size="10" font-family="JetBrains Mono">Port-Unauthorized</text>
-          <text x="255" y="80" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Noto Sans SC">仅放行 EAPOL</text>
-          <text x="255" y="118" text-anchor="middle" fill="#cf2030" font-size="10" font-family="Noto Sans SC">❌ DHCP / IP / ARP 全部阻断</text>
-
-          <line x1="135" y1="48" x2="176" y2="48" stroke="#6cc04a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
-          <text x="155" y="40" text-anchor="middle" fill="#6cc04a" font-size="9" font-weight="600" font-family="JetBrains Mono">EAPOL ✓</text>
-
-          <rect x="378" y="25" width="115" height="60" rx="8" fill="rgba(0,188,235,0.1)" stroke="#00bceb" stroke-width="1"/>
-          <text x="435" y="52" text-anchor="middle" fill="#e2e8f0" font-size="12.5" font-weight="600" font-family="Noto Sans SC">WLC</text>
-          <text x="435" y="72" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">Authenticator</text>
-
-          <line x1="333" y1="52" x2="376" y2="52" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-
-          <rect x="538" y="25" width="105" height="60" rx="8" fill="rgba(108,192,74,0.1)" stroke="#6cc04a" stroke-width="1"/>
-          <text x="590" y="52" text-anchor="middle" fill="#e2e8f0" font-size="12.5" font-weight="600" font-family="Noto Sans SC">ISE</text>
-          <text x="590" y="72" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">Auth Server</text>
-
-          <line x1="493" y1="52" x2="536" y2="52" stroke="#6cc04a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
-          <text x="514" y="42" text-anchor="middle" fill="#6cc04a" font-size="9.5" font-family="JetBrains Mono">RADIUS</text>
-        </svg>
-        <div class="diagram-caption">图 5：端口受控状态 — 仅 EAPOL 帧可通过，所有业务数据被阻断</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== PHASE C ========== -->
-  <div class="section-header">
-    <span class="phase-tag">Phase C</span>
-    <h2>完整 EAP 认证（耗时大户）</h2>
-  </div>
-
-  <!-- Step 5 -->
-  <div class="step-card color-orange">
-    <div class="step-top">
-      <div class="step-number">05</div>
-      <div class="step-title-block">
-        <h3>完整的 802.1X / EAP 认证流程</h3>
-        <div class="step-subtitle">无快速漫游 → 完整重认证 (200ms ~ 1000+ ms)</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p>因为没有快速漫游机制（无 OKC / 11r），终端和 ISE 必须<strong>重新执行一次完整、极其耗时的 EAP 认证</strong>。这是整个漫游过程中的最大延迟瓶颈。</p>
-
-      <div class="scenario-tabs">
-        <button class="scenario-tab active" onclick="switchScenario('tls', this)">场景 A：EAP-TLS</button>
-        <button class="scenario-tab" onclick="switchScenario('peap', this)">场景 B：PEAP-MSCHAPv2</button>
-      </div>
-
-      <!-- EAP-TLS -->
-      <div class="scenario-content active" id="scenario-tls">
-        <div class="callout">
-          <strong>🔐 EAP-TLS — 双向证书认证（最高安全级别）</strong><br>
-          由于证书尺寸极大（2200-8000 Bytes），EAP 会进行分片（Fragmentation），导致多次往返。
-        </div>
-        <div class="svg-diagram-wrap">
-          <svg viewBox="0 0 720 430" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:720px;">
-            <text x="110" y="20" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">📱 终端 (Supplicant)</text>
-            <text x="570" y="20" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">🛡️ ISE (via WLC)</text>
-            <line x1="110" y1="30" x2="110" y2="410" stroke="#94a3b8" stroke-width="0.8"/>
-            <line x1="570" y1="30" x2="570" y2="410" stroke="#94a3b8" stroke-width="0.8"/>
-
-            <line x1="568" y1="55" x2="112" y2="55" stroke="#ff8200" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="48" text-anchor="middle" fill="#ff8200" font-size="11.5" font-weight="600" font-family="JetBrains Mono">1. EAP-Request / EAP-TLS Start</text>
-
-            <line x1="112" y1="90" x2="568" y2="90" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="83" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600" font-family="JetBrains Mono">2. EAP-Response / Client Hello</text>
-            <text x="340" y="106" text-anchor="middle" fill="#64748b" font-size="10" font-family="Noto Sans SC">Cipher Suites + 随机数</text>
-
-            <line x1="568" y1="130" x2="112" y2="130" stroke="#ff8200" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="123" text-anchor="middle" fill="#ff8200" font-size="11" font-weight="600" font-family="JetBrains Mono">3. Server Hello + Certificate + CertReq</text>
-            <text x="340" y="148" text-anchor="middle" fill="#cf2030" font-size="10" font-weight="600" font-family="Noto Sans SC">⚡ 大证书分片！多个 EAP Fragment</text>
-
-            <line x1="112" y1="172" x2="568" y2="172" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="165" text-anchor="middle" fill="#049fd9" font-size="11" font-weight="600" font-family="JetBrains Mono">4. Client Cert + KeyExchange + Verify</text>
-            <text x="340" y="190" text-anchor="middle" fill="#cf2030" font-size="10" font-weight="600" font-family="Noto Sans SC">⚡ 终端证书分片！又多个 Fragment</text>
-
-            <line x1="568" y1="215" x2="112" y2="215" stroke="#ff8200" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="208" text-anchor="middle" fill="#ff8200" font-size="11.5" font-weight="600" font-family="JetBrains Mono">5. Change Cipher Spec + Finished</text>
-
-            <line x1="112" y1="250" x2="568" y2="250" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="243" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="600" font-family="JetBrains Mono">6. Empty EAP-Response (ACK)</text>
-
-            <line x1="568" y1="285" x2="112" y2="285" stroke="#6cc04a" stroke-width="2" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="278" text-anchor="middle" fill="#6cc04a" font-size="12" font-weight="700" font-family="JetBrains Mono">7. ✅ EAP-Success</text>
-
-            <rect x="610" y="52" width="80" height="238" rx="4" fill="none" stroke="#cf2030" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="650" y="168" text-anchor="middle" fill="#cf2030" font-size="10.5" font-weight="700" font-family="JetBrains Mono" transform="rotate(90, 650, 168)">200 ~ 1000+ ms</text>
-
-            <rect x="60" y="310" width="600" height="90" rx="6" fill="rgba(207,32,48,0.06)" stroke="#cf2030" stroke-width="0.8"/>
-            <text x="82" y="332" fill="#cf2030" font-size="11.5" font-weight="700" font-family="Noto Sans SC">⏱ 延迟分析</text>
-            <text x="88" y="354" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">▸ 每次 EAP 报文需经 空口(Client↔AP) + CAPWAP(AP↔WLC) + RADIUS(WLC↔ISE) 三段转发</text>
-            <text x="88" y="374" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">▸ 证书分片导致报文往返次数可达 10-20 次，每次 RTT 叠加</text>
-            <text x="88" y="394" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">▸ ISE 到 AD/CA 的后端查询增加额外 10-50ms</text>
-          </svg>
-          <div class="diagram-caption">图 6A：EAP-TLS 完整认证序列 — 双向证书交换的分片地狱</div>
-        </div>
-      </div>
-
-      <!-- PEAP -->
-      <div class="scenario-content" id="scenario-peap">
-        <div class="callout">
-          <strong>🔑 PEAP-MSCHAPv2 — 用户名密码认证（两阶段）</strong><br>
-          Phase 1 建立单向 TLS 隧道（仅 ISE 出示证书），Phase 2 在加密隧道内执行 MSCHAPv2 质询。
-        </div>
-        <div class="svg-diagram-wrap">
-          <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:720px;">
-            <text x="110" y="20" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">📱 终端</text>
-            <text x="570" y="20" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">🛡️ ISE</text>
-            <line x1="110" y1="30" x2="110" y2="360" stroke="#94a3b8" stroke-width="0.8"/>
-            <line x1="570" y1="30" x2="570" y2="360" stroke="#94a3b8" stroke-width="0.8"/>
-
-            <!-- Phase 1 -->
-            <rect x="30" y="40" width="660" height="140" rx="6" fill="rgba(4,159,217,0.04)" stroke="#049fd9" stroke-width="0.8" stroke-dasharray="4,4"/>
-            <text x="55" y="60" fill="#049fd9" font-size="11.5" font-weight="700" font-family="Noto Sans SC">Phase 1：外层 TLS 隧道</text>
-
-            <line x1="568" y1="80" x2="112" y2="80" stroke="#ff8200" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="73" text-anchor="middle" fill="#ff8200" font-size="11" font-family="JetBrains Mono">PEAP Start</text>
-
-            <line x1="112" y1="110" x2="568" y2="110" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="103" text-anchor="middle" fill="#049fd9" font-size="11" font-family="JetBrains Mono">Client Hello → Server Hello/Cert → Finished</text>
-            <text x="340" y="125" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Noto Sans SC">仅 ISE 出示证书，终端无需证书</text>
-
-            <line x1="130" y1="155" x2="550" y2="155" stroke="#6cc04a" stroke-width="1.5" stroke-dasharray="4,4"/>
-            <text x="340" y="172" text-anchor="middle" fill="#6cc04a" font-size="11" font-weight="600" font-family="Noto Sans SC">🔐 TLS 加密隧道已建立</text>
-
-            <!-- Phase 2 -->
-            <rect x="30" y="192" width="660" height="125" rx="6" fill="rgba(108,192,74,0.04)" stroke="#6cc04a" stroke-width="0.8" stroke-dasharray="4,4"/>
-            <text x="55" y="212" fill="#6cc04a" font-size="11.5" font-weight="700" font-family="Noto Sans SC">Phase 2：内层 MSCHAPv2（加密隧道内）</text>
-
-            <line x1="568" y1="235" x2="112" y2="235" stroke="#ff8200" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="228" text-anchor="middle" fill="#ff8200" font-size="11" font-family="JetBrains Mono">EAP-Request / Identity (inner)</text>
-
-            <line x1="112" y1="265" x2="568" y2="265" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="258" text-anchor="middle" fill="#049fd9" font-size="11" font-family="JetBrains Mono">MSCHAPv2 Challenge → Response</text>
-            <text x="340" y="282" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Noto Sans SC">密码哈希在加密隧道内传输</text>
-
-            <line x1="568" y1="305" x2="112" y2="305" stroke="#6cc04a" stroke-width="2" marker-end="url(#arrowBlue)"/>
-            <text x="340" y="298" text-anchor="middle" fill="#6cc04a" font-size="12" font-weight="700" font-family="JetBrains Mono">✅ EAP-Success</text>
-
-            <rect x="615" y="44" width="60" height="270" rx="4" fill="none" stroke="#cf2030" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="645" y="180" text-anchor="middle" fill="#cf2030" font-size="10" font-weight="700" font-family="JetBrains Mono" transform="rotate(90, 645, 180)">150 ~ 600ms</text>
-          </svg>
-          <div class="diagram-caption">图 6B：PEAP-MSCHAPv2 两阶段认证序列 — 外层隧道保护内层密码</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== PHASE D ========== -->
-  <div class="section-header">
-    <span class="phase-tag">Phase D</span>
-    <h2>后端策略与身份校验</h2>
-  </div>
-
-  <!-- Step 6 -->
-  <div class="step-card color-green">
-    <div class="step-top">
-      <div class="step-number">06</div>
-      <div class="step-title-block">
-        <h3>WLC → RADIUS → ISE 通信细节</h3>
-        <div class="step-subtitle">翻译官（Authenticator）的底层管道数据流转</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p>WLC 充当 <strong>"翻译官"（Authenticator / NAD）</strong>，将空口 EAP 帧封装在 RADIUS 报文（UDP 1812）中与 ISE 交互。</p>
-
-      <h4 style="color: var(--cisco-teal); font-size: 0.95rem; margin: 22px 0 12px;">关键 RADIUS 属性</h4>
-      <table class="info-table">
-        <thead><tr><th>属性</th><th>内容</th><th>作用</th></tr></thead>
-        <tbody>
-          <tr><td><code>User-Name</code></td><td>终端的身份标识</td><td>认证主体</td></tr>
-          <tr><td><code>Calling-Station-Id</code></td><td>终端 MAC 地址</td><td>ISE 端点画像与追踪（极度重要）</td></tr>
-          <tr><td><code>Called-Station-Id</code></td><td>WLC MAC + SSID</td><td>例如 <code>00-11-22-33:Corp_SSID</code></td></tr>
-          <tr><td><code>NAS-IP-Address</code></td><td>WLC 管理 IP</td><td>ISE NAD 匹配</td></tr>
-          <tr><td><code>EAP-Message</code></td><td>EAP 载荷</td><td>真正的 TLS/PEAP 报文</td></tr>
-        </tbody>
-      </table>
-
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot"></span>ISE Authentication Policy</h4>
-          <p>ISE 看到 802.11 流量，匹配无线策略，决定到哪个 Identity Store（如内部用户库或 AD）去查询身份。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot"></span>ISE Authorization Policy</h4>
-          <p>认证成功后，ISE 根据 AD 组、终端指纹（Profiling）等分配 Authorization Profile（如下发 VLAN、SGT、ACL）。</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step 7 -->
-  <div class="step-card color-green">
-    <div class="step-top">
-      <div class="step-number">07</div>
-      <div class="step-title-block">
-        <h3>ISE → AD / CA 的交互</h3>
-        <div class="step-subtitle">ISE 是策略引擎，真实身份源在后端</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-purple);"></span>PEAP → Active Directory</h4>
-          <p>ISE 将终端的 MSCHAPv2 Challenge/Response 通过 <code>DCE/RPC</code> 或 <code>Kerberos</code> 传递给 Microsoft AD。AD 校验哈希通过后返回 OK，并附带用户的 <strong>AD 组信息（ExternalGroups）</strong>供 ISE 做授权。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-orange);"></span>EAP-TLS → 证书校验</h4>
-          <p>ISE 充当本地验证者。校验终端证书的：</p>
-          <ul>
-            <li>CA 信任链（Root/Sub CA）</li>
-            <li>有效期</li>
-            <li>CRL（证书吊销列表）或 OCSP 在线查询</li>
-            <li>如含 UPN，可能查询 AD 获取组信息</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 760 190" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:760px;">
-          <rect x="270" y="25" width="135" height="65" rx="10" fill="rgba(108,192,74,0.1)" stroke="#6cc04a" stroke-width="1.5"/>
-          <text x="337" y="52" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="700" font-family="Noto Sans SC">🛡️ ISE</text>
-          <text x="337" y="76" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-family="JetBrains Mono">策略引擎</text>
-
-          <rect x="530" y="10" width="145" height="58" rx="8" fill="rgba(127,91,213,0.1)" stroke="#7f5bd5" stroke-width="1"/>
-          <text x="602" y="36" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600" font-family="Noto Sans SC">🏛 Active Directory</text>
-          <text x="602" y="55" text-anchor="middle" fill="#7f5bd5" font-size="10" font-family="JetBrains Mono">LDAP / DCE-RPC</text>
-
-          <rect x="530" y="82" width="145" height="58" rx="8" fill="rgba(255,130,0,0.1)" stroke="#ff8200" stroke-width="1"/>
-          <text x="602" y="108" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600" font-family="Noto Sans SC">🏛 CA / CRL / OCSP</text>
-          <text x="602" y="127" text-anchor="middle" fill="#ff8200" font-size="10" font-family="JetBrains Mono">证书校验</text>
-
-          <rect x="50" y="30" width="125" height="55" rx="8" fill="rgba(0,188,235,0.1)" stroke="#00bceb" stroke-width="1"/>
-          <text x="112" y="55" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600" font-family="Noto Sans SC">📡 WLC (NAD)</text>
-          <text x="112" y="74" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">RADIUS:1812</text>
-
-          <line x1="175" y1="55" x2="268" y2="55" stroke="#6cc04a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
-          <text x="222" y="46" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="JetBrains Mono">RADIUS</text>
-
-          <line x1="405" y1="42" x2="528" y2="36" stroke="#7f5bd5" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="466" y="30" text-anchor="middle" fill="#7f5bd5" font-size="10" font-family="JetBrains Mono">MSCHAPv2 校验</text>
-
-          <line x1="405" y1="70" x2="528" y2="105" stroke="#ff8200" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
-          <text x="466" y="96" text-anchor="middle" fill="#ff8200" font-size="10" font-family="JetBrains Mono">CRL/OCSP 查询</text>
-
-          <text x="337" y="128" text-anchor="middle" fill="#6cc04a" font-size="11" font-weight="600" font-family="Noto Sans SC">验证通过 → Access-Accept (含 MSK)</text>
-          <line x1="268" y1="110" x2="175" y2="110" stroke="#6cc04a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowBlue)"/>
-          <text x="222" y="105" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="JetBrains Mono">Access-Accept</text>
-
-          <text x="380" y="170" text-anchor="middle" fill="#cf2030" font-size="11" font-family="Noto Sans SC">⏱ AD 查询 + OCSP 通常额外增加 10-50ms</text>
-        </svg>
-        <div class="diagram-caption">图 7：ISE 后端交互 — 根据 EAP 方法分流至 AD 或 CA 进行身份裁决</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== PHASE E ========== -->
-  <div class="section-header">
-    <span class="phase-tag">Phase E</span>
-    <h2>密钥体系与四次握手</h2>
-  </div>
-
-  <!-- Step 8 -->
-  <div class="step-card color-purple">
-    <div class="step-top">
-      <div class="step-number">08</div>
-      <div class="step-title-block">
-        <h3>认证成功，生成 PMK（成对主密钥）</h3>
-        <div class="step-subtitle">安全架构的枢纽环节 — 加密的"种子"诞生</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p><strong>这是整个安全架构的枢纽。</strong>只有认证成功，加密的"种子"才会被分发。</p>
-
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-purple);"></span>独立计算 MSK</h4>
-          <p>终端（Supplicant）和 ISE（Auth Server）利用 TLS 握手材料，<strong>各自独立计算</strong>出一个 <code>64 字节</code> 的 <strong>MSK (Master Session Key)</strong>。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-purple);"></span>安全分发 MSK</h4>
-          <p>ISE 将 MSK 打包在最后一个 <code>RADIUS Access-Accept</code> 报文的 <code>MS-MPPE-Send-Key</code> 和 <code>MS-MPPE-Recv-Key</code> 属性中，通过有线网络发送给 WLC。</p>
-        </div>
-      </div>
-
-      <div class="callout">
-        <strong>🔑 截取 PMK：</strong>终端和 WLC 各自截取 MSK 的<strong>前 32 字节</strong>，即 <strong>PMK (Pairwise Master Key)</strong>。本次为"完全重认证"，所以是全新 PMK，WLC 将其与终端 MAC 绑定存入内存。
-      </div>
-
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:760px;">
-          <rect x="230" y="15" width="300" height="45" rx="8" fill="rgba(127,91,213,0.15)" stroke="#7f5bd5" stroke-width="1.5"/>
-          <text x="380" y="35" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="700" font-family="Noto Sans SC">MSK (Master Session Key)</text>
-          <text x="380" y="52" text-anchor="middle" fill="#7f5bd5" font-size="11" font-family="JetBrains Mono">64 bytes — 由 TLS 握手材料派生</text>
-
-          <line x1="380" y1="60" x2="380" y2="88" stroke="#7f5bd5" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="435" y="80" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">截取前 32 字节</text>
-
-          <rect x="245" y="88" width="270" height="45" rx="8" fill="rgba(4,159,217,0.15)" stroke="#049fd9" stroke-width="1.5"/>
-          <text x="380" y="108" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="700" font-family="Noto Sans SC">PMK (Pairwise Master Key)</text>
-          <text x="380" y="125" text-anchor="middle" fill="#049fd9" font-size="11" font-family="JetBrains Mono">32 bytes — 会话主密钥</text>
-
-          <line x1="380" y1="133" x2="380" y2="160" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <text x="455" y="152" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">PRF(PMK, ANonce, SNonce, MACs)</text>
-
-          <rect x="210" y="160" width="340" height="45" rx="8" fill="rgba(0,188,235,0.15)" stroke="#00bceb" stroke-width="1.5"/>
-          <text x="380" y="180" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="700" font-family="Noto Sans SC">PTK (Pairwise Transient Key)</text>
-          <text x="380" y="197" text-anchor="middle" fill="#00bceb" font-size="11" font-family="JetBrains Mono">单播加密密钥 — 由 4-Way Handshake 协商</text>
-
-          <line x1="285" y1="205" x2="285" y2="232" stroke="#00bceb" stroke-width="1" marker-end="url(#arrowBlue)"/>
-          <line x1="380" y1="205" x2="380" y2="232" stroke="#00bceb" stroke-width="1" marker-end="url(#arrowBlue)"/>
-          <line x1="475" y1="205" x2="475" y2="232" stroke="#00bceb" stroke-width="1" marker-end="url(#arrowBlue)"/>
-
-          <rect x="230" y="234" width="110" height="32" rx="5" fill="rgba(0,0,0,0.3)" stroke="#00bceb" stroke-width="0.8"/>
-          <text x="285" y="254" text-anchor="middle" fill="#00bceb" font-size="11" font-weight="600" font-family="JetBrains Mono">KCK</text>
-
-          <rect x="350" y="234" width="60" height="32" rx="5" fill="rgba(0,0,0,0.3)" stroke="#00bceb" stroke-width="0.8"/>
-          <text x="380" y="254" text-anchor="middle" fill="#00bceb" font-size="11" font-weight="600" font-family="JetBrains Mono">KEK</text>
-
-          <rect x="420" y="234" width="110" height="32" rx="5" fill="rgba(0,0,0,0.3)" stroke="#6cc04a" stroke-width="0.8"/>
-          <text x="475" y="254" text-anchor="middle" fill="#6cc04a" font-size="11" font-weight="600" font-family="JetBrains Mono">TK (加密)</text>
-
-          <text x="285" y="280" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="Noto Sans SC">MIC 完整性校验</text>
-          <text x="380" y="280" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="Noto Sans SC">密钥加密</text>
-          <text x="475" y="280" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="Noto Sans SC">数据帧加密</text>
-
-          <text x="60" y="40" fill="#6cc04a" font-size="10.5" font-weight="600" font-family="Noto Sans SC">ISE 计算 → RADIUS 分发</text>
-          <text x="60" y="112" fill="#6cc04a" font-size="10.5" font-weight="600" font-family="Noto Sans SC">终端 + WLC 各持一份</text>
-          <text x="60" y="184" fill="#ffcc00" font-size="10.5" font-weight="600" font-family="Noto Sans SC">4-Way Handshake 产物</text>
-        </svg>
-        <div class="diagram-caption">图 8：密钥派生层级 — MSK → PMK → PTK (KCK + KEK + TK)</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step 9 -->
-  <div class="step-card color-purple">
-    <div class="step-top">
-      <div class="step-number">09</div>
-      <div class="step-title-block">
-        <h3>四次握手 (4-Way Handshake)</h3>
-        <div class="step-subtitle">PMK → PTK / GTK 协商 — 建立加密通道的最后冲刺</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <p>拥有了 PMK（主钥匙），WLC 和终端通过 4 次 EAPOL-Key 报文，协商出用于加密实际数据包的<strong>临时钥匙 PTK 和组播密钥 GTK</strong>。</p>
-
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:760px;">
-          <rect x="55" y="10" width="130" height="34" rx="6" fill="rgba(4,159,217,0.12)" stroke="#049fd9" stroke-width="1"/>
-          <text x="120" y="32" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">📱 终端</text>
-          <rect x="520" y="10" width="130" height="34" rx="6" fill="rgba(0,188,235,0.12)" stroke="#00bceb" stroke-width="1"/>
-          <text x="585" y="32" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700" font-family="Noto Sans SC">📡 WLC</text>
-
-          <line x1="120" y1="44" x2="120" y2="365" stroke="#94a3b8" stroke-width="0.8"/>
-          <line x1="585" y1="44" x2="585" y2="365" stroke="#94a3b8" stroke-width="0.8"/>
-
-          <!-- M1 -->
-          <line x1="583" y1="78" x2="122" y2="78" stroke="#00bceb" stroke-width="1.8" marker-end="url(#arrowBlue)"/>
-          <rect x="210" y="63" width="280" height="22" rx="3" fill="rgba(0,188,235,0.08)"/>
-          <text x="350" y="79" text-anchor="middle" fill="#00bceb" font-size="11.5" font-weight="700" font-family="JetBrains Mono">M1: WLC → 终端 | ANonce (明文)</text>
-          <text x="350" y="100" text-anchor="middle" fill="#64748b" font-size="10" font-family="Noto Sans SC">WLC 产生随机数 ANonce 并明文发送</text>
-
-          <!-- Client calc -->
-          <rect x="15" y="112" width="210" height="46" rx="6" fill="rgba(255,204,0,0.06)" stroke="#ffcc00" stroke-width="0.8" stroke-dasharray="3,3"/>
-          <text x="120" y="130" text-anchor="middle" fill="#ffcc00" font-size="10.5" font-weight="600" font-family="Noto Sans SC">🧮 终端内部计算 PTK</text>
-          <text x="120" y="148" text-anchor="middle" fill="#ffcc00" font-size="9.5" font-family="JetBrains Mono">PRF(PMK, ANonce, SNonce, MACs)</text>
-
-          <!-- M2 -->
-          <line x1="122" y1="178" x2="583" y2="178" stroke="#049fd9" stroke-width="1.8" marker-end="url(#arrowBlue)"/>
-          <rect x="180" y="163" width="340" height="22" rx="3" fill="rgba(4,159,217,0.08)"/>
-          <text x="350" y="179" text-anchor="middle" fill="#049fd9" font-size="11.5" font-weight="700" font-family="JetBrains Mono">M2: 终端 → WLC | SNonce + MIC</text>
-          <text x="350" y="200" text-anchor="middle" fill="#64748b" font-size="10" font-family="Noto Sans SC">终端发送 SNonce 并用 PTK 签名（MIC）证明持有 PMK</text>
-
-          <!-- WLC calc -->
-          <rect x="480" y="212" width="210" height="46" rx="6" fill="rgba(255,204,0,0.06)" stroke="#ffcc00" stroke-width="0.8" stroke-dasharray="3,3"/>
-          <text x="585" y="230" text-anchor="middle" fill="#ffcc00" font-size="10.5" font-weight="600" font-family="Noto Sans SC">🧮 WLC 计算 PTK + 校验 MIC</text>
-          <text x="585" y="248" text-anchor="middle" fill="#ffcc00" font-size="9.5" font-family="JetBrains Mono">MIC 验证通过 = PMK 一致</text>
-
-          <!-- M3 -->
-          <line x1="583" y1="275" x2="122" y2="275" stroke="#00bceb" stroke-width="1.8" marker-end="url(#arrowBlue)"/>
-          <rect x="160" y="260" width="380" height="22" rx="3" fill="rgba(0,188,235,0.08)"/>
-          <text x="350" y="276" text-anchor="middle" fill="#00bceb" font-size="11.5" font-weight="700" font-family="JetBrains Mono">M3: WLC → 终端 | 加密的 GTK + MIC</text>
-          <text x="350" y="298" text-anchor="middle" fill="#64748b" font-size="10" font-family="Noto Sans SC">WLC 用 PTK 加密 GTK（组播密钥）发送给终端，附带 MIC</text>
-
-          <!-- M4 -->
-          <line x1="122" y1="322" x2="583" y2="322" stroke="#6cc04a" stroke-width="1.8" marker-end="url(#arrowBlue)"/>
-          <rect x="235" y="307" width="230" height="22" rx="3" fill="rgba(108,192,74,0.08)"/>
-          <text x="350" y="323" text-anchor="middle" fill="#6cc04a" font-size="11.5" font-weight="700" font-family="JetBrains Mono">M4: 终端 → WLC | ACK 确认</text>
-          <text x="350" y="345" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-family="Noto Sans SC">✅ 双方密钥安装完毕，加密通道就绪</text>
-
-          <rect x="685" y="72" width="55" height="256" rx="4" fill="none" stroke="#6cc04a" stroke-width="1" stroke-dasharray="3,3"/>
-          <text x="712" y="200" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-weight="700" font-family="JetBrains Mono" transform="rotate(90, 712, 200)">~20-50 ms</text>
-        </svg>
-        <div class="diagram-caption">图 9：4-Way Handshake 完整序列 — PTK / GTK 协商与密钥安装</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== PHASE F ========== -->
-  <div class="section-header">
-    <span class="phase-tag">Phase F</span>
-    <h2>数据转发恢复</h2>
-  </div>
-
-  <!-- Step 10 -->
-  <div class="step-card color-green">
-    <div class="step-top">
-      <div class="step-number">10</div>
-      <div class="step-title-block">
-        <h3>数据转发恢复 (S_CO_RUN)</h3>
-        <div class="step-subtitle">漫游的漫长黑夜终于结束 — 闸门大开</div>
-      </div>
-    </div>
-    <div class="step-body">
-      <div class="detail-grid">
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-green);"></span>状态翻转</h4>
-          <p>WLC 将终端状态从 <code>Authenticating / Associated</code> 推进到 <strong><code>Run (S_CO_RUN)</code></strong> 状态。</p>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-green);"></span>授权策略落地</h4>
-          <p>ISE 在 <code>Access-Accept</code> 中返回的授权结果此时被 WLC 应用：</p>
-          <ul>
-            <li>VLAN ID 绑定</li>
-            <li>Airespace-ACL 下发</li>
-            <li>CTS:Security-Group-Tag (SGT)</li>
-          </ul>
-        </div>
-        <div class="detail-box">
-          <h4><span class="dot" style="background: var(--cisco-green);"></span>闸门大开</h4>
-          <p>WLC 解除"仅允许 EAPOL"阻断。终端后续的 DHCP、ARP、IP 流量全部由底层的 <strong>AES-CCMP 芯片级全速硬件加密</strong>。</p>
-        </div>
-      </div>
-
-      <div class="svg-diagram-wrap">
-        <svg viewBox="0 0 760 115" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:760px;">
-          <rect x="20" y="30" width="130" height="44" rx="8" fill="rgba(207,32,48,0.1)" stroke="#cf2030" stroke-width="1.2"/>
-          <text x="85" y="56" text-anchor="middle" fill="#cf2030" font-size="11.5" font-weight="700" font-family="JetBrains Mono">Authenticating</text>
-
-          <line x1="150" y1="52" x2="210" y2="52" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-
-          <rect x="210" y="30" width="120" height="44" rx="8" fill="rgba(255,130,0,0.1)" stroke="#ff8200" stroke-width="1.2"/>
-          <text x="270" y="56" text-anchor="middle" fill="#ff8200" font-size="11.5" font-weight="700" font-family="JetBrains Mono">Associated</text>
-
-          <line x1="330" y1="52" x2="390" y2="52" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-
-          <rect x="390" y="30" width="130" height="44" rx="8" fill="rgba(255,204,0,0.1)" stroke="#ffcc00" stroke-width="1.2"/>
-          <text x="455" y="56" text-anchor="middle" fill="#ffcc00" font-size="11.5" font-weight="700" font-family="JetBrains Mono">Key Exchange</text>
-
-          <line x1="520" y1="52" x2="585" y2="52" stroke="#6cc04a" stroke-width="2" marker-end="url(#arrowGreen)"/>
-
-          <rect x="585" y="22" width="155" height="60" rx="10" fill="rgba(108,192,74,0.15)" stroke="#6cc04a" stroke-width="2"/>
-          <text x="662" y="50" text-anchor="middle" fill="#6cc04a" font-size="14" font-weight="900" font-family="JetBrains Mono">✅ RUN</text>
-          <text x="662" y="70" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="JetBrains Mono">S_CO_RUN</text>
-
-          <text x="662" y="100" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">AES-CCMP 硬件加密 | 数据转发就绪</text>
-        </svg>
-        <div class="diagram-caption">图 10：WLC 终端状态机推进 — 从 Authenticating 到 RUN 的完整生命周期</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ========== FULL MSC ========== -->
-  <div class="msc-section">
-    <h2>⏱️ 漫游总耗时估算 — MSC 全局消息序列图</h2>
-    <p class="msc-sub">在无任何快速漫游（11r / OKC）的基线中，每一次漫游都是一场灾难</p>
-
-    <div class="svg-diagram-wrap" style="background: transparent; border: none; padding: 0;">
-      <svg viewBox="0 0 980 600" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:980px;">
-        <defs>
-          <marker id="a1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#049fd9"/></marker>
-          <marker id="a2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#6cc04a"/></marker>
-          <marker id="a3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#ff8200"/></marker>
-          <marker id="a5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#7f5bd5"/></marker>
-        </defs>
-
-        <!-- Column headers -->
-        <rect x="90" y="5" width="110" height="32" rx="6" fill="rgba(4,159,217,0.12)" stroke="#049fd9" stroke-width="1"/>
-        <text x="145" y="26" text-anchor="middle" fill="#049fd9" font-size="12.5" font-weight="700" font-family="Noto Sans SC">Client</text>
-
-        <rect x="345" y="5" width="130" height="32" rx="6" fill="rgba(0,188,235,0.12)" stroke="#00bceb" stroke-width="1"/>
-        <text x="410" y="26" text-anchor="middle" fill="#00bceb" font-size="12.5" font-weight="700" font-family="Noto Sans SC">AP-B / WLC</text>
-
-        <rect x="615" y="5" width="90" height="32" rx="6" fill="rgba(108,192,74,0.12)" stroke="#6cc04a" stroke-width="1"/>
-        <text x="660" y="26" text-anchor="middle" fill="#6cc04a" font-size="12.5" font-weight="700" font-family="Noto Sans SC">ISE</text>
-
-        <rect x="820" y="5" width="90" height="32" rx="6" fill="rgba(255,130,0,0.12)" stroke="#ff8200" stroke-width="1"/>
-        <text x="865" y="26" text-anchor="middle" fill="#ff8200" font-size="12.5" font-weight="700" font-family="Noto Sans SC">AD / CA</text>
-
-        <!-- Lifelines -->
-        <line x1="145" y1="37" x2="145" y2="585" stroke="#049fd9" stroke-width="0.6" stroke-dasharray="3,3"/>
-        <line x1="410" y1="37" x2="410" y2="585" stroke="#00bceb" stroke-width="0.6" stroke-dasharray="3,3"/>
-        <line x1="660" y1="37" x2="660" y2="585" stroke="#6cc04a" stroke-width="0.6" stroke-dasharray="3,3"/>
-        <line x1="865" y1="37" x2="865" y2="585" stroke="#ff8200" stroke-width="0.6" stroke-dasharray="3,3"/>
-
-        <!-- Phase A -->
-        <rect x="8" y="52" width="960" height="105" rx="4" fill="rgba(4,159,217,0.03)" stroke="#049fd9" stroke-width="0.5" stroke-dasharray="5,5"/>
-        <text x="20" y="70" fill="#049fd9" font-size="10.5" font-weight="700" font-family="Noto Sans SC">Phase A: 射频扫描 + L2 关联</text>
-
-        <line x1="147" y1="85" x2="408" y2="85" stroke="#049fd9" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="79" text-anchor="middle" fill="#049fd9" font-size="10.5" font-weight="600" font-family="JetBrains Mono">(1) Probe Req → Probe Res</text>
-        <text x="505" y="85" fill="#cf2030" font-size="10" font-family="JetBrains Mono">10-500+ ms</text>
-
-        <line x1="147" y1="108" x2="408" y2="108" stroke="#049fd9" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="102" text-anchor="middle" fill="#049fd9" font-size="10.5" font-weight="600" font-family="JetBrains Mono">(2) 802.11 Open Auth</text>
-        <text x="505" y="108" fill="#64748b" font-size="10" font-family="JetBrains Mono">~5 ms</text>
-
-        <line x1="147" y1="130" x2="408" y2="130" stroke="#049fd9" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="124" text-anchor="middle" fill="#049fd9" font-size="10.5" font-weight="600" font-family="JetBrains Mono">(3) Reassociation Req / Res</text>
-        <text x="505" y="130" fill="#64748b" font-size="10" font-family="JetBrains Mono">~5 ms</text>
-        <line x1="408" y1="142" x2="147" y2="142" stroke="#049fd9" stroke-width="1" marker-end="url(#a1)"/>
-
-        <!-- Port Block -->
-        <rect x="108" y="162" width="340" height="22" rx="3" fill="rgba(207,32,48,0.08)" stroke="#cf2030" stroke-width="0.8"/>
-        <text x="278" y="178" text-anchor="middle" fill="#cf2030" font-size="10.5" font-weight="700" font-family="JetBrains Mono">🔒 端口阻塞 — 仅放行 EAPOL</text>
-
-        <!-- Phase C: EAP -->
-        <rect x="8" y="192" width="960" height="235" rx="4" fill="rgba(255,130,0,0.03)" stroke="#ff8200" stroke-width="0.5" stroke-dasharray="5,5"/>
-        <text x="20" y="210" fill="#ff8200" font-size="10.5" font-weight="700" font-family="Noto Sans SC">Phase C: 完整 EAP 认证 (耗时大户)</text>
-
-        <line x1="408" y1="228" x2="147" y2="228" stroke="#00bceb" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="222" text-anchor="middle" fill="#00bceb" font-size="10.5" font-family="JetBrains Mono">(4) EAP-Request / Identity</text>
-
-        <line x1="147" y1="252" x2="408" y2="252" stroke="#049fd9" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="246" text-anchor="middle" fill="#049fd9" font-size="10.5" font-family="JetBrains Mono">(5) EAP-Response / Identity</text>
-
-        <line x1="412" y1="258" x2="658" y2="258" stroke="#6cc04a" stroke-width="1.2" marker-end="url(#a2)"/>
-        <text x="535" y="253" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="JetBrains Mono">RADIUS Access-Request</text>
-
-        <line x1="658" y1="278" x2="412" y2="278" stroke="#6cc04a" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="535" y="273" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="JetBrains Mono">RADIUS Access-Challenge</text>
-
-        <!-- EAP exchanges block -->
-        <rect x="120" y="292" width="565" height="70" rx="6" fill="rgba(255,130,0,0.06)" stroke="#ff8200" stroke-width="0.8" stroke-dasharray="4,4"/>
-        <text x="402" y="315" text-anchor="middle" fill="#ff8200" font-size="12" font-weight="700" font-family="Noto Sans SC">(6) EAP-TLS 或 PEAP 认证阶段</text>
-        <text x="402" y="335" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="Noto Sans SC">5 ~ 20 个交互报文（含证书分片往返）</text>
-        <text x="402" y="353" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">Client ←EAPOL→ WLC ←RADIUS→ ISE</text>
-
-        <!-- ISE to AD/CA -->
-        <line x1="662" y1="318" x2="863" y2="318" stroke="#ff8200" stroke-width="1.2" marker-end="url(#a3)"/>
-        <text x="762" y="312" text-anchor="middle" fill="#ff8200" font-size="10" font-family="JetBrains Mono">LDAP / RPC / OCSP</text>
-        <line x1="863" y1="338" x2="662" y2="338" stroke="#ff8200" stroke-width="1.2" marker-end="url(#a2)"/>
-        <text x="762" y="354" text-anchor="middle" fill="#ff8200" font-size="10" font-family="JetBrains Mono">AD/CA 返回结果</text>
-
-        <!-- Latency callout -->
-        <rect x="745" y="370" width="215" height="44" rx="5" fill="rgba(207,32,48,0.08)" stroke="#cf2030" stroke-width="0.8"/>
-        <text x="852" y="388" text-anchor="middle" fill="#cf2030" font-size="11" font-weight="700" font-family="Noto Sans SC">⏱ 认证耗时大户</text>
-        <text x="852" y="406" text-anchor="middle" fill="#cf2030" font-size="10.5" font-family="JetBrains Mono">通常 200ms ~ 1000+ ms</text>
-
-        <!-- Access Accept -->
-        <line x1="658" y1="372" x2="412" y2="372" stroke="#6cc04a" stroke-width="1.8" marker-end="url(#a1)"/>
-        <text x="535" y="367" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-weight="700" font-family="JetBrains Mono">RADIUS Access-Accept (MSK)</text>
-        <text x="535" y="387" text-anchor="middle" fill="#94a3b8" font-size="9.5" font-family="JetBrains Mono">MS-MPPE-Send-Key / Recv-Key</text>
-
-        <!-- Phase D: 4-Way Handshake -->
-        <rect x="8" y="432" width="720" height="115" rx="4" fill="rgba(127,91,213,0.03)" stroke="#7f5bd5" stroke-width="0.5" stroke-dasharray="5,5"/>
-        <text x="20" y="450" fill="#7f5bd5" font-size="10.5" font-weight="700" font-family="Noto Sans SC">Phase D: 4-Way Handshake + 密钥安装</text>
-
-        <line x1="408" y1="466" x2="147" y2="466" stroke="#7f5bd5" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="460" text-anchor="middle" fill="#7f5bd5" font-size="10.5" font-family="JetBrains Mono">(7) EAPOL-Key M1: ANonce</text>
-
-        <line x1="147" y1="488" x2="408" y2="488" stroke="#7f5bd5" stroke-width="1.2" marker-end="url(#a5)"/>
-        <text x="277" y="482" text-anchor="middle" fill="#7f5bd5" font-size="10.5" font-family="JetBrains Mono">(8) EAPOL-Key M2: SNonce + MIC</text>
-        <text x="505" y="488" fill="#64748b" font-size="10" font-family="JetBrains Mono">~20-50 ms</text>
-
-        <line x1="408" y1="510" x2="147" y2="510" stroke="#7f5bd5" stroke-width="1.2" marker-end="url(#a1)"/>
-        <text x="277" y="504" text-anchor="middle" fill="#7f5bd5" font-size="10.5" font-family="JetBrains Mono">(9) EAPOL-Key M3: GTK + MIC</text>
-
-        <line x1="147" y1="532" x2="408" y2="532" stroke="#6cc04a" stroke-width="1.5" marker-end="url(#a2)"/>
-        <text x="277" y="526" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-weight="700" font-family="JetBrains Mono">(10) EAPOL-Key M4: ACK ✅</text>
-
-        <!-- Phase E: Data Restore -->
-        <rect x="108" y="552" width="340" height="22" rx="3" fill="rgba(108,192,74,0.1)" stroke="#6cc04a" stroke-width="1"/>
-        <text x="278" y="568" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-weight="700" font-family="JetBrains Mono">✅ 端口放行 — AES-CCMP 加密就绪</text>
-
-        <line x1="147" y1="585" x2="408" y2="585" stroke="#6cc04a" stroke-width="1.5" marker-end="url(#a2)"/>
-        <text x="277" y="580" text-anchor="middle" fill="#6cc04a" font-size="10.5" font-family="JetBrains Mono">(11) DHCP / ARP / 数据转发</text>
-
-        <!-- Total time bar -->
-        <rect x="0" y="80" width="9" height="458" rx="4.5" fill="url(#timeGrad)"/>
-        <defs>
-          <linearGradient id="timeGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#cf2030"/>
-            <stop offset="50%" stop-color="#ff8200"/>
-            <stop offset="100%" stop-color="#6cc04a"/>
-          </linearGradient>
-        </defs>
-        <text x="60" y="315" text-anchor="middle" fill="#cf2030" font-size="12" font-weight="900" font-family="JetBrains Mono" transform="rotate(-90, 60, 315)">总计 300ms — 数秒</text>
-
-      </svg>
-      <div class="diagram-caption">图 11：Full 802.1X 漫游 MSC 全局消息序列 — 四实体交互全貌</div>
-    </div>
-  </div>
-
-
-  <!-- ========== CONCLUSION ========== -->
-  <div class="conclusion-card">
-    <h2>🚀 为什么需要 Fast Roaming（802.11r / FT）？</h2>
-    <p>
-      从 MSC 序列可以看出，一次无优化的 802.1X 漫游耗时通常在 <strong style="color: var(--cisco-red);">300ms 到数秒不等</strong>。这远超语音视频（Webex / Teams）所能容忍的 <strong style="color: var(--cisco-teal);">150ms</strong> 延迟极限，会导致明显的音频卡顿或通话掉线。
+    <p style="margin-top:4px;">
+      类似 HTTPS 的握手过程 — ISE 出示服务器证书，终端验证证书合法性后，双方建立一条<strong>加密的 TLS 隧道</strong>。这条隧道的作用是保护接下来第二阶段中传输的用户名和密码，防止被空口窃听。
     </p>
-    <br>
-    <p>
-      而 <strong style="color: var(--cisco-teal);">802.11r (Fast Transition)</strong> 通过在 AP 之间提前分发派生的密钥（PMK-R0 / PMK-R1），直接<strong>砍掉了序列中的 Step 4 ~ Step 7</strong>（数百毫秒的 EAP 和 RADIUS 交互），并将四次握手压缩在 Reassociation 帧内完成。这就是我们为什么需要在企业网中部署快速漫游优化机制的<strong>根本原因</strong>。
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Phase 2：内层 MSCHAPv2 质询（真正的身份验证）</div>
+        <div class="card-subtitle">在加密隧道内传输密码哈希</div>
+      </div>
+    </div>
+    <p style="margin-top:4px;">
+      在加密隧道保护下，ISE 发起 <strong>MSCHAPv2 Challenge</strong>（质询）。终端使用用户密码的哈希值进行 Response。ISE 将此哈希转发给后端的 Active Directory 进行验证。验证通过后，ISE 发送 <code>EAP-Success</code>。
     </p>
+  </div>
 
-    <div class="svg-diagram-wrap" style="margin-top: 30px; background: rgba(0,0,0,0.2);">
-      <svg viewBox="0 0 760 180" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:760px;">
-        <!-- Without 11r -->
-        <rect x="20" y="18" width="720" height="58" rx="8" fill="rgba(207,32,48,0.06)" stroke="#cf2030" stroke-width="1"/>
-        <text x="38" y="38" fill="#cf2030" font-size="12" font-weight="700" font-family="Noto Sans SC">❌ 无 802.11r（本文基线）</text>
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div>
+      <strong>PEAP vs EAP-TLS 的速度差异：</strong>PEAP 比 EAP-TLS 快，因为<strong>只有服务器端出示证书</strong>（单向证书），分片次数少。但 PEAP 依然需要完整的 TLS 隧道建立 + 内层质询，总耗时通常在 <strong>200ms ~ 500ms</strong>。<span class="badge warn">中等延迟</span>
+    </div>
+  </div>
+</section>
 
-        <rect x="38" y="48" width="48" height="18" rx="2" fill="rgba(4,159,217,0.2)"/>
-        <text x="62" y="61" text-anchor="middle" fill="#049fd9" font-size="8.5" font-family="JetBrains Mono">Scan</text>
+<hr class="divider">
 
-        <rect x="90" y="48" width="32" height="18" rx="2" fill="rgba(0,188,235,0.2)"/>
-        <text x="106" y="61" text-anchor="middle" fill="#00bceb" font-size="8.5" font-family="JetBrains Mono">Auth</text>
+<!-- ============================== STEP 6 ============================== -->
+<section id="step6">
+  <div class="section-label">Step 6 / 10</div>
+  <h2 class="section-title">WLC ↔ ISE 通信 — "翻译官"的工作细节</h2>
 
-        <rect x="126" y="48" width="38" height="18" rx="2" fill="rgba(0,188,235,0.2)"/>
-        <text x="145" y="61" text-anchor="middle" fill="#00bceb" font-size="8.5" font-family="JetBrains Mono">Assoc</text>
+  <p>
+    在整个 EAP 认证过程中，WLC 充当了 <strong>Authenticator（认证者）</strong> 的角色 — 它是终端和 ISE 之间的"翻译官"。具体来说，WLC 将空口的 EAPOL 帧封装在 <strong>RADIUS 报文</strong>（UDP 端口 1812）中与 ISE 交互。
+  </p>
 
-        <rect x="168" y="48" width="400" height="18" rx="2" fill="rgba(207,32,48,0.3)"/>
-        <text x="368" y="61" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="JetBrains Mono">Full EAP + RADIUS + AD/CA (200-1000+ ms) 🔥</text>
+  <h3>📋 RADIUS 报文中的关键属性</h3>
 
-        <rect x="572" y="48" width="68" height="18" rx="2" fill="rgba(127,91,213,0.2)"/>
-        <text x="606" y="61" text-anchor="middle" fill="#7f5bd5" font-size="8.5" font-family="JetBrains Mono">4-Way HS</text>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon teal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+      </div>
+      <div>
+        <div class="card-title">RADIUS Access-Request 核心属性</div>
+        <div class="card-subtitle">WLC 发送给 ISE 的每个 RADIUS 请求都携带这些信息</div>
+      </div>
+    </div>
+    <ul class="bullet">
+      <li><strong><code>User-Name</code></strong>：终端的身份标识（如 <code>DOMAIN\bob</code> 或 <code>anonymous</code>）</li>
+      <li><strong><code>Calling-Station-Id</code></strong>：终端的 <strong>MAC 地址</strong> — 极度重要！ISE 用此做端点画像、追踪和 Profiling</li>
+      <li><strong><code>Called-Station-Id</code></strong>：WLC 的 MAC 地址 + SSID 名称（例如 <code>00-11-22-33:Corp-WiFi</code>）</li>
+      <li><strong><code>NAS-IP-Address</code></strong>：WLC 的管理 IP 地址 — ISE 用此匹配网络设备（Network Device）</li>
+      <li><strong><code>EAP-Message</code></strong>：真正的 EAP 载荷（TLS 握手数据、证书分片、密码哈希等），被封装在此属性中传输</li>
+      <li><strong><code>NAS-Port-Type</code></strong>：值为 <code>Wireless - IEEE 802.11</code>，告诉 ISE 这是无线接入</li>
+    </ul>
+  </div>
 
-        <rect x="644" y="48" width="48" height="18" rx="2" fill="rgba(108,192,74,0.3)"/>
-        <text x="668" y="61" text-anchor="middle" fill="#6cc04a" font-size="8.5" font-family="JetBrains Mono">RUN</text>
+  <h3>🧠 ISE 内部的双引擎决策</h3>
 
-        <text x="718" y="61" fill="#cf2030" font-size="11" font-weight="700" font-family="JetBrains Mono">~1-3s</text>
+  <p>ISE 收到 RADIUS 请求后，内部按顺序执行两个策略引擎：</p>
 
-        <!-- With 11r -->
-        <rect x="20" y="92" width="720" height="64" rx="8" fill="rgba(108,192,74,0.06)" stroke="#6cc04a" stroke-width="1.5"/>
-        <text x="38" y="114" fill="#6cc04a" font-size="12" font-weight="700" font-family="Noto Sans SC">✅ 有 802.11r (Fast Transition)</text>
+  <div class="threshold-grid">
+    <div class="threshold-card" style="border-left: 4px solid var(--accent);">
+      <div class="brand" style="color: var(--accent);">
+        <span class="dot" style="background:var(--accent)"></span>
+        认证策略 (Authentication Policy)
+      </div>
+      <ul>
+        <li>ISE 看到 <code>NAS-Port-Type = Wireless</code></li>
+        <li>匹配到预配置的"无线 802.1X"认证策略</li>
+        <li>决定去<strong>哪个身份库</strong>查 — 内部数据库 or Active Directory</li>
+        <li>选择对应的 EAP 方法（EAP-TLS / PEAP）</li>
+      </ul>
+    </div>
+    <div class="threshold-card" style="border-left: 4px solid var(--green);">
+      <div class="brand" style="color: var(--green);">
+        <span class="dot" style="background:var(--green)"></span>
+        授权策略 (Authorization Policy)
+      </div>
+      <ul>
+        <li>认证通过后，ISE 根据条件做精细化授权</li>
+        <li>条件包括：AD 组、终端类型、合规状态、位置等</li>
+        <li>输出 <strong>Authorization Profile</strong>：VLAN、ACL、SGT 等</li>
+        <li>结果随 <code>Access-Accept</code> 报文返回给 WLC</li>
+      </ul>
+    </div>
+  </div>
+</section>
 
-        <rect x="38" y="124" width="48" height="18" rx="2" fill="rgba(4,159,217,0.2)"/>
-        <text x="62" y="137" text-anchor="middle" fill="#049fd9" font-size="8.5" font-family="JetBrains Mono">Scan</text>
+<hr class="divider">
 
-        <rect x="90" y="124" width="115" height="18" rx="2" fill="rgba(108,192,74,0.3)"/>
-        <text x="147" y="137" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono">FT Auth + Reassoc (含密钥)</text>
+<!-- ============================== STEP 7 ============================== -->
+<section id="step7">
+  <div class="section-label">Step 7 / 10</div>
+  <h2 class="section-title">ISE → AD / CA 后端验证 — 真正的身份核实</h2>
 
-        <rect x="210" y="124" width="42" height="18" rx="2" fill="rgba(108,192,74,0.3)"/>
-        <text x="231" y="137" text-anchor="middle" fill="#6cc04a" font-size="8.5" font-family="JetBrains Mono">RUN</text>
+  <p>
+    ISE 本身只是一个<strong>策略引擎</strong>和决策点，真正存储用户身份信息的是后端系统。这一步是 ISE 与后端"交叉验证"的过程。
+  </p>
 
-        <line x1="258" y1="133" x2="465" y2="133" stroke="#6cc04a" stroke-width="0.8" stroke-dasharray="3,3"/>
-        <text x="362" y="150" text-anchor="middle" fill="#6cc04a" font-size="10" font-family="Noto Sans SC">← EAP / RADIUS / AD 全部跳过 →</text>
-
-        <text x="718" y="137" fill="#6cc04a" font-size="11" font-weight="700" font-family="JetBrains Mono">&lt;50ms</text>
-      </svg>
-      <div class="diagram-caption">图 12：802.11r Fast Transition 对比 — 从秒级降至 50ms 以内</div>
+  <div class="threshold-grid">
+    <div class="threshold-card" style="border-left: 4px solid var(--purple);">
+      <div class="brand" style="color: var(--purple);">
+        <span class="dot" style="background:var(--purple)"></span>
+        PEAP 场景 → Active Directory
+      </div>
+      <ul>
+        <li>ISE 将 MSCHAPv2 的 Challenge/Response 通过 <strong>DCE/RPC</strong> 或 <strong>Kerberos</strong> 协议转发给 AD</li>
+        <li>AD 在自己的数据库中校验密码哈希是否匹配</li>
+        <li>校验通过后，AD 返回 OK 并附带该用户的<strong> AD 组信息</strong>（<code>ExternalGroups</code>）</li>
+        <li>ISE 拿到组信息后用于授权策略匹配（如"工程部 → VLAN 100"）</li>
+      </ul>
+    </div>
+    <div class="threshold-card" style="border-left: 4px solid var(--teal);">
+      <div class="brand" style="color: var(--teal);">
+        <span class="dot" style="background:var(--teal)"></span>
+        EAP-TLS 场景 → CA / CRL / OCSP
+      </div>
+      <ul>
+        <li>ISE 充当<strong>本地验证者</strong>，检查终端出示的证书</li>
+        <li>验证信任链：是否由受信任的 Root/Sub CA 签发</li>
+        <li>验证有效期：证书是否已过期</li>
+        <li>验证吊销状态：通过 <strong>CRL（证书吊销列表）</strong>或 <strong>OCSP</strong> 查询证书是否被撤销</li>
+        <li>如证书含 UPN，ISE 也可能查询 AD 获取用户组信息</li>
+      </ul>
     </div>
   </div>
 
-</div><!-- end main-container -->
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div>
+      <strong>延迟叠加：</strong>ISE → AD 的查询通常需要 <strong>20~100ms</strong>（取决于 AD 的健康状况和网络距离）。如果使用 OCSP 在线查询证书吊销状态，还需要额外的 HTTP 请求往返。这些延迟都会<strong>叠加</strong>到漫游总耗时上。在跨地域部署中（ISE 和 AD 不在同一数据中心），这个延迟可能飙升到数百毫秒。
+    </div>
+  </div>
+</section>
 
-<footer>
-  <p>Full 802.1X Roaming Baseline Analysis — Cisco Validated Design Perspective</p>
-  <p style="margin-top:8px;">Crafted by Senior Cisco Network & Security Architect | March 25, 2026</p>
+<hr class="divider">
+
+<!-- ============================== STEP 8 ============================== -->
+<section id="step8">
+  <div class="section-label">Step 8 / 10</div>
+  <h2 class="section-title">PMK 生成 — 安全架构的"枢纽"</h2>
+
+  <p>
+    <strong>这是整个安全架构中最关键的转折点。</strong>只有认证成功，加密的"种子"才会被创建和分发。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      如果把整个认证过程比作一场国际外交，那么 PMK 就是两国签署的<strong>"密码协议书"</strong>。有了这份协议书，双方才能进入下一步 — 用它来制作实际通信中使用的"临时密码本"（PTK）。没有 PMK，一切后续加密都无从谈起。
+    </p>
+  </div>
+
+  <h3>🔑 密钥的诞生过程</h3>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="tl-title">① 导出 MSK（Master Session Key）</div>
+      <div class="tl-desc">
+        在 EAP 方法（TLS 或 PEAP）成功完成后，终端和 ISE 利用之前 TLS 握手中交换的密钥材料（Pre-Master Secret + 随机数），<strong>各自独立计算</strong>出一个 <strong>64 字节</strong>的 MSK。双方不需要传输 MSK 本身 — 因为输入相同，算法相同，结果自然相同。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">② 分发 MSK 给 WLC</div>
+      <div class="tl-desc">
+        ISE 将 MSK 打包在最后一个 <code>RADIUS Access-Accept</code> 报文中，具体存放在 <code>MS-MPPE-Send-Key</code> 和 <code>MS-MPPE-Recv-Key</code> 属性中。这些属性使用 RADIUS Shared Secret 加密后，通过<strong>安全的有线网络</strong>发送给 WLC。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">③ 截取 PMK（Pairwise Master Key）</div>
+      <div class="tl-desc">
+        WLC 和终端都从 64 字节的 MSK 中<strong>截取前 32 字节</strong>，这便是大名鼎鼎的 <strong>PMK（成对主密钥）</strong>。由于本次漫游是"完全重认证"，这是一个<strong>全新生成的 PMK</strong> — WLC 将其存储在内存中，并绑定到该终端的 MAC 会话。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">✅</div>
+    <div>
+      <strong>密钥层级总结：</strong><code>TLS 握手材料</code> → <code>MSK (64B)</code> → <code>PMK (前32B)</code> → 接下来的 4-Way Handshake 将用 PMK 推导出 <code>PTK</code>（用于加密实际数据流）。每一层密钥都是从上一层推导而来，层层递进，确保安全性。
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== STEP 9 ============================== -->
+<section id="step9">
+  <div class="section-label">Step 9 / 10</div>
+  <h2 class="section-title">四次握手 — 锻造"临时钥匙"</h2>
+
+  <p>
+    有了 PMK（相当于"主钥匙"），WLC 和终端还需要通过 <strong>4 次 EAPOL-Key 报文交换</strong>，协商出用于加密实际单播数据包的<strong>临时钥匙（PTK）</strong>和用于加密广播/组播数据的 <strong>GTK</strong>。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 类比时间</div>
+    <p>
+      PMK 相当于两人共同拥有的"保险箱密码"。但你不会直接用保险箱密码去锁每封信 — 那太危险了，一旦泄露就全完了。所以双方各掷一次骰子（随机数），把骰子点数和保险箱密码混在一起，<strong>制造出一把"临时钥匙"</strong>专门用于这次通信。即使临时钥匙被破解，保险箱密码依然安全。
+    </p>
+  </div>
+
+  <div class="svg-figure">
+    <svg viewBox="0 0 880 480" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+      <rect width="880" height="480" rx="12" fill="#FAFBFF"/>
+
+      <!-- Title -->
+      <text x="440" y="32" text-anchor="middle" font-size="16" font-weight="700" fill="#1E293B">WPA2 四次握手（4-Way Handshake）</text>
+
+      <!-- Column headers -->
+      <rect x="120" y="55" width="180" height="38" rx="8" fill="#DBEAFE"/>
+      <text x="210" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#1D4ED8">终端 (Supplicant)</text>
+
+      <rect x="580" y="55" width="180" height="38" rx="8" fill="#FEF3C7"/>
+      <text x="670" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#92400E">WLC / AP</text>
+
+      <!-- Lifelines -->
+      <line x1="210" y1="98" x2="210" y2="440" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="670" y1="98" x2="670" y2="440" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6,4"/>
+
+      <!-- Both have PMK -->
+      <rect x="50" y="104" width="320" height="26" rx="6" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="210" y="121" text-anchor="middle" font-size="11" fill="#065F46">✅ 已持有 PMK</text>
+      <rect x="510" y="104" width="320" height="26" rx="6" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="670" y="121" text-anchor="middle" font-size="11" fill="#065F46">✅ 已持有 PMK</text>
+
+      <!-- Message 1 -->
+      <g>
+        <rect x="30" y="148" width="38" height="38" rx="19" fill="#3B82F6"/>
+        <text x="49" y="173" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">1</text>
+        <line x1="660" y1="167" x2="220" y2="167" stroke="#3B82F6" stroke-width="2.5" marker-end="url(#a4Blue)"/>
+        <rect x="330" y="152" width="220" height="28" rx="7" fill="#EFF6FF" stroke="#BFDBFE"/>
+        <text x="440" y="171" text-anchor="middle" font-size="12" font-weight="600" fill="#1D4ED8">ANonce（WLC 随机数）</text>
+        <text x="440" y="198" text-anchor="middle" font-size="10" fill="#64748B">WLC 产生随机数 ANonce，明文发送给终端</text>
+      </g>
+
+      <!-- Message 2 -->
+      <g>
+        <rect x="30" y="218" width="38" height="38" rx="19" fill="#8B5CF6"/>
+        <text x="49" y="243" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">2</text>
+        <line x1="220" y1="237" x2="660" y2="237" stroke="#8B5CF6" stroke-width="2.5" marker-end="url(#a4Purple)"/>
+        <rect x="300" y="222" width="280" height="28" rx="7" fill="#F5F3FF" stroke="#DDD6FE"/>
+        <text x="440" y="241" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">SNonce + MIC（终端随机数 + 签名）</text>
+        <text x="440" y="268" text-anchor="middle" font-size="10" fill="#64748B">终端用 PMK+ANonce+SNonce+双方MAC → PRF → 算出 PTK，用 PTK 生成 MIC</text>
+      </g>
+
+      <!-- Message 3 -->
+      <g>
+        <rect x="30" y="288" width="38" height="38" rx="19" fill="#F59E0B"/>
+        <text x="49" y="313" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">3</text>
+        <line x1="660" y1="307" x2="220" y2="307" stroke="#F59E0B" stroke-width="2.5" marker-end="url(#a4Orange)"/>
+        <rect x="295" y="292" width="290" height="28" rx="7" fill="#FFFBEB" stroke="#FDE68A"/>
+        <text x="440" y="311" text-anchor="middle" font-size="12" font-weight="600" fill="#92400E">加密的 GTK + MIC（组播密钥）</text>
+        <text x="440" y="338" text-anchor="middle" font-size="10" fill="#64748B">WLC 也算出 PTK，验证 MIC 一致 → 将 GTK 用 PTK 加密后发给终端</text>
+      </g>
+
+      <!-- Message 4 -->
+      <g>
+        <rect x="30" y="358" width="38" height="38" rx="19" fill="#10B981"/>
+        <text x="49" y="383" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">4</text>
+        <line x1="220" y1="377" x2="660" y2="377" stroke="#10B981" stroke-width="2.5" marker-end="url(#a4Green)"/>
+        <rect x="350" y="362" width="180" height="28" rx="7" fill="#D1FAE5" stroke="#6EE7B7"/>
+        <text x="440" y="381" text-anchor="middle" font-size="12" font-weight="600" fill="#065F46">ACK（确认安装完毕）</text>
+        <text x="440" y="408" text-anchor="middle" font-size="10" fill="#64748B">终端回复确认，密钥安装完毕，双方就绪</text>
+      </g>
+
+      <!-- Result -->
+      <rect x="100" y="430" width="680" height="36" rx="8" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="440" y="453" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">🔐 PTK（单播加密）+ GTK（组播加密）安装完成 — 耗时约 20~50ms</text>
+
+      <defs>
+        <marker id="a4Blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#3B82F6"/></marker>
+        <marker id="a4Purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#8B5CF6"/></marker>
+        <marker id="a4Orange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#F59E0B"/></marker>
+        <marker id="a4Green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#10B981"/></marker>
+      </defs>
+    </svg>
+    <div class="svg-caption">图 2：WPA2 四次握手 — 用 PMK 和双方随机数推导出 PTK/GTK</div>
+  </div>
+
+  <h3>🧮 PTK 的推导公式</h3>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+      </div>
+      <div>
+        <div class="card-title">PTK = PRF (PMK + ANonce + SNonce + AP-MAC + Client-MAC)</div>
+        <div class="card-subtitle">五个参数输入伪随机函数，输出临时密钥</div>
+      </div>
+    </div>
+    <ul class="bullet">
+      <li><strong>PMK</strong>（32 字节）— 双方通过 EAP 认证获得的主密钥</li>
+      <li><strong>ANonce</strong> — WLC/AP 生成的随机数（Message 1 中明文传输）</li>
+      <li><strong>SNonce</strong> — 终端生成的随机数（Message 2 中传输）</li>
+      <li><strong>AP MAC 地址</strong> — AP-B 的 BSSID</li>
+      <li><strong>Client MAC 地址</strong> — 终端的无线网卡 MAC</li>
+    </ul>
+    <p style="margin-top:12px;">
+      五个参数中，PMK 是秘密的，两个随机数确保每次会话的 PTK 唯一，两个 MAC 地址防止密钥被"移植"到其他设备。<strong>MIC（Message Integrity Check）</strong>就是用 PTK 中的密钥计算出的签名，用于验证双方确实持有相同的 PMK — 如果 MIC 校验失败，说明密钥不匹配，握手终止。
+    </p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== STEP 10 ============================== -->
+<section id="step10">
+  <div class="section-label">Step 10 / 10</div>
+  <h2 class="section-title">数据恢复 — 终于能上网了！</h2>
+
+  <p>
+    经历了前面 9 个步骤的"长征"，漫游过程终于画上句号。
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="tl-title">🔄 状态翻转</div>
+      <div class="tl-desc">
+        WLC 将该终端的状态从 <code>Authenticating</code> / <code>Associated</code> 推进到 <strong><code>Run (S_CO_RUN)</code></strong> 状态。这是 Cisco WLC 内部状态机的最终"通行"状态。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">📜 授权下发</div>
+      <div class="tl-desc">
+        ISE 在 <code>RADIUS Access-Accept</code> 中返回的授权结果（例如下发 <strong>VLAN ID</strong>、<strong>Airespace-ACL</strong> 或 <strong>CTS Security-Group-Tag</strong>）此时被 WLC 应用到底层的网络转发表中。终端被分配到正确的 VLAN，ACL 规则生效。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">🔓 端口放行</div>
+      <div class="tl-desc">
+        WLC 解除之前"仅允许 EAPOL"的阻断策略。受控端口切换为 <strong>Port-Authorized（端口已授权）</strong>。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-title">📡 加密数据传输</div>
+      <div class="tl-desc">
+        终端发出的所有后续数据帧，全部由底层的 <strong>CCMP (AES)</strong> 使用刚刚协商好的 PTK 进行<strong>硬件加密</strong>。DHCP 请求、DNS 查询、应用数据 — 一切流量恢复正常传输。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">🎉</div>
+    <div>
+      <strong>终于完成了！</strong>但是……你有没有注意到，从 Step 1 到 Step 10，在没有任何快速漫游优化的情况下，这整个过程消耗了多少时间？让我们用下面的端到端消息流图来算一笔账。
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== MSC: Full Message Flow ============================== -->
+<section id="msc">
+  <div class="section-label">⏱️ 端到端总览</div>
+  <h2 class="section-title">完整漫游消息流图 — 时间都去哪了？</h2>
+
+  <p>
+    下面这张 SVG 图展示了 Full 802.1X 漫游（无任何优化）的<strong>完整端到端消息流</strong>。四个参与方从左到右分别是：<strong>终端、AP-B / WLC、ISE、AD / CA</strong>。注意右侧标注的延迟估算 — 这就是每次漫游时你的手机经历的"黑暗时刻"。
+  </p>
+
+  <div class="svg-figure" style="padding: 16px 8px;">
+    <svg viewBox="0 0 920 920" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+      <rect width="920" height="920" rx="12" fill="#FAFBFF"/>
+
+      <!-- Title -->
+      <text x="460" y="30" text-anchor="middle" font-size="16" font-weight="800" fill="#1E293B">Full 802.1X 漫游 · 端到端消息序列图</text>
+      <text x="460" y="50" text-anchor="middle" font-size="11" fill="#94A3B8">无 802.11r / 无 OKC / 无 CCKM — 最慢基线场景</text>
+
+      <!-- Column Headers -->
+      <rect x="50" y="64" width="120" height="36" rx="8" fill="#DBEAFE"/>
+      <text x="110" y="87" text-anchor="middle" font-size="12" font-weight="700" fill="#1D4ED8">终端</text>
+
+      <rect x="280" y="64" width="120" height="36" rx="8" fill="#FEF3C7"/>
+      <text x="340" y="87" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">AP-B / WLC</text>
+
+      <rect x="510" y="64" width="120" height="36" rx="8" fill="#D1FAE5"/>
+      <text x="570" y="87" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">ISE</text>
+
+      <rect x="720" y="64" width="120" height="36" rx="8" fill="#EDE9FE"/>
+      <text x="780" y="87" text-anchor="middle" font-size="12" font-weight="700" fill="#5B21B6">AD / CA</text>
+
+      <!-- Lifelines -->
+      <line x1="110" y1="104" x2="110" y2="870" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <line x1="340" y1="104" x2="340" y2="870" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <line x1="570" y1="104" x2="570" y2="870" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <line x1="780" y1="104" x2="780" y2="870" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+      <!-- ====== Phase A: Scan & Connect ====== -->
+      <!-- Phase label -->
+      <rect x="10" y="118" width="8" height="100" rx="4" fill="#3B82F6"/>
+      <text x="28" y="174" font-size="10" font-weight="700" fill="#3B82F6" transform="rotate(-90,28,174)">扫描与连接</text>
+
+      <!-- 1. Probe -->
+      <line x1="110" y1="135" x2="330" y2="135" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlue)"/>
+      <text x="220" y="130" text-anchor="middle" font-size="10" fill="#1D4ED8">Probe Request</text>
+      <line x1="340" y1="150" x2="120" y2="150" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlueR)"/>
+      <text x="220" y="147" text-anchor="middle" font-size="10" fill="#1D4ED8">Probe Response</text>
+      <!-- Time -->
+      <rect x="830" y="130" width="80" height="22" rx="4" fill="#FEE2E2"/>
+      <text x="870" y="145" text-anchor="middle" font-size="9" font-weight="700" fill="#DC2626">10~2000ms</text>
+
+      <!-- 2. 802.11 Auth -->
+      <line x1="110" y1="175" x2="330" y2="175" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlue)"/>
+      <text x="220" y="171" text-anchor="middle" font-size="10" fill="#1D4ED8">802.11 Auth Req</text>
+      <line x1="340" y1="190" x2="120" y2="190" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlueR)"/>
+      <text x="220" y="187" text-anchor="middle" font-size="10" fill="#1D4ED8">802.11 Auth Resp</text>
+      <rect x="830" y="172" width="80" height="22" rx="4" fill="#D1FAE5"/>
+      <text x="870" y="187" text-anchor="middle" font-size="9" font-weight="600" fill="#065F46">~5ms</text>
+
+      <!-- 3. Reassociation -->
+      <line x1="110" y1="213" x2="330" y2="213" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlue)"/>
+      <text x="220" y="209" text-anchor="middle" font-size="10" fill="#1D4ED8">Reassociation Req</text>
+      <line x1="340" y1="228" x2="120" y2="228" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlueR)"/>
+      <text x="220" y="225" text-anchor="middle" font-size="10" fill="#1D4ED8">Reassociation Resp</text>
+      <rect x="830" y="210" width="80" height="22" rx="4" fill="#D1FAE5"/>
+      <text x="870" y="225" text-anchor="middle" font-size="9" font-weight="600" fill="#065F46">~5ms</text>
+
+      <!-- Port Blocked bar -->
+      <rect x="85" y="245" width="280" height="22" rx="6" fill="#FEE2E2" stroke="#FECACA"/>
+      <text x="225" y="260" text-anchor="middle" font-size="10" font-weight="700" fill="#DC2626">🔒 端口阻塞 — 仅放行 EAPOL</text>
+
+      <!-- ====== Phase B: EAP ====== -->
+      <rect x="10" y="278" width="8" height="310" rx="4" fill="#F59E0B"/>
+      <text x="28" y="430" font-size="10" font-weight="700" fill="#92400E" transform="rotate(-90,28,430)">完整 EAP 认证（最耗时）</text>
+
+      <!-- 4. EAP Identity -->
+      <line x1="340" y1="290" x2="120" y2="290" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#mscOrangeR)"/>
+      <text x="220" y="286" text-anchor="middle" font-size="10" fill="#92400E">EAP-Request/Identity</text>
+
+      <line x1="110" y1="310" x2="330" y2="310" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#mscOrange)"/>
+      <text x="220" y="306" text-anchor="middle" font-size="10" fill="#92400E">EAP-Response/Identity</text>
+
+      <!-- 5. WLC → ISE RADIUS -->
+      <line x1="340" y1="335" x2="560" y2="335" stroke="#10B981" stroke-width="1.5" marker-end="url(#mscGreen)"/>
+      <text x="450" y="331" text-anchor="middle" font-size="10" fill="#065F46">RADIUS Access-Request</text>
+
+      <line x1="570" y1="350" x2="350" y2="350" stroke="#10B981" stroke-width="1.5" marker-end="url(#mscGreenR)"/>
+      <text x="450" y="348" text-anchor="middle" font-size="10" fill="#065F46">RADIUS Access-Challenge</text>
+
+      <!-- 6. EAP-TLS / PEAP exchanges (simplified) -->
+      <rect x="88" y="368" width="504" height="100" rx="8" fill="#FFFBEB" stroke="#FDE68A" stroke-dasharray="4,3"/>
+      <text x="340" y="395" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">EAP-TLS 或 PEAP 认证阶段</text>
+      <text x="340" y="415" text-anchor="middle" font-size="10" fill="#B45309">⟵ 5~20 个报文往返：TLS 握手 + 证书分片 + 内层质询 ⟶</text>
+      <text x="340" y="435" text-anchor="middle" font-size="10" fill="#B45309">终端 ⟷ WLC (EAPOL) ⟷ ISE (RADIUS)</text>
+
+      <!-- time for EAP phase -->
+      <rect x="808" y="375" width="102" height="55" rx="6" fill="#FEE2E2" stroke="#FECACA"/>
+      <text x="859" y="398" text-anchor="middle" font-size="10" font-weight="800" fill="#DC2626">200ms</text>
+      <text x="859" y="414" text-anchor="middle" font-size="10" font-weight="800" fill="#DC2626">~ 1000ms+</text>
+      <text x="859" y="426" text-anchor="middle" font-size="8" fill="#EF4444">头号延迟杀手</text>
+
+      <!-- 7. ISE → AD / CA -->
+      <line x1="570" y1="485" x2="770" y2="485" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#mscPurple)"/>
+      <text x="670" y="481" text-anchor="middle" font-size="10" fill="#5B21B6">LDAP / RPC / OCSP 查询</text>
+
+      <line x1="780" y1="505" x2="580" y2="505" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#mscPurpleR)"/>
+      <text x="670" y="502" text-anchor="middle" font-size="10" fill="#5B21B6">AD 返回结果 + 组信息</text>
+      <rect x="830" y="486" width="80" height="22" rx="4" fill="#EDE9FE"/>
+      <text x="870" y="501" text-anchor="middle" font-size="9" font-weight="600" fill="#5B21B6">20~100ms</text>
+
+      <!-- 8. Access-Accept with MSK -->
+      <line x1="570" y1="535" x2="350" y2="535" stroke="#10B981" stroke-width="1.5" marker-end="url(#mscGreenR)"/>
+      <text x="450" y="531" text-anchor="middle" font-size="10" fill="#065F46">RADIUS Access-Accept (含 MSK)</text>
+
+      <!-- PMK generated -->
+      <rect x="85" y="552" width="504" height="22" rx="6" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="337" y="567" text-anchor="middle" font-size="10" font-weight="700" fill="#065F46">🔑 PMK 生成 — 双方从 MSK 截取前 32 字节</text>
+
+      <!-- ====== Phase C: 4-Way Handshake ====== -->
+      <rect x="10" y="588" width="8" height="170" rx="4" fill="#10B981"/>
+      <text x="28" y="678" font-size="10" font-weight="700" fill="#065F46" transform="rotate(-90,28,678)">四次握手</text>
+
+      <!-- Msg 1 -->
+      <line x1="340" y1="600" x2="120" y2="600" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#mscBlueR)"/>
+      <text x="220" y="596" text-anchor="middle" font-size="10" fill="#1D4ED8">Msg1: ANonce</text>
+
+      <!-- Msg 2 -->
+      <line x1="110" y1="630" x2="330" y2="630" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#mscPurple2)"/>
+      <text x="220" y="626" text-anchor="middle" font-size="10" fill="#6D28D9">Msg2: SNonce + MIC</text>
+
+      <!-- Msg 3 -->
+      <line x1="340" y1="660" x2="120" y2="660" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#mscOrangeR)"/>
+      <text x="220" y="656" text-anchor="middle" font-size="10" fill="#92400E">Msg3: 加密GTK + MIC</text>
+
+      <!-- Msg 4 -->
+      <line x1="110" y1="690" x2="330" y2="690" stroke="#10B981" stroke-width="1.5" marker-end="url(#mscGreen)"/>
+      <text x="220" y="686" text-anchor="middle" font-size="10" fill="#065F46">Msg4: ACK</text>
+
+      <rect x="830" y="632" width="80" height="22" rx="4" fill="#FEF3C7"/>
+      <text x="870" y="647" text-anchor="middle" font-size="9" font-weight="600" fill="#92400E">20~50ms</text>
+
+      <!-- ====== Phase D: Data ====== -->
+      <rect x="10" y="720" width="8" height="60" rx="4" fill="#14B8A6"/>
+
+      <!-- Port Open bar -->
+      <rect x="85" y="718" width="280" height="22" rx="6" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="225" y="733" text-anchor="middle" font-size="10" font-weight="700" fill="#065F46">🔓 端口放行 — AES-CCMP 加密就绪</text>
+
+      <!-- Data -->
+      <line x1="110" y1="755" x2="330" y2="755" stroke="#14B8A6" stroke-width="2" marker-end="url(#mscTeal)"/>
+      <text x="220" y="751" text-anchor="middle" font-size="10" fill="#0F766E">DHCP / ARP / 业务数据 →</text>
+      <rect x="830" y="747" width="80" height="22" rx="4" fill="#CCFBF1"/>
+      <text x="870" y="762" text-anchor="middle" font-size="9" font-weight="600" fill="#0F766E">恢复正常</text>
+
+      <!-- ====== Total ====== -->
+      <rect x="50" y="800" width="820" height="60" rx="12" fill="#1E293B"/>
+      <text x="460" y="825" text-anchor="middle" font-size="15" font-weight="800" fill="#F87171">⏱️ 漫游总耗时估算：300ms ~ 3000ms+</text>
+      <text x="460" y="848" text-anchor="middle" font-size="12" fill="#94A3B8">语音应用要求 &lt; 150ms — 基线漫游远远超标，这就是为什么需要 802.11r</text>
+
+      <!-- Arrow Markers -->
+      <defs>
+        <marker id="mscBlue" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#3B82F6"/></marker>
+        <marker id="mscBlueR" markerWidth="7" markerHeight="5" refX="0" refY="2.5" orient="auto"><path d="M7,0 L0,2.5 L7,5Z" fill="#3B82F6"/></marker>
+        <marker id="mscOrange" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#F59E0B"/></marker>
+        <marker id="mscOrangeR" markerWidth="7" markerHeight="5" refX="0" refY="2.5" orient="auto"><path d="M7,0 L0,2.5 L7,5Z" fill="#F59E0B"/></marker>
+        <marker id="mscGreen" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#10B981"/></marker>
+        <marker id="mscGreenR" markerWidth="7" markerHeight="5" refX="0" refY="2.5" orient="auto"><path d="M7,0 L0,2.5 L7,5Z" fill="#10B981"/></marker>
+        <marker id="mscPurple" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#8B5CF6"/></marker>
+        <marker id="mscPurpleR" markerWidth="7" markerHeight="5" refX="0" refY="2.5" orient="auto"><path d="M7,0 L0,2.5 L7,5Z" fill="#8B5CF6"/></marker>
+        <marker id="mscPurple2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#6D28D9"/></marker>
+        <marker id="mscTeal" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#14B8A6"/></marker>
+      </defs>
+    </svg>
+    <div class="svg-caption">图 3：Full 802.1X 漫游完整消息序列 — 从扫描到数据恢复的端到端视图</div>
+  </div>
+
+  <h3>📊 各阶段延迟瓶颈汇总</h3>
+
+  <div class="card">
+    <table style="width:100%; border-collapse:collapse; font-size:1rem;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);">
+          <th style="text-align:left; padding:12px 8px; color:var(--text-light); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">阶段</th>
+          <th style="text-align:left; padding:12px 8px; color:var(--text-light); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">内容</th>
+          <th style="text-align:right; padding:12px 8px; color:var(--text-light); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">延迟</th>
+          <th style="text-align:center; padding:12px 8px; color:var(--text-light); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">风险</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 8px; font-weight:600;">Step 1-2</td>
+          <td style="padding:12px 8px; color:var(--text-secondary);">漫游决策 + 信道扫描</td>
+          <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--red);">10ms ~ 2s+</td>
+          <td style="padding:12px 8px; text-align:center;"><span class="badge time">极高</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 8px; font-weight:600;">Step 3</td>
+          <td style="padding:12px 8px; color:var(--text-secondary);">802.11 Auth + Reassociation</td>
+          <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--green);">~10ms</td>
+          <td style="padding:12px 8px; text-align:center;"><span class="badge ok">低</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 8px; font-weight:600;">Step 4-7</td>
+          <td style="padding:12px 8px; color:var(--text-secondary);">完整 EAP 认证 + ISE/AD 交互</td>
+          <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--red);">200ms ~ 1s+</td>
+          <td style="padding:12px 8px; text-align:center;"><span class="badge time">极高</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 8px; font-weight:600;">Step 8</td>
+          <td style="padding:12px 8px; color:var(--text-secondary);">PMK 生成与分发</td>
+          <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--green);">~1ms</td>
+          <td style="padding:12px 8px; text-align:center;"><span class="badge ok">低</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 8px; font-weight:600;">Step 9</td>
+          <td style="padding:12px 8px; color:var(--text-secondary);">四次握手</td>
+          <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--orange);">20~50ms</td>
+          <td style="padding:12px 8px; text-align:center;"><span class="badge warn">中</span></td>
+        </tr>
+        <tr>
+          <td style="padding:12px 8px; font-weight:600;">Step 10</td>
+          <td style="padding:12px 8px; color:var(--text-secondary);">授权下发 + 数据恢复</td>
+          <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--green);">~5ms</td>
+          <td style="padding:12px 8px; text-align:center;"><span class="badge ok">低</span></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid var(--text);">
+          <td style="padding:14px 8px; font-weight:800; font-size:1.05rem;" colspan="2">🔴 总计</td>
+          <td style="padding:14px 8px; text-align:right; font-weight:800; font-size:1.05rem; color:var(--red);">300ms ~ 3s+</td>
+          <td style="padding:14px 8px; text-align:center;"><span class="badge time">远超 150ms 语音要求</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="callout danger">
+    <div class="callout-icon">💀</div>
+    <div>
+      <strong>结论很残酷：</strong>在没有任何快速漫游机制的基线场景下，每一次漫游都是一场"小型灾难"。<strong>300ms ~ 3 秒</strong>的中断对于语音通话（要求 &lt;150ms）来说是完全不可接受的 — 用户会听到卡顿、断续甚至通话直接掉线。这就是我们<strong>必须</strong>引入 802.11k/v/r 的根本原因。
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+<!-- ============================== 802.11k/v/r SECTION ============================== -->
+<section id="kvr">
+  <div class="section-label">🚀 解决之道</div>
+  <h2 class="section-title">802.11k / v / r — 让漫游从"灾难"变"无感"</h2>
+
+  <p>
+    看完了前面 10 步的"酷刑"，你一定在想：<strong>有没有办法把这 3 秒缩短到几十毫秒？</strong>答案是肯定的。IEEE 和 Cisco 为我们准备了三把"瑞士军刀"— 它们各司其职，协同工作，将漫游体验从"灾难"级别提升到"无感"级别。
+  </p>
+
+  <div class="analogy">
+    <div class="analogy-label">🎯 核心类比：开车换道</div>
+    <p>
+      如果把基线漫游比作<strong>"下高速 → 重新排队 → 重新验证 → 重新上高速"</strong>，那么：<br><br>
+      🧭 <strong>802.11k/v</strong> = <strong>GPS 导航</strong> — 告诉你"前方 500 米有更快的车道"，让你不再盲目找路<br>
+      ⚡ <strong>802.11r</strong> = <strong>ETC 不停车收费</strong> — 你的身份已经提前验证好，直接以 200km/h 冲过收费站，零停留
+    </p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ 802.11k ============ -->
+  <h3 id="kvr-k">🧭 802.11k — 邻居报告：从"盲扫"到"精确制导"</h3>
+
+  <p>
+    还记得 Step 2 中终端扫描信道的痛苦吗？没有 802.11k 时，终端必须逐一扫描所有 20+ 个信道，每个信道停留数十毫秒，总扫描时间可能高达数秒。<strong>802.11k 的核心功能就是消灭这种盲目扫描。</strong>
+  </p>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Neighbor Report（邻居报告）工作机制</div>
+        <div class="card-subtitle">终端主动请求，AP 即时回复周围 AP 清单</div>
+      </div>
+    </div>
+    <ol class="styled">
+      <li>终端在移动过程中感知到当前 AP 信号变弱，向当前 AP 发送 <strong>Neighbor Report Request</strong>（邻居报告请求）帧</li>
+      <li>当前 AP 查询 WLC 维护的邻居数据库，返回 <strong>Neighbor Report Response</strong>，其中包含周围<strong>同 SSID</strong> 的最优 AP 列表：BSSID、信道号、PHY 类型、信号强度等</li>
+      <li>终端拿到这张"地图"后，<strong>只扫描清单中列出的 2~3 个信道</strong>，而不是全部 20+ 个信道</li>
+    </ol>
+  </div>
+
+  <div class="svg-figure">
+    <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+      <rect width="880" height="340" rx="12" fill="#FAFBFF"/>
+      <text x="440" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1E293B">802.11k：盲扫 vs 精确扫描对比</text>
+
+      <!-- Left: Without 11k -->
+      <rect x="30" y="55" width="390" height="260" rx="12" fill="#FEF2F2" stroke="#FECACA"/>
+      <text x="225" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#DC2626">❌ 无 802.11k — 全信道盲扫</text>
+
+      <!-- Channel blocks -->
+      <g font-size="10" text-anchor="middle">
+        <rect x="50" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="71" y="118" fill="#991B1B">CH 36</text>
+        <rect x="98" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="119" y="118" fill="#991B1B">CH 40</text>
+        <rect x="146" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="167" y="118" fill="#991B1B">CH 44</text>
+        <rect x="194" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="215" y="118" fill="#991B1B">CH 48</text>
+        <rect x="242" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="263" y="118" fill="#991B1B">CH 52</text>
+        <rect x="290" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="311" y="118" fill="#991B1B">CH 56</text>
+        <rect x="338" y="100" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="359" y="118" fill="#991B1B">CH 60</text>
+
+        <rect x="50" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="71" y="154" fill="#991B1B">CH 64</text>
+        <rect x="98" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="119" y="154" fill="#991B1B">CH100</text>
+        <rect x="146" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="167" y="154" fill="#991B1B">CH104</text>
+        <rect x="194" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="215" y="154" fill="#991B1B">CH108</text>
+        <rect x="242" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="263" y="154" fill="#991B1B">CH112</text>
+        <rect x="290" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="311" y="154" fill="#991B1B">CH116</text>
+        <rect x="338" y="136" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="359" y="154" fill="#991B1B">CH149</text>
+
+        <rect x="50" y="172" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="71" y="190" fill="#991B1B">CH153</text>
+        <rect x="98" y="172" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="119" y="190" fill="#991B1B">CH157</text>
+        <rect x="146" y="172" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="167" y="190" fill="#991B1B">CH161</text>
+        <rect x="194" y="172" width="42" height="28" rx="5" fill="#FEE2E2" stroke="#FECACA"/><text x="215" y="190" fill="#991B1B">CH165</text>
+        <text x="280" y="192" font-size="14" fill="#DC2626">…还有更多</text>
+      </g>
+
+      <text x="225" y="228" text-anchor="middle" font-size="11" fill="#991B1B">每个信道停留 10~100ms</text>
+      <rect x="100" y="240" width="250" height="36" rx="8" fill="#DC2626"/>
+      <text x="225" y="263" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">⏱️ 总扫描：200ms ~ 2000ms+</text>
+      <text x="225" y="300" text-anchor="middle" font-size="11" font-weight="600" fill="#DC2626">DFS 信道只能被动扫描，更慢！</text>
+
+      <!-- Right: With 11k -->
+      <rect x="460" y="55" width="390" height="260" rx="12" fill="#ECFDF5" stroke="#A7F3D0"/>
+      <text x="655" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">✅ 有 802.11k — 精确信道扫描</text>
+
+      <!-- Neighbor Report -->
+      <rect x="490" y="100" width="330" height="50" rx="8" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="655" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#065F46">📋 AP 返回 Neighbor Report：</text>
+      <text x="655" y="138" text-anchor="middle" font-size="11" fill="#047857">"AP-B 在 CH 44 · AP-C 在 CH 149 · AP-D 在 CH 36"</text>
+
+      <!-- Only scan 3 -->
+      <g font-size="11" text-anchor="middle">
+        <rect x="510" y="170" width="70" height="34" rx="8" fill="#10B981" stroke="#059669" stroke-width="2"/>
+        <text x="545" y="192" font-weight="700" fill="#fff">CH 44 ✓</text>
+
+        <rect x="605" y="170" width="70" height="34" rx="8" fill="#10B981" stroke="#059669" stroke-width="2"/>
+        <text x="640" y="192" font-weight="700" fill="#fff">CH 149 ✓</text>
+
+        <rect x="700" y="170" width="70" height="34" rx="8" fill="#10B981" stroke="#059669" stroke-width="2"/>
+        <text x="735" y="192" font-weight="700" fill="#fff">CH 36 ✓</text>
+      </g>
+
+      <text x="655" y="232" text-anchor="middle" font-size="11" fill="#065F46">只扫描 3 个信道，每个 ~10ms</text>
+      <rect x="530" y="244" width="250" height="36" rx="8" fill="#059669"/>
+      <text x="655" y="267" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">⏱️ 总扫描：~30ms</text>
+      <text x="655" y="300" text-anchor="middle" font-size="12" font-weight="700" fill="#059669">🚀 速度提升 10~60 倍！</text>
+    </svg>
+    <div class="svg-caption">图 4：802.11k Neighbor Report 将扫描从"盲扫所有信道"缩减为"精确扫描 2~3 个目标信道"</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ 802.11v ============ -->
+  <h3 id="kvr-v">📡 802.11v — BSS 切换管理：解决"粘性客户端"的终极武器</h3>
+
+  <p>
+    802.11k 帮助终端<strong>找到目标 AP</strong>，而 802.11v 解决的是另一个常见问题：<strong>终端明明应该漫游了，却死活不肯走</strong> — 即"粘性客户端"（Sticky Client）。
+  </p>
+
+  <div class="threshold-grid">
+    <div class="threshold-card" style="border-left: 4px solid var(--accent);">
+      <div class="brand" style="color: var(--accent);">
+        <span class="dot" style="background:var(--accent)"></span>
+        Solicited（终端主动请求）
+      </div>
+      <ul>
+        <li>终端感觉信号不好，<strong>主动</strong>询问当前 AP："我该去哪个 AP？"</li>
+        <li>AP 结合各 AP 的负载、信号强度等信息，返回推荐列表</li>
+        <li>终端参考建议，做出漫游决策</li>
+        <li>类似于你主动问导航"附近哪条路不堵？"</li>
+      </ul>
+    </div>
+    <div class="threshold-card" style="border-left: 4px solid var(--red);">
+      <div class="brand" style="color: var(--red);">
+        <span class="dot" style="background:var(--red)"></span>
+        Unsolicited（网络主动推送）
+      </div>
+      <ul>
+        <li>当终端信号跌破阈值（如 −70dBm）或 AP 负载过高时</li>
+        <li>WLC / AP <strong>主动</strong>向终端发送 <code>BSS Transition Management Request</code></li>
+        <li>建议终端漫游到更好的 AP，甚至发送<strong>"即将断开连接"</strong>最后通牒</li>
+        <li>类似于交警拿着喇叭喊："前面施工，请绕行！"</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout purple-c">
+    <div class="callout-icon">💡</div>
+    <div>
+      <strong>Disassociation Imminent（即将解除关联）：</strong>这是 802.11v 的"核武器"。当 AP 在 BSS Transition Management Request 中设置了此标志位，意味着告诉终端：<strong>"你不走，我就踢你了。"</strong> 终端收到后通常会立即开始漫游过程。这是解决那些特别固执的"粘性客户端"的最有效手段。
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ 802.11r ============ -->
+  <h3 id="kvr-r">⚡ 802.11r — 快速 BSS 切换：漫游的"终极形态"</h3>
+
+  <p>
+    如果说 802.11k/v 是"导航员"（减少寻找 AP 的时间），那么 <strong>802.11r（Fast BSS Transition / FT）就是"ETC 不停车收费系统"</strong> — 它从架构上彻底重构了密钥体系，让终端在漫游时<strong>同时跳过 EAP 认证和独立的四次握手</strong>。
+  </p>
+
+  <h4>🏗️ 802.11r 的三层密钥架构</h4>
+
+  <p>
+    为了将主密钥安全地"预分发"到边缘 AP，802.11r 设计了一套严谨的三层密钥层次结构：
+  </p>
+
+  <div class="svg-figure">
+    <svg viewBox="0 0 880 420" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+      <rect width="880" height="420" rx="12" fill="#FAFBFF"/>
+      <text x="440" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1E293B">802.11r 密钥层次架构（FT Key Hierarchy）</text>
+
+      <!-- Level 0: MSK -->
+      <rect x="310" y="55" width="260" height="48" rx="10" fill="#1E293B"/>
+      <text x="440" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#F87171">MSK</text>
+      <text x="440" y="92" text-anchor="middle" font-size="10" fill="#94A3B8">Master Session Key — EAP 首次认证生成</text>
+
+      <!-- Arrow down -->
+      <line x1="440" y1="103" x2="440" y2="125" stroke="#F87171" stroke-width="2" marker-end="url(#kArrowRed)"/>
+      <text x="510" y="118" font-size="9" fill="#94A3B8">PRF 推导</text>
+
+      <!-- Level 1: PMK-R0 -->
+      <rect x="270" y="128" width="340" height="52" rx="10" fill="#1D4ED8"/>
+      <text x="440" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">PMK-R0（第一层漫游密钥）</text>
+      <text x="440" y="168" text-anchor="middle" font-size="10" fill="#93C5FD">保存在 R0KH (WLC) + 终端 — 顶级漫游密钥</text>
+
+      <!-- Arrows to PMK-R1s -->
+      <line x1="350" y1="180" x2="200" y2="225" stroke="#3B82F6" stroke-width="2" marker-end="url(#kArrowBlue)"/>
+      <line x1="440" y1="180" x2="440" y2="225" stroke="#3B82F6" stroke-width="2" marker-end="url(#kArrowBlue)"/>
+      <line x1="530" y1="180" x2="680" y2="225" stroke="#3B82F6" stroke-width="2" marker-end="url(#kArrowBlue)"/>
+      <text x="160" y="210" font-size="9" fill="#64748B">推导 + 下发</text>
+      <text x="510" y="210" font-size="9" fill="#64748B">推导 + 下发</text>
+      <text x="710" y="210" font-size="9" fill="#64748B">推导 + 下发</text>
+
+      <!-- Level 2: PMK-R1s -->
+      <rect x="100" y="228" width="200" height="52" rx="10" fill="#8B5CF6"/>
+      <text x="200" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">PMK-R1 (AP-A)</text>
+      <text x="200" y="268" text-anchor="middle" font-size="9" fill="#DDD6FE">R1KH = AP-A</text>
+
+      <rect x="340" y="228" width="200" height="52" rx="10" fill="#8B5CF6"/>
+      <text x="440" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">PMK-R1 (AP-B)</text>
+      <text x="440" y="268" text-anchor="middle" font-size="9" fill="#DDD6FE">R1KH = AP-B</text>
+
+      <rect x="580" y="228" width="200" height="52" rx="10" fill="#8B5CF6"/>
+      <text x="680" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">PMK-R1 (AP-C)</text>
+      <text x="680" y="268" text-anchor="middle" font-size="9" fill="#DDD6FE">R1KH = AP-C</text>
+
+      <!-- Arrows to PTK -->
+      <line x1="200" y1="280" x2="200" y2="320" stroke="#8B5CF6" stroke-width="2" marker-end="url(#kArrowPurple)"/>
+      <line x1="440" y1="280" x2="440" y2="320" stroke="#8B5CF6" stroke-width="2" marker-end="url(#kArrowPurple)"/>
+      <line x1="680" y1="280" x2="680" y2="320" stroke="#8B5CF6" stroke-width="2" marker-end="url(#kArrowPurple)"/>
+
+      <!-- Level 3: PTKs -->
+      <rect x="120" y="323" width="160" height="42" rx="8" fill="#10B981"/>
+      <text x="200" y="349" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">PTK — 加密数据流</text>
+
+      <rect x="360" y="323" width="160" height="42" rx="8" fill="#10B981"/>
+      <text x="440" y="349" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">PTK — 加密数据流</text>
+
+      <rect x="600" y="323" width="160" height="42" rx="8" fill="#10B981"/>
+      <text x="680" y="349" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">PTK — 加密数据流</text>
+
+      <!-- Result box -->
+      <rect x="140" y="382" width="600" height="28" rx="8" fill="#D1FAE5" stroke="#6EE7B7"/>
+      <text x="440" y="401" text-anchor="middle" font-size="11" font-weight="700" fill="#065F46">✅ 每个 AP 预持有 PMK-R1 → 漫游时直接推导 PTK → 跳过 EAP + 四次握手</text>
+
+      <defs>
+        <marker id="kArrowRed" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#F87171"/></marker>
+        <marker id="kArrowBlue" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#3B82F6"/></marker>
+        <marker id="kArrowPurple" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#8B5CF6"/></marker>
+      </defs>
+    </svg>
+    <div class="svg-caption">图 5：802.11r 密钥层次 — MSK → PMK-R0 → PMK-R1 → PTK 的三层推导架构</div>
+  </div>
+
+  <h4>✈️ 两种 FT 漫游模式</h4>
+
+  <div class="threshold-grid">
+    <div class="threshold-card" style="border-left: 4px solid var(--accent);">
+      <div class="brand" style="color: var(--accent);">
+        <span class="dot" style="background:var(--accent)"></span>
+        OTA（Over-the-Air）模式
+      </div>
+      <ul>
+        <li>终端与目标 AP-B <strong>直接通过空口</strong>通信</li>
+        <li>最关键的创新：<strong>四次握手被"折叠"进了 802.11 Auth + Reassociation 帧中</strong></li>
+        <li>即：Auth Request/Response 中携带 PMKR1Name + SNonce/ANonce</li>
+        <li>Reassociation 完成时，PTK/GTK <strong>已安装完毕</strong>，直接可以发数据</li>
+        <li>适用于：大多数企业场景</li>
+      </ul>
+    </div>
+    <div class="threshold-card" style="border-left: 4px solid var(--purple);">
+      <div class="brand" style="color: var(--purple);">
+        <span class="dot" style="background:var(--purple)"></span>
+        ODS（Over-the-DS）模式
+      </div>
+      <ul>
+        <li>终端通过<strong>当前 AP-A 的有线网络</strong>（DS = 分布系统）与目标 AP-B 通信</li>
+        <li>终端向 AP-A 发送 FT Action Request → AP-A 通过有线转发给 AP-B</li>
+        <li>AP-B 计算密钥后，通过有线网络回传结果</li>
+        <li><strong>终端甚至不需要切换信道</strong>就能提前准备好新 AP 的密钥！</li>
+        <li>适用于：DFS 信道密集、对延迟极度敏感的场景</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>🏷️ MDID：漫游信任域标识</h4>
+
+  <p>
+    AP 在 Beacon 和 Probe Response 中广播 <strong>MDID（Mobility Domain Identifier）</strong>。只有当终端发现两个 AP 拥有<strong>相同的 MDID</strong> 时，才会发起 FT 漫游 — 这代表它们共享同一个 R0 信任域，即 PMK-R0 可以被安全地跨 AP 推导为 PMK-R1。
+  </p>
+
+  <h4>⚡ 802.11r 的性能数据</h4>
+
+  <div class="callout success">
+    <div class="callout-icon">🚀</div>
+    <div>
+      <strong>802.11r 真正实现了"零额外握手"漫游：</strong><br>
+      ✅ 跳过完整 EAP 认证（省去 Step 4~7 的 200ms~1s+）<br>
+      ✅ 跳过独立的四次握手（省去 Step 9 的 20~50ms）<br>
+      ✅ 将密钥协商折叠进 Auth/Reassociation 帧<br>
+      📊 <strong>漫游总延迟：&lt; 50ms，最优可达 &lt; 10ms</strong> <span class="badge ok">满足语音要求</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ OKC ============ -->
+  <h3 id="kvr-okc">🔄 OKC（机会密钥缓存）— 802.11r 之前的"过渡方案"</h3>
+
+  <p>
+    在 802.11r 普及之前，Cisco 和业界使用 <strong>OKC（Opportunistic Key Caching）</strong>作为折中方案。OKC 的思路是：<strong>跳过 EAP 认证，但仍然需要四次握手。</strong>
+  </p>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </div>
+      <div>
+        <div class="card-title">OKC 工作原理</div>
+        <div class="card-subtitle">C9800 默认启用 OKC</div>
+      </div>
+    </div>
+    <ol class="styled">
+      <li>终端首次在 AP-A 完成 802.1X 认证后，WLC 缓存了该终端的 <strong>PMK</strong></li>
+      <li>终端漫游到 AP-B 时，在 Reassociation Request 的 RSN IE 中携带 <strong>PMKID</strong>（PMK 的指纹哈希）</li>
+      <li>WLC 查找缓存，发现该 PMKID 对应一个有效的 PMK → <strong>跳过整个 EAP 认证</strong></li>
+      <li>但仍需执行<strong>完整的四次握手</strong>来协商新的 PTK/GTK</li>
+    </ol>
+    <p style="margin-top:12px; color:var(--text-secondary);">
+      <strong>延迟估算：</strong>约 <strong>50~100ms</strong>。比基线好很多，但不如 802.11r 快，因为四次握手仍然需要额外的 20~50ms。而且 OKC 不是 IEEE 官方标准，各厂家兼容性参差不齐。
+    </p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ Adaptive 11r ============ -->
+  <h3 id="kvr-adaptive">🔧 Adaptive 802.11r — 曾经的救星，如今的包袱</h3>
+
+  <p>
+    标准 802.11r 有一个令人头疼的兼容性问题：当 SSID 的 RSN IE 中广播了 FT AKM 套件时，<strong>很多老旧的非 FT 客户端无法解析这个未知的 AKM</strong>，直接拒绝连接。为了避免维护两个完全相同的 SSID（一个开 FT，一个关 FT），Cisco 与 Apple / Samsung 合作推出了 <strong>Adaptive FT</strong>。
+  </p>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Adaptive 11r 工作机制</div>
+        <div class="card-subtitle">在 Beacon 中隐藏 FT，用 MDIE 标签暗示支持</div>
+      </div>
+    </div>
+    <ul class="bullet">
+      <li>Beacon / Probe 帧的 RSN IE 中<strong>隐藏</strong>了 FT 方法，只广播标准的 WPA2 AKM</li>
+      <li>但在帧的外围发送一个 <strong>802.11r MDIE 标签</strong></li>
+      <li>支持此功能的 <strong>Apple iOS 10+</strong> 和 <strong>Samsung S10+</strong> 识别到 MDIE 后，通过"私有握手"激活 802.11r 漫游</li>
+      <li>老旧设备对 MDIE 视而不见，依然使用普通 WPA2 接入 — <strong>完美兼容</strong></li>
+    </ul>
+  </div>
+
+  <div class="callout danger">
+    <div class="callout-icon">🚨</div>
+    <div>
+      <strong>最新最佳实践 — 重大反转！</strong><br><br>
+      Cisco 9800 最新配置指南特别强调：<strong>Adaptive 11r 不支持 WPA3</strong>。而如果不开启 WPA3，就<strong>无法使用 Wi-Fi 6E（6GHz 频段）和 Wi-Fi 7（MLO）</strong> — 因为 6GHz 强制要求 WPA3 + PMF。<br><br>
+      因此，最新的官方建议是：<strong>放弃 Adaptive FT，改回配置标准的 "802.11r Mixed Mode"</strong>（即同时勾选 <code>FT + 802.1X</code> 和普通 <code>802.1X</code>）。现代客户端大多已修复了早期的 FT 兼容性 bug，无需再用 Adaptive 作为"拐杖"。
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ Synergy ============ -->
+  <h3>🤝 三剑合璧：k + v + r 的协同效应</h3>
+
+  <div class="svg-figure">
+    <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+      <rect width="880" height="300" rx="12" fill="#FAFBFF"/>
+      <text x="440" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1E293B">802.11 k + v + r 协同工作流</text>
+
+      <!-- Phase 1: 11v -->
+      <rect x="30" y="60" width="240" height="140" rx="12" fill="#FEF2F2" stroke="#FECACA"/>
+      <text x="150" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#DC2626">📡 802.11v</text>
+      <text x="150" y="108" text-anchor="middle" font-size="11" fill="#991B1B">"是时候走了"</text>
+      <line x1="50" y1="120" x2="250" y2="120" stroke="#FECACA"/>
+      <text x="150" y="140" text-anchor="middle" font-size="10" fill="#64748B">网络检测到终端信号弱</text>
+      <text x="150" y="158" text-anchor="middle" font-size="10" fill="#64748B">主动发送 BSS Transition</text>
+      <text x="150" y="176" text-anchor="middle" font-size="10" fill="#64748B">Request，建议漫游目标</text>
+
+      <!-- Arrow -->
+      <line x1="270" y1="130" x2="320" y2="130" stroke="#F59E0B" stroke-width="3" marker-end="url(#synArrow)"/>
+
+      <!-- Phase 2: 11k -->
+      <rect x="320" y="60" width="240" height="140" rx="12" fill="#FFFBEB" stroke="#FDE68A"/>
+      <text x="440" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">🧭 802.11k</text>
+      <text x="440" y="108" text-anchor="middle" font-size="11" fill="#92400E">"该去哪里"</text>
+      <line x1="340" y1="120" x2="540" y2="120" stroke="#FDE68A"/>
+      <text x="440" y="140" text-anchor="middle" font-size="10" fill="#64748B">终端请求 Neighbor Report</text>
+      <text x="440" y="158" text-anchor="middle" font-size="10" fill="#64748B">AP 返回最优 AP + 信道清单</text>
+      <text x="440" y="176" text-anchor="middle" font-size="10" fill="#64748B">终端精确扫描 2~3 个信道</text>
+
+      <!-- Arrow -->
+      <line x1="560" y1="130" x2="610" y2="130" stroke="#F59E0B" stroke-width="3" marker-end="url(#synArrow)"/>
+
+      <!-- Phase 3: 11r -->
+      <rect x="610" y="60" width="240" height="140" rx="12" fill="#ECFDF5" stroke="#A7F3D0"/>
+      <text x="730" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">⚡ 802.11r</text>
+      <text x="730" y="108" text-anchor="middle" font-size="11" fill="#065F46">"极速切换"</text>
+      <line x1="630" y1="120" x2="830" y2="120" stroke="#A7F3D0"/>
+      <text x="730" y="140" text-anchor="middle" font-size="10" fill="#64748B">跳过 EAP 完整认证</text>
+      <text x="730" y="158" text-anchor="middle" font-size="10" fill="#64748B">跳过独立四次握手</text>
+      <text x="730" y="176" text-anchor="middle" font-size="10" fill="#64748B">密钥在 Auth/Reassoc 中完成</text>
+
+      <!-- Result bar -->
+      <rect x="100" y="230" width="680" height="50" rx="12" fill="#1E293B"/>
+      <text x="440" y="252" text-anchor="middle" font-size="14" font-weight="800" fill="#34D399">✅ 三剑合璧：漫游总延迟 &lt; 50ms（通常 &lt; 10ms）</text>
+      <text x="440" y="270" text-anchor="middle" font-size="11" fill="#94A3B8">完美满足语音（&lt;150ms）、视频（&lt;300ms）等实时应用需求</text>
+
+      <defs>
+        <marker id="synArrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7Z" fill="#F59E0B"/></marker>
+      </defs>
+    </svg>
+    <div class="svg-caption">图 6：802.11v 触发漫游 → 802.11k 精确定位目标 → 802.11r 极速完成切换</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== COMPARISON TABLE ============================== -->
+<section id="compare">
+  <div class="section-label">📊 总览对比</div>
+  <h2 class="section-title">漫游方案性能对比 — 一张图看清差距</h2>
+
+  <div class="card" style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:1rem; min-width:700px;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border); background:var(--surface-alt);">
+          <th style="text-align:left; padding:14px 12px; font-size:0.88rem;">漫游方式</th>
+          <th style="text-align:center; padding:14px 12px; font-size:0.88rem;">跳过 EAP？</th>
+          <th style="text-align:center; padding:14px 12px; font-size:0.88rem;">跳过四次握手？</th>
+          <th style="text-align:center; padding:14px 12px; font-size:0.88rem;">漫游延迟</th>
+          <th style="text-align:center; padding:14px 12px; font-size:0.88rem;">标准化</th>
+          <th style="text-align:center; padding:14px 12px; font-size:0.88rem;">语音适用？</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:14px 12px;"><strong>Full 802.1X（基线）</strong></td>
+          <td style="padding:14px 12px; text-align:center;">❌ 否</td>
+          <td style="padding:14px 12px; text-align:center;">❌ 否</td>
+          <td style="padding:14px 12px; text-align:center;"><span class="badge time">300ms ~ 3s+</span></td>
+          <td style="padding:14px 12px; text-align:center;">IEEE 802.1X</td>
+          <td style="padding:14px 12px; text-align:center; font-size:1.2rem;">❌</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border); background:var(--surface-alt);">
+          <td style="padding:14px 12px;"><strong>PMKID Caching（Sticky Key）</strong></td>
+          <td style="padding:14px 12px; text-align:center;">✅ 是</td>
+          <td style="padding:14px 12px; text-align:center;">❌ 否</td>
+          <td style="padding:14px 12px; text-align:center;"><span class="badge warn">50~100ms</span></td>
+          <td style="padding:14px 12px; text-align:center;">IEEE 802.11i</td>
+          <td style="padding:14px 12px; text-align:center; font-size:1.2rem;">⚠️</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:14px 12px;"><strong>OKC（机会密钥缓存）</strong></td>
+          <td style="padding:14px 12px; text-align:center;">✅ 是</td>
+          <td style="padding:14px 12px; text-align:center;">❌ 否</td>
+          <td style="padding:14px 12px; text-align:center;"><span class="badge warn">50~100ms</span></td>
+          <td style="padding:14px 12px; text-align:center;">非 IEEE 标准</td>
+          <td style="padding:14px 12px; text-align:center; font-size:1.2rem;">⚠️</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border); background:var(--surface-alt);">
+          <td style="padding:14px 12px;"><strong>CCKM（Cisco 专有）</strong></td>
+          <td style="padding:14px 12px; text-align:center;">✅ 是</td>
+          <td style="padding:14px 12px; text-align:center;">✅ 是</td>
+          <td style="padding:14px 12px; text-align:center;"><span class="badge ok">&lt; 50ms</span></td>
+          <td style="padding:14px 12px; text-align:center;">Cisco 专有</td>
+          <td style="padding:14px 12px; text-align:center; font-size:1.2rem;">✅</td>
+        </tr>
+        <tr style="background:#ECFDF5;">
+          <td style="padding:14px 12px;"><strong>802.11r（FT — 快速 BSS 切换）</strong></td>
+          <td style="padding:14px 12px; text-align:center;">✅ 是</td>
+          <td style="padding:14px 12px; text-align:center;">✅ 是</td>
+          <td style="padding:14px 12px; text-align:center;"><span class="badge ok">&lt; 10ms</span></td>
+          <td style="padding:14px 12px; text-align:center; font-weight:700;">IEEE 802.11r ✓</td>
+          <td style="padding:14px 12px; text-align:center; font-size:1.2rem;">✅✅</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout success" style="margin-top:24px;">
+    <div class="callout-icon">🏆</div>
+    <div>
+      <strong>最终建议：</strong>在 Cisco Catalyst 9800 平台上，推荐使用 <strong>802.11r Mixed Mode</strong>（同时支持 FT + 标准 802.1X），搭配 <strong>802.11k + 802.11v</strong> 全部启用。对于需要支持 Wi-Fi 6E / Wi-Fi 7 的 6GHz 频段部署，必须使用 <strong>WPA3 + PMF</strong>，此时 Adaptive 11r 不再适用，请直接配置标准 802.11r Mixed Mode。
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================== REFERENCES ============================== -->
+<div class="footer-refs">
+  <h3>📚 参考文献与引用来源</h3>
+  <ol>
+    <li><strong>[roaming.html]</strong> — 802.1X Full Roaming Baseline 技术拆解文档。提供了 10 步基线漫游流程、RSSI 阈值（iOS -70dBm / Android -75dBm）、DFS 信道被动扫描限制、EAP-TLS 证书分片机制、四次握手 PTK 推导公式等核心技术细节。</li>
+    <li><strong>[80211be-2024.pdf]</strong> — IEEE 802.11be-2024 标准文档（Wi-Fi 7 / EHT）。定义了 MLO 多链路操作、320MHz 信道、4096-QAM 等新特性。本文中关于 Wi-Fi 7 对 WPA3 的强制要求即来源于此标准。</li>
+    <li><strong>[Cisco Catalyst 9800 Series Configuration Best Practices.pdf]</strong> — Cisco 官方 C9800 配置最佳实践指南。提供了 "802.11r Mixed Mode" 替代 Adaptive FT 的建议、Site Tag 设计原则（≤500 AP/Tag）、WNCd 进程分布、6GHz WPA3 强制要求、vlan-persistent 命令等关键配置指导。</li>
+    <li><strong>[cat9800-ser-primer-enterprise-wlan-guide.pdf]</strong> — Cisco C9800 漫游技术入门指南。详细介绍了 L2/L3 漫游机制（VLAN ID 判定）、OKC 默认启用、802.11r 密钥层次结构（MSK→PMK-R0→PMK-R1→PTK）、OTA/ODS 两种 FT 模式、Adaptive 11r 与 Apple/Samsung 的合作机制，以及 IRCM 跨版本控制器漫游要求。</li>
+  </ol>
+</div>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="site-footer">
+  <p>
+    本文基于 Cisco 官方技术文档与 IEEE 802.11 标准编写。所有技术细节均经过文档交叉验证。<br>
+    如有疑问或需要进一步讨论，欢迎联系您的 Cisco 技术代表。
+  </p>
+  <p style="margin-top:8px; color:#CBD5E1;">
+    © 2026 · 802.1X 无线漫游深度解析 · 基于第一性原理
+  </p>
 </footer>
 
-<script>
-function switchScenario(id, btn) {
-  document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.scenario-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('scenario-' + id).classList.add('active');
-}
-</script>
+</div><!-- /.container -->
 
 </body>
 </html>

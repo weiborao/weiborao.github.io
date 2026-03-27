@@ -2,286 +2,160 @@
 layout: false
 ---
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Factory Architecture</title>
-    <style>
-        /* CSS Variables - Cisco Inspired Palette */
-        :root {
-            --cisco-navy: #00223A;
-            --cisco-blue: #00BCEB;
-            --cisco-light-blue: #E8F2F5;
-            --cisco-gray-900: #1E293B;
-            --cisco-gray-700: #334155;
-            --cisco-gray-500: #64748B;
-            --cisco-gray-200: #E2E8F0;
-            --cisco-bg: #F8FAFC;
-            --white: #FFFFFF;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --transition-speed: 0.3s;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco Secure AI Factory 全景图 — 生产智能的超级现代工厂</title>
+<style>
+  :root {
+    --bg: #FAFBFC;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --text: #1A202C;
+    --text-secondary: #4A5568;
+    --accent-blue: #0D6EFD;
+    --accent-teal: #0694A2;
+    --accent-green: #38A169;
+    --accent-orange: #DD6B20;
+    --accent-purple: #805AD5;
+    --accent-red: #E53E3E;
+    --accent-indigo: #5A67D8;
+    --layer4: #1B3A5C;
+    --layer3: #0D6EFD;
+    --layer2: #0694A2;
+    --layer1: #38A169;
+    --gradient-hero: linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; font-size:16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+  }
+  .container { max-width:1200px; margin:0 auto; padding:0 24px; }
+  h1,h2,h3,h4 { font-weight:700; line-height:1.3; }
+  h1 { font-size:2.4rem; }
+  h2 { font-size:1.8rem; margin-bottom:16px; }
+  h3 { font-size:1.3rem; margin-bottom:10px; }
+  h4 { font-size:1.1rem; margin-bottom:8px; }
+  p { margin-bottom:14px; color:var(--text-secondary); }
+  a { color:var(--accent-blue); text-decoration:none; }
 
-        /* Reset & Typography */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  /* Hero */
+  .hero {
+    background: var(--gradient-hero);
+    color:#fff;
+    padding: 80px 0 60px;
+    text-align:center;
+  }
+  .hero h1 { color:#fff; margin-bottom:16px; font-size:2.6rem; }
+  .hero .subtitle { color:rgba(255,255,255,.82); font-size:1.15rem; max-width:800px; margin:0 auto 30px; }
+  .hero .meta-pills { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .hero .pill { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:20px; padding:6px 18px; font-size:.85rem; color:rgba(255,255,255,.9); }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--cisco-bg);
-            color: var(--cisco-gray-900);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-        }
+  /* Section */
+  .section { padding:56px 0; }
+  .section-title-bar { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+  .section-title-bar .icon-circle {
+    width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .section-title-bar h2 { margin-bottom:0; }
 
-        /* Layout */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+  /* Cards */
+  .card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:28px;
+    margin-bottom:24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
+  .card-sm { padding:20px; }
 
-        /* Header */
-        header {
-            background-color: var(--cisco-navy);
-            color: var(--white);
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            position: relative;
-            box-shadow: var(--card-shadow);
-        }
+  /* Tables */
+  .table-wrap { overflow-x:auto; margin-bottom:20px; }
+  table { width:100%; border-collapse:collapse; font-size:.92rem; }
+  th,td { padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:#F7FAFC; font-weight:600; white-space:nowrap; }
+  tr:last-child td { border-bottom:none; }
 
-        .header-content {
-            max-width: 800px;
-        }
+  /* Tag / Badge */
+  .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:.78rem; font-weight:600; }
+  .badge-blue { background:#EBF4FF; color:#2B6CB0; }
+  .badge-teal { background:#E6FFFA; color:#234E52; }
+  .badge-green { background:#F0FFF4; color:#22543D; }
+  .badge-orange { background:#FFFAF0; color:#9C4221; }
+  .badge-purple { background:#FAF5FF; color:#553C9A; }
+  .badge-red { background:#FFF5F5; color:#9B2C2C; }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
+  /* Panorama SVG wrapper */
+  .panorama-wrap { text-align:center; margin:32px 0; overflow-x:auto; }
+  .panorama-wrap svg { max-width:100%; height:auto; }
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: var(--cisco-blue);
-            margin-bottom: 1.5rem;
-        }
+  /* Callout */
+  .callout {
+    border-left:4px solid var(--accent-blue);
+    background:#EBF8FF;
+    padding:16px 20px;
+    border-radius:0 10px 10px 0;
+    margin-bottom:20px;
+  }
+  .callout p { margin-bottom:0; color:#2A4365; }
+  .callout strong { color:#1A365D; }
+  .callout.green { border-left-color:var(--accent-green); background:#F0FFF4; }
+  .callout.green p { color:#22543D; }
+  .callout.orange { border-left-color:var(--accent-orange); background:#FFFAF0; }
+  .callout.orange p { color:#7B341E; }
 
-        .analogy-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-left: 4px solid var(--cisco-blue);
-            border-radius: 4px;
-            font-size: 0.95rem;
-        }
+  /* Divider */
+  .divider { height:1px; background:var(--border); margin:40px 0; }
 
-        /* Language Toggle */
-        .lang-toggle {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--white);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-speed) ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  /* Footnotes */
+  .footnotes { font-size:.82rem; color:#718096; padding:30px 0 60px; }
+  .footnotes h3 { color:var(--text); }
+  .footnotes ol { padding-left:20px; }
+  .footnotes li { margin-bottom:4px; }
 
-        .lang-toggle:hover {
-            background: var(--cisco-blue);
-            border-color: var(--cisco-blue);
-        }
+  /* SVG specific */
+  .svg-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif; }
 
-        /* Layer Architectures */
-        .layers-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+  /* Responsive */
+  @media(max-width:768px){
+    .hero { padding:50px 0 40px; }
+    .hero h1 { font-size:1.8rem; }
+    h2 { font-size:1.4rem; }
+    .card-grid { grid-template-columns:1fr; }
+    .container { padding:0 16px; }
+    .section { padding:36px 0; }
+  }
 
-        .layer {
-            background: var(--white);
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-            transition: all var(--transition-speed) ease;
-            border: 1px solid var(--cisco-gray-200);
-        }
+  /* Glossary */
+  .glossary-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
+  .glossary-item { display:flex; gap:10px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; }
+  .glossary-item .term { font-weight:700; min-width:100px; flex-shrink:0; color:var(--text); font-size:.92rem; }
+  .glossary-item .def { color:var(--text-secondary); font-size:.88rem; line-height:1.55; }
 
-        .layer-header {
-            padding: 1.5rem 2rem;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            background: var(--white);
-            border-bottom: 1px solid transparent;
-            transition: background var(--transition-speed) ease;
-        }
+  /* Numbered step */
+  .step-list { counter-reset: stepCounter; list-style:none; padding:0; }
+  .step-list li { counter-increment:stepCounter; padding-left:42px; position:relative; margin-bottom:16px; }
+  .step-list li::before {
+    content: counter(stepCounter);
+    position:absolute; left:0; top:0;
+    width:30px; height:30px; border-radius:50%;
+    background:var(--accent-blue); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:.85rem;
+  }
 
-        .layer-header:hover {
-            background: var(--cisco-light-blue);
-        }
-
-        .layer.active .layer-header {
-            border-bottom: 1px solid var(--cisco-gray-200);
-            background: var(--cisco-light-blue);
-        }
-
-        .layer-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--cisco-blue);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .layer-icon svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--white);
-        }
-
-        .layer-title-wrapper {
-            flex-grow: 1;
-        }
-
-        .layer-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--cisco-navy);
-            margin-bottom: 0.25rem;
-        }
-
-        .layer-desc {
-            font-size: 0.9rem;
-            color: var(--cisco-gray-500);
-        }
-
-        .expand-icon {
-            width: 24px;
-            height: 24px;
-            fill: var(--cisco-gray-500);
-            transition: transform var(--transition-speed) ease;
-        }
-
-        .layer.active .expand-icon {
-            transform: rotate(180deg);
-        }
-
-        /* Layer Content & Tech Cards */
-        .layer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-            padding: 0;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .layer.active .layer-content {
-            padding: 2rem;
-            max-height: 2000px; /* Arbitrary large number to allow expansion */
-            opacity: 1;
-        }
-
-        .tech-card {
-            background: var(--white);
-            border: 1px solid var(--cisco-gray-200);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .tech-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--hover-shadow);
-            border-color: var(--cisco-blue);
-        }
-
-        .tech-name {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--cisco-navy);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .tech-name::before {
-            content: '';
-            display: block;
-            width: 4px;
-            height: 1.15rem;
-            background-color: var(--cisco-blue);
-            border-radius: 2px;
-        }
-
-        .golden-circle {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .gc-item {
-            font-size: 0.9rem;
-        }
-
-        .gc-label {
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .gc-what .gc-label { background: #E0E7FF; color: #3730A3; }
-        .gc-why .gc-label { background: #FEF3C7; color: #92400E; }
-        .gc-how .gc-label { background: #D1FAE5; color: #065F46; }
-
-        .gc-text {
-            color: var(--cisco-gray-700);
-            display: block;
-            margin-top: 2px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            h1 { font-size: 1.8rem; }
-            .header-content { margin-top: 2.5rem; }
-            .lang-toggle { top: 1rem; right: 1rem; }
-            .layer-header { padding: 1.25rem 1rem; }
-            .layer-icon { width: 40px; height: 40px; margin-right: 1rem; }
-            .layer.active .layer-content { padding: 1.5rem 1rem; }
-            .tech-card { padding: 1.25rem; }
-        }
-    </style>
+  .layer-tag {
+    display:inline-block; padding:4px 12px; border-radius:6px;
+    font-size:.78rem; font-weight:700; color:#fff; margin-bottom:10px;
+  }
+</style>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -291,368 +165,960 @@ layout: false
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                <span id="langBtnText">EN</span>
-            </button>
-            <div class="header-content">
-                <h1 data-i18n="headerTitle">AI工厂架构全景图</h1>
-                <div class="subtitle" data-i18n="headerSubtitle">解密现代AI基础设施：从底层硬件到上层应用的端到端解析</div>
-                <div class="analogy-box">
-                    <strong data-i18n="analogyTitle">💡 核心隐喻：生产智能的超级现代工厂</strong><br>
-                    <span data-i18n="analogyText">
-                        要理解复杂的AI生态，我们可以将其想象为一个超级工厂：<br>
-                        • <strong>数据</strong> 是原材料<br>
-                        • <strong>GPU</strong> 是流水线工人<br>
-                        • <strong>网络</strong> 是传送带<br>
-                        • <strong>AI应用</strong> 是最终产出的定制商品
-                    </span>
-                </div>
-            </div>
-        </header>
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<header class="hero">
+  <div class="container">
+    <h1>Cisco Secure AI Factory 全景图</h1>
+    <p class="subtitle">将海量数据转化为智能的超级现代工厂——从硅片到应用的端到端技术深度解析</p>
+    <div class="meta-pills">
+      <span class="pill">🏭 AI Factory 架构</span>
+      <span class="pill">🔒 全栈安全</span>
+      <span class="pill">⚡ 800G 以太网</span>
+      <span class="pill">🧠 Agentic AI</span>
+      <span class="pill">📊 可观测性</span>
+    </div>
+  </div>
+</header>
 
-        <div class="layers-container" id="layersContainer">
-            <!-- Content will be injected by JavaScript -->
-        </div>
+<main>
+
+<!-- ═══════════════════════ 背景介绍 ═══════════════════════ -->
+<section class="section" id="background">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#EBF4FF;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="#2B6CB0"/><path d="M2 17l10 5 10-5" stroke="#2B6CB0" stroke-width="2" fill="none"/><path d="M2 12l10 5 10-5" stroke="#2B6CB0" stroke-width="2" fill="none"/></svg>
+      </div>
+      <h2>背景：为什么需要 AI 工厂？</h2>
     </div>
 
-    <script>
-        // Data Structure utilizing the Feynman Technique and Golden Circle
-        const data = {
-            zh: {
-                headerTitle: "AI工厂架构全景图",
-                headerSubtitle: "解密现代AI基础设施：从底层硬件到上层应用的端到端解析",
-                analogyTitle: "💡 核心隐喻：生产智能的超级现代工厂",
-                analogyText: "要理解复杂的AI生态，我们可以将其想象为一个超级工厂：<br>• <strong>数据</strong> 是原材料<br>• <strong>GPU</strong> 是流水线工人<br>• <strong>网络</strong> 是高速传送带<br>• <strong>AI应用</strong> 是最终产出的高价值定制商品",
-                labels: { what: "是什么 (What)", why: "为什么 (Why)", how: "如何实现 (How)" },
-                layers: [
-                    {
-                        id: "layer1",
-                        icon: `<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>`, // Stack icon
-                        title: "第一层：AI 应用与业务层 (Application Layer)",
-                        desc: "工厂的交付窗口——直接为终端用户提供业务价值",
-                        items: [
-                            {
-                                name: "大语言模型 (LLM / Llama 3 / GPT)",
-                                what: "具备百亿/千亿级参数的人工智能基础模型。",
-                                why: "传统软件基于固定规则，而LLM通过理解自然语言，能够执行推理、编程、创作等复杂泛化任务。",
-                                how: "通过预训练（阅读海量互联网数据建立语言神经连接）和微调（对齐人类偏好），利用Transformer架构预测下一个Token。"
-                            },
-                            {
-                                name: "RAG (检索增强生成)",
-                                what: "一种将企业私有知识库与大模型能力结合的应用范式。",
-                                why: "大模型的知识停留在训练截止日，且会产生“幻觉”。企业需要基于最新、绝对准确的私有数据来生成回答。",
-                                how: "当用户提问时，系统先在私有数据库中检索出相关文档（知识），然后将“问题+文档”一起打包喂给大模型，让其基于给定事实进行总结生成。"
-                            },
-                            {
-                                name: "Agentic AI (智能体)",
-                                what: "具备自主规划、工具调用和多步决策能力的AI系统。",
-                                why: "突破LLM只能“陪聊”的限制，使其成为能代替人类执行真实世界复杂任务（如订票、查库、操作软件）的数字员工。",
-                                how: "为大模型配备“大脑（记忆与规划引擎）”和“手脚（API/工具箱）”。模型自主分析任务步骤，按需执行SQL代码或网页搜索，最后汇总结果。"
-                            }
-                        ]
-                    },
-                    {
-                        id: "layer2",
-                        icon: `<path d="M12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-8c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm8.56 3.44c.22-.66.34-1.36.34-2.09 0-3.53-2.61-6.43-6-6.92V.43C19.12.96 22 4.13 22 7.85c0 .92-.17 1.8-.48 2.61l-1.96-1.02zM1.96 11.02C1.74 11.68 1.62 12.38 1.62 13.1c0 3.53 2.61 6.43 6 6.92v1.01c-4.23-.53-7.11-3.7-7.11-7.42 0-.92.17-1.8.48-2.61l1.97 1.02z"/>`, // Orchestration/Gears
-                        title: "第二层：模型编排与推理服务层 (Orchestration & Serving Layer)",
-                        desc: "工厂的车间调度——高效管理算力并提供标准化服务",
-                        items: [
-                            {
-                                name: "Kubernetes (K8s)",
-                                what: "开源的容器编排与集群管理操作系统。",
-                                why: "AI任务极其庞大且组件繁多，手动管理成百上千台服务器上的环境配置会导致灾难。需要自动化的部署、扩展和自愈机制。",
-                                how: "将应用打包成容器（轻量级隔离环境），K8s作为“数据中心操作系统”，智能地将这些容器调度到合适的服务器节点上运行并监控其状态。"
-                            },
-                            {
-                                name: "NVIDIA Run:ai",
-                                what: "构建在K8s之上的AI专用高级算力调度器。",
-                                why: "GPU极其昂贵但利用率往往很低（常被闲置或独占）。企业需要让多个数据科学团队像使用水墨一样共享算力池。",
-                                how: "通过动态配额、任务排队机制以及“切分GPU (Fractional GPUs)”技术，智能拦截并分配算力，将整体资源利用率提升数倍。"
-                            },
-                            {
-                                name: "NVIDIA NIM (推理微服务)",
-                                what: "经过NVIDIA极致优化的容器化AI模型推理引擎。",
-                                why: "将数百GB的大模型部署为高性能API极为复杂，涉及底层的CUDA版本匹配、TensorRT加速等繁杂操作，耗时耗力。",
-                                how: "将预训练模型、运行时引擎和所需依赖全部打包。开发者只需运行一行标准Docker命令，即可在几分钟内拉起一个极高性能的生产级API供上层应用调用。"
-                            }
-                        ]
-                    },
-                    {
-                        id: "layer3",
-                        icon: `<rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><path d="M7 7h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>`, // Chip/Compute
-                        title: "第三层：计算框架与通信加速层 (Compute & Communication Layer)",
-                        desc: "核心流水线——硬件与算法框架的深度交织",
-                        items: [
-                            {
-                                name: "PyTorch",
-                                what: "由Meta主导开发的当前最主流深度学习框架。",
-                                why: "研究人员需要一个灵活、直观的工具来将复杂的数学公式（神经网络架构）转化为可执行的代码。",
-                                how: "提供Pythonic的接口和动态计算图机制。开发者可以像写普通Python代码一样定义神经网络、计算损失函数并控制训练反向传播循环。"
-                            },
-                            {
-                                name: "CUDA (计算统一设备架构)",
-                                what: "NVIDIA推出的让GPU执行通用计算的并行编程平台。",
-                                why: "CPU擅长复杂的单线程逻辑判断；而AI的核心是海量简单的矩阵乘法，需要成千上万个核心同时工作。CUDA架起了软件控制GPU的桥梁。",
-                                how: "允许开发者使用C++等语言编写“内核(Kernel)”程序，直接指挥GPU内部海量的流多处理器(SM)同时对海量数据进行并行数学运算。"
-                            },
-                            {
-                                name: "NCCL (NVIDIA集合通信库)",
-                                what: "专为多GPU节点之间的数据同步优化的底层通信库。",
-                                why: "训练大模型需要成百上千张GPU协同工作。在每一步计算后，GPU们必须相互交换更新的参数（梯度）。如果通信慢，所有GPU都得停机等待。",
-                                how: "提供诸如 All-Reduce、All-Gather 等高度优化的拓扑感知通信算法。它能自动识别硬件架构（如NVLink或PCIe），选择最优路径在GPU间高速汇合数据。"
-                            }
-                        ]
-                    },
-                    {
-                        id: "layer4",
-                        icon: `<path d="M4 4h16v4H4zm0 6h16v4H4zm0 6h16v4H4zM6 6h2v2H6zm0 6h2v2H6zm0 6h2v2H6z"/>`, // Network/Switch
-                        title: "第四层：高性能网络与硬件基础设施 (Infrastructure & Network Layer)",
-                        desc: "传送带与地基——决定整个工厂产能的无损物理底座",
-                        items: [
-                            {
-                                name: "RDMA (远程直接内存访问)",
-                                what: "一种允许跨网络直接读写远程服务器内存的硬件技术。",
-                                why: "传统的TCP/IP网络传输数据时，需要经过操作系统内核多次拷贝和CPU处理，延迟极高且占用CPU资源，无法满足AI海量数据的吞吐需求。",
-                                how: "智能网卡(NIC)直接在硬件层面处理网络封包。一台服务器的GPU可以直接将数据“写入”到另一台服务器的GPU内存中，实现零拷贝、极低延迟和超高带宽。"
-                            },
-                            {
-                                name: "ROCEv2",
-                                what: "基于融合以太网的RDMA协议 (RDMA over Converged Ethernet)。",
-                                why: "原生RDMA最早跑在昂贵的InfiniBand(IB)专有网络上。企业希望在通用、成本更低的以太网架构上也能享受RDMA的性能。",
-                                how: "将RDMA指令封装在标准的UDP/IP以太网数据包中，配合交换机的无损网络配置（如PFC/ECN机制），使标准以太网也能支持AI所需的高速直接内存传输。"
-                            },
-                            {
-                                name: "Adaptive Routing & Packet Spraying",
-                                what: "现代AI交换机（如NVIDIA Spectrum-X）中的高级流量调度机制。",
-                                why: "AI集群的流量往往是多对多的“大象流”（巨大突发流量）。传统路由会将一个数据流绑定在一条死路径上，极易造成局部拥堵导致全网降速。",
-                                how: "自适应路由(Adaptive Routing)实时感知全网拥塞；数据包喷洒(Packet Spraying)将同一个数据流拆散成微小的包，通过所有可用物理路径同时传输，到达终点再由网卡重组，实现100%无拥塞吞吐。"
-                            },
-                            {
-                                name: "UEC (超级以太网联盟标准)",
-                                what: "面向未来AI和HPC工作负载优化的下一代开放式网络传输规范。",
-                                why: "随着千亿参数模型和百万GPU集群的出现，现有的以太网协议在处理微秒级尾部延迟和极高网络连通状态时遇到瓶颈。",
-                                how: "通过行业联盟定义全新的传输层协议和机制（如更细粒度的多路径传输、改进的拥塞控制和更智能的网卡卸载），旨在打造比传统ROCEv2更极致的无损高性能以太网底座。"
-                            }
-                        ]
-                    }
-                ]
-            },
-            en: {
-                headerTitle: "AI Factory Architecture Landscape",
-                headerSubtitle: "Decoding Modern AI Infrastructure: From Hardware to Applications",
-                analogyTitle: "💡 Core Metaphor: The Super Modern Intelligence Factory",
-                analogyText: "To understand the complex AI ecosystem, imagine a super factory:<br>• <strong>Data</strong> is the raw material<br>• <strong>GPUs</strong> are the assembly line workers<br>• <strong>Network</strong> is the high-speed conveyor belt<br>• <strong>AI Apps</strong> are the customized final products",
-                labels: { what: "What", why: "Why", how: "How" },
-                layers: [
-                    {
-                        id: "layer1",
-                        icon: `<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>`,
-                        title: "Layer 1: Application & Business Layer",
-                        desc: "The factory's delivery window — providing direct business value to end users.",
-                        items: [
-                            {
-                                name: "Large Language Models (LLM / Llama 3 / GPT)",
-                                what: "Foundation models with tens/hundreds of billions of parameters.",
-                                why: "Traditional software uses rigid rules; LLMs understand natural language, enabling complex generalized tasks like reasoning, coding, and generation.",
-                                how: "Through pre-training (building neural connections across massive web data) and fine-tuning (aligning with human intent) via the Transformer architecture to predict the next token."
-                            },
-                            {
-                                name: "RAG (Retrieval-Augmented Generation)",
-                                what: "An application paradigm combining private enterprise knowledge with LLM capabilities.",
-                                why: "LLM knowledge is frozen in time and prone to 'hallucinations'. Enterprises need answers grounded in the latest, absolutely accurate private data.",
-                                how: "When queried, the system retrieves relevant documents from a private vector database, then feeds 'Query + Documents' to the LLM to generate an answer strictly based on those facts."
-                            },
-                            {
-                                name: "Agentic AI",
-                                what: "AI systems capable of autonomous planning, tool usage, and multi-step decision-making.",
-                                why: "Breaks the limitation of LLMs as mere 'chatbots', transforming them into digital workers that execute real-world tasks (booking, DB queries, software operation).",
-                                how: "Equips the LLM with a 'Brain' (memory/planner) and 'Hands' (APIs/Tools). The model analyzes steps, executes SQL or web searches autonomously, and synthesizes the final result."
-                            }
-                        ]
-                    },
-                    {
-                        id: "layer2",
-                        icon: `<path d="M12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-8c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm8.56 3.44c.22-.66.34-1.36.34-2.09 0-3.53-2.61-6.43-6-6.92V.43C19.12.96 22 4.13 22 7.85c0 .92-.17 1.8-.48 2.61l-1.96-1.02zM1.96 11.02C1.74 11.68 1.62 12.38 1.62 13.1c0 3.53 2.61 6.43 6 6.92v1.01c-4.23-.53-7.11-3.7-7.11-7.42 0-.92.17-1.8.48-2.61l1.97 1.02z"/>`,
-                        title: "Layer 2: Orchestration & Serving Layer",
-                        desc: "Factory floor scheduling — efficient compute management and standard services.",
-                        items: [
-                            {
-                                name: "Kubernetes (K8s)",
-                                what: "An open-source container orchestration and cluster management OS.",
-                                why: "AI pipelines are massive and complex. Managing environments across thousands of nodes manually is disastrous. Automated deployment, scaling, and self-healing are mandatory.",
-                                how: "Applications are packaged into containers (lightweight isolated environments). K8s acts as the 'Datacenter OS' to intelligently schedule and monitor them across server nodes."
-                            },
-                            {
-                                name: "NVIDIA Run:ai",
-                                what: "An advanced, AI-specific compute scheduler built on top of Kubernetes.",
-                                why: "GPUs are costly but often underutilized (idle or monopolized). Enterprises need multiple data science teams to share a compute pool fluidly.",
-                                how: "Utilizes dynamic quotas, job queuing, and 'Fractional GPUs' technology to intelligently intercept and allocate compute, multiplying overall hardware utilization."
-                            },
-                            {
-                                name: "NVIDIA NIM (Inference Microservices)",
-                                what: "Highly optimized, containerized AI model inference engines by NVIDIA.",
-                                why: "Deploying a massive 100GB model as a fast API is complex, involving strict CUDA version matching and TensorRT acceleration compilation.",
-                                how: "Packages pre-trained models, runtime engines, and dependencies together. Developers run a single standard Docker command to spin up a production-ready, ultra-fast API in minutes."
-                            }
-                        ]
-                    },
-                    {
-                        id: "layer3",
-                        icon: `<rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><path d="M7 7h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>`,
-                        title: "Layer 3: Compute & Communication Layer",
-                        desc: "Core assembly line — deep integration of hardware and algorithmic frameworks.",
-                        items: [
-                            {
-                                name: "PyTorch",
-                                what: "The dominant deep learning framework, primarily developed by Meta.",
-                                why: "Researchers need a flexible, intuitive tool to translate complex mathematical formulas (neural architectures) into executable code.",
-                                how: "Provides a Pythonic interface with dynamic computation graphs. Developers define neural networks, loss functions, and backpropagation loops intuitively as standard Python code."
-                            },
-                            {
-                                name: "CUDA (Compute Unified Device Architecture)",
-                                what: "NVIDIA's parallel computing platform that allows GPUs to execute general-purpose compute.",
-                                why: "CPUs excel at complex logic; AI requires massive, simple matrix multiplications simultaneously. CUDA bridges software to GPU hardware.",
-                                how: "Allows developers to write 'Kernels' in C++ to directly command thousands of Streaming Multiprocessors (SMs) inside the GPU to perform parallel math operations on massive datasets."
-                            },
-                            {
-                                name: "NCCL (NVIDIA Collective Communication Library)",
-                                what: "A low-level library optimized for data synchronization across multi-GPU nodes.",
-                                why: "Training huge models requires thousands of GPUs. After each compute step, GPUs must exchange parameter updates (gradients). If communication lags, all GPUs halt and wait.",
-                                how: "Provides highly optimized topology-aware algorithms like All-Reduce and All-Gather. It automatically detects hardware (NVLink/PCIe) to route data optimally across GPUs."
-                            }
-                        ]
-                    },
-                    {
-                        id: "layer4",
-                        icon: `<path d="M4 4h16v4H4zm0 6h16v4H4zm0 6h16v4H4zM6 6h2v2H6zm0 6h2v2H6zm0 6h2v2H6z"/>`,
-                        title: "Layer 4: Infrastructure & Network Layer",
-                        desc: "Conveyor belt & foundation — the physical layer dictating total factory throughput.",
-                        items: [
-                            {
-                                name: "RDMA (Remote Direct Memory Access)",
-                                what: "Hardware technology allowing direct read/write access to a remote server's memory.",
-                                why: "Traditional TCP/IP networks route data through the OS kernel and CPU, causing high latency and CPU overhead, entirely bottlenecking AI throughput.",
-                                how: "SmartNICs handle packets at the hardware layer. A GPU in Server A can 'write' directly into the memory of a GPU in Server B, achieving zero-copy, ultra-low latency, and massive bandwidth."
-                            },
-                            {
-                                name: "ROCEv2",
-                                what: "RDMA over Converged Ethernet protocol.",
-                                why: "Native RDMA initially ran on expensive, proprietary InfiniBand (IB) networks. Enterprises want RDMA performance over standard, cost-effective Ethernet.",
-                                how: "Encapsulates RDMA commands within standard UDP/IP Ethernet packets. Paired with lossless switch configurations (PFC/ECN), it enables high-speed direct memory transfers over Ethernet."
-                            },
-                            {
-                                name: "Adaptive Routing & Packet Spraying",
-                                what: "Advanced traffic scheduling mechanisms in modern AI switches (e.g., NVIDIA Spectrum-X).",
-                                why: "AI clusters generate massive 'Elephant Flows' (huge traffic bursts). Traditional routing binds a flow to a single path, easily causing local congestion that slows the entire network.",
-                                how: "Adaptive Routing senses network congestion in real-time; Packet Spraying splits a single flow into tiny packets, transmitting them simultaneously across all available paths, reassembling at the NIC for 100% congestion-free throughput."
-                            },
-                            {
-                                name: "UEC (Ultra Ethernet Consortium)",
-                                what: "A next-generation, open networking standard optimized for future AI and HPC workloads.",
-                                why: "As trillion-parameter models and massive GPU clusters emerge, existing Ethernet protocols struggle with microsecond tail-latency and extreme connection states.",
-                                how: "Defines new transport layer protocols via an industry consortium (e.g., fine-grained multi-pathing, improved congestion control, smarter NIC offloads) to build an ultimate lossless Ethernet foundation beyond traditional ROCEv2."
-                            }
-                        ]
-                    }
-                ]
-            }
-        };
+    <div class="callout">
+      <p><strong>核心隐喻</strong>：将整个 AI 基础设施想象为一座"生产智能的超级现代工厂"——<strong>数据</strong>是源源不断的原材料，<strong>GPU</strong>是高并发流水线上的核心工人，精密的<strong>软硬件调度系统</strong>是车间主管，超低延迟、超高带宽的<strong>高性能网络</strong>是连接所有车间的无缝传送带，而最终交付给终端用户的各类 <strong>AI 应用</strong>，则是这座工厂产出的定制化智能商品。<sup>[1]</sup></p>
+    </div>
 
-        let currentLang = 'zh';
+    <div class="card-grid">
+      <div class="card card-sm">
+        <h4>📈 规模扩展定律的驱动</h4>
+        <p>大语言模型（LLM）的参数量正以指数级增长——从数亿到如今的数千亿乃至万亿。传统的通用 CPU 计算架构已触及天花板，传统数据中心的核心衡量指标不再是服务器在线率，而是"<strong>Token 生成速率</strong>"——这是 AI 时代最基础的制造单元。<sup>[1]</sup></p>
+      </div>
+      <div class="card card-sm">
+        <h4>🏗️ 从数据中心到 AI 工厂</h4>
+        <p>NVIDIA 提出的 AI Factory 概念：专门为规模化生产"智能（Intelligence）"而建造的新型基础设施。它将"原始数据"和"电力"作为输入，以极高的效率批量输出"智能和 Token"。每个企业都将需要一座 AI 工厂来交付快速、可重复、灵活且高效的 AI 成果。<sup>[2][3]</sup></p>
+      </div>
+      <div class="card card-sm">
+        <h4>⚠️ 企业面临的三大挑战</h4>
+        <p>Cisco 将企业落地 AI 的障碍归纳为三大核心挑战：<strong>基础设施约束</strong>（缺乏高性能、集成化的计算/网络/存储）、<strong>信任赤字</strong>（AI 模型存在安全漏洞与幻觉风险）、以及<strong>数据鸿沟</strong>（数据是 AI 的燃料，但访问与治理面临巨大挑战）。<sup>[4]</sup></p>
+      </div>
+    </div>
 
-        function renderContent() {
-            const currentData = data[currentLang];
-            const labels = currentData.labels;
+    <div class="callout orange">
+      <p><strong>Cisco 的回应</strong>：<strong>Cisco Secure AI Factory with NVIDIA</strong>——一套模块化参考设计，将高性能基础设施与全栈安全和可观测性相融合。它不仅仅是硬件堆叠，而是从芯片到系统到分布式 AI 流水线每一层都嵌入安全的完整解决方案。<sup>[4]</sup></p>
+    </div>
+  </div>
+</section>
 
-            // Update Static Texts
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (currentData[key]) {
-                    el.innerHTML = currentData[key];
-                }
-            });
+<div class="divider container"></div>
 
-            // Update Button
-            document.getElementById('langBtnText').innerText = currentLang === 'zh' ? 'EN' : '中文';
+<!-- ═══════════════════════ 全景图 SVG ═══════════════════════ -->
+<section class="section" id="panorama">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#FAF5FF;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#805AD5" stroke-width="2"/><path d="M3 9h18M9 3v18" stroke="#805AD5" stroke-width="2"/></svg>
+      </div>
+      <h2>Cisco Secure AI Factory 四层架构全景图</h2>
+    </div>
+    <p>下图以"智能工厂"为隐喻，将整个 Cisco Secure AI Factory 划分为四个核心层级。从最底层的物理硬件与高性能网络（工厂的地基与传送带），经过计算框架与通信加速层（核心流水线），到模型编排与推理服务层（车间调度），直至最顶层的 AI 应用与业务层（最终交付的智能商品）。安全（Security）与可观测性（Observability）贯穿所有层级。</p>
 
-            // Render Layers
-            const container = document.getElementById('layersContainer');
-            container.innerHTML = ''; // Clear existing
+    <div class="panorama-wrap">
+      <svg viewBox="0 0 1100 820" xmlns="http://www.w3.org/2000/svg" class="svg-label" font-family="-apple-system,BlinkMacSystemFont,'Noto Sans SC',sans-serif">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#38A169" stop-opacity=".12"/><stop offset="100%" stop-color="#38A169" stop-opacity=".03"/></linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0694A2" stop-opacity=".12"/><stop offset="100%" stop-color="#0694A2" stop-opacity=".03"/></linearGradient>
+          <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0D6EFD" stop-opacity=".12"/><stop offset="100%" stop-color="#0D6EFD" stop-opacity=".03"/></linearGradient>
+          <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1B3A5C" stop-opacity=".14"/><stop offset="100%" stop-color="#1B3A5C" stop-opacity=".03"/></linearGradient>
+          <linearGradient id="secGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E53E3E" stop-opacity=".08"/><stop offset="100%" stop-color="#E53E3E" stop-opacity=".04"/></linearGradient>
+          <linearGradient id="obsGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#805AD5" stop-opacity=".08"/><stop offset="100%" stop-color="#805AD5" stop-opacity=".04"/></linearGradient>
+        </defs>
 
-            currentData.layers.forEach((layer, index) => {
-                // Determine if layer should be open by default (e.g., first layer)
-                const isActive = 'active'; // Changed to make all layers active by default
-                
-                let itemsHtml = '';
-                layer.items.forEach(item => {
-                    itemsHtml += `
-                        <div class="tech-card">
-                            <div class="tech-name">${item.name}</div>
-                            <div class="golden-circle">
-                                <div class="gc-item gc-what">
-                                    <span class="gc-label">${labels.what}</span>
-                                    <span class="gc-text">${item.what}</span>
-                                </div>
-                                <div class="gc-item gc-why">
-                                    <span class="gc-label">${labels.why}</span>
-                                    <span class="gc-text">${item.why}</span>
-                                </div>
-                                <div class="gc-item gc-how">
-                                    <span class="gc-label">${labels.how}</span>
-                                    <span class="gc-text">${item.how}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+        <!-- Security sidebar left -->
+        <rect x="20" y="30" width="70" height="760" rx="10" fill="url(#secGrad)" stroke="#E53E3E" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="55" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#E53E3E" transform="rotate(-90,55,420)">🔒 Cisco Security（全栈安全）</text>
 
-                const layerHtml = `
-                    <div class="layer ${isActive}" onclick="toggleLayer(this)">
-                        <div class="layer-header">
-                            <div class="layer-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${layer.icon}</svg>
-                            </div>
-                            <div class="layer-title-wrapper">
-                                <div class="layer-title">${layer.title}</div>
-                                <div class="layer-desc">${layer.desc}</div>
-                            </div>
-                            <svg class="expand-icon" viewBox="0 0 24 24">
-                                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                            </svg>
-                        </div>
-                        <div class="layer-content" onclick="event.stopPropagation()">
-                            ${itemsHtml}
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += layerHtml;
-            });
-        }
+        <!-- Observability sidebar right -->
+        <rect x="1010" y="30" width="70" height="760" rx="10" fill="url(#obsGrad)" stroke="#805AD5" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="1045" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#805AD5" transform="rotate(90,1045,420)">📊 Splunk Observability（可观测性）</text>
 
-        function toggleLayer(element) {
-            const isActive = element.classList.contains('active');
-            
-            // Optional: Close other layers (Accordion style)
-            // document.querySelectorAll('.layer').forEach(layer => layer.classList.remove('active'));
-            
-            if (!isActive) {
-                element.classList.add('active');
-            } else {
-                element.classList.remove('active');
-            }
-        }
+        <!-- Layer 1: Application (top) -->
+        <rect x="110" y="40" width="880" height="160" rx="12" fill="url(#g1)" stroke="#38A169" stroke-width="2"/>
+        <rect x="120" y="48" width="16" height="16" rx="4" fill="#38A169"/>
+        <text x="144" y="62" font-size="14" font-weight="700" fill="#22543D">第一层：AI 应用与业务层 — 交付最终价值（智能商品）</text>
+        <text x="130" y="86" font-size="11.5" fill="#2D3748">隐喻：工厂产出的定制化高端商品</text>
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'zh' ? 'en' : 'zh';
-            renderContent();
-        }
+        <!-- L1 boxes -->
+        <rect x="130" y="102" width="195" height="80" rx="8" fill="#fff" stroke="#C6F6D5" stroke-width="1.2"/>
+        <text x="227" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#276749">LLM 大语言模型</text>
+        <text x="227" y="139" text-anchor="middle" font-size="9.5" fill="#4A5568">Llama 3 / GPT 系列</text>
+        <text x="227" y="154" text-anchor="middle" font-size="9.5" fill="#4A5568">涌现能力·零样本学习</text>
+        <text x="227" y="169" text-anchor="middle" font-size="9.5" fill="#4A5568">多语言代码编写</text>
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', renderContent);
+        <rect x="345" y="102" width="195" height="80" rx="8" fill="#fff" stroke="#C6F6D5" stroke-width="1.2"/>
+        <text x="442" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#276749">RAG 检索增强生成</text>
+        <text x="442" y="139" text-anchor="middle" font-size="9.5" fill="#4A5568">向量数据库 + 嵌入模型</text>
+        <text x="442" y="154" text-anchor="middle" font-size="9.5" fill="#4A5568">减少幻觉·知识实时更新</text>
+        <text x="442" y="169" text-anchor="middle" font-size="9.5" fill="#4A5568">单次检索→线性流水线</text>
 
-    </script>
+        <rect x="560" y="102" width="195" height="80" rx="8" fill="#fff" stroke="#C6F6D5" stroke-width="1.2"/>
+        <text x="657" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#276749">Agentic AI 智能体</text>
+        <text x="657" y="139" text-anchor="middle" font-size="9.5" fill="#4A5568">自主规划·迭代推理·工具调用</text>
+        <text x="657" y="154" text-anchor="middle" font-size="9.5" fill="#4A5568">Agentic RAG 多步检索</text>
+        <text x="657" y="169" text-anchor="middle" font-size="9.5" fill="#4A5568">NVIDIA AI Blueprints</text>
+
+        <rect x="775" y="102" width="195" height="80" rx="8" fill="#fff" stroke="#C6F6D5" stroke-width="1.2"/>
+        <text x="872" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#276749">AI 安全与护栏</text>
+        <text x="872" y="139" text-anchor="middle" font-size="9.5" fill="#4A5568">Cisco AI Defense</text>
+        <text x="872" y="154" text-anchor="middle" font-size="9.5" fill="#4A5568">模型验证·运行时保护</text>
+        <text x="872" y="169" text-anchor="middle" font-size="9.5" fill="#4A5568">Prompt 注入防御·护栏</text>
+
+        <!-- Arrow down -->
+        <path d="M550 204 L550 224" stroke="#999" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+        <defs><marker id="arrowDown" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#999"/></marker></defs>
+
+        <!-- Layer 2: Orchestration -->
+        <rect x="110" y="230" width="880" height="160" rx="12" fill="url(#g2)" stroke="#0694A2" stroke-width="2"/>
+        <rect x="120" y="238" width="16" height="16" rx="4" fill="#0694A2"/>
+        <text x="144" y="252" font-size="14" font-weight="700" fill="#234E52">第二层：模型编排与推理服务层 — 车间调度</text>
+        <text x="130" y="276" font-size="11.5" fill="#2D3748">隐喻：工厂的智能车间管理系统——让 GPU 资源物尽其用</text>
+
+        <rect x="130" y="292" width="260" height="80" rx="8" fill="#fff" stroke="#B2F5EA" stroke-width="1.2"/>
+        <text x="260" y="312" text-anchor="middle" font-size="11" font-weight="700" fill="#285E61">Kubernetes + Run:ai</text>
+        <text x="260" y="329" text-anchor="middle" font-size="9.5" fill="#4A5568">GPU 动态资源池化 · 弹性伸缩</text>
+        <text x="260" y="344" text-anchor="middle" font-size="9.5" fill="#4A5568">MIG 硬件空间分割 (物理隔离)</text>
+        <text x="260" y="359" text-anchor="middle" font-size="9.5" fill="#4A5568">Time Slicing 时间分片 (软件共享)</text>
+
+        <rect x="415" y="292" width="260" height="80" rx="8" fill="#fff" stroke="#B2F5EA" stroke-width="1.2"/>
+        <text x="545" y="312" text-anchor="middle" font-size="11" font-weight="700" fill="#285E61">NVIDIA NIM 推理微服务</text>
+        <text x="545" y="329" text-anchor="middle" font-size="9.5" fill="#4A5568">预优化容器 · 一行命令部署</text>
+        <text x="545" y="344" text-anchor="middle" font-size="9.5" fill="#4A5568">In-flight Batching (IFB) 动态批处理</text>
+        <text x="545" y="359" text-anchor="middle" font-size="9.5" fill="#4A5568">Tensor Parallelism 张量并行</text>
+
+        <rect x="700" y="292" width="270" height="80" rx="8" fill="#fff" stroke="#B2F5EA" stroke-width="1.2"/>
+        <text x="835" y="312" text-anchor="middle" font-size="11" font-weight="700" fill="#285E61">管理与编排平台</text>
+        <text x="835" y="329" text-anchor="middle" font-size="9.5" fill="#4A5568">Red Hat OpenShift / Upstream K8s</text>
+        <text x="835" y="344" text-anchor="middle" font-size="9.5" fill="#4A5568">Cisco Intersight (UCS 管理)</text>
+        <text x="835" y="359" text-anchor="middle" font-size="9.5" fill="#4A5568">Cisco Nexus Dashboard (网络管理)</text>
+
+        <path d="M550 394 L550 414" stroke="#999" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+
+        <!-- Layer 3: Compute & Comms -->
+        <rect x="110" y="420" width="880" height="160" rx="12" fill="url(#g3)" stroke="#0D6EFD" stroke-width="2"/>
+        <rect x="120" y="428" width="16" height="16" rx="4" fill="#0D6EFD"/>
+        <text x="144" y="442" font-size="14" font-weight="700" fill="#1A365D">第三层：计算框架与通信加速层 — 核心流水线</text>
+        <text x="130" y="466" font-size="11.5" fill="#2D3748">隐喻：流水线工人的专属语言（CUDA）与极速物流通讯系统（NCCL）</text>
+
+        <rect x="130" y="482" width="270" height="80" rx="8" fill="#fff" stroke="#BEE3F8" stroke-width="1.2"/>
+        <text x="265" y="502" text-anchor="middle" font-size="11" font-weight="700" fill="#2A4365">PyTorch + CUDA</text>
+        <text x="265" y="519" text-anchor="middle" font-size="9.5" fill="#4A5568">动态计算图 · 即刻执行</text>
+        <text x="265" y="534" text-anchor="middle" font-size="9.5" fill="#4A5568">GPU Kernel → SM (流多处理器)</text>
+        <text x="265" y="549" text-anchor="middle" font-size="9.5" fill="#4A5568">海量线程并行矩阵运算 (SIMT)</text>
+
+        <rect x="420" y="482" width="270" height="80" rx="8" fill="#fff" stroke="#BEE3F8" stroke-width="1.2"/>
+        <text x="555" y="502" text-anchor="middle" font-size="11" font-weight="700" fill="#2A4365">NCCL 集合通信</text>
+        <text x="555" y="519" text-anchor="middle" font-size="9.5" fill="#4A5568">All-Reduce / Broadcast / Scatter</text>
+        <text x="555" y="534" text-anchor="middle" font-size="9.5" fill="#4A5568">Ring → 双二叉树 O(log k)</text>
+        <text x="555" y="549" text-anchor="middle" font-size="9.5" fill="#4A5568">跨数据中心网络拓扑感知</text>
+
+        <rect x="710" y="482" width="260" height="80" rx="8" fill="#fff" stroke="#BEE3F8" stroke-width="1.2"/>
+        <text x="840" y="502" text-anchor="middle" font-size="11" font-weight="700" fill="#2A4365">NVIDIA 软件栈</text>
+        <text x="840" y="519" text-anchor="middle" font-size="9.5" fill="#4A5568">NVIDIA AI Enterprise 6.0+</text>
+        <text x="840" y="534" text-anchor="middle" font-size="9.5" fill="#4A5568">GPU Operator · Network Operator</text>
+        <text x="840" y="549" text-anchor="middle" font-size="9.5" fill="#4A5568">TensorRT-LLM · Triton Server</text>
+
+        <path d="M550 584 L550 604" stroke="#999" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+
+        <!-- Layer 4: Infra & Network -->
+        <rect x="110" y="610" width="880" height="170" rx="12" fill="url(#g4)" stroke="#1B3A5C" stroke-width="2"/>
+        <rect x="120" y="618" width="16" height="16" rx="4" fill="#1B3A5C"/>
+        <text x="144" y="632" font-size="14" font-weight="700" fill="#1A202C">第四层：高性能网络与硬件基础设施层 — 传送带与地基</text>
+        <text x="130" y="656" font-size="11.5" fill="#2D3748">隐喻：绝不堵车的高速物流系统 + 坚实的工厂地基</text>
+
+        <rect x="130" y="672" width="200" height="90" rx="8" fill="#fff" stroke="#CBD5E0" stroke-width="1.2"/>
+        <text x="230" y="692" text-anchor="middle" font-size="11" font-weight="700" fill="#1A202C">GPU 计算节点</text>
+        <text x="230" y="709" text-anchor="middle" font-size="9.5" fill="#4A5568">Cisco UCS C885A M8</text>
+        <text x="230" y="724" text-anchor="middle" font-size="9.5" fill="#4A5568">8×NVIDIA HGX H200 GPU</text>
+        <text x="230" y="739" text-anchor="middle" font-size="9.5" fill="#4A5568">NVLink 节点内互联</text>
+        <text x="230" y="754" text-anchor="middle" font-size="9.5" fill="#4A5568">BlueField-3 SuperNIC</text>
+
+        <rect x="350" y="672" width="200" height="90" rx="8" fill="#fff" stroke="#CBD5E0" stroke-width="1.2"/>
+        <text x="450" y="692" text-anchor="middle" font-size="11" font-weight="700" fill="#1A202C">后端网络 (E/W)</text>
+        <text x="450" y="709" text-anchor="middle" font-size="9.5" fill="#4A5568">Nexus 9364E-SG2 (800G)</text>
+        <text x="450" y="724" text-anchor="middle" font-size="9.5" fill="#4A5568">RoCEv2 无损以太网</text>
+        <text x="450" y="739" text-anchor="middle" font-size="9.5" fill="#4A5568">RDMA · GPUDirect</text>
+        <text x="450" y="754" text-anchor="middle" font-size="9.5" fill="#4A5568">自适应路由 · Packet Spray</text>
+
+        <rect x="570" y="672" width="200" height="90" rx="8" fill="#fff" stroke="#CBD5E0" stroke-width="1.2"/>
+        <text x="670" y="692" text-anchor="middle" font-size="11" font-weight="700" fill="#1A202C">前端网络 (N/S)</text>
+        <text x="670" y="709" text-anchor="middle" font-size="9.5" fill="#4A5568">Nexus 9364D-GX2A</text>
+        <text x="670" y="724" text-anchor="middle" font-size="9.5" fill="#4A5568">管理·存储·推理用户流量</text>
+        <text x="670" y="739" text-anchor="middle" font-size="9.5" fill="#4A5568">EVPN VXLAN 多租户</text>
+        <text x="670" y="754" text-anchor="middle" font-size="9.5" fill="#4A5568">QoS 优先级保障</text>
+
+        <rect x="790" y="672" width="180" height="90" rx="8" fill="#fff" stroke="#CBD5E0" stroke-width="1.2"/>
+        <text x="880" y="692" text-anchor="middle" font-size="11" font-weight="700" fill="#1A202C">存储</text>
+        <text x="880" y="709" text-anchor="middle" font-size="9.5" fill="#4A5568">VAST · NetApp · Pure</text>
+        <text x="880" y="724" text-anchor="middle" font-size="9.5" fill="#4A5568">全闪存 NVMe</text>
+        <text x="880" y="739" text-anchor="middle" font-size="9.5" fill="#4A5568">NVIDIA 认证存储</text>
+        <text x="880" y="754" text-anchor="middle" font-size="9.5" fill="#4A5568">训练·检查点·RAG 向量</text>
+
+        <!-- Data flow annotations -->
+        <text x="550" y="810" text-anchor="middle" font-size="10" fill="#A0AEC0">数据 (原材料) ➜ GPU 计算 (流水线) ➜ 网络同步 (传送带) ➜ Token 输出 (智能商品)</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+<!-- ═══════════════════════ 第一层 详细 ═══════════════════════ -->
+<section class="section" id="layer1">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#F0FFF4;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 4.5v7c0 4.5-3.5 8.5-9 10.5-5.5-2-9-6-9-10.5v-7L12 2z" stroke="#38A169" stroke-width="2" fill="none"/></svg>
+      </div>
+      <h2>第一层：AI 应用与业务层</h2>
+    </div>
+    <p><span class="layer-tag" style="background:var(--layer1);">智能商品</span> 位于系统架构最顶层——底层庞大而专精的硬件算力在这里被抽象为具体的认知、推理、协作与决策能力。大语言模型（LLM）成为核心认知引擎，应用范式正经历从被动的信息检索向自主的智能体（Agentic AI）的深刻演变。<sup>[1]</sup></p>
+
+    <!-- 1.1 LLM -->
+    <div class="card">
+      <h3>1.1 大语言模型（LLM）：核心认知引擎</h3>
+      <p>LLM（如 Llama 3、GPT 系列等）通过在海量互联网文本上进行自监督学习，吸收了人类世界广大的知识与语言逻辑。这些模型拥有海量参数权重，不仅能理解和生成自然语言，还展现出"<strong>涌现能力（Emergent Abilities）</strong>"——包括零样本学习、复杂逻辑链推理以及多语言代码编写。<sup>[1]</sup></p>
+
+      <h4>LLM 的工作原理（推理流水线）</h4>
+      <ol class="step-list">
+        <li><strong>Token 化</strong>：文本被分词器切分为基本单元（Token），转换为数字 ID。模型处理的不是文字，而是这些数字编码。</li>
+        <li><strong>预填充阶段（Prefill）</strong>：GPU 一次性并行处理所有输入 Token，注意力机制计算词间关联，生成 KV Cache（键值缓存）存入显存。</li>
+        <li><strong>解码阶段（Decode）</strong>：模型利用 KV Cache 进行矩阵乘法，预测下一个最可能的 Token。每次只输出一个 Token（自回归），循环往复直至遇到结束符。屏幕上"打字机效果"的根本原因就在于此。</li>
+        <li><strong>去 Token 化</strong>：数字 ID 序列被转回人类可读的自然语言文本。</li>
+      </ol>
+
+      <div class="callout">
+        <p><strong>关键性能指标</strong>：<strong>TTFT（Time to First Token，首字延迟）</strong>——用户看到第一个字符弹出的等待时间；<strong>ITL（Inter Token Latency，Token 间延迟）</strong>——生成每个后续字符的时间间隔。NIM 的 IFB 和张量并行直接优化这两个指标。</p>
+      </div>
+
+      <p>然而，一个裸露的基础大模型类似一个拥有最高智商却被关在密室中的学者——它既不知道当前时间，也无法访问企业内部的保密数据，更无法直接操作外部软件系统。为此，<strong>LangChain</strong> 和 <strong>LlamaIndex</strong> 等中间件框架充当了大模型与外部世界的桥梁。<sup>[1]</sup></p>
+    </div>
+
+    <!-- 1.2 RAG -->
+    <div class="card">
+      <h3>1.2 检索增强生成（RAG）：为模型注入实时知识</h3>
+      <p>LLM 存在两个致命弱点：<strong>知识过时</strong>（训练数据有截止日期）和<strong>幻觉（Hallucination）</strong>（对缺乏内部知识的问题倾向于"一本正经地胡说八道"）。<strong>RAG（Retrieval-Augmented Generation）</strong>通过引入外部知识库优雅地解决了这些问题。<sup>[1]</sup></p>
+
+      <h4>RAG 工作机制三步曲</h4>
+      <div class="panorama-wrap">
+        <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'Noto Sans SC',sans-serif">
+          <!-- Step 1 -->
+          <rect x="10" y="30" width="230" height="140" rx="10" fill="#F0FFF4" stroke="#C6F6D5" stroke-width="1.5"/>
+          <text x="125" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#276749">① 索引（Indexing）</text>
+          <text x="125" y="78" text-anchor="middle" font-size="9.5" fill="#4A5568">企业私有数据（合规文档、</text>
+          <text x="125" y="93" text-anchor="middle" font-size="9.5" fill="#4A5568">内部维基、客户记录）</text>
+          <text x="125" y="113" text-anchor="middle" font-size="9.5" fill="#4A5568">→ 分割为文本块（Chunks）</text>
+          <text x="125" y="128" text-anchor="middle" font-size="9.5" fill="#4A5568">→ 嵌入模型转为高维向量</text>
+          <text x="125" y="148" text-anchor="middle" font-size="9.5" fill="#4A5568">→ 存入向量数据库</text>
+
+          <!-- Arrow 1 -->
+          <path d="M248 100 L278 100" stroke="#38A169" stroke-width="2" marker-end="url(#arrG)"/>
+          <defs><marker id="arrG" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#38A169"/></marker></defs>
+
+          <!-- Step 2 -->
+          <rect x="285" y="30" width="230" height="140" rx="10" fill="#EBF8FF" stroke="#BEE3F8" stroke-width="1.5"/>
+          <text x="400" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#2A4365">② 检索（Retrieval）</text>
+          <text x="400" y="78" text-anchor="middle" font-size="9.5" fill="#4A5568">用户提问 → 向量化</text>
+          <text x="400" y="98" text-anchor="middle" font-size="9.5" fill="#4A5568">在向量数据库中</text>
+          <text x="400" y="113" text-anchor="middle" font-size="9.5" fill="#4A5568">进行相似度检索</text>
+          <text x="400" y="133" text-anchor="middle" font-size="9.5" fill="#4A5568">→ 召回最相关的 Top-K</text>
+          <text x="400" y="148" text-anchor="middle" font-size="9.5" fill="#4A5568">文档段落作为上下文</text>
+
+          <!-- Arrow 2 -->
+          <path d="M523 100 L553 100" stroke="#2B6CB0" stroke-width="2" marker-end="url(#arrB)"/>
+          <defs><marker id="arrB" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#2B6CB0"/></marker></defs>
+
+          <!-- Step 3 -->
+          <rect x="560" y="30" width="230" height="140" rx="10" fill="#FAF5FF" stroke="#E9D8FD" stroke-width="1.5"/>
+          <text x="675" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#553C9A">③ 生成（Generation）</text>
+          <text x="675" y="78" text-anchor="middle" font-size="9.5" fill="#4A5568">原始提问 + 检索到的</text>
+          <text x="675" y="93" text-anchor="middle" font-size="9.5" fill="#4A5568">真实上下文一起"喂"给 LLM</text>
+          <text x="675" y="118" text-anchor="middle" font-size="9.5" fill="#4A5568">→ 模型基于提供的上下文</text>
+          <text x="675" y="133" text-anchor="middle" font-size="9.5" fill="#4A5568">进行总结和回答</text>
+          <text x="675" y="153" text-anchor="middle" font-size="9.5" fill="#4A5568">→ 事实准确、可追溯</text>
+        </svg>
+      </div>
+
+      <p>尽管 RAG 在提升事实准确性方面表现优异，但其本质上仍是一个<strong>单轮、基于单次检索的静态流水线</strong>。传统 RAG 擅长"找到正确的信息"，但不具备"根据信息采取行动"的能力。<sup>[1]</sup></p>
+    </div>
+
+    <!-- 1.3 Agentic AI -->
+    <div class="card">
+      <h3>1.3 Agentic AI（智能体 AI）：从"回答"到"行动"</h3>
+      <p>为突破传统 RAG 的局限，<strong>Agentic AI</strong> 概念迅速崛起并成为当前企业 AI 转型的核心方向。如果说 RAG 改善了模型"回答之前所知道的信息"，那么 Agentic AI 则赋予了模型"<strong>自主行动与执行的能力</strong>"。<sup>[1]</sup></p>
+
+      <p>智能体不再是被动等待提示词的反应器，而是被赋予了<strong>自主规划、迭代推理、调用工具以及上下文记忆</strong>的数字化员工。<sup>[1]</sup></p>
+
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>评估维度</th>
+            <th>传统 RAG</th>
+            <th>Agentic AI / Agentic RAG</th>
+          </tr>
+          <tr>
+            <td><strong>核心机制</strong></td>
+            <td>线性流水线：查询 → 单次静态检索 → 文本生成</td>
+            <td>循环推理迭代：规划 → 工具调用 → 评估 → 动态检索 → 执行<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>LLM 角色</strong></td>
+            <td>语言与特定知识的合成器和事实校验工具</td>
+            <td>具备跨系统路由、异常处理和事件驱动动作执行的中央大脑<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>优势场景</strong></td>
+            <td>高精度知识点问答（如法规查询、产品说明书解析）</td>
+            <td>异步多步任务、复杂工作流自动化（如实时仓库调度、深度科研摘要与推理）<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>基础设施需求</strong></td>
+            <td>单次长上下文生成（10-20× Token）</td>
+            <td>高频、海量的外部工具并发调用与多步连续决策（<strong>50-200× Token</strong>）<sup>[4]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>部署风险</strong></td>
+            <td>依赖高质量结构化文档和精确向量检索</td>
+            <td>存在策略漂移和误执行风险，高度依赖沙盒隔离、严格权限治理以及"人机协同"（Human-in-the-loop）控制<sup>[1]</sup></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="callout orange">
+        <p><strong>Token 需求的通货膨胀</strong>：从简单的"单次应答"（10-20× Token）到深度的"智能体推理"（50-200× Token），AI 基础设施必须从支持单次长上下文生成的静态响应模式，转型为能够支撑<strong>高频、海量且复杂的外部工具并发调用与多步连续决策</strong>的弹性模式。这正是 Cisco Secure AI Factory 存在的根本意义。<sup>[4]</sup></p>
+      </div>
+    </div>
+
+    <!-- 1.4 AI Defense -->
+    <div class="card">
+      <h3>1.4 AI 安全：Cisco AI Defense</h3>
+      <p>AI 模型和应用构成了全新的网络攻击面——Prompt 注入、模型窃取、训练数据投毒、幻觉导致的财务/法律/声誉损害等威胁层出不穷。<sup>[4]</sup></p>
+      <div class="card-grid">
+        <div class="card card-sm" style="border-left:3px solid var(--accent-red);">
+          <h4>🛡️ AI 模型与应用验证</h4>
+          <p>通过<strong>算法化红队测试（Algorithmic Red Teaming）</strong>自动检测模型中的漏洞，自动生成映射到 AI 安全标准的报告，并针对特定模型漏洞创建防护栏。<sup>[4]</sup></p>
+        </div>
+        <div class="card card-sm" style="border-left:3px solid var(--accent-red);">
+          <h4>🚧 AI 运行时应用保护</h4>
+          <p>在模型实时服务期间，强制执行<strong>Guardrails（护栏）</strong>——拦截恶意 Prompt 和不安全的模型响应（包括亵渎、仇恨言论、敏感信息泄露、偏离主题等），实现输入/输出双向防护。<sup>[4]</sup></p>
+        </div>
+      </div>
+      <p>Cisco AI Defense 采用<strong>云管理、混合执行</strong>架构——通过 Cisco Security Cloud Control 集中管理策略，但验证和运行时保护服务可在本地 AI POD 或云端工作负载中灵活执行。<sup>[4]</sup></p>
+    </div>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+<!-- ═══════════════════════ 第二层 详细 ═══════════════════════ -->
+<section class="section" id="layer2">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#E6FFFA;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#0694A2" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </div>
+      <h2>第二层：模型编排与推理服务层</h2>
+    </div>
+    <p><span class="layer-tag" style="background:var(--layer2);">车间调度</span> 当企业开发出高价值的 AI 应用后，如何将其高效、经济、可靠地部署到物理服务器上运行，是决定业务可行性的关键。在这一层，底层庞大的算力资源被虚拟化、池化，并根据应用需求进行动态调度。<sup>[1]</sup></p>
+
+    <!-- 2.1 K8s + Run:ai -->
+    <div class="card">
+      <h3>2.1 Kubernetes + NVIDIA Run:ai：GPU 资源的智能调度</h3>
+      <p>Kubernetes（K8s）是云原生时代管理容器化应用的操作系统标准。然而传统 K8s 主要为调度 CPU 资源和无状态 Web 应用设计。面对 AI 工作负载——训练一个大模型可能需要数百上千 GPU 节点连续运行数周——原生 K8s 暴露出对底层异构硬件感知不足、资源隔离粒度粗糙等问题。<sup>[1]</sup></p>
+      <p><strong>NVIDIA Run:ai</strong> 作为运行在 K8s 之上的高级调度器，引入了动态 GPU 资源池化与精细化分割机制。<sup>[1][4]</sup></p>
+
+      <h4>GPU 分割的两大技术路线</h4>
+      <div class="card-grid">
+        <div class="card card-sm" style="border-left:4px solid var(--accent-indigo);">
+          <span class="badge badge-purple">硬件级</span>
+          <h4>MIG（Multi-Instance GPU）硬件空间分割</h4>
+          <p>NVIDIA 硬件架构层面的创新。允许在物理层面将单张 GPU 划分为最多 <strong>7 个完全独立的实例</strong>。每个 MIG 实例被分配了专属的显存、二级缓存和计算核心（SM）。<sup>[1]</sup></p>
+          <p><strong>绝对优势</strong>：严格的物理隔离——一个分区上的应用崩溃或高负载计算绝对不会影响同一张显卡上其他分区的性能。<sup>[1]</sup></p>
+          <p><strong>核心适用</strong>：多租户云环境的计费隔离、SLA 级别的生产推理服务。<sup>[1]</sup></p>
+        </div>
+        <div class="card card-sm" style="border-left:4px solid var(--accent-orange);">
+          <span class="badge badge-orange">软件级</span>
+          <h4>Time Slicing 时间分片</h4>
+          <p>让多个进程"拼车"共享 GPU。系统通过并发调度让多个进程交替占用 GPU 的全部计算资源。<sup>[1]</sup></p>
+          <p><strong>优势</strong>：最具弹性，可支持数十个轻量级应用同时搭载，超额分配能力强。</p>
+          <p><strong>缺陷</strong>：缺乏底层显存和算力的硬隔离。当多个重负载任务同时运行，容易产生"嘈杂邻居效应（Noisy Neighbor）"，导致性能波动不可预测。<sup>[1]</sup></p>
+          <p><strong>核心适用</strong>：研发测试环境（Dev/Test）、交互式 Jupyter Notebook 调试。<sup>[1]</sup></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.2 NIM -->
+    <div class="card">
+      <h3>2.2 NVIDIA NIM：一行命令部署的高性能推理微服务</h3>
+      <p>传统的模型部署需要开发者手动配置复杂的 CUDA 环境、编译底层库、选择推理框架，耗时数周。<strong>NIM（NVIDIA Inference Microservices）</strong>将预训练的开源基础模型（如 Llama 3）或微调模型，与高度优化的推理引擎（如 Triton Inference Server 和 TensorRT-LLM）统一封装为企业级软件容器。开发者只需一行简单命令，几分钟内即可在任何云环境或本地数据中心启动一个符合行业标准 API 的推理接口。<sup>[1][4]</sup></p>
+
+      <h4>NIM 的核心性能优化技术</h4>
+      <div class="card-grid">
+        <div class="card card-sm">
+          <h4>⚡ In-flight Batching (IFB) 动态批处理</h4>
+          <p>传统批处理要求等待当前批次中所有用户请求都生成完毕才能处理下一批，导致 GPU 大量闲置。NIM 启用的 IFB 技术允许在<strong>每一个生成步骤（Token 级）</strong>动态评估——当新请求到达时，立即将其插入正在执行的批处理流中，实现 GPU 利用率的最大化。<sup>[1]</sup></p>
+        </div>
+        <div class="card card-sm">
+          <h4>🔀 Tensor Parallelism 张量并行</h4>
+          <p>对于参数量超出单张 GPU 显存容量的超大模型，NIM 提供开箱即用的张量并行能力。模型的权重矩阵被物理分片（Sharding），各分片分布到多张 GPU 上，推理时 GPU 并行执行矩阵乘法，并通过最高速网络交换部分计算结果。这不仅解决了内存瓶颈，还有效缩短了首字生成时间（TTFT）。<sup>[1]</sup></p>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <p><strong>基准测试</strong>：在单张 H100 GPU 上处理 200 个并发请求时，未经优化的 Llama 3.1 8B 模型吞吐量仅为 613 tokens/s、Token 间延迟（ITL）37 ms；启用 NIM 优化后，吞吐量骤增至 <strong>1201 tokens/s</strong>，延迟下降至 <strong>32 ms</strong>，实现了接近两倍的产能飞跃。<sup>[1]</sup></p>
+      </div>
+    </div>
+
+    <!-- 2.3 管理平台 -->
+    <div class="card">
+      <h3>2.3 管理与编排平台</h3>
+      <div class="card-grid">
+        <div class="card card-sm">
+          <h4>Red Hat OpenShift</h4>
+          <p>本参考架构以 Red Hat OpenShift（v4.18+）为中心提供企业级工作负载编排。管理集群（≥3 控制节点）部署在独立的 Cisco UCS X-Series Direct 上，与 GPU 工作负载集群物理隔离。<sup>[5]</sup></p>
+        </div>
+        <div class="card card-sm">
+          <h4>Cisco Intersight</h4>
+          <p>SaaS 或本地私有部署的 IT 运维平台，提供所有 Cisco UCS 基础设施的统一实时视图和全生命周期管理——从部署配置到合规安全。<sup>[5]</sup></p>
+        </div>
+        <div class="card card-sm">
+          <h4>Cisco Nexus Dashboard</h4>
+          <p>统一管理和运维后端、前端双 Fabric 的平台。提供基于最佳实践的 AI 部署蓝图模板，支持自动化滚动部署和简化的生命周期管理。单一 API 端点驱动整个 Fabric 自动化。<sup>[5]</sup></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+<!-- ═══════════════════════ 第三层 详细 ═══════════════════════ -->
+<section class="section" id="layer3">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#EBF4FF;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66l4.24-4.24" stroke="#0D6EFD" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <h2>第三层：计算框架与通信加速层</h2>
+    </div>
+    <p><span class="layer-tag" style="background:var(--layer3);">核心流水线</span> 上层应用的业务逻辑最终要被转译为硬件能够理解的数学运算指令。这一过程由 PyTorch 等深度学习框架与底层的 CUDA 及 NCCL 通信库紧密协作完成。<sup>[1]</sup></p>
+
+    <!-- 3.1 PyTorch & CUDA -->
+    <div class="card">
+      <h3>3.1 PyTorch 与 CUDA：GPU 的操作手册</h3>
+
+      <h4>PyTorch 动态计算图</h4>
+      <p>PyTorch 采用<strong>动态计算图（Dynamic Computational Graphs）</strong>机制——图的结构在每次前向传播代码运行时动态生成。这种"即刻执行（Eager Execution）"的特性赋予了模型开发空前的直观性和灵活性，使得定义复杂神经网络、设计损失函数以及控制梯度反向传播训练循环，就像编写普通 Python 脚本一样简单。<sup>[1]</sup></p>
+
+      <h4>CUDA 并行计算微架构</h4>
+      <p>然而 Python 本身是顺序执行的。要处理深度学习中数以亿计的参数矩阵相乘，必须依赖底层并行计算平台。<strong>CUDA（Compute Unified Device Architecture）</strong>是 NVIDIA 推出的解锁 GPU 所有并行计算潜能的钥匙。<sup>[1]</sup></p>
+
+      <ol class="step-list">
+        <li><strong>Kernel（内核函数）</strong>：开发者使用 C++ 编写特殊函数并通过 <code>__global__</code> 修饰符声明其在 GPU（Device）而非 CPU（Host）上执行。<sup>[1]</sup></li>
+        <li><strong>SM（流多处理器）</strong>：GPU 硬件的微架构被组织为层级系统。以 T4 GPU 为例，单卡封装了 40 个 SM，共包含 2560 个 CUDA 核心，每个 SM 可同时维持多达 1024 个活跃线程的并行上下文。<sup>[1]</sup></li>
+        <li><strong>线程组织：Grid → Block → Thread</strong>：启动 Kernel 时通过特殊语法 <code>&lt;&lt;&lt;numBlocks, threadsPerBlock&gt;&gt;&gt;</code> 定义并行规模。CUDA 运行时将线程组织为由多个线程块（Thread Blocks）组成的网格（Grid），硬件调度器动态分配给可用 SM 执行。<sup>[1]</sup></li>
+        <li><strong>SIMT 范式</strong>：每个线程通过内置环境变量（<code>threadIdx.x</code>, <code>blockIdx.x</code>）精确计算自身负责的数据索引，海量线程同时对不同数据元素执行相同指令——这就是 GPU 以比单线程 CPU 快数千倍的速度完成矩阵运算的根本机制。<sup>[1]</sup></li>
+      </ol>
+    </div>
+
+    <!-- 3.2 NCCL -->
+    <div class="card">
+      <h3>3.2 NCCL：跨 GPU 集合通信的极速物流系统</h3>
+      <p>当模型规模达到 GPT-4 的数万亿参数级别时，任何单一节点的显存都无法容纳完整的计算图。分布式计算成为唯一出路。数据并行（Data Parallelism）和张量并行（Tensor Parallelism）要求成百上千张 GPU 协同工作——而在每一次反向传播周期的末尾，分散在各个 GPU 上的节点必须同步梯度参数，之后才能进行下一次迭代。<strong>NCCL（NVIDIA Collective Communication Library）</strong>正是为解决大规模 GPU 集群间的通信瓶颈而设计。<sup>[1]</sup></p>
+
+      <h4>核心集合通信原语</h4>
+      <div class="table-wrap">
+        <table>
+          <tr><th>原语</th><th>功能</th></tr>
+          <tr><td>Broadcast</td><td>将数据从一个节点广播到所有节点</td></tr>
+          <tr><td>Scatter</td><td>将数据分割发给各个节点</td></tr>
+          <tr><td>Gather</td><td>从各个节点收集数据</td></tr>
+          <tr><td><strong>All-Reduce（全规约）</strong></td><td>分布式深度学习中最核心的操作——所有 GPU 同时交换并聚合梯度数据<sup>[1]</sup></td></tr>
+        </table>
+      </div>
+
+      <h4>算法演进：从环形到双二叉树</h4>
+
+      <div class="card-grid">
+        <div class="card card-sm" style="border-left:3px solid #DD6B20;">
+          <h4>🔄 环形全规约（Ring All-Reduce）</h4>
+          <p>所有 GPU 逻辑组成一个环，每个 GPU 仅与直接邻居通信。分为 Reduce-Scatter 和 All-Gather 两阶段。<strong>优势</strong>：充分利用每个节点的入站和出站带宽。<strong>瓶颈</strong>：需要 2(k-1) 个严格串行通信步骤，延迟随 GPU 规模 k 线性增长。集群达到千卡以上时延迟不可接受。<sup>[1]</sup></p>
+        </div>
+        <div class="card card-sm" style="border-left:3px solid #38A169;">
+          <h4>🌳 双二叉树算法（Double Binary Trees）</h4>
+          <p>NCCL 后续版本引入的革命性算法。系统内部构建两棵互补的二叉树。规约阶段数据从叶子节点层层向上汇总到根节点；广播阶段根节点将合并完毕的数据快速向下分发。<strong>通信步骤从线性 O(k) 骤降为对数级 O(log k)</strong>，成为当代超大规模集群的首选算法。<sup>[1]</sup></p>
+        </div>
+      </div>
+
+      <h4>跨数据中心拓扑感知</h4>
+      <p>随着单体数据中心电力和物理空间的硬约束，跨越多个物理数据中心构建统一的 AI 训练集群成为新趋势。NCCL 引入了<strong>网络拓扑感知机制与 Fabric ID</strong>——智能识别物理拓扑，避免在低带宽的广域网（WAN）链路上进行粗暴的数据搬运。All-Reduce 流程被动态重组为：在数据中心内部利用最高速的 NVLink 完成局部 Reduce-Scatter → 仅通过跨数据中心链路交换最小化的汇总数据 → 各自数据中心内再进行快速的 All-Gather 广播。<sup>[1]</sup></p>
+    </div>
+
+    <!-- 3.3 NVIDIA 软件栈 -->
+    <div class="card">
+      <h3>3.3 NVIDIA AI Enterprise 软件栈</h3>
+      <p>Cisco Secure AI Factory 验证的软件栈包括：<sup>[5]</sup></p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>组件</th><th>版本</th><th>功能</th></tr>
+          <tr><td>NVIDIA AI Enterprise</td><td>6.0+</td><td>企业级 AI 全栈软件平台（含 NIM、NeMo 等）</td></tr>
+          <tr><td>NVIDIA GPU Driver</td><td>570.172.08+</td><td>GPU 驱动程序</td></tr>
+          <tr><td>CUDA</td><td>12.8+</td><td>并行计算平台</td></tr>
+          <tr><td>GPU Operator</td><td>25.3.4+</td><td>K8s 中自动管理 GPU 驱动与运行时</td></tr>
+          <tr><td>Network Operator</td><td>25.7.0+</td><td>K8s 中自动管理 RDMA/RoCE 网络</td></tr>
+          <tr><td>DOCA-OFED Driver</td><td>3.0.0+</td><td>BlueField DPU/SuperNIC 驱动</td></tr>
+          <tr><td>NIM Operator</td><td>2.0.2+</td><td>K8s 中自动部署 NIM 推理微服务</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+
+<!-- ═══════════════════════ 第四层 详细 ═══════════════════════ -->
+<section class="section" id="layer4">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#E2E8F0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="14" width="20" height="8" rx="2" fill="#1B3A5C"/><rect x="5" y="4" width="14" height="8" rx="2" fill="#2D3748"/></svg>
+      </div>
+      <h2>第四层：高性能网络与硬件基础设施</h2>
+    </div>
+    <p><span class="layer-tag" style="background:var(--layer4);">地基与传送带</span> 在 AI 工厂中，单打独斗的时代已经结束。要让数万张 GPU 如同一台统一的超级计算机般齐心运转，网络通信的带宽和延迟直接决定了整座机器的利用率上限。<sup>[1]</sup></p>
+
+    <!-- 4.1 计算节点 -->
+    <div class="card">
+      <h3>4.1 GPU 计算节点：Cisco UCS C885A M8</h3>
+      <p>Cisco UCS C885A M8 是一台 8RU 的高密度 GPU 服务器，基于 NVIDIA HGX 架构，遵循 <strong>2-8-9-400</strong>（2 CPU – 8 GPU – 9 NIC – 400GbE/GPU）参考配置模式设计。<sup>[5][6]</sup></p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>规格</th><th>详情</th></tr>
+          <tr><td>CPU</td><td>2× AMD EPYC 9575F（3.3 GHz，Max Boost 5 GHz）</td></tr>
+          <tr><td>GPU</td><td>8× NVIDIA HGX H200 SXM（141 GB HBM3e / 每卡）</td></tr>
+          <tr><td>GPU 内部互联</td><td>NVLink（节点内 GPU-to-GPU 高速总线，带宽可达 900 GB/s+）</td></tr>
+          <tr><td>后端 NIC（E/W）</td><td>8× NVIDIA BlueField-3 B3140H SuperNIC（各 1×400GbE）</td></tr>
+          <tr><td>前端 NIC（N/S）</td><td>2× NVIDIA BlueField-3 B3220（各 2×200GbE）</td></tr>
+          <tr><td>内存</td><td>24× 96GB DDR5-6000 MT/s（最高 3 TB）</td></tr>
+          <tr><td>本地存储</td><td>最高 30 TB NVMe SSD</td></tr>
+          <tr><td>管理</td><td>Cisco Intersight（SaaS 或本地私有部署）</td></tr>
+        </table>
+      </div>
+      <div class="callout green">
+        <p><strong>为什么需要 NVLink？</strong> 一个 4050 亿参数的大模型，仅存储其权重（FP16）就需要约 810 GB 显存，远超单卡 141 GB。通过 NVLink 在节点内将 8 张 H200 的显存统一为一个共享内存池（8×141=1128 GB），使单节点即可容纳超大模型的推理负载，且 GPU 间数据交换无需经过缓慢的 PCIe 和 CPU。<sup>[6]</sup></p>
+      </div>
+    </div>
+
+    <!-- 4.2 后端网络 -->
+    <div class="card">
+      <h3>4.2 后端网络（East-West）：GPU-to-GPU 的无损高速公路</h3>
+      <p>后端网络是<strong>专用于 GPU 间集合通信的隔离网络</strong>，直接决定分布式训练的作业完成时间（JCT）。其核心要求：<strong>无阻塞、无损、超高带宽、极低尾部延迟</strong>。<sup>[5]</sup></p>
+
+      <h4>4.2.1 拓扑设计：四路 Rail-Optimized Clos</h4>
+      <p>Cisco AI POD 采用两层非阻塞 Spine-Leaf Clos 拓扑。每台 UCS C885A 的 8 块后端 NIC 以<strong>"四路 Rail"</strong>方式连接到 4 台叶交换机——每台叶交换机负责两个 GPU Rank 的流量。这种拓扑保证了每个 GPU 拥有 400GbE 的专属东西向带宽，全网无过订。<sup>[5]</sup></p>
+
+      <div class="panorama-wrap">
+        <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'Noto Sans SC',sans-serif">
+          <!-- Spine -->
+          <rect x="200" y="10" width="130" height="36" rx="6" fill="#1B3A5C"/>
+          <text x="265" y="33" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">Spine A (9364E-SG2)</text>
+          <rect x="370" y="10" width="130" height="36" rx="6" fill="#1B3A5C"/>
+          <text x="435" y="33" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">Spine B (9364E-SG2)</text>
+
+          <!-- Leaf -->
+          <rect x="50" y="80" width="120" height="32" rx="5" fill="#2B6CB0"/>
+          <text x="110" y="101" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Leaf 1 (RG 1,5)</text>
+          <rect x="200" y="80" width="120" height="32" rx="5" fill="#2B6CB0"/>
+          <text x="260" y="101" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Leaf 2 (RG 2,6)</text>
+          <rect x="370" y="80" width="120" height="32" rx="5" fill="#2B6CB0"/>
+          <text x="430" y="101" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Leaf 3 (RG 3,7)</text>
+          <rect x="530" y="80" width="120" height="32" rx="5" fill="#2B6CB0"/>
+          <text x="590" y="101" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Leaf 4 (RG 4,8)</text>
+
+          <!-- Lines spine-leaf -->
+          <line x1="265" y1="46" x2="110" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="265" y1="46" x2="260" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="265" y1="46" x2="430" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="265" y1="46" x2="590" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="435" y1="46" x2="110" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="435" y1="46" x2="260" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="435" y1="46" x2="430" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+          <line x1="435" y1="46" x2="590" y2="80" stroke="#A0AEC0" stroke-width="1"/>
+
+          <!-- Server 1 -->
+          <rect x="80" y="150" width="540" height="52" rx="6" fill="#EDF2F7" stroke="#CBD5E0" stroke-width="1"/>
+          <text x="100" y="170" font-size="10" font-weight="700" fill="#2D3748">UCS C885A-1</text>
+          <rect x="190" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="210" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU1</text>
+          <rect x="235" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="255" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU2</text>
+          <rect x="280" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="300" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU3</text>
+          <rect x="325" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="345" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU4</text>
+          <rect x="370" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="390" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU5</text>
+          <rect x="415" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="435" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU6</text>
+          <rect x="460" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="480" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU7</text>
+          <rect x="505" y="156" width="40" height="20" rx="3" fill="#38A169"/><text x="525" y="170" text-anchor="middle" font-size="8" fill="#fff">GPU8</text>
+          <text x="350" y="194" text-anchor="middle" font-size="8.5" fill="#718096">← NVLink 节点内高速互联 →</text>
+
+          <!-- Lines leaf-server -->
+          <line x1="110" y1="112" x2="210" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="110" y1="112" x2="390" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="260" y1="112" x2="255" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="260" y1="112" x2="435" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="430" y1="112" x2="300" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="430" y1="112" x2="480" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="590" y1="112" x2="345" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="590" y1="112" x2="525" y2="150" stroke="#63B3ED" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- Server N -->
+          <rect x="80" y="210" width="540" height="36" rx="6" fill="#EDF2F7" stroke="#CBD5E0" stroke-width="1"/>
+          <text x="350" y="233" text-anchor="middle" font-size="10" fill="#718096">⋯ 最多可扩展至 32 台 UCS C885A（256 GPU）⋯</text>
+
+          <text x="350" y="270" text-anchor="middle" font-size="9" fill="#A0AEC0">四路 Rail-Optimized 拓扑：每台 Leaf 连接 2 个 GPU Rank，全网无阻塞</text>
+        </svg>
+      </div>
+
+      <h4>4.2.2 核心交换机：Cisco Nexus 9364E-SG2</h4>
+      <div class="table-wrap">
+        <table>
+          <tr><th>特性</th><th>Nexus 9364E-SG2</th></tr>
+          <tr><td>芯片</td><td>Cisco Silicon One G200</td></tr>
+          <tr><td>端口</td><td>64× 800GbE（QSFP-DD 或 OSFP）</td></tr>
+          <tr><td>交换容量</td><td>51.2 Tbps</td></tr>
+          <tr><td>片上缓存</td><td>256 MB（吸收微突发流量防止丢包）</td></tr>
+          <tr><td>关键 AI 特性</td><td>DLB (动态负载均衡) · PFC · ECN · RoCEv2 无损传输 · 细粒度遥测</td></tr>
+          <tr><td>管理</td><td>Cisco Nexus Dashboard · NX-OS</td></tr>
+          <tr><td>NVIDIA 认证</td><td>通过 NVIDIA Enterprise RA 和 Spectrum-X 平台验证<sup>[4][5]</sup></td></tr>
+        </table>
+      </div>
+
+      <h4>4.2.3 RDMA 与 RoCEv2：绕过 CPU 的数据直达</h4>
+      <p>在传统的 TCP/IP 网络中，数据包需经过操作系统内核空间的层层封装与拷贝，引入数十至数百微秒的延迟，根本无法应对 AI 训练中密集的数据交换。<sup>[1]</sup></p>
+      <p><strong>RDMA（Remote Direct Memory Access，远程直接内存访问）</strong>技术彻底颠覆了数据流转范式：一台主机的网卡可以直接读写另一台主机的物理内存，完全绕过（Bypass）双方的 CPU、操作系统内核和系统缓存，实现"零拷贝（Zero-copy）"通信，端到端延迟压缩至个位数微秒级别。<sup>[1]</sup></p>
+      <p><strong>RoCEv2（RDMA over Converged Ethernet v2）</strong>将 RDMA 操作指令封装在标准的 UDP/IP 数据包中，使其可以跨越标准以太网的 L3 路由器传输。但 RDMA 对丢包"零容忍"——丢包会触发灾难性的性能崩塌。因此部署 RoCEv2 依赖数据中心桥接（DCB）技术体系：<sup>[1]</sup></p>
+      <ul style="padding-left:20px;color:var(--text-secondary);margin-bottom:14px;">
+        <li><strong>PFC（优先级流量控制）</strong>：交换机端口缓冲池即将溢出时向上游发送暂停帧，强制源头暂停发送</li>
+        <li><strong>ECN（显式拥塞通知）</strong>：在 IP 头标记拥塞程度</li>
+        <li><strong>DCQCN 算法</strong>：结合 PFC 与 ECN，平滑调节发送速率</li>
+      </ul>
+
+      <h4>4.2.4 自适应路由与数据包喷洒（Adaptive Routing & Packet Spraying）</h4>
+      <p>AI 训练流量具有独特的"大象流（Elephant Flows）"特征——同时爆发的巨大突发流量（Incast）。传统的 ECMP 基于五元组哈希将同一条流锁定在单一物理链路上，极易造成部分链路瞬间拥塞并触发 PFC 暂停，而其他可用路径却闲置。<sup>[1]</sup></p>
+      <p>Cisco Nexus 9364E-SG2 支持的<strong>自适应路由</strong>和<strong>数据包喷洒（Packet Spraying / DLB）</strong>技术根本性地改变了这一格局：交换机不再以"数据流"为单位分配路径，而是在<strong>每个数据包</strong>级别实时感知全网微秒级拥塞状况，将同一个巨大通信流的后续数据包如同喷洒水雾般动态分散到当前所有未拥塞的可用网络路径上传输。<sup>[1][4]</sup></p>
+
+      <div class="callout">
+        <p><strong>乱序问题如何解决？</strong> 数据包经不同路径传输，到达顺序必然混乱。接收端的 NVIDIA BlueField-3 SuperNIC 具备<strong>直接数据放置（DDP, Direct Data Placement）</strong>功能——网卡硬件无需 CPU 介入，根据每个数据包头部携带的内存地址标签，直接将乱序到达的数据包按正确顺序拼接并写入主机/GPU 内存。整个重组过程对上层应用（NCCL）完全透明。<sup>[1]</sup></p>
+      </div>
+
+      <p>在以色列的超算节点测试中，这种智能路由技术大幅减少了流冲突——相较传统 RoCEv2，存储读取带宽提升高达 <strong>48%</strong>，写入带宽提升 <strong>41%</strong>，显著降低了长时推理的 Token 间延迟。<sup>[1]</sup></p>
+    </div>
+
+    <!-- 4.3 前端网络 -->
+    <div class="card">
+      <h3>4.3 前端网络（North-South）：管理、存储与用户接入</h3>
+      <p>前端网络是 AI 部署中的多用途网络，负责连接 GPU 集群与外部世界——包括管理编排组件、存储系统以及（在混合部署中）终端用户的推理请求流量。<sup>[5]</sup></p>
+
+      <div class="table-wrap">
+        <table>
+          <tr><th>特性</th><th>前端网络设计</th></tr>
+          <tr><td>拓扑</td><td>两层 Spine-Leaf Clos（与后端镜像，但允许过订）</td></tr>
+          <tr><td>叶交换机</td><td>Cisco Nexus 9364D-GX2A（64×400GbE，51.2 Tbps）或 Nexus 9332D-GX2B（32×400GbE，25.6 Tbps）</td></tr>
+          <tr><td>服务器连接</td><td>每台 UCS C885A 配备 2× BlueField-3 B3220（各 2×200GbE），以 Active/Active Port-Channel 聚合</td></tr>
+          <tr><td>带宽标准</td><td>NVIDIA ERA 要求：存储流量 ≥12.5 Gbps/GPU，用户流量 ≥25 Gbps/GPU<sup>[5][6]</sup></td></tr>
+          <tr><td>多租户</td><td>MP-BGP EVPN + VXLAN Fabric（L2 扩展 + L3 转发 + 网络分段）</td></tr>
+          <tr><td>QoS</td><td>部署优先级策略，保护延迟敏感的推理请求和存储流量</td></tr>
+          <tr><td>统一管理</td><td>Cisco Nexus Dashboard 统一管理前后端双 Fabric</td></tr>
+        </table>
+      </div>
+
+      <div class="callout green">
+        <p><strong>为什么前后端要物理隔离？</strong> 后端 Fabric 是纯粹为 GPU 集合通信而建的专网，要求无阻塞、无过订；而前端 Fabric 承载混合流量（管理、存储、用户推理），允许过订以降低成本。两张独立的 Fabric 确保 AI 训练的关键路径不受管理流量或推理流量的干扰。<sup>[5]</sup></p>
+      </div>
+    </div>
+
+    <!-- 4.4 存储 -->
+    <div class="card">
+      <h3>4.4 存储：AI 工厂的燃料仓库</h3>
+      <p>数据是 AI 的燃料。如果存储系统无法以足够的速度将数据喂给 GPU，再强大的 GPU 也会因"等米下锅"而闲置。<sup>[4][6]</sup></p>
+
+      <div class="table-wrap">
+        <table>
+          <tr><th>AI 流水线阶段</th><th>存储需求特征</th></tr>
+          <tr><td>数据摄取（Ingest）</td><td>大量写入操作</td></tr>
+          <tr><td>数据准备（ETL）</td><td>读写混合循环</td></tr>
+          <tr><td>训练与微调</td><td>极端并行读取（所有 GPU 同时读取数据集）</td></tr>
+          <tr><td>推理服务</td><td>可预测的低延迟随机读取</td></tr>
+          <tr><td>RAG 检索</td><td>向量数据库的快速向量查找</td></tr>
+          <tr><td>日志与可观测性</td><td>持续遥测写入</td></tr>
+        </table>
+      </div>
+
+      <p>Cisco Secure AI Factory 采用<strong>存储无关但厂商验证</strong>的策略，支持经 NVIDIA 认证的存储合作伙伴：<sup>[4][5]</sup></p>
+      <div class="card-grid">
+        <div class="card card-sm" style="border-left:3px solid #805AD5;">
+          <h4>VAST Data</h4>
+          <p style="margin:0;">AI 级别统一存储，解耦架构，极致性能。Cisco + NVIDIA + VAST 提供交钥匙式全优化参考架构。</p>
+        </div>
+        <div class="card card-sm" style="border-left:3px solid #0694A2;">
+          <h4>NetApp</h4>
+          <p style="margin:0;">企业级数据治理与多协议数据结构，成熟的数据服务。</p>
+        </div>
+        <div class="card card-sm" style="border-left:3px solid #DD6B20;">
+          <h4>Pure Storage FlashBlade</h4>
+          <p style="margin:0;">高带宽文件/对象存储，适合非结构化数据工作负载。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4.5 网络架构演进 -->
+    <div class="card">
+      <h3>4.5 网络架构未来：InfiniBand vs RoCEv2 vs UEC</h3>
+      <p>当前 AI 数据中心的底层网络架构正处于群雄逐鹿的关键分水岭。<sup>[1]</sup></p>
+
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>评估维度</th>
+            <th>InfiniBand</th>
+            <th>RoCEv2 + PFC/DCQCN</th>
+            <th>UEC / UET 协议</th>
+          </tr>
+          <tr>
+            <td><strong>生态体系</strong></td>
+            <td>闭环体系，由 NVIDIA/Mellanox 主导</td>
+            <td>构建于成熟的标准以太网之上，部署成本较低</td>
+            <td>全新开放标准，由 Meta、Microsoft、Broadcom、Arista、Nokia 等联合制定<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>拥塞控制</strong></td>
+            <td>硬件级信用流控 + CCA（纳秒级响应）</td>
+            <td>依赖 PFC 被动暂停 + ECN，极端场景易引发队头阻塞</td>
+            <td>革命性的接收方信用（Credit-based）主动流控，从源头扼杀 Incast 拥塞<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>多路径路由</strong></td>
+            <td>子网管理器集中式自适应路由</td>
+            <td>传统依赖静态 ECMP，高级方案需厂商扩展</td>
+            <td>协议核心原生支持逐包多路径（Packet Spraying）+ 高并发小消息乱序处理<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>乱序处理</strong></td>
+            <td>严格按序，丢包触发 Go-Back-N 重传（代价高昂）</td>
+            <td>依赖厂商私有 DDP 扩展</td>
+            <td>在标准化协议层面原生支持乱序交付与接收端重组<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td><strong>适用场景</strong></td>
+            <td>追求极致最低延迟的顶级 AI/HPC 超算训练集群</td>
+            <td>中小企业 AI 推理、常规云原生 GPU 资源池</td>
+            <td>面向下一代百万端点规模的开放网络基座<sup>[1]</sup></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="callout">
+        <p><strong>以太网正在赢得 AI 后端网络</strong>：据 Dell'Oro 报告，尽管 InfiniBand 交换机在 2025 年 Q2 的 AI 后端网络销售中激增，<strong>以太网仍保持市场领先</strong>——而仅仅两年前，以太网在该市场的份额还不到 20%。Cisco Silicon One 芯片已通过 NVIDIA 验证，作为唯一的第三方芯片获得 Spectrum-X 平台认证。<sup>[4]</sup></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+
+<!-- ═══════════════════════ 全栈安全 & 可观测性 ═══════════════════════ -->
+<section class="section" id="security-obs">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#FFF5F5;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 4.5v7c0 4.5-3.5 8.5-9 10.5-5.5-2-9-6-9-10.5v-7L12 2z" fill="#FEB2B2" stroke="#E53E3E" stroke-width="1.5"/></svg>
+      </div>
+      <h2>贯穿全栈：安全与可观测性</h2>
+    </div>
+    <p>Cisco Secure AI Factory 的核心差异化竞争力在于：<strong>安全和可观测性不是事后附加的补丁，而是从芯片到应用每一层都内嵌的原生能力</strong>。<sup>[4]</sup></p>
+
+    <h3>🔒 每层安全能力一览</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>层级</th><th>安全能力</th><th>关键产品</th></tr>
+        <tr>
+          <td><strong>AI 软件层</strong></td>
+          <td>模型验证 · 模型护栏 · AI 供应链安全 · 库弱点防护</td>
+          <td>Cisco AI Defense</td>
+        </tr>
+        <tr>
+          <td><strong>Kubernetes 平台</strong></td>
+          <td>AI 运行时分段 · OS 漏洞防护 · 容器传输加密</td>
+          <td>Isovalent Runtime Security · Hypershield</td>
+        </tr>
+        <tr>
+          <td><strong>网络层</strong></td>
+          <td>Fabric 漏洞防护 · 区域分段 · 边界安全</td>
+          <td>Cisco Hybrid Mesh Firewall · Cisco Secure Firewall</td>
+        </tr>
+        <tr>
+          <td><strong>计算层</strong></td>
+          <td>NVIDIA 机密计算 · 供应链完整性</td>
+          <td>NVIDIA Confidential Compute · Cisco UCS</td>
+        </tr>
+        <tr>
+          <td><strong>存储层</strong></td>
+          <td>多类别安全 · 勒索软件防护 · 静态加密</td>
+          <td>合作伙伴存储原生安全</td>
+        </tr>
+        <tr>
+          <td><strong>共享服务</strong></td>
+          <td>安全运营 · 访问控制 · SIEM & SOAR · 威胁情报</td>
+          <td>Splunk Enterprise Security · Cisco Secure Access</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>📊 Splunk 可观测性</h3>
+    <p>从模型推理延迟、应用响应时间、Kubernetes 平台健康到底层网络遥测和基础设施监控——Splunk Observability 提供从模型到芯片的端到端全栈可观测性，使运维团队能够精确定位性能瓶颈。Cisco Nexus 交换机集成的 NetQ 遥测平台将所有遥测数据通过 PromQL 统一采集，使工程师能够通过单一视图精确定位 LLM 训练中的微秒级性能瓶颈。<sup>[1][4]</sup></p>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+<!-- ═══════════════════════ NVIDIA ERA 参考配置 ═══════════════════════ -->
+<section class="section" id="era">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#FFFAF0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#DD6B20" stroke-width="2"/><path d="M3 10h18" stroke="#DD6B20" stroke-width="2"/></svg>
+      </div>
+      <h2>附录：NVIDIA 企业参考架构（ERA）配置速查</h2>
+    </div>
+    <p>NVIDIA Enterprise Reference Architecture 采用 <strong>C-G-N-B 命名法</strong>（CPU 数 – GPU 数 – NIC 数 – 每 GPU 平均东西向带宽 GbE）来标准化描述计算节点配置。<sup>[6]</sup></p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>配置模式</th><th>描述</th><th>典型 GPU</th><th>集群规模</th><th>适用场景</th></tr>
+        <tr>
+          <td><strong>2-8-9-400</strong></td>
+          <td>2 CPU, 8 GPU (HGX SXM), 9 NIC, 400 GbE/GPU</td>
+          <td>HGX H100/H200/B200</td>
+          <td>4-32 节点 (32-256 GPU)</td>
+          <td>大模型训练与微调 · 大规模推理<sup>[5][6]</sup></td>
+        </tr>
+        <tr>
+          <td><strong>2-8-5-200</strong></td>
+          <td>2 CPU, 8 GPU (PCIe), 5 NIC, 200 GbE/GPU</td>
+          <td>H200 NVL / RTX PRO 6000 Blackwell</td>
+          <td>4-32 节点</td>
+          <td>中大模型训练与微调 · 推理<sup>[6]</sup></td>
+        </tr>
+        <tr>
+          <td><strong>2-4-3-200</strong></td>
+          <td>2 CPU, 4 GPU (PCIe), 3 NIC, 200 GbE/GPU</td>
+          <td>H100 NVL / L40S</td>
+          <td>8-32 节点</td>
+          <td>3D 渲染 · 中等模型推理 · 小规模训练<sup>[6]</sup></td>
+        </tr>
+        <tr>
+          <td><strong>2-2-3-400</strong></td>
+          <td>2 CPU (Grace), 2 GPU, 3 NIC, 400 GbE/GPU</td>
+          <td>GH200 NVL2 Superchip</td>
+          <td>4-32 节点</td>
+          <td>多节点 AI/HPC 混合应用<sup>[6]</sup></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><strong>本文档重点</strong>：Cisco AI POD 参考架构采用 <strong>2-8-9-400</strong> 模式（Cisco UCS C885A + Nexus 9364E-SG2），经 NVIDIA 认证的基础设施配置和 Spectrum-X 平台验证，支持最大 <strong>256 GPU</strong> 的企业级训练/推理集群。<sup>[5]</sup></p>
+    </div>
+  </div>
+</section>
+
+<div class="divider container"></div>
+
+<!-- ═══════════════════════ 术语表 ═══════════════════════ -->
+<section class="section" id="glossary">
+  <div class="container">
+    <div class="section-title-bar">
+      <div class="icon-circle" style="background:#EBF4FF;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="#2B6CB0" stroke-width="2" rx="2"/><path d="M8 8h8M8 12h6M8 16h4" stroke="#2B6CB0" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <h2>术语表 Glossary</h2>
+    </div>
+    <div class="glossary-grid">
+      <div class="glossary-item"><span class="term">AI Factory</span><span class="def">专门为规模化生产"智能（Intelligence）"而建造的新型数据中心基础设施，将数据和电力转化为 Token。</span></div>
+      <div class="glossary-item"><span class="term">Token</span><span class="def">模型处理和生成文本的基本原子单位。AI 系统的输入和输出均以 Token 为单位。</span></div>
+      <div class="glossary-item"><span class="term">LLM</span><span class="def">Large Language Model，大语言模型。具有数十亿至数万亿参数的深度神经网络，能理解和生成自然语言。</span></div>
+      <div class="glossary-item"><span class="term">Transformer</span><span class="def">基于多头注意力机制的神经网络架构，是几乎所有主流 LLM 的基础。</span></div>
+      <div class="glossary-item"><span class="term">RAG</span><span class="def">Retrieval-Augmented Generation，检索增强生成。将 LLM 与外部知识库结合，减少幻觉并提供实时信息。</span></div>
+      <div class="glossary-item"><span class="term">Agentic AI</span><span class="def">智能体 AI。具备自主规划、迭代推理、工具调用和上下文记忆能力的 AI 系统。</span></div>
+      <div class="glossary-item"><span class="term">Hallucination</span><span class="def">幻觉。AI 生成的包含虚假或误导性信息但被当作事实呈现的回应。</span></div>
+      <div class="glossary-item"><span class="term">Embedding</span><span class="def">将文本转化为包含语义特征的高维数字向量的过程/结果，用于相似度搜索。</span></div>
+      <div class="glossary-item"><span class="term">向量数据库</span><span class="def">专门用于高效存储、管理和查询高维向量表示的数据库，支持语义相似性搜索。</span></div>
+      <div class="glossary-item"><span class="term">GPU</span><span class="def">Graphics Processing Unit，图形处理器。包含数千个并行计算核心，是 AI 训练和推理的核心硬件。</span></div>
+      <div class="glossary-item"><span class="term">CUDA</span><span class="def">Compute Unified Device Architecture。NVIDIA 的并行计算平台和编程模型，用于调度 GPU 上的并行计算。</span></div>
+      <div class="glossary-item"><span class="term">SM</span><span class="def">Streaming Multiprocessor，流多处理器。GPU 内部最主要的计算引擎单元。</span></div>
+      <div class="glossary-item"><span class="term">Kernel</span><span class="def">在 CUDA 中，指在 GPU（Device）上执行的特殊函数。</span></div>
+      <div class="glossary-item"><span class="term">NVLink</span><span class="def">NVIDIA 专有的高速 GPU 互联总线，用于节点内 GPU 间的超高带宽数据交换。</span></div>
+      <div class="glossary-item"><span class="term">NCCL</span><span class="def">NVIDIA Collective Communication Library。优化多 GPU 和多节点环境集合通信的底层软件库。</span></div>
+      <div class="glossary-item"><span class="term">All-Reduce</span><span class="def">分布式深度学习中最核心的集合通信操作，所有 GPU 同时交换并聚合梯度参数。</span></div>
+      <div class="glossary-item"><span class="term">RDMA</span><span class="def">Remote Direct Memory Access，远程直接内存访问。网卡直接读写远端主机物理内存，绕过 CPU 和操作系统。</span></div>
+      <div class="glossary-item"><span class="term">RoCEv2</span><span class="def">RDMA over Converged Ethernet v2。将 RDMA 封装在标准 UDP/IP 以太网之上的协议。</span></div>
+      <div class="glossary-item"><span class="term">PFC</span><span class="def">Priority Flow Control，优先级流量控制。以太网交换机缓冲溢出时向上游发送暂停帧以防止丢包。</span></div>
+      <div class="glossary-item"><span class="term">ECN</span><span class="def">Explicit Congestion Notification，显式拥塞通知。在 IP 头标记网络拥塞程度，通知端点降低发送速率。</span></div>
+      <div class="glossary-item"><span class="term">DCQCN</span><span class="def">Data Center QoS-based Congestion Notification。结合 PFC 和 ECN 的 RoCEv2 拥塞控制算法。</span></div>
+      <div class="glossary-item"><span class="term">Adaptive Routing</span><span class="def">自适应路由。交换机根据网络链路实时拥塞状态动态选择最优路径转发数据。</span></div>
+      <div class="glossary-item"><span class="term">Packet Spraying</span><span class="def">数据包喷洒/逐包负载均衡。将同一数据流的每个数据包分散到不同路径传输以实现 100% 链路利用。</span></div>
+      <div class="glossary-item"><span class="term">DDP</span><span class="def">Direct Data Placement，直接数据放置。网卡硬件将乱序到达的数据包直接按正确顺序写入目标内存。</span></div>
+      <div class="glossary-item"><span class="term">InfiniBand</span><span class="def">一种高性能、低延迟的网络互联技术，原生支持 RDMA，广泛用于 HPC 和 AI 超算集群。</span></div>
+      <div class="glossary-item"><span class="term">UEC / UET</span><span class="def">Ultra Ethernet Consortium / Ultra Ethernet Transport。面向下一代 AI 网络的开放以太网标准及传输协议。</span></div>
+      <div class="glossary-item"><span class="term">Spectrum-X</span><span class="def">NVIDIA 为大规模 AI 网络定制的以太网平台，包含 Spectrum-4 交换机和 BlueField SuperNIC。</span></div>
+      <div class="glossary-item"><span class="term">MIG</span><span class="def">Multi-Instance GPU。在物理层面将单张 GPU 划分为多个完全独立实例的硬件技术。</span></div>
+      <div class="glossary-item"><span class="term">NIM</span><span class="def">NVIDIA Inference Microservices。将模型与优化推理引擎封装为企业级容器的微服务。</span></div>
+      <div class="glossary-item"><span class="term">IFB</span><span class="def">In-flight Batching，动态批处理。在每个 Token 生成步骤动态插入新请求以最大化 GPU 利用率。</span></div>
+      <div class="glossary-item"><span class="term">Tensor Parallelism</span><span class="def">张量并行。将模型权重矩阵物理分片到多张 GPU 并行计算以突破单卡显存限制。</span></div>
+      <div class="glossary-item"><span class="term">TTFT</span><span class="def">Time to First Token，首字延迟。用户发送请求到看到第一个字符输出的等待时间。</span></div>
+      <div class="glossary-item"><span class="term">ITL</span><span class="def">Inter Token Latency，Token 间延迟。模型生成每个后续 Token 的时间间隔。</span></div>
+      <div class="glossary-item"><span class="term">KV Cache</span><span class="def">Key-Value Cache，键值缓存。模型在预填充阶段计算的注意力中间状态，存储在 GPU 显存中用于加速后续解码。</span></div>
+      <div class="glossary-item"><span class="term">DPU</span><span class="def">Data Processing Unit，数据处理单元。如 NVIDIA BlueField，卸载 CPU 的基础设施管理和安全加密工作。</span></div>
+      <div class="glossary-item"><span class="term">Clos 拓扑</span><span class="def">一种多级非阻塞交换网络拓扑（Spine-Leaf），广泛用于现代数据中心以提供可预测的低延迟。</span></div>
+      <div class="glossary-item"><span class="term">EVPN VXLAN</span><span class="def">Ethernet VPN + Virtual eXtensible LAN。基于 BGP 控制平面和 VXLAN 数据平面的网络虚拟化叠加技术，支持多租户。</span></div>
+      <div class="glossary-item"><span class="term">Rail-Optimized</span><span class="def">一种 GPU 集群网络拓扑设计，每台叶交换机连接所有服务器中相同 Rank 的 GPU NIC，确保流量平衡。</span></div>
+      <div class="glossary-item"><span class="term">Guardrails</span><span class="def">护栏。确保 AI 模型遵守组织策略和价值观的安全机制，防止生成有害或偏离主题的内容。</span></div>
+      <div class="glossary-item"><span class="term">TCO</span><span class="def">Total Cost of Ownership，总拥有成本。包含购买、部署、运维和能耗的全生命周期成本。</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 脚注 ═══════════════════════ -->
+<section class="footnotes">
+  <div class="container">
+    <h3>参考文献与来源标注</h3>
+    <ol>
+      <li><strong>[1]</strong> — AI 技术栈：智能工厂全景 (AI 技术栈：智能工厂全景.md) — 涵盖 NVIDIA AI Factory 全栈技术架构的深度研究报告，包括应用层（LLM / RAG / Agentic AI）、编排层（K8s / Run:ai / NIM）、计算层（PyTorch / CUDA / NCCL）、基础设施层（RDMA / RoCEv2 / Spectrum-X / InfiniBand / UEC）的详细解析。</li>
+      <li><strong>[2]</strong> — NVIDIA Data Center Solutions: AI Factories, nvidia.com</li>
+      <li><strong>[3]</strong> — NVIDIA Enterprise Reference Architecture Overview (nvidia-enterprise-reference-architecture-white-paper.pdf) — "Building AI Factories for the Enterprise" 章节。</li>
+      <li><strong>[4]</strong> — Cisco Secure AI Factory with NVIDIA (TEM Q3 M1_Cisco Secure AI Factory.pdf) — Cisco 解决方案工程师培训材料，涵盖产品定位、安全架构、竞争分析。</li>
+      <li><strong>[5]</strong> — Cisco AI POD Infrastructure for Enterprises Guide (Cisco AI POD Infrastructure for Enterprises Guide.pdf) — 使用 UCS C885A 和 Nexus 9364E-SG2 的详细参考架构设计文档，包括拓扑、BOM、软件版本矩阵。</li>
+      <li><strong>[6]</strong> — NVIDIA Enterprise Reference Architecture Overview Whitepaper (nvidia-enterprise-reference-architecture-white-paper.pdf) — C-G-N-B 命名法、各参考配置的详细描述、集群规模与用例指南。</li>
+    </ol>
+    <p style="margin-top:20px;color:#A0AEC0;font-size:.8rem;">本全景图基于上述公开文档与技术资料综合整理，仅供学习参考。文档访问日期：2026年3月27日。</p>
+  </div>
+</section>
+
+</main>
 </body>
 </html>
