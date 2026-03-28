@@ -4,554 +4,2748 @@ layout: false
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cisco Security Omni-Guide | 专家全景指南</title>
-    <style>
-        /* --- 1. CISCO BRAND & DESIGN SYSTEM --- */
-        :root {
-            /* Primary Palette */
-            --cisco-blue: #00BCEB;       /* Core Blue */
-            --cisco-dark-blue: #005073;  /* Deep Navy */
-            --cisco-midnight: #1B2C42;   /* UI Background */
-            --cisco-sky: #64BBE3;        /* Light Blue accents */
-            
-            /* Functional Palette (NIST/Status) */
-            --color-id: #0096AF;   /* Identify */
-            --color-pr: #95509F;   /* Protect */
-            --color-de: #FF9E1B;   /* Detect */
-            --color-re: #E2231A;   /* Respond */
-            --color-rc: #6ABF4B;   /* Recover */
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco安全架构：以NIST CSF 2.0为主线的统一理解框架</title>
+<style>
+/* ========== CSS RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #ffffff;
+  color: #1a1a1a;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-            /* UI Variables */
-            --bg-body: #F4F6F8;
-            --bg-card: #FFFFFF;
-            --text-main: #333333;
-            --text-light: #666666;
-            --radius-sm: 8px;
-            --radius-lg: 16px;
-            --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
-            --shadow-hover: 0 10px 25px rgba(0,0,0,0.12);
-        }
+/* ========== CONTAINER ========== */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.container-narrow { max-width: 900px; margin: 0 auto; padding: 0 24px; }
 
-        /* --- 2. GLOBAL RESET & TYPOGRAPHY --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-body); color: var(--text-main); padding-bottom: 100px; line-height: 1.6; }
-        
-        h1, h2, h3, h4 { margin: 0; color: var(--cisco-midnight); }
-        h1 { font-size: 1.8rem; font-weight: 800; text-align: center; margin: 20px 0 5px 0; }
-        .subtitle { text-align: center; color: var(--text-light); font-size: 0.9rem; margin-bottom: 30px; }
-        
-        h2 { font-size: 1.4rem; padding-left: 15px; border-left: 5px solid var(--cisco-blue); margin: 30px 0 20px 0; display: flex; align-items: center; justify-content: space-between; }
-        h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--cisco-dark-blue); }
+/* ========== TYPOGRAPHY ========== */
+h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; }
+h2 { font-size: 2rem; font-weight: 700; line-height: 1.3; color: #049fd9; margin-bottom: 16px; letter-spacing: -0.01em; }
+h3 { font-size: 1.5rem; font-weight: 700; line-height: 1.4; color: #1a1a1a; margin-bottom: 12px; }
+h4 { font-size: 1.15rem; font-weight: 600; line-height: 1.4; color: #333; margin-bottom: 8px; }
+p { margin-bottom: 16px; color: #333; }
+a { color: #049fd9; text-decoration: none; transition: color 0.2s; }
+a:hover { color: #00BCEB; }
+strong { color: #1a1a1a; }
+ul, ol { margin-bottom: 16px; padding-left: 24px; }
+li { margin-bottom: 6px; }
+.text-muted { color: #666; }
+.text-small { font-size: 0.9rem; }
+.text-center { text-align: center; }
+.text-cisco-blue { color: #049fd9; }
+.text-white { color: #fff; }
 
-        /* --- 3. LAYOUT UTILITIES --- */
-        .container { max-width: 900px; margin: 0 auto; padding: 0 15px; padding-top: 10px; }
-        .card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow-card); position: relative; overflow: hidden; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-        
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+/* ========== NAVIGATION ========== */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e8e8e8;
+  transition: box-shadow 0.3s;
+}
+.navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+.navbar-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.navbar-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 1.1rem; color: #1a1a1a;
+}
+.navbar-logo svg { flex-shrink: 0; }
+.navbar-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.navbar-links a {
+  font-size: 0.85rem; font-weight: 500; color: #555;
+  padding: 6px 12px; border-radius: 8px; transition: all 0.2s;
+  white-space: nowrap;
+}
+.navbar-links a:hover { color: #049fd9; background: #f0f8ff; }
+.navbar-links a.active { color: #049fd9; background: #e8f4fd; }
+.mobile-menu-btn {
+  display: none; background: none; border: none; cursor: pointer; padding: 8px;
+}
+.mobile-menu-btn svg { display: block; }
+.mobile-nav {
+  display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(12px);
+  z-index: 999; padding: 24px; overflow-y: auto;
+}
+.mobile-nav.open { display: block; }
+.mobile-nav a {
+  display: block; padding: 14px 16px; font-size: 1rem; font-weight: 500;
+  color: #333; border-bottom: 1px solid #f0f0f0; border-radius: 8px;
+}
+.mobile-nav a:hover { color: #049fd9; background: #f0f8ff; }
 
-        /* --- 4. INTERACTIVE COMPONENTS --- */
-        /* Language Switcher - MOVED TO TOP RIGHT */
-        .lang-switch { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            z-index: 1000; 
-            background: rgba(27, 44, 66, 0.9); /* Cisco Midnight with opacity */
-            border-radius: 30px; 
-            padding: 4px; 
-            display: flex; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
-            backdrop-filter: blur(5px);
-        }
-        .lang-btn { background: transparent; border: none; color: #ccc; padding: 6px 14px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 0.85rem; }
-        .lang-btn.active { background: var(--cisco-blue); color: white; }
-        .hidden { display: none !important; }
+@media (max-width: 900px) {
+  .navbar-links { display: none; }
+  .mobile-menu-btn { display: block; }
+}
 
-        /* Accordion / Detailed Specs */
-        .specs-toggle { color: var(--cisco-blue); cursor: pointer; font-size: 0.9rem; font-weight: bold; margin-top: 10px; display: inline-block; border-bottom: 1px dashed var(--cisco-blue); }
-        .specs-content { display: none; background: #f9f9f9; padding: 15px; border-radius: var(--radius-sm); margin-top: 10px; font-size: 0.9rem; border-left: 3px solid var(--cisco-blue); }
-        .specs-content.show { display: block; animation: fadeIn 0.4s; }
+/* ========== HERO SECTION ========== */
+.hero {
+  margin-top: 64px;
+  background: linear-gradient(135deg, #049fd9 0%, #0077b6 40%, #023e8a 100%);
+  padding: 80px 24px 72px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(0,188,235,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(255,255,255,0.05) 0%, transparent 50%);
+  animation: heroFloat 20s ease-in-out infinite;
+}
+@keyframes heroFloat {
+  0%, 100% { transform: translate(0,0) rotate(0deg); }
+  50% { transform: translate(-2%,1%) rotate(1deg); }
+}
+.hero-content { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+.hero h1 { color: #fff; margin-bottom: 20px; font-size: 2.6rem; }
+.hero .subtitle {
+  color: rgba(255,255,255,0.9); font-size: 1.2rem; line-height: 1.7;
+  margin-bottom: 36px; max-width: 700px; margin-left: auto; margin-right: auto;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50px; padding: 8px 20px; font-size: 0.85rem; color: #fff;
+  margin-bottom: 28px; backdrop-filter: blur(8px);
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: #049fd9; font-weight: 700; font-size: 1rem;
+  padding: 14px 36px; border-radius: 50px; border: none; cursor: pointer;
+  transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); background: #f0f8ff; }
+.hero-stats {
+  display: flex; justify-content: center; gap: 48px; margin-top: 48px;
+  flex-wrap: wrap;
+}
+.hero-stat { text-align: center; }
+.hero-stat .number { font-size: 2.2rem; font-weight: 800; color: #fff; }
+.hero-stat .label { font-size: 0.85rem; color: rgba(255,255,255,0.75); margin-top: 4px; }
 
-        /* Tag Badges */
-        .tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; color: white; margin-right: 5px; margin-bottom: 5px; }
-        .bg-blue { background: var(--cisco-blue); }
-        .bg-dark { background: var(--cisco-midnight); }
-        .bg-nist-id { background: var(--color-id); }
-        .bg-nist-pr { background: var(--color-pr); }
-        .bg-nist-de { background: var(--color-de); }
-        .bg-nist-re { background: var(--color-re); }
+@media (max-width: 600px) {
+  .hero { padding: 60px 16px 52px; }
+  .hero h1 { font-size: 1.8rem; }
+  .hero .subtitle { font-size: 1rem; }
+  .hero-stats { gap: 24px; }
+  .hero-stat .number { font-size: 1.6rem; }
+}
 
-        /* --- 5. VISUALIZATION STYLES --- */
-        .svg-container { width: 100%; overflow-x: auto; display: flex; justify-content: center; padding: 10px 0; background: #fff; border-radius: 8px; }
-        
-        /* Attack Scenario Simulator Styles */
-        .scenario-box { background: #222; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; height: 150px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #444; }
-        .log-entry { margin-bottom: 5px; }
-        .log-time { color: #888; margin-right: 10px; }
-        .log-alert { color: #ff5555; font-weight: bold; }
-        .log-action { color: var(--cisco-blue); font-weight: bold; }
-        .scenario-btn { background: var(--color-re); color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
-        .scenario-btn:active { transform: scale(0.98); }
+/* ========== SECTIONS ========== */
+.section { padding: 72px 0; }
+.section-alt { background: #f8fafb; }
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-header p { max-width: 700px; margin: 8px auto 0; color: #555; font-size: 1.05rem; }
+.section-divider {
+  width: 60px; height: 4px; background: linear-gradient(90deg, #049fd9, #00BCEB);
+  border-radius: 2px; margin: 16px auto 0;
+}
 
-        /* Keyframe Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* ========== CARDS ========== */
+.card {
+  background: #fff; border-radius: 16px; padding: 32px;
+  border: 1px solid #e8eef3;
+  transition: all 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card:hover {
+  box-shadow: 0 8px 30px rgba(4,159,217,0.1);
+  border-color: #c8e6f5;
+  transform: translateY(-2px);
+}
+.card-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.card-icon.blue { background: linear-gradient(135deg, #e8f4fd, #d0ecfb); }
+.card-icon.green { background: linear-gradient(135deg, #e6f9f0, #c8f0dd); }
+.card-icon.orange { background: linear-gradient(135deg, #fff3e6, #ffe8cc); }
+.card-icon.red { background: linear-gradient(135deg, #fde8e8, #f9d0d0); }
+.card-icon.purple { background: linear-gradient(135deg, #f0e8fd, #e0d0f9); }
+.card-icon.teal { background: linear-gradient(135deg, #e0f7fa, #b2ebf2); }
 
-    </style>
-<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+/* ========== GRID LAYOUTS ========== */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ========== NIST FUNCTION CARDS ========== */
+.nist-func-card {
+  background: #fff; border-radius: 16px; padding: 28px;
+  border-left: 5px solid; position: relative;
+  border-top: 1px solid #e8eef3;
+  border-right: 1px solid #e8eef3;
+  border-bottom: 1px solid #e8eef3;
+  transition: all 0.3s;
+}
+.nist-func-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+.nist-func-card.govern { border-left-color: #6c5ce7; }
+.nist-func-card.identify { border-left-color: #0984e3; }
+.nist-func-card.protect { border-left-color: #00b894; }
+.nist-func-card.detect { border-left-color: #fdcb6e; }
+.nist-func-card.respond { border-left-color: #e17055; }
+.nist-func-card.recover { border-left-color: #a29bfe; }
+.nist-tag {
+  display: inline-block; font-size: 0.75rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px; color: #fff; margin-bottom: 12px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.nist-tag.govern { background: #6c5ce7; }
+.nist-tag.identify { background: #0984e3; }
+.nist-tag.protect { background: #00b894; }
+.nist-tag.detect { background: #fdcb6e; color: #333; }
+.nist-tag.respond { background: #e17055; }
+.nist-tag.recover { background: #a29bfe; }
+
+/* ========== FLOW DIAGRAM ========== */
+.nist-flow {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; flex-wrap: wrap; margin: 40px 0; padding: 32px 16px;
+  background: #f8fafb; border-radius: 16px;
+}
+.nist-flow-item {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 16px 20px; border-radius: 12px; min-width: 110px;
+  text-align: center; font-weight: 700; font-size: 0.85rem;
+  color: #fff; transition: transform 0.2s;
+}
+.nist-flow-item:hover { transform: scale(1.05); }
+.nist-flow-item.govern-bg { background: #6c5ce7; }
+.nist-flow-item.identify-bg { background: #0984e3; }
+.nist-flow-item.protect-bg { background: #00b894; }
+.nist-flow-item.detect-bg { background: #f9a825; color: #333; }
+.nist-flow-item.respond-bg { background: #e17055; }
+.nist-flow-item.recover-bg { background: #a29bfe; }
+.nist-flow-arrow { font-size: 1.4rem; color: #bbb; flex-shrink: 0; }
+@media (max-width: 700px) {
+  .nist-flow { flex-direction: column; gap: 4px; }
+  .nist-flow-arrow { transform: rotate(90deg); }
+}
+
+/* ========== ACCORDION / COLLAPSIBLE ========== */
+.accordion { margin-bottom: 12px; border-radius: 12px; overflow: hidden; border: 1px solid #e8eef3; }
+.accordion-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; cursor: pointer; background: #fff;
+  font-weight: 600; font-size: 1.05rem; color: #1a1a1a;
+  transition: background 0.2s; gap: 12px;
+  user-select: none;
+}
+.accordion-header:hover { background: #f8fafb; }
+.accordion-header .acc-icon {
+  flex-shrink: 0; width: 24px; height: 24px;
+  transition: transform 0.3s;
+}
+.accordion-header.open .acc-icon { transform: rotate(180deg); }
+.accordion-body {
+  max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+  background: #fdfdfd;
+}
+.accordion-body-inner { padding: 0 24px 24px; }
+
+/* ========== PRODUCT MAPPING TABLE ========== */
+.mapping-table-wrap { overflow-x: auto; margin: 24px 0; border-radius: 12px; border: 1px solid #e8eef3; }
+.mapping-table {
+  width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  min-width: 800px;
+}
+.mapping-table thead th {
+  background: #049fd9; color: #fff; padding: 14px 16px;
+  text-align: left; font-weight: 600; font-size: 0.85rem;
+  letter-spacing: 0.03em; position: sticky; top: 0;
+}
+.mapping-table tbody td {
+  padding: 12px 16px; border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+.mapping-table tbody tr:hover { background: #f8fbfd; }
+.mapping-table tbody tr:last-child td { border-bottom: none; }
+.check-mark { color: #00b894; font-weight: 700; }
+.partial-mark { color: #fdcb6e; font-weight: 700; }
+
+/* ========== TOOLTIP ========== */
+.tooltip-trigger {
+  position: relative; cursor: help;
+  border-bottom: 1px dashed #049fd9; color: #049fd9;
+}
+.tooltip-trigger .tooltip-text {
+  visibility: hidden; opacity: 0;
+  position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+  background: #1a1a1a; color: #fff; font-size: 0.8rem; font-weight: 400;
+  padding: 10px 14px; border-radius: 8px; width: max-content; max-width: 280px;
+  line-height: 1.5; z-index: 100; pointer-events: none;
+  transition: opacity 0.2s, visibility 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.tooltip-trigger .tooltip-text::after {
+  content: ''; position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%); border: 6px solid transparent;
+  border-top-color: #1a1a1a;
+}
+.tooltip-trigger:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+/* ========== CODE BLOCK ========== */
+.code-block {
+  background: #1e293b; color: #e2e8f0; border-radius: 12px;
+  padding: 24px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 0.85rem; line-height: 1.7; overflow-x: auto;
+  margin: 16px 0; position: relative;
+}
+.code-block .code-label {
+  position: absolute; top: 8px; right: 12px;
+  font-size: 0.7rem; color: #94a3b8; background: #334155;
+  padding: 2px 10px; border-radius: 4px;
+}
+.code-block .keyword { color: #c084fc; }
+.code-block .string { color: #86efac; }
+.code-block .comment { color: #64748b; font-style: italic; }
+.code-block .number { color: #fbbf24; }
+.code-block .cmd { color: #38bdf8; }
+
+/* ========== SCENARIO STORY BOX ========== */
+.story-box {
+  background: linear-gradient(135deg, #f0f8ff, #e8f4fd);
+  border-left: 4px solid #049fd9;
+  border-radius: 0 12px 12px 0;
+  padding: 24px 28px; margin: 24px 0;
+  font-style: italic; color: #333;
+}
+.story-box .story-label {
+  font-style: normal; font-weight: 700; color: #049fd9;
+  font-size: 0.85rem; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 8px;
+}
+
+/* ========== METRIC CARDS ========== */
+.metric-card {
+  background: #fff; border-radius: 14px; padding: 24px;
+  text-align: center; border: 1px solid #e8eef3;
+  transition: all 0.3s;
+}
+.metric-card:hover { box-shadow: 0 4px 20px rgba(4,159,217,0.1); transform: translateY(-2px); }
+.metric-value { font-size: 2.4rem; font-weight: 800; color: #049fd9; }
+.metric-label { font-size: 0.9rem; color: #666; margin-top: 4px; }
+
+/* ========== INDUSTRY TAB ========== */
+.tab-group { display: flex; gap: 4px; margin-bottom: 24px; background: #f0f2f5; border-radius: 12px; padding: 4px; }
+.tab-btn {
+  flex: 1; padding: 12px 20px; border: none; background: transparent;
+  border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+  cursor: pointer; transition: all 0.2s; color: #666;
+}
+.tab-btn.active { background: #fff; color: #049fd9; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== QUESTION LIST ========== */
+.question-list { counter-reset: q; list-style: none; padding-left: 0; }
+.question-list li {
+  counter-increment: q; position: relative;
+  padding: 16px 16px 16px 52px; margin-bottom: 8px;
+  background: #fff; border-radius: 10px; border: 1px solid #e8eef3;
+  font-size: 0.95rem; transition: all 0.2s;
+}
+.question-list li:hover { border-color: #049fd9; background: #f8fbfd; }
+.question-list li::before {
+  content: "Q" counter(q);
+  position: absolute; left: 14px; top: 16px;
+  background: #049fd9; color: #fff; font-weight: 700;
+  font-size: 0.75rem; padding: 2px 8px; border-radius: 6px;
+}
+
+/* ========== CTA SECTION ========== */
+.cta-section {
+  background: linear-gradient(135deg, #049fd9 0%, #023e8a 100%);
+  padding: 64px 24px; text-align: center; border-radius: 20px;
+  margin: 48px 0;
+}
+.cta-section h2 { color: #fff; }
+.cta-section p { color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto 28px; }
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: #049fd9; font-weight: 700; font-size: 1rem;
+  padding: 14px 36px; border-radius: 50px; border: none; cursor: pointer;
+  transition: all 0.3s;
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+
+/* ========== FOOTER ========== */
+.site-footer {
+  background: #1a1a2e; color: #aaa; padding: 48px 24px 32px;
+  font-size: 0.85rem;
+}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 32px; }
+@media (max-width: 700px) { .footer-grid { grid-template-columns: 1fr; gap: 24px; } }
+.footer-divider { border: none; border-top: 1px solid #333; margin-bottom: 20px; }
+.footer-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+/* ========== COMPARISON TABLE ========== */
+.comparison-card {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0;
+}
+@media (max-width: 700px) { .comparison-card { grid-template-columns: 1fr; } }
+.compare-item {
+  background: #fff; border-radius: 14px; padding: 28px;
+  border: 1px solid #e8eef3;
+}
+.compare-item h4 { display: flex; align-items: center; gap: 8px; }
+
+/* ========== BADGE ========== */
+.badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px;
+  letter-spacing: 0.04em;
+}
+.badge-blue { background: #e8f4fd; color: #049fd9; }
+.badge-green { background: #e6f9f0; color: #00a878; }
+.badge-orange { background: #fff3e6; color: #e67e22; }
+
+/* ========== SCROLL TO TOP ========== */
+.scroll-top {
+  position: fixed; bottom: 32px; right: 32px;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #049fd9; color: #fff; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(4,159,217,0.3); z-index: 999;
+}
+.scroll-top.visible { opacity: 1; visibility: visible; }
+.scroll-top:hover { transform: translateY(-3px); background: #0388c2; }
+
+/* ========== ANIMATIONS ========== */
+.fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* ========== PRINT ========== */
+@media print {
+  .navbar, .scroll-top, .mobile-nav { display: none !important; }
+  .hero { margin-top: 0; padding: 40px 24px; }
+  .section { padding: 32px 0; }
+  body { font-size: 12pt; }
+}
+</style>
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 </head>
 <body>
 
-    <!-- Language Controls (Top Right) -->
-    <div class="lang-switch">
-        <button class="lang-btn active" onclick="switchLang('zh')">中</button>
-        <button class="lang-btn" onclick="switchLang('en')">EN</button>
+<!-- ==================== NAVIGATION ==================== -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="8" fill="#049fd9"/>
+        <path d="M7 18V10M10.5 16V12M14 18V10M17.5 16V12M21 18V10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Cisco 安全架构</span>
+    </div>
+    <div class="navbar-links" id="navLinks">
+      <a href="#story">故事引入</a>
+      <a href="#nist-csf">NIST CSF 2.0</a>
+      <a href="#mitre">MITRE对比</a>
+      <a href="#product-mapping">产品映射</a>
+      <a href="#industry">行业案例</a>
+      <a href="#sales">销售机会</a>
+      <a href="#conclusion">结论</a>
+    </div>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="#story" onclick="closeMobileMenu()">📖 故事引入</a>
+  <a href="#nist-csf" onclick="closeMobileMenu()">🛡️ NIST CSF 2.0</a>
+  <a href="#mitre" onclick="closeMobileMenu()">🎯 MITRE对比</a>
+  <a href="#product-mapping" onclick="closeMobileMenu()">🔧 产品映射</a>
+  <a href="#industry" onclick="closeMobileMenu()">🏭 行业案例</a>
+  <a href="#sales" onclick="closeMobileMenu()">💡 销售机会</a>
+  <a href="#conclusion" onclick="closeMobileMenu()">✅ 结论</a>
+</div>
+
+<!-- ==================== HERO SECTION ==================== -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.8 3.8 14l.8-4.7L1.2 6l4.7-.7L8 1z" fill="#fbbf24"/></svg>
+      技术白皮书 · 2026版
+    </div>
+    <h1>Cisco安全架构<br>以NIST CSF 2.0为主线的统一理解框架</h1>
+    <p class="subtitle">
+      从业内权威方法论出发，系统梳理Cisco安全产品组合如何覆盖治理、识别、防护、检测、响应、恢复六大安全函数——面向制造业与银行业的实战指南
+    </p>
+    <a href="#story" class="hero-cta">
+      开始阅读
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    </a>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="number">8</div><div class="label">核心安全产品</div></div>
+      <div class="hero-stat"><div class="number">6</div><div class="label">NIST CSF函数</div></div>
+      <div class="hero-stat"><div class="number">2</div><div class="label">行业深度场景</div></div>
+      <div class="hero-stat"><div class="number">20+</div><div class="label">销售发现问题</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<main>
+
+<!-- ====== SECTION: STORY INTRO ====== -->
+<section class="section" id="story">
+  <div class="container-narrow">
+    <div class="section-header">
+      <h2>📖 一个工厂的安全觉醒——从"看不见"到"全掌控"</h2>
+      <div class="section-divider"></div>
     </div>
 
-    <div class="container">
-        
-        <!-- HEADER -->
-        <header>
-            <div style="text-align:center; padding-top:20px;">
-                <!-- Cisco Logo SVG -->
-                <svg width="80" height="45" viewBox="0 0 80 45" style="display:inline-block;">
-                    <path d="M14 32h-3v-12h3v12zm13 0h-3v-22h3v22zm13 0h-3v-12h3v12zm13 0h-3v-22h3v22zm13 0h-3v-15h3v15zM14 17a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13-9a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13 9a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13-9a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0zm13 12a1.5 1.5 0 1 1-2 0 1.5 1.5 0 0 1 2 0z" fill="#00BCEB"/>
-                </svg>
+    <div class="story-box">
+      <div class="story-label">🏭 场景故事</div>
+      <p>
+        2025年夏天，华东某汽车零部件制造商——"华锐精密"（化名）——的IT总监李明接到一个令人不安的电话：公司的一条AGV（自动导引车）产线突然停摆两小时，直接造成超过80万元的产能损失。
+      </p>
+      <p>
+        事后调查发现，原因并非机械故障，而是一台运行老旧Windows XP的PLC（可编程逻辑控制器）网关被恶意软件感染，导致AGV调度系统的通信中断。更令人担忧的是——从感染到发现，整整过去了17天。在这17天里，攻击者已经横向移动到了三个OT网段。
+      </p>
+      <p>
+        李明问了自己一个根本问题：<strong>"我们到底看不见什么？"</strong>
+      </p>
+    </div>
+
+    <p>
+      这个故事并不罕见。根据IBM《2025年数据泄露成本报告》，制造业数据泄露的平均识别时间为<strong>212天</strong>，遏制时间为<strong>75天</strong>。而在银行业，虽然安全投入更大，但面对日益复杂的零信任转型、多云合规、第三方供应链风险，CTO们同样在追问同一个问题：
+    </p>
+
+    <div style="background: #fff; border-radius: 14px; padding: 28px 32px; border: 2px solid #049fd9; text-align: center; margin: 28px 0;">
+      <p style="font-size: 1.25rem; font-weight: 700; color: #049fd9; margin-bottom: 8px;">
+        "我们的安全体系是否存在系统性盲区？"
+      </p>
+      <p style="margin: 0; color: #666; font-size: 0.95rem;">
+        —— 这正是第一性原理的起点：从最根本的问题开始，自下而上构建安全架构。
+      </p>
+    </div>
+
+    <h3 style="margin-top: 36px;">🔍 第一性原理：安全问题的三层本质</h3>
+    <p>
+      要从根本理解企业安全，我们需要像物理学家一样，剥离表面症状，直达问题本质。企业安全问题可以归纳为三个层次：
+    </p>
+
+    <div class="grid-3" style="margin: 24px 0;">
+      <div class="card" style="text-align: center;">
+        <div class="card-icon blue" style="margin: 0 auto 16px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#049fd9" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </div>
+        <h4>第一层：可见性缺失</h4>
+        <p class="text-small text-muted">你无法保护你看不见的东西。多数企业对OT资产、加密流量、横向移动行为缺乏感知能力。</p>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div class="card-icon orange" style="margin: 0 auto 16px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h4>第二层：控制面碎片化</h4>
+        <p class="text-small text-muted">身份、网络、终端、工作负载各自为政，策略不一致、联动不实时，形成安全孤岛。</p>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div class="card-icon red" style="margin: 0 auto 16px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <h4>第三层：响应速度不足</h4>
+        <p class="text-small text-muted">即使检测到威胁，从告警到遏制的"黄金时间"内（通常<1小时），组织往往缺乏自动化闭环能力。</p>
+      </div>
+    </div>
+
+    <p>
+      要系统性地解决这三层问题，我们需要一个<strong>被业界广泛认可的参考框架</strong>作为思考主线——而不是从单一产品出发。这就是我们选择<strong>NIST Cybersecurity Framework (CSF) 2.0</strong>作为本文主线的原因。
+    </p>
+
+    <div style="background: #f8fafb; border-radius: 14px; padding: 24px 28px; margin: 24px 0;">
+      <h4>🧭 为什么选择NIST CSF 2.0？</h4>
+      <ul>
+        <li><strong>全球通用性</strong>：被美国联邦政府、EU NIS2指令、中国等保2.0等广泛引用或映射</li>
+        <li><strong>技术无关性</strong>：不绑定特定厂商，从能力（Capability）角度定义安全目标</li>
+        <li><strong>业务视角</strong>：2.0版本新增"Govern"函数，强调安全必须与业务战略对齐</li>
+        <li><strong>OT/ICS兼容</strong>：明确涵盖工业控制系统（ICS）和运营技术（OT）场景</li>
+        <li><strong>Cisco映射良好</strong>：Cisco产品组合天然覆盖六大函数的多数子类目</li>
+      </ul>
+    </div>
+
+    <p>
+      接下来，我们将首先深入理解NIST CSF 2.0的六大函数，然后将每个Cisco安全解决方案精准映射到这些函数中，最后通过制造业和银行业的实战场景，展示这一框架的实际运用价值。
+    </p>
+  </div>
+</section>
+
+<!-- ====== SECTION: NIST CSF 2.0 DEEP DIVE ====== -->
+<section class="section section-alt" id="nist-csf">
+  <div class="container">
+    <div class="section-header">
+      <h2>🛡️ NIST Cybersecurity Framework 2.0 核心详解</h2>
+      <p>六大安全函数：从治理到恢复的完整生命周期</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- NIST Flow Diagram -->
+    <div class="nist-flow">
+      <div class="nist-flow-item govern-bg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        GOVERN<br>治理
+      </div>
+      <div class="nist-flow-arrow">→</div>
+      <div class="nist-flow-item identify-bg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        IDENTIFY<br>识别
+      </div>
+      <div class="nist-flow-arrow">→</div>
+      <div class="nist-flow-item protect-bg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        PROTECT<br>防护
+      </div>
+      <div class="nist-flow-arrow">→</div>
+      <div class="nist-flow-item detect-bg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        DETECT<br>检测
+      </div>
+      <div class="nist-flow-arrow">→</div>
+      <div class="nist-flow-item respond-bg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        RESPOND<br>响应
+      </div>
+      <div class="nist-flow-arrow">→</div>
+      <div class="nist-flow-item recover-bg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        RECOVER<br>恢复
+      </div>
+    </div>
+
+    <div class="container-narrow">
+      <p class="text-center text-muted" style="margin-bottom: 40px;">
+        NIST CSF 2.0于2024年2月正式发布，是自2014年首版发布以来的最大更新。最核心的变化是新增<strong>Govern（治理）</strong>函数，
+        将其置于框架中心，强调安全治理必须与组织战略、风险偏好和供应链管理深度绑定。以下逐一详解六大函数。
+      </p>
+    </div>
+
+    <!-- 6 NIST Function Cards -->
+    <div class="grid-2" style="margin-bottom: 32px;">
+
+      <!-- GOVERN -->
+      <div class="nist-func-card govern fade-in">
+        <span class="nist-tag govern">GV · GOVERN</span>
+        <h3>治理 — 安全战略的指挥部</h3>
+        <p>
+          <strong>定义：</strong>Govern函数确定并传达组织的网络安全风险管理战略、期望和政策。它是CSF 2.0最重要的新增——将安全从"技术部门的事"提升为"董事会的事"。
+        </p>
+        <p><strong>关键目标：</strong></p>
+        <ul>
+          <li><strong>组织背景（GV.OC）：</strong>理解组织的使命、利益相关方期望、法律法规要求（如中国《网络安全法》《数据安全法》、银行业PCIDSS、制造业IEC 62443等），将其作为安全策略的输入。</li>
+          <li><strong>风险管理策略（GV.RM）：</strong>确立组织的风险偏好（Risk Appetite）、风险容忍度和优先级排序方法。例如，一家汽车零部件厂的首要风险是产线停摆，而银行的首要风险是客户数据泄露。</li>
+          <li><strong>角色与职责（GV.RR）：</strong>明确CISO、业务线负责人、OT安全负责人等各角色的安全责任矩阵（RACI）。</li>
+          <li><strong>策略与监督（GV.PO/GV.OV）：</strong>制定、传达并定期审查安全政策，确保高层持续监督安全投资的有效性。</li>
+          <li><strong>供应链风险管理（GV.SC）：</strong>将安全要求延伸到第三方供应商、集成商和云服务商，这在制造业供应链攻击（如SolarWinds事件模式）中尤为关键。</li>
+        </ul>
+        <p>
+          <em>类比：如果整个安全体系是一座城市的防御系统，Govern就是市政厅——它不直接巡逻街头，但决定了预算分配、法律法规、应急预案和城市规划。没有好的治理，其他一切都是无根之木。</em>
+        </p>
+      </div>
+
+      <!-- IDENTIFY -->
+      <div class="nist-func-card identify fade-in">
+        <span class="nist-tag identify">ID · IDENTIFY</span>
+        <h3>识别 — 知道你要保护什么</h3>
+        <p>
+          <strong>定义：</strong>Identify函数帮助组织理解并管理其资产、数据流、供应商和相关的网络安全风险。它是"安全始于可见性"原则的直接体现。
+        </p>
+        <p><strong>关键目标：</strong></p>
+        <ul>
+          <li><strong>资产管理（ID.AM）：</strong>建立并维护所有硬件设备、软件系统、数据资产和服务的清单。在OT环境中，这包括PLC、HMI、SCADA服务器、工业交换机、AGV/AMR等。这通常是企业最大的盲区——"你不能保护你不知道存在的东西"。</li>
+          <li><strong>风险评估（ID.RA）：</strong>识别威胁源、漏洞和潜在影响，结合资产价值进行风险评分。包括CVE漏洞扫描、威胁情报关联和业务影响分析（BIA）。</li>
+          <li><strong>改进（ID.IM）：</strong>基于评估结果制定改进计划，优先修复高风险项。这需要将安全运营数据（如检测率、平均响应时间MTTR）作为持续优化的输入。</li>
+        </ul>
+        <p>
+          <em>类比：Identify就像医院的全面体检——在开出任何处方之前，你必须先知道病人的完整健康状况。在制造业，很多企业甚至不知道自己的OT网络中运行着多少台设备、运行什么协议、与谁通信。</em>
+        </p>
+      </div>
+
+      <!-- PROTECT -->
+      <div class="nist-func-card protect fade-in">
+        <span class="nist-tag protect">PR · PROTECT</span>
+        <h3>防护 — 构建安全围栏</h3>
+        <p>
+          <strong>定义：</strong>Protect函数实施安全防护措施，以防止或降低网络安全事件发生的可能性和影响。这是大多数安全投资传统上集中的领域。
+        </p>
+        <p><strong>关键目标：</strong></p>
+        <ul>
+          <li><strong>身份管理与访问控制（PR.AA）：</strong>实施"最小权限"原则，确保只有经过身份验证和授权的用户和设备才能访问关键资源。包括多因素认证（MFA）、基于角色的访问控制（RBAC）、网络准入控制（NAC）和<span class="tooltip-trigger">零信任网络访问（ZTNA）<span class="tooltip-text">Zero Trust Network Access：不再基于网络位置信任用户，而是每次访问都进行身份验证、设备合规检查和上下文评估。</span></span>。</li>
+          <li><strong>安全意识与培训（PR.AT）：</strong>确保所有人员了解安全政策、钓鱼识别和事件报告流程。</li>
+          <li><strong>数据安全（PR.DS）：</strong>通过加密、DLP（数据防泄漏）、备份和访问日志保护数据在传输中和静态时的机密性、完整性和可用性。</li>
+          <li><strong>平台安全（PR.PS）：</strong>对硬件、软件和服务进行安全配置管理（Hardening），包括补丁管理、安全基线和变更控制。</li>
+          <li><strong>技术基础设施韧性（PR.IR）：</strong>通过冗余、微分段（Micro-Segmentation）、网络隔离等手段增强基础设施的抗攻击能力。</li>
+        </ul>
+        <p>
+          <em>类比：Protect是城市的城墙、门禁系统和巡逻岗亭。在零信任模型下，不再是"城墙内的人都可信"，而是"每个人进入每栋建筑都要刷脸验证"。</em>
+        </p>
+      </div>
+
+      <!-- DETECT -->
+      <div class="nist-func-card detect fade-in">
+        <span class="nist-tag detect">DE · DETECT</span>
+        <h3>检测 — 发现入侵者</h3>
+        <p>
+          <strong>定义：</strong>Detect函数旨在及时发现网络安全事件和异常活动。即使最完美的防护措施也有被突破的可能（假设违规 — Assume Breach），因此检测能力是安全架构的关键层次。
+        </p>
+        <p><strong>关键目标：</strong></p>
+        <ul>
+          <li><strong>持续监控（DE.CM）：</strong>对网络流量、用户行为、系统日志和物理环境进行7×24小时持续监控。包括<span class="tooltip-trigger">NDR（Network Detection and Response）<span class="tooltip-text">网络检测与响应：通过分析网络流量元数据和行为基线，检测加密流量中的异常、横向移动、C2通信等高级威胁。</span></span>、<span class="tooltip-trigger">EDR（Endpoint Detection and Response）<span class="tooltip-text">终端检测与响应：在终端设备上监控进程、文件和网络活动，检测恶意行为并支持远程响应。</span></span>和<span class="tooltip-trigger">XDR（Extended Detection and Response）<span class="tooltip-text">扩展检测与响应：整合网络、终端、云、邮件等多数据源，提供跨域关联分析和统一告警视图。</span></span>。</li>
+          <li><strong>不利事件分析（DE.AE）：</strong>对检测到的异常进行上下文分析，判断是否为真实威胁（降低误报），并进行严重性分级。这需要行为基线建模、机器学习异常检测和威胁情报关联。</li>
+        </ul>
+        <p>
+          <em>类比：Detect是城市的监控摄像头网络和情报分析中心。当城墙被翻越、门禁被绕过时，你需要能在几分钟内（而非几个月后）发现异常——比如一个"员工"在凌晨3点连续访问10个他从未去过的数据库。</em>
+        </p>
+      </div>
+
+      <!-- RESPOND -->
+      <div class="nist-func-card respond fade-in">
+        <span class="nist-tag respond">RS · RESPOND</span>
+        <h3>响应 — 快速遏制与根除</h3>
+        <p>
+          <strong>定义：</strong>Respond函数定义在检测到网络安全事件后应采取的行动，以遏制其影响、根除威胁并防止蔓延。响应速度直接决定损失规模。
+        </p>
+        <p><strong>关键目标：</strong></p>
+        <ul>
+          <li><strong>事件管理（RS.MA）：</strong>执行预定义的事件响应计划（IRP），包括事件分类、升级流程、团队协调和外部通报。</li>
+          <li><strong>事件分析（RS.AN）：</strong>进行深入的事件调查和取证分析，确定攻击范围、入侵路径、受影响资产和数据泄露程度。</li>
+          <li><strong>事件报告与通信（RS.CO）：</strong>按照法律法规（如《网络安全法》72小时报告义务、GDPR 72小时通知窗口）向监管机构、利益相关方和受影响个人进行通报。</li>
+          <li><strong>事件缓解（RS.MI）：</strong>实施遏制措施（如隔离受感染主机、阻断C2通信、撤销被盗凭证），并在确认根除后恢复受影响系统。</li>
+        </ul>
+        <p>
+          <em>类比：Respond是城市的消防队和SWAT特警队。火灾发生后的前5分钟决定了是一个房间着火还是整个街区被烧毁。在网络安全中，自动化响应（如ISE自动隔离感染设备）就是这个"5分钟"的关键。</em>
+        </p>
+      </div>
+
+      <!-- RECOVER -->
+      <div class="nist-func-card recover fade-in">
+        <span class="nist-tag recover">RC · RECOVER</span>
+        <h3>恢复 — 重建与韧性</h3>
+        <p>
+          <strong>定义：</strong>Recover函数确保在网络安全事件发生后，组织能够及时恢复正常运营，并从事件中吸取教训以增强未来韧性。
+        </p>
+        <p><strong>关键目标：</strong></p>
+        <ul>
+          <li><strong>事件恢复计划执行（RC.RP）：</strong>启动灾难恢复计划（DRP）和业务连续性计划（BCP），按照预定义的RTO（恢复时间目标）和RPO（恢复点目标）恢复关键系统和数据。</li>
+          <li><strong>恢复通信（RC.CO）：</strong>向内部团队、客户、合作伙伴和公众进行恢复进度的透明沟通，管理品牌声誉风险。</li>
+        </ul>
+        <p>
+          恢复不仅仅是"把系统重启"——它包括确认威胁已被彻底根除、验证数据完整性、恢复受影响用户的访问权限，以及最关键的：<strong>将事件中学到的教训反馈到Govern和Protect环节</strong>，形成持续改进闭环。
+        </p>
+        <p>
+          <em>类比：Recover是灾后重建委员会。它不仅重建被烧毁的街区，还要修订建筑防火法规、更新消防队的响应流程、安装更先进的预警系统——确保同样的灾难不会再次以同样的方式发生。</em>
+        </p>
+      </div>
+
+    </div><!-- end grid-2 -->
+
+    <!-- NIST CSF 2.0 Key Insight Box -->
+    <div class="container-narrow" style="margin-top: 40px;">
+      <div style="background: linear-gradient(135deg, #f0e8fd, #e8f4fd); border-radius: 16px; padding: 32px; text-align: center;">
+        <h3 style="color: #6c5ce7; margin-bottom: 12px;">💡 CSF 2.0的核心洞察：Govern是轮毂，其他五个函数是轮辐</h3>
+        <p style="max-width: 660px; margin: 0 auto; color: #444;">
+          在CSF 2.0的官方图示中，Govern位于中心环形，而Identify、Protect、Detect、Respond、Recover围绕其外。这意味着：<strong>没有治理的安全投资就像没有方向盘的汽车——速度越快，偏离越远。</strong>每一分安全预算、每一条安全策略，都必须回答"这如何服务于组织的业务目标和风险偏好？"
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ====== SECTION: MITRE ATT&CK COMPARISON ====== -->
+<section class="section" id="mitre">
+  <div class="container">
+    <div class="section-header">
+      <h2>🎯 MITRE ATT&CK：攻击者视角的补充框架</h2>
+      <p>防御者用NIST CSF构建体系，但也必须理解攻击者如何思考和行动</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="container-narrow">
+      <p>
+        如果说NIST CSF 2.0是<strong>"防御者的蓝图"</strong>——告诉你应该建什么能力，那么<span class="tooltip-trigger">MITRE ATT&CK<span class="tooltip-text">Adversarial Tactics, Techniques, and Common Knowledge：由MITRE公司维护的全球最大的对抗性战术和技术知识库，基于真实APT组织行为观察构建。</span></span>就是<strong>"攻击者的剧本"</strong>——告诉你敌人会用什么招式。两者互补，缺一不可。
+      </p>
+
+      <div class="story-box" style="margin: 28px 0;">
+        <div class="story-label">🎭 换位思考</div>
+        <p>
+          想象你是一座城堡的守卫队长。NIST CSF告诉你"你需要城墙、护城河、瞭望塔、巡逻队和紧急撤离通道"。
+          而MITRE ATT&CK则告诉你"敌人上次用了云梯翻墙（Initial Access），用伪装的商人混入城门（Valid Accounts），
+          在粮仓里藏了间谍（Persistence），然后通过地道把情报传出去（Exfiltration）"。只有同时理解两者，
+          你才能既有系统性防御，又有针对性对抗。
+        </p>
+      </div>
+
+      <h3 style="margin-top: 36px;">📋 MITRE ATT&CK核心概念</h3>
+      <p>
+        MITRE ATT&CK是一个结构化的知识库，将真实世界中观察到的网络攻击行为组织为三层金字塔：
+      </p>
+
+      <div class="grid-3" style="margin: 24px 0;">
+        <div class="card" style="text-align: center;">
+          <div class="card-icon red" style="margin: 0 auto 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          </div>
+          <h4>Tactics（战术）</h4>
+          <p class="text-small text-muted">攻击者的"为什么"——14个战术阶段代表攻击者在攻击链中的目的，如初始访问（Initial Access）、横向移动（Lateral Movement）、数据外泄（Exfiltration）等。</p>
+        </div>
+        <div class="card" style="text-align: center;">
+          <div class="card-icon orange" style="margin: 0 auto 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+          </div>
+          <h4>Techniques（技术）</h4>
+          <p class="text-small text-muted">攻击者的"怎么做"——200+种具体攻击手法，如钓鱼邮件（Phishing T1566）、利用公开应用漏洞（Exploit Public-Facing Application T1190）、Pass-the-Hash（T1550.002）等。</p>
+        </div>
+        <div class="card" style="text-align: center;">
+          <div class="card-icon purple" style="margin: 0 auto 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8e44ad" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h4>Procedures（过程）</h4>
+          <p class="text-small text-muted">攻击者的"具体操作"——特定APT组织或恶意软件的实际实施细节。例如，APT41使用Cobalt Strike Beacon通过DNS隧道进行C2通信。</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 32px;">🏭 Enterprise矩阵 vs. ICS矩阵</h3>
+      <p>
+        MITRE ATT&CK维护多个矩阵，其中与企业安全最相关的是两个：
+      </p>
+
+      <div class="comparison-card">
+        <div class="compare-item">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0984e3" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            ATT&CK for Enterprise
+          </h4>
+          <p class="text-small">覆盖Windows、macOS、Linux、Cloud（AWS/Azure/GCP）、SaaS、Network、Containers等平台。</p>
+          <ul class="text-small">
+            <li><strong>14个战术</strong>：从Reconnaissance（侦察）到Impact（影响）</li>
+            <li><strong>201+技术</strong>，含424+子技术</li>
+            <li><strong>适用场景</strong>：IT网络、数据中心、云环境、办公网络</li>
+            <li><strong>典型用例</strong>：银行SOC团队用它来验证检测规则覆盖率</li>
+          </ul>
+          <span class="badge badge-blue">适用于银行IT环境</span>
+        </div>
+        <div class="compare-item">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00b894" stroke-width="2" stroke-linecap="round"><path d="M2 20h20M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
+            ATT&CK for ICS
+          </h4>
+          <p class="text-small">专门针对工业控制系统（ICS/OT）环境，反映OT特有的攻击手法和影响。</p>
+          <ul class="text-small">
+            <li><strong>12个战术</strong>：含OT特有战术如Inhibit Response Function（抑制响应功能）</li>
+            <li><strong>83+技术</strong>，侧重于PLC/HMI/SCADA/DCS攻击</li>
+            <li><strong>适用场景</strong>：制造产线、电力系统、水处理、石油化工</li>
+            <li><strong>典型用例</strong>：评估Cisco Cyber Vision对OT攻击手法的检测覆盖度</li>
+          </ul>
+          <span class="badge badge-green">适用于制造业OT环境</span>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 36px;">🔗 NIST CSF 2.0 与 MITRE ATT&CK 的协同使用</h3>
+      <p>
+        两个框架不是二选一的关系，而是<strong>战略层与战术层的互补</strong>：
+      </p>
+
+      <div class="mapping-table-wrap">
+        <table class="mapping-table">
+          <thead>
+            <tr>
+              <th style="width: 18%;">对比维度</th>
+              <th style="width: 41%;">NIST CSF 2.0</th>
+              <th style="width: 41%;">MITRE ATT&CK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>视角</strong></td>
+              <td>防御者视角：我应该具备什么能力？</td>
+              <td>攻击者视角：敌人会用什么手段？</td>
+            </tr>
+            <tr>
+              <td><strong>抽象层级</strong></td>
+              <td>战略/能力级（What to achieve）</td>
+              <td>战术/技术级（How they attack）</td>
+            </tr>
+            <tr>
+              <td><strong>主要用途</strong></td>
+              <td>安全规划、差距评估、合规映射、管理层沟通</td>
+              <td>威胁建模、检测工程、红队演练、SOC运营</td>
+            </tr>
+            <tr>
+              <td><strong>覆盖范围</strong></td>
+              <td>治理→识别→防护→检测→响应→恢复全生命周期</td>
+              <td>聚焦攻击链（主要对应Detect和部分Protect/Respond）</td>
+            </tr>
+            <tr>
+              <td><strong>更新频率</strong></td>
+              <td>约10年大版本（1.0→1.1→2.0）</td>
+              <td>每季度更新（持续纳入新APT组织和技术）</td>
+            </tr>
+            <tr>
+              <td><strong>协同价值</strong></td>
+              <td colspan="2" style="text-align: center; color: #049fd9; font-weight: 600;">
+                用CSF规划"建什么"，用ATT&CK验证"建得够不够"——先用CSF做差距评估确定优先级，再用ATT&CK矩阵检验每个安全控制能覆盖哪些攻击技术
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background: #f8fafb; border-radius: 14px; padding: 24px 28px; margin: 28px 0;">
+        <h4>🔄 实战中的协同流程</h4>
+        <ol>
+          <li><strong>Step 1 — CSF差距评估：</strong>用NIST CSF 2.0的Profile工具评估当前安全能力成熟度（Current Profile），定义目标状态（Target Profile），识别差距。</li>
+          <li><strong>Step 2 — ATT&CK威胁建模：</strong>基于行业威胁情报（如制造业面临的APT41、Sandworm等），在ATT&CK矩阵上标记最可能的攻击技术。</li>
+          <li><strong>Step 3 — 控制映射：</strong>将当前部署的安全产品（如Cisco SNA、Cisco Secure Firewall）映射到ATT&CK技术上，检查检测和防护覆盖度。</li>
+          <li><strong>Step 4 — 优先投资：</strong>将CSF差距和ATT&CK覆盖盲区叠加分析，确定最紧迫的安全投资方向。</li>
+          <li><strong>Step 5 — 持续验证：</strong>通过Purple Team演练定期验证安全控制的有效性，并将结果反馈到Govern函数的监督流程中。</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION: PRODUCT MAPPING ====== -->
+<section class="section section-alt" id="product-mapping">
+  <div class="container">
+    <div class="section-header">
+      <h2>🔧 Cisco安全产品 × NIST CSF 2.0 映射矩阵</h2>
+      <p>八大核心安全解决方案如何覆盖六大安全函数——逐一拆解使用场景、技术优势与客户价值</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- Master Mapping Table -->
+    <div class="container-narrow" style="margin-bottom: 40px;">
+      <p>
+        下表是Cisco八大安全产品与NIST CSF 2.0六大函数的映射总览。<span class="check-mark">●</span>表示该产品在此函数中有<strong>核心作用</strong>，<span class="partial-mark">◐</span>表示有<strong>辅助/间接贡献</strong>。点击各产品的折叠面板可展开详细说明。
+      </p>
+    </div>
+
+    <div class="mapping-table-wrap">
+      <table class="mapping-table">
+        <thead>
+          <tr>
+            <th style="width: 24%;">Cisco 产品</th>
+            <th style="width: 11%;">Govern<br>治理</th>
+            <th style="width: 11%;">Identify<br>识别</th>
+            <th style="width: 12%;">Protect<br>防护</th>
+            <th style="width: 11%;">Detect<br>检测</th>
+            <th style="width: 12%;">Respond<br>响应</th>
+            <th style="width: 12%;">Recover<br>恢复</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Cisco Secure Firewall</strong></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco ISE</strong></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco Secure Network Analytics (SNA)</strong></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco Secure Client</strong></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco Secure Workload</strong></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco Cyber Vision</strong></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco Secure Access</strong></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cisco Secure Equipment Access</strong></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="check-mark">●</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+            <td><span class="partial-mark">◐</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="text-center text-muted text-small" style="margin-top: 12px;">
+      <span class="check-mark">●</span> 核心作用 &nbsp;&nbsp; <span class="partial-mark">◐</span> 辅助/间接贡献 &nbsp;&nbsp; 
+      提示：每个产品通常跨越多个函数——安全不是单点产品，而是体系化能力。
+    </p>
+
+    <!-- ===== PRODUCT 1: Cisco Secure Firewall ===== -->
+    <div style="margin-top: 48px;">
+      <h2 style="font-size: 1.6rem; margin-bottom: 24px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#049fd9" stroke-width="2" stroke-linecap="round" style="vertical-align: middle; margin-right: 8px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        产品详解 — 逐一展开
+      </h2>
+
+      <!-- Product 1: Secure Firewall -->
+      <div class="accordion" id="acc-firewall">
+        <div class="accordion-header" onclick="toggleAccordion('acc-firewall')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <h1 class="lang-zh">Cisco 安全全景指南 v4.1</h1>
-            <h1 class="lang-en hidden">Cisco Security Omni-Guide v4.1</h1>
-            <p class="subtitle lang-zh">NIST CSF · Splunk · XDR · SASE · Zero Trust</p>
-            <p class="subtitle lang-en hidden">NIST CSF · Splunk · XDR · SASE · Zero Trust</p>
-        </header>
-
-        <!-- 1. THE HOOK: ATTACK SIMULATION -->
-        <section class="card" style="border-top: 5px solid var(--color-re);">
-            <h2 style="margin-top:0; border:none; padding:0;">
-                <span class="lang-zh">⚠️ 攻防演练：勒索病毒入侵</span>
-                <span class="lang-en hidden">⚠️ Simulation: Ransomware Attack</span>
-            </h2>
-            <p class="lang-zh">为了让您直观理解各个产品的作用，我们模拟一次攻击。请点击下方按钮，观察 Cisco 全栈如何协同工作。</p>
-            <p class="lang-en hidden">To understand the stack, let's simulate an attack. Click below to see how Cisco solutions collaborate to stop it.</p>
-            
-            <div id="console-log" class="scenario-box">
-                <div class="log-entry"><span class="log-time">00:00:00</span> System Ready. Monitoring...</div>
+            <div>
+              <div style="font-weight: 700;">Cisco Secure Firewall（新一代防火墙）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Protect · Detect · Respond ｜ 辅助：Govern · Identify · Recover</div>
             </div>
-            
-            <button class="scenario-btn" onclick="runScenario()">
-                <span class="lang-zh">⚡ 开始模拟攻击</span>
-                <span class="lang-en hidden">⚡ Simulate Attack</span>
-            </button>
-        </section>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
 
-        <!-- 2. FOUNDATION: NIST & METHODOLOGY -->
-        <section>
-            <h2 class="lang-zh">第一章：方法论与框架 (Common Ground)</h2>
-            <h2 class="lang-en hidden">Chapter 1: Methodology (Common Ground)</h2>
-            
-            <div class="grid-2">
-                <!-- NIST Explanation -->
-                <div class="card">
-                    <h3>NIST CSF</h3>
-                    <p class="lang-zh">网络安全不是买个防火墙就结束了。它是一个基于风险管理的生命周期。</p>
-                    <p class="lang-en hidden">Security is not a one-time purchase. It's a risk management lifecycle.</p>
-                    
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <div style="display:flex; align-items:center;">
-                            <span class="tag bg-nist-id" style="width:80px; text-align:center;">IDENTIFY</span>
-                            <span class="lang-zh" style="font-size:0.85rem">知道你有什么资产 (Cyber Vision, ISE)</span>
-                            <span class="lang-en hidden" style="font-size:0.85rem">Know your assets (Cyber Vision, ISE)</span>
-                        </div>
-                        <div style="display:flex; align-items:center;">
-                            <span class="tag bg-nist-pr" style="width:80px; text-align:center;">PROTECT</span>
-                            <span class="lang-zh" style="font-size:0.85rem">筑墙防御 (Firewall, Duo, Umbrella)</span>
-                            <span class="lang-en hidden" style="font-size:0.85rem">Build walls (Firewall, Duo, Umbrella)</span>
-                        </div>
-                        <div style="display:flex; align-items:center;">
-                            <span class="tag bg-nist-de" style="width:80px; text-align:center;">DETECT</span>
-                            <span class="lang-zh" style="font-size:0.85rem">发现绕过防御的威胁 (SNA, XDR)</span>
-                            <span class="lang-en hidden" style="font-size:0.85rem">Spot what got through (SNA, XDR)</span>
-                        </div>
-                        <div style="display:flex; align-items:center;">
-                            <span class="tag bg-nist-re" style="width:80px; text-align:center;">RESPOND</span>
-                            <span class="lang-zh" style="font-size:0.85rem">自动化隔离与阻断 (ISE, Splunk)</span>
-                            <span class="lang-en hidden" style="font-size:0.85rem">Auto-quarantine (ISE, Splunk)</span>
-                        </div>
-                    </div>
-                </div>
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco Secure Firewall（前身为Firepower NGFW）是Cisco安全架构中的<strong>网络边界和分段防护核心</strong>。它不仅是传统意义上的"防火墙"——更准确地说，它是一个集成了<span class="tooltip-trigger">NGIPS（Next-Generation Intrusion Prevention System）<span class="tooltip-text">新一代入侵防御系统：基于深度包检测和特征匹配，检测并阻断已知和未知漏洞利用攻击。</span></span>、<span class="tooltip-trigger">AVC（Application Visibility and Control）<span class="tooltip-text">应用可视化与控制：识别并管控超过4000种应用的流量，如识别工业协议Modbus/TCP、EtherNet/IP等。</span></span>、<span class="tooltip-trigger">AMP（Advanced Malware Protection）<span class="tooltip-text">高级恶意软件防护：通过沙箱分析、回溯分析和威胁情报，检测已知和零日恶意文件。</span></span>、URL过滤、TLS解密、<span class="tooltip-trigger">Encrypted Visibility Engine（EVE）<span class="tooltip-text">加密可见性引擎：无需解密即可通过TLS握手元数据和流量指纹识别加密流量中的恶意应用和威胁。Cisco独有技术。</span></span>的统一威胁防御平台。
+            </p>
 
-                <!-- Splunk Integration -->
-                <div class="card" style="border: 2px solid #000;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3>Cisco + Splunk</h3>
-                        <span class="tag bg-dark">NEW</span>
-                    </div>
-                    <p class="lang-zh"><strong>数据就是安全。</strong> 以前，Cisco 强在网络和控制。现在有了 Splunk，我们拥有了业界最强的大数据分析平台 (SIEM/SOAR)。</p>
-                    <p class="lang-en hidden"><strong>Data is Security.</strong> Cisco owned the network. Now with Splunk, we own the Data Platform (SIEM/SOAR).</p>
-                    <ul style="font-size:0.9rem; padding-left:20px;">
-                        <li class="lang-zh"><strong>Splunk:</strong> 收集所有日志（服务器、应用、云、防火墙）。</li>
-                        <li class="lang-en hidden"><strong>Splunk:</strong> Ingests ALL logs (Server, App, Cloud, FW).</li>
-                        <li class="lang-zh"><strong>Cisco Security Cloud:</strong> 提供遥测数据并执行 Splunk 下达的指令。</li>
-                        <li class="lang-en hidden"><strong>Cisco Security Cloud:</strong> Provides telemetry & executes Splunk's orders.</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+            <h4 style="color: #00b894;">🛡️ NIST CSF映射详解</h4>
 
-        <!-- 3. ARCHITECTURE VISUALIZATION -->
-        <section class="card">
-            <h3 class="lang-zh" style="text-align:center;">Cisco Security Cloud 全景架构</h3>
-            <h3 class="lang-en hidden" style="text-align:center;">Cisco Security Cloud Architecture</h3>
-            <div class="svg-container">
-                <svg width="600" height="300" viewBox="0 0 600 300">
-                    <!-- BACKGROUND ZONES -->
-                    <rect x="10" y="40" width="100" height="220" rx="10" fill="#E6F2FF" stroke="#00BCEB" stroke-dasharray="4"/>
-                    <text x="60" y="60" text-anchor="middle" font-size="10" fill="#005073" font-weight="bold">USER / EDGE</text>
-
-                    <rect x="150" y="40" width="180" height="220" rx="10" fill="#F4F4F4" stroke="#999"/>
-                    <text x="240" y="60" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">NETWORK / CAMPUS</text>
-
-                    <rect x="370" y="40" width="100" height="220" rx="10" fill="#FFF8E1" stroke="#FF9E1B" stroke-dasharray="4"/>
-                    <text x="420" y="60" text-anchor="middle" font-size="10" fill="#D35400" font-weight="bold">CLOUD / APP</text>
-                    
-                    <rect x="500" y="40" width="90" height="220" rx="10" fill="#333" stroke="black"/>
-                    <text x="545" y="60" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">SOC / OPS</text>
-
-                    <!-- CONNECTORS -->
-                    <line x1="110" y1="150" x2="150" y2="150" stroke="#00BCEB" stroke-width="2"/>
-                    <line x1="330" y1="150" x2="370" y2="150" stroke="#00BCEB" stroke-width="2"/>
-                    <line x1="470" y1="150" x2="500" y2="150" stroke="#00BCEB" stroke-width="2"/>
-
-                    <!-- COMPONENTS -->
-                    <!-- SASE -->
-                    <circle cx="60" cy="120" r="20" fill="white" stroke="#00BCEB" stroke-width="2"/>
-                    <text x="60" y="125" text-anchor="middle" font-size="8">Secure</text>
-                    <text x="60" y="135" text-anchor="middle" font-size="8">Access</text>
-
-                    <!-- DUO -->
-                    <circle cx="60" cy="180" r="20" fill="white" stroke="#0096AF" stroke-width="2"/>
-                    <text x="60" y="185" text-anchor="middle" font-size="9">Duo</text>
-
-                    <!-- FIREWALL -->
-                    <rect x="160" y="130" width="30" height="40" fill="#95509F" rx="4"/>
-                    <text x="175" y="155" text-anchor="middle" fill="white" font-size="8">FW</text>
-
-                    <!-- ISE -->
-                    <rect x="220" y="80" width="40" height="30" fill="#0096AF" rx="4"/>
-                    <text x="240" y="100" text-anchor="middle" fill="white" font-size="8">ISE</text>
-
-                    <!-- SNA -->
-                    <rect x="220" y="190" width="40" height="30" fill="#FF9E1B" rx="4"/>
-                    <text x="240" y="210" text-anchor="middle" fill="white" font-size="8">SNA</text>
-
-                    <!-- WORKLOAD -->
-                    <rect x="400" y="130" width="40" height="30" fill="#95509F" rx="4"/>
-                    <text x="420" y="150" text-anchor="middle" fill="white" font-size="8">Workload</text>
-
-                    <!-- SPLUNK / XDR -->
-                    <rect x="510" y="100" width="70" height="100" fill="#000" stroke="#6ABF4B" stroke-width="2"/>
-                    <text x="545" y="140" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Splunk</text>
-                    <text x="545" y="160" text-anchor="middle" fill="#fff" font-size="10">+ XDR</text>
-
-                    <!-- DATA FLOW -->
-                    <path d="M260 95 H 510" stroke="#666" stroke-width="1" stroke-dasharray="2" opacity="0.5"/>
-                    <path d="M260 205 H 510" stroke="#666" stroke-width="1" stroke-dasharray="2" opacity="0.5"/>
-                    <path d="M190 150 H 510" stroke="#666" stroke-width="1" stroke-dasharray="2" opacity="0.5"/>
-                </svg>
-            </div>
-            <p class="lang-zh" style="font-size:0.8rem; text-align:center; color:#666;">图解：用户 (Edge) 通过 SASE 接入，网络层 (Network) 由 ISE/FW 保护，云端 (Cloud) 由 Workload 隔离。所有数据汇聚至 Splunk/XDR 进行分析。</p>
-            <p class="lang-en hidden" style="font-size:0.8rem; text-align:center; color:#666;">Diagram: Users enter via SASE, Network secured by ISE/FW, Cloud segmented by Workload. All telemetry feeds into Splunk/XDR.</p>
-        </section>
-
-        <!-- 4. PRODUCT DEEP DIVE (EXPANDABLE) -->
-        <section>
-            <h2 class="lang-zh">第二章：核心产品深度解析 (Deep Dive)</h2>
-            <h2 class="lang-en hidden">Chapter 2: Product Deep Dive</h2>
-
-            <!-- PRODUCT 1: FIREWALL -->
-            <div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>Cisco Secure Firewall (FMC/FTD)</h3>
-                    <span class="tag bg-nist-pr">PROTECT</span>
-                </div>
-                <p class="lang-zh">“安全的一道防线”。不仅仅是访问控制，更是搭载了 Snort 3 引擎的 IPS（入侵防御系统）。</p>
-                <p class="lang-en hidden">"The First Line of Defense". Powered by Snort 3 IPS, not just ACLs.</p>
-                
-                <div class="specs-toggle" onclick="toggleSpecs('spec-fw')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
-                <div id="spec-fw" class="specs-content">
-                    <ul>
-                        <li><strong>Snort 3 Engine:</strong> 相比 Snort 2，采用多线程处理，吞吐量提升显著，规则语法更灵活。</li>
-                        <li><strong>TLS 1.3 Decryption:</strong> 硬件加速解密，看见加密流量中的威胁。</li>
-                        <li><strong>Virtual Patching:</strong> 在服务器打补丁之前，通过防火墙规则拦截针对该漏洞的 CVE 攻击。</li>
-                        <li><strong>Dynamic Objects:</strong> 与 Azure/AWS 联动，基于云标签（Tag）而不是 IP 写策略。</li>
-                    </ul>
-                </div>
+            <div class="grid-2" style="margin: 16px 0;">
+              <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; border-left: 4px solid #00b894;">
+                <strong style="color: #00b894;">PR · Protect（核心）</strong>
+                <ul class="text-small" style="margin-top: 8px;">
+                  <li><strong>PR.AA — 访问控制：</strong>基于用户身份（集成ISE的SGT标签）和应用层策略进行精细化访问控制。不再是简单的"IP+端口"规则，而是"用户张三 + 财务应用 + 工作时间 = 允许"。</li>
+                  <li><strong>PR.DS — 数据安全：</strong>通过TLS/SSL检查（含TLS 1.3解密能力）防止敏感数据在加密通道中被窃取；文件策略检测恶意文档。</li>
+                  <li><strong>PR.IR — 基础设施韧性：</strong>支持HA（高可用）集群、多实例部署；在制造业IT/OT边界部署时，实现DMZ隔离和工业协议（Modbus、CIP、S7）深度检测。</li>
+                  <li><strong>PR.PS — 平台安全：</strong>Snort 3引擎支持自定义规则，可针对OT环境的特定协议异常进行定制化防护。</li>
+                </ul>
+              </div>
+              <div style="background: #fef9e7; border-radius: 12px; padding: 20px; border-left: 4px solid #fdcb6e;">
+                <strong style="color: #c0870a;">DE · Detect（核心）</strong>
+                <ul class="text-small" style="margin-top: 8px;">
+                  <li><strong>DE.CM — 持续监控：</strong>NGIPS引擎7×24实时检测网络流量中的漏洞利用、恶意载荷和协议异常。Encrypted Visibility Engine（EVE）无需解密即可识别加密流量中的恶意行为，这在银行等对隐私合规敏感的环境中尤为重要。</li>
+                  <li><strong>DE.AE — 事件分析：</strong>与Cisco SecureX/XDR集成，将防火墙事件与终端、邮件、DNS等上下文数据关联分析，降低误报率。Talos威胁情报实时更新规则，检测新型CVE漏洞利用。</li>
+                </ul>
+              </div>
             </div>
 
-            <!-- PRODUCT 2: ISE -->
-            <div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>Identity Services Engine (ISE)</h3>
-                    <span class="tag bg-nist-id">IDENTIFY</span>
-                </div>
-                <p class="lang-zh">“零信任的大脑”。负责网络准入（NAC）、设备健康检查（Posture）和微分段（Segmentation）。</p>
-                <p class="lang-en hidden">"The Brain of Zero Trust". Handles NAC, Posture, and Segmentation.</p>
-                
-                <div class="specs-toggle" onclick="toggleSpecs('spec-ise')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
-                <div id="spec-ise" class="specs-content">
-                    <ul>
-                        <li><strong>802.1X / MAB:</strong> 有线无线统一认证标准。</li>
-                        <li><strong>pxGrid (Platform Exchange Grid):</strong> Cisco 的独门绝技。ISE 知道“IP 1.1.1.1 是财务部的 Bob”。它通过 pxGrid 把这个信息告诉防火墙，防火墙就能写“允许 Bob 访问数据库”的策略，而不是基于 IP。</li>
-                        <li><strong>SGT (Security Group Tag):</strong> 在数据包头打上标签，实现与 IP 无关的隔离。</li>
-                    </ul>
-                </div>
+            <div style="background: #fde8e8; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #e17055;">
+              <strong style="color: #e17055;">RS · Respond（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>RS.MI — 事件缓解：</strong>自动阻断检测到的恶意IP/域名/文件哈希；与ISE联动实现<span class="tooltip-trigger">pxGrid<span class="tooltip-text">Cisco Platform Exchange Grid：一种发布/订阅式的上下文共享平台，使ISE、SNA、Firewall等产品可以实时交换安全事件和策略执行指令。</span></span>自动隔离——当Firewall检测到C2通信时，ISE可在秒级将该终端隔离到隔离VLAN。</li>
+                <li><strong>RS.AN — 事件分析：</strong>文件轨迹（File Trajectory）功能支持回溯分析——当一个文件后来被Talos标记为恶意时，可以追溯该文件曾经过哪些主机，精确确定攻击影响范围。</li>
+              </ul>
             </div>
 
-            <!-- PRODUCT 3: SECURE NETWORK ANALYTICS (SNA) -->
-            <div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>Secure Network Analytics (NDR)</h3>
-                    <span class="tag bg-nist-de">DETECT</span>
-                </div>
-                <p class="lang-zh">“全网监控摄像头”。不需要在服务器装代理，通过交换机发送的 NetFlow 分析流量行为。</p>
-                <p class="lang-en hidden">"CCTV for the Network". Uses NetFlow. No agents required.</p>
-                
-                <div class="specs-toggle" onclick="toggleSpecs('spec-sna')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
-                <div id="spec-sna" class="specs-content">
-                    <ul>
-                        <li><strong>ETA (Encrypted Traffic Analytics):</strong> 不需要解密，通过分析数据包的长度、到达时间间隔、初始握手特征，识别加密流量中的恶意软件（准确率 >99%）。</li>
-                        <li><strong>Behavioral Modeling:</strong> 自动学习基线。如果一台打印机半夜突然向海外 IP 发送 1GB 数据，立即报警。</li>
-                    </ul>
-                </div>
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：IT/OT边界防护</div>
+              <p>
+                部署在Purdue模型Level 3.5（IT/OT DMZ）的Cisco Secure Firewall，作为IT网络与OT网络之间的唯一合法通道。启用工业协议深度检测（Modbus/TCP、EtherNet/IP、OPC-UA），仅允许已知的、合法的控制指令通过。当检测到异常的PLC固件下载请求或非授权的SCADA服务器访问时，自动阻断并触发告警。结合Cyber Vision提供的OT资产上下文，Firewall策略可以精确到"仅允许工程师工作站A向PLC-07发送特定功能码的Modbus写指令"。
+              </p>
             </div>
 
-            <!-- PRODUCT 4: CYBER VISION (OT/IoT) -->
-            <div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>Cisco Cyber Vision (OT Security)</h3>
-                    <span class="tag bg-nist-id">IDENTIFY</span>
-                </div>
-                <p class="lang-zh">“听懂机器语言”。运行在工业交换机上的传感器，解析工控协议 (Modbus, DNP3)。</p>
-                <p class="lang-en hidden">"Speaks Machine Language". Sensor runs on switches, parses OT protocols.</p>
-                
-                <div class="specs-toggle" onclick="toggleSpecs('spec-cv')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
-                <div id="spec-cv" class="specs-content">
-                    <ul>
-                        <li><strong>Deep Packet Inspection (DPI):</strong> 能看懂“PLC 正在对离心机下达‘停止’指令”。</li>
-                        <li><strong>No Extra Hardware:</strong> 传感器是软件容器 (IOx)，直接跑在 Cisco IE3300/3400 交换机上，无需旁路部署额外的探针硬件。</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- PRODUCT 5: SECURE ACCESS (SSE) -->
-            <div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>Cisco Secure Access (SASE/SSE)</h3>
-                    <span class="tag bg-blue">CLOUD</span>
-                </div>
-                <p class="lang-zh">“未来的 VPN”。基于云的安全服务边缘。无论用户在哪里，都通过 Cisco 云网关访问互联网或内网应用。</p>
-                <p class="lang-en hidden">"The Future of VPN". Cloud-delivered security edge. Unified access.</p>
-                
-                <div class="specs-toggle" onclick="toggleSpecs('spec-sse')">▶ <span class="lang-zh">技术规格与亮点</span><span class="lang-en hidden">Technical Specs</span></div>
-                <div id="spec-sse" class="specs-content">
-                    <ul>
-                        <li><strong>ZTNA (Zero Trust Network Access):</strong> 只有应用连接，没有网络连接。黑客无法利用受损的终端扫描内网。</li>
-                        <li><strong>SWG (Secure Web Gateway):</strong> 云端代理，过滤网页恶意内容。</li>
-                        <li><strong>Experience Monitoring:</strong> 集成了 ThousandEyes，当用户喊慢时，知道是 WiFi 还是 App 的问题。</li>
-                    </ul>
-                </div>
+            <h4 style="color: #2c3e50;">🏦 银行业场景</h4>
+            <div class="story-box" style="background: linear-gradient(135deg, #fef9e7, #fdf2e9); border-left-color: #f39c12;">
+              <div class="story-label" style="color: #f39c12;">场景：加密流量威胁检测</div>
+              <p>
+                某股份制银行80%以上的流量为TLS加密。传统方式是全量解密检查，但这既影响性能又触及客户隐私合规底线（如PCIDSS对CHD数据的保护要求）。部署Cisco Secure Firewall的EVE（Encrypted Visibility Engine），通过分析TLS Client Hello中的JA3/JA3S指纹、SNI、证书属性等元数据，<strong>无需解密即可以95%+准确率识别恶意加密流量</strong>（如Cobalt Strike Beacon的TLS指纹）。同时对高风险流量选择性解密深度检查，在安全与合规之间取得最优平衡。
+              </p>
             </div>
 
-        </section>
-
-        <!-- 5. VERTICALS: MANUFACTURING DEEP DIVE -->
-        <section>
-            <h2 class="lang-zh">第三章：行业纵深 - 制造业 (Manufacturing)</h2>
-            <h2 class="lang-en hidden">Chapter 3: Vertical Deep Dive - Manufacturing</h2>
-            
-            <div class="card" style="border-left: 5px solid var(--cisco-dark-blue);">
-                <h3>The Purdue Model Alignment (普渡模型)</h3>
-                <p class="lang-zh">制造业安全的核心是将 IT（企业网）与 OT（工业网）进行分层防御。</p>
-                <p class="lang-en hidden">Core of Mfg security is layering IT and OT defenses.</p>
-                
-                <div class="svg-container">
-                    <svg width="500" height="200" viewBox="0 0 500 200">
-                        <g>
-                            <rect x="10" y="10" width="480" height="40" fill="#E6F2FF" rx="5"/>
-                            <text x="250" y="35" text-anchor="middle" font-size="12" fill="#005073" font-weight="bold">Level 4-5: Enterprise (IT) - Protected by Firewall / Umbrella</text>
-                        </g>
-                        <g>
-                            <rect x="10" y="60" width="480" height="30" fill="#FFE0B2" rx="5"/>
-                            <text x="250" y="80" text-anchor="middle" font-size="12" fill="#E65100" font-weight="bold">Level 3.5: Industrial DMZ - Cisco ISA 3000 Firewall</text>
-                        </g>
-                        <g>
-                            <rect x="10" y="100" width="480" height="40" fill="#E8F5E9" rx="5"/>
-                            <text x="250" y="125" text-anchor="middle" font-size="12" fill="#1B5E20" font-weight="bold">Level 0-3: OT/ICS - Visibility by Cyber Vision</text>
-                        </g>
-                        
-                        <!-- Arrows -->
-                        <line x1="250" y1="50" x2="250" y2="60" stroke="#333" stroke-width="2"/>
-                        <line x1="250" y1="90" x2="250" y2="100" stroke="#333" stroke-width="2"/>
-                    </svg>
-                </div>
-                
-                <div class="specs-toggle" onclick="toggleSpecs('spec-mfg')">▶ <span class="lang-zh">制造业销售痛点与对策</span><span class="lang-en hidden">Mfg Sales Pain Points</span></div>
-                <div id="spec-mfg" class="specs-content">
-                    <ul class="lang-zh">
-                        <li><strong>痛点：</strong> “我们不能在 PLC 上装杀毒软件，会导致停机。”</li>
-                        <li><strong>对策：</strong> “没错。所以您需要 Cyber Vision。它是无代理（Agentless）的被动监听，完全不影响生产，但能告诉您哪台 PLC 的固件有漏洞。”</li>
-                        <li><strong>痛点：</strong> “设备供应商需要远程连进来修机器。”</li>
-                        <li><strong>对策：</strong> “使用 Cisco Secure Equipment Access (SEA)。不要给 VPN 账号。SEA 允许他们只远程桌面到那一台机器，无法访问其他网络。”</li>
-                    </ul>
-                    <ul class="lang-en hidden">
-                        <li><strong>Pain:</strong> "Can't install AV on PLCs. It crashes them."</li>
-                        <li><strong>Solution:</strong> "Exactly. Use Cyber Vision. Agentless, passive monitoring. Zero impact, but 100% visibility."</li>
-                        <li><strong>Pain:</strong> "Vendors need remote access."</li>
-                        <li><strong>Solution:</strong> "Use Secure Equipment Access (SEA). No VPNs. Granular ZTNA access only to the specific machine."</li>
-                    </ul>
-                </div>
+            <h4 style="color: #049fd9;">⚙️ 示例配置（Snort 3自定义OT规则）</h4>
+            <div class="code-block">
+              <span class="code-label">Snort 3 Rule — 检测异常Modbus写寄存器操作</span>
+<span class="comment"># 检测非授权源IP对PLC的Modbus"Write Multiple Registers"（功能码0x10）操作</span>
+<span class="keyword">alert</span> tcp <span class="string">!$AUTHORIZED_ENG_STATIONS</span> any -> <span class="string">$PLC_SUBNET</span> <span class="number">502</span> (
+  <span class="cmd">msg</span>:<span class="string">"CUSTOM OT - Unauthorized Modbus Write Multiple Registers"</span>;
+  <span class="cmd">flow</span>:to_server,established;
+  <span class="cmd">content</span>:<span class="string">"|00 00 00 00|"</span>, offset 0, depth 4;  <span class="comment"># Modbus MBAP header</span>
+  <span class="cmd">content</span>:<span class="string">"|10|"</span>, offset 7, depth 1;               <span class="comment"># Function Code 0x10</span>
+  <span class="cmd">classtype</span>:attempted-admin;
+  <span class="cmd">sid</span>:<span class="number">1000001</span>;
+  <span class="cmd">rev</span>:<span class="number">1</span>;
+  <span class="cmd">metadata</span>:policy security-ips alert;
+)
             </div>
-        </section>
 
-        <!-- 6. SALES & DISCOVERY -->
-        <section>
-            <h2 class="lang-zh">第四章：销售实战 (Sales Playbook)</h2>
-            <h2 class="lang-en hidden">Chapter 4: Sales Playbook</h2>
-
-            <div class="grid-2">
-                <!-- Discovery Questions -->
-                <div class="card">
-                    <h3>发掘机会 (Discovery)</h3>
-                    <ul style="padding-left:15px; font-size:0.9rem;">
-                        <li style="margin-bottom:10px;">
-                            <strong class="lang-zh">问 CIO (IT 经理):</strong>
-                            <div class="lang-zh">“您现在有多少种不同的安全工具？当发生警报时，您的团队需要切换多少个控制台？”</div>
-                            <div class="lang-en hidden">"How many security consoles do you have? How much time is wasted switching context?"</div>
-                            <span class="tag bg-dark">Pitch: Platform / XDR</span>
-                        </li>
-                        <li style="margin-bottom:10px;">
-                            <strong class="lang-zh">问 Network Team:</strong>
-                            <div class="lang-zh">“如果有人绕过了防火墙，在内网横向移动，您的交换机能告诉您吗？”</div>
-                            <div class="lang-en hidden">"If someone bypasses the firewall, can your switches tell you about lateral movement?"</div>
-                            <span class="tag bg-dark">Pitch: SNA / ISE</span>
-                        </li>
-                         <li style="margin-bottom:10px;">
-                            <strong class="lang-zh">问 OT/Plant Manager:</strong>
-                            <div class="lang-zh">“上次因为勒索病毒导致的停产造成了多少损失？您知道现在工厂里有多少台 WinXP 裸奔吗？”</div>
-                            <div class="lang-en hidden">"What's the cost of downtime? How many unpatched WinXP machines do you have?"</div>
-                            <span class="tag bg-dark">Pitch: Cyber Vision</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Glossary -->
-                <div class="card" style="background:#f4f6f8;">
-                    <h3>术语表 (Glossary)</h3>
-                    <div style="height:200px; overflow-y:auto; font-size:0.85rem;">
-                        <p><strong>XDR:</strong> Extended Detection and Response. 跨产品（端点、网络、云）的威胁检测与响应平台。</p>
-                        <p><strong>SASE:</strong> Secure Access Service Edge. 网络(SD-WAN)与安全(SSE)的云端融合。</p>
-                        <p><strong>SSE:</strong> SASE 中剥离掉 SD-WAN 的纯安全部分 (SWG, CASB, ZTNA)。</p>
-                        <p><strong>SOAR:</strong> Security Orchestration, Automation and Response. 比如 Splunk Phantom，负责把“封锁IP”这种动作自动化。</p>
-                        <p><strong>NDR:</strong> Network Detection and Response. 即 Cisco SNA。</p>
-                        <p><strong>Talos:</strong> Cisco 的威胁情报团队，世界上最大的非政府安全研究组织。</p>
-                    </div>
-                </div>
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">95%+</div>
+                <div class="metric-label">加密恶意流量检测率（EVE）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">&lt;1s</div>
+                <div class="metric-label">联动ISE自动隔离响应时间</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">4000+</div>
+                <div class="metric-label">可识别应用数（含工业协议）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">99.999%</div>
+                <div class="metric-label">HA集群可用性</div>
+              </div>
             </div>
-        </section>
 
-        <!-- FOOTER -->
-        <footer style="text-align:center; padding-top:20px; border-top:1px solid #ddd; color:#999; font-size:0.8rem;">
-            <p>Cisco Security Omni-Guide v4.1 | Expert Edition</p>
-            <p>Designed for Offline & Mobile Use</p>
-        </footer>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 2: Cisco ISE -->
+      <div class="accordion" id="acc-ise">
+        <div class="accordion-header" onclick="toggleAccordion('acc-ise')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #0984e3, #0652DD); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Identity Services Engine（ISE，身份服务引擎）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Govern · Identify · Protect · Respond ｜ 辅助：Detect · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco ISE是Cisco零信任架构的<strong>策略决策引擎和身份枢纽</strong>。如果说整个安全架构是一座机场，ISE就是<strong>安检中心</strong>——每一个人（用户）、每一件行李（设备）、每一次登机（网络访问）都要经过它的身份核验、安全检查和权限分配。
+            </p>
+            <p>
+              ISE的核心能力包括：<strong>802.1X认证</strong>（有线/无线）、<strong>MAB（MAC认证旁路）</strong>用于不支持802.1X的OT设备、<strong>RADIUS/TACACS+</strong>设备管理、<strong>终端Profiling（设备画像）</strong>自动识别设备类型、<strong>Posture Assessment（终端合规检查）</strong>、<strong>Guest Access（访客管理）</strong>和关键的<strong><span class="tooltip-trigger">TrustSec/SGT（安全组标签）<span class="tooltip-text">Cisco TrustSec通过为每个用户/设备分配SGT（Security Group Tag），实现基于身份的微分段。策略定义从"IP A可以访问IP B"变为"财务组可以访问ERP组"，与IP地址解耦，大幅简化策略管理。</span></span></strong>微分段。
+            </p>
+
+            <h4 style="color: #6c5ce7;">🏛️ NIST CSF映射详解</h4>
+
+            <div style="background: #f0e8fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #6c5ce7;">
+              <strong style="color: #6c5ce7;">GV · Govern（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>GV.PO — 策略管理：</strong>ISE是组织网络访问策略的统一定义和执行平台。所有"谁、用什么设备、在什么条件下、可以访问什么资源"的策略都在ISE中集中管理，确保策略的一致性和可审计性。</li>
+                <li><strong>GV.RR — 角色与职责：</strong>通过RBAC和Admin Groups实现ISE自身管理权限的分离——网络团队只能管理NAC策略，安全团队只能查看审计日志，OT团队只能管理工业区域的设备Profile。</li>
+                <li><strong>GV.SC — 供应链管理：</strong>对第三方供应商的设备和人员实施严格的访客网络准入，限制其仅能访问必要的维护系统。</li>
+              </ul>
+            </div>
+
+            <div class="grid-2" style="margin: 12px 0;">
+              <div style="background: #e8f4fd; border-radius: 12px; padding: 20px; border-left: 4px solid #0984e3;">
+                <strong style="color: #0984e3;">ID · Identify（核心）</strong>
+                <ul class="text-small" style="margin-top: 8px;">
+                  <li><strong>ID.AM — 资产管理：</strong>ISE的Profiling引擎通过分析DHCP指纹、HTTP User-Agent、CDP/LLDP信息、NMAP扫描等数据源，自动识别和分类连接到网络的每一台设备——从员工笔记本到IP摄像头到AGV控制器。这是企业网络资产可见性的第一道关卡。</li>
+                  <li><strong>ID.AM — 数据流映射：</strong>通过pxGrid共享的上下文数据，可以关联"谁在使用什么设备，从哪里连接，访问了什么资源"，建立完整的网络访问画像。</li>
+                </ul>
+              </div>
+              <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; border-left: 4px solid #00b894;">
+                <strong style="color: #00b894;">PR · Protect（核心）</strong>
+                <ul class="text-small" style="margin-top: 8px;">
+                  <li><strong>PR.AA — 身份与访问控制：</strong>ISE是Cisco零信任架构的核心执行点。通过802.1X+EAP-TLS（证书认证）或EAP-FAST实现用户身份验证；通过SGT标签实现微分段；通过Posture检查确保终端满足安全基线（如补丁级别、杀毒软件状态、磁盘加密）后才允许接入。</li>
+                  <li><strong>PR.IR — 基础设施韧性：</strong>TrustSec SGT策略实现了网络层的微分段，即使攻击者突破一个网段，也无法横向移动到其他安全组——这直接打断了ATT&CK矩阵中"Lateral Movement"战术链。</li>
+                </ul>
+              </div>
+            </div>
+
+            <div style="background: #fde8e8; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #e17055;">
+              <strong style="color: #e17055;">RS · Respond（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>RS.MI — 自动隔离与修复：</strong>ISE通过pxGrid接收来自SNA、Secure Firewall、Secure Endpoint等产品的威胁信号，<strong>在秒级自动执行CoA（Change of Authorization）</strong>——将受感染设备从正常VLAN移至隔离VLAN或完全断网。这是Cisco安全联动（Security Closed-Loop）的核心机制。</li>
+                <li><strong>RS.MI — 自修复流程：</strong>设备被隔离后，用户可通过Posture remediation页面自助修复（如安装缺失补丁、更新杀毒引擎），修复后ISE自动重新评估并恢复正常访问——无需IT人员手动干预。</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：工业设备安全准入</div>
+              <p>
+                在制造业OT环境中，大量PLC、HMI、IP摄像头、AGV控制器等设备<strong>不支持802.1X认证</strong>——它们没有用户界面，无法安装supplicant。ISE通过<strong>MAB（MAC Authentication Bypass）+ Profiling</strong>组合解决这一难题：
+              </p>
+              <ul style="font-style: normal;">
+                <li>设备接入时，交换机将其MAC地址发送给ISE进行MAB认证</li>
+                <li>ISE的Profiling引擎通过DHCP指纹、CDP/LLDP、流量模式等自动识别设备类型（如"Allen-Bradley PLC"或"SICK激光导航传感器"）</li>
+                <li>基于设备Profile自动分配SGT标签（如SGT-PLC、SGT-AGV、SGT-Camera），将其放入对应的安全组</li>
+                <li>TrustSec矩阵确保PLC只能与其对应的SCADA服务器通信，AGV只能与调度系统通信，彼此隔离</li>
+                <li>当Cyber Vision检测到某台PLC出现异常通信模式时，通过pxGrid通知ISE，ISE自动将其隔离</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #2c3e50;">🏦 银行业场景</h4>
+            <div class="story-box" style="background: linear-gradient(135deg, #fef9e7, #fdf2e9); border-left-color: #f39c12;">
+              <div class="story-label" style="color: #f39c12;">场景：零信任网络准入 + 合规审计</div>
+              <p>
+                某城市商业银行需满足银保监会《商业银行信息科技风险管理指引》和等保2.0三级要求，核心诉求包括：① 所有终端必须经过身份认证才能接入内网；② 接入设备必须满足安全基线（补丁、杀毒、加密）；③ 所有网络访问行为可审计追溯。
+              </p>
+              <p style="font-style: normal;">
+                ISE部署方案：全行有线/无线网络启用802.1X + EAP-TLS（证书认证，杜绝密码泄露风险）；Posture策略强制检查Windows补丁级别、杀毒引擎更新时间、BitLocker加密状态；不合规终端自动重定向到修复门户；所有认证和授权事件集中存储并提供合规审计报告，直接对接等保2.0中"身份鉴别"和"访问控制"测评项。SGT微分段将核心银行系统、办公网络、访客网络严格隔离。
+              </p>
+            </div>
+
+            <h4 style="color: #049fd9;">⚙️ ISE策略逻辑示例</h4>
+            <div class="code-block">
+              <span class="code-label">ISE Authorization Policy（简化逻辑）</span>
+<span class="comment"># 授权策略示例：基于身份 + 设备合规状态 + 位置的动态访问控制</span>
+
+<span class="keyword">Rule 1:</span> <span class="string">"Corporate_Full_Access"</span>
+  <span class="cmd">IF</span>  Identity Group = <span class="string">"Domain_Users"</span>
+  <span class="cmd">AND</span> Posture Status = <span class="string">"Compliant"</span>
+  <span class="cmd">AND</span> Location = <span class="string">"Corporate_Office"</span>
+  <span class="cmd">THEN</span> SGT = <span class="number">10</span> (Corp_Full), VLAN = <span class="number">100</span>, dACL = <span class="string">"Permit_All_Internal"</span>
+
+<span class="keyword">Rule 2:</span> <span class="string">"Non_Compliant_Remediation"</span>
+  <span class="cmd">IF</span>  Identity Group = <span class="string">"Domain_Users"</span>
+  <span class="cmd">AND</span> Posture Status = <span class="string">"Non_Compliant"</span>
+  <span class="cmd">THEN</span> SGT = <span class="number">99</span> (Quarantine), VLAN = <span class="number">999</span>, Redirect → <span class="string">"Remediation_Portal"</span>
+
+<span class="keyword">Rule 3:</span> <span class="string">"OT_Device_Auto_Segment"</span>
+  <span class="cmd">IF</span>  Endpoint Profile = <span class="string">"Allen-Bradley-PLC"</span>
+  <span class="cmd">AND</span> Auth Method = <span class="string">"MAB"</span>
+  <span class="cmd">AND</span> Location = <span class="string">"Plant_Floor_Zone3"</span>
+  <span class="cmd">THEN</span> SGT = <span class="number">30</span> (SGT_PLC), VLAN = <span class="number">310</span>, dACL = <span class="string">"Permit_SCADA_Only"</span>
+
+<span class="keyword">Rule 4:</span> <span class="string">"Threat_Auto_Quarantine"</span>
+  <span class="cmd">IF</span>  ThreatScore (from pxGrid/SNA) >= <span class="number">7</span>
+  <span class="cmd">THEN</span> CoA = <span class="string">"Reauthenticate"</span>, SGT = <span class="number">99</span> (Quarantine), <span class="string">"Disconnect_Port"</span>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">100%</div>
+                <div class="metric-label">网络接入设备可见性</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">80%↓</div>
+                <div class="metric-label">横向移动攻击面（SGT微分段）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">&lt;3s</div>
+                <div class="metric-label">威胁自动隔离时间（pxGrid CoA）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">70%↓</div>
+                <div class="metric-label">合规审计准备时间</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 3: Cisco Secure Network Analytics (SNA) -->
+      <div class="accordion" id="acc-sna">
+        <div class="accordion-header" onclick="toggleAccordion('acc-sna')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #00b894, #00897B); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Secure Network Analytics（SNA，安全网络分析）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Identify · Detect · Respond ｜ 辅助：Govern · Protect · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco Secure Network Analytics（前身为Stealthwatch）是Cisco的<strong>NDR（Network Detection and Response）平台</strong>。它的核心理念可以用一句话概括：<strong>"网络不会说谎"</strong>——无论攻击者多么善于伪装，其恶意行为最终都会在网络流量中留下痕迹。
+            </p>
+            <p>
+              SNA通过收集和分析全网的<span class="tooltip-trigger">NetFlow/IPFIX<span class="tooltip-text">NetFlow是Cisco开发的网络流量元数据格式，记录每个网络会话的源/目的IP、端口、协议、字节数、包数、时间戳等信息。IPFIX是其IETF标准化版本。SNA可处理每秒数百万条Flow记录。</span></span>遥测数据（由路由器、交换机、防火墙等基础设施原生生成，无需额外部署探针），构建全网流量行为基线，然后使用<strong>机器学习和行为分析算法</strong>检测偏离基线的异常行为。
+            </p>
+            <p>
+              关键差异化优势：SNA<strong>不需要解密流量</strong>即可检测威胁——它分析的是Flow元数据（即"信封"信息），而非包内容（即"信件"内容）。这使其在加密流量占比超过85%的现代企业网络中尤为有效，也天然符合隐私合规要求。
+            </p>
+
+            <h4 style="color: #6c5ce7;">🛡️ NIST CSF映射详解</h4>
+
+            <div style="background: #e8f4fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #0984e3;">
+              <strong style="color: #0984e3;">ID · Identify（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>ID.AM — 资产发现与分类：</strong>SNA通过分析NetFlow数据，自动发现网络中所有活跃的IP主机及其通信模式，即使这些设备未在ISE中注册或未安装任何Agent。这对于发现"影子IT"设备和OT环境中的未知资产尤为关键。</li>
+                <li><strong>ID.RA — 风险评估：</strong>SNA为每个主机和用户维护一个动态的<strong>Security Event威胁得分</strong>，基于其通信行为的异常程度自动评估风险等级。管理层可以通过Dashboard看到"当前网络中威胁得分最高的10个主机"，直接优先处理。</li>
+              </ul>
+            </div>
+
+            <div style="background: #fef9e7; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #fdcb6e;">
+              <strong style="color: #c0870a;">DE · Detect（核心——SNA的灵魂功能）</strong>
+              <p class="text-small" style="margin-top: 8px;">SNA的检测能力覆盖了ATT&CK矩阵中多个关键战术的技术手法：</p>
+              <ul class="text-small">
+                <li><strong>C2通信检测（Command and Control TA0011）：</strong>通过分析流量的周期性Beacon模式、异常DNS查询频率、DGA（域名生成算法）特征等，检测被控主机的C2回连行为——即使通信是加密的。</li>
+                <li><strong>横向移动检测（Lateral Movement TA0008）：</strong>建模每个主机的正常通信伙伴（Peer Group基线），当一台主机突然开始扫描或连接从未交互过的内部主机时，立即标记为异常。</li>
+                <li><strong>数据外泄检测（Exfiltration TA0010）：</strong>通过监控异常大流量传输（Data Hoarding）、非工作时间的大量上传行为、向异常地理位置的数据传输等模式检测数据窃取。</li>
+                <li><strong>内部威胁检测（Insider Threat）：</strong>通过行为基线偏差检测——如一个从不访问研发服务器的销售人员突然大量下载技术文档。</li>
+                <li><strong>加密流量分析（ETA — Encrypted Traffic Analytics）：</strong>Cisco独有技术，分析加密流量的元数据特征（包长序列、到达间隔、TLS指纹等），<strong>以99.6%准确率检测加密恶意流量，误报率仅0.01%</strong>（Cisco官方测试数据）。</li>
+              </ul>
+            </div>
+
+            <div style="background: #fde8e8; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #e17055;">
+              <strong style="color: #e17055;">RS · Respond（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>RS.AN — 事件调查：</strong>SNA提供强大的Flow查询和可视化工具。安全分析师可以回溯任意时间窗口内任意主机的所有通信记录——"这台服务器在过去30天内与哪些外部IP通信过？传输了多少数据？"——精确重建攻击时间线。</li>
+                <li><strong>RS.MI — 自动遏制：</strong>当SNA检测到高置信度威胁时，通过pxGrid将威胁情报推送给ISE，ISE在秒级执行CoA隔离。也可通过API触发Secure Firewall添加黑名单规则。这实现了从<strong>检测到遏制的全自动闭环</strong>——MTTR（平均响应时间）从小时级压缩到秒级。</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：OT网络异常流量检测</div>
+              <p>
+                回到开篇"华锐精密"的故事——如果当时部署了SNA，情况会完全不同。SNA通过收集OT网络交换机的NetFlow数据，建立了每台PLC、HMI、SCADA服务器的通信行为基线（正常情况下，PLC-07只与SCADA-Server-A通信，使用Modbus/TCP 502端口，每5秒一个请求周期）。
+              </p>
+              <p>
+                当恶意软件感染了PLC网关并开始横向扫描时，SNA在<strong>2分钟内</strong>检测到以下异常：① PLC-07-Gateway开始向10个从未通信的内部IP发起TCP SYN扫描（Reconnaissance行为）；② 出现了与一个境外IP的周期性HTTPS通信（疑似C2 Beacon）；③ 数据传输量在非生产时段异常增加300%。
+              </p>
+              <p>
+                SNA自动将该主机的威胁得分从0提升至9.2/10，通过pxGrid通知ISE执行CoA，交换机在<strong>3秒内</strong>将该网关端口移至隔离VLAN——<strong>攻击从发生到遏制：2分03秒</strong>，而非17天。
+              </p>
+            </div>
+
+            <h4 style="color: #2c3e50;">🏦 银行业场景</h4>
+            <div class="story-box" style="background: linear-gradient(135deg, #fef9e7, #fdf2e9); border-left-color: #f39c12;">
+              <div class="story-label" style="color: #f39c12;">场景：内部威胁与数据泄露检测</div>
+              <p>
+                某银行部署SNA后，在第一周就发现了一个持续数月的安全隐患：一名即将离职的信贷审批人员，在过去三个月中，每天下班前通过加密通道向个人云存储上传大量客户信贷档案数据。SNA通过以下异常信号组合检测到此行为：
+              </p>
+              <ul style="font-style: normal;">
+                <li>该用户的上行流量在每天17:30-18:00出现尖峰，偏离同组用户基线>400%</li>
+                <li>目标IP地址为个人云存储服务（通过Talos威胁情报分类识别）</li>
+                <li>传输总量在30天内累计超过12GB——远超该岗位的正常数据使用量</li>
+              </ul>
+              <p>
+                SNA生成高置信度告警后，银行安全团队介入调查，阻止了一起潜在的大规模客户数据泄露事件。估算避免的合规处罚和品牌损失超过<strong>5000万元</strong>。
+              </p>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">99.6%</div>
+                <div class="metric-label">加密恶意流量检测率（ETA）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">0代理</div>
+                <div class="metric-label">无需安装Agent（利用网络遥测）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">&lt;3min</div>
+                <div class="metric-label">从异常到自动遏制时间</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">90%↓</div>
+                <div class="metric-label">威胁调查时间缩减</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 4: Cisco Secure Client -->
+      <div class="accordion" id="acc-secureclient">
+        <div class="accordion-header" onclick="toggleAccordion('acc-secureclient')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #6c5ce7, #5b4cdb); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Secure Client（安全客户端，前身AnyConnect）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Protect · Detect ｜ 辅助：Govern · Identify · Respond · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco Secure Client是Cisco部署在终端设备上的<strong>统一安全代理（Unified Agent）</strong>。它不仅是传统VPN客户端的升级版——而是整合了多种安全模块的"瑞士军刀"，将VPN连接、零信任网络访问（ZTNA）、终端遥测、DNS层安全、网络可见性（NVM）等功能集成在一个客户端中。
+            </p>
+            <p>
+              <strong>核心理念：</strong>在混合办公时代，用户可能从公司办公室、家中、咖啡厅或出差酒店连接企业资源。Secure Client确保<strong>无论用户在哪里，都获得一致的安全保护和访问体验</strong>——这是零信任"永不信任、始终验证"原则在终端侧的体现。
+            </p>
+
+            <h4 style="color: #00b894;">🛡️ NIST CSF映射详解</h4>
+
+            <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #00b894;">
+              <strong style="color: #00b894;">PR · Protect（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>PR.AA — 安全远程访问：</strong>提供IPSec/SSL VPN和<span class="tooltip-trigger">ZTNA（Zero Trust Network Access）<span class="tooltip-text">零信任网络访问：用户每次访问应用时都经过身份验证和设备合规检查，仅授予访问特定应用的权限（而非整个网络），且访问路径加密。</span></span>两种远程访问模式。ZTNA模式下，用户不再获得对整个网络的VPN隧道，而是按应用（per-app）获得精确授权——极大缩小了攻击面。</li>
+                <li><strong>PR.DS — 数据保护：</strong>所有远程通信通过加密隧道传输，防止在公共WiFi等不可信网络中被窃听。</li>
+                <li><strong>PR.PS — 终端合规：</strong>Secure Client内置的Posture模块与ISE协同，在用户连接时检查终端安全状态（OS版本、补丁、杀毒、磁盘加密、越狱/Root检测等），不合规设备自动降级访问权限或拒绝连接。</li>
+                <li><strong>PR.AA — DNS层防护（Umbrella模块）：</strong>集成Cisco Umbrella的DNS层安全，在任何应用建立连接之前，先通过Umbrella的智能DNS解析阻断对恶意域名/IP的访问——这是"shift-left"安全理念的典型体现，将防线前移到DNS解析层。</li>
+              </ul>
+            </div>
+
+            <div style="background: #fef9e7; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #fdcb6e;">
+              <strong style="color: #c0870a;">DE · Detect（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>DE.CM — 终端网络遥测（NVM — Network Visibility Module）：</strong>NVM模块在终端上收集所有网络连接的元数据（进程名、目的IP/域名、端口、字节数、时间戳等）并发送到SNA或Splunk进行分析。这解决了一个关键盲区——<strong>当用户不在公司网络中（如家中WiFi）时，网络遥测通常不可见</strong>，NVM填补了这一空白。</li>
+                <li><strong>DE.CM — Umbrella DNS日志：</strong>每一次DNS查询都被记录和分类，当用户（即使无意中）尝试访问钓鱼网站、恶意软件下载站或C2服务器时，Umbrella在DNS解析层即刻阻断并记录——提供了传统防火墙和终端杀毒无法覆盖的检测层。</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：远程维护工程师的安全接入</div>
+              <p>
+                制造业的OT设备经常需要设备供应商（如西门子、罗克韦尔的工程师）进行远程维护。传统方式是开放VPN全隧道访问，工程师一旦连入就能看到整个OT网络——这是巨大的供应链安全风险。
+              </p>
+              <p>
+                通过Cisco Secure Client的ZTNA模式：① 供应商工程师安装Secure Client；② 连接时进行MFA身份认证 + 设备合规检查（必须安装指定的杀毒软件、OS补丁到位）；③ 仅获得访问特定PLC编程软件（如Studio 5000 Web Interface）的权限，而非整个网络；④ 所有操作通过加密隧道传输，并被完整记录；⑤ 维护窗口结束后，访问权限自动撤销。
+              </p>
+            </div>
+
+            <h4 style="color: #2c3e50;">🏦 银行业场景</h4>
+            <div class="story-box" style="background: linear-gradient(135deg, #fef9e7, #fdf2e9); border-left-color: #f39c12;">
+              <div class="story-label" style="color: #f39c12;">场景：混合办公下的统一安全接入</div>
+              <p>
+                某银行有3000名员工实行混合办公（每周3天远程），需要在家中安全访问核心银行系统（CBS）、信贷审批系统和邮件。部署Secure Client后：
+              </p>
+              <ul style="font-style: normal;">
+                <li>员工在家通过ZTNA模式按需访问授权应用，无需传统VPN的"全隧道"</li>
+                <li>Posture模块确保家用PC满足银行安全基线（如Windows Defender实时防护开启、系统补丁≤30天内）</li>
+                <li>Umbrella DNS模块阻止员工在家期间点击钓鱼邮件中的恶意链接——第一个月即阻断了1,200+次恶意DNS查询</li>
+                <li>NVM遥测数据发送到SNA，安全团队可以监控远程员工的网络行为基线，及时发现异常</li>
+              </ul>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">1个Agent</div>
+                <div class="metric-label">统一VPN/ZTNA/DNS/遥测</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">68%↓</div>
+                <div class="metric-label">远程访问攻击面（ZTNA vs VPN）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">85%+</div>
+                <div class="metric-label">钓鱼/恶意域名DNS层阻断率</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">全覆盖</div>
+                <div class="metric-label">离网终端行为可见性（NVM）</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- Product 5: Cisco Secure Workload -->
+      <div class="accordion" id="acc-workload">
+        <div class="accordion-header" onclick="toggleAccordion('acc-workload')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #e67e22, #d35400); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Secure Workload（安全工作负载，前身Tetration）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Identify · Protect · Detect · Respond ｜ 辅助：Govern · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              如果说ISE管控的是"谁能进入网络"，Cisco Secure Firewall管控的是"流量能否通过边界"，那么<strong>Cisco Secure Workload管控的是"工作负载之间能否互相通信"</strong>——它是数据中心和云环境中<strong>微分段（Micro-Segmentation）</strong>和<strong>工作负载保护</strong>的核心平台。
+            </p>
+            <p>
+              Secure Workload通过在服务器、虚拟机和容器上部署轻量级Agent（也支持Agentless模式），实时采集进程级通信数据，利用<strong>机器学习算法自动生成最小权限白名单策略</strong>，然后在操作系统防火墙层（Linux iptables/nftables、Windows Firewall）或云原生安全组（AWS SG、Azure NSG）层面强制执行这些策略。
+            </p>
+            <p>
+              <em>类比：如果网络防火墙是大楼的门禁系统（控制谁能进大楼），那么Secure Workload就是每个房间的智能门锁——即使攻击者进入了大楼，也无法从会计部走进研发实验室，因为每个房间的门只对授权访客开放。</em>
+            </p>
+
+            <h4 style="color: #6c5ce7;">🛡️ NIST CSF映射详解</h4>
+
+            <div style="background: #e8f4fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #0984e3;">
+              <strong style="color: #0984e3;">ID · Identify（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>ID.AM — 工作负载资产清单：</strong>自动发现数据中心和云中的所有工作负载（物理机、VM、容器、Serverless），记录其操作系统、运行的进程/服务、监听端口、已安装的软件包及版本。</li>
+                <li><strong>ID.AM — 应用依赖关系映射（ADM）：</strong>这是Secure Workload最强大的能力之一——通过分析实际流量数据，<strong>自动生成应用拓扑图</strong>，展示"Web前端→API网关→微服务A→数据库B→缓存C"的完整调用链和通信矩阵。很多企业自己都不清楚应用间的依赖关系，Secure Workload可以在数天内揭示"真实的应用地图"。</li>
+                <li><strong>ID.RA — 漏洞评估：</strong>Agent收集每个工作负载上安装的软件包和版本信息，与CVE数据库实时比对，自动识别存在已知漏洞的软件并按CVSS评分排列优先级。</li>
+              </ul>
+            </div>
+
+            <div class="grid-2" style="margin: 12px 0;">
+              <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; border-left: 4px solid #00b894;">
+                <strong style="color: #00b894;">PR · Protect（核心）</strong>
+                <ul class="text-small" style="margin-top: 8px;">
+                  <li><strong>PR.IR — 微分段策略自动生成与执行：</strong>基于ADM学习到的实际通信模式，Secure Workload自动建议"最小权限"微分段策略——仅允许观察到的合法通信路径，拒绝一切其他连接。策略在OS防火墙层面执行，不依赖网络基础设施变更。</li>
+                  <li><strong>PR.PS — 进程级白名单：</strong>不仅控制"IP A能否访问IP B的端口X"，还能控制"只有nginx进程可以监听80端口，任何其他进程尝试监听都将被阻断"——这是防止恶意进程伪装合法服务的关键手段。</li>
+                  <li><strong>PR.AA — 跨云一致策略：</strong>对于多云/混合云部署的银行或大型制造商，Secure Workload提供统一的策略视图和执行能力——无论工作负载在本地数据中心、AWS、Azure还是GCP，策略定义和执行完全一致。</li>
+                </ul>
+              </div>
+              <div style="background: #fef9e7; border-radius: 12px; padding: 20px; border-left: 4px solid #fdcb6e;">
+                <strong style="color: #c0870a;">DE · Detect + RS · Respond</strong>
+                <ul class="text-small" style="margin-top: 8px;">
+                  <li><strong>DE.CM — 行为异常检测：</strong>持续监控工作负载的进程行为和网络通信，检测偏离基线的异常——如一个数据库服务器突然开始发起对外HTTP连接（疑似反弹Shell），或一个Web服务器开始运行PowerShell进程（疑似Webshell）。</li>
+                  <li><strong>DE.AE — 取证快照：</strong>检测到异常时自动捕获进程树、网络连接、文件系统变更等取证信息。</li>
+                  <li><strong>RS.MI — 动态策略收紧：</strong>当检测到攻击行为时，可以从"监控模式"即时切换为"强制执行模式"，将白名单策略从"记录违规"提升为"阻断违规"，在数据中心层面实现自动遏制。</li>
+                </ul>
+              </div>
+            </div>
+
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：MES/ERP系统微分段保护</div>
+              <p>
+                某大型汽车制造商的数据中心运行着MES（制造执行系统）、ERP（SAP）、PLM（产品生命周期管理）和SCADA历史数据库等关键业务系统。传统上，这些系统位于同一个"服务器VLAN"中，缺乏东西向流量隔离——一旦攻击者控制了一台服务器，即可在数据中心内自由横向移动。
+              </p>
+              <p>
+                部署Secure Workload后：① ADM功能在2周内自动描绘出MES→SAP RFC接口→Oracle DB的完整调用链；② 自动生成最小权限策略（如"仅允许MES-APP-01的TCP 3300端口→SAP-APP-01的TCP 3200端口"）；③ 策略在模拟模式运行1周后确认无误，切换为强制执行；④ 勒索软件如果感染了一台PLM服务器，尝试横向移动到SAP时会被微分段策略立即阻断。
+              </p>
+            </div>
+
+            <h4 style="color: #2c3e50;">🏦 银行业场景</h4>
+            <div class="story-box" style="background: linear-gradient(135deg, #fef9e7, #fdf2e9); border-left-color: #f39c12;">
+              <div class="story-label" style="color: #f39c12;">场景：核心银行系统零信任微分段 + PCI DSS合规</div>
+              <p>
+                PCI DSS v4.0要求对持卡人数据环境（CDE）实施严格的网络分段和访问控制。某银行使用Secure Workload对CDE环境中的交易处理服务器、卡数据库和支付网关实施微分段：
+              </p>
+              <ul style="font-style: normal;">
+                <li>ADM自动识别CDE边界——精确界定"哪些服务器真正处理或存储卡数据"，将PCI DSS审计范围缩小60%</li>
+                <li>微分段策略确保CDE服务器只能与已授权的支付网关和HSM（硬件安全模块）通信，完全隔离于办公网络和互联网</li>
+                <li>合规Dashboard实时展示策略覆盖率、违规事件和漏洞状态，直接输出PCI DSS要求1（安装和维护网络安全控制）和要求6（开发和维护安全系统）的审计证据</li>
+                <li>季度合规审计准备时间从3周缩短至3天</li>
+              </ul>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">85%↓</div>
+                <div class="metric-label">东西向攻击面（微分段后）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">2周</div>
+                <div class="metric-label">ADM自动映射应用依赖</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">60%↓</div>
+                <div class="metric-label">PCI DSS审计范围</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">零人工</div>
+                <div class="metric-label">ML自动生成微分段策略</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 6: Cisco Cyber Vision -->
+      <div class="accordion" id="acc-cybervision">
+        <div class="accordion-header" onclick="toggleAccordion('acc-cybervision')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #00b894, #00cec9); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M2 20h20M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Cyber Vision（工业安全可视化平台）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Identify · Detect ｜ 辅助：Govern · Protect · Respond · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco Cyber Vision是专为<strong>OT/ICS（运营技术/工业控制系统）</strong>环境设计的<strong>工业安全可视化和威胁检测平台</strong>。它解决了OT安全的第一大痛点——<strong>"看不见"</strong>。
+            </p>
+            <p>
+              传统IT安全工具无法理解工业协议（如Modbus、EtherNet/IP、PROFINET、S7、OPC-UA、BACnet等），也无法深入解析PLC指令、HMI操作和SCADA通信的语义。Cyber Vision通过<strong>深度包检测（DPI）引擎</strong>，不仅识别OT设备类型和厂商，还能解析工业协议中的<strong>具体操作内容</strong>——比如"工程站A正在向PLC-07发送固件更新指令"或"HMI-03正在读取温度传感器值"。
+            </p>
+            <p>
+              <strong>独特架构优势：</strong>Cyber Vision的传感器（Sensor）<strong>嵌入在Cisco工业交换机（IE3x00/IE9300系列）内部</strong>，无需额外部署独立探针硬件。传感器作为交换机上的一个应用容器运行（基于Cisco IOx平台），直接在交换机SPAN/Mirror端口上进行协议解析。这意味着：① 零额外硬件成本和部署复杂度；② 不改变现有OT网络拓扑；③ 传感器与交换机共享管理界面（通过Catalyst Center集中管理）。
+            </p>
+
+            <h4 style="color: #6c5ce7;">🛡️ NIST CSF映射详解</h4>
+
+            <div style="background: #e8f4fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #0984e3;">
+              <strong style="color: #0984e3;">ID · Identify（核心——Cyber Vision的灵魂功能）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>ID.AM — OT资产自动发现与深度画像：</strong>
+                  <ul>
+                    <li>自动发现每一台连接到OT网络的设备，包括PLC、HMI、VFD（变频器）、机器人控制器、AGV/AMR控制单元、IP摄像头、安全继电器等</li>
+                    <li>深度解析设备属性：厂商（如Siemens、Rockwell、Fanuc）、型号、固件版本、IP/MAC地址、运行的工业协议和服务</li>
+                    <li>追踪设备间的实际通信关系，生成OT资产通信拓扑图——"PLC-07与SCADA-A每5秒交换一次Modbus读取请求"</li>
+                  </ul>
+                </li>
+                <li><strong>ID.RA — OT漏洞评估：</strong>将发现的设备型号和固件版本与CVE数据库、ICS-CERT公告和Cisco Talos OT威胁情报关联，自动标记存在已知漏洞的设备。例如："Siemens S7-1500 FW V2.8.1 — CVE-2023-XXXX（CVSS 9.8，远程代码执行），建议升级至V2.9.4。"</li>
+                <li><strong>ID.AM — Purdue模型可视化：</strong>自动将发现的资产按<span class="tooltip-trigger">Purdue模型<span class="tooltip-text">Purdue Enterprise Reference Architecture：工业网络的标准分层模型。Level 0为物理过程，Level 1为基本控制（PLC/DCS），Level 2为区域监控（HMI/SCADA），Level 3为站点运营（MES/Historian），Level 3.5为DMZ，Level 4-5为企业IT网络。</span></span>层级分类，直观展示IT/OT边界和各层级的资产分布。</li>
+              </ul>
+            </div>
+
+            <div style="background: #fef9e7; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #fdcb6e;">
+              <strong style="color: #c0870a;">DE · Detect（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>DE.CM — 工业协议异常检测：</strong>基于对工业协议语义的深度理解，检测异常操作行为。例如：
+                  <ul>
+                    <li>非授权设备向PLC发送"Stop CPU"指令</li>
+                    <li>非维护窗口时间段出现PLC固件上传/下载操作</li>
+                    <li>异常的Modbus功能码使用（如诊断功能码0x08在正常运行中不应出现）</li>
+                    <li>OPC-UA的未授权订阅请求</li>
+                  </ul>
+                </li>
+                <li><strong>DE.CM — OT环境通信基线偏差检测：</strong>OT环境的通信模式高度确定性和周期性（不像IT网络那样随机多变），这使得异常检测更为精准。Cyber Vision建立每个设备的"正常"通信画像后，任何偏差（新通信伙伴、新协议、新端口、流量突增）都高度可疑。</li>
+                <li><strong>DE.AE — ATT&CK for ICS映射：</strong>Cyber Vision的告警可直接映射到MITRE ATT&CK for ICS矩阵的战术和技术，帮助OT安全团队理解攻击处于哪个阶段。</li>
+              </ul>
+            </div>
+
+            <div style="background: #f0e8fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #6c5ce7;">
+              <strong style="color: #6c5ce7;">🔗 与Cisco安全生态的集成</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>→ ISE：</strong>将OT资产Profile信息推送给ISE，ISE基于此为OT设备分配SGT标签实施微分段</li>
+                <li><strong>→ SNA：</strong>将OT网络的遥测数据发送给SNA进行跨IT/OT的统一行为分析</li>
+                <li><strong>→ Secure Firewall：</strong>为Firewall提供OT资产上下文，使Firewall策略可以精确到"仅允许特定工程站向特定PLC发送特定功能码"</li>
+                <li><strong>→ Catalyst Center：</strong>OT网络拓扑与IT网络拓扑在Catalyst Center中统一可视化，实现IT/OT融合管理</li>
+                <li><strong>→ SecureX/XDR：</strong>OT威胁事件纳入统一XDR视图，与IT侧事件关联分析</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：汽车产线AGV/AMR安全可视化</div>
+              <p>
+                某新能源汽车工厂部署了200台AGV/AMR用于物料搬运。这些AGV通过IWLAN（工业无线局域网）与调度系统通信，使用私有协议和ROS（Robot Operating System）。工厂OT团队发现一个棘手问题：他们完全不知道这200台AGV的固件版本分布、与哪些服务通信、是否存在未修补的漏洞。
+              </p>
+              <p>
+                部署Cyber Vision后：① 48小时内自动发现并建档全部200台AGV及其控制器，识别出3种不同固件版本（其中V1.2.3存在已知漏洞）；② 绘制完整的AGV通信拓扑——发现12台AGV除了与调度系统通信外，还在向一个未知的内部IP发送周期性数据包（经调查为测试环境遗留的调试端口，未被关闭）；③ 建立AGV通信基线后，当一台AGV的通信模式突然改变（如开始扫描其他网段），Cyber Vision在30秒内生成告警并通过pxGrid通知ISE执行隔离。
+              </p>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">100%</div>
+                <div class="metric-label">OT资产可见性（从0到100%）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">零硬件</div>
+                <div class="metric-label">传感器嵌入Cisco工业交换机</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">400+</div>
+                <div class="metric-label">支持的工业协议数量</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">48h</div>
+                <div class="metric-label">完成全面OT资产盘点</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 7: Cisco Secure Access -->
+      <div class="accordion" id="acc-secureaccess">
+        <div class="accordion-header" onclick="toggleAccordion('acc-secureaccess')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #00BCEB, #049fd9); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Secure Access（SSE/SASE统一安全接入平台）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Govern · Protect · Detect ｜ 辅助：Identify · Respond · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco Secure Access是Cisco的<strong><span class="tooltip-trigger">SSE（Security Service Edge）<span class="tooltip-text">安全服务边缘：Gartner定义的云交付安全架构，整合ZTNA、SWG、CASB、FWaaS等安全服务，在云端为用户提供一致的安全保护，不论其物理位置。</span></span>平台</strong>，也是Cisco <span class="tooltip-trigger">SASE（Secure Access Service Edge）<span class="tooltip-text">安全访问服务边缘：将网络（SD-WAN）和安全（SSE）功能融合为统一的云交付服务。Cisco的SASE方案由Cisco SD-WAN + Cisco Secure Access组成。</span></span>架构的安全侧核心。它在云端融合了以下安全服务：
+            </p>
+            <ul>
+              <li><strong>ZTNA（零信任网络访问）</strong>：基于身份和上下文的按应用访问控制，替代传统VPN</li>
+              <li><strong>SWG（Secure Web Gateway，安全Web网关）</strong>：实时检测和阻断Web流量中的恶意内容、URL和下载</li>
+              <li><strong>CASB（Cloud Access Security Broker，云访问安全代理）</strong>：发现和控制Shadow IT（影子SaaS应用），实施DLP策略</li>
+              <li><strong>FWaaS（Firewall as a Service）</strong>：云端防火墙能力，保护非Web协议流量</li>
+              <li><strong>DNS层安全（原Umbrella）</strong>：在DNS解析层阻断恶意域名访问</li>
+              <li><strong>RBI（Remote Browser Isolation，远程浏览器隔离）</strong>：将高风险Web页面在云端沙箱中渲染，仅将安全的视觉流传输给用户</li>
+              <li><strong>DLP（Data Loss Prevention）</strong>：跨SaaS、Web和私有应用的统一数据防泄漏策略</li>
+            </ul>
+            <p>
+              <em>类比：如果传统安全是在公司大楼里设立安检门，那Secure Access是给每个员工配备了一个<strong>"贴身安全保镖"</strong>——无论员工去哪里（办公室、家里、机场），保镖都跟随左右，检查每一次访问请求、每一个打开的网页、每一份下载的文件。</em>
+            </p>
+
+            <h4 style="color: #6c5ce7;">🛡️ NIST CSF映射详解</h4>
+
+            <div style="background: #f0e8fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #6c5ce7;">
+              <strong style="color: #6c5ce7;">GV · Govern（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>GV.PO — 统一安全策略管理：</strong>Secure Access提供单一管理控制台，统一定义和执行跨ZTNA、SWG、CASB、DLP的安全策略。这解决了传统多点产品（Web代理一套策略、VPN一套策略、CASB一套策略）导致的策略碎片化和管理低效问题。</li>
+                <li><strong>GV.SC — Shadow IT治理：</strong>CASB功能自动发现企业员工使用的所有SaaS应用（通常企业真实使用的SaaS数量是IT部门已知数量的5-10倍），识别高风险应用（如未经批准的文件共享服务），为管理层提供Shadow IT风险报告。</li>
+              </ul>
+            </div>
+
+            <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #00b894;">
+              <strong style="color: #00b894;">PR · Protect（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>PR.AA — 零信任访问：</strong>ZTNA模块确保每次应用访问都经过身份认证（集成Azure AD/Okta/ISE等IdP）+ 设备合规检查 + 上下文评估（位置、时间、风险评分），仅授予最小权限。用户不再"登录VPN后可以访问一切"，而是"每个应用单独授权"。</li>
+                <li><strong>PR.DS — DLP数据保护：</strong>跨Web上传、SaaS文件共享（如OneDrive、Box）和私有应用的统一DLP策略，防止敏感数据（如客户PII、银行卡号、源代码）通过任何渠道外泄。支持精确数据匹配（EDM）和OCR图片文字识别。</li>
+                <li><strong>PR.DS — Web安全：</strong>SWG实时扫描Web流量，阻断恶意下载、网页挂马和钓鱼页面。RBI对高风险URL进行隔离渲染，即使用户点击了钓鱼链接，恶意代码也在云端沙箱中执行，不会触及用户终端。</li>
+              </ul>
+            </div>
+
+            <div style="background: #fef9e7; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #fdcb6e;">
+              <strong style="color: #c0870a;">DE · Detect（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>DE.CM — DNS层威胁检测：</strong>每天处理超过6200亿次DNS请求（全球Umbrella基础设施），利用统计模型和机器学习识别DGA域名、DNS隧道和新注册恶意域名。在威胁到达用户之前即在DNS层拦截。</li>
+                <li><strong>DE.CM — Cloud Malware检测：</strong>对SaaS应用中存储的文件进行持续恶意软件扫描（追溯扫描），检测通过协作工具（如Teams、Slack文件分享）传播的恶意文件。</li>
+                <li><strong>DE.AE — 用户风险评分：</strong>综合用户的Web行为、DNS查询模式、SaaS使用情况生成动态风险评分，高风险用户自动触发增强验证或降级访问权限。</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #2c3e50;">🏦 银行业场景</h4>
+            <div class="story-box" style="background: linear-gradient(135deg, #fef9e7, #fdf2e9); border-left-color: #f39c12;">
+              <div class="story-label" style="color: #f39c12;">场景：银行分支机构安全上网 + DLP合规</div>
+              <p>
+                某全国性银行有800家分支网点，每个网点的柜员和理财经理需要访问互联网（查询政策、使用SaaS工具）和内部系统。传统架构要求所有互联网流量回传至总行数据中心的Web代理，导致高延迟和单点故障。
+              </p>
+              <p>
+                部署Cisco Secure Access后：① 各网点互联网流量直接通过最近的Cisco PoP（全球50+节点）进行安全检查，延迟降低60%；② SWG阻断恶意网站和钓鱼页面；③ CASB发现员工通过个人Dropbox分享客户资料（Shadow IT），自动阻断并记录；④ DLP策略实时检测并阻止包含银行卡号（PAN）或身份证号的内容上传到任何未授权的外部服务；⑤ ZTNA替代传统VPN，理财经理在外出拜访客户时通过手机安全访问CRM系统。
+              </p>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">7合1</div>
+                <div class="metric-label">融合安全服务（SSE平台）</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">60%↓</div>
+                <div class="metric-label">分支机构上网延迟</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">620B+</div>
+                <div class="metric-label">每日DNS请求分析量</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">5x~10x</div>
+                <div class="metric-label">Shadow IT发现倍增</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 8: Cisco Secure Equipment Access -->
+      <div class="accordion" id="acc-sea">
+        <div class="accordion-header" onclick="toggleAccordion('acc-sea')">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #636e72, #2d3436); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+              <div style="font-weight: 700;">Cisco Secure Equipment Access（工业设备安全远程访问）</div>
+              <div style="font-size: 0.8rem; color: #888; font-weight: 400;">核心函数：Protect ｜ 辅助：Govern · Identify · Detect · Respond · Recover</div>
+            </div>
+          </div>
+          <svg class="acc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+
+            <h4 style="margin-top: 16px; color: #049fd9;">📌 产品概述</h4>
+            <p>
+              Cisco Secure Equipment Access（SEA）是专为<strong>OT/工业环境设计的安全远程访问解决方案</strong>。它解决了制造业和关键基础设施的一个核心矛盾：<strong>工业设备需要远程维护和诊断，但传统的VPN或端口转发方式引入了巨大的安全风险</strong>。
+            </p>
+            <p>
+              想象一下传统场景：西门子工程师需要远程升级一台PLC的固件。IT团队为其开通了VPN隧道——但这条隧道一旦打通，工程师不仅可以访问目标PLC，还可能"看到"整个OT网络。如果工程师的笔记本已被感染，恶意软件就获得了通向OT核心的直达通道。
+            </p>
+            <p>
+              Cisco SEA采用<strong>零信任架构</strong>解决这一问题：
+            </p>
+            <ul>
+              <li><strong>精确到设备的访问授权：</strong>远程用户只能访问被明确授权的特定工业设备（如"PLC-07的编程端口"），无法发现或访问网络中的任何其他设备</li>
+              <li><strong>基于身份的多因素认证：</strong>每次远程会话都需要MFA验证，并与用户身份（而非仅IP地址）绑定</li>
+              <li><strong>会话录制与审计：</strong>所有远程操作会话（包括RDP、SSH、VNC、工业协议连接）被完整录制，支持回放审计</li>
+              <li><strong>时间窗口控制：</strong>访问权限可设定为"2026年3月28日14:00-16:00"这样的精确维护窗口，过期自动撤销</li>
+              <li><strong>无需VPN隧道：</strong>通过云网关中转，远程用户与OT设备之间不建立直接网络连接，彻底消除VPN隧道的攻击面</li>
+            </ul>
+
+            <h4 style="color: #6c5ce7;">🛡️ NIST CSF映射详解</h4>
+
+            <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #00b894;">
+              <strong style="color: #00b894;">PR · Protect（核心）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>PR.AA — 最小权限远程访问：</strong>这是SEA的核心价值。每个远程用户的每次会话都遵循最小权限原则——只能访问特定设备的特定服务，不能横向探索。这直接对应IEC 62443-3-3中SL-2~SL-3的远程访问安全要求。</li>
+                <li><strong>PR.AA — 多因素身份认证：</strong>所有远程会话强制MFA（支持TOTP、Push Notification、FIDO2等），杜绝凭证盗用风险。</li>
+                <li><strong>PR.PS — 审计与合规：</strong>完整的会话录制和操作日志，满足等保2.0、IEC 62443、FDA 21 CFR Part 11等法规对远程访问审计的要求。安全团队可以事后回放"供应商工程师在维护窗口内对PLC做了哪些具体操作"。</li>
+              </ul>
+            </div>
+
+            <div style="background: #f0e8fd; border-radius: 12px; padding: 20px; margin: 12px 0; border-left: 4px solid #6c5ce7;">
+              <strong style="color: #6c5ce7;">GV · Govern（辅助）</strong>
+              <ul class="text-small" style="margin-top: 8px;">
+                <li><strong>GV.SC — 供应链风险管理：</strong>SEA是管理第三方供应商远程访问的最佳实践工具。它将"供应商需要访问我们的OT设备"这一不可避免的业务需求，从"高风险开放"转变为"精确控制、完整审计"。管理层可以通过Dashboard看到"本月有多少供应商进行了多少次远程维护，各操作了哪些设备"。</li>
+              </ul>
+            </div>
+
+            <h4 style="color: #e67e22;">🏭 制造业场景</h4>
+            <div class="story-box">
+              <div class="story-label">场景：多供应商OT设备远程维护</div>
+              <p>
+                某半导体制造工厂有来自12个不同供应商的设备（光刻机、蚀刻设备、检测仪、物流AGV等），每月需要约40次远程维护会话。以前，每次维护IT团队都要手动配置VPN、开放端口、现场监督，维护结束后再手动关闭——这一流程极其低效且容易遗忘（曾发生过VPN账户维护窗口结束后忘记关闭、持续暴露3个月的事件）。
+              </p>
+              <p>
+                部署SEA后：① 为每个供应商创建独立的访问策略，绑定其可以访问的设备清单；② 供应商工程师通过Web门户申请维护窗口，OT经理在线审批；③ 维护时间到达后，工程师通过MFA登录SEA门户，仅看到被授权的设备列表；④ 连接通过SEA云网关中转，工程师的终端不直接接入OT网络；⑤ 所有操作被录制；⑥ 维护窗口结束后，访问权限自动撤销，无需人工干预；⑦ 月底生成供应商远程访问审计报告，直接满足审计要求。
+              </p>
+            </div>
+
+            <h4 style="margin-top: 20px;">💰 客户价值量化</h4>
+            <div class="grid-4" style="margin: 12px 0;">
+              <div class="metric-card">
+                <div class="metric-value">100%</div>
+                <div class="metric-label">远程维护会话审计覆盖率</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">零VPN</div>
+                <div class="metric-label">消除VPN隧道攻击面</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">90%↓</div>
+                <div class="metric-label">远程维护准备时间</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">自动</div>
+                <div class="metric-label">维护窗口到期权限撤销</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end product accordions wrapper -->
+  </div>
+</section>
+
+<!-- ====== SECTION: INDUSTRY DEEP DIVE ====== -->
+<section class="section" id="industry">
+  <div class="container">
+    <div class="section-header">
+      <h2>🏭🏦 行业深度案例：制造业与银行业的安全转型之路</h2>
+      <p>从痛点到方案，从第一性原理到量化价值——两个行业的完整Storytelling</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- Industry Tabs -->
+    <div class="tab-group">
+      <button class="tab-btn active" onclick="switchTab('manufacturing')" id="tab-manufacturing">🏭 制造业</button>
+      <button class="tab-btn" onclick="switchTab('banking')" id="tab-banking">🏦 银行业</button>
+    </div>
+
+    <!-- TAB: Manufacturing -->
+    <div class="tab-content active" id="content-manufacturing">
+      <div class="card" style="padding: 40px; margin-bottom: 32px;">
+        <h3 style="color: #049fd9; margin-bottom: 20px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#049fd9" stroke-width="2" stroke-linecap="round" style="vertical-align: middle; margin-right: 6px;"><path d="M2 20h20M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
+          "华锐精密"的安全转型全景——从17天到3秒
+        </h3>
+
+        <h4>📍 客户背景</h4>
+        <p>
+          华锐精密（化名）是一家年产值60亿元的汽车零部件制造商，拥有3个生产基地、12条自动化产线、200+台AGV/AMR、3000+台OT设备（PLC、HMI、VFD、机器人）。IT团队15人、OT工程师8人，尚未设立独立安全岗位。
+        </p>
+
+        <h4 style="margin-top: 24px;">🔴 转型前的痛点（用NIST CSF做差距评估）</h4>
+        <div class="mapping-table-wrap" style="margin: 16px 0;">
+          <table class="mapping-table" style="min-width: 700px;">
+            <thead>
+              <tr>
+                <th style="width: 15%;">CSF函数</th>
+                <th style="width: 20%;">差距项</th>
+                <th style="width: 65%;">具体痛点描述</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="nist-tag govern" style="font-size: 0.65rem;">GOVERN</span></td>
+                <td>安全治理缺失</td>
+                <td>无CISO角色，安全预算由IT经理"争取"；OT安全责任在IT和设备部之间推诿；无安全策略文件和风险评估流程</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag identify" style="font-size: 0.65rem;">IDENTIFY</span></td>
+                <td>OT资产不可见</td>
+                <td>OT网络中有3000+设备，IT团队只掌握约40%的资产清单（手工Excel维护，最后更新在18个月前）。不知道有多少设备运行过时固件，不知道设备间的通信关系</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag protect" style="font-size: 0.65rem;">PROTECT</span></td>
+                <td>IT/OT边界模糊</td>
+                <td>IT与OT网络之间仅有一台老旧的ACL路由器做"隔离"，规则维护混乱。无身份认证——任何设备接入工厂交换机即可通信。12家供应商共用一个VPN账户进行远程维护</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag detect" style="font-size: 0.65rem;">DETECT</span></td>
+                <td>OT检测为零</td>
+                <td>OT网络无任何检测手段——没有IDS/IPS、没有流量分析、没有日志集中收集。上次恶意软件感染被发现时已横向移动17天</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag respond" style="font-size: 0.65rem;">RESPOND</span></td>
+                <td>无自动化响应</td>
+                <td>没有事件响应计划（IRP）。上次安全事件的"响应"是：拔网线→重装系统→祈祷不再发生</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag recover" style="font-size: 0.65rem;">RECOVER</span></td>
+                <td>恢复靠运气</td>
+                <td>PLC程序仅有一份离线备份（在工程师的U盘上），无灾难恢复计划。如果遭受勒索攻击导致PLC程序被加密，产线恢复时间估计>2周</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 style="margin-top: 24px;">🟢 转型方案（分阶段，18个月路线图）</h4>
+
+        <div style="background: #f8fafb; border-radius: 14px; padding: 28px; margin: 16px 0;">
+          <h4 style="color: #049fd9;">Phase 1：看见（Month 1-3）— Identify</h4>
+          <ul>
+            <li><strong>Cisco Cyber Vision</strong>：在12条产线的工业交换机（IE3400/IE9300）上激活嵌入式传感器，48小时内完成OT资产全面发现和画像。结果：发现了3,247台OT设备（比预估多800+台），其中387台运行已知漏洞固件</li>
+            <li><strong>Cisco SNA</strong>：在核心交换机上启用NetFlow遥测，建立IT和OT网络的流量行为基线</li>
+            <li><strong>Cisco ISE</strong>：部署ISE并启用Profiling，为所有有线接入设备建立身份档案</li>
+          </ul>
+
+          <h4 style="color: #00b894; margin-top: 20px;">Phase 2：防护（Month 4-9）— Protect</h4>
+          <ul>
+            <li><strong>Cisco Secure Firewall</strong>：在IT/OT DMZ部署Firepower 2130集群，启用工业协议DPI，替换老旧的ACL路由器</li>
+            <li><strong>Cisco ISE + TrustSec</strong>：为OT设备实施基于SGT的微分段——PLC、HMI、AGV、摄像头各归其组，彼此隔离。设备准入从"即插即用"变为"认证后入网"</li>
+            <li><strong>Cisco Secure Equipment Access</strong>：替换共享VPN账户，为12家供应商建立独立的零信任远程访问通道，所有会话录制</li>
+            <li><strong>Cisco Secure Client</strong>：为远程办公的工程师和管理人员部署ZTNA模式的安全接入</li>
+          </ul>
+
+          <h4 style="color: #fdcb6e; margin-top: 20px;">Phase 3：检测与响应（Month 10-15）— Detect + Respond</h4>
+          <ul>
+            <li><strong>Cisco SNA + Cyber Vision联动</strong>：SNA接收来自IT和OT网络的全面遥测数据，实现跨IT/OT的统一异常行为检测</li>
+            <li><strong>pxGrid闭环</strong>：SNA/Cyber Vision检测到威胁 → pxGrid通知ISE → ISE执行CoA自动隔离 → Firewall同步更新黑名单。从检测到遏制：<strong>&lt;3秒</strong></li>
+            <li>制定和演练OT安全事件响应计划（OT-IRP）</li>
+          </ul>
+
+          <h4 style="color: #a29bfe; margin-top: 20px;">Phase 4：治理与持续优化（Month 16-18）— Govern + Recover</h4>
+          <ul>
+            <li>任命OT安全负责人，建立跨IT/OT的安全治理委员会</li>
+            <li>制定OT安全政策和风险管理框架，与IEC 62443对标</li>
+            <li>建立PLC程序和关键配置的自动化备份机制</li>
+            <li>季度ATT&CK for ICS覆盖率评估和Purple Team演练</li>
+          </ul>
+        </div>
+
+        <h4 style="margin-top: 24px;">📊 转型成果（量化价值）</h4>
+        <div class="grid-3" style="margin: 16px 0;">
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">17天 → 3秒</div>
+            <div class="metric-label">威胁发现到遏制的时间</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">0% → 100%</div>
+            <div class="metric-label">OT资产可见性</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">¥800万+</div>
+            <div class="metric-label">年化风险降低估值</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">85%↓</div>
+            <div class="metric-label">横向移动攻击面</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">100%</div>
+            <div class="metric-label">供应商远程操作审计覆盖</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">IEC 62443</div>
+            <div class="metric-label">SL-2合规就绪</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Banking -->
+    <div class="tab-content" id="content-banking">
+      <div class="card" style="padding: 40px; margin-bottom: 32px;">
+        <h3 style="color: #049fd9; margin-bottom: 20px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#049fd9" stroke-width="2" stroke-linecap="round" style="vertical-align: middle; margin-right: 6px;"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+          "滨海银行"的零信任之路——从合规驱动到能力驱动
+        </h3>
+
+        <h4>📍 客户背景</h4>
+        <p>
+          滨海银行（化名）是一家总资产3000亿元的城市商业银行，拥有总行+800家分支网点，员工8000人（其中3000人混合办公），核心银行系统（CBS）部署在同城双活数据中心，正在推进多云战略（私有云+阿里云）。安全团队20人，设有CISO（向CTO汇报）。
+        </p>
+
+        <h4 style="margin-top: 24px;">🔴 转型前的痛点</h4>
+        <div class="mapping-table-wrap" style="margin: 16px 0;">
+          <table class="mapping-table" style="min-width: 700px;">
+            <thead>
+              <tr>
+                <th style="width: 15%;">CSF函数</th>
+                <th style="width: 20%;">差距项</th>
+                <th style="width: 65%;">具体痛点描述</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="nist-tag govern" style="font-size: 0.65rem;">GOVERN</span></td>
+                <td>多点产品策略碎片化</td>
+                <td>分别部署了Web代理、VPN、CASB、DNS安全、DLP五套独立系统，五个管理控制台、五套策略体系，运维复杂且策略冲突频发</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag identify" style="font-size: 0.65rem;">IDENTIFY</span></td>
+                <td>Shadow IT失控</td>
+                <td>IT部门已知的SaaS应用约120个，实际使用超过800个。理财经理通过个人微信传输客户投资报告，信贷人员使用个人网盘存储贷款申请材料</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag protect" style="font-size: 0.65rem;">PROTECT</span></td>
+                <td>远程访问攻击面大</td>
+                <td>3000混合办公员工使用传统SSL VPN全隧道接入，一旦连接即可访问整个内部网络。已发生过员工家用PC感染后通过VPN隧道将恶意软件带入核心网络的事件</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag detect" style="font-size: 0.65rem;">DETECT</span></td>
+                <td>加密流量盲区</td>
+                <td>85%+的网络流量为TLS加密，现有IDS/IPS对加密流量基本"失明"。SOC团队每天面对5000+告警，真实威胁淹没在噪声中</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag respond" style="font-size: 0.65rem;">RESPOND</span></td>
+                <td>响应依赖人工</td>
+                <td>即使SOC识别出真实威胁，从告警到遏制的平均时间（MTTR）为4.5小时——因为需要人工在多个产品间跳转执行隔离操作</td>
+              </tr>
+              <tr>
+                <td><span class="nist-tag recover" style="font-size: 0.65rem;">RECOVER</span></td>
+                <td>数据中心东西向盲区</td>
+                <td>数据中心内部服务器间通信（东西向流量）缺乏分段和监控，一旦攻击者进入数据中心，可以在CBS、CRM、信贷系统之间自由移动</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 style="margin-top: 24px;">🟢 转型方案</h4>
+
+        <div style="background: #f8fafb; border-radius: 14px; padding: 28px; margin: 16px 0;">
+          <h4 style="color: #049fd9;">Phase 1：统一管控 + 边界强化（Month 1-6）</h4>
+          <ul>
+            <li><strong>Cisco Secure Access（SSE）</strong>：替换5套独立安全产品，统一为单一SSE平台。一个控制台管理ZTNA、SWG、CASB、DLP、DNS安全。800家网点的互联网流量从回传总行改为本地直连Cisco PoP，延迟降低60%</li>
+            <li><strong>Cisco Secure Firewall</strong>：在数据中心边界和互联网出口部署新一代防火墙集群，启用EVE加密流量检测。替代全量TLS解密方案，解决隐私合规与安全检测的矛盾</li>
+            <li><strong>Cisco ISE</strong>：全行有线/无线网络启用802.1X + EAP-TLS认证，Posture强制终端安全基线检查</li>
+          </ul>
+
+          <h4 style="color: #00b894; margin-top: 20px;">Phase 2：零信任深化 + 数据中心微分段（Month 7-12）</h4>
+          <ul>
+            <li><strong>Cisco Secure Client + Secure Access ZTNA</strong>：3000名混合办公员工从VPN全隧道迁移至ZTNA按应用授权。理财经理外出时仅能访问CRM和邮件，无法触及CBS</li>
+            <li><strong>Cisco Secure Workload</strong>：在双活数据中心部署Agent，ADM自动映射CBS、信贷、CRM等系统的应用依赖关系，自动生成微分段白名单策略</li>
+            <li><strong>Cisco ISE + TrustSec</strong>：在园区网络实施SGT微分段，将总行各部门网络从扁平二层改为基于身份的逻辑分段</li>
+          </ul>
+
+          <h4 style="color: #fdcb6e; margin-top: 20px;">Phase 3：检测响应闭环（Month 13-18）</h4>
+          <ul>
+            <li><strong>Cisco SNA</strong>：全网部署NetFlow遥测，启用ETA加密流量分析。接入SNA的异常行为告警将SOC日常告警从5000+/天降至<200/天（有效告警）</li>
+            <li><strong>pxGrid全联动</strong>：SNA检测异常 → ISE自动CoA隔离 → Firewall同步阻断 → Secure Access撤销云端访问权限。MTTR从4.5小时降至<5分钟</li>
+            <li>建立红蓝对抗机制，每季度使用ATT&CK Enterprise矩阵验证检测覆盖率</li>
+          </ul>
+        </div>
+
+        <h4 style="margin-top: 24px;">📊 转型成果（量化价值）</h4>
+        <div class="grid-3" style="margin: 16px 0;">
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">5→1</div>
+            <div class="metric-label">安全管理控制台整合</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">4.5h → 5min</div>
+            <div class="metric-label">MTTR（平均响应时间）</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">800+</div>
+            <div class="metric-label">Shadow SaaS应用发现</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">96%↓</div>
+            <div class="metric-label">SOC告警噪声降低</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">PCI DSS 4.0</div>
+            <div class="metric-label">合规就绪</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="font-size: 1.8rem;">¥3500万</div>
+            <div class="metric-label">3年TCO节约（整合5→1）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ====== SECTION: SALES OPPORTUNITIES ====== -->
+<section class="section section-alt" id="sales">
+  <div class="container">
+    <div class="section-header">
+      <h2>💡 发掘安全销售机会：引导式对话问题库</h2>
+      <p>针对制造业和银行业的开放式问题，帮助销售人员从痛点出发、引导对话、发现机会</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="container-narrow" style="margin-bottom: 36px;">
+      <div style="background: linear-gradient(135deg, #f0f8ff, #e8f4fd); border-radius: 16px; padding: 28px 32px;">
+        <h4 style="color: #049fd9; margin-bottom: 12px;">🎯 使用指南：如何运用这些问题</h4>
+        <p class="text-small">
+          以下问题基于<strong>"痛点→可见性→控制→合规→投资回报"</strong>的引导逻辑设计。不要一次性抛出所有问题——建议根据对话场景选取3-5个最相关的问题，以<strong>倾听为主</strong>。每个问题后的方括号标注了该问题可能引出的Cisco产品机会。问题的目的不是推销，而是帮助客户<strong>自己意识到安全差距</strong>——"最好的销售不是告诉客户他需要什么，而是让客户自己说出来。"
+        </p>
+      </div>
+    </div>
+
+    <!-- Manufacturing Questions -->
+    <div style="margin-bottom: 48px;">
+      <h3 style="margin-bottom: 20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" style="vertical-align: middle; margin-right: 6px;"><path d="M2 20h20M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
+        制造业 — 开放式发现问题（12题）
+      </h3>
+
+      <ol class="question-list">
+        <li>
+          <strong>关于OT资产可见性：</strong>如果我现在问您，您的工厂OT网络中一共有多少台联网设备（包括PLC、HMI、传感器、AGV等），各自运行什么固件版本——您能在多长时间内给我一个准确答案？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ Cyber Vision · ISE Profiling</span>
+        </li>
+        <li>
+          <strong>关于IT/OT边界：</strong>您当前的IT网络和OT网络之间是如何隔离的？这个隔离方案上一次被审计或渗透测试验证是什么时候？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Firewall · ISE TrustSec</span>
+        </li>
+        <li>
+          <strong>关于OT威胁检测：</strong>假设今天有一台PLC被恶意软件感染并开始横向扫描，您现有的安全系统能在多快时间内发现？是分钟级、小时级还是天级？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ SNA · Cyber Vision · pxGrid联动</span>
+        </li>
+        <li>
+          <strong>关于供应商远程访问：</strong>您工厂有多少家设备供应商需要远程访问OT设备进行维护？目前的远程访问方式是什么？维护结束后，访问权限是自动撤销还是需要人工关闭？
+          <br><span class="badge badge-orange" style="margin-top: 6px;">→ Secure Equipment Access</span>
+        </li>
+        <li>
+          <strong>关于工业无线安全：</strong>您的AGV/AMR或移动机器人使用什么无线网络？这些无线网络与办公WiFi是否隔离？无线网络上的设备之间是否有访问控制？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Catalyst 9800 WLC · ISE · Cyber Vision</span>
+        </li>
+        <li>
+          <strong>关于OT网络分段：</strong>在您的OT网络中，不同产线的PLC能否直接互相通信？一台机器人控制器能否"看到"其他产线的SCADA服务器？如果可以，您认为这是否是一个需要关注的风险？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ ISE TrustSec SGT · Secure Firewall</span>
+        </li>
+        <li>
+          <strong>关于安全事件响应：</strong>如果明天您的MES或SCADA系统遭受勒索软件攻击导致产线停摆，您现有的应急响应流程是什么？预计恢复需要多长时间？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ 全套方案 · 安全服务</span>
+        </li>
+        <li>
+          <strong>关于合规要求：</strong>您的行业（如汽车/制药/食品/半导体）是否要求满足IEC 62443、等保2.0或客户的网络安全审计要求（如大众TISAX、通用汽车GSEP）？目前的合规就绪状态如何？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ 全套方案 · 治理咨询</span>
+        </li>
+        <li>
+          <strong>关于数字化转型安全：</strong>您的智能制造路线图中（如数字孪生、MES上云、AI质检等），是否已经将安全作为架构设计的一部分？还是打算"先上线再补安全"？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Workload · Secure Access</span>
+        </li>
+        <li>
+          <strong>关于安全投资回报：</strong>过去两年中，您的工厂是否因安全事件（包括病毒、误操作、网络故障等）导致过非计划停机？每次停机的直接损失大概是多少？
+          <br><span class="badge badge-orange" style="margin-top: 6px;">→ ROI量化 · 业务案例构建</span>
+        </li>
+        <li>
+          <strong>关于IT/OT融合管理：</strong>您的IT安全团队和OT工程团队在安全事务上如何协作？是否存在"IT不懂OT、OT不管安全"的组织壁垒？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ Catalyst Center统一管理 · Cyber Vision</span>
+        </li>
+        <li>
+          <strong>关于AGV/AMR漫游安全：</strong>您的AGV在不同AP之间漫游时，是否会出现短暂的通信中断？漫游过程中的安全策略（如身份认证和分段策略）是否能无缝保持？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Catalyst 9800 WLC · ISE · URWB</span>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Banking Questions -->
+    <div>
+      <h3 style="margin-bottom: 20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#049fd9" stroke-width="2" stroke-linecap="round" style="vertical-align: middle; margin-right: 6px;"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+        银行业 — 开放式发现问题（12题）
+      </h3>
+
+      <ol class="question-list">
+        <li>
+          <strong>关于零信任进展：</strong>贵行在零信任网络架构（ZTNA）方面做了哪些尝试？目前是否还有大量用户通过传统VPN全隧道方式访问内部系统？您认为这在安全和用户体验上带来了什么挑战？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Access ZTNA · Secure Client · ISE</span>
+        </li>
+        <li>
+          <strong>关于加密流量威胁：</strong>贵行目前对TLS加密流量的安全检测策略是什么？是全量解密、选择性解密还是基本不检测？您如何平衡安全检测与客户隐私合规之间的矛盾？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ Secure Firewall EVE · SNA ETA</span>
+        </li>
+        <li>
+          <strong>关于Shadow IT：</strong>贵行是否了解员工在日常工作中使用了多少未经IT部门批准的SaaS应用或云存储服务？是否发生过员工通过个人网盘外传客户敏感资料的情况？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Access CASB · DLP</span>
+        </li>
+        <li>
+          <strong>关于数据中心东西向安全：</strong>贵行数据中心内部的核心银行系统（CBS）、信贷系统、CRM等关键应用之间，是否实施了网络微分段隔离？如果攻击者控制了一台DMZ Web服务器，能否横向移动到CBS？
+          <br><span class="badge badge-orange" style="margin-top: 6px;">→ Secure Workload · ISE TrustSec</span>
+        </li>
+        <li>
+          <strong>关于SOC运营效率：</strong>贵行SOC团队每天处理多少条安全告警？其中有多少是真实威胁、多少是误报？从发现威胁到完成遏制的平均时间（MTTR）是多少？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ SNA · XDR · pxGrid联动</span>
+        </li>
+        <li>
+          <strong>关于多点产品整合：</strong>贵行目前安全运营中使用了多少个独立的安全产品/管理控制台？您的安全团队是否面临"工具疲劳"——在多个界面之间切换以调查一个安全事件？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Access SSE整合 · XDR</span>
+        </li>
+        <li>
+          <strong>关于分支机构安全：</strong>贵行800家分支网点的互联网流量目前是如何处理的——回传总行还是本地突破？本地突破时如何保证安全？各网点的安全策略是否与总行一致？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Access · SD-WAN · Secure Firewall</span>
+        </li>
+        <li>
+          <strong>关于内部威胁：</strong>贵行是否有能力检测内部人员的异常行为——比如一个信贷人员在离职前大量下载客户数据？当前是通过什么技术手段来发现此类内部威胁？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ SNA行为分析 · Secure Access DLP</span>
+        </li>
+        <li>
+          <strong>关于合规审计：</strong>贵行在准备等保2.0三级测评、PCI DSS v4.0合规审计时，最耗时和最困难的环节是什么？身份鉴别、访问控制和安全审计日志方面是否能快速提供符合要求的证据？
+          <br><span class="badge badge-orange" style="margin-top: 6px;">→ ISE审计报告 · Secure Workload合规Dashboard</span>
+        </li>
+        <li>
+          <strong>关于多云安全：</strong>贵行在私有云和公有云（如阿里云、腾讯云）之间的安全策略是否统一？云上工作负载是否有与本地数据中心同等级别的微分段和行为监控？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ Secure Workload跨云策略 · Secure Access</span>
+        </li>
+        <li>
+          <strong>关于网络准入控制：</strong>贵行是否对所有接入内部网络的终端设备（包括员工PC、ATM、自助终端、IoT设备等）实施了身份认证和安全合规检查？是否存在"插上网线就能上网"的区域？
+          <br><span class="badge badge-green" style="margin-top: 6px;">→ ISE 802.1X · Posture · Profiling</span>
+        </li>
+        <li>
+          <strong>关于未来规划：</strong>贵行未来2-3年的安全战略重点是什么？是云安全、零信任深化、数据安全还是安全运营自动化？在这些方向上，您认为最大的障碍是技术、预算还是人才？
+          <br><span class="badge badge-blue" style="margin-top: 6px;">→ 战略对齐 · 全套方案路线图</span>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Sales Methodology Tips -->
+    <div class="container-narrow" style="margin-top: 40px;">
+      <div class="card" style="border-left: 4px solid #049fd9;">
+        <h4 style="color: #049fd9;">📘 销售对话方法论提示</h4>
+        <div class="grid-2" style="margin-top: 16px;">
+          <div>
+            <h4 style="font-size: 1rem;">黄金圈法则（WHY → HOW → WHAT）</h4>
+            <ul class="text-small">
+              <li><strong>WHY：</strong>先讨论客户的业务痛点和风险（"为什么这个问题值得关注？"）</li>
+              <li><strong>HOW：</strong>再讨论方法论和架构方法（"NIST CSF 2.0框架建议怎样做？"）</li>
+              <li><strong>WHAT：</strong>最后才介绍具体产品（"Cisco用什么产品实现？"）</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="font-size: 1rem;">MEDDPICC销售资格判断</h4>
+            <ul class="text-small">
+              <li><strong>M</strong>etrics：量化痛点（停机损失、合规罚款、人力成本）</li>
+              <li><strong>E</strong>conomic Buyer：识别预算决策者（CTO/CFO/CISO）</li>
+              <li><strong>D</strong>ecision Criteria：了解评价标准（技术能力 vs 价格 vs 本地支持）</li>
+              <li><strong>D</strong>ecision Process：理解采购流程（PoC→评估→招标→签约）</li>
+              <li><strong>P</strong>aper Process：了解合同和合规要求</li>
+              <li><strong>I</strong>mplicate Pain：深化痛点认知，让客户感受"不行动的代价"</li>
+              <li><strong>C</strong>hampion：发展内部支持者</li>
+              <li><strong>C</strong>ompetition：了解竞争对手态势</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ====== SECTION: CONCLUSION ====== -->
+<section class="section" id="conclusion">
+  <div class="container">
+    <div class="section-header">
+      <h2>✅ 结论：从框架到行动的统一安全之路</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="container-narrow">
+      <p style="font-size: 1.1rem; line-height: 1.9;">
+        回到开篇的故事——华锐精密的IT总监李明问了一个根本问题：<strong>"我们到底看不见什么？"</strong>
+      </p>
+      <p>
+        通过本文的系统梳理，我们可以用NIST CSF 2.0框架给出一个结构化的答案：
+      </p>
+
+      <div class="grid-2" style="margin: 28px 0;">
+        <div class="card" style="border-top: 4px solid #6c5ce7;">
+          <h4 style="color: #6c5ce7;">🏛️ Govern — 你看不见的战略盲区</h4>
+          <p class="text-small text-muted">安全预算是否与业务风险对齐？谁为OT安全负责？供应链风险是否纳入管理？</p>
+          <p class="text-small"><strong>Cisco赋能：</strong>ISE统一策略管理 + Secure Access治理控制台 + 合规报告自动化</p>
+        </div>
+        <div class="card" style="border-top: 4px solid #0984e3;">
+          <h4 style="color: #0984e3;">🔍 Identify — 你看不见的资产与风险</h4>
+          <p class="text-small text-muted">有多少OT设备？多少Shadow SaaS？应用间的依赖关系？哪里有未修补的漏洞？</p>
+          <p class="text-small"><strong>Cisco赋能：</strong>Cyber Vision OT发现 + ISE Profiling + SNA资产发现 + Secure Workload ADM + Secure Access CASB</p>
+        </div>
+        <div class="card" style="border-top: 4px solid #00b894;">
+          <h4 style="color: #00b894;">🛡️ Protect — 你看不见的攻击面</h4>
+          <p class="text-small text-muted">IT/OT边界是否坚固？VPN隧道攻击面有多大？数据中心东西向是否隔离？终端是否合规？</p>
+          <p class="text-small"><strong>Cisco赋能：</strong>Secure Firewall边界防护 + ISE/TrustSec微分段 + Secure Client ZTNA + Secure Workload工作负载隔离 + SEA零信任远程访问</p>
+        </div>
+        <div class="card" style="border-top: 4px solid #f9a825;">
+          <h4 style="color: #c0870a;">👁️ Detect — 你看不见的威胁活动</h4>
+          <p class="text-small text-muted">加密流量中的恶意行为？横向移动？内部威胁？OT协议异常？C2回连？</p>
+          <p class="text-small"><strong>Cisco赋能：</strong>SNA（ETA/NDR）+ Cyber Vision（OT DPI）+ Secure Firewall（EVE）+ Secure Access（DNS/Web检测）+ Secure Client（NVM遥测）</p>
+        </div>
+        <div class="card" style="border-top: 4px solid #e17055;">
+          <h4 style="color: #e17055;">⚡ Respond — 你看不见的时间流逝</h4>
+          <p class="text-small text-muted">从告警到遏制需要多久？跨产品联动是否自动化？事件调查需要在几个控制台间切换？</p>
+          <p class="text-small"><strong>Cisco赋能：</strong>pxGrid安全闭环（SNA→ISE→Firewall秒级联动）+ XDR跨域关联 + Secure Workload动态策略收紧</p>
+        </div>
+        <div class="card" style="border-top: 4px solid #a29bfe;">
+          <h4 style="color: #a29bfe;">🔄 Recover — 你看不见的韧性缺口</h4>
+          <p class="text-small text-muted">关键系统的备份在哪？RTO/RPO是否满足业务需求？事件教训是否反馈到策略改进中？</p>
+          <p class="text-small"><strong>Cisco赋能：</strong>Secure Firewall HA + ISE自修复流程 + 安全架构韧性设计 + 持续改进闭环</p>
+        </div>
+      </div>
+
+      <!-- Key Takeaways -->
+      <div style="background: linear-gradient(135deg, #049fd9, #023e8a); border-radius: 16px; padding: 36px; margin: 36px 0; color: #fff;">
+        <h3 style="color: #fff; margin-bottom: 20px; text-align: center;">🔑 核心要点回顾</h3>
+        <div class="grid-2" style="gap: 20px;">
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.15);">
+            <strong style="color: #00BCEB;">1. 框架先于产品</strong>
+            <p class="text-small" style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">
+              先用NIST CSF 2.0评估差距，再用MITRE ATT&CK验证覆盖度，最后才选择产品填补差距。避免"拿着锤子找钉子"的误区。
+            </p>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.15);">
+            <strong style="color: #00BCEB;">2. 体系优于单点</strong>
+            <p class="text-small" style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">
+              Cisco安全产品的最大价值不在于任何单一产品，而在于通过pxGrid、XDR和统一管理实现的<strong>产品间联动闭环</strong>——整体大于部分之和。
+            </p>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.15);">
+            <strong style="color: #00BCEB;">3. 可见性是一切的起点</strong>
+            <p class="text-small" style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">
+              无论制造业还是银行业，安全转型的第一步永远是"看见"——看见资产、看见流量、看见行为、看见风险。Cyber Vision、SNA、ISE Profiling、Secure Access CASB分别从OT、网络、终端、云维度提供完整可见性。
+            </p>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.15);">
+            <strong style="color: #00BCEB;">4. 分阶段、可衡量的推进</strong>
+            <p class="text-small" style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">
+              安全转型不是一步到位的"大爆炸"，而是分阶段推进：先可见性，再防护，再检测响应，最后治理优化。每个阶段都要有可衡量的成果（MTTR、攻击面缩减、合规覆盖率等）。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Story Closure -->
+      <div class="story-box" style="margin: 36px 0;">
+        <div class="story-label">📖 故事结尾</div>
+        <p>
+          18个月后，华锐精密的IT总监李明在公司年度安全评审会上展示了Cisco安全平台的统一Dashboard。大屏幕上，3,247台OT设备的实时状态清晰可见，每台设备的身份、安全组、通信关系和风险评分一目了然。
+        </p>
+        <p>
+          他点开上周的一条已处理告警记录：一台AGV控制器因固件Bug产生异常通信模式——Cyber Vision在28秒内检测到异常，SNA确认威胁得分后通过pxGrid通知ISE，ISE在2秒内将该AGV隔离到修复VLAN，调度系统自动将其负载转移到备用AGV。<strong>整个过程：从异常到遏制30秒，产线影响为零。</strong>
+        </p>
+        <p>
+          李明关掉Dashboard，对董事会说了一句话：<strong>"现在，我们看得见——所以我们保护得了。"</strong>
+        </p>
+      </div>
 
     </div>
 
-    <!-- SCRIPT LOGIC -->
-    <script>
-        // 1. Language Switcher
-        function switchLang(lang) {
-            const zhEls = document.querySelectorAll('.lang-zh');
-            const enEls = document.querySelectorAll('.lang-en');
-            const btns = document.querySelectorAll('.lang-btn');
+    <!-- CTA -->
+    <div class="cta-section">
+      <h2>准备开启您的安全转型之旅？</h2>
+      <p>
+        无论您是制造业的OT安全探索者，还是银行业的零信任推进者，Cisco安全架构团队都可以为您提供基于NIST CSF 2.0的差距评估和定制化方案设计。
+      </p>
+      <a href="mailto:security-china@cisco.com" class="cta-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        联系Cisco安全架构团队
+      </a>
+      <p style="margin-top: 16px; font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+        或联系您的Cisco客户经理，获取NIST CSF 2.0安全差距评估Workshop
+      </p>
+    </div>
+  </div>
+</section>
 
-            if (lang === 'zh') {
-                zhEls.forEach(el => el.classList.remove('hidden'));
-                enEls.forEach(el => el.classList.add('hidden'));
-                btns[0].classList.add('active');
-                btns[1].classList.remove('active');
-            } else {
-                zhEls.forEach(el => el.classList.add('hidden'));
-                enEls.forEach(el => el.classList.remove('hidden'));
-                btns[0].classList.remove('active');
-                btns[1].classList.add('active');
-            }
+<!-- ====== SECTION: REFERENCES ====== -->
+<section class="section section-alt" id="references">
+  <div class="container-narrow">
+    <h2 style="font-size: 1.4rem; margin-bottom: 20px;">📚 参考文献与资料来源</h2>
+    <div style="font-size: 0.85rem; color: #555; line-height: 2;">
+      <ol>
+        <li><strong>NIST Cybersecurity Framework 2.0</strong> — National Institute of Standards and Technology, "The NIST Cybersecurity Framework (CSF) 2.0", February 2024. <em>本文NIST CSF 2.0六大函数的定义、子类目和核心概念均基于此官方文档。</em></li>
+        <li><strong>MITRE ATT&CK Framework</strong> — The MITRE Corporation, "ATT&CK for Enterprise v15" 及 "ATT&CK for ICS v15", 2025. <em>战术、技术和过程的定义及矩阵结构引用自此知识库。</em></li>
+        <li><strong>Cisco Validated Design (CVD)</strong> — Cisco Systems, "Security Design Guide for Manufacturing", 2024. <em>Purdue模型部署架构、IT/OT DMZ设计和工业协议检测最佳实践参考。</em></li>
+        <li><strong>Cisco Secure Firewall Configuration Guide</strong> — Cisco Systems, "Firepower Threat Defense Configuration Guide, Version 7.4", 2024. <em>Snort 3规则语法、EVE加密可见性引擎和AVC功能描述参考。</em></li>
+        <li><strong>Cisco ISE Administration Guide</strong> — Cisco Systems, "Cisco Identity Services Engine Administrator Guide, Release 3.3", 2024. <em>802.1X、MAB、Profiling、TrustSec SGT和pxGrid联动机制描述参考。</em></li>
+        <li><strong>Cisco Secure Network Analytics (SNA) Design Guide</strong> — Cisco Systems, "Cisco Secure Network Analytics Deployment Guide", 2024. <em>NetFlow分析、ETA加密流量分析、行为基线建模和pxGrid威胁响应流程参考。</em></li>
+        <li><strong>Cisco Cyber Vision Product Documentation</strong> — Cisco Systems, "Cisco Cyber Vision Administration Guide, v5.x", 2025. <em>OT资产发现、工业协议DPI、嵌入式传感器架构和ISE集成描述参考。</em></li>
+        <li><strong>Cisco Secure Workload Documentation</strong> — Cisco Systems, "Cisco Secure Workload User Guide, v3.9", 2024. <em>ADM应用依赖映射、微分段策略自动生成和漏洞评估功能参考。</em></li>
+        <li><strong>Cisco Secure Access Technical Overview</strong> — Cisco Systems, "Cisco Secure Access Solution Overview", 2025. <em>SSE平台架构、ZTNA/SWG/CASB/DLP集成能力描述参考。</em></li>
+        <li><strong>Cisco Secure Equipment Access Documentation</strong> — Cisco Systems, "Cisco Secure Equipment Access Administration Guide", 2025. <em>零信任OT远程访问架构、会话录制和时间窗口控制功能参考。</em></li>
+        <li><strong>IBM Cost of a Data Breach Report 2025</strong> — IBM Security & Ponemon Institute. <em>制造业平均泄露识别时间（212天）和遏制时间（75天）数据引用。</em></li>
+        <li><strong>IEC 62443 Series</strong> — International Electrotechnical Commission, "Industrial communication networks - Network and system security". <em>工业安全分区、安全等级（SL）和远程访问安全要求参考。</em></li>
+        <li><strong>PCI DSS v4.0</strong> — PCI Security Standards Council, "Payment Card Industry Data Security Standard v4.0", March 2022. <em>银行CDE分段和持卡人数据保护要求参考。</em></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="#049fd9"/>
+            <path d="M7 18V10M10.5 16V12M14 18V10M17.5 16V12M21 18V10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span style="font-weight: 700; color: #fff; font-size: 1.1rem;">Cisco 安全架构</span>
+        </div>
+        <p style="font-size: 0.85rem; line-height: 1.7; color: #888;">
+          本文档为Cisco安全架构技术白皮书，旨在帮助客户和合作伙伴系统理解Cisco安全产品组合与NIST CSF 2.0框架的映射关系。内容基于公开技术文档和最佳实践编写。
+        </p>
+      </div>
+      <div>
+        <h4 style="color: #fff; font-size: 0.9rem; margin-bottom: 12px;">快速链接</h4>
+        <ul style="list-style: none; padding: 0; font-size: 0.85rem;">
+          <li style="margin-bottom: 8px;"><a href="#story" style="color: #888;">故事引入</a></li>
+          <li style="margin-bottom: 8px;"><a href="#nist-csf" style="color: #888;">NIST CSF 2.0</a></li>
+          <li style="margin-bottom: 8px;"><a href="#product-mapping" style="color: #888;">产品映射</a></li>
+          <li style="margin-bottom: 8px;"><a href="#industry" style="color: #888;">行业案例</a></li>
+          <li style="margin-bottom: 8px;"><a href="#sales" style="color: #888;">销售机会</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: #fff; font-size: 0.9rem; margin-bottom: 12px;">资源</h4>
+        <ul style="list-style: none; padding: 0; font-size: 0.85rem;">
+          <li style="margin-bottom: 8px;"><a href="https://www.cisco.com/site/cn/zh/products/security/index.html" style="color: #888;" target="_blank">Cisco安全产品中心</a></li>
+          <li style="margin-bottom: 8px;"><a href="https://www.nist.gov/cyberframework" style="color: #888;" target="_blank">NIST CSF官方网站</a></li>
+          <li style="margin-bottom: 8px;"><a href="https://attack.mitre.org/" style="color: #888;" target="_blank">MITRE ATT&CK</a></li>
+          <li style="margin-bottom: 8px;"><a href="https://talosintelligence.com/" style="color: #888;" target="_blank">Cisco Talos威胁情报</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-bottom">
+      <div style="color: #666; font-size: 0.8rem;">
+        © 2026 Cisco Systems, Inc. 保留所有权利。Cisco、Cisco徽标和其他Cisco标志是Cisco Systems, Inc.及其在美国和其他国家/地区的附属公司的商标或注册商标。
+      </div>
+      <div style="color: #666; font-size: 0.8rem;">
+        文档版本：v1.0 ｜ 最后更新：2026年3月28日
+      </div>
+    </div>
+    <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid #333;">
+      <p style="font-size: 0.75rem; color: #666; margin: 0; line-height: 1.7;">
+        <strong style="color: #888;">⚠️ 免责声明：</strong>本文档中的信息仅供参考和教育目的。文中提及的客户案例（"华锐精密"、"滨海银行"等）为基于行业最佳实践构建的虚构场景，不代表任何真实企业。所有技术描述基于产品公开文档，实际部署效果可能因环境和配置不同而有差异。产品功能和规格可能随版本更新而变化，请以Cisco官方文档为准。本文不构成任何形式的安全承诺或保证。如需针对特定环境的安全建议，请联系Cisco专业服务团队或授权合作伙伴。
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== SCROLL TO TOP ==================== -->
+<button class="scroll-top" id="scrollTop" aria-label="回到顶部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+(function() {
+  'use strict';
+
+  // ========== Mobile Menu ==========
+  var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  var mobileNav = document.getElementById('mobileNav');
+  var mobileMenuOpen = false;
+
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', function() {
+      mobileMenuOpen = !mobileMenuOpen;
+      if (mobileMenuOpen) {
+        mobileNav.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } else {
+        mobileNav.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  window.closeMobileMenu = function() {
+    mobileMenuOpen = false;
+    if (mobileNav) mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  // ========== Navbar Scroll Effect ==========
+  var navbar = document.getElementById('navbar');
+  var scrollTop = document.getElementById('scrollTop');
+  var lastScroll = 0;
+
+  window.addEventListener('scroll', function() {
+    var st = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Navbar shadow
+    if (navbar) {
+      if (st > 10) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    }
+
+    // Scroll to top button
+    if (scrollTop) {
+      if (st > 600) {
+        scrollTop.classList.add('visible');
+      } else {
+        scrollTop.classList.remove('visible');
+      }
+    }
+
+    // Active nav link
+    updateActiveNav();
+
+    lastScroll = st;
+  }, { passive: true });
+
+  if (scrollTop) {
+    scrollTop.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // ========== Active Nav Link ==========
+  function updateActiveNav() {
+    var sections = document.querySelectorAll('section[id]');
+    var navLinks = document.querySelectorAll('.navbar-links a');
+    var scrollPos = window.pageYOffset + 100;
+
+    sections.forEach(function(section) {
+      var top = section.offsetTop;
+      var height = section.offsetHeight;
+      var id = section.getAttribute('id');
+
+      if (scrollPos >= top && scrollPos < top + height) {
+        navLinks.forEach(function(link) {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }
+
+  // ========== Accordion Toggle ==========
+  window.toggleAccordion = function(id) {
+    var accordion = document.getElementById(id);
+    if (!accordion) return;
+
+    var header = accordion.querySelector('.accordion-header');
+    var body = accordion.querySelector('.accordion-body');
+
+    if (header.classList.contains('open')) {
+      header.classList.remove('open');
+      body.style.maxHeight = '0';
+    } else {
+      // Close all other accordions
+      document.querySelectorAll('.accordion').forEach(function(acc) {
+        var h = acc.querySelector('.accordion-header');
+        var b = acc.querySelector('.accordion-body');
+        if (h && b && acc.id !== id) {
+          h.classList.remove('open');
+          b.style.maxHeight = '0';
         }
+      });
 
-        // 2. Specs Toggle
-        function toggleSpecs(id) {
-            const el = document.getElementById(id);
-            if (el.style.display === 'block') {
-                el.style.display = 'none';
-                el.classList.remove('show');
-            } else {
-                el.style.display = 'block';
-                // Small timeout to allow CSS transition if added later
-                setTimeout(() => el.classList.add('show'), 10);
-            }
+      header.classList.add('open');
+      body.style.maxHeight = body.scrollHeight + 'px';
+
+      // Re-calculate after images/content load
+      setTimeout(function() {
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }, 100);
+    }
+  };
+
+  // ========== Industry Tabs ==========
+  window.switchTab = function(tab) {
+    // Update buttons
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.classList.remove('active');
+    });
+    document.getElementById('tab-' + tab).classList.add('active');
+
+    // Update content
+    document.querySelectorAll('.tab-content').forEach(function(content) {
+      content.classList.remove('active');
+    });
+    document.getElementById('content-' + tab).classList.add('active');
+  };
+
+  // ========== Fade In Animation (Intersection Observer) ==========
+  if ('IntersectionObserver' in window) {
+    var fadeObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          fadeObserver.unobserve(entry.target);
         }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
 
-        // 3. Attack Simulation Logic
-        function runScenario() {
-            const consoleLog = document.getElementById('console-log');
-            const isZh = !document.querySelector('.lang-zh').classList.contains('hidden');
-            
-            // Clear previous
-            consoleLog.innerHTML = '';
+    document.querySelectorAll('.fade-in').forEach(function(el) {
+      fadeObserver.observe(el);
+    });
+  } else {
+    // Fallback for older browsers
+    document.querySelectorAll('.fade-in').forEach(function(el) {
+      el.classList.add('visible');
+    });
+  }
 
-            const logs = [
-                { time: 1000, zh: "检测到异常: 用户 Bob 收到带有恶意附件的邮件。", en: "Anomaly: User Bob received phishing email with attachment.", type: "alert" },
-                { time: 2500, zh: "终端执行: 恶意文件试图运行 PowerShell 脚本。", en: "Endpoint: Malicious file attempting PowerShell execution.", type: "alert" },
-                { time: 3500, zh: "Cisco Secure Client: 拦截并隔离本地文件 (AMP)。", en: "Secure Client: File quarantined locally (AMP).", type: "action" },
-                { time: 5000, zh: "网络异常: 设备试图连接已知的 C&C 僵尸网络服务器。", en: "Network: Device attempting C&C connection.", type: "alert" },
-                { time: 6000, zh: "Secure Firewall: 阻断出站连接 (基于 Talos 情报)。", en: "Firewall: Outbound connection blocked (Talos Intel).", type: "action" },
-                { time: 7500, zh: "ISE 响应: 将设备隔离至 'Guest' VLAN，移除访问权限。", en: "ISE Response: Device moved to Quarantine VLAN.", type: "action" },
-                { time: 9000, zh: "Splunk/XDR: 生成完整攻击溯源报告。威胁已清除。", en: "Splunk/XDR: Attack storyboard generated. Threat contained.", type: "success" }
-            ];
+  // ========== Smooth scroll for anchor links (fallback) ==========
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var targetId = this.getAttribute('href');
+      if (targetId === '#') return;
 
-            let currentTime = 0;
+      var target = document.querySelector(targetId);
+      if (target) {
+        e.preventDefault();
+        var offsetTop = target.offsetTop - 80; // Account for fixed navbar
+        window.scrollTo({
+          top: offsetTop,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
 
-            logs.forEach(log => {
-                currentTime += (log.time - currentTime) + Math.random() * 500; // random delay
-                setTimeout(() => {
-                    const text = isZh ? log.zh : log.en;
-                    const date = new Date();
-                    const timeStr = date.toTimeString().split(' ')[0];
-                    
-                    let colorClass = "";
-                    if (log.type === 'alert') colorClass = "log-alert";
-                    if (log.type === 'action') colorClass = "log-action";
-                    if (log.type === 'success') colorClass = "log-action"; // Green? using blue for simplicity or inline style
+  // ========== Keyboard Accessibility for Accordions ==========
+  document.querySelectorAll('.accordion-header').forEach(function(header) {
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('role', 'button');
+    header.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
+      }
+    });
+  });
 
-                    const entry = document.createElement('div');
-                    entry.className = "log-entry";
-                    entry.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${colorClass}">${text}</span>`;
-                    
-                    if (log.type === 'success') entry.style.color = '#0f0';
+  // ========== Print-friendly: expand all accordions ==========
+  window.addEventListener('beforeprint', function() {
+    document.querySelectorAll('.accordion-body').forEach(function(body) {
+      body.style.maxHeight = 'none';
+    });
+    document.querySelectorAll('.accordion-header').forEach(function(header) {
+      header.classList.add('open');
+    });
+    document.querySelectorAll('.tab-content').forEach(function(content) {
+      content.classList.add('active');
+      content.style.display = 'block';
+    });
+  });
 
-                    consoleLog.appendChild(entry);
-                    consoleLog.scrollTop = consoleLog.scrollHeight;
-                }, log.time);
-            });
-        }
-    </script>
+  window.addEventListener('afterprint', function() {
+    document.querySelectorAll('.accordion-body').forEach(function(body) {
+      if (!body.parentElement.querySelector('.accordion-header.open')) {
+        body.style.maxHeight = '0';
+      }
+    });
+  });
+
+  // ========== Console Easter Egg ==========
+  console.log('%c🛡️ Cisco Security Architecture White Paper', 'color: #049fd9; font-size: 18px; font-weight: bold;');
+  console.log('%cBuilt with NIST CSF 2.0 framework mapping', 'color: #666; font-size: 12px;');
+  console.log('%c© 2026 Cisco Systems, Inc.', 'color: #999; font-size: 11px;');
+
+})();
+</script>
+
 </body>
 </html>
