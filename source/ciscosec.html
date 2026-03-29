@@ -446,35 +446,6 @@ li { margin-bottom: 6px; }
   body { font-size: 12pt; }
 }
 
-  #simScoreboard {
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 32px;
-  }
-  @media (max-width: 700px) {
-    #simScoreboard {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    #simScoreboard > div:nth-child(2) {
-      order: -1;
-    }
-    #simulation .grid-2,
-    #simulation > .container > div[style*="grid-template-columns: 1fr 1fr"] {
-      display: block !important;
-    }
-    #simulation > .container > div[style*="grid-template-columns: 1fr 1fr"] > div {
-      margin-bottom: 16px;
-    }
-    #simSummary [style*="grid-template-columns: repeat(4"] {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-    #simSummary [style*="grid-template-columns: 1fr 1fr"] {
-      grid-template-columns: 1fr !important;
-    }
-  }
-
 </style>
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -497,10 +468,11 @@ li { margin-bottom: 6px; }
     </div>
     <div class="navbar-links" id="navLinks">
       <a href="#story">故事引入</a>
-      <a href="#simulation">攻防演练</a>
+      <a href="#sim-attack">攻击推演</a>
       <a href="#nist-csf">NIST CSF 2.0</a>
       <a href="#mitre">MITRE对比</a>
       <a href="#product-mapping">产品映射</a>
+      <a href="#sim-defense">防御演练</a>
       <a href="#industry">行业案例</a>
       <a href="#sales">销售机会</a>
       <a href="#conclusion">结论</a>
@@ -517,10 +489,11 @@ li { margin-bottom: 6px; }
 
 <div class="mobile-nav" id="mobileNav">
   <a href="#story" onclick="closeMobileMenu()">📖 故事引入</a>
-  <a href="#simulation" onclick="closeMobileMenu()">⚔️ 攻防演练</a>
+  <a href="#sim-attack" onclick="closeMobileMenu()">🎭 攻击推演</a>
   <a href="#nist-csf" onclick="closeMobileMenu()">🛡️ NIST CSF 2.0</a>
   <a href="#mitre" onclick="closeMobileMenu()">🎯 MITRE对比</a>
   <a href="#product-mapping" onclick="closeMobileMenu()">🔧 产品映射</a>
+  <a href="#sim-defense" onclick="closeMobileMenu()">🛡️ 防御演练</a>
   <a href="#industry" onclick="closeMobileMenu()">🏭 行业案例</a>
   <a href="#sales" onclick="closeMobileMenu()">💡 销售机会</a>
   <a href="#conclusion" onclick="closeMobileMenu()">✅ 结论</a>
@@ -582,952 +555,547 @@ li { margin-bottom: 6px; }
       <p style="font-size: 1.25rem; font-weight: 700; color: #049fd9; margin-bottom: 8px;">
         "我们的安全体系是否存在系统性盲区？"
       </p>
-      <p style="margin: 0; color: #666; font-size: 0.95rem;">
-        —— 这正是第一性原理的起点：从最根本的问题开始，自下而上构建安全架构。
-      </p>
     </div>
 
-    <h3 style="margin-top: 36px;">🔍 第一性原理：安全问题的三层本质</h3>
-    <p>
-      要从根本理解企业安全，我们需要像物理学家一样，剥离表面症状，直达问题本质。企业安全问题可以归纳为三个层次：
-    </p>
-
-    <div class="grid-3" style="margin: 24px 0;">
-      <div class="card" style="text-align: center;">
-        <div class="card-icon blue" style="margin: 0 auto 16px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#049fd9" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+<!-- === NEW: Direct transition from story to attack simulation === -->
+      <div style="margin-top:3rem; padding:2.5rem 2rem; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius:16px; border-left:5px solid #e74c3c; color:#fff; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:0; right:0; width:200px; height:200px; background: radial-gradient(circle, rgba(231,76,60,0.15) 0%, transparent 70%); border-radius:50%;"></div>
+        <h3 style="color:#e74c3c; margin-bottom:1rem; font-size:1.5rem;">
+          <span style="margin-right:0.5rem;">⚠️</span>让我们回到事发当天
+        </h3>
+        <p style="font-size:1.1rem; line-height:1.8; margin-bottom:1rem; color:#e0e0e0;">
+          李明和团队在事后复盘中发现，攻击并非一蹴而就。从最初的钓鱼邮件到最终的产线停摆，攻击者用了
+          <strong style="color:#e74c3c;">整整17天</strong>，经历了7个精心策划的阶段。
+        </p>
+        <p style="font-size:1.1rem; line-height:1.8; margin-bottom:1.5rem; color:#e0e0e0;">
+          如果我们能够回到那17天中的<em>任何一个节点</em>，结局是否会不同？
+        </p>
+        <p style="font-size:1rem; line-height:1.8; color:#b0b0b0;">
+          下面的模拟将还原攻击者的完整视角——<strong style="color:#ffcc00;">没有任何防御系统</strong>的干预，
+          纯粹从攻击者的角度，看他们如何一步步渗透华锐精密的网络。这不是假设，而是根据真实APT攻击链复原的典型路径。
+        </p>
+        <div style="text-align:center; margin-top:1.5rem;">
+          <a href="#sim-attack" style="display:inline-block; padding:0.8rem 2rem; background:linear-gradient(135deg, #e74c3c, #c0392b); color:#fff; border-radius:30px; text-decoration:none; font-weight:700; font-size:1.05rem; box-shadow:0 4px 15px rgba(231,76,60,0.4); transition: transform 0.2s, box-shadow 0.2s;"
+             onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(231,76,60,0.5)'"
+             onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(231,76,60,0.4)'">
+            ▶ 进入攻击模拟 — 还原17天全过程
+          </a>
         </div>
-        <h4>第一层：可见性缺失</h4>
-        <p class="text-small text-muted">你无法保护你看不见的东西。多数企业对OT资产、加密流量、横向移动行为缺乏感知能力。</p>
-      </div>
-      <div class="card" style="text-align: center;">
-        <div class="card-icon orange" style="margin: 0 auto 16px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        </div>
-        <h4>第二层：控制面碎片化</h4>
-        <p class="text-small text-muted">身份、网络、终端、工作负载各自为政，策略不一致、联动不实时，形成安全孤岛。</p>
-      </div>
-      <div class="card" style="text-align: center;">
-        <div class="card-icon red" style="margin: 0 auto 16px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-        </div>
-        <h4>第三层：响应速度不足</h4>
-        <p class="text-small text-muted">即使检测到威胁，从告警到遏制的"黄金时间"内（通常<1小时），组织往往缺乏自动化闭环能力。</p>
       </div>
     </div>
+  </section>
 
-    <p>
-      要系统性地解决这三层问题，我们需要一个<strong>被业界广泛认可的参考框架</strong>作为思考主线——而不是从单一产品出发。这就是我们选择<strong>NIST Cybersecurity Framework (CSF) 2.0</strong>作为本文主线的原因。
-    </p>
-
-    <div style="background: #f8fafb; border-radius: 14px; padding: 24px 28px; margin: 24px 0;">
-      <h4>🧭 为什么选择NIST CSF 2.0？</h4>
-      <ul>
-        <li><strong>全球通用性</strong>：被美国联邦政府、EU NIS2指令、中国等保2.0等广泛引用或映射</li>
-        <li><strong>技术无关性</strong>：不绑定特定厂商，从能力（Capability）角度定义安全目标</li>
-        <li><strong>业务视角</strong>：2.0版本新增"Govern"函数，强调安全必须与业务战略对齐</li>
-        <li><strong>OT/ICS兼容</strong>：明确涵盖工业控制系统（ICS）和运营技术（OT）场景</li>
-        <li><strong>Cisco映射良好</strong>：Cisco产品组合天然覆盖六大函数的多数子类目</li>
-      </ul>
-    </div>
-
-    <p>
-      接下来，我们将首先用一个攻防演练的模拟实验来感受一下攻击者是如何攻击的，再深入理解NIST CSF 2.0的六大函数，然后将每个Cisco安全解决方案精准映射到这些函数中，最后通过制造业和银行业的实战场景，展示这一框架的实际运用价值。
-    </p>
-  </div>
-</section>
-
-<!-- ====== SECTION: ATTACK SIMULATION ====== -->
-<section class="section section-alt" id="simulation">
+<!-- ====== SECTION: ATTACK SIMULATION (Part 1 - Attack Side Only) ====== -->
+<section class="section" id="sim-attack">
   <div class="container">
     <div class="section-header">
-      <h2>⚔️ 攻防实战推演：勒索软件入侵 vs. Cisco全栈防御</h2>
-      <p>一次完整的APT攻击链模拟——观察Cisco 8大安全产品如何在NIST CSF六大函数中协同作战</p>
+      <h2>⚔️ 攻击者的剧本：一次APT攻击链的完整展开</h2>
+      <p>如果没有体系化防御，攻击者从钓鱼邮件到控制PLC只需要不到2小时</p>
       <div class="section-divider"></div>
     </div>
 
     <div class="container-narrow" style="margin-bottom: 32px;">
       <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 16px; padding: 28px 32px; color: #e0e0e0;">
-        <h4 style="color: #00BCEB; margin-bottom: 12px;">🎯 演练场景设定</h4>
-        <p style="font-size: 0.95rem; line-height: 1.8; color: #ccc; margin-bottom: 12px;">
-          <strong style="color: #fff;">攻击者：</strong>APT组织"暗影蜘蛛"（模拟），目标是某汽车零部件制造商"华锐精密"的MES系统和PLC产线控制器。
-          攻击链覆盖MITRE ATT&CK的7个战术阶段。<br>
-          <strong style="color: #fff;">防御方：</strong>部署了Cisco全栈安全方案——Secure Firewall、ISE、SNA、Cyber Vision、Secure Client、Secure Workload、Secure Access、Secure Equipment Access。
-        </p>
-        <p style="font-size: 0.85rem; color: #888; margin: 0;">
-          ⚡ 点击"启动演练"后，攻击将分7个阶段自动推进。每个阶段您将看到：攻击者行动 → Cisco产品检测/响应 → NIST CSF函数映射 → ATT&CK战术映射。
+        <h4 style="color: #e74c3c; margin-bottom: 12px;">🎭 场景设定：你是攻击者</h4>
+        <p style="font-size: 0.95rem; line-height: 1.8; color: #ccc; margin-bottom: 0;">
+          假设你是APT组织"暗影蜘蛛"的攻击操盘手。你的目标：入侵华锐精密的OT网络，加密MES系统和PLC程序进行勒索。
+          你已经通过开源情报（OSINT）收集了目标信息——工程部张工的邮箱、公司使用的VPN品牌、工控论坛账号。
+          <strong style="color: #ff6b6b;">点击下方按钮，观察攻击如何一步步展开。</strong>
         </p>
       </div>
     </div>
 
-    <!-- ===== SIMULATION CONTROL PANEL ===== -->
-    <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; flex-wrap: wrap;">
-      <button id="simStartBtn" onclick="startSimulation()" style="
+    <!-- Attack Control -->
+    <div style="text-align: center; margin-bottom: 28px;">
+      <button id="atkStartBtn" onclick="startAttackSim()" style="
         display: inline-flex; align-items: center; gap: 8px;
         background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff;
-        font-weight: 700; font-size: 1rem; padding: 14px 32px;
+        font-weight: 700; font-size: 1rem; padding: 14px 36px;
         border-radius: 50px; border: none; cursor: pointer;
         transition: all 0.3s; box-shadow: 0 4px 20px rgba(231,76,60,0.3);
       ">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        启动攻防演练
+        开始攻击推演
       </button>
-      <button id="simResetBtn" onclick="resetSimulation()" style="
+      <button onclick="resetAttackSim()" style="
         display: inline-flex; align-items: center; gap: 8px;
         background: #fff; color: #666; font-weight: 600; font-size: 0.9rem;
         padding: 12px 24px; border-radius: 50px; border: 1px solid #ddd;
-        cursor: pointer; transition: all 0.3s;
-      ">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        重置
-      </button>
-      <button id="simSpeedBtn" onclick="toggleSimSpeed()" style="
-        display: inline-flex; align-items: center; gap: 8px;
-        background: #fff; color: #666; font-weight: 600; font-size: 0.9rem;
-        padding: 12px 24px; border-radius: 50px; border: 1px solid #ddd;
-        cursor: pointer; transition: all 0.3s;
-      ">
-        ⚡ 速度: 正常
-      </button>
+        cursor: pointer; transition: all 0.3s; margin-left: 8px;
+      ">↻ 重置</button>
     </div>
 
-    <!-- ===== SCOREBOARD ===== -->
-    <div id="simScoreboard" style="
-      display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px;
-      margin-bottom: 32px; align-items: center;
-    ">
-      <!-- Attacker Score -->
-      <div style="background: linear-gradient(135deg, #2d1f1f, #1a1a2e); border-radius: 14px; padding: 20px 24px; text-align: center; border: 1px solid #3d2020;">
-        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #e74c3c; font-weight: 700; margin-bottom: 8px;">
-          🔴 攻击方 · 暗影蜘蛛
-        </div>
-        <div style="display: flex; justify-content: center; gap: 24px;">
-          <div>
-            <div id="attackPhase" style="font-size: 2rem; font-weight: 800; color: #e74c3c;">0</div>
-            <div style="font-size: 0.75rem; color: #888;">攻击阶段</div>
-          </div>
-          <div>
-            <div id="attackSuccess" style="font-size: 2rem; font-weight: 800; color: #e74c3c;">0</div>
-            <div style="font-size: 0.75rem; color: #888;">突破成功</div>
-          </div>
-        </div>
+    <!-- Attack Progress Bar -->
+    <div style="max-width: 800px; margin: 0 auto 32px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="font-size: 0.75rem; color: #888;">攻击进度</span>
+        <span id="atkProgressLabel" style="font-size: 0.75rem; color: #e74c3c; font-weight: 700;">0 / 7 阶段</span>
       </div>
-
-      <!-- VS -->
-      <div style="text-align: center;">
-        <div style="
-          width: 56px; height: 56px; border-radius: 50%;
-          background: linear-gradient(135deg, #e74c3c, #049fd9);
-          display: flex; align-items: center; justify-content: center;
-          font-weight: 900; color: #fff; font-size: 0.85rem;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        ">VS</div>
-      </div>
-
-      <!-- Defender Score -->
-      <div style="background: linear-gradient(135deg, #0d253f, #1a1a2e); border-radius: 14px; padding: 20px 24px; text-align: center; border: 1px solid #1a3a5c;">
-        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #049fd9; font-weight: 700; margin-bottom: 8px;">
-          🔵 防御方 · Cisco全栈
-        </div>
-        <div style="display: flex; justify-content: center; gap: 24px;">
-          <div>
-            <div id="defendDetect" style="font-size: 2rem; font-weight: 800; color: #049fd9;">0</div>
-            <div style="font-size: 0.75rem; color: #888;">检测成功</div>
-          </div>
-          <div>
-            <div id="defendBlock" style="font-size: 2rem; font-weight: 800; color: #00b894;">0</div>
-            <div style="font-size: 0.75rem; color: #888;">阻断成功</div>
-          </div>
-        </div>
+      <div style="background: #f0f0f0; border-radius: 8px; height: 8px; overflow: hidden;">
+        <div id="atkProgressBar" style="background: linear-gradient(90deg, #e74c3c, #ff6b6b); height: 100%; width: 0%; border-radius: 8px; transition: width 0.6s ease;"></div>
       </div>
     </div>
 
-    <!-- ===== NETWORK TOPOLOGY (SVG) ===== -->
-    <div style="background: #0d1117; border-radius: 16px; padding: 24px; margin-bottom: 32px; overflow-x: auto; border: 1px solid #21262d;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h4 style="color: #e0e0e0; font-size: 0.9rem; margin: 0;">🗺️ 实时网络拓扑 · Live Network Topology</h4>
-        <div style="display: flex; gap: 16px; font-size: 0.7rem; color: #888;">
-          <span>🔴 攻击路径</span>
-          <span>🔵 检测信号</span>
-          <span>🟢 阻断/隔离</span>
-          <span>⚪ 正常</span>
-        </div>
+    <!-- Attack Timeline -->
+    <div style="max-width: 800px; margin: 0 auto;">
+      <div id="atkTimeline">
+        <!-- Phases will be injected here -->
       </div>
-      <svg id="topoSvg" viewBox="0 0 960 380" style="width: 100%; height: auto; min-width: 700px;" xmlns="http://www.w3.org/2000/svg">
-        <!-- Background Grid -->
-        <defs>
-          <pattern id="simGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#161b22" stroke-width="0.5"/>
-          </pattern>
-          <!-- Glow filters -->
-          <filter id="glowRed" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowBlue" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glowGreen" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <!-- Animated dash -->
-          <style>
-            @keyframes dashAttack { to { stroke-dashoffset: -40; } }
-            @keyframes dashDefend { to { stroke-dashoffset: 40; } }
-            @keyframes pulse { 0%,100%{opacity:0.6;r:22} 50%{opacity:1;r:26} }
-            @keyframes nodeAlert { 0%,100%{stroke-width:2} 50%{stroke-width:5} }
-            .attack-path { stroke-dasharray: 8 6; animation: dashAttack 0.8s linear infinite; }
-            .defend-path { stroke-dasharray: 6 4; animation: dashDefend 0.6s linear infinite; }
-            .node-alert { animation: nodeAlert 0.6s ease-in-out infinite; }
-            .node-pulse { animation: pulse 1.2s ease-in-out infinite; }
-          </style>
-        </defs>
-        <rect width="960" height="380" fill="url(#simGrid)"/>
-
-        <!-- Zone Labels -->
-        <text x="80" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">INTERNET</text>
-        <text x="260" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">DMZ</text>
-        <text x="480" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">企业IT网络</text>
-        <text x="700" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">IT/OT DMZ</text>
-        <text x="880" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">OT产线网络</text>
-
-        <!-- Zone Dividers -->
-        <line x1="170" y1="30" x2="170" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
-        <line x1="370" y1="30" x2="370" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
-        <line x1="590" y1="30" x2="590" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
-        <line x1="780" y1="30" x2="780" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
-
-        <!-- Static Connection Lines (dormant) -->
-        <line id="line-atk-email" x1="80" y1="100" x2="260" y2="100" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-email-pc" x1="260" y1="100" x2="440" y2="100" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-pc-ad" x1="440" y1="100" x2="440" y2="200" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-pc-dc" x1="440" y1="100" x2="540" y2="200" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-dc-fw2" x1="540" y1="200" x2="700" y2="200" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-fw2-mes" x1="700" y1="200" x2="840" y2="140" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-fw2-plc" x1="700" y1="200" x2="880" y2="260" stroke="#21262d" stroke-width="1.5"/>
-        <line id="line-mes-plc" x1="840" y1="140" x2="880" y2="260" stroke="#21262d" stroke-width="1.5"/>
-        <!-- C2 line -->
-        <line id="line-c2" x1="440" y1="100" x2="80" y2="260" stroke="#21262d" stroke-width="1.5"/>
-        <!-- SNA monitoring lines -->
-        <line id="line-sna-monitor" x1="480" y1="330" x2="540" y2="200" stroke="#21262d" stroke-width="1" stroke-dasharray="2 3"/>
-        <line id="line-sna-monitor2" x1="480" y1="330" x2="440" y2="100" stroke="#21262d" stroke-width="1" stroke-dasharray="2 3"/>
-
-        <!-- ===== NODES ===== -->
-        <!-- Attacker -->
-        <g id="node-attacker" style="cursor:pointer">
-          <circle cx="80" cy="100" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="80" y="104" fill="#e74c3c" font-size="18" text-anchor="middle">🎭</text>
-          <text x="80" y="135" fill="#888" font-size="9" text-anchor="middle">攻击者</text>
-        </g>
-        <!-- C2 Server -->
-        <g id="node-c2" style="cursor:pointer">
-          <circle cx="80" cy="260" r="20" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="80" y="264" fill="#e74c3c" font-size="16" text-anchor="middle">💀</text>
-          <text x="80" y="293" fill="#888" font-size="9" text-anchor="middle">C2 Server</text>
-        </g>
-
-        <!-- Email Gateway (Secure Access) -->
-        <g id="node-email" style="cursor:pointer">
-          <circle cx="260" cy="100" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="260" y="104" fill="#aaa" font-size="16" text-anchor="middle">📧</text>
-          <text x="260" y="135" fill="#888" font-size="9" text-anchor="middle">Secure Access</text>
-          <text x="260" y="146" fill="#666" font-size="8" text-anchor="middle">邮件/Web网关</text>
-        </g>
-
-        <!-- Employee PC -->
-        <g id="node-pc" style="cursor:pointer">
-          <circle cx="440" cy="100" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="440" y="104" fill="#aaa" font-size="16" text-anchor="middle">💻</text>
-          <text x="440" y="135" fill="#888" font-size="9" text-anchor="middle">员工PC</text>
-          <text x="440" y="146" fill="#666" font-size="8" text-anchor="middle">Secure Client</text>
-        </g>
-
-        <!-- AD/ISE -->
-        <g id="node-ise" style="cursor:pointer">
-          <circle cx="440" cy="200" r="22" fill="#1a1a2e" stroke="#0984e3" stroke-width="2"/>
-          <text x="440" y="204" fill="#0984e3" font-size="16" text-anchor="middle">🛂</text>
-          <text x="440" y="235" fill="#888" font-size="9" text-anchor="middle">Cisco ISE</text>
-          <text x="440" y="246" fill="#666" font-size="8" text-anchor="middle">身份&准入控制</text>
-        </g>
-
-        <!-- Data Center / Secure Workload -->
-        <g id="node-dc" style="cursor:pointer">
-          <circle cx="540" cy="200" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="540" y="204" fill="#aaa" font-size="16" text-anchor="middle">🏢</text>
-          <text x="540" y="235" fill="#888" font-size="9" text-anchor="middle">数据中心</text>
-          <text x="540" y="246" fill="#666" font-size="8" text-anchor="middle">Secure Workload</text>
-        </g>
-
-        <!-- OT Firewall -->
-        <g id="node-fw2" style="cursor:pointer">
-          <circle cx="700" cy="200" r="22" fill="#1a1a2e" stroke="#e67e22" stroke-width="2"/>
-          <text x="700" y="204" fill="#e67e22" font-size="16" text-anchor="middle">🔥</text>
-          <text x="700" y="235" fill="#888" font-size="9" text-anchor="middle">Secure Firewall</text>
-          <text x="700" y="246" fill="#666" font-size="8" text-anchor="middle">IT/OT边界</text>
-        </g>
-
-        <!-- MES Server -->
-        <g id="node-mes" style="cursor:pointer">
-          <circle cx="840" cy="140" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="840" y="144" fill="#aaa" font-size="16" text-anchor="middle">🖥️</text>
-          <text x="840" y="175" fill="#888" font-size="9" text-anchor="middle">MES服务器</text>
-        </g>
-
-        <!-- PLC / AGV -->
-        <g id="node-plc" style="cursor:pointer">
-          <circle cx="880" cy="260" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/>
-          <text x="880" y="264" fill="#aaa" font-size="16" text-anchor="middle">⚙️</text>
-          <text x="880" y="293" fill="#888" font-size="9" text-anchor="middle">PLC / AGV</text>
-          <text x="880" y="304" fill="#666" font-size="8" text-anchor="middle">Cyber Vision</text>
-        </g>
-
-        <!-- SNA (bottom center) -->
-        <g id="node-sna" style="cursor:pointer">
-          <circle cx="480" cy="330" r="22" fill="#1a1a2e" stroke="#00b894" stroke-width="2"/>
-          <text x="480" y="334" fill="#00b894" font-size="16" text-anchor="middle">👁️</text>
-          <text x="480" y="363" fill="#888" font-size="9" text-anchor="middle">SNA (NDR)</text>
-        </g>
-
-        <!-- Splunk/XDR (bottom right) -->
-        <g id="node-xdr" style="cursor:pointer">
-          <circle cx="700" cy="330" r="22" fill="#1a1a2e" stroke="#a29bfe" stroke-width="2"/>
-          <text x="700" y="334" fill="#a29bfe" font-size="16" text-anchor="middle">🧠</text>
-          <text x="700" y="363" fill="#888" font-size="9" text-anchor="middle">Splunk / XDR</text>
-        </g>
-
-        <!-- pxGrid hub indicator -->
-        <g id="node-pxgrid" opacity="0.3">
-          <circle cx="560" cy="280" r="14" fill="none" stroke="#049fd9" stroke-width="1" stroke-dasharray="3 2"/>
-          <text x="560" y="284" fill="#049fd9" font-size="8" text-anchor="middle">pxGrid</text>
-        </g>
-      </svg>
-    </div>
-
-    <!-- ===== SIMULATION TIMELINE + LOG ===== -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-
-      <!-- Left: Attack Phase Timeline -->
-      <div style="background: #fff; border-radius: 16px; border: 1px solid #e8eef3; overflow: hidden;">
-        <div style="background: linear-gradient(135deg, #2d1f1f, #1a1a2e); padding: 16px 20px;">
-          <h4 style="color: #e74c3c; font-size: 0.9rem; margin: 0;">🔴 攻击链进程 · ATT&CK Tactics</h4>
-        </div>
-        <div id="simTimeline" style="padding: 20px; max-height: 480px; overflow-y: auto;">
-          <div id="simTimelineEmpty" style="text-align: center; padding: 40px 20px; color: #bbb;">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <p style="font-size: 0.9rem; margin: 0;">等待演练启动...</p>
-            <p style="font-size: 0.75rem; color: #ccc; margin: 4px 0 0;">点击"启动攻防演练"按钮开始</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Defense Log -->
-      <div style="background: #fff; border-radius: 16px; border: 1px solid #e8eef3; overflow: hidden;">
-        <div style="background: linear-gradient(135deg, #0d253f, #1a1a2e); padding: 16px 20px;">
-          <h4 style="color: #049fd9; font-size: 0.9rem; margin: 0;">🔵 防御响应日志 · Cisco Security Cloud</h4>
-        </div>
-        <div id="simLog" style="padding: 0; max-height: 480px; overflow-y: auto; font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: 0.78rem; line-height: 1.7; background: #0d1117; color: #8b949e;">
-          <div id="simLogEmpty" style="text-align: center; padding: 40px 20px; color: #484f58;">
-            <pre style="margin: 0; font-size: 0.8rem; color: #484f58;">
-  ╔══════════════════════════════════════╗
-  ║   CISCO SECURITY OPERATIONS CENTER   ║
-  ║        SOC Console v3.2              ║
-  ║   Status: MONITORING ● ● ●          ║
-  ╚══════════════════════════════════════╝
-            </pre>
-          </div>
-        </div>
+      <div id="atkTimelineEmpty" style="text-align: center; padding: 48px 24px; color: #bbb; background: #f8fafb; border-radius: 16px; border: 2px dashed #e0e0e0;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🎭</div>
+        <p style="font-size: 1rem; margin: 0; color: #999;">等待攻击推演启动...</p>
+        <p style="font-size: 0.8rem; color: #ccc; margin: 8px 0 0;">点击上方按钮，以攻击者视角体验完整APT攻击链</p>
       </div>
     </div>
 
-    <!-- ===== POST-SIMULATION SUMMARY (hidden initially) ===== -->
-    <div id="simSummary" style="display: none; margin-top: 32px;">
-      <div style="background: linear-gradient(135deg, #049fd9, #023e8a); border-radius: 16px; padding: 36px; color: #fff;">
-        <h3 style="color: #fff; text-align: center; margin-bottom: 24px;">📊 攻防演练总结报告</h3>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.15);">
-            <div style="font-size: 2rem; font-weight: 800;">7</div>
-            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">攻击阶段</div>
+    <!-- Post-Attack Summary -->
+    <div id="atkSummary" style="display: none; max-width: 800px; margin: 32px auto 0;">
+      <div style="background: linear-gradient(135deg, #2d1f1f, #1a1a2e); border-radius: 16px; padding: 32px; color: #e0e0e0;">
+        <h3 style="color: #e74c3c; text-align: center; margin-bottom: 16px;">💀 攻击完成：如果没有防御体系...</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div style="background: rgba(231,76,60,0.15); border-radius: 10px; padding: 16px; text-align: center; border: 1px solid rgba(231,76,60,0.2);">
+            <div style="font-size: 1.6rem; font-weight: 800; color: #e74c3c;">~2小时</div>
+            <div style="font-size: 0.75rem; color: #999;">从钓鱼邮件到PLC控制</div>
           </div>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.15);">
-            <div id="summaryDetect" style="font-size: 2rem; font-weight: 800;">0</div>
-            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">检测命中</div>
+          <div style="background: rgba(231,76,60,0.15); border-radius: 10px; padding: 16px; text-align: center; border: 1px solid rgba(231,76,60,0.2);">
+            <div style="font-size: 1.6rem; font-weight: 800; color: #e74c3c;">7个阶段</div>
+            <div style="font-size: 0.75rem; color: #999;">全链路无阻碍突破</div>
           </div>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.15);">
-            <div id="summaryBlock" style="font-size: 2rem; font-weight: 800;">0</div>
-            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">阻断成功</div>
-          </div>
-          <div style="background: rgba(231,76,60,0.2); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(231,76,60,0.3);">
-            <div id="summaryBreach" style="font-size: 2rem; font-weight: 800; color: #ff6b6b;">0</div>
-            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">攻击者得手</div>
+          <div style="background: rgba(231,76,60,0.15); border-radius: 10px; padding: 16px; text-align: center; border: 1px solid rgba(231,76,60,0.2);">
+            <div style="font-size: 1.6rem; font-weight: 800; color: #e74c3c;">¥800万+</div>
+            <div style="font-size: 0.75rem; color: #999;">预估直接损失</div>
           </div>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 16px;">
-            <h4 style="color: #00BCEB; font-size: 0.85rem; margin-bottom: 8px;">⏱️ 关键时间指标</h4>
-            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.9;">
-              <div>首次检测时间 (MTTD): <strong style="color: #00BCEB;" id="summaryMTTD">—</strong></div>
-              <div>自动遏制时间 (MTTR): <strong style="color: #00b894;" id="summaryMTTR">—</strong></div>
-              <div>攻击链阻断点: <strong id="summaryKillPoint" style="color: #fbbf24;">—</strong></div>
-            </div>
-          </div>
-          <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 16px;">
-            <h4 style="color: #00BCEB; font-size: 0.85rem; margin-bottom: 8px;">🛡️ 防御产品贡献</h4>
-            <div id="summaryProducts" style="font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.9;"></div>
-          </div>
+        <div style="text-align: center;">
+          <p style="font-size: 0.95rem; color: #ccc; line-height: 1.8; max-width: 600px; margin: 0 auto 16px;">
+            这7个阶段完美映射了<strong style="color: #ff6b6b;">MITRE ATT&CK攻击链</strong>——从Initial Access到Impact。
+            问题是：<strong style="color: #fff;">你的安全体系在哪个阶段能发现它？在哪个阶段能阻止它？</strong>
+          </p>
+          <p style="font-size: 0.9rem; color: #888; margin: 0;">
+            要回答这个问题，我们需要一个系统性的安全能力框架——这就是NIST CSF 2.0。<br>
+            请继续阅读，我们将用这个框架逐层构建防御，然后<strong style="color: #049fd9;">在产品映射之后，重新回放这次攻击——但这次，有Cisco全栈在场。</strong>
+          </p>
         </div>
-        <p style="text-align: center; margin: 20px 0 0; font-size: 0.85rem; color: rgba(255,255,255,0.6);">
-          💡 如果没有Cisco全栈防御，攻击者将在约2小时内完成从钓鱼邮件到PLC控制的完整攻击链。部署后，攻击在第4阶段即被阻断，产线影响为零。
-        </p>
       </div>
     </div>
 
   </div>
 </section>
 
-<!-- ===== SIMULATION JAVASCRIPT ===== -->
 <script>
 (function() {
   'use strict';
 
-  // ===== Simulation State =====
-  var simState = {
-    running: false,
-    phase: 0,
-    speed: 1, // 1=normal, 2=fast
-    timers: [],
-    scores: { attackPhase: 0, attackSuccess: 0, defendDetect: 0, defendBlock: 0 },
-    startTime: null
-  };
-
-  // ===== Attack Phases Data =====
-  var phases = [
+  var atkPhases = [
     {
-      id: 1,
-      attackTitle: '🎣 初始访问 · Initial Access',
-      attackTactic: 'TA0001',
-      attackTechnique: 'T1566.001 Spearphishing Attachment',
-      attackDesc: '攻击者向工程部张工发送伪装为"设备供应商报价单.xlsx"的钓鱼邮件，内含恶意宏代码。邮件来源伪造为合作供应商域名。',
-      attackTime: '09:14:22',
-      topoActions: function() {
-        animateLine('line-atk-email', 'attack');
-        highlightNode('node-attacker', 'red');
-      },
-      defenseActions: [
-        { time: '09:14:22', product: 'Secure Access', icon: '🌐', color: '#00BCEB', nist: 'PROTECT',
-          msg: '[SWG/Email] 邮件附件沙箱分析触发 → 检测到宏代码调用PowerShell下载器 → 威胁评分: 92/100',
-          action: 'detect' },
-        { time: '09:14:23', product: 'Secure Access', icon: '🛡️', color: '#00b894', nist: 'PROTECT',
-          msg: '[SWG] 自动隔离邮件附件 → 原始邮件投递至用户但附件被替换为安全通知页面',
-          action: 'block' },
-        { time: '09:14:23', product: 'Talos', icon: '🔍', color: '#a29bfe', nist: 'DETECT',
-          msg: '[Threat Intel] 文件哈希 SHA256:a1b2c3... 匹配Talos IOC数据库 → 关联APT组织"暗影蜘蛛"的已知工具集',
-          action: 'detect' }
-      ],
-      topoDefense: function() {
-        highlightNode('node-email', 'green');
-        animateLine('line-atk-email', 'block');
-      },
-      result: 'blocked' // blocked, partial, success
+      id: 1, tactic: 'TA0001 · Initial Access',
+      title: '🎣 阶段一：鱼叉式钓鱼',
+      time: 'T+0min',
+      desc: '向工程部张工发送伪装为设备供应商"华东机电"的报价单邮件。附件为Excel文件，内含恶意VBA宏。邮件头伪造了供应商的真实域名（利用该域名未配置DMARC/SPF）。',
+      detail: '<strong>ATT&CK技术：</strong>T1566.001 Spearphishing Attachment<br><strong>攻击者准备：</strong>通过LinkedIn确认张工负责设备采购；通过公开招标文件获取供应商名称和格式模板。',
+      color: '#e74c3c',
+      noDefense: '没有邮件沙箱分析，附件直达用户收件箱。张工习惯性打开了"报价单"。'
     },
     {
-      id: 2,
-      attackTitle: '🔓 备用入口 · Alternative Access',
-      attackTactic: 'TA0001',
-      attackTechnique: 'T1189 Drive-by Compromise',
-      attackDesc: '钓鱼邮件被拦截后，攻击者转向水坑攻击——在张工常访问的工控论坛中注入恶意JavaScript。张工浏览该网站时，Exploit Kit尝试利用浏览器漏洞。',
-      attackTime: '09:31:05',
-      topoActions: function() {
-        animateLine('line-atk-email', 'attack');
-        animateLine('line-email-pc', 'attack');
-        highlightNode('node-attacker', 'red');
-      },
-      defenseActions: [
-        { time: '09:31:05', product: 'Secure Access', icon: '🌐', color: '#00BCEB', nist: 'PROTECT',
-          msg: '[DNS/Umbrella] DNS查询 evil-exploit.xyz → 域名注册<48小时, DGA特征匹配 → DNS解析阻断',
-          action: 'block' },
-        { time: '09:31:05', product: 'Secure Client', icon: '💻', color: '#6c5ce7', nist: 'PROTECT',
-          msg: '[Umbrella Roaming] 终端DNS模块拦截恶意域名解析，Exploit Kit无法加载',
-          action: 'block' }
-      ],
-      topoDefense: function() {
-        highlightNode('node-email', 'green');
-        highlightNode('node-pc', 'blue');
-      },
-      result: 'blocked'
+      id: 2, tactic: 'TA0002 · Execution',
+      title: '💉 阶段二：恶意代码执行',
+      time: 'T+3min',
+      desc: '张工打开Excel后，VBA宏启动PowerShell下载器，从攻击者的CDN服务器下载并执行Cobalt Strike Beacon载荷。该Beacon通过HTTPS协议与C2服务器建立加密通信通道。',
+      detail: '<strong>ATT&CK技术：</strong>T1059.001 PowerShell + T1204.002 User Execution<br><strong>规避手法：</strong>PowerShell命令使用Base64编码混淆；Beacon载荷存放在合法的Azure Blob Storage上以绕过域名信誉检测。',
+      color: '#e74c3c',
+      noDefense: '终端杀毒软件未检出（Cobalt Strike使用自定义Malleable Profile规避特征检测）。加密C2流量与正常HTTPS无异。'
     },
     {
-      id: 3,
-      attackTitle: '💉 代码执行 · Execution',
-      attackTactic: 'TA0002',
-      attackTechnique: 'T1059.001 PowerShell + T1204 User Execution',
-      attackDesc: '攻击者发送第二封更精密的钓鱼邮件（通过个人邮箱绕过企业邮件网关），张工在家中通过个人设备打开了附件。恶意宏启动PowerShell下载Cobalt Strike Beacon。次日张工将文件拷贝到公司电脑打开。',
-      attackTime: '次日 08:42:17',
-      topoActions: function() {
-        highlightNode('node-pc', 'red');
-        animateLine('line-c2', 'attack');
-        highlightNode('node-c2', 'red');
-      },
-      defenseActions: [
-        { time: '08:42:18', product: 'Secure Client', icon: '💻', color: '#6c5ce7', nist: 'DETECT',
-          msg: '[Endpoint/NVM] 检测到PowerShell异常行为: -ExecutionPolicy Bypass -EncodedCommand → 可疑进程链: WINWORD.EXE→CMD→PowerShell',
-          action: 'detect' },
-        { time: '08:42:19', product: 'Secure Firewall', icon: '🔥', color: '#e67e22', nist: 'DETECT',
-          msg: '[EVE] 检测到向 185.x.x.x:443 的TLS连接 → JA3指纹匹配Cobalt Strike Beacon默认Profile → 威胁评分: 95/100',
-          action: 'detect' },
-        { time: '08:42:19', product: 'SNA', icon: '👁️', color: '#00b894', nist: 'DETECT',
-          msg: '[NDR/ETA] 加密流量行为异常: 周期性Beacon间隔60s±5%抖动, 包长分布匹配C2特征 → 主机威胁得分: 8.7/10',
-          action: 'detect' },
-        { time: '08:42:20', product: 'SNA→pxGrid→ISE', icon: '🔗', color: '#049fd9', nist: 'RESPOND',
-          msg: '[pxGrid联动] SNA推送高威胁主机信息 → ISE执行CoA(Change of Authorization) → 员工PC移至隔离VLAN-999',
-          action: 'block' },
-        { time: '08:42:20', product: 'Secure Firewall', icon: '🚫', color: '#e74c3c', nist: 'RESPOND',
-          msg: '[Auto-Block] 自动将C2 IP 185.x.x.x 加入Firewall黑名单 → 全网阻断该IOC',
-          action: 'block' }
-      ],
-      topoDefense: function() {
-        highlightNode('node-pc', 'orange');
-        highlightNode('node-sna', 'green');
-        highlightNode('node-ise', 'green');
-        animateLine('line-sna-monitor2', 'defend');
-        animateLine('line-c2', 'block');
-        setTimeout(function() { highlightNode('node-pc', 'quarantine'); }, 800);
-      },
-      result: 'partial' // got in but was detected and contained
+      id: 3, tactic: 'TA0003 · Persistence',
+      title: '🔩 阶段三：建立持久化',
+      time: 'T+8min',
+      desc: '攻击者在张工PC上创建计划任务（Scheduled Task）实现开机自启动，并注册一个WMI事件订阅作为备用持久化机制。即使张工重启电脑或清除计划任务，Beacon仍可恢复。',
+      detail: '<strong>ATT&CK技术：</strong>T1053.005 Scheduled Task + T1546.003 WMI Event Subscription<br><strong>隐藏手法：</strong>计划任务名称伪装为"MicrosoftEdgeUpdateDaily"，WMI订阅使用加密的PowerShell命令。',
+      color: '#e74c3c',
+      noDefense: '没有终端行为监控（EDR），计划任务的创建未被发现。IT团队无法区分合法和恶意的计划任务。'
     },
     {
-      id: 4,
-      attackTitle: '🔑 权限提升 · Privilege Escalation',
-      attackTactic: 'TA0004',
-      attackTechnique: 'T1558.003 Kerberoasting',
-      attackDesc: '在被隔离之前的短暂窗口（约1.8秒），Cobalt Strike Beacon尝试了Kerberoasting攻击——请求SPN关联的服务票据(TGS)以离线破解服务账户密码。',
-      attackTime: '08:42:18-08:42:20',
-      topoActions: function() {
-        animateLine('line-pc-ad', 'attack');
-        highlightNode('node-ise', 'alert');
-      },
-      defenseActions: [
-        { time: '08:42:19', product: 'SNA', icon: '👁️', color: '#00b894', nist: 'DETECT',
-          msg: '[行为分析] 检测到单一主机在1.2秒内请求了15个不同SPN的TGS票据 → 异常模式匹配: Kerberoasting (T1558.003)',
-          action: 'detect' },
-        { time: '08:42:20', product: 'ISE', icon: '🛂', color: '#0984e3', nist: 'RESPOND',
-          msg: '[CoA已执行] 主机已隔离 → Kerberoasting在获得可破解票据前被中断 → AD管理员通知: 建议重置高权限服务账户密码',
-          action: 'block' },
-        { time: '08:42:21', product: 'Splunk/XDR', icon: '🧠', color: '#a29bfe', nist: 'DETECT',
-          msg: '[关联分析] 事件链聚合: 钓鱼→C2→Kerberoasting → 自动生成事件工单 → 严重等级: CRITICAL → 通知SOC值班人员',
-          action: 'detect' }
-      ],
-      topoDefense: function() {
-        highlightNode('node-ise', 'green');
-        highlightNode('node-xdr', 'blue');
-        animateLine('line-pc-ad', 'block');
-      },
-      result: 'blocked'
+      id: 4, tactic: 'TA0004 · Privilege Escalation',
+      title: '🔑 阶段四：权限提升',
+      time: 'T+25min',
+      desc: '攻击者使用Kerberoasting技术请求大量服务票据（TGS），离线破解后获取了一个域管理员级别的服务账户密码（该密码8位且3年未更换）。同时通过Mimikatz从内存中提取了张工PC上缓存的域凭证。',
+      detail: '<strong>ATT&CK技术：</strong>T1558.003 Kerberoasting + T1003.001 LSASS Memory<br><strong>利用弱点：</strong>服务账户使用弱密码、未启用gMSA（组托管服务账户）、域内未部署凭证保护策略。',
+      color: '#e74c3c',
+      noDefense: '没有异常Kerberos票据请求的监控，没有特权账户使用告警。弱密码策略使离线破解在10分钟内完成。'
     },
     {
-      id: 5,
-      attackTitle: '🔄 横向移动（被阻断）· Lateral Movement (Blocked)',
-      attackTactic: 'TA0008',
-      attackTechnique: 'T1021.002 SMB/Windows Admin Shares',
-      attackDesc: '假设攻击者在隔离前成功获取了一个服务账户的凭证，尝试使用SMB协议横向移动到数据中心的MES应用服务器。',
-      attackTime: '08:43:05',
-      topoActions: function() {
-        animateLine('line-pc-dc', 'attack');
-        highlightNode('node-dc', 'alert');
-      },
-      defenseActions: [
-        { time: '08:43:05', product: 'Secure Workload', icon: '📦', color: '#e67e22', nist: 'PROTECT',
-          msg: '[微分段] 拒绝连接: 源SGT=99(Quarantine) → 目标:MES-APP-01:445(SMB) → 策略: DENY_ALL_FROM_QUARANTINE → 连接被丢弃',
-          action: 'block' },
-        { time: '08:43:05', product: 'ISE/TrustSec', icon: '🛂', color: '#0984e3', nist: 'PROTECT',
-          msg: '[SGT策略] TrustSec矩阵: SGT-99(Quarantine) → SGT-20(DataCenter) = DENY → 网络层直接丢弃，无需到达服务器',
-          action: 'block' },
-        { time: '08:43:06', product: 'Secure Workload', icon: '📦', color: '#e67e22', nist: 'DETECT',
-          msg: '[行为异常] 即使该凭证有效，Workload检测到: 从未观察到的源IP尝试SMB连接 → 偏离ADM应用依赖基线 → 告警',
-          action: 'detect' }
-      ],
-      topoDefense: function() {
-        highlightNode('node-dc', 'green');
-        animateLine('line-pc-dc', 'block');
-      },
-      result: 'blocked'
+      id: 5, tactic: 'TA0008 · Lateral Movement',
+      title: '🕸️ 阶段五：横向移动',
+      time: 'T+45min',
+      desc: '利用获取的域管理员凭证，攻击者通过SMB和WMI从张工PC横向移动到数据中心的MES应用服务器、SCADA历史数据库服务器和Active Directory域控制器。每台服务器上都部署了Beacon。',
+      detail: '<strong>ATT&CK技术：</strong>T1021.002 SMB/Windows Admin Shares + T1047 WMI<br><strong>攻击路径：</strong>张工PC → 文件服务器（跳板）→ MES-APP-01 → SCADA-Historian → DC01。利用了网络扁平化（IT/OT之间仅有ACL路由器"隔离"）。',
+      color: '#e74c3c',
+      noDefense: '网络未分段——IT和OT服务器在同一广播域。没有东西向流量监控。没有基于身份的访问控制。攻击者横向移动如入无人之境。'
     },
     {
-      id: 6,
-      attackTitle: '🏭 OT渗透尝试（被阻断）· OT Pivot Attempt (Blocked)',
-      attackTactic: 'TA0008 (ICS)',
-      attackTechnique: 'T0886 Remote Services (ATT&CK for ICS)',
-      attackDesc: '攻击者的自动化工具尝试通过已泄露的VPN凭证从互联网直接连接到OT网络中的PLC进行远程固件篡改。',
-      attackTime: '08:45:30',
-      topoActions: function() {
-        animateLine('line-dc-fw2', 'attack');
-        animateLine('line-fw2-plc', 'attack');
-        highlightNode('node-fw2', 'alert');
-        highlightNode('node-plc', 'alert');
-      },
-      defenseActions: [
-        { time: '08:45:30', product: 'Secure Firewall', icon: '🔥', color: '#e67e22', nist: 'PROTECT',
-          msg: '[OT DPI] IT/OT边界防火墙: 检测到从IT网段到PLC-07(Modbus/TCP:502)的连接请求 → 源IP不在授权工程站列表 → DENY + 告警',
-          action: 'block' },
-        { time: '08:45:31', product: 'SEA', icon: '🔐', color: '#636e72', nist: 'PROTECT',
-          msg: '[Secure Equipment Access] 当前无活跃的授权远程维护会话 → 所有OT远程访问通道关闭 → 无合法路径到达PLC',
-          action: 'block' },
-        { time: '08:45:31', product: 'Cyber Vision', icon: '🏭', color: '#00b894', nist: 'DETECT',
-          msg: '[OT监控] 尽管连接被Firewall拦截，Cyber Vision记录到: 对PLC-07 Modbus端口的异常连接尝试 → 来源分析: 非授权主机 → OT告警升级',
-          action: 'detect' },
-        { time: '08:45:32', product: 'Cyber Vision→ISE', icon: '🔗', color: '#049fd9', nist: 'RESPOND',
-          msg: '[pxGrid] Cyber Vision将OT威胁事件推送至ISE → ISE检查: 源设备已在隔离VLAN → 确认无新的OT侧暴露',
-          action: 'detect' }
-      ],
-      topoDefense: function() {
-        highlightNode('node-fw2', 'green');
-        highlightNode('node-plc', 'green');
-        highlightNode('node-mes', 'green');
-        animateLine('line-dc-fw2', 'block');
-        animateLine('line-fw2-plc', 'block');
-      },
-      result: 'blocked'
+      id: 6, tactic: 'TA0008 (ICS) · OT Pivot',
+      title: '🏭 阶段六：OT网络渗透',
+      time: 'T+72min',
+      desc: '从MES服务器出发，攻击者发现OT网络的SCADA服务器和PLC可以直接通信（IT/OT边界形同虚设）。通过SCADA服务器上的远程桌面，攻击者连接到PLC编程工作站，下载了所有PLC程序（作为勒索筹码）。',
+      detail: '<strong>ATT&CK for ICS技术：</strong>T0886 Remote Services + T0845 Program Upload<br><strong>利用弱点：</strong>IT/OT之间仅有ACL路由器且规则已过时；PLC编程工作站使用默认密码；OT网络无任何监控。',
+      color: '#e74c3c',
+      noDefense: '没有Cyber Vision → OT网络完全不可见。没有工业防火墙 → 无法检测异常工业协议操作。IT安全团队甚至不知道这些PLC的存在。'
     },
     {
-      id: 7,
-      attackTitle: '🧹 事件收尾 · Incident Closure',
-      attackTactic: 'RESPOND + RECOVER',
-      attackTechnique: 'NIST CSF: RS + RC',
-      attackDesc: '攻击链被完全阻断。SOC团队启动事件响应流程，进行取证分析、根除残留和系统恢复。',
-      attackTime: '08:50:00 - 10:30:00',
-      topoActions: function() {
-        // all nodes back to normal with green tint
-        resetTopoColors();
-        highlightNode('node-sna', 'green');
-        highlightNode('node-xdr', 'green');
-        highlightNode('node-ise', 'green');
-      },
-      defenseActions: [
-        { time: '08:50:00', product: 'Splunk/XDR', icon: '🧠', color: '#a29bfe', nist: 'RESPOND',
-          msg: '[事件报告] 自动生成完整攻击时间线: 7个阶段, 涉及资产3个, IOC 5个 → 事件严重等级: CRITICAL → 报告推送至CISO',
-          action: 'detect' },
-        { time: '09:00:00', product: 'ISE', icon: '🛂', color: '#0984e3', nist: 'RECOVER',
-          msg: '[终端修复] 张工的PC进行完整杀毒扫描+系统重置 → Posture重新评估: COMPLIANT → 恢复正常VLAN访问',
-          action: 'block' },
-        { time: '09:15:00', product: 'Secure Firewall', icon: '🔥', color: '#e67e22', nist: 'RECOVER',
-          msg: '[IOC全网同步] C2 IP/域名/文件哈希添加至全网Firewall + Secure Access黑名单 → 防止复发',
-          action: 'block' },
-        { time: '10:30:00', product: 'GOVERN', icon: '📋', color: '#6c5ce7', nist: 'GOVERN',
-          msg: '[治理反馈] 事件复盘: ①加强个人邮箱到企业设备的文件传输管控 ②服务账户密码策略升级(≥24字符+轮换) ③更新OT-IRP手册',
-          action: 'detect' }
-      ],
-      topoDefense: function() {
-        resetTopoColors();
-        ['node-email','node-pc','node-ise','node-dc','node-fw2','node-mes','node-plc','node-sna','node-xdr'].forEach(function(n) {
-          highlightNode(n, 'safe');
-        });
-      },
-      result: 'resolved'
+      id: 7, tactic: 'TA0040 · Impact',
+      title: '💣 阶段七：勒索执行',
+      time: 'T+110min',
+      desc: '攻击者在MES服务器、SCADA历史数据库和3台关键PLC的编程工作站上同时部署勒索软件。PLC程序被加密，MES系统停机，12条产线全部停摆。勒索信要求48小时内支付200个比特币（约合¥4000万），否则公开窃取的客户订单数据。',
+      detail: '<strong>ATT&CK技术：</strong>T1486 Data Encrypted for Impact + T1489 Service Stop<br><strong>业务影响：</strong>产线停摆直接损失约¥200万/天；客户订单违约赔偿；品牌声誉损失；监管调查和罚款。',
+      color: '#c0392b',
+      noDefense: '没有事件响应计划，没有PLC程序备份（唯一备份在工程师的U盘上，也被加密了），没有数据中心微分段阻止勒索软件扩散。恢复预估>2周。'
     }
   ];
 
-  // ===== Topology Animation Functions =====
-  function animateLine(lineId, type) {
-    var line = document.getElementById(lineId);
-    if (!line) return;
-    if (type === 'attack') {
-      line.setAttribute('stroke', '#e74c3c');
-      line.setAttribute('stroke-width', '2.5');
-      line.classList.add('attack-path');
-      line.classList.remove('defend-path');
-      line.setAttribute('filter', 'url(#glowRed)');
-    } else if (type === 'defend') {
-      line.setAttribute('stroke', '#049fd9');
-      line.setAttribute('stroke-width', '2');
-      line.classList.add('defend-path');
-      line.classList.remove('attack-path');
-      line.setAttribute('filter', 'url(#glowBlue)');
-    } else if (type === 'block') {
-      line.setAttribute('stroke', '#00b894');
-      line.setAttribute('stroke-width', '3');
-      line.classList.remove('attack-path');
-      line.classList.remove('defend-path');
-      line.setAttribute('stroke-dasharray', '2 6');
-      line.setAttribute('filter', 'url(#glowGreen)');
-    }
-  }
+  var atkState = { phase: 0, running: false, timers: [] };
 
-  function highlightNode(nodeId, type) {
-    var node = document.getElementById(nodeId);
-    if (!node) return;
-    var circle = node.querySelector('circle');
-    if (!circle) return;
-    circle.classList.remove('node-alert', 'node-pulse');
-    if (type === 'red') {
-      circle.setAttribute('stroke', '#e74c3c');
-      circle.setAttribute('stroke-width', '3');
-      circle.classList.add('node-alert');
-      circle.setAttribute('filter', 'url(#glowRed)');
-    } else if (type === 'green') {
-      circle.setAttribute('stroke', '#00b894');
-      circle.setAttribute('stroke-width', '3');
-      circle.classList.add('node-pulse');
-      circle.setAttribute('filter', 'url(#glowGreen)');
-    } else if (type === 'blue') {
-      circle.setAttribute('stroke', '#049fd9');
-      circle.setAttribute('stroke-width', '3');
-      circle.setAttribute('filter', 'url(#glowBlue)');
-    } else if (type === 'orange') {
-      circle.setAttribute('stroke', '#f39c12');
-      circle.setAttribute('stroke-width', '3');
-      circle.classList.add('node-alert');
-    } else if (type === 'alert') {
-      circle.setAttribute('stroke', '#e74c3c');
-      circle.setAttribute('stroke-width', '3');
-      circle.classList.add('node-alert');
-      circle.setAttribute('filter', 'url(#glowRed)');
-    } else if (type === 'quarantine') {
-      circle.setAttribute('stroke', '#e74c3c');
-      circle.setAttribute('stroke-width', '4');
-      circle.setAttribute('stroke-dasharray', '4 3');
-      circle.setAttribute('filter', 'url(#glowRed)');
-      circle.classList.remove('node-alert');
-    } else if (type === 'safe') {
-      circle.setAttribute('stroke', '#00b894');
-      circle.setAttribute('stroke-width', '2');
-      circle.removeAttribute('filter');
-      circle.removeAttribute('stroke-dasharray');
-    }
-  }
+  window.startAttackSim = function() {
+    if (atkState.running) return;
+    resetAttackSim();
+    atkState.running = true;
 
-  function resetTopoColors() {
-    // Reset all lines
-    var lines = document.querySelectorAll('#topoSvg line[id^="line-"]');
-    lines.forEach(function(l) {
-      l.setAttribute('stroke', '#21262d');
-      l.setAttribute('stroke-width', '1.5');
-      l.classList.remove('attack-path', 'defend-path');
-      l.removeAttribute('filter');
-      l.removeAttribute('stroke-dasharray');
-      if (l.id.indexOf('sna-monitor') !== -1) {
-        l.setAttribute('stroke-width', '1');
-        l.setAttribute('stroke-dasharray', '2 3');
-      }
-    });
-    // Reset all nodes
-    var nodes = document.querySelectorAll('#topoSvg g[id^="node-"]');
-    nodes.forEach(function(n) {
-      var c = n.querySelector('circle');
-      if (c) {
-        c.setAttribute('stroke', '#555');
-        c.setAttribute('stroke-width', '2');
-        c.classList.remove('node-alert', 'node-pulse');
-        c.removeAttribute('filter');
-        c.removeAttribute('stroke-dasharray');
-      }
-    });
-    // Restore ISE and FW2 default colors
-    var iseC = document.querySelector('#node-ise circle');
-    if (iseC) iseC.setAttribute('stroke', '#0984e3');
-    var fw2C = document.querySelector('#node-fw2 circle');
-    if (fw2C) fw2C.setAttribute('stroke', '#e67e22');
-    var snaC = document.querySelector('#node-sna circle');
-    if (snaC) snaC.setAttribute('stroke', '#00b894');
-    var xdrC = document.querySelector('#node-xdr circle');
-    if (xdrC) xdrC.setAttribute('stroke', '#a29bfe');
-  }
-
-  // ===== UI Update Functions =====
-  function addTimelineEntry(phase) {
-    var timeline = document.getElementById('simTimeline');
-    var empty = document.getElementById('simTimelineEmpty');
-    if (empty) empty.style.display = 'none';
-
-    var resultColors = { blocked: '#00b894', partial: '#f39c12', success: '#e74c3c', resolved: '#049fd9' };
-    var resultLabels = { blocked: '✅ 已阻断', partial: '⚠️ 部分突破 → 已遏制', success: '❌ 攻击成功', resolved: '🔄 事件关闭' };
-
-    var div = document.createElement('div');
-    div.style.cssText = 'margin-bottom:16px; padding:16px; background:#f8fafb; border-radius:12px; border-left:4px solid #e74c3c; opacity:0; transform:translateY(12px); transition: opacity 0.4s, transform 0.4s;';
-    div.innerHTML =
-      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">' +
-        '<span style="font-weight:700; font-size:0.95rem; color:#1a1a1a;">' + phase.attackTitle + '</span>' +
-        '<span style="font-size:0.7rem; background:#1a1a2e; color:#e74c3c; padding:2px 8px; border-radius:4px; font-family:monospace;">' + phase.attackTactic + '</span>' +
-      '</div>' +
-      '<div style="font-size:0.78rem; color:#888; margin-bottom:6px; font-family:monospace;">⏰ ' + phase.attackTime + ' | ' + phase.attackTechnique + '</div>' +
-      '<div style="font-size:0.85rem; color:#444; line-height:1.6; margin-bottom:8px;">' + phase.attackDesc + '</div>' +
-      '<div style="font-size:0.8rem; font-weight:600; color:' + resultColors[phase.result] + ';">' + resultLabels[phase.result] + '</div>';
-
-    timeline.appendChild(div);
-    setTimeout(function() { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, 50);
-    timeline.scrollTop = timeline.scrollHeight;
-  }
-
-  function addLogEntry(entry) {
-    var log = document.getElementById('simLog');
-    var empty = document.getElementById('simLogEmpty');
-    if (empty) empty.style.display = 'none';
-
-    var nistColors = { PROTECT: '#00b894', DETECT: '#fdcb6e', RESPOND: '#e17055', RECOVER: '#a29bfe', GOVERN: '#6c5ce7' };
-
-    var div = document.createElement('div');
-    div.style.cssText = 'padding:8px 14px; border-bottom:1px solid #161b22; opacity:0; transition: opacity 0.3s;';
-    div.innerHTML =
-      '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
-        '<span style="color:#484f58; font-size:0.72rem;">' + entry.time + '</span>' +
-        '<span style="background:' + (nistColors[entry.nist] || '#555') + '; color:#fff; font-size:0.6rem; padding:1px 6px; border-radius:3px; font-weight:700;">' + entry.nist + '</span>' +
-        '<span style="color:' + entry.color + '; font-weight:600;">' + entry.icon + ' ' + entry.product + '</span>' +
-      '</div>' +
-      '<div style="color:#c9d1d9; margin-top:4px; padding-left:4px; font-size:0.76rem; line-height:1.5;">' + entry.msg + '</div>';
-
-    log.appendChild(div);
-    setTimeout(function() { div.style.opacity = '1'; }, 50);
-    log.scrollTop = log.scrollHeight;
-  }
-
-  function updateScores() {
-    document.getElementById('attackPhase').textContent = simState.scores.attackPhase;
-    document.getElementById('attackSuccess').textContent = simState.scores.attackSuccess;
-    document.getElementById('defendDetect').textContent = simState.scores.defendDetect;
-    document.getElementById('defendBlock').textContent = simState.scores.defendBlock;
-  }
-
-  // ===== Run a Single Phase =====
-  function runPhase(index) {
-    if (index >= phases.length || !simState.running) {
-      if (index >= phases.length) showSummary();
-      return;
-    }
-
-    var phase = phases[index];
-    simState.phase = phase.id;
-    simState.scores.attackPhase = phase.id;
-    if (phase.result === 'success') simState.scores.attackSuccess++;
-    updateScores();
-
-    // Topo attack animation
-    if (phase.topoActions) phase.topoActions();
-
-    // Add timeline entry
-    addTimelineEntry(phase);
-
-    // Schedule defense actions
-    var baseDelay = simState.speed === 2 ? 400 : 800;
-    phase.defenseActions.forEach(function(action, i) {
-      var t = setTimeout(function() {
-        if (!simState.running) return;
-        addLogEntry(action);
-        if (action.action === 'detect') simState.scores.defendDetect++;
-        if (action.action === 'block') simState.scores.defendBlock++;
-        updateScores();
-      }, baseDelay * (i + 1));
-      simState.timers.push(t);
-    });
-
-    // Topo defense animation
-    var defenseTopoDelay = baseDelay * (phase.defenseActions.length + 1);
-    var t2 = setTimeout(function() {
-      if (!simState.running) return;
-      if (phase.topoDefense) phase.topoDefense();
-    }, defenseTopoDelay);
-    simState.timers.push(t2);
-
-    // Schedule next phase
-    var nextDelay = baseDelay * (phase.defenseActions.length + 3);
-    var t3 = setTimeout(function() {
-      runPhase(index + 1);
-    }, nextDelay);
-    simState.timers.push(t3);
-  }
-
-  // ===== Show Summary =====
-  function showSummary() {
-    simState.running = false;
-    var summary = document.getElementById('simSummary');
-    summary.style.display = 'block';
-    summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    document.getElementById('summaryDetect').textContent = simState.scores.defendDetect;
-    document.getElementById('summaryBlock').textContent = simState.scores.defendBlock;
-    document.getElementById('summaryBreach').textContent = simState.scores.attackSuccess;
-    document.getElementById('summaryMTTD').textContent = '< 1 秒 (Secure Access邮件沙箱)';
-    document.getElementById('summaryMTTR').textContent = '1.8 秒 (pxGrid → ISE CoA自动隔离)';
-    document.getElementById('summaryKillPoint').textContent = '第3阶段 — C2通信建立即被SNA检测+ISE隔离';
-
-    var productsHtml =
-      '<div>🌐 Secure Access: <strong style="color:#00BCEB;">3次拦截</strong> (邮件+DNS+Web)</div>' +
-      '<div>💻 Secure Client: <strong style="color:#6c5ce7;">2次检测</strong> (NVM+DNS)</div>' +
-      '<div>🔥 Secure Firewall: <strong style="color:#e67e22;">3次拦截</strong> (EVE+OT DPI+IOC)</div>' +
-      '<div>👁️ SNA: <strong style="color:#00b894;">3次检测</strong> (ETA+行为+Kerberoast)</div>' +
-      '<div>🛂 ISE: <strong style="color:#0984e3;">3次执行</strong> (CoA隔离+SGT+恢复)</div>' +
-      '<div>📦 Secure Workload: <strong style="color:#e67e22;">2次阻断</strong> (微分段)</div>' +
-      '<div>🏭 Cyber Vision: <strong style="color:#00b894;">2次检测</strong> (OT异常)</div>' +
-      '<div>🔐 SEA: <strong style="color:#636e72;">1次阻断</strong> (无授权会话)</div>';
-    document.getElementById('summaryProducts').innerHTML = productsHtml;
-
-    // Update button
-    var btn = document.getElementById('simStartBtn');
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 演练完成';
-    btn.style.background = 'linear-gradient(135deg, #00b894, #00a878)';
-    btn.style.cursor = 'default';
-  }
-
-  // ===== Start Simulation =====
-  window.startSimulation = function() {
-    if (simState.running) return;
-    resetSimulation();
-    simState.running = true;
-    simState.startTime = Date.now();
-
-    var btn = document.getElementById('simStartBtn');
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg> 演练进行中...';
+    var btn = document.getElementById('atkStartBtn');
+    btn.innerHTML = '⏳ 攻击推演中...';
     btn.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
     btn.style.cursor = 'not-allowed';
 
-    // Add initial log
-    addLogEntry({
-      time: '09:14:00', product: 'SOC Console', icon: '🖥️', color: '#8b949e', nist: 'DETECT',
-      msg: '━━ SIMULATION STARTED ━━ 所有安全传感器处于监控状态 | Threat Level: ELEVATED | NetFlow: Active | pxGrid: Connected', action: 'detect'
-    });
-    simState.scores.defendDetect++;
-    updateScores();
-
-    setTimeout(function() { runPhase(0); }, simState.speed === 2 ? 600 : 1200);
+    document.getElementById('atkTimelineEmpty').style.display = 'none';
+    runAtkPhase(0);
   };
 
-  // ===== Reset Simulation =====
-  window.resetSimulation = function() {
-    simState.running = false;
-    simState.phase = 0;
-    simState.scores = { attackPhase: 0, attackSuccess: 0, defendDetect: 0, defendBlock: 0 };
+  function runAtkPhase(index) {
+    if (index >= atkPhases.length || !atkState.running) {
+      if (index >= atkPhases.length) showAtkSummary();
+      return;
+    }
 
-    // Clear timers
-    simState.timers.forEach(function(t) { clearTimeout(t); });
-    simState.timers = [];
+    var phase = atkPhases[index];
+    atkState.phase = index + 1;
 
-    // Reset UI
-    updateScores();
-    resetTopoColors();
+    // Update progress
+    document.getElementById('atkProgressLabel').textContent = atkState.phase + ' / 7 阶段';
+    document.getElementById('atkProgressBar').style.width = ((atkState.phase / 7) * 100) + '%';
 
-    var timeline = document.getElementById('simTimeline');
-    timeline.innerHTML = '<div id="simTimelineEmpty" style="text-align:center;padding:40px 20px;color:#bbb;">' +
-      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-      '<p style="font-size:0.9rem;margin:0;">等待演练启动...</p>' +
-      '<p style="font-size:0.75rem;color:#ccc;margin:4px 0 0;">点击"启动攻防演练"按钮开始</p></div>';
+    // Add phase card
+    var timeline = document.getElementById('atkTimeline');
+    var card = document.createElement('div');
+    card.style.cssText = 'margin-bottom:16px; opacity:0; transform:translateX(-20px); transition: opacity 0.5s, transform 0.5s;';
+    card.innerHTML =
+      '<div style="background:#fff; border-radius:14px; border:1px solid #e8eef3; border-left:5px solid ' + phase.color + '; overflow:hidden;">' +
+        '<div style="padding:20px 24px;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">' +
+            '<span style="font-weight:800; font-size:1.05rem; color:#1a1a1a;">' + phase.title + '</span>' +
+            '<div style="display:flex; gap:8px; align-items:center;">' +
+              '<span style="font-size:0.7rem; background:#1a1a2e; color:#e74c3c; padding:3px 10px; border-radius:4px; font-family:monospace; font-weight:600;">' + phase.tactic + '</span>' +
+              '<span style="font-size:0.7rem; background:#2d1f1f; color:#ff6b6b; padding:3px 10px; border-radius:4px; font-family:monospace;">' + phase.time + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<p style="font-size:0.9rem; color:#444; line-height:1.7; margin-bottom:12px;">' + phase.desc + '</p>' +
+          '<div style="font-size:0.8rem; color:#666; line-height:1.6; margin-bottom:12px; padding:12px; background:#f8f8f8; border-radius:8px;">' + phase.detail + '</div>' +
+          '<div style="background:#fde8e8; border-radius:8px; padding:12px 16px; font-size:0.82rem; color:#c0392b; line-height:1.6;">' +
+            '<strong>⚠️ 无防御状态：</strong>' + phase.noDefense +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    timeline.appendChild(card);
+    setTimeout(function() { card.style.opacity = '1'; card.style.transform = 'translateX(0)'; }, 50);
 
-    var log = document.getElementById('simLog');
-    log.innerHTML = '<div id="simLogEmpty" style="text-align:center;padding:40px 20px;color:#484f58;">' +
-      '<pre style="margin:0;font-size:0.8rem;color:#484f58;">\n  ╔══════════════════════════════════════╗\n  ║   CISCO SECURITY OPERATIONS CENTER   ║\n  ║        SOC Console v3.2              ║\n  ║   Status: MONITORING ● ● ●          ║\n  ╚══════════════════════════════════════╝\n</pre></div>';
+    // Schedule next
+    var t = setTimeout(function() { runAtkPhase(index + 1); }, 2200);
+    atkState.timers.push(t);
+  }
 
-    document.getElementById('simSummary').style.display = 'none';
+  function showAtkSummary() {
+    atkState.running = false;
+    document.getElementById('atkSummary').style.display = 'block';
+    document.getElementById('atkSummary').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    var btn = document.getElementById('simStartBtn');
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> 启动攻防演练';
+    var btn = document.getElementById('atkStartBtn');
+    btn.innerHTML = '💀 攻击推演完成';
+    btn.style.background = '#555';
+    btn.style.cursor = 'default';
+  }
+
+  window.resetAttackSim = function() {
+    atkState.running = false;
+    atkState.phase = 0;
+    atkState.timers.forEach(function(t) { clearTimeout(t); });
+    atkState.timers = [];
+
+    document.getElementById('atkTimeline').innerHTML = '';
+    document.getElementById('atkTimelineEmpty').style.display = 'block';
+    document.getElementById('atkSummary').style.display = 'none';
+    document.getElementById('atkProgressLabel').textContent = '0 / 7 阶段';
+    document.getElementById('atkProgressBar').style.width = '0%';
+
+    var btn = document.getElementById('atkStartBtn');
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> 开始攻击推演';
     btn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
     btn.style.cursor = 'pointer';
   };
-
-  // ===== Toggle Speed =====
-  window.toggleSimSpeed = function() {
-    simState.speed = simState.speed === 1 ? 2 : 1;
-    var btn = document.getElementById('simSpeedBtn');
-    btn.textContent = simState.speed === 1 ? '⚡ 速度: 正常' : '⚡⚡ 速度: 快速';
-  };
-
 })();
 </script>
+
+<!-- ============================================================
+       NEW SECTION: Post-Attack Analysis — First Principles + Why NIST CSF
+       Placement: AFTER #sim-attack, BEFORE #nist-csf
+       ============================================================ -->
+  <section id="post-attack-analysis" style="padding:4rem 0;">
+    <div class="container">
+
+      <!-- Emotional bridge from attack simulation -->
+      <div style="padding:2.5rem 2rem; background:linear-gradient(135deg, #fff5f5 0%, #fff 100%); border-radius:16px; border-left:5px solid #e74c3c; margin-bottom:3rem; box-shadow:0 2px 15px rgba(0,0,0,0.06);">
+        <h3 style="color:#e74c3c; font-size:1.4rem; margin-bottom:1rem;">
+          <span style="margin-right:0.5rem;">💔</span>7个阶段，17天，零告警
+        </h3>
+        <p style="font-size:1.1rem; line-height:1.9; color:#333; margin-bottom:1rem;">
+          你刚刚目睹的，不仅仅是一次模拟。这是<strong>每天都在全球数千家企业中真实发生的场景</strong>。
+          攻击者从一封精心伪装的钓鱼邮件开始，17天后完全控制了生产网络——而防守方的日志中，
+          <span style="color:#e74c3c; font-weight:700;">没有一条高危告警</span>。
+        </p>
+        <p style="font-size:1.05rem; line-height:1.9; color:#555;">
+          问题不在于华锐精密缺乏安全产品——他们有防火墙、有杀毒软件、有VPN。
+          问题在于：<strong style="color:#049fd9;">这些防御像一座座孤岛，彼此之间没有对话</strong>。
+          攻击者利用的不是某一个漏洞，而是<em>防御体系之间的缝隙</em>。
+        </p>
+      </div>
+
+      <!-- ===== 第一性原理：安全问题的三层本质 ===== -->
+      <h2 style="text-align:center; font-size:2rem; margin-bottom:0.5rem; color:#0d274d;">
+        <span style="color:#049fd9;">⬢</span> 第一性原理：安全问题的三层本质
+      </h2>
+      <p style="text-align:center; color:#666; margin-bottom:2.5rem; font-size:1.05rem;">
+        First Principles Thinking — 从攻击模拟中，我们能提炼出什么根本规律？
+      </p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:2rem; margin-bottom:3rem;">
+
+        <!-- Layer 1: Visibility -->
+        <div style="background:#fff; border-radius:16px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.07); border-top:4px solid #049fd9; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1.2rem;">
+            <div style="width:52px; height:52px; background:linear-gradient(135deg, #049fd9, #00BCEB); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#fff; flex-shrink:0;">👁️</div>
+            <div>
+              <h3 style="margin:0; font-size:1.2rem; color:#0d274d;">第一层：可见性缺失</h3>
+              <span style="font-size:0.85rem; color:#888;">Visibility Gap</span>
+            </div>
+          </div>
+          <p style="font-size:0.95rem; line-height:1.8; color:#444; margin-bottom:1rem;">
+            <strong style="color:#e74c3c;">在攻击模拟中：</strong>阶段2-3的横向移动和内部侦察，在传统日志中完全隐形。
+            攻击者使用合法的管理工具（PowerShell、WMI）在内网穿行，防火墙只看到"正常的内部流量"。
+          </p>
+          <div style="background:#f0f8ff; padding:1rem; border-radius:10px; border-left:3px solid #049fd9;">
+            <p style="margin:0; font-size:0.9rem; color:#555; line-height:1.7;">
+              <strong>核心问题：</strong>你无法保护你看不见的东西。没有东西向（East-West）流量可见性，
+              没有终端行为分析，攻击者在内网如入无人之境。
+            </p>
+          </div>
+          <div style="margin-top:1rem; padding:0.8rem 1rem; background:#fff3e0; border-radius:8px;">
+            <p style="margin:0; font-size:0.85rem; color:#e65100;">
+              🔍 <strong>类比：</strong>想象一栋大楼只在大门装了摄像头，楼内走廊、电梯、仓库全是盲区。
+              小偷从窗户爬进来后，可以在整栋楼里自由行走。
+            </p>
+          </div>
+        </div>
+
+        <!-- Layer 2: Correlation -->
+        <div style="background:#fff; border-radius:16px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.07); border-top:4px solid #00BCEB; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1.2rem;">
+            <div style="width:52px; height:52px; background:linear-gradient(135deg, #00BCEB, #6DD5FA); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#fff; flex-shrink:0;">🔗</div>
+            <div>
+              <h3 style="margin:0; font-size:1.2rem; color:#0d274d;">第二层：关联性断裂</h3>
+              <span style="font-size:0.85rem; color:#888;">Correlation Breakdown</span>
+            </div>
+          </div>
+          <p style="font-size:0.95rem; line-height:1.8; color:#444; margin-bottom:1rem;">
+            <strong style="color:#e74c3c;">在攻击模拟中：</strong>每个单独阶段的行为看起来都"不算异常"——
+            一封邮件、一次登录、一个文件传输。但串联起来，就是一条完整的杀伤链（Kill Chain）。
+          </p>
+          <div style="background:#f0f8ff; padding:1rem; border-radius:10px; border-left:3px solid #00BCEB;">
+            <p style="margin:0; font-size:0.9rem; color:#555; line-height:1.7;">
+              <strong>核心问题：</strong>安全工具各自为战。防火墙、终端防护、邮件网关各有各的告警逻辑，
+              但没有人——或系统——能把这些碎片拼成完整的画面。
+            </p>
+          </div>
+          <div style="margin-top:1rem; padding:0.8rem 1rem; background:#fff3e0; border-radius:8px;">
+            <p style="margin:0; font-size:0.85rem; color:#e65100;">
+              🔍 <strong>类比：</strong>医院急诊室里，血压科说"血压偏高"，心电图说"心律不齐"，
+              血液科说"凝血指标异常"——每个科室都觉得不严重，但如果一个主治医生综合来看，
+              答案显而易见：<strong>心梗前兆</strong>。
+            </p>
+          </div>
+        </div>
+
+        <!-- Layer 3: Response -->
+        <div style="background:#fff; border-radius:16px; padding:2rem; box-shadow:0 4px 20px rgba(0,0,0,0.07); border-top:4px solid #0d274d; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1.2rem;">
+            <div style="width:52px; height:52px; background:linear-gradient(135deg, #0d274d, #1a3a5c); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#fff; flex-shrink:0;">⚡</div>
+            <div>
+              <h3 style="margin:0; font-size:1.2rem; color:#0d274d;">第三层：响应速度脱节</h3>
+              <span style="font-size:0.85rem; color:#888;">Response Time Mismatch</span>
+            </div>
+          </div>
+          <p style="font-size:0.95rem; line-height:1.8; color:#444; margin-bottom:1rem;">
+            <strong style="color:#e74c3c;">在攻击模拟中：</strong>攻击者在阶段5-7从数据外传到勒索加密，
+            只用了不到48小时。而传统安全运维团队发现并确认一次高级威胁的平均时间？
+            <strong style="color:#e74c3c;">287天</strong>（IBM 2024 数据泄露成本报告）。
+          </p>
+          <div style="background:#f0f8ff; padding:1rem; border-radius:10px; border-left:3px solid #0d274d;">
+            <p style="margin:0; font-size:0.9rem; color:#555; line-height:1.7;">
+              <strong>核心问题：</strong>即使发现了威胁，从告警到遏制的路径太长。需要人工登录不同管理台、
+              逐一操作隔离、逐一确认范围。攻击者以机器速度行动，防守方却以人工速度响应。
+            </p>
+          </div>
+          <div style="margin-top:1rem; padding:0.8rem 1rem; background:#fff3e0; border-radius:8px;">
+            <p style="margin:0; font-size:0.85rem; color:#e65100;">
+              🔍 <strong>类比：</strong>消防队发现火灾报警后，需要先打电话确认是否误报，
+              再手动查找最近的消防栓位置，再逐一通知每层楼疏散。等到水龙头接上，整层楼已经烧穿了。
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Summary bridge -->
+      <div style="text-align:center; padding:2rem; background:#f8f9fa; border-radius:12px; margin-bottom:3.5rem;">
+        <p style="font-size:1.15rem; line-height:1.9; color:#333; max-width:800px; margin:0 auto;">
+          三个问题，一个共同的根源：<strong style="color:#049fd9; font-size:1.25rem;">缺乏统一的安全架构思维</strong>。
+          <br>不是产品不够多，而是产品之间没有<em>共同的语言</em>和<em>协作的框架</em>。
+        </p>
+      </div>
+
+      <!-- ===== 为什么选择NIST CSF 2.0 ===== -->
+      <h2 style="text-align:center; font-size:2rem; margin-bottom:0.5rem; color:#0d274d;">
+        <span style="color:#049fd9;">⬢</span> 为什么选择 NIST CSF 2.0 作为统一框架？
+      </h2>
+      <p style="text-align:center; color:#666; margin-bottom:2.5rem; font-size:1.05rem;">
+        Why NIST Cybersecurity Framework 2.0 — 从混乱到秩序的桥梁
+      </p>
+
+      <!-- Context paragraph referencing attack sim -->
+      <div style="max-width:860px; margin:0 auto 2.5rem; padding:2rem; background:linear-gradient(135deg, #f0f8ff 0%, #fff 100%); border-radius:14px; border:1px solid #e0e8f0;">
+        <p style="font-size:1.05rem; line-height:1.9; color:#444; margin-bottom:1rem;">
+          刚才的攻击模拟暴露了一个残酷的现实：<strong>单点防御在高级威胁面前不堪一击</strong>。
+          我们需要的不是再多买一个安全产品，而是一个能让所有安全能力<em>协同工作</em>的参考框架。
+        </p>
+        <p style="font-size:1.05rem; line-height:1.9; color:#444;">
+          市面上的安全框架不少——ISO 27001、CIS Controls、MITRE ATT&CK——
+          但我们选择 <strong style="color:#049fd9;">NIST CSF 2.0</strong> 作为本文的主线框架，原因有三：
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1.8rem; margin-bottom:2.5rem;">
+
+        <!-- Reason 1 -->
+        <div style="background:#fff; border-radius:14px; padding:1.8rem; box-shadow:0 3px 15px rgba(0,0,0,0.06); border-left:4px solid #049fd9;">
+          <div style="font-size:2rem; margin-bottom:0.5rem;">🌐</div>
+          <h4 style="color:#0d274d; margin-bottom:0.8rem; font-size:1.1rem;">① 业务导向，而非技术导向</h4>
+          <p style="font-size:0.95rem; line-height:1.8; color:#555;">
+            NIST CSF 2.0 的六大功能从<strong>治理（Govern）</strong>开始，天然适合与业务管理层对话。
+            它不说"你需要部署IDS"，而是问"你如何识别关键资产的风险？"——
+            这让安全团队能用<strong>业务语言</strong>争取预算和支持。
+          </p>
+          <div style="margin-top:1rem; padding:0.6rem 1rem; background:#e8f5e9; border-radius:8px;">
+            <p style="margin:0; font-size:0.85rem; color:#2e7d32;">
+              <strong>回看攻击：</strong>如果华锐精密在Govern层面识别了OT网络的关键性，
+              就不会让IT和OT共享同一个扁平网络。
+            </p>
+          </div>
+        </div>
+
+        <!-- Reason 2 -->
+        <div style="background:#fff; border-radius:14px; padding:1.8rem; box-shadow:0 3px 15px rgba(0,0,0,0.06); border-left:4px solid #00BCEB;">
+          <div style="font-size:2rem; margin-bottom:0.5rem;">🔄</div>
+          <h4 style="color:#0d274d; margin-bottom:0.8rem; font-size:1.1rem;">② 覆盖全生命周期</h4>
+          <p style="font-size:0.95rem; line-height:1.8; color:#555;">
+            六大功能——治理、识别、保护、检测、响应、恢复——覆盖了从<strong>事前到事中到事后</strong>的完整链路。
+            不像某些框架偏重"防御"（Protection-heavy），CSF 2.0 明确要求"你被攻破后怎么办"。
+          </p>
+          <div style="margin-top:1rem; padding:0.6rem 1rem; background:#e8f5e9; border-radius:8px;">
+            <p style="margin:0; font-size:0.85rem; color:#2e7d32;">
+              <strong>回看攻击：</strong>攻击模拟的7个阶段，恰好映射到CSF的不同功能——
+              这不是巧合，而是CSF设计的初衷。
+            </p>
+          </div>
+        </div>
+
+        <!-- Reason 3 -->
+        <div style="background:#fff; border-radius:14px; padding:1.8rem; box-shadow:0 3px 15px rgba(0,0,0,0.06); border-left:4px solid #0d274d;">
+          <div style="font-size:2rem; margin-bottom:0.5rem;">🧩</div>
+          <h4 style="color:#0d274d; margin-bottom:0.8rem; font-size:1.1rem;">③ 产品中立，映射灵活</h4>
+          <p style="font-size:0.95rem; line-height:1.8; color:#555;">
+            CSF 2.0 不绑定任何厂商，但它的分类法天然适合映射具体产品能力。
+            这让我们能<strong>客观地</strong>展示Cisco安全产品如何覆盖每个功能域，
+            而不是自说自话。
+          </p>
+          <div style="margin-top:1rem; padding:0.6rem 1rem; background:#e8f5e9; border-radius:8px;">
+            <p style="margin:0; font-size:0.85rem; color:#2e7d32;">
+              <strong>接下来：</strong>我们将先详解CSF 2.0的6大功能，
+              再展示8款Cisco产品如何精准映射，最后在防御模拟中验证效果。
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Near-miss comparison -->
+      <div style="max-width:860px; margin:0 auto 2rem;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div style="background:#fff5f5; border-radius:12px; padding:1.5rem; border:1px solid #ffcdd2;">
+            <h4 style="color:#c62828; margin-bottom:0.8rem; font-size:1rem;">❌ 没有统一框架时</h4>
+            <ul style="list-style:none; padding:0; margin:0;">
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555; border-bottom:1px solid #ffebee;">
+                ▸ 买了20个安全产品，各管各的
+              </li>
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555; border-bottom:1px solid #ffebee;">
+                ▸ 安全团队说"我们需要XDR"，管理层听不懂
+              </li>
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555; border-bottom:1px solid #ffebee;">
+                ▸ 出事后才发现某个环节没覆盖
+              </li>
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555;">
+                ▸ 合规检查靠Excel手动填表
+              </li>
+            </ul>
+          </div>
+          <div style="background:#e8f5e9; border-radius:12px; padding:1.5rem; border:1px solid #c8e6c9;">
+            <h4 style="color:#2e7d32; margin-bottom:0.8rem; font-size:1rem;">✅ 以NIST CSF 2.0为主线时</h4>
+            <ul style="list-style:none; padding:0; margin:0;">
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555; border-bottom:1px solid #e8f5e9;">
+                ▸ 每个产品的定位清晰：它覆盖哪个功能域
+              </li>
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555; border-bottom:1px solid #e8f5e9;">
+                ▸ 用"识别-保护-检测"的语言与管理层沟通
+              </li>
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555; border-bottom:1px solid #e8f5e9;">
+                ▸ 差距分析一目了然：哪个功能域薄弱
+              </li>
+              <li style="padding:0.4rem 0; font-size:0.9rem; color:#555;">
+                ▸ 合规映射自动化，审计效率提升80%
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final transition to NIST CSF detailed section -->
+      <div style="text-align:center; margin-top:3rem; padding:2rem;">
+        <p style="font-size:1.1rem; color:#555; margin-bottom:1.5rem;">
+          理解了"为什么"，现在让我们深入了解 NIST CSF 2.0 的六大功能到底在说什么——
+        </p>
+        <a href="#nist-csf" style="display:inline-block; padding:0.8rem 2.5rem; background:linear-gradient(135deg, #049fd9, #00BCEB); color:#fff; border-radius:30px; text-decoration:none; font-weight:700; font-size:1.05rem; box-shadow:0 4px 15px rgba(4,159,217,0.3); transition: transform 0.2s, box-shadow 0.2s;"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(4,159,217,0.4)'"
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(4,159,217,0.3)'">
+          📖 深入 NIST CSF 2.0 六大功能
+        </a>
+      </div>
+
+    </div>
+  </section>
 
 <!-- ====== SECTION: NIST CSF 2.0 DEEP DIVE ====== -->
 <section class="section section-alt" id="nist-csf">
@@ -1537,7 +1105,10 @@ li { margin-bottom: 6px; }
       <p>六大安全函数：从治理到恢复的完整生命周期</p>
       <div class="section-divider"></div>
     </div>
-
+      <p style="text-align:center; color:#888; margin-bottom:3rem; font-size:0.95rem; max-width:700px; margin-left:auto; margin-right:auto;">
+        以下是CSF 2.0六大功能的详细解读。每个功能都会标注它在攻击模拟中对应的阶段，
+        帮助你建立从"攻击现象"到"防御框架"的直觉映射。
+      </p>
     <!-- NIST Flow Diagram -->
     <div class="nist-flow">
       <div class="nist-flow-item govern-bg">
@@ -2830,9 +2401,342 @@ li { margin-bottom: 6px; }
       </div>
 
     </div><!-- end product accordions wrapper -->
+    <!-- 承上启下过渡段：从产品映射过渡到防御演练 -->
+<div class="container-narrow" style="margin-top: 48px;">
+  <div style="background: linear-gradient(135deg, #049fd9, #023e8a); border-radius: 16px; padding: 32px; text-align: center; color: #fff;">
+    <h3 style="color: #fff; margin-bottom: 12px;">🔄 还记得那个攻击者吗？</h3>
+    <p style="max-width: 650px; margin: 0 auto 16px; color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.8;">
+      在文章开头，我们以攻击者视角体验了一次完整的APT攻击链——7个阶段、2小时、从钓鱼邮件到PLC控制。<br>
+      现在，你已经了解了Cisco的8大安全产品以及它们在NIST CSF六大函数中的角色。
+    </p>
+    <p style="max-width: 650px; margin: 0 auto; font-size: 1.1rem; font-weight: 700; color: #fff;">
+      是时候回放那次攻击了——但这一次，<span style="color: #00BCEB;">Cisco全栈安全在场。</span><br>
+      让我们看看，同样的7步攻击链，会在哪里被发现、在哪里被阻断。
+    </p>
+  </div>
+</div>
   </div>
 </section>
+<!-- ====== SECTION: DEFENSE SIMULATION (Part 2 - Full Stack Response) ====== -->
+<section class="section section-alt" id="sim-defense">
+  <div class="container">
+    <div class="section-header">
+      <h2>🛡️ Cisco全栈防御：同一攻击链，截然不同的结果</h2>
+      <p>重放7阶段攻击——这一次，观察8大Cisco安全产品如何在NIST CSF六大函数中协同作战</p>
+      <div class="section-divider"></div>
+    </div>
 
+    <div class="container-narrow" style="margin-bottom: 32px;">
+      <div style="background: linear-gradient(135deg, #0d253f, #1a1a2e); border-radius: 16px; padding: 28px 32px; color: #e0e0e0;">
+        <h4 style="color: #049fd9; margin-bottom: 12px;">🔄 攻防对比：同一剧本，两种结局</h4>
+        <p style="font-size: 0.95rem; line-height: 1.8; color: #ccc; margin-bottom: 12px;">
+          <strong style="color: #e74c3c;">上半场（已体验）：</strong>攻击者视角 — 无防御体系 — 7阶段全部突破 — 耗时约2小时 — 产线停摆<br>
+          <strong style="color: #049fd9;">下半场（即将体验）：</strong>防御者视角 — Cisco全栈部署 — 观察每个阶段的检测与响应 — <span style="color: #00b894;">攻击链被阻断</span>
+        </p>
+        <p style="font-size: 0.85rem; color: #888; margin: 0;">
+          ⚡ 每个阶段将展示：<span style="color: #e74c3c;">攻击者行动</span> → <span style="color: #049fd9;">Cisco产品检测</span> → <span style="color: #00b894;">自动响应</span> → <span style="color: #fdcb6e;">NIST CSF函数映射</span> → <span style="color: #a29bfe;">ATT&CK战术映射</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== CONTROL PANEL ===== -->
+    <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; flex-wrap: wrap;">
+      <button id="simStartBtn" onclick="startSimulation()" style="
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(135deg, #049fd9, #0077b6); color: #fff;
+        font-weight: 700; font-size: 1rem; padding: 14px 32px;
+        border-radius: 50px; border: none; cursor: pointer;
+        transition: all 0.3s; box-shadow: 0 4px 20px rgba(4,159,217,0.3);
+      ">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        启动防御演练
+      </button>
+      <button id="simResetBtn" onclick="resetSimulation()" style="
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #fff; color: #666; font-weight: 600; font-size: 0.9rem;
+        padding: 12px 24px; border-radius: 50px; border: 1px solid #ddd;
+        cursor: pointer; transition: all 0.3s;
+      ">↻ 重置</button>
+      <button id="simSpeedBtn" onclick="toggleSimSpeed()" style="
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #fff; color: #666; font-weight: 600; font-size: 0.9rem;
+        padding: 12px 24px; border-radius: 50px; border: 1px solid #ddd;
+        cursor: pointer; transition: all 0.3s;
+      ">⚡ 速度: 正常</button>
+    </div>
+
+    <!-- ===== SCOREBOARD ===== -->
+    <div id="simScoreboard" style="
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px;
+      margin-bottom: 32px; align-items: center; max-width: 800px; margin-left: auto; margin-right: auto;
+    ">
+      <div style="background: linear-gradient(135deg, #2d1f1f, #1a1a2e); border-radius: 14px; padding: 20px 24px; text-align: center; border: 1px solid #3d2020;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #e74c3c; font-weight: 700; margin-bottom: 8px;">
+          🔴 攻击方 · 暗影蜘蛛
+        </div>
+        <div style="display: flex; justify-content: center; gap: 24px;">
+          <div><div id="attackPhase" style="font-size: 2rem; font-weight: 800; color: #e74c3c;">0</div><div style="font-size: 0.75rem; color: #888;">攻击阶段</div></div>
+          <div><div id="attackSuccess" style="font-size: 2rem; font-weight: 800; color: #e74c3c;">0</div><div style="font-size: 0.75rem; color: #888;">突破成功</div></div>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #e74c3c, #049fd9); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 0.85rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">VS</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #0d253f, #1a1a2e); border-radius: 14px; padding: 20px 24px; text-align: center; border: 1px solid #1a3a5c;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #049fd9; font-weight: 700; margin-bottom: 8px;">
+          🔵 防御方 · Cisco全栈
+        </div>
+        <div style="display: flex; justify-content: center; gap: 24px;">
+          <div><div id="defendDetect" style="font-size: 2rem; font-weight: 800; color: #049fd9;">0</div><div style="font-size: 0.75rem; color: #888;">检测成功</div></div>
+          <div><div id="defendBlock" style="font-size: 2rem; font-weight: 800; color: #00b894;">0</div><div style="font-size: 0.75rem; color: #888;">阻断成功</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NETWORK TOPOLOGY SVG ===== -->
+    <div style="background: #0d1117; border-radius: 16px; padding: 24px; margin-bottom: 32px; overflow-x: auto; border: 1px solid #21262d;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h4 style="color: #e0e0e0; font-size: 0.9rem; margin: 0;">🗺️ 实时网络拓扑 · Live Network Topology</h4>
+        <div style="display: flex; gap: 16px; font-size: 0.7rem; color: #888;">
+          <span>🔴 攻击路径</span><span>🔵 检测信号</span><span>🟢 阻断/隔离</span><span>⚪ 正常</span>
+        </div>
+      </div>
+      <svg id="topoSvg" viewBox="0 0 960 380" style="width: 100%; height: auto; min-width: 700px;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="simGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#161b22" stroke-width="0.5"/></pattern>
+          <filter id="glowRed" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="glowBlue" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="glowGreen" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <style>
+            @keyframes dashAttack { to { stroke-dashoffset: -40; } }
+            @keyframes dashDefend { to { stroke-dashoffset: 40; } }
+            @keyframes pulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+            @keyframes nodeAlert { 0%,100%{stroke-width:2} 50%{stroke-width:5} }
+            .attack-path { stroke-dasharray: 8 6; animation: dashAttack 0.8s linear infinite; }
+            .defend-path { stroke-dasharray: 6 4; animation: dashDefend 0.6s linear infinite; }
+            .node-alert { animation: nodeAlert 0.6s ease-in-out infinite; }
+            .node-pulse { animation: pulse 1.2s ease-in-out infinite; }
+          </style>
+        </defs>
+        <rect width="960" height="380" fill="url(#simGrid)"/>
+        <text x="80" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">INTERNET</text>
+        <text x="260" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">DMZ</text>
+        <text x="480" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">企业IT网络</text>
+        <text x="700" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">IT/OT DMZ</text>
+        <text x="880" y="25" fill="#555" font-size="10" font-weight="600" text-anchor="middle">OT产线网络</text>
+        <line x1="170" y1="30" x2="170" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="370" y1="30" x2="370" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="590" y1="30" x2="590" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="780" y1="30" x2="780" y2="370" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
+        <line id="line-atk-email" x1="80" y1="100" x2="260" y2="100" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-email-pc" x1="260" y1="100" x2="440" y2="100" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-pc-ad" x1="440" y1="100" x2="440" y2="200" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-pc-dc" x1="440" y1="100" x2="540" y2="200" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-dc-fw2" x1="540" y1="200" x2="700" y2="200" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-fw2-mes" x1="700" y1="200" x2="840" y2="140" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-fw2-plc" x1="700" y1="200" x2="880" y2="260" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-mes-plc" x1="840" y1="140" x2="880" y2="260" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-c2" x1="440" y1="100" x2="80" y2="260" stroke="#21262d" stroke-width="1.5"/>
+        <line id="line-sna-monitor" x1="480" y1="330" x2="540" y2="200" stroke="#21262d" stroke-width="1" stroke-dasharray="2 3"/>
+        <line id="line-sna-monitor2" x1="480" y1="330" x2="440" y2="100" stroke="#21262d" stroke-width="1" stroke-dasharray="2 3"/>
+        <g id="node-attacker"><circle cx="80" cy="100" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="80" y="104" fill="#e74c3c" font-size="18" text-anchor="middle">🎭</text><text x="80" y="135" fill="#888" font-size="9" text-anchor="middle">攻击者</text></g>
+        <g id="node-c2"><circle cx="80" cy="260" r="20" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="80" y="264" fill="#e74c3c" font-size="16" text-anchor="middle">💀</text><text x="80" y="293" fill="#888" font-size="9" text-anchor="middle">C2 Server</text></g>
+        <g id="node-email"><circle cx="260" cy="100" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="260" y="104" fill="#aaa" font-size="16" text-anchor="middle">📧</text><text x="260" y="135" fill="#888" font-size="9" text-anchor="middle">Secure Access</text><text x="260" y="146" fill="#666" font-size="8" text-anchor="middle">邮件/Web网关</text></g>
+        <g id="node-pc"><circle cx="440" cy="100" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="440" y="104" fill="#aaa" font-size="16" text-anchor="middle">💻</text><text x="440" y="135" fill="#888" font-size="9" text-anchor="middle">员工PC</text><text x="440" y="146" fill="#666" font-size="8" text-anchor="middle">Secure Client</text></g>
+        <g id="node-ise"><circle cx="440" cy="200" r="22" fill="#1a1a2e" stroke="#0984e3" stroke-width="2"/><text x="440" y="204" fill="#0984e3" font-size="16" text-anchor="middle">🛂</text><text x="440" y="235" fill="#888" font-size="9" text-anchor="middle">Cisco ISE</text></g>
+        <g id="node-dc"><circle cx="540" cy="200" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="540" y="204" fill="#aaa" font-size="16" text-anchor="middle">🏢</text><text x="540" y="235" fill="#888" font-size="9" text-anchor="middle">数据中心</text><text x="540" y="246" fill="#666" font-size="8" text-anchor="middle">Secure Workload</text></g>
+        <g id="node-fw2"><circle cx="700" cy="200" r="22" fill="#1a1a2e" stroke="#e67e22" stroke-width="2"/><text x="700" y="204" fill="#e67e22" font-size="16" text-anchor="middle">🔥</text><text x="700" y="235" fill="#888" font-size="9" text-anchor="middle">Secure Firewall</text><text x="700" y="246" fill="#666" font-size="8" text-anchor="middle">IT/OT边界</text></g>
+        <g id="node-mes"><circle cx="840" cy="140" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="840" y="144" fill="#aaa" font-size="16" text-anchor="middle">🖥️</text><text x="840" y="175" fill="#888" font-size="9" text-anchor="middle">MES服务器</text></g>
+        <g id="node-plc"><circle cx="880" cy="260" r="22" fill="#1a1a2e" stroke="#555" stroke-width="2"/><text x="880" y="264" fill="#aaa" font-size="16" text-anchor="middle">⚙️</text><text x="880" y="293" fill="#888" font-size="9" text-anchor="middle">PLC / AGV</text><text x="880" y="304" fill="#666" font-size="8" text-anchor="middle">Cyber Vision</text></g>
+        <g id="node-sna"><circle cx="480" cy="330" r="22" fill="#1a1a2e" stroke="#00b894" stroke-width="2"/><text x="480" y="334" fill="#00b894" font-size="16" text-anchor="middle">👁️</text><text x="480" y="363" fill="#888" font-size="9" text-anchor="middle">SNA (NDR)</text></g>
+        <g id="node-xdr"><circle cx="700" cy="330" r="22" fill="#1a1a2e" stroke="#a29bfe" stroke-width="2"/><text x="700" y="334" fill="#a29bfe" font-size="16" text-anchor="middle">🧠</text><text x="700" y="363" fill="#888" font-size="9" text-anchor="middle">Splunk / XDR</text></g>
+        <g id="node-pxgrid" opacity="0.3"><circle cx="560" cy="280" r="14" fill="none" stroke="#049fd9" stroke-width="1" stroke-dasharray="3 2"/><text x="560" y="284" fill="#049fd9" font-size="8" text-anchor="middle">pxGrid</text></g>
+      </svg>
+    </div>
+
+    <!-- ===== TIMELINE + LOG ===== -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;" id="simPanels">
+      <div style="background: #fff; border-radius: 16px; border: 1px solid #e8eef3; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #2d1f1f, #1a1a2e); padding: 16px 20px;">
+          <h4 style="color: #e74c3c; font-size: 0.9rem; margin: 0;">🔴 攻击链进程 · ATT&CK Tactics</h4>
+        </div>
+        <div id="simTimeline" style="padding: 20px; max-height: 480px; overflow-y: auto;">
+          <div id="simTimelineEmpty" style="text-align: center; padding: 40px 20px; color: #bbb;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <p style="font-size: 0.9rem; margin: 0;">等待演练启动...</p>
+          </div>
+        </div>
+      </div>
+      <div style="background: #fff; border-radius: 16px; border: 1px solid #e8eef3; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #0d253f, #1a1a2e); padding: 16px 20px;">
+          <h4 style="color: #049fd9; font-size: 0.9rem; margin: 0;">🔵 Cisco防御响应 · Security Cloud</h4>
+        </div>
+        <div id="simLog" style="padding: 0; max-height: 480px; overflow-y: auto; font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: 0.78rem; line-height: 1.7; background: #0d1117; color: #8b949e;">
+          <div id="simLogEmpty" style="text-align: center; padding: 40px 20px; color: #484f58;">
+            <pre style="margin: 0; font-size: 0.8rem; color: #484f58;">  ╔══════════════════════════════════════╗
+  ║   CISCO SECURITY OPERATIONS CENTER   ║
+  ║   Status: ARMED & MONITORING ●●●     ║
+  ╚══════════════════════════════════════╝</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SUMMARY (hidden) ===== -->
+    <div id="simSummary" style="display: none; margin-top: 32px;">
+      <div style="background: linear-gradient(135deg, #049fd9, #023e8a); border-radius: 16px; padding: 36px; color: #fff;">
+        <h3 style="color: #fff; text-align: center; margin-bottom: 24px;">📊 攻防演练对比报告</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+          <!-- Without Cisco -->
+          <div style="background: rgba(231,76,60,0.15); border-radius: 12px; padding: 20px; border: 1px solid rgba(231,76,60,0.3);">
+            <h4 style="color: #ff6b6b; font-size: 0.9rem; margin-bottom: 12px;">❌ 没有Cisco全栈</h4>
+            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 2;">
+              <div>首次检测: <strong style="color: #e74c3c;">17天后</strong>（人工发现）</div>
+              <div>攻击阶段突破: <strong style="color: #e74c3c;">7/7 全部成功</strong></div>
+              <div>产线影响: <strong style="color: #e74c3c;">全线停摆 >2周</strong></div>
+              <div>预估损失: <strong style="color: #e74c3c;">¥800万+</strong></div>
+            </div>
+          </div>
+          <!-- With Cisco -->
+          <div style="background: rgba(0,184,148,0.15); border-radius: 12px; padding: 20px; border: 1px solid rgba(0,184,148,0.3);">
+            <h4 style="color: #00b894; font-size: 0.9rem; margin-bottom: 12px;">✅ 有Cisco全栈</h4>
+            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 2;">
+              <div>首次检测: <strong style="color: #00BCEB;" id="summaryMTTD">—</strong></div>
+              <div>自动遏制: <strong style="color: #00b894;" id="summaryMTTR">—</strong></div>
+              <div>攻击链阻断点: <strong style="color: #fbbf24;" id="summaryKillPoint">—</strong></div>
+              <div>产线影响: <strong style="color: #00b894;">零</strong></div>
+            </div>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+          <h4 style="color: #00BCEB; font-size: 0.85rem; margin-bottom: 8px;">🛡️ 各产品贡献统计</h4>
+          <div id="summaryProducts" style="font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.9;"></div>
+        </div>
+        <p style="text-align: center; margin: 0; font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+          接下来，让我们看看这套方案在真实的制造业和银行业场景中是如何落地的。
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+<script>
+(function() {
+  'use strict';
+
+  // ===== Simulation State =====
+  var simState = { running: false, phase: 0, speed: 1, timers: [], scores: { attackPhase:0, attackSuccess:0, defendDetect:0, defendBlock:0 } };
+
+  var phases = [
+    {
+      id:1, attackTitle:'🎣 初始访问 · Initial Access', attackTactic:'TA0001', attackTechnique:'T1566.001 Spearphishing', attackDesc:'攻击者发送伪装为供应商报价单的钓鱼邮件。', attackTime:'09:14:22',
+      topoActions: function(){ animateLine('line-atk-email','attack'); highlightNode('node-attacker','red'); },
+      defenseActions: [
+        { time:'09:14:22', product:'Secure Access', icon:'🌐', color:'#00BCEB', nist:'PROTECT', msg:'[SWG/Email] 沙箱分析 → 检测到宏代码调用PowerShell下载器 → 威胁评分: 92/100', action:'detect' },
+        { time:'09:14:23', product:'Secure Access', icon:'🛡️', color:'#00b894', nist:'PROTECT', msg:'[SWG] 自动隔离邮件附件 → 替换为安全通知页面', action:'block' },
+        { time:'09:14:23', product:'Talos', icon:'🔍', color:'#a29bfe', nist:'DETECT', msg:'[Threat Intel] 文件哈希匹配Talos IOC → 关联APT组织"暗影蜘蛛"', action:'detect' }
+      ],
+      topoDefense: function(){ highlightNode('node-email','green'); animateLine('line-atk-email','block'); },
+      result:'blocked'
+    },
+    {
+      id:2, attackTitle:'🔓 备用入口 · Drive-by Compromise', attackTactic:'TA0001', attackTechnique:'T1189 Drive-by Compromise', attackDesc:'攻击者转向水坑攻击，在工控论坛注入恶意JS。', attackTime:'09:31:05',
+      topoActions: function(){ animateLine('line-atk-email','attack'); animateLine('line-email-pc','attack'); },
+      defenseActions: [
+        { time:'09:31:05', product:'Secure Access', icon:'🌐', color:'#00BCEB', nist:'PROTECT', msg:'[DNS/Umbrella] 恶意域名注册<48h, DGA特征匹配 → DNS解析阻断', action:'block' },
+        { time:'09:31:05', product:'Secure Client', icon:'💻', color:'#6c5ce7', nist:'PROTECT', msg:'[Umbrella Roaming] 终端DNS模块拦截恶意域名，Exploit Kit无法加载', action:'block' }
+      ],
+      topoDefense: function(){ highlightNode('node-email','green'); highlightNode('node-pc','blue'); },
+      result:'blocked'
+    },
+    {
+      id:3, attackTitle:'💉 代码执行 · Execution via Personal Device', attackTactic:'TA0002', attackTechnique:'T1059.001 PowerShell', attackDesc:'张工通过个人设备打开附件后拷贝到公司电脑，Cobalt Strike Beacon建立C2通信。', attackTime:'次日 08:42:17',
+      topoActions: function(){ highlightNode('node-pc','red'); animateLine('line-c2','attack'); highlightNode('node-c2','red'); },
+      defenseActions: [
+        { time:'08:42:18', product:'Secure Client', icon:'💻', color:'#6c5ce7', nist:'DETECT', msg:'[NVM] PowerShell异常: -ExecutionPolicy Bypass -EncodedCommand → 可疑进程链', action:'detect' },
+        { time:'08:42:19', product:'Secure Firewall', icon:'🔥', color:'#e67e22', nist:'DETECT', msg:'[EVE] TLS连接JA3指纹匹配Cobalt Strike Beacon → 威胁评分: 95/100', action:'detect' },
+        { time:'08:42:19', product:'SNA', icon:'👁️', color:'#00b894', nist:'DETECT', msg:'[ETA] 加密流量Beacon间隔60s±5%抖动 → 主机威胁得分: 8.7/10', action:'detect' },
+        { time:'08:42:20', product:'SNA→pxGrid→ISE', icon:'🔗', color:'#049fd9', nist:'RESPOND', msg:'[pxGrid联动] SNA推送威胁 → ISE执行CoA → PC移至隔离VLAN-999', action:'block' },
+        { time:'08:42:20', product:'Secure Firewall', icon:'🚫', color:'#e74c3c', nist:'RESPOND', msg:'[Auto-Block] C2 IP加入全网Firewall黑名单', action:'block' }
+      ],
+      topoDefense: function(){ highlightNode('node-pc','orange'); highlightNode('node-sna','green'); highlightNode('node-ise','green'); animateLine('line-sna-monitor2','defend'); animateLine('line-c2','block'); setTimeout(function(){ highlightNode('node-pc','quarantine'); },800); },
+      result:'partial'
+    },
+    {
+      id:4, attackTitle:'🔑 权限提升 · Kerberoasting', attackTactic:'TA0004', attackTechnique:'T1558.003 Kerberoasting', attackDesc:'在隔离前1.8秒窗口内，Beacon尝试请求SPN关联的服务票据。', attackTime:'08:42:18-20',
+      topoActions: function(){ animateLine('line-pc-ad','attack'); highlightNode('node-ise','alert'); },
+      defenseActions: [
+        { time:'08:42:19', product:'SNA', icon:'👁️', color:'#00b894', nist:'DETECT', msg:'[行为分析] 1.2秒内请求15个SPN的TGS票据 → 匹配Kerberoasting模式', action:'detect' },
+        { time:'08:42:20', product:'ISE', icon:'🛂', color:'#0984e3', nist:'RESPOND', msg:'[CoA已执行] 主机已隔离 → Kerberoasting被中断 → 通知AD管理员重置密码', action:'block' },
+        { time:'08:42:21', product:'Splunk/XDR', icon:'🧠', color:'#a29bfe', nist:'DETECT', msg:'[关联分析] 钓鱼→C2→Kerberoasting事件链聚合 → 严重等级: CRITICAL', action:'detect' }
+      ],
+      topoDefense: function(){ highlightNode('node-ise','green'); highlightNode('node-xdr','blue'); animateLine('line-pc-ad','block'); },
+      result:'blocked'
+    },
+    {
+      id:5, attackTitle:'🕸️ 横向移动（被阻断）', attackTactic:'TA0008', attackTechnique:'T1021.002 SMB', attackDesc:'攻击者尝试用服务账户凭证横向移动到MES服务器。', attackTime:'08:43:05',
+      topoActions: function(){ animateLine('line-pc-dc','attack'); highlightNode('node-dc','alert'); },
+      defenseActions: [
+        { time:'08:43:05', product:'Secure Workload', icon:'📦', color:'#e67e22', nist:'PROTECT', msg:'[微分段] SGT=99(Quarantine) → MES-APP-01:445 → 策略: DENY → 连接丢弃', action:'block' },
+        { time:'08:43:05', product:'ISE/TrustSec', icon:'🛂', color:'#0984e3', nist:'PROTECT', msg:'[SGT] Quarantine→DataCenter = DENY → 网络层直接丢弃', action:'block' },
+        { time:'08:43:06', product:'Secure Workload', icon:'📦', color:'#e67e22', nist:'DETECT', msg:'[行为异常] 从未观察到的源IP尝试SMB → 偏离ADM基线 → 告警', action:'detect' }
+      ],
+      topoDefense: function(){ highlightNode('node-dc','green'); animateLine('line-pc-dc','block'); },
+      result:'blocked'
+    },
+    {
+      id:6, attackTitle:'🏭 OT渗透尝试（被阻断）', attackTactic:'TA0008 (ICS)', attackTechnique:'T0886 Remote Services', attackDesc:'攻击者自动化工具尝试连接PLC进行固件篡改。', attackTime:'08:45:30',
+      topoActions: function(){ animateLine('line-dc-fw2','attack'); animateLine('line-fw2-plc','attack'); highlightNode('node-fw2','alert'); highlightNode('node-plc','alert'); },
+      defenseActions: [
+        { time:'08:45:30', product:'Secure Firewall', icon:'🔥', color:'#e67e22', nist:'PROTECT', msg:'[OT DPI] 源IP不在授权工程站列表 → Modbus/TCP:502 → DENY + 告警', action:'block' },
+        { time:'08:45:31', product:'SEA', icon:'🔐', color:'#636e72', nist:'PROTECT', msg:'[Secure Equipment Access] 无活跃授权维护会话 → 所有OT远程通道关闭', action:'block' },
+        { time:'08:45:31', product:'Cyber Vision', icon:'🏭', color:'#00b894', nist:'DETECT', msg:'[OT监控] PLC-07 Modbus端口异常连接尝试 → 非授权主机 → OT告警升级', action:'detect' },
+        { time:'08:45:32', product:'Cyber Vision→ISE', icon:'🔗', color:'#049fd9', nist:'RESPOND', msg:'[pxGrid] OT事件推送至ISE → 确认源设备已在隔离VLAN', action:'detect' }
+      ],
+      topoDefense: function(){ highlightNode('node-fw2','green'); highlightNode('node-plc','green'); highlightNode('node-mes','green'); animateLine('line-dc-fw2','block'); animateLine('line-fw2-plc','block'); },
+      result:'blocked'
+    },
+    {
+      id:7, attackTitle:'🧹 事件收尾 · Incident Closure', attackTactic:'RESPOND + RECOVER', attackTechnique:'NIST CSF: RS + RC', attackDesc:'攻击链被完全阻断。SOC启动事件响应流程。', attackTime:'08:50-10:30',
+      topoActions: function(){ resetTopoColors(); highlightNode('node-sna','green'); highlightNode('node-xdr','green'); highlightNode('node-ise','green'); },
+      defenseActions: [
+        { time:'08:50:00', product:'Splunk/XDR', icon:'🧠', color:'#a29bfe', nist:'RESPOND', msg:'[事件报告] 完整攻击时间线: 7阶段, IOC 5个 → CRITICAL → 推送至CISO', action:'detect' },
+        { time:'09:00:00', product:'ISE', icon:'🛂', color:'#0984e3', nist:'RECOVER', msg:'[终端修复] PC杀毒+重置 → Posture: COMPLIANT → 恢复正常VLAN', action:'block' },
+        { time:'09:15:00', product:'Secure Firewall', icon:'🔥', color:'#e67e22', nist:'RECOVER', msg:'[IOC全网同步] C2 IP/域名/哈希添加至全网黑名单', action:'block' },
+        { time:'10:30:00', product:'GOVERN', icon:'📋', color:'#6c5ce7', nist:'GOVERN', msg:'[治理反馈] ①加强个人设备文件传输管控 ②服务账户密码策略升级 ③更新OT-IRP', action:'detect' }
+      ],
+      topoDefense: function(){ resetTopoColors(); ['node-email','node-pc','node-ise','node-dc','node-fw2','node-mes','node-plc','node-sna','node-xdr'].forEach(function(n){ highlightNode(n,'safe'); }); },
+      result:'resolved'
+    }
+  ];
+
+  // Topo helper functions
+  function animateLine(id,type){ var l=document.getElementById(id); if(!l)return; if(type==='attack'){l.setAttribute('stroke','#e74c3c');l.setAttribute('stroke-width','2.5');l.classList.add('attack-path');l.classList.remove('defend-path');l.setAttribute('filter','url(#glowRed)');}else if(type==='defend'){l.setAttribute('stroke','#049fd9');l.setAttribute('stroke-width','2');l.classList.add('defend-path');l.classList.remove('attack-path');l.setAttribute('filter','url(#glowBlue)');}else if(type==='block'){l.setAttribute('stroke','#00b894');l.setAttribute('stroke-width','3');l.classList.remove('attack-path','defend-path');l.setAttribute('stroke-dasharray','2 6');l.setAttribute('filter','url(#glowGreen)');} }
+  function highlightNode(id,type){ var n=document.getElementById(id); if(!n)return; var c=n.querySelector('circle'); if(!c)return; c.classList.remove('node-alert','node-pulse'); if(type==='red'){c.setAttribute('stroke','#e74c3c');c.setAttribute('stroke-width','3');c.classList.add('node-alert');c.setAttribute('filter','url(#glowRed)');}else if(type==='green'){c.setAttribute('stroke','#00b894');c.setAttribute('stroke-width','3');c.classList.add('node-pulse');c.setAttribute('filter','url(#glowGreen)');}else if(type==='blue'){c.setAttribute('stroke','#049fd9');c.setAttribute('stroke-width','3');c.setAttribute('filter','url(#glowBlue)');}else if(type==='orange'){c.setAttribute('stroke','#f39c12');c.setAttribute('stroke-width','3');c.classList.add('node-alert');}else if(type==='alert'){c.setAttribute('stroke','#e74c3c');c.setAttribute('stroke-width','3');c.classList.add('node-alert');c.setAttribute('filter','url(#glowRed)');}else if(type==='quarantine'){c.setAttribute('stroke','#e74c3c');c.setAttribute('stroke-width','4');c.setAttribute('stroke-dasharray','4 3');c.setAttribute('filter','url(#glowRed)');c.classList.remove('node-alert');}else if(type==='safe'){c.setAttribute('stroke','#00b894');c.setAttribute('stroke-width','2');c.removeAttribute('filter');c.removeAttribute('stroke-dasharray');} }
+  function resetTopoColors(){ document.querySelectorAll('#topoSvg line[id^="line-"]').forEach(function(l){l.setAttribute('stroke','#21262d');l.setAttribute('stroke-width','1.5');l.classList.remove('attack-path','defend-path');l.removeAttribute('filter');l.removeAttribute('stroke-dasharray');if(l.id.indexOf('sna-monitor')!==-1){l.setAttribute('stroke-width','1');l.setAttribute('stroke-dasharray','2 3');}}); document.querySelectorAll('#topoSvg g[id^="node-"]').forEach(function(n){var c=n.querySelector('circle');if(c){c.setAttribute('stroke','#555');c.setAttribute('stroke-width','2');c.classList.remove('node-alert','node-pulse');c.removeAttribute('filter');c.removeAttribute('stroke-dasharray');}}); var iseC=document.querySelector('#node-ise circle');if(iseC)iseC.setAttribute('stroke','#0984e3'); var fw2C=document.querySelector('#node-fw2 circle');if(fw2C)fw2C.setAttribute('stroke','#e67e22'); var snaC=document.querySelector('#node-sna circle');if(snaC)snaC.setAttribute('stroke','#00b894'); var xdrC=document.querySelector('#node-xdr circle');if(xdrC)xdrC.setAttribute('stroke','#a29bfe'); }
+
+  function addTimelineEntry(phase){ var t=document.getElementById('simTimeline'); var e=document.getElementById('simTimelineEmpty'); if(e)e.style.display='none'; var rc={blocked:'#00b894',partial:'#f39c12',success:'#e74c3c',resolved:'#049fd9'}; var rl={blocked:'✅ 已阻断',partial:'⚠️ 部分突破→已遏制',success:'❌ 攻击成功',resolved:'🔄 事件关闭'}; var d=document.createElement('div'); d.style.cssText='margin-bottom:16px;padding:16px;background:#f8fafb;border-radius:12px;border-left:4px solid #e74c3c;opacity:0;transform:translateY(12px);transition:opacity 0.4s,transform 0.4s;'; d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:700;font-size:0.95rem;">'+phase.attackTitle+'</span><span style="font-size:0.7rem;background:#1a1a2e;color:#e74c3c;padding:2px 8px;border-radius:4px;font-family:monospace;">'+phase.attackTactic+'</span></div><div style="font-size:0.78rem;color:#888;font-family:monospace;margin-bottom:6px;">⏰ '+phase.attackTime+' | '+phase.attackTechnique+'</div><div style="font-size:0.85rem;color:#444;line-height:1.6;margin-bottom:8px;">'+phase.attackDesc+'</div><div style="font-size:0.8rem;font-weight:600;color:'+rc[phase.result]+';">'+rl[phase.result]+'</div>'; t.appendChild(d); setTimeout(function(){d.style.opacity='1';d.style.transform='translateY(0)';},50); t.scrollTop=t.scrollHeight; }
+  function addLogEntry(entry){ var l=document.getElementById('simLog'); var e=document.getElementById('simLogEmpty'); if(e)e.style.display='none'; var nc={PROTECT:'#00b894',DETECT:'#fdcb6e',RESPOND:'#e17055',RECOVER:'#a29bfe',GOVERN:'#6c5ce7'}; var d=document.createElement('div'); d.style.cssText='padding:8px 14px;border-bottom:1px solid #161b22;opacity:0;transition:opacity 0.3s;'; d.innerHTML='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="color:#484f58;font-size:0.72rem;">'+entry.time+'</span><span style="background:'+(nc[entry.nist]||'#555')+';color:#fff;font-size:0.6rem;padding:1px 6px;border-radius:3px;font-weight:700;">'+entry.nist+'</span><span style="color:'+entry.color+';font-weight:600;">'+entry.icon+' '+entry.product+'</span></div><div style="color:#c9d1d9;margin-top:4px;padding-left:4px;font-size:0.76rem;line-height:1.5;">'+entry.msg+'</div>'; l.appendChild(d); setTimeout(function(){d.style.opacity='1';},50); l.scrollTop=l.scrollHeight; }
+  function updateScores(){ document.getElementById('attackPhase').textContent=simState.scores.attackPhase; document.getElementById('attackSuccess').textContent=simState.scores.attackSuccess; document.getElementById('defendDetect').textContent=simState.scores.defendDetect; document.getElementById('defendBlock').textContent=simState.scores.defendBlock; }
+
+  function runPhase(i){ if(i>=phases.length||!simState.running){if(i>=phases.length)showSummary();return;} var p=phases[i]; simState.phase=p.id; simState.scores.attackPhase=p.id; if(p.result==='success')simState.scores.attackSuccess++; updateScores(); if(p.topoActions)p.topoActions(); addTimelineEntry(p); var bd=simState.speed===2?400:800; p.defenseActions.forEach(function(a,j){var t=setTimeout(function(){if(!simState.running)return;addLogEntry(a);if(a.action==='detect')simState.scores.defendDetect++;if(a.action==='block')simState.scores.defendBlock++;updateScores();},bd*(j+1));simState.timers.push(t);}); var dt=bd*(p.defenseActions.length+1); var t2=setTimeout(function(){if(!simState.running)return;if(p.topoDefense)p.topoDefense();},dt);simState.timers.push(t2); var nt=bd*(p.defenseActions.length+3); var t3=setTimeout(function(){runPhase(i+1);},nt);simState.timers.push(t3); }
+
+  function showSummary(){ simState.running=false; var s=document.getElementById('simSummary'); s.style.display='block'; s.scrollIntoView({behavior:'smooth',block:'center'}); document.getElementById('summaryMTTD').textContent='< 1秒 (Secure Access邮件沙箱)'; document.getElementById('summaryMTTR').textContent='1.8秒 (pxGrid→ISE CoA)'; document.getElementById('summaryKillPoint').textContent='第3阶段 — C2建立即被检测+隔离'; document.getElementById('summaryProducts').innerHTML='<div>🌐 Secure Access: <strong style="color:#00BCEB;">3次拦截</strong></div><div>💻 Secure Client: <strong style="color:#6c5ce7;">2次检测</strong></div><div>🔥 Secure Firewall: <strong style="color:#e67e22;">3次拦截</strong></div><div>👁️ SNA: <strong style="color:#00b894;">3次检测</strong></div><div>🛂 ISE: <strong style="color:#0984e3;">3次执行</strong></div><div>📦 Secure Workload: <strong style="color:#e67e22;">2次阻断</strong></div><div>🏭 Cyber Vision: <strong style="color:#00b894;">2次检测</strong></div><div>🔐 SEA: <strong style="color:#636e72;">1次阻断</strong></div>'; var btn=document.getElementById('simStartBtn'); btn.innerHTML='✅ 防御演练完成'; btn.style.background='linear-gradient(135deg,#00b894,#00a878)'; btn.style.cursor='default'; }
+
+  window.startSimulation=function(){ if(simState.running)return; resetSimulation(); simState.running=true; var btn=document.getElementById('simStartBtn'); btn.innerHTML='⏳ 防御演练进行中...'; btn.style.background='linear-gradient(135deg,#f39c12,#e67e22)'; btn.style.cursor='not-allowed'; addLogEntry({time:'09:14:00',product:'SOC Console',icon:'🖥️',color:'#8b949e',nist:'DETECT',msg:'━━ DEFENSE SIMULATION ━━ 全栈传感器就绪 | pxGrid: Connected | NetFlow: Active',action:'detect'}); simState.scores.defendDetect++; updateScores(); setTimeout(function(){runPhase(0);},simState.speed===2?600:1200); };
+  window.resetSimulation=function(){ simState.running=false;simState.phase=0;simState.scores={attackPhase:0,attackSuccess:0,defendDetect:0,defendBlock:0};simState.timers.forEach(function(t){clearTimeout(t);});simState.timers=[];updateScores();resetTopoColors(); document.getElementById('simTimeline').innerHTML='<div id="simTimelineEmpty" style="text-align:center;padding:40px 20px;color:#bbb;"><p style="margin:0;">等待演练启动...</p></div>'; document.getElementById('simLog').innerHTML='<div id="simLogEmpty" style="text-align:center;padding:40px 20px;color:#484f58;"><pre style="margin:0;font-size:0.8rem;color:#484f58;">  ╔══════════════════════════════════════╗\n  ║   CISCO SECURITY OPERATIONS CENTER   ║\n  ║   Status: ARMED & MONITORING ●●●     ║\n  ╚══════════════════════════════════════╝</pre></div>'; document.getElementById('simSummary').style.display='none'; var btn=document.getElementById('simStartBtn'); btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 启动防御演练'; btn.style.background='linear-gradient(135deg,#049fd9,#0077b6)'; btn.style.cursor='pointer'; };
+  window.toggleSimSpeed=function(){ simState.speed=simState.speed===1?2:1; document.getElementById('simSpeedBtn').textContent=simState.speed===1?'⚡ 速度: 正常':'⚡⚡ 速度: 快速'; };
+})();
+</script>
+
+<style>
+  @media (max-width: 700px) {
+    #simScoreboard { grid-template-columns: 1fr !important; }
+    #simScoreboard > div:nth-child(2) { order: -1; }
+    #simPanels { grid-template-columns: 1fr !important; }
+    #simSummary [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+</style>
 <!-- ====== SECTION: INDUSTRY DEEP DIVE ====== -->
 <section class="section" id="industry">
   <div class="container">
