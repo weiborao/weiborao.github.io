@@ -1384,6 +1384,1308 @@ layout: false
     </div>
   </section>
 
+<!-- ============================================================
+     第 4.5 章：AP 安装部署 · 高度与间距的物理法则
+     插入位置：第 4 章 (数据速率与覆盖策略) 之后，第 5 章 (漫游机制) 之前
+     ============================================================ -->
+
+<section id="ch4-5" class="chapter-section" style="padding:3rem 0;">
+
+  <!-- 章节标题 -->
+  <div style="text-align:center; margin-bottom:2.5rem;">
+    <span style="display:inline-block; background:linear-gradient(135deg,#0d9488,#0891b2); color:#fff; font-size:0.95rem; font-weight:700; padding:0.35rem 1.2rem; border-radius:50px; letter-spacing:0.5px; margin-bottom:1rem;">增补章节</span>
+    <h2 style="font-size:2.2rem; font-weight:800; color:#0f172a; margin:0.5rem 0 0.3rem;">
+      🏗️ AP 安装部署 · 高度与间距的物理法则
+    </h2>
+    <p style="font-size:1.15rem; color:#64748b; max-width:750px; margin:0 auto;">
+      从电磁波的传播本质出发，用公式和数据推导每一个部署决策
+    </p>
+  </div>
+
+  <!-- 引言卡片 -->
+  <div style="background:linear-gradient(135deg,#f0fdfa,#ecfeff); border-left:5px solid #0d9488; border-radius:12px; padding:2rem 2.5rem; margin-bottom:3rem; box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+    <p style="font-size:1.2rem; color:#134e4a; line-height:1.9; margin:0;">
+      <strong>💡 核心洞察：</strong>很多工程师在部署 AP 时，凭经验选择"天花板中央、每隔 15 米放一个"——这就像不量体裁衣就买衣服。AP 的安装高度决定了<strong>信号锥的覆盖半径和信号强度</strong>，安装间距决定了<strong>重叠区域是否足够漫游</strong>。这两个参数必须从<strong>物理公式</strong>出发，结合<strong>场景需求</strong>反向推导，而非拍脑袋决定。
+    </p>
+  </div>
+
+  <!-- ====== 4.5.0 为什么高度和间距如此重要？ ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#0d9488; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">0</span>
+      为什么高度和间距如此重要？
+    </h3>
+
+    <!-- 类比说明 -->
+    <div style="background:#fffbeb; border:1px solid #fbbf24; border-radius:12px; padding:1.8rem 2rem; margin-bottom:2rem;">
+      <p style="font-size:1.15rem; color:#92400e; line-height:1.9; margin:0;">
+        <strong>🔦 手电筒类比：</strong>想象你拿一个手电筒从天花板往地面照——<br>
+        • 手电筒<strong>越高</strong>，光斑越大，但亮度越弱（信号衰减）<br>
+        • 手电筒<strong>越低</strong>，光斑越亮，但覆盖面积小（需要更多 AP）<br>
+        • 两个手电筒的<strong>光斑边缘</strong>必须有足够重叠，否则人走到中间就会"摸黑"（漫游失败）<br><br>
+        AP 部署就是在<strong>"亮度"（信号强度）</strong>和<strong>"光斑大小"（覆盖面积）</strong>之间找到最佳平衡点。
+      </p>
+    </div>
+
+    <!-- 三角关系 SVG -->
+    <div style="text-align:center; margin:2rem 0;">
+      <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="max-width:680px; width:100%;">
+        <defs>
+          <linearGradient id="triGrad1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0d9488"/>
+            <stop offset="100%" stop-color="#0891b2"/>
+          </linearGradient>
+          <filter id="shadow1" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.12"/>
+          </filter>
+        </defs>
+        <!-- 中心三角形 -->
+        <polygon points="350,35 150,260 550,260" fill="none" stroke="url(#triGrad1)" stroke-width="3" filter="url(#shadow1)"/>
+        <!-- 顶点标签 -->
+        <rect x="280" y="5" width="140" height="38" rx="19" fill="#0d9488"/>
+        <text x="350" y="30" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">安装高度 H</text>
+        <!-- 左下标签 -->
+        <rect x="60" y="258" width="160" height="38" rx="19" fill="#0891b2"/>
+        <text x="140" y="283" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">覆盖半径 R</text>
+        <!-- 右下标签 -->
+        <rect x="480" y="258" width="160" height="38" rx="19" fill="#7c3aed"/>
+        <text x="560" y="283" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">信号强度 RSSI</text>
+        <!-- 边上的关系 -->
+        <text x="220" y="155" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="600" transform="rotate(-40,220,155)">H↑ → R↑ 但 RSSI↓</text>
+        <text x="480" y="155" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="600" transform="rotate(40,480,155)">H↓ → RSSI↑ 但 R↓</text>
+        <text x="350" y="290" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="600">R 需保证重叠 ≥ 20% 以支持漫游</text>
+        <!-- 中心要点 -->
+        <circle cx="350" cy="185" r="50" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="350" y="180" text-anchor="middle" fill="#0d9488" font-size="13" font-weight="700">最佳</text>
+        <text x="350" y="198" text-anchor="middle" fill="#0d9488" font-size="13" font-weight="700">平衡点</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ====== 4.5.1 物理公式基础 ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#0d9488; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">1</span>
+      物理公式工具箱：从第一性原理出发
+    </h3>
+
+    <p style="font-size:1.1rem; color:#334155; line-height:1.9; margin-bottom:1.5rem;">
+      在推导 AP 的安装参数之前，我们需要掌握三个核心公式。它们构成了所有计算的基石。
+    </p>
+
+    <!-- 公式卡片组 -->
+    <div style="display:grid; grid-template-columns:1fr; gap:1.5rem; margin-bottom:2rem;">
+
+      <!-- 公式1: 室内路径损耗 -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem 2.5rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1rem;">
+          <span style="background:#fef3c7; color:#92400e; font-size:1.3rem; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">📐</span>
+          <h4 style="font-size:1.3rem; font-weight:700; color:#0f172a; margin:0;">公式 ①：室内路径损耗模型（ITU-R P.1238）</h4>
+        </div>
+        <div style="background:#f8fafc; border-radius:12px; padding:1.5rem 2rem; margin-bottom:1rem; text-align:center;">
+          <p style="font-size:1.35rem; font-weight:700; color:#1e293b; margin:0 0 0.5rem; font-family:'Courier New',monospace;">
+            L(dB) = L₀ + 10 × n × log₁₀(d)
+          </p>
+          <p style="font-size:1rem; color:#64748b; margin:0;">
+            其中 d 为距离（米），n 为路径损耗指数，L₀ 为参考距离（1m）处的损耗
+          </p>
+        </div>
+        <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem; margin-top:1rem;">
+          <thead>
+            <tr>
+              <th style="background:#0d9488; color:#fff; padding:0.8rem 1.2rem; text-align:left; border-radius:8px 0 0 0;">频段</th>
+              <th style="background:#0d9488; color:#fff; padding:0.8rem 1.2rem; text-align:center;">L₀ (1m处损耗)</th>
+              <th style="background:#0d9488; color:#fff; padding:0.8rem 1.2rem; text-align:center;">n (典型室内办公)</th>
+              <th style="background:#0d9488; color:#fff; padding:0.8rem 1.2rem; text-align:center; border-radius:0 8px 0 0;">n (开放空间)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f0fdfa;">
+              <td style="padding:0.8rem 1.2rem; font-weight:600; border-bottom:1px solid #e2e8f0;">2.4 GHz</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center; border-bottom:1px solid #e2e8f0;">46 dB</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center; border-bottom:1px solid #e2e8f0;">3.0 ~ 3.5</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center; border-bottom:1px solid #e2e8f0;">2.0 ~ 2.5</td>
+            </tr>
+            <tr>
+              <td style="padding:0.8rem 1.2rem; font-weight:600; border-bottom:1px solid #e2e8f0;">5 GHz</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center; border-bottom:1px solid #e2e8f0;">53 dB</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center; border-bottom:1px solid #e2e8f0;">3.0 ~ 3.5</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center; border-bottom:1px solid #e2e8f0;">2.0 ~ 2.5</td>
+            </tr>
+            <tr style="background:#f0fdfa;">
+              <td style="padding:0.8rem 1.2rem; font-weight:600;">6 GHz</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center;">~55 dB</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center;">3.0 ~ 3.5</td>
+              <td style="padding:0.8rem 1.2rem; text-align:center;">2.0 ~ 2.5</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.95rem; color:#64748b; margin-top:0.8rem; line-height:1.7;">
+          <strong>解读：</strong>频率越高，L₀ 越大（5GHz 比 2.4GHz 在 1m 处多损耗 7dB）。这就是为什么 5GHz/6GHz 的覆盖半径天然比 2.4GHz 小——并非"穿墙差"，而是起步损耗就高。
+        </p>
+      </div>
+
+      <!-- 公式2: 6dB法则 -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem 2.5rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1rem;">
+          <span style="background:#dbeafe; color:#1e40af; font-size:1.3rem; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">📏</span>
+          <h4 style="font-size:1.3rem; font-weight:700; color:#0f172a; margin:0;">公式 ②：6dB 距离法则</h4>
+        </div>
+        <div style="background:#f8fafc; border-radius:12px; padding:1.5rem 2rem; margin-bottom:1rem; text-align:center;">
+          <p style="font-size:1.35rem; font-weight:700; color:#1e293b; margin:0 0 0.5rem; font-family:'Courier New',monospace;">
+            距离加倍 → 信号衰减 +6 dB &nbsp;&nbsp;|&nbsp;&nbsp; 距离减半 → 信号增强 +6 dB
+          </p>
+        </div>
+        <p style="font-size:1.05rem; color:#334155; line-height:1.9;">
+          这是自由空间传播模型（FSPL）在 n=2 时的简化。在开阔空间（如仓库通道、体育场看台），距离每翻一倍，信号损失约 6dB。在室内多径环境（n≈3），距离翻倍约损失 9dB。此法则来自 Cisco Live TECEWN-2007 的核心教学内容<sup>[1]</sup>。
+        </p>
+      </div>
+
+      <!-- 公式3: 链路预算 -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem 2.5rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:1rem;">
+          <span style="background:#fce7f3; color:#9d174d; font-size:1.3rem; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">⚡</span>
+          <h4 style="font-size:1.3rem; font-weight:700; color:#0f172a; margin:0;">公式 ③：链路预算方程</h4>
+        </div>
+        <div style="background:#f8fafc; border-radius:12px; padding:1.5rem 2rem; margin-bottom:1rem; text-align:center;">
+          <p style="font-size:1.35rem; font-weight:700; color:#1e293b; margin:0 0 0.5rem; font-family:'Courier New',monospace;">
+            RSSI = EIRP − L(d) + G<sub>rx</sub>
+          </p>
+          <p style="font-size:1rem; color:#64748b; margin:0;">
+            EIRP = Tx Power + G<sub>tx</sub>（发射功率 + 天线增益）
+          </p>
+        </div>
+        <p style="font-size:1.05rem; color:#334155; line-height:1.9;">
+          这是 wlan-basic.html 中反复强调的核心公式<sup>[2]</sup>。当我们确定了<strong>目标 RSSI</strong>（如 -67dBm 用于语音）、<strong>EIRP</strong>（如对称功率下的 17dBm）和<strong>路径损耗模型</strong>之后，就能反向计算出<strong>最大允许距离 d</strong>，从而确定 AP 间距。
+        </p>
+      </div>
+    </div>
+
+    <!-- 关键推导公式 -->
+    <div style="background:linear-gradient(135deg,#ede9fe,#e0e7ff); border-radius:16px; padding:2rem 2.5rem; margin-bottom:2rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#4c1d95; margin:0 0 1rem;">🧮 核心反向推导：已知 RSSI 目标，求最大覆盖距离</h4>
+      <div style="background:#fff; border-radius:12px; padding:1.5rem 2rem; text-align:center; margin-bottom:1rem;">
+        <p style="font-size:1.2rem; font-weight:700; color:#1e293b; margin:0 0 0.3rem; font-family:'Courier New',monospace;">
+          目标 RSSI = EIRP − [L₀ + 10·n·log₁₀(d)]
+        </p>
+        <p style="font-size:1.2rem; font-weight:700; color:#7c3aed; margin:0; font-family:'Courier New',monospace;">
+          ∴ d = 10 ^ [(EIRP − L₀ − 目标RSSI) / (10·n)]
+        </p>
+      </div>
+      <p style="font-size:1.05rem; color:#334155; line-height:1.9; margin:0;">
+        <strong>示例推导（5GHz 室内办公，n=3）：</strong><br>
+        EIRP = 17 dBm（对称功率），目标 RSSI = −67 dBm（语音质量要求）<br>
+        d = 10^[(17 − 53 − (−67)) / (10 × 3)] = 10^[31/30] = 10^1.033 ≈ <strong>10.8 米</strong><br><br>
+        这意味着：在 5GHz、对称功率 17dBm、室内办公环境下，<strong>AP 的有效语音级覆盖半径约为 10~11 米</strong>。<br>
+        若两个 AP 之间需保持 20% 覆盖重叠用于漫游，则 AP 间距 ≈ 2 × 10.8 × 0.8 = <strong>约 17 米</strong>。
+      </p>
+    </div>
+
+    <!-- 高度与斜距关系 SVG -->
+    <div style="margin-bottom:2rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">📐 高度引入斜距：别忘了勾股定理</h4>
+      <p style="font-size:1.05rem; color:#334155; line-height:1.9; margin-bottom:1.5rem;">
+        上面计算的 d 是 AP 到客户端的<strong>直线距离（斜距）</strong>，而非水平距离。当 AP 安装在天花板高度 H、客户端在高度 h 时，水平覆盖半径 R 需要用勾股定理修正：
+      </p>
+      <div style="text-align:center; margin:1.5rem 0;">
+        <svg viewBox="0 0 650 340" xmlns="http://www.w3.org/2000/svg" style="max-width:640px; width:100%;">
+          <defs>
+            <linearGradient id="floorGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#e2e8f0"/>
+              <stop offset="100%" stop-color="#cbd5e1"/>
+            </linearGradient>
+          </defs>
+          <!-- 天花板线 -->
+          <line x1="50" y1="50" x2="600" y2="50" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8,4"/>
+          <text x="30" y="46" fill="#64748b" font-size="12" text-anchor="end">天花板</text>
+          <!-- 地面 -->
+          <rect x="50" y="270" width="550" height="8" rx="4" fill="url(#floorGrad)"/>
+          <text x="30" y="276" fill="#64748b" font-size="12" text-anchor="end">地面</text>
+          <!-- AP -->
+          <circle cx="325" cy="70" r="18" fill="#0d9488" stroke="#fff" stroke-width="3"/>
+          <text x="325" y="76" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">AP</text>
+          <!-- 客户端 -->
+          <rect x="510" y="230" width="30" height="40" rx="5" fill="#3b82f6"/>
+          <text x="525" y="255" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">📱</text>
+          <!-- 高度线 H -->
+          <line x1="325" y1="88" x2="325" y2="250" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="310" y="175" fill="#ef4444" font-size="14" font-weight="700" text-anchor="end">H − h</text>
+          <!-- 水平距离 R -->
+          <line x1="325" y1="250" x2="510" y2="250" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="418" y="245" fill="#3b82f6" font-size="14" font-weight="700" text-anchor="middle">R（水平半径）</text>
+          <!-- 斜距 d -->
+          <line x1="325" y1="70" x2="525" y2="250" stroke="#7c3aed" stroke-width="3"/>
+          <text x="450" y="145" fill="#7c3aed" font-size="15" font-weight="700" transform="rotate(44,440,145)">d（斜距）</text>
+          <!-- 直角标记 -->
+          <polyline points="325,235 340,235 340,250" fill="none" stroke="#64748b" stroke-width="1.5"/>
+          <!-- 公式框 -->
+          <rect x="50" y="295" width="550" height="35" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+          <text x="325" y="318" text-anchor="middle" fill="#1e293b" font-size="14" font-weight="700" font-family="'Courier New',monospace">
+            R = √(d² − (H − h)²)  |  若 H=3m, h=1m, d=10.8m → R = √(116.6 − 4) ≈ 10.6m
+          </text>
+        </svg>
+      </div>
+      <div style="background:#fff7ed; border:1px solid #fb923c; border-radius:12px; padding:1.2rem 1.8rem; margin-top:1rem;">
+        <p style="font-size:1.05rem; color:#9a3412; line-height:1.8; margin:0;">
+          <strong>⚠️ 关键发现：</strong>在标准办公环境（天花板高 3m），斜距和水平距离几乎相等（差异 &lt; 2%）。但当 AP 安装在高层高环境（如 10m+ 的仓库），高度分量会<strong>显著"吃掉"覆盖半径</strong>——这正是仓库部署的核心挑战。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 4.5.2 场景一：室内办公 ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#3b82f6; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">2</span>
+      场景一：室内办公环境
+    </h3>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+      <!-- 场景参数卡片 -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.8rem 2rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <h4 style="font-size:1.15rem; font-weight:700; color:#1e40af; margin:0 0 1rem;">🏢 典型场景特征</h4>
+        <ul style="font-size:1.05rem; color:#334155; line-height:2.2; padding-left:1.2rem; margin:0;">
+          <li>天花板高度：<strong>2.7 ~ 3.5 米</strong></li>
+          <li>用户高度：<strong>~1.0 米</strong>（坐姿手持设备）</li>
+          <li>路径损耗指数：<strong>n ≈ 3.0</strong>（隔断、桌椅、人体遮挡）</li>
+          <li>障碍物衰减：每面石膏板墙 <strong>3~5 dB</strong>，玻璃墙 <strong>2~4 dB</strong></li>
+          <li>终端密度：<strong>高</strong>（每人 2~3 台设备）</li>
+          <li>目标 RSSI：<strong>≤ −67 dBm</strong>（支持语音和视频会议）</li>
+        </ul>
+      </div>
+      <!-- 推导过程 -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.8rem 2rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <h4 style="font-size:1.15rem; font-weight:700; color:#0d9488; margin:0 0 1rem;">🧮 推导计算</h4>
+        <div style="font-size:1.02rem; color:#334155; line-height:2;">
+          <p style="margin:0 0 0.5rem;"><strong>5GHz 频段（主力频段）：</strong></p>
+          <p style="margin:0; font-family:'Courier New',monospace; background:#f8fafc; padding:0.5rem 0.8rem; border-radius:6px; font-size:0.95rem;">
+            EIRP = 17 dBm（对称功率）<br>
+            d = 10^[(17−53−(−67))/(10×3)]<br>
+            d = 10^[31/30] = 10^1.033<br>
+            d ≈ <strong>10.8 米</strong>
+          </p>
+          <p style="margin:0.8rem 0 0.5rem;"><strong>修正斜距 → 水平半径：</strong></p>
+          <p style="margin:0; font-family:'Courier New',monospace; background:#f8fafc; padding:0.5rem 0.8rem; border-radius:6px; font-size:0.95rem;">
+            H−h = 3.0−1.0 = 2.0m<br>
+            R = √(10.8²−2.0²) = √(112.6)<br>
+            R ≈ <strong>10.6 米</strong>
+          </p>
+          <p style="margin:0.8rem 0 0;"><strong>AP 间距（20% 重叠）：</strong></p>
+          <p style="margin:0; font-family:'Courier New',monospace; background:#f0fdfa; padding:0.5rem 0.8rem; border-radius:6px; font-size:0.95rem; border:1px solid #0d9488;">
+            间距 = 2 × 10.6 × 0.80<br>
+            间距 ≈ <strong>17 米</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 室内办公 SVG 示意图 -->
+    <div style="text-align:center; margin:2rem 0;">
+      <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" style="max-width:680px; width:100%;">
+        <!-- 天花板 -->
+        <rect x="30" y="30" width="640" height="6" rx="3" fill="#94a3b8"/>
+        <text x="15" y="26" fill="#64748b" font-size="11">3m</text>
+        <!-- 地面 -->
+        <rect x="30" y="230" width="640" height="6" rx="3" fill="#94a3b8"/>
+        <text x="15" y="236" fill="#64748b" font-size="11">0m</text>
+        <!-- AP1 -->
+        <circle cx="200" cy="50" r="14" fill="#0d9488"/>
+        <text x="200" y="55" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">AP1</text>
+        <!-- AP1 覆盖锥 -->
+        <ellipse cx="200" cy="200" rx="110" ry="20" fill="#0d9488" opacity="0.12" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,2"/>
+        <line x1="200" y1="64" x2="90" y2="200" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,2" opacity="0.4"/>
+        <line x1="200" y1="64" x2="310" y2="200" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,2" opacity="0.4"/>
+        <!-- AP2 -->
+        <circle cx="500" cy="50" r="14" fill="#3b82f6"/>
+        <text x="500" y="55" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">AP2</text>
+        <!-- AP2 覆盖锥 -->
+        <ellipse cx="500" cy="200" rx="110" ry="20" fill="#3b82f6" opacity="0.12" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,2"/>
+        <line x1="500" y1="64" x2="390" y2="200" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,2" opacity="0.4"/>
+        <line x1="500" y1="64" x2="610" y2="200" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,2" opacity="0.4"/>
+        <!-- 重叠区域 -->
+        <rect x="310" y="180" width="80" height="40" rx="8" fill="#fbbf24" opacity="0.3" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="350" y="205" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700">漫游区</text>
+        <!-- 间距标注 -->
+        <line x1="200" y1="260" x2="500" y2="260" stroke="#0f172a" stroke-width="2" marker-start="url(#arrowL)" marker-end="url(#arrowR)"/>
+        <defs>
+          <marker id="arrowL" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8" fill="#0f172a"/></marker>
+          <marker id="arrowR" markerWidth="8" markerHeight="8" refX="0" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#0f172a"/></marker>
+        </defs>
+        <text x="350" y="280" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">≈ 15~18 米</text>
+        <!-- 高度标注 -->
+        <text x="660" y="50" fill="#64748b" font-size="11">吊装高度</text>
+        <text x="660" y="65" fill="#0d9488" font-size="13" font-weight="700">3m</text>
+      </svg>
+    </div>
+
+    <!-- 室内办公推荐总结 -->
+    <div style="background:linear-gradient(135deg,#ecfdf5,#f0fdfa); border:2px solid #0d9488; border-radius:16px; padding:2rem 2.5rem; margin-bottom:1.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#065f46; margin:0 0 1rem;">✅ 室内办公部署推荐</h4>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem;">
+        <thead>
+          <tr>
+            <th style="background:#0d9488; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:8px 0 0 0;">参数</th>
+            <th style="background:#0d9488; color:#fff; padding:0.8rem 1rem; text-align:center;">推荐值</th>
+            <th style="background:#0d9488; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:0 8px 0 0;">依据</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装高度</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#0d9488; border-bottom:1px solid #e2e8f0;">2.7 ~ 3.5 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">紧贴天花板或吊装在吊顶下方 15cm</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">AP 间距</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#0d9488; border-bottom:1px solid #e2e8f0;">15 ~ 18 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">基于 5GHz/17dBm/−67dBm 推导，保留 20% 重叠</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">天线类型</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#0d9488; border-bottom:1px solid #e2e8f0;">全向内置天线</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">如 C9130AXI / CW9166I，内置天线最适合 360° 均匀覆盖</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装方式</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#0d9488; border-bottom:1px solid #e2e8f0;">天花板倒装</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">天线辐射主瓣朝下，覆盖用户平面</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600;">Tx Power (5GHz)</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#0d9488;">14 ~ 17 dBm</td>
+            <td style="padding:0.8rem 1rem;">对称功率原则，匹配最弱客户端<sup>[2]</sup></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 补充：开放式 vs 隔间式 -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 1.8rem;">
+        <h5 style="font-size:1.1rem; color:#1e40af; margin:0 0 0.8rem;">🏢 开放式办公（Open Plan）</h5>
+        <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+          无硬墙隔断，路径损耗指数 n≈2.8~3.0。AP 间距可适当放宽至 <strong>18 米</strong>。但需注意<strong>高密度终端竞争</strong>——用更多 AP 不是为了覆盖，而是为了<strong>容量分担</strong>。典型密度：每 AP 服务 25~35 个活跃终端。
+        </p>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 1.8rem;">
+        <h5 style="font-size:1.1rem; color:#1e40af; margin:0 0 0.8rem;">🧱 隔间/会议室（Cubicles & Meeting Rooms）</h5>
+        <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+          每面石膏板墙衰减 3~5dB，两面墙 = 6~10dB 额外损耗。覆盖半径可能缩短到 <strong>7~8 米</strong>，AP 间距需缩至 <strong>12~14 米</strong>。大型会议室建议独立部署 AP，因 10+ 人同时视频会议是容量瓶颈。
+        </p>
+      </div>
+    </div>
+
+  </div>
+<!-- ====== 4.5.3 场景二：工厂车间（高层高复杂结构） ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#ea580c; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">3</span>
+      场景二：工厂车间 · 高层高复杂结构
+    </h3>
+
+    <!-- 场景引言 -->
+    <div style="background:#fff7ed; border-left:5px solid #ea580c; border-radius:12px; padding:1.8rem 2.2rem; margin-bottom:2rem;">
+      <p style="font-size:1.15rem; color:#9a3412; line-height:1.9; margin:0;">
+        <strong>🏭 核心挑战：</strong>工厂车间是无线部署最复杂的场景之一。层高通常在 <strong>6~15 米</strong>，金属设备、行车轨道、管道、钢结构产生严重的<strong>多径反射</strong>和<strong>阴影效应</strong>。同时，AGV（自动引导车）、手持扫码枪、工业平板等终端需要<strong>低延迟、不间断的连接</strong>。如果 AP 简单地安装在高处天花板，就像把手电筒挂在 10 米高的杆子上——虽然照得远，但地面一片昏暗。
+      </p>
+    </div>
+
+    <!-- 为什么不能直接装在天花板？ -->
+    <div style="margin-bottom:2rem;">
+      <h4 style="font-size:1.25rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">❌ 反面推导：如果 AP 装在 12 米天花板会怎样？</h4>
+
+      <div style="background:#fff; border:1px solid #fecaca; border-radius:16px; padding:2rem 2.5rem; margin-bottom:1.5rem;">
+        <div style="font-size:1.05rem; color:#334155; line-height:2;">
+          <p style="margin:0 0 0.8rem;"><strong>假设条件：</strong>5GHz，EIRP = 17 dBm，工厂室内 n = 2.5（金属环境多径丰富，实际近似开放空间但有遮挡）</p>
+          <p style="margin:0 0 0.5rem; font-family:'Courier New',monospace; background:#fef2f2; padding:0.8rem 1rem; border-radius:8px; font-size:0.98rem;">
+            <strong>步骤 1：计算最大斜距 d</strong><br>
+            d = 10^[(17 − 53 − (−67)) / (10 × 2.5)]<br>
+            d = 10^[31/25] = 10^1.24 ≈ <strong>17.4 米</strong><br><br>
+            <strong>步骤 2：扣除高度分量（H=12m, h=1.5m 手持设备）</strong><br>
+            R = √(17.4² − 10.5²) = √(302.8 − 110.3) = √192.5<br>
+            R ≈ <strong>13.9 米</strong> — 看起来还不错？<br><br>
+            <strong>步骤 3：但算一下地面 RSSI！</strong><br>
+            斜距 d = √(10.5² + 13.9²) = 17.4m ✔<br>
+            L = 53 + 10 × 2.5 × log₁₀(17.4) = 53 + 25 × 1.24 = 53 + 31 = <strong>84 dB</strong><br>
+            RSSI = 17 − 84 = <strong>−67 dBm</strong> — 刚好踩线！
+          </p>
+          <p style="margin:0.8rem 0 0; color:#dc2626; font-weight:600; font-size:1.1rem;">
+            ⚠️ 问题一：−67dBm 是语音的最低门槛，没有任何余量。一旦有人体遮挡（额外 3~5dB）、叉车金属反射、或设备功率不对称，RSSI 立刻跌破 −70dBm，语音中断、扫码失败。
+          </p>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #fecaca; border-radius:16px; padding:2rem 2.5rem;">
+        <p style="font-size:1.05rem; color:#334155; line-height:2; margin:0;">
+          <strong>⚠️ 问题二：仰角过大导致天线增益下降。</strong><br>
+          全向天线的辐射图并非完美球形——在天线正下方（仰角 90°），增益通常比最大值低 <strong>3~6 dB</strong>。12 米高度安装时，AP 正下方 3 米半径内的区域反而是<strong>"增益凹陷区"</strong>。<br><br>
+          <strong>⚠️ 问题三：高度带来的多径恶化。</strong><br>
+          工厂的金属天花板、行车导轨会产生强反射。AP 越高，反射路径越多、延迟扩展越大，导致 <strong>OFDM 符号间干扰（ISI）</strong>增加，实际吞吐量远低于理论值。
+        </p>
+      </div>
+    </div>
+
+    <!-- 正确做法：降低安装高度 -->
+    <div style="margin-bottom:2rem;">
+      <h4 style="font-size:1.25rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">✅ 正确策略：降低安装高度 + 定向天线</h4>
+
+      <p style="font-size:1.08rem; color:#334155; line-height:1.9; margin-bottom:1.5rem;">
+        Cisco Live TECEWN-2007 明确建议：在仓库/工厂场景中，AP 应安装在 <strong>4~6 米高度</strong>，而非天花板<sup>[1]</sup>。如果结构条件不允许（如没有侧墙立柱），也应尽量控制在 <strong>8 米以内</strong>，并搭配<strong>定向天线</strong>将能量集中在工作平面。
+      </p>
+
+      <!-- 工厂场景 SVG -->
+      <div style="text-align:center; margin:2rem 0;">
+        <svg viewBox="0 0 750 420" xmlns="http://www.w3.org/2000/svg" style="max-width:720px; width:100%;">
+          <defs>
+            <linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d1d5db"/>
+              <stop offset="100%" stop-color="#9ca3af"/>
+            </linearGradient>
+            <marker id="arrowDown" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto">
+              <path d="M0,0 L4,8 L8,0" fill="#ea580c"/>
+            </marker>
+          </defs>
+          <!-- 工厂外壳 -->
+          <rect x="30" y="20" width="690" height="350" rx="4" fill="none" stroke="#6b7280" stroke-width="2"/>
+          <!-- 天花板（钢结构） -->
+          <line x1="30" y1="20" x2="375" y2="8" stroke="#6b7280" stroke-width="2"/>
+          <line x1="375" y1="8" x2="720" y2="20" stroke="#6b7280" stroke-width="2"/>
+          <text x="375" y="6" text-anchor="middle" fill="#6b7280" font-size="11">钢结构天花板 ~12m</text>
+          <!-- 地面 -->
+          <rect x="30" y="358" width="690" height="12" rx="2" fill="url(#metalGrad)"/>
+          <text x="25" y="368" fill="#6b7280" font-size="10" text-anchor="end">0m</text>
+          <!-- 高度标尺 -->
+          <line x1="45" y1="28" x2="45" y2="356" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="25" y="28" fill="#6b7280" font-size="10" text-anchor="end">12m</text>
+          <text x="25" y="155" fill="#ea580c" font-size="11" font-weight="700" text-anchor="end">5m</text>
+          <line x1="30" y1="155" x2="720" y2="155" stroke="#ea580c" stroke-width="1" stroke-dasharray="6,3" opacity="0.4"/>
+
+          <!-- ❌ 错误安装：天花板 -->
+          <circle cx="200" cy="40" r="14" fill="#dc2626" opacity="0.4"/>
+          <text x="200" y="45" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">AP</text>
+          <line x1="200" y1="54" x2="200" y2="340" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,3" opacity="0.3"/>
+          <text x="200" y="80" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="600">❌ 12m 安装</text>
+          <text x="200" y="95" text-anchor="middle" fill="#dc2626" font-size="10">信号弱 / 无余量</text>
+
+          <!-- ✅ 正确安装：侧墙 5m -->
+          <rect x="440" y="130" width="8" height="230" rx="2" fill="#6b7280"/>
+          <text x="460" y="375" fill="#6b7280" font-size="10">立柱</text>
+          <circle cx="465" cy="155" r="14" fill="#0d9488"/>
+          <text x="465" y="160" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">AP</text>
+          <!-- 定向覆盖锥 -->
+          <polygon points="479,155 620,240 620,310 479,310 380,310 380,240" fill="#0d9488" opacity="0.08" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,2"/>
+          <text x="530" y="200" fill="#0d9488" font-size="11" font-weight="600">✅ 5m 侧挂</text>
+          <text x="530" y="215" fill="#0d9488" font-size="10">定向天线朝通道</text>
+
+          <!-- 通道示意 -->
+          <rect x="380" y="310" width="240" height="48" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+          <text x="500" y="338" text-anchor="middle" fill="#92400e" font-size="12" font-weight="600">🚜 AGV / 作业通道</text>
+
+          <!-- 设备 -->
+          <rect x="540" y="320" width="20" height="35" rx="4" fill="#3b82f6"/>
+          <text x="550" y="342" text-anchor="middle" fill="#fff" font-size="7">📱</text>
+
+          <!-- 高度标注箭头 -->
+          <line x1="444" y1="155" x2="444" y2="358" stroke="#ea580c" stroke-width="2"/>
+          <text x="432" y="260" fill="#ea580c" font-size="13" font-weight="700" text-anchor="end" transform="rotate(-90,432,260)">5 米</text>
+        </svg>
+      </div>
+
+      <!-- 推导验证 -->
+      <div style="background:linear-gradient(135deg,#fff7ed,#fffbeb); border:2px solid #ea580c; border-radius:16px; padding:2rem 2.5rem; margin-bottom:1.5rem;">
+        <h4 style="font-size:1.15rem; font-weight:700; color:#9a3412; margin:0 0 1rem;">🧮 验证：5 米安装高度的覆盖能力</h4>
+        <div style="font-size:1.02rem; color:#334155; line-height:2;">
+          <p style="margin:0; font-family:'Courier New',monospace; background:#fff; padding:0.8rem 1rem; border-radius:8px; font-size:0.98rem;">
+            <strong>条件：</strong>5GHz, EIRP = 17dBm, n = 2.5, 目标 RSSI = −67dBm<br>
+            <strong>最大斜距：</strong>d = 10^[(17−53+67)/(10×2.5)] = 10^1.24 ≈ 17.4m<br><br>
+            <strong>高度分量：</strong>H−h = 5.0−1.5 = 3.5m<br>
+            <strong>水平半径：</strong>R = √(17.4²−3.5²) = √(302.8−12.3) = √290.5 ≈ <strong>17.0 m</strong><br><br>
+            <strong>地面正下方 RSSI（斜距仅 3.5m）：</strong><br>
+            L = 53 + 10×2.5×log₁₀(3.5) = 53 + 25×0.544 = 53 + 13.6 = 66.6 dB<br>
+            RSSI = 17 − 66.6 = <strong>−49.6 dBm</strong> ← 非常强！余量充足 ✅<br><br>
+            <strong>最远水平 17m 处 RSSI（斜距 = √(3.5²+17²) = 17.4m）：</strong><br>
+            L = 53 + 25×log₁₀(17.4) = 53 + 31 = 84 dB<br>
+            RSSI = 17 − 84 = <strong>−67 dBm</strong> ← 刚好达标 ✅
+          </p>
+        </div>
+        <p style="font-size:1.05rem; color:#9a3412; margin:1rem 0 0; line-height:1.8;">
+          <strong>结论：</strong>5 米高度安装，AP 正下方信号达 −50dBm（余量 17dB），最远处刚好 −67dBm。相比 12 米安装（正下方仅 −67dBm，无余量），<strong>降低高度是质的飞跃</strong>。考虑到工厂内的金属遮挡，建议实际间距按 <strong>70%~80%</strong> 理论值计算：17 × 0.75 ≈ <strong>12~13 米</strong>。
+        </p>
+      </div>
+    </div>
+
+    <!-- 工厂推荐参数表 -->
+    <div style="background:linear-gradient(135deg,#ecfdf5,#f0fdfa); border:2px solid #0d9488; border-radius:16px; padding:2rem 2.5rem; margin-bottom:1.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#065f46; margin:0 0 1rem;">✅ 工厂车间部署推荐</h4>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem;">
+        <thead>
+          <tr>
+            <th style="background:#ea580c; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:8px 0 0 0;">参数</th>
+            <th style="background:#ea580c; color:#fff; padding:0.8rem 1rem; text-align:center;">推荐值</th>
+            <th style="background:#ea580c; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:0 8px 0 0;">依据</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装高度</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#ea580c; border-bottom:1px solid #e2e8f0;">4 ~ 6 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">TECEWN-2007 建议 5m 挂墙<sup>[1]</sup>；物理推导验证余量充足</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">AP 间距</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#ea580c; border-bottom:1px solid #e2e8f0;">10 ~ 15 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">理论 17m × 75% 安全系数 = 12.8m，取整后 10~15m</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">天线类型</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#ea580c; border-bottom:1px solid #e2e8f0;">定向天线（Patch）</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">将能量集中到通道方向，避免向天花板浪费<sup>[1]</sup></td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装方式</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#ea580c; border-bottom:1px solid #e2e8f0;">侧墙 / 立柱挂装</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">利用立柱、桁架侧面，天线朝向通道/作业区</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">AP 型号建议</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#ea580c; border-bottom:1px solid #e2e8f0;">C9130AXE / CW9166D</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">E 型（外置天线）搭配定向 Patch 天线</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600;">特别注意</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626;">IP67 防护</td>
+            <td style="padding:0.8rem 1rem;">粉尘、湿度、温度波动大的车间需选用工业级 AP（如 IW 系列）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 补充：AGV 漫游特殊要求 -->
+    <div style="background:#eff6ff; border:1px solid #3b82f6; border-radius:12px; padding:1.5rem 2rem;">
+      <h5 style="font-size:1.1rem; font-weight:700; color:#1e40af; margin:0 0 0.8rem;">🤖 AGV / AMR 漫游特别要求</h5>
+      <p style="font-size:1.02rem; color:#334155; line-height:1.9; margin:0;">
+        自动引导车（AGV）移动速度通常 1~2 m/s，要求漫游延迟 <strong>&lt; 50ms</strong>。必须保证相邻 AP 覆盖重叠区域在 AGV 速度下提供 <strong>≥ 3 秒</strong>的穿越时间，即重叠宽度 ≥ 2m/s × 3s = <strong>6 米</strong>。因此 AP 间距需进一步压缩，或增加重叠比例至 <strong>30%~35%</strong>。同时<strong>必须启用 802.11r（FT）和 802.11k</strong>以确保快速漫游<sup>[2][6]</sup>。
+      </p>
+    </div>
+  </div>
+
+  <!-- ====== 4.5.4 场景三：立体仓库 ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#7c3aed; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">4</span>
+      场景三：立体仓库 · 钢铁峡谷中的信号之战
+    </h3>
+
+    <!-- 场景引言 -->
+    <div style="background:#f5f3ff; border-left:5px solid #7c3aed; border-radius:12px; padding:1.8rem 2.2rem; margin-bottom:2rem;">
+      <p style="font-size:1.15rem; color:#4c1d95; line-height:1.9; margin:0;">
+        <strong>📦 核心挑战：</strong>立体仓库（AS/RS）是最极端的无线环境——层高可达 <strong>20~30 米</strong>，密集的金属货架形成<strong>"钢铁峡谷"</strong>，通道宽度仅 <strong>2.5~3.5 米</strong>，信号几乎<strong>无法穿透货架</strong>。每条通道就像一条独立的"信号隧道"，需要独立覆盖。
+      </p>
+    </div>
+
+    <!-- 立体仓库 SVG 示意图 -->
+    <div style="text-align:center; margin:2rem 0;">
+      <svg viewBox="0 0 750 400" xmlns="http://www.w3.org/2000/svg" style="max-width:720px; width:100%;">
+        <defs>
+          <pattern id="shelfPattern" patternUnits="userSpaceOnUse" width="20" height="20">
+            <rect width="20" height="20" fill="#d4d4d8"/>
+            <rect x="0" y="0" width="19" height="3" fill="#a1a1aa"/>
+            <rect x="0" y="10" width="19" height="3" fill="#a1a1aa"/>
+          </pattern>
+        </defs>
+        <!-- 天花板 -->
+        <line x1="20" y1="15" x2="730" y2="15" stroke="#9ca3af" stroke-width="2"/>
+        <text x="375" y="10" text-anchor="middle" fill="#6b7280" font-size="11">天花板 ~25m</text>
+        <!-- 地面 -->
+        <rect x="20" y="360" width="710" height="8" rx="3" fill="#a1a1aa"/>
+
+        <!-- 货架 A (左) -->
+        <rect x="60" y="30" width="100" height="330" rx="3" fill="url(#shelfPattern)" stroke="#71717a" stroke-width="1.5"/>
+        <text x="110" y="200" text-anchor="middle" fill="#52525b" font-size="12" font-weight="700" transform="rotate(-90,110,200)">金属货架 A</text>
+
+        <!-- 通道 1 -->
+        <rect x="160" y="30" width="80" height="330" rx="0" fill="#fef9c3" opacity="0.3"/>
+        <text x="200" y="390" text-anchor="middle" fill="#854d0e" font-size="11" font-weight="600">通道 1 (3m宽)</text>
+
+        <!-- 货架 B -->
+        <rect x="240" y="30" width="100" height="330" rx="3" fill="url(#shelfPattern)" stroke="#71717a" stroke-width="1.5"/>
+        <text x="290" y="200" text-anchor="middle" fill="#52525b" font-size="12" font-weight="700" transform="rotate(-90,290,200)">金属货架 B</text>
+
+        <!-- 通道 2 -->
+        <rect x="340" y="30" width="80" height="330" rx="0" fill="#fef9c3" opacity="0.3"/>
+        <text x="380" y="390" text-anchor="middle" fill="#854d0e" font-size="11" font-weight="600">通道 2 (3m宽)</text>
+
+        <!-- 货架 C -->
+        <rect x="420" y="30" width="100" height="330" rx="3" fill="url(#shelfPattern)" stroke="#71717a" stroke-width="1.5"/>
+        <text x="470" y="200" text-anchor="middle" fill="#52525b" font-size="12" font-weight="700" transform="rotate(-90,470,200)">金属货架 C</text>
+
+        <!-- 通道 3 -->
+        <rect x="520" y="30" width="80" height="330" rx="0" fill="#fef9c3" opacity="0.3"/>
+        <text x="560" y="390" text-anchor="middle" fill="#854d0e" font-size="11" font-weight="600">通道 3 (3m宽)</text>
+
+        <!-- 货架 D -->
+        <rect x="600" y="30" width="100" height="330" rx="3" fill="url(#shelfPattern)" stroke="#71717a" stroke-width="1.5"/>
+        <text x="650" y="200" text-anchor="middle" fill="#52525b" font-size="12" font-weight="700" transform="rotate(-90,650,200)">金属货架 D</text>
+
+        <!-- AP 安装在通道入口侧墙 5m 高 -->
+        <!-- 通道 1 AP -->
+        <circle cx="165" cy="155" r="11" fill="#7c3aed"/>
+        <text x="165" y="159" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">AP</text>
+        <!-- 信号沿通道传播 -->
+        <polygon points="176,155 235,100 235,210" fill="#7c3aed" opacity="0.1" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <!-- 通道 2 AP -->
+        <circle cx="345" cy="155" r="11" fill="#7c3aed"/>
+        <text x="345" y="159" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">AP</text>
+        <polygon points="356,155 415,100 415,210" fill="#7c3aed" opacity="0.1" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <!-- 通道 3 AP -->
+        <circle cx="525" cy="155" r="11" fill="#7c3aed"/>
+        <text x="525" y="159" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">AP</text>
+        <polygon points="536,155 595,100 595,210" fill="#7c3aed" opacity="0.1" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <!-- 高度标注 -->
+        <line x1="40" y1="155" x2="40" y2="360" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="35" y="260" fill="#7c3aed" font-size="12" font-weight="700" text-anchor="end" transform="rotate(-90,35,260)">安装高度 ~5m</text>
+
+        <!-- 叉车 -->
+        <rect x="175" y="280" width="30" height="50" rx="4" fill="#f59e0b"/>
+        <text x="190" y="310" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">🚜</text>
+      </svg>
+    </div>
+
+    <!-- 仓库部署原则 -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.8rem 2rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <h4 style="font-size:1.15rem; font-weight:700; color:#7c3aed; margin:0 0 1rem;">📐 部署核心原则</h4>
+        <ul style="font-size:1.02rem; color:#334155; line-height:2.2; padding-left:1.2rem; margin:0;">
+          <li><strong>每条通道独立覆盖</strong>——不要指望信号穿过金属货架</li>
+          <li>AP 安装在<strong>通道入口或中部</strong>的货架侧面，高度 <strong>4~6 米</strong></li>
+          <li>使用<strong>定向天线（Patch）</strong>沿通道方向发射</li>
+          <li>通道长度 &gt; 25m 时，需两端各部署一个 AP<sup>[1]</sup></li>
+          <li>堆垛机/穿梭车天线需对准通道方向</li>
+        </ul>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.8rem 2rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <h4 style="font-size:1.15rem; font-weight:700; color:#7c3aed; margin:0 0 1rem;">🧮 通道覆盖距离推导</h4>
+        <div style="font-size:1rem; color:#334155; line-height:2;">
+          <p style="margin:0 0 0.5rem;">通道内近似<strong>波导效应</strong>，路径损耗指数 <strong>n ≈ 1.8~2.2</strong>（低于开放空间，因为金属墙反射帮助传导信号）。</p>
+          <p style="margin:0; font-family:'Courier New',monospace; background:#f5f3ff; padding:0.6rem 0.8rem; border-radius:6px; font-size:0.95rem;">
+            取 n = 2.0（波导效应），EIRP = 17dBm<br>
+            目标 RSSI = −67dBm<br>
+            d = 10^[(17−53+67)/(10×2.0)]<br>
+            d = 10^[31/20] = 10^1.55<br>
+            d ≈ <strong>35.5 m</strong>
+          </p>
+          <p style="margin:0.8rem 0 0;">
+            <strong>含义：</strong>单个定向 AP 在通道内可覆盖约 <strong>30~35 米</strong>（考虑余量）。通道长度 ≤ 30m 用一个 AP 即可；30~60m 需两端各一个。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 仓库推荐参数表 -->
+    <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); border:2px solid #7c3aed; border-radius:16px; padding:2rem 2.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#4c1d95; margin:0 0 1rem;">✅ 立体仓库部署推荐</h4>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem;">
+        <thead>
+          <tr>
+            <th style="background:#7c3aed; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:8px 0 0 0;">参数</th>
+            <th style="background:#7c3aed; color:#fff; padding:0.8rem 1rem; text-align:center;">推荐值</th>
+            <th style="background:#7c3aed; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:0 8px 0 0;">依据</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装高度</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#7c3aed; border-bottom:1px solid #e2e8f0;">4 ~ 6 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">匹配叉车/人员作业高度，避免仰角损耗</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">通道内 AP 间距</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#7c3aed; border-bottom:1px solid #e2e8f0;">25 ~ 35 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">波导效应下 n≈2.0，覆盖更远；需保留 20% 重叠</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">天线类型</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#7c3aed; border-bottom:1px solid #e2e8f0;">窄波束定向 Patch</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">水平波束宽度 60°~90°，对准通道纵深方向</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装位置</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#7c3aed; border-bottom:1px solid #e2e8f0;">通道入口货架侧面</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">每条通道独立部署，不跨货架覆盖</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600;">信道规划</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#7c3aed;">相邻通道不同信道</td>
+            <td style="padding:0.8rem 1rem;">虽然货架提供隔离，但通道端口仍有泄漏，需错开信道</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ====== 4.5.5 场景四：室外空旷场景 ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#2563eb; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">5</span>
+      场景四：室外空旷场景 · 广场、园区、停车场
+    </h3>
+
+    <!-- 场景引言 -->
+    <div style="background:#eff6ff; border-left:5px solid #2563eb; border-radius:12px; padding:1.8rem 2.2rem; margin-bottom:2rem;">
+      <p style="font-size:1.15rem; color:#1e3a8a; line-height:1.9; margin:0;">
+        <strong>🌳 核心特征：</strong>室外场景几乎是<strong>自由空间传播</strong>的"理想教科书"——没有墙壁、隔断，路径损耗指数 <strong>n ≈ 2.0</strong>（纯距离衰减）。但挑战在于：(1) 覆盖面积巨大；(2) <strong>法规限制</strong>发射功率（EIRP）；(3) <strong>天气</strong>对 6GHz 高频有额外衰减；(4) AP 需要<strong>户外防护等级</strong>（IP67+）。
+      </p>
+    </div>
+
+    <!-- 自由空间路径损耗 vs 室内 对比 -->
+    <div style="margin-bottom:2rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">📊 自由空间 vs 室内：同功率下覆盖距离对比</h4>
+
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem 2.5rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem;">
+          <thead>
+            <tr>
+              <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:8px 0 0 0;">场景</th>
+              <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:center;">n</th>
+              <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:center;">L₀ (5GHz)</th>
+              <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:center;">最大斜距 d<br><span style="font-size:0.85rem; font-weight:400;">(EIRP=17dBm, RSSI=−67dBm)</span></th>
+              <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:center; border-radius:0 8px 0 0;">近似水平半径 R</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#eff6ff;">
+              <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">🌳 室外空旷 (n=2.0)</td>
+              <td style="padding:0.8rem 1rem; text-align:center; border-bottom:1px solid #e2e8f0;">2.0</td>
+              <td style="padding:0.8rem 1rem; text-align:center; border-bottom:1px solid #e2e8f0;">53 dB</td>
+              <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">10^(31/20) ≈ <strong>35.5 m</strong></td>
+              <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">~35 m (H≈5m)</td>
+            </tr>
+            <tr>
+              <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">🏢 室内办公 (n=3.0)</td>
+              <td style="padding:0.8rem 1rem; text-align:center; border-bottom:1px solid #e2e8f0;">3.0</td>
+              <td style="padding:0.8rem 1rem; text-align:center; border-bottom:1px solid #e2e8f0;">53 dB</td>
+              <td style="padding:0.8rem 1rem; text-align:center; border-bottom:1px solid #e2e8f0;">10^(31/30) ≈ 10.8 m</td>
+              <td style="padding:0.8rem 1rem; text-align:center; border-bottom:1px solid #e2e8f0;">~10.6 m</td>
+            </tr>
+            <tr style="background:#eff6ff;">
+              <td style="padding:0.8rem 1rem; font-weight:600;">🏭 工厂车间 (n=2.5)</td>
+              <td style="padding:0.8rem 1rem; text-align:center;">2.5</td>
+              <td style="padding:0.8rem 1rem; text-align:center;">53 dB</td>
+              <td style="padding:0.8rem 1rem; text-align:center;">10^(31/25) ≈ 17.4 m</td>
+              <td style="padding:0.8rem 1rem; text-align:center;">~17 m</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.95rem; color:#64748b; margin:1rem 0 0; line-height:1.7;">
+          <strong>关键发现：</strong>相同功率下，室外覆盖半径是室内的 <strong>3 倍以上</strong>！这意味着室外场景 AP 数量可大幅减少，但间距拉大后<strong>漫游重叠区</strong>变宽，需要精心规划。
+        </p>
+      </div>
+    </div>
+
+    <!-- 室外安装高度分析 -->
+    <div style="margin-bottom:2rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">📐 室外最佳安装高度：为什么是 5~8 米？</h4>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 1.8rem;">
+          <h5 style="font-size:1.08rem; font-weight:700; color:#2563eb; margin:0 0 0.8rem;">✅ 太低的问题（&lt; 3m）</h5>
+          <ul style="font-size:1rem; color:#334155; line-height:2; padding-left:1.2rem; margin:0;">
+            <li>人群遮挡（人体 3~5dB 衰减）极为严重</li>
+            <li>视线被灌木、车辆、临时设施阻挡</li>
+            <li>AP 容易被物理触碰或破坏</li>
+            <li>覆盖锥过小，需要大量 AP</li>
+          </ul>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 1.8rem;">
+          <h5 style="font-size:1.08rem; font-weight:700; color:#2563eb; margin:0 0 0.8rem;">✅ 太高的问题（&gt; 12m）</h5>
+          <ul style="font-size:1rem; color:#334155; line-height:2; padding-left:1.2rem; margin:0;">
+            <li>高度分量消耗过多链路预算</li>
+            <li>天线下倾角需很大，增益受损</li>
+            <li>风载荷增大，安装维护困难</li>
+            <li>可能违反景观法规或航空限高</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe); border:2px solid #2563eb; border-radius:16px; padding:1.8rem 2.2rem; margin-top:1.5rem;">
+        <p style="font-size:1.08rem; color:#1e3a8a; line-height:1.9; margin:0;">
+          <strong>🎯 黄金高度 5~8 米的物理理由：</strong><br>
+          在 H = 6m、RSSI 目标 −67dBm、EIRP = 17dBm 条件下：<br>
+          <span style="font-family:'Courier New',monospace;">R = √(35.5² − 4.5²) = √(1260 − 20) ≈ 35.2m</span><br>
+          高度仅"消耗"了 0.3m 的水平半径（&lt;1%）！说明 6 米高度在室外几乎不损失覆盖。同时 6 米足以避开人群遮挡和地面杂物，且便于电线杆/灯杆安装。
+        </p>
+      </div>
+    </div>
+
+    <!-- 室外推荐参数表 -->
+    <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe); border:2px solid #2563eb; border-radius:16px; padding:2rem 2.5rem; margin-bottom:1.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#1e3a8a; margin:0 0 1rem;">✅ 室外空旷场景部署推荐</h4>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem;">
+        <thead>
+          <tr>
+            <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:8px 0 0 0;">参数</th>
+            <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:center;">推荐值</th>
+            <th style="background:#2563eb; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:0 8px 0 0;">依据</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装高度</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">5 ~ 8 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">灯杆/电线杆安装；高于人群遮挡，低于风载极限</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">AP 间距</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">40 ~ 55 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">理论 2×35m×80% ≈ 56m；考虑人群密度降至 40~55m</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">天线类型</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">全向 或 120° 扇区</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">广场用全向；沿道路/走廊用扇区天线集中覆盖</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">AP 型号</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">C9124AXE / IW9167E</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">户外级 IP67，宽温 −40°C~65°C，外置天线</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">Tx Power</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#2563eb; border-bottom:1px solid #e2e8f0;">≤ 法规 EIRP 上限</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">中国 5GHz 室外 EIRP ≤ 33dBm（需确认当地法规）</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600;">特殊注意</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626;">雷击防护 + 接地</td>
+            <td style="padding:0.8rem 1rem;">室外 AP 必须配合避雷器和正确接地</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 补充：2.4GHz 室外对比 -->
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 2rem;">
+      <h5 style="font-size:1.1rem; font-weight:700; color:#2563eb; margin:0 0 0.8rem;">📡 补充：2.4 GHz 在室外的覆盖优势</h5>
+      <p style="font-size:1.02rem; color:#334155; line-height:1.9; margin:0;">
+        室外场景是 2.4GHz 少数仍有价值的地方。由于 L₀ 仅 46dB（比 5GHz 低 7dB），相同功率下：<br>
+        <span style="font-family:'Courier New',monospace; background:#f8fafc; padding:0.3rem 0.5rem; border-radius:4px; font-size:0.95rem;">
+          d(2.4G) = 10^[(17−46+67)/(10×2.0)] = 10^[38/20] = 10^1.9 ≈ <strong>79.4 m</strong>
+        </span><br>
+        2.4GHz 的覆盖半径几乎是 5GHz 的 <strong>2.2 倍</strong>！对于低密度、广覆盖的物联网终端（传感器、巡检设备），2.4GHz 仍是首选。但对于高吞吐（视频、语音），5GHz/6GHz 的信道容量远优于 2.4GHz 的 3 个非重叠信道。
+      </p>
+    </div>
+  </div>
+  <!-- ====== 4.5.6 场景五：体育场馆 / 演唱会 ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#dc2626; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">6</span>
+      场景五：体育场馆 / 演唱会 · 万人并发的极限考验
+    </h3>
+
+    <!-- 场景引言 -->
+    <div style="background:#fef2f2; border-left:5px solid #dc2626; border-radius:12px; padding:1.8rem 2.2rem; margin-bottom:2rem;">
+      <p style="font-size:1.15rem; color:#991b1b; line-height:1.9; margin:0;">
+        <strong>🏟️ 核心挑战：</strong>高密度场馆是无线设计的"终极 Boss"。一场演唱会可能有 <strong>50,000+ 部手机</strong>同时在线——发朋友圈、直播、刷社交媒体。此时，覆盖已经不再是主要矛盾，<strong>容量</strong>才是。你的 AP 不是手电筒照明，而是<strong>高速公路的收费站</strong>：每个 AP 就是一个收费窗口，客户端就是排队的车辆。窗口越多、车道越宽（信道带宽），通过能力越强。
+      </p>
+    </div>
+
+    <!-- 设计思维翻转 -->
+    <div style="margin-bottom:2.5rem;">
+      <h4 style="font-size:1.25rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">🔄 思维翻转：从"覆盖驱动"到"容量驱动"</h4>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+        <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:16px; padding:1.8rem 2rem;">
+          <h5 style="font-size:1.1rem; font-weight:700; color:#dc2626; margin:0 0 1rem; text-align:center;">❌ 常规思维（覆盖驱动）</h5>
+          <p style="font-size:1.05rem; color:#334155; line-height:1.9; margin:0; text-align:center;">
+            "一个 AP 覆盖半径 15 米，<br>场馆 100m × 60m，<br>所以需要 100/30 × 60/30 ≈ 6~7 个 AP"
+          </p>
+          <p style="font-size:1.3rem; text-align:center; margin:1rem 0 0; color:#dc2626; font-weight:700;">
+            6 个 AP 服务 50,000 人？<br>每 AP 承载 8,333 台设备 🤯
+          </p>
+        </div>
+        <div style="background:#ecfdf5; border:2px solid #6ee7b7; border-radius:16px; padding:1.8rem 2rem;">
+          <h5 style="font-size:1.1rem; font-weight:700; color:#059669; margin:0 0 1rem; text-align:center;">✅ 正确思维（容量驱动）</h5>
+          <p style="font-size:1.05rem; color:#334155; line-height:1.9; margin:0; text-align:center;">
+            "每 AP 合理承载 25~50 个活跃设备，<br>50,000 × 60% 活跃率 = 30,000 台，<br>需要 30,000 / 40 ≈ <strong>750 个 AP</strong>"
+          </p>
+          <p style="font-size:1.3rem; text-align:center; margin:1rem 0 0; color:#059669; font-weight:700;">
+            750 个 AP 密集部署<br>每 AP ≈ 40 台设备 ✅
+          </p>
+        </div>
+      </div>
+
+      <div style="background:#fffbeb; border:1px solid #fbbf24; border-radius:12px; padding:1.2rem 1.8rem;">
+        <p style="font-size:1.05rem; color:#92400e; line-height:1.8; margin:0;">
+          <strong>💡 Cisco Live TECEWN-2007 的核心教导<sup>[1]</sup>：</strong>高密度场馆的 AP 数量由<strong>容量需求</strong>决定，而非覆盖需求。覆盖只是"副产品"——当你为了容量部署了足够多的 AP，覆盖自然就有了。挑战反而变成了<strong>如何让这么多 AP 互不干扰</strong>。
+        </p>
+      </div>
+    </div>
+
+    <!-- 场馆部署架构 SVG -->
+    <div style="margin-bottom:2.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">🏗️ 高密度场馆典型部署架构</h4>
+
+      <div style="text-align:center; margin:1.5rem 0;">
+        <svg viewBox="0 0 760 480" xmlns="http://www.w3.org/2000/svg" style="max-width:740px; width:100%;">
+          <defs>
+            <linearGradient id="seatGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#dbeafe"/>
+              <stop offset="100%" stop-color="#bfdbfe"/>
+            </linearGradient>
+            <linearGradient id="fieldGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#bbf7d0"/>
+              <stop offset="100%" stop-color="#86efac"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 场馆轮廓 -->
+          <ellipse cx="380" cy="240" rx="350" ry="200" fill="none" stroke="#6b7280" stroke-width="2"/>
+
+          <!-- 看台（分层） -->
+          <!-- 下层看台 -->
+          <ellipse cx="380" cy="240" rx="310" ry="170" fill="url(#seatGrad)" opacity="0.4" stroke="#93c5fd" stroke-width="1"/>
+          <text x="380" y="85" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="600">上层看台</text>
+          <!-- 中层 -->
+          <ellipse cx="380" cy="240" rx="250" ry="130" fill="url(#seatGrad)" opacity="0.5" stroke="#93c5fd" stroke-width="1"/>
+          <text x="380" y="125" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="600">中层看台</text>
+          <!-- 下层 -->
+          <ellipse cx="380" cy="240" rx="190" ry="90" fill="url(#seatGrad)" opacity="0.6" stroke="#93c5fd" stroke-width="1"/>
+          <text x="380" y="168" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="600">下层看台</text>
+
+          <!-- 场地 -->
+          <ellipse cx="380" cy="240" rx="120" ry="55" fill="url(#fieldGrad)" stroke="#22c55e" stroke-width="2"/>
+          <text x="380" y="237" text-anchor="middle" fill="#166534" font-size="14" font-weight="700">⚽ 场地</text>
+          <text x="380" y="255" text-anchor="middle" fill="#166534" font-size="10">（通常不需要覆盖观众）</text>
+
+          <!-- AP 部署位置标注 -->
+          <!-- 座椅下方 AP（下层） -->
+          <circle cx="220" cy="220" r="7" fill="#dc2626"/>
+          <circle cx="260" cy="195" r="7" fill="#dc2626"/>
+          <circle cx="300" cy="180" r="7" fill="#dc2626"/>
+          <circle cx="460" cy="180" r="7" fill="#dc2626"/>
+          <circle cx="500" cy="195" r="7" fill="#dc2626"/>
+          <circle cx="540" cy="220" r="7" fill="#dc2626"/>
+          <circle cx="220" cy="260" r="7" fill="#dc2626"/>
+          <circle cx="260" cy="280" r="7" fill="#dc2626"/>
+          <circle cx="500" cy="280" r="7" fill="#dc2626"/>
+          <circle cx="540" cy="260" r="7" fill="#dc2626"/>
+
+          <!-- 座椅下方 AP（中层） -->
+          <circle cx="170" cy="190" r="7" fill="#ea580c"/>
+          <circle cx="200" cy="160" r="7" fill="#ea580c"/>
+          <circle cx="560" cy="160" r="7" fill="#ea580c"/>
+          <circle cx="590" cy="190" r="7" fill="#ea580c"/>
+          <circle cx="170" cy="290" r="7" fill="#ea580c"/>
+          <circle cx="200" cy="315" r="7" fill="#ea580c"/>
+          <circle cx="560" cy="315" r="7" fill="#ea580c"/>
+          <circle cx="590" cy="290" r="7" fill="#ea580c"/>
+
+          <!-- 上层 AP -->
+          <circle cx="130" cy="160" r="7" fill="#7c3aed"/>
+          <circle cx="160" cy="130" r="7" fill="#7c3aed"/>
+          <circle cx="380" cy="60" r="7" fill="#7c3aed"/>
+          <circle cx="600" cy="130" r="7" fill="#7c3aed"/>
+          <circle cx="630" cy="160" r="7" fill="#7c3aed"/>
+          <circle cx="130" cy="320" r="7" fill="#7c3aed"/>
+          <circle cx="160" cy="348" r="7" fill="#7c3aed"/>
+          <circle cx="380" cy="415" r="7" fill="#7c3aed"/>
+          <circle cx="600" cy="348" r="7" fill="#7c3aed"/>
+          <circle cx="630" cy="320" r="7" fill="#7c3aed"/>
+
+          <!-- 图例 -->
+          <rect x="30" y="435" width="700" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+          <circle cx="70" cy="455" r="7" fill="#dc2626"/>
+          <text x="85" y="459" fill="#334155" font-size="11">下层 AP（座椅下）</text>
+          <circle cx="250" cy="455" r="7" fill="#ea580c"/>
+          <text x="265" y="459" fill="#334155" font-size="11">中层 AP（座椅下）</text>
+          <circle cx="440" cy="455" r="7" fill="#7c3aed"/>
+          <text x="455" y="459" fill="#334155" font-size="11">上层 AP（栏杆/结构梁）</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 高密度关键参数 -->
+    <div style="margin-bottom:2.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">📐 高密度场馆的"反直觉"部署参数</h4>
+
+      <p style="font-size:1.08rem; color:#334155; line-height:1.9; margin-bottom:1.5rem;">
+        高密度设计的核心思想是：<strong>降低功率、缩小覆盖、增加密度</strong>。这与常规部署完全相反——你需要每个 AP 只覆盖一小片区域（约 30~80 个座位），从而将终端分散到不同的 AP 上。
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem; margin-bottom:2rem;">
+        <!-- 卡片1：功率 -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); text-align:center;">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;">🔊</div>
+          <h5 style="font-size:1.05rem; font-weight:700; color:#dc2626; margin:0 0 0.5rem;">极低发射功率</h5>
+          <p style="font-size:1.8rem; font-weight:800; color:#0f172a; margin:0 0 0.3rem;">5 ~ 8 dBm</p>
+          <p style="font-size:0.95rem; color:#64748b; line-height:1.6; margin:0;">
+            远低于常规 14~17dBm<br>
+            5GHz 覆盖半径仅 <strong>3~5 米</strong><br>
+            防止 AP 间互相干扰
+          </p>
+        </div>
+        <!-- 卡片2：间距 -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); text-align:center;">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;">📏</div>
+          <h5 style="font-size:1.05rem; font-weight:700; color:#dc2626; margin:0 0 0.5rem;">超密 AP 间距</h5>
+          <p style="font-size:1.8rem; font-weight:800; color:#0f172a; margin:0 0 0.3rem;">5 ~ 10 m</p>
+          <p style="font-size:0.95rem; color:#64748b; line-height:1.6; margin:0;">
+            每个 AP 仅服务<br>
+            周围 <strong>30~80 个座位</strong><br>
+            约 25~50 台活跃设备
+          </p>
+        </div>
+        <!-- 卡片3：高度 -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); text-align:center;">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;">📐</div>
+          <h5 style="font-size:1.05rem; font-weight:700; color:#dc2626; margin:0 0 0.5rem;">安装高度</h5>
+          <p style="font-size:1.8rem; font-weight:800; color:#0f172a; margin:0 0 0.3rem;">座椅下方</p>
+          <p style="font-size:0.95rem; color:#64748b; line-height:1.6; margin:0;">
+            离用户仅 <strong>0.5~1.5 米</strong><br>
+            最短路径 = 最少损耗<br>
+            天线朝上覆盖上方座位
+          </p>
+        </div>
+      </div>
+
+      <!-- 推导验证 -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:2rem 2.5rem; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+        <h5 style="font-size:1.1rem; font-weight:700; color:#dc2626; margin:0 0 1rem;">🧮 验证：低功率下的精确覆盖控制</h5>
+        <div style="font-size:1.02rem; color:#334155; line-height:2;">
+          <p style="margin:0; font-family:'Courier New',monospace; background:#fef2f2; padding:0.8rem 1rem; border-radius:8px; font-size:0.98rem;">
+            <strong>目标：</strong>每个 AP 覆盖半径 ≈ 4 米（约 60 个座位的扇区）<br>
+            <strong>条件：</strong>5GHz, n = 2.5（座椅间有人体遮挡）, 目标边缘 RSSI = −65dBm<br><br>
+            <strong>反向求解所需 EIRP：</strong><br>
+            L(4m) = 53 + 10 × 2.5 × log₁₀(4) = 53 + 25 × 0.602 = 53 + 15.1 = <strong>68.1 dB</strong><br>
+            所需 EIRP = RSSI + L = −65 + 68.1 = <strong>3.1 dBm</strong><br><br>
+            <strong>考虑天线增益 3dBi（内置天线）：</strong><br>
+            Tx Power = 3.1 − 3 = <strong>0.1 dBm</strong> ← 实际中取 <strong>2~5 dBm</strong>（留 2~5dB 余量）<br><br>
+            <strong>验证 5dBm 时的覆盖半径：</strong><br>
+            EIRP = 5 + 3 = 8 dBm<br>
+            d = 10^[(8 − 53 + 65) / (10 × 2.5)] = 10^[20/25] = 10^0.8 ≈ <strong>6.3 m</strong> ✅<br>
+            <span style="color:#059669; font-weight:600;">→ 正好覆盖 2~3 排座椅，与设计目标吻合</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 场馆特殊设计要点 -->
+    <div style="margin-bottom:2rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-bottom:1rem;">🎯 场馆部署的五大设计要点</h4>
+
+      <div style="display:grid; grid-template-columns:1fr; gap:1rem;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 2rem; display:flex; gap:1.2rem; align-items:flex-start;">
+          <span style="background:#dc2626; color:#fff; width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700;">1</span>
+          <div>
+            <h5 style="font-size:1.08rem; font-weight:700; color:#0f172a; margin:0 0 0.3rem;">使用 20MHz 信道宽度</h5>
+            <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+              高密度场景下，<strong>窄信道 = 更多可用信道 = 更少干扰</strong>。5GHz 在 20MHz 模式下有多达 <strong>25 个</strong>非重叠信道（取决于国家法规），而 40MHz 只有 12 个，80MHz 只有 6 个。wlan-basic.html 明确建议高密度环境使用 20MHz 信道<sup>[2]</sup>。如果部署了 6GHz（Wi-Fi 6E/7），可获得额外 <strong>59 个 20MHz 信道</strong>（美国）<sup>[4]</sup>。
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 2rem; display:flex; gap:1.2rem; align-items:flex-start;">
+          <span style="background:#dc2626; color:#fff; width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700;">2</span>
+          <div>
+            <h5 style="font-size:1.08rem; font-weight:700; color:#0f172a; margin:0 0 0.3rem;">分区信道规划（手动分配）</h5>
+            <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+              在如此密集的 AP 部署下，RRM 自动信道分配可能<strong>无法收敛</strong>。Cisco 建议对高密度场馆进行<strong>手动信道规划</strong>，使用蜂窝式信道复用图确保相邻 AP 使用不同信道，最小复用距离 ≥ 3 个 AP 间距。
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 2rem; display:flex; gap:1.2rem; align-items:flex-start;">
+          <span style="background:#dc2626; color:#fff; width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700;">3</span>
+          <div>
+            <h5 style="font-size:1.08rem; font-weight:700; color:#0f172a; margin:0 0 0.3rem;">定向天线 + 下倾角精确控制</h5>
+            <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+              座椅下方安装的 AP 通常使用<strong>窄波束定向天线</strong>，波束宽度约 <strong>60°×60°</strong>，朝上方和前方发射。关键是控制<strong>后瓣抑制</strong>（≥ 15dB），防止信号泄漏到相邻扇区。部分场馆使用 Cisco 的<strong>C-ANT9104</strong> 等专用场馆天线<sup>[3]</sup>。
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 2rem; display:flex; gap:1.2rem; align-items:flex-start;">
+          <span style="background:#dc2626; color:#fff; width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700;">4</span>
+          <div>
+            <h5 style="font-size:1.08rem; font-weight:700; color:#0f172a; margin:0 0 0.3rem;">禁用低速率 + 启用 Band Steering</h5>
+            <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+              禁用所有低于 <strong>12 Mbps</strong> 的 mandatory 速率（2.4GHz 的 1/2/5.5/6/9/11 Mbps），强制客户端使用高效速率，减少<strong>单帧占空比</strong>。同时启用 Band Steering 将双频客户端引导到 5GHz/6GHz，释放 2.4GHz 空间给仅支持 2.4G 的旧设备<sup>[2]</sup>。
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem 2rem; display:flex; gap:1.2rem; align-items:flex-start;">
+          <span style="background:#dc2626; color:#fff; width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700;">5</span>
+          <div>
+            <h5 style="font-size:1.08rem; font-weight:700; color:#0f172a; margin:0 0 0.3rem;">Wi-Fi 7 OFDMA + BSS Coloring 的场馆价值</h5>
+            <p style="font-size:1rem; color:#334155; line-height:1.8; margin:0;">
+              BRKEWN-2048 的测试数据显示<sup>[3]</sup>：在高密度竞争场景下，Wi-Fi 6/7 的 <strong>OFDMA</strong> 将延迟曲线从指数增长变为<strong>线性增长</strong>（"Contention Breaking Point"）。同时 <strong>BSS Coloring</strong> 允许相邻 AP 即使使用同一信道也能通过颜色标识减少 CCA 退避（"忽略其他桌的对话，继续自己的"）<sup>[5]</sup>。这两项技术使场馆的实际可用容量提升 <strong>2~4 倍</strong>。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 场馆推荐参数表 -->
+    <div style="background:linear-gradient(135deg,#fef2f2,#fee2e2); border:2px solid #dc2626; border-radius:16px; padding:2rem 2.5rem;">
+      <h4 style="font-size:1.2rem; font-weight:700; color:#991b1b; margin:0 0 1rem;">✅ 体育场馆 / 演唱会部署推荐</h4>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:1.05rem;">
+        <thead>
+          <tr>
+            <th style="background:#dc2626; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:8px 0 0 0;">参数</th>
+            <th style="background:#dc2626; color:#fff; padding:0.8rem 1rem; text-align:center;">推荐值</th>
+            <th style="background:#dc2626; color:#fff; padding:0.8rem 1rem; text-align:left; border-radius:0 8px 0 0;">依据</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">安装高度</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626; border-bottom:1px solid #e2e8f0;">座椅下 0.3~1.0 m<br>或栏杆 2~3 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">最短路径 = 最小损耗 = 最精确的覆盖控制</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">AP 间距</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626; border-bottom:1px solid #e2e8f0;">5 ~ 10 m</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">容量驱动，每 AP 服务 30~80 座位</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">Tx Power</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626; border-bottom:1px solid #e2e8f0;">2 ~ 8 dBm</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">极低功率以缩小单 AP 覆盖半径至 3~6m</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">信道宽度</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626; border-bottom:1px solid #e2e8f0;">20 MHz</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">最大化可用信道数，减少同频干扰</td>
+          </tr>
+          <tr style="background:#fff;">
+            <td style="padding:0.8rem 1rem; font-weight:600; border-bottom:1px solid #e2e8f0;">天线</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626; border-bottom:1px solid #e2e8f0;">窄波束定向 60°×60°</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0;">精确控制扇区覆盖，后瓣抑制 ≥ 15dB</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:600;">每 AP 终端数</td>
+            <td style="padding:0.8rem 1rem; text-align:center; font-weight:700; color:#dc2626;">25 ~ 50 台活跃</td>
+            <td style="padding:0.8rem 1rem;">TECEWN-2007 建议每 AP ≤ 50 活跃设备<sup>[1]</sup></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ====== 4.5.7 五大场景总结决策表 ====== -->
+  <div style="margin-bottom:3rem;">
+    <h3 style="font-size:1.6rem; font-weight:700; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <span style="background:#0f172a; color:#fff; width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem;">∑</span>
+      五大场景部署速查总表
+    </h3>
+
+    <p style="font-size:1.08rem; color:#334155; line-height:1.9; margin-bottom:1.5rem;">
+      以下是从第一性原理推导出的五大场景核心参数汇总。每一个数值都有物理公式和文档证据支撑，不是"经验值"，而是<strong>可验证的工程结论</strong>。
+    </p>
+
+    <div style="overflow-x:auto; margin-bottom:2rem;">
+      <table style="width:100%; min-width:900px; border-collapse:separate; border-spacing:0; font-size:1.02rem;">
+        <thead>
+          <tr>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:left; border-radius:12px 0 0 0; min-width:100px;">场景</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:center;">安装高度</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:center;">AP 间距</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:center;">Tx Power<br>(5GHz)</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:center;">天线类型</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:center;">n 值</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:center;">驱动因素</th>
+            <th style="background:#0f172a; color:#fff; padding:1rem; text-align:left; border-radius:0 12px 0 0;">特殊注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#f0fdfa;">
+            <td style="padding:0.8rem 1rem; font-weight:700; border-bottom:1px solid #e2e8f0;">
+              <span style="color:#0d9488;">🏢</span> 室内办公
+            </td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">2.7 ~ 3.5 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">15 ~ 18 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">14 ~ 17 dBm</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">全向内置</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">3.0</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">覆盖</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0; font-size:0.95rem;">会议室独立 AP</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:700; border-bottom:1px solid #e2e8f0;">
+              <span style="color:#ea580c;">🏭</span> 工厂车间
+            </td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">4 ~ 6 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">10 ~ 15 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">14 ~ 17 dBm</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">定向 Patch</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">2.5</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">覆盖+漫游</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0; font-size:0.95rem;">AGV 重叠 ≥ 30%</td>
+          </tr>
+          <tr style="background:#f5f3ff;">
+            <td style="padding:0.8rem 1rem; font-weight:700; border-bottom:1px solid #e2e8f0;">
+              <span style="color:#7c3aed;">📦</span> 立体仓库
+            </td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">4 ~ 6 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">25 ~ 35 m<br><span style="font-size:0.85rem; color:#64748b;">(通道内)</span></td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">14 ~ 17 dBm</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">窄波束定向</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">2.0<br><span style="font-size:0.85rem; color:#64748b;">(波导)</span></td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">覆盖</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0; font-size:0.95rem;">每通道独立覆盖</td>
+          </tr>
+          <tr>
+            <td style="padding:0.8rem 1rem; font-weight:700; border-bottom:1px solid #e2e8f0;">
+              <span style="color:#2563eb;">🌳</span> 室外空旷
+            </td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">5 ~ 8 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0; font-weight:600;">40 ~ 55 m</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">≤ 法规上限</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">全向 / 120°扇区</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">2.0</td>
+            <td style="padding:0.8rem; text-align:center; border-bottom:1px solid #e2e8f0;">覆盖</td>
+            <td style="padding:0.8rem 1rem; border-bottom:1px solid #e2e8f0; font-size:0.95rem;">IP67 + 防雷接地</td>
+          </tr>
+          <tr style="background:#fef2f2;">
+            <td style="padding:0.8rem 1rem; font-weight:700;">
+              <span style="color:#dc2626;">🏟️</span> 场馆/演唱会
+            </td>
+            <td style="padding:0.8rem; text-align:center; font-weight:600;">座椅下 0.3~1m<br>栏杆 2~3m</td>
+            <td style="padding:0.8rem; text-align:center; font-weight:600;">5 ~ 10 m</td>
+            <td style="padding:0.8rem; text-align:center;">2 ~ 8 dBm</td>
+            <td style="padding:0.8rem; text-align:center;">窄波束 60°×60°</td>
+            <td style="padding:0.8rem; text-align:center;">2.5</td>
+            <td style="padding:0.8rem; text-align:center; font-weight:700; color:#dc2626;">容量！</td>
+            <td style="padding:0.8rem 1rem; font-size:0.95rem;">20MHz 信道 / 手动规划</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 总结金句 -->
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:16px; padding:2.5rem 3rem; text-align:center;">
+      <p style="font-size:1.4rem; color:#e2e8f0; line-height:2; margin:0 0 1rem;">
+        <strong style="color:#fbbf24;">🎯 本章核心结论</strong>
+      </p>
+      <p style="font-size:1.2rem; color:#f8fafc; line-height:2; margin:0 auto; max-width:700px;">
+        AP 的安装高度和间距<strong style="color:#34d399;">不是经验参数，而是物理推导的必然结果</strong>。<br><br>
+        掌握三个公式——<strong style="color:#fbbf24;">路径损耗模型</strong>、<strong style="color:#fbbf24;">链路预算方程</strong>、<strong style="color:#fbbf24;">勾股定理修正</strong>——你就能在任何场景下，从<strong style="color:#34d399;">目标 RSSI</strong> 反推出精确的部署参数。<br><br>
+        记住两个决策起点：<br>
+        <span style="color:#60a5fa; font-size:1.1rem;">普通场景 → <strong>"我需要覆盖多远？"</strong> → 由高度和间距决定</span><br>
+        <span style="color:#f87171; font-size:1.1rem;">高密度场景 → <strong>"我需要服务多少人？"</strong> → 由 AP 数量和功率决定</span>
+      </p>
+    </div>
+  </div>
+
+</section>
+<!-- ============================================================
+     第 4.5 章 结束
+     ============================================================ -->
+
   <!-- ======================== CHAPTER 5 ======================== -->
   <section class="chapter" id="ch5">
     <h2>5 &nbsp; 漫游机制深度拆解</h2>
