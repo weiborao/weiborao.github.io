@@ -1,0 +1,3039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无线网络设计：从第一性原理到工程实践 | Wireless First World</title>
+<style>
+  :root {
+    --primary: #0D274D;
+    --accent: #0078D4;
+    --accent-light: #E8F4FD;
+    --accent-dark: #005A9E;
+    --bg: #FAFBFC;
+    --card-bg: #FFFFFF;
+    --text: #1A2B3C;
+    --text-secondary: #5A6B7C;
+    --border: #E2E8F0;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --purple: #7C3AED;
+    --teal: #0D9488;
+    --orange: #EA580C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --max-width: 920px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 18px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Hero Section */
+  .hero {
+    background: linear-gradient(135deg, #0D274D 0%, #1565C0 50%, #0D9488 100%);
+    color: white;
+    padding: 80px 24px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero .container { position: relative; z-index: 1; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .hero .subtitle {
+    font-size: clamp(18px, 2.5vw, 22px);
+    opacity: 0.9;
+    line-height: 1.6;
+    max-width: 700px;
+    font-weight: 300;
+  }
+  .hero-meta {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-size: 15px;
+    opacity: 0.8;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* Table of Contents */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    margin: -30px auto 48px;
+    position: relative;
+    z-index: 2;
+    box-shadow: var(--shadow-lg);
+    max-width: var(--max-width);
+  }
+  .toc h2 {
+    font-size: 22px;
+    color: var(--primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--text);
+    font-size: 16px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .toc-item:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+  }
+  .toc-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Section Styles */
+  .section {
+    padding: 60px 0;
+  }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .section h2 {
+    font-size: clamp(28px, 4vw, 36px);
+    color: var(--primary);
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .section-desc {
+    font-size: 19px;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+
+  h3 {
+    font-size: 24px;
+    color: var(--primary);
+    margin: 40px 0 16px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  h4 {
+    font-size: 20px;
+    color: var(--accent-dark);
+    margin: 28px 0 12px;
+    font-weight: 700;
+  }
+
+  p {
+    margin-bottom: 18px;
+    font-size: 18px;
+    line-height: 1.85;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .card-accent {
+    border-left: 4px solid var(--accent);
+  }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .card-purple { border-left: 4px solid var(--purple); }
+  .card-teal { border-left: 4px solid var(--teal); }
+  .card-orange { border-left: 4px solid var(--orange); }
+
+  .card h4 { margin-top: 0; }
+  .card h4:first-child { margin-top: 0; }
+
+  /* Analogy Box */
+  .analogy {
+    background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+    border: 1px solid #FDE68A;
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin: 28px 0;
+    position: relative;
+  }
+  .analogy::before {
+    content: '💡';
+    font-size: 28px;
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #FFF7ED;
+    padding: 0 8px;
+  }
+  .analogy .analogy-title {
+    font-weight: 700;
+    color: var(--orange);
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .analogy p { margin-bottom: 8px; font-size: 17px; }
+
+  /* Key Insight */
+  .insight {
+    background: linear-gradient(135deg, var(--accent-light) 0%, #E0F2FE 100%);
+    border: 1px solid #93C5FD;
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin: 28px 0;
+    position: relative;
+  }
+  .insight::before {
+    content: '🔑';
+    font-size: 28px;
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: var(--accent-light);
+    padding: 0 8px;
+  }
+  .insight .insight-title {
+    font-weight: 700;
+    color: var(--accent-dark);
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  /* Principle Box */
+  .principle {
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+    border: 1px solid #86EFAC;
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin: 28px 0;
+    position: relative;
+  }
+  .principle::before {
+    content: '⚡';
+    font-size: 28px;
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #F0FDF4;
+    padding: 0 8px;
+  }
+  .principle .principle-title {
+    font-weight: 700;
+    color: var(--success);
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 24px 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    background: var(--card-bg);
+  }
+  thead { background: var(--primary); color: white; }
+  th {
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:hover { background: #F8FAFC; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Lists */
+  ul, ol {
+    padding-left: 28px;
+    margin-bottom: 18px;
+  }
+  li {
+    margin-bottom: 10px;
+    font-size: 18px;
+    line-height: 1.7;
+  }
+  li strong { color: var(--primary); }
+
+  /* SVG Diagram Containers */
+  .diagram {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 32px 0;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .diagram svg {
+    max-width: 100%;
+    height: auto;
+  }
+  .diagram-caption {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  /* Formula */
+  .formula {
+    background: #F1F5F9;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 28px;
+    margin: 20px 0;
+    font-family: "Courier New", monospace;
+    font-size: 18px;
+    text-align: center;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* Footnotes */
+  .footnotes {
+    background: #F8FAFC;
+    border-top: 2px solid var(--border);
+    padding: 40px 0;
+    margin-top: 60px;
+  }
+  .footnotes h2 {
+    font-size: 24px;
+    color: var(--primary);
+    margin-bottom: 20px;
+  }
+  .footnote-item {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+  }
+  .footnote-item::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Glossary */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .glossary-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+  }
+  .glossary-term {
+    font-weight: 700;
+    color: var(--accent-dark);
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .glossary-def {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Step Indicators */
+  .steps { margin: 24px 0; }
+  .step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-content h4 { margin-top: 4px; margin-bottom: 6px; font-size: 19px; }
+  .step-content p { font-size: 17px; margin-bottom: 6px; }
+
+  /* Highlight */
+  .highlight {
+    background: linear-gradient(to right, #FEF9C3, #FEF08A);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  /* Separator */
+  .sep {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero { padding: 60px 20px 48px; }
+    .toc { padding: 24px 20px; margin: -20px 16px 36px; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .section { padding: 40px 0; }
+    .card { padding: 24px 20px; }
+    .hero-meta { gap: 16px; }
+    body { font-size: 17px; }
+    table { font-size: 14px; }
+    th, td { padding: 10px 12px; }
+    .analogy, .insight, .principle { padding: 24px 20px; }
+    .glossary-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 28px; }
+    .container { padding: 0 16px; }
+    h3 { font-size: 21px; }
+    h4 { font-size: 18px; }
+  }
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-badge">📡 WIRELESS FIRST WORLD</div>
+    <h1>无线网络设计<br>从第一性原理到工程实践</h1>
+    <p class="subtitle">
+      在这个"无线优先"的时代，Wi-Fi 已从办公室的"锦上添花"变成了业务运转的"氧气管道"。<br>
+      本文将带你从电磁波的物理本质出发，一步步推导出高性能无线网络的设计方法论。
+    </p>
+    <div class="hero-meta">
+      <span>📖 深度技术长文</span>
+      <span>🕐 约 45 分钟阅读</span>
+      <span>🎯 适合：网络工程师 / IT 架构师 / 技术管理者</span>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== TOC ==================== -->
+<nav class="toc container" id="toc">
+  <h2>📑 文章导览</h2>
+  <div class="toc-grid">
+    <a href="#ch0" class="toc-item"><span class="toc-num">0</span>引子：为什么需要"第一性原理"？</a>
+    <a href="#ch1" class="toc-item"><span class="toc-num">1</span>RF 物理基础：信号的三要素</a>
+    <a href="#ch2" class="toc-item"><span class="toc-num">2</span>调制与吞吐：Wi-Fi 速率的三重阶梯</a>
+    <a href="#ch3" class="toc-item"><span class="toc-num">3</span>天线选型：全向 vs 定向的工程抉择</a>
+    <a href="#ch4" class="toc-item"><span class="toc-num">4</span>蜂窝设计：从客户端视角定义边缘</a>
+    <a href="#ch5" class="toc-item"><span class="toc-num">5</span>场景实战：办公 / 仓储 / 高密度</a>
+    <a href="#ch6" class="toc-item"><span class="toc-num">6</span>AP 选型：Cisco Wi-Fi 7 产品矩阵</a>
+    <a href="#ch7" class="toc-item"><span class="toc-num">7</span>设计验证：勘测、工具与优化闭环</a>
+    <a href="#ch8" class="toc-item"><span class="toc-num">8</span>Wi-Fi 7 新特性与迁移策略</a>
+    <a href="#ch9" class="toc-item"><span class="toc-num">9</span>总结：设计黄金法则</a>
+    <a href="#glossary" class="toc-item"><span class="toc-num">G</span>术语表</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ==================== Chapter 0: 引子 ==================== -->
+<section class="section" id="ch0">
+  <div class="container">
+    <div class="section-label">◆ 引子</div>
+    <h2>为什么需要"第一性原理"？</h2>
+    <p class="section-desc">
+      很多人设计无线网络时，习惯从"经验规则"出发——"每隔 15 米放一个 AP"，"5 GHz 比 2.4 GHz 好"，"信号强度到 -67 dBm 就够了"。这些规则有一定道理，但它们就像"菜谱"——告诉你放多少盐，却不告诉你为什么。
+    </p>
+
+    <div class="analogy">
+      <div class="analogy-title">生活类比：装修房子 vs 设计无线网络</div>
+      <p>设计无线网络就像装修一栋房子。你可以照搬别人家的装修方案，但如果你家的户型、采光、居住人数不同，照搬必然出问题。<strong>第一性原理</strong>就是先搞清楚"物理结构"和"居住需求"，再决定"如何装修"。</p>
+    </div>
+
+    <p>
+      本文的方法论来源于 Cisco Live 2026 EMEA 技术研讨会 <em>TECEWN-2007: Wireless Network Design for a Wireless First World</em>，结合 Cisco Wi-Fi 7 全线产品（9172 / 9174 / 9176 系列）的官方数据手册和部署指南。我们将从电磁波的物理特性出发，一层层推导出无线网络设计的每一个关键决策。
+    </p>
+
+    <div class="principle">
+      <div class="principle-title">第一性原理思维</div>
+      <p>无线网络的一切行为，最终都由三条物理定律决定：<strong>电磁波的传播特性</strong>（自由空间路径损耗）、<strong>信噪比对解调的影响</strong>（香农定理）、<strong>介质共享的竞争机制</strong>（CSMA/CA）。掌握这三条，就掌握了所有设计决策的"底层逻辑"。</p>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 1: RF 物理基础 ==================== -->
+<section class="section" id="ch1">
+  <div class="container">
+    <div class="section-label">◆ 第一章</div>
+    <h2>RF 物理基础：信号的三要素</h2>
+    <p class="section-desc">
+      每一根天线、每一个 AP 的行为，最终都可以归结为三个问题：信号有多强（增益）、信号朝哪个方向走（方向性）、信号的电场如何振荡（极化）。让我们逐一拆解。
+    </p>
+
+    <!-- 1.1 天线的本质 -->
+    <h3>1.1 天线的本质：一个无源的"聚光灯"</h3>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：天线就是手电筒的反光碗</div>
+      <p>手电筒的灯泡亮度是固定的（就像发射功率），反光碗不会让灯泡更亮，但它能把原本四散的光<strong>聚拢</strong>到一个方向，让那个方向"看起来更亮"。天线做的事情完全一样——它不产生能量，只是<strong>重新分配</strong>能量。当某个方向的信号变强时，其他方向的信号一定在变弱。</p>
+    </div>
+
+    <p>
+      这是一条极其重要的第一性原理：<strong>天线是无源器件，不会给信号增加任何功率</strong>。无论是 AP 内部焊死在电路板上的"内置天线"，还是通过同轴线缆外接的"外置天线"，它们在物理层面没有本质区别——都是金属振子，遵循同样的电磁场法则<sup>[1]</sup>。两者的差异仅在于：
+    </p>
+    <ul>
+      <li><strong>工程灵活性</strong>：外置天线可以更换不同的辐射模式（全向 / 定向 / 高增益），内置天线的模式在出厂时已固定。</li>
+      <li><strong>部署便利性</strong>：内置天线即插即用，外置天线需要额外的安装和线缆管理。</li>
+      <li><strong>场景适配性</strong>：外置天线可以与 AP 分离安装，适合仓库、高天花板等特殊环境。</li>
+    </ul>
+
+    <div class="insight">
+      <div class="insight-title">关键认知</div>
+      <p>在物理第一性原理面前，内置天线和外置天线没有本质区别。它们都是无源的金属振子，遵循同样的电磁场法则。选择哪种，取决于工程需求，而非物理优劣。</p>
+    </div>
+
+    <!-- 1.2 增益、方向和极化 -->
+    <h3>1.2 天线的三个基本属性</h3>
+
+    <p>根据 Cisco 官方文档<sup>[2]</sup>，天线赋予无线系统三个基本属性：</p>
+
+    <div class="card card-accent">
+      <h4>① 增益（Gain）：信号的"集中度"</h4>
+      <p>增益衡量的是天线在特定方向上将能量<strong>集中</strong>的程度，单位是 dBi（相对于理想各向同性天线）。增益越高，信号在主方向上越强，但覆盖角度越窄。</p>
+      <p>以 Cisco CW9176I 为例<sup>[3]</sup>：其 6 GHz 天线增益为 <strong>6 dBi</strong>——意味着在主方向上，信号比理想球形辐射强 4 倍（6 dB ≈ 4 倍功率）。</p>
+    </div>
+
+    <div class="card card-success">
+      <h4>② 方向性（Direction）：信号的"照射形状"</h4>
+      <p>方向性描述了天线辐射图案的形状。全向天线（Omnidirectional）在水平面 360° 均匀覆盖，如同一盏顶灯照亮整个房间；定向天线（Directional）则像一束手电筒光，集中照亮一个方向。</p>
+      <p>方向性用<strong>波束宽度</strong>（Beamwidth）来量化——即辐射功率下降到峰值一半（-3 dB 点）时的角度范围，分水平波束宽度和垂直波束宽度两个维度。</p>
+    </div>
+
+    <div class="card card-purple">
+      <h4>③ 极化（Polarization）：电场的"振荡方向"</h4>
+      <p>极化是天线辐射电磁波中电场的振荡方向。全向天线通常是<strong>垂直极化</strong>的。当发射端和接收端的极化方向不匹配时，会产生额外的信号损耗。</p>
+    </div>
+
+    <!-- 1.3 辐射图案 -->
+    <h3>1.3 用图案理解天线：从理想到现实</h3>
+
+    <p>为了直观理解天线的行为，我们从最简单的理论模型开始，逐步逼近现实：</p>
+
+    <!-- SVG: 三种天线辐射图案对比 -->
+    <div class="diagram">
+      <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+        <!-- Isotropic -->
+        <g transform="translate(150,160)">
+          <circle cx="0" cy="0" r="70" fill="none" stroke="#0078D4" stroke-width="2" stroke-dasharray="6,4" opacity="0.4"/>
+          <circle cx="0" cy="0" r="90" fill="none" stroke="#0078D4" stroke-width="2" stroke-dasharray="6,4" opacity="0.25"/>
+          <circle cx="0" cy="0" r="50" fill="#0078D4" fill-opacity="0.12" stroke="#0078D4" stroke-width="2.5"/>
+          <circle cx="0" cy="0" r="5" fill="#0D274D"/>
+          <text x="0" y="-105" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">各向同性天线</text>
+          <text x="0" y="-88" text-anchor="middle" font-size="12" fill="#5A6B7C">(理论模型，增益 0 dBi)</text>
+          <text x="0" y="120" text-anchor="middle" font-size="13" fill="#5A6B7C">如同裸灯泡：</text>
+          <text x="0" y="136" text-anchor="middle" font-size="13" fill="#5A6B7C">各方向等强度</text>
+        </g>
+        <!-- Omnidirectional -->
+        <g transform="translate(450,160)">
+          <ellipse cx="0" cy="0" rx="100" ry="35" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="6,4" opacity="0.3"/>
+          <ellipse cx="0" cy="0" rx="80" ry="28" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="2.5"/>
+          <rect x="-2" y="-45" width="4" height="90" rx="2" fill="#0D274D"/>
+          <text x="0" y="-105" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">全向天线</text>
+          <text x="0" y="-88" text-anchor="middle" font-size="12" fill="#5A6B7C">(水平 360°，垂直压缩)</text>
+          <text x="0" y="120" text-anchor="middle" font-size="13" fill="#5A6B7C">如同压扁的气球：</text>
+          <text x="0" y="136" text-anchor="middle" font-size="13" fill="#5A6B7C">水平远、上下弱</text>
+          <!-- Arrows -->
+          <line x1="85" y1="0" x2="115" y2="0" stroke="#10B981" stroke-width="2" marker-end="url(#arrowG)"/>
+          <line x1="-85" y1="0" x2="-115" y2="0" stroke="#10B981" stroke-width="2" marker-end="url(#arrowG)"/>
+        </g>
+        <!-- Directional -->
+        <g transform="translate(750,160)">
+          <path d="M0,0 Q60,-80 120,-30 Q130,0 120,30 Q60,80 0,0Z" fill="#7C3AED" fill-opacity="0.12" stroke="#7C3AED" stroke-width="2.5"/>
+          <circle cx="-10" cy="0" r="15" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+          <circle cx="0" cy="0" r="5" fill="#0D274D"/>
+          <text x="0" y="-105" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">定向天线</text>
+          <text x="0" y="-88" text-anchor="middle" font-size="12" fill="#5A6B7C">(能量集中在一个方向)</text>
+          <text x="0" y="120" text-anchor="middle" font-size="13" fill="#5A6B7C">如同手电筒：</text>
+          <text x="0" y="136" text-anchor="middle" font-size="13" fill="#5A6B7C">正前方强、背后弱</text>
+        </g>
+        <defs>
+          <marker id="arrowG" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8Z" fill="#10B981"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">图 1-1：三种天线辐射图案对比——从理论到实际</div>
+    </div>
+
+    <p>
+      关键概念：想象一个气球代表信号能量。各向同性天线是完美的球形。当我们从上下方向"压扁"这个气球时，能量就会向水平方向扩展——这就是全向天线的工作原理。继续把气球从侧面也压扁，只留下一个方向"鼓"出去——这就是定向天线<sup>[2]</sup>。
+    </p>
+
+    <!-- 1.4 信噪比 -->
+    <h3>1.4 信噪比：无线世界的"信号纯净度"</h3>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：嘈杂餐厅里的对话</div>
+      <p>想象你在一间拥挤的餐厅里和朋友说话。你的声音就是"信号"，周围所有其他人的说话声就是"噪声"。<strong>信噪比（SNR）</strong>就是你的声音比背景噪声大多少——如果你的声音比噪声大 25 分贝，对方听得很清楚；如果只大 5 分贝，对方需要不断"请你再说一遍"（重传）。</p>
+    </div>
+
+    <p>
+      信噪比（Signal-to-Noise Ratio, SNR）是决定无线传输质量的<strong>核心度量</strong>。它不是信号强度（RSSI）本身，而是信号与噪声的<strong>差值</strong><sup>[4]</sup>：
+    </p>
+
+    <div class="formula">
+      SNR (dB) = 接收信号强度 (dBm) − 噪声底噪 (dBm)
+    </div>
+
+    <p>几个具体的例子帮助你建立直觉：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>信号强度</th><th>噪声底噪</th><th>SNR</th><th>通信质量</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>-50 dBm</td><td>-95 dBm</td><td>45 dB</td><td>🟢 极佳，可支持最高速率</td></tr>
+          <tr><td>-60 dBm</td><td>-90 dBm</td><td>30 dB</td><td>🟢 良好，足以支持视频会议</td></tr>
+          <tr><td>-75 dBm</td><td>-90 dBm</td><td>15 dB</td><td>🟡 较差，仅支持低速传输</td></tr>
+          <tr><td>-50 dBm</td><td>-55 dBm</td><td>5 dB</td><td>🔴 信号很强但充满干扰，无法可靠通信</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">设计启示</div>
+      <p>最后一行是最发人深省的：信号强度 -50 dBm 看起来很"强"，但如果环境干扰也很严重（噪声 -55 dBm），通信质量反而极差。<strong>无线设计的目标不是让信号尽可能强，而是让信噪比尽可能高。</strong>有时候，降低发射功率、减少同频干扰，反而能显著提升整体性能<sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 1.5 自由空间路径损耗 -->
+    <h3>1.5 距离与频率：信号衰减的两大杀手</h3>
+
+    <p>
+      电磁波在空间中传播时，能量会随距离扩散而衰减。这种衰减遵循一个被称为<strong>自由空间路径损耗</strong>（Free Space Path Loss, FSPL）的公式。它揭示了两条重要规律<sup>[4]</sup>：
+    </p>
+
+    <div class="card card-accent" style="text-align:center;">
+      <h4 style="text-align:center;">6 dB 法则</h4>
+      <p style="font-size:20px;">
+        <strong>距离翻倍 → 信号衰减 6 dB</strong>（功率降至 ¼）<br>
+        <strong>距离减半 → 信号增强 6 dB</strong>（功率增至 4 倍）
+      </p>
+    </div>
+
+    <!-- SVG: 6dB Law Illustration -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- AP -->
+        <rect x="30" y="85" width="50" height="50" rx="8" fill="#0D274D"/>
+        <text x="55" y="115" text-anchor="middle" font-size="13" fill="white" font-weight="700">AP</text>
+        <!-- Distance markers -->
+        <line x1="80" y1="110" x2="750" y2="110" stroke="#E2E8F0" stroke-width="2"/>
+        <!-- d/2 -->
+        <circle cx="220" cy="110" r="22" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="2"/>
+        <text x="220" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#10B981">d/2</text>
+        <text x="220" y="68" text-anchor="middle" font-size="15" font-weight="700" fill="#10B981">-60 dBm</text>
+        <text x="220" y="160" text-anchor="middle" font-size="13" fill="#5A6B7C">距离减半</text>
+        <text x="220" y="178" text-anchor="middle" font-size="13" fill="#10B981" font-weight="600">+6 dB</text>
+        <!-- d -->
+        <circle cx="420" cy="110" r="22" fill="#0078D4" fill-opacity="0.15" stroke="#0078D4" stroke-width="2"/>
+        <text x="420" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#0078D4">d</text>
+        <text x="420" y="68" text-anchor="middle" font-size="15" font-weight="700" fill="#0078D4">-66 dBm</text>
+        <text x="420" y="160" text-anchor="middle" font-size="13" fill="#5A6B7C">参考距离</text>
+        <!-- 2d -->
+        <circle cx="620" cy="110" r="22" fill="#EF4444" fill-opacity="0.15" stroke="#EF4444" stroke-width="2"/>
+        <text x="620" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#EF4444">2d</text>
+        <text x="620" y="68" text-anchor="middle" font-size="15" font-weight="700" fill="#EF4444">-72 dBm</text>
+        <text x="620" y="160" text-anchor="middle" font-size="13" fill="#5A6B7C">距离翻倍</text>
+        <text x="620" y="178" text-anchor="middle" font-size="13" fill="#EF4444" font-weight="600">-6 dB</text>
+        <!-- Arrows -->
+        <path d="M260,90 Q340,55 400,90" fill="none" stroke="#0078D4" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <path d="M460,90 Q540,55 600,90" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+      </svg>
+      <div class="diagram-caption">图 1-2：6 dB 法则——距离每翻倍，信号衰减 6 dB</div>
+    </div>
+
+    <p>
+      第二条规律与<strong>频率</strong>有关：频率越高，波长越短，路径损耗越大。这意味着 6 GHz 的信号比 5 GHz 在相同距离下衰减更多。根据 Cisco 的实测数据<sup>[4]</sup>，在典型企业室内环境中：
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>频段</th><th>相对衰减</th><th>设计含义</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2.4 GHz</td><td>基准</td><td>覆盖范围最大，但频谱资源最少（仅 3 个不重叠信道）</td></tr>
+          <tr><td>5 GHz</td><td>比 2.4 GHz 约多 7 dB</td><td>覆盖范围中等，在相同功率下比 2.4 GHz 信号弱约 7 dB</td></tr>
+          <tr><td>6 GHz</td><td>比 5 GHz 约多 2-3 dB</td><td>覆盖范围最小，但频谱空间最大（最多 1200 MHz）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="principle">
+      <div class="principle-title">设计原则：6 GHz 需要更高的发射功率来匹配 5 GHz 的覆盖范围</div>
+      <p>对于现有 5 GHz 网络，AP 的发射功率通常在 11-15 dBm（PL3/4）。由于 6 GHz 的额外路径损耗，需要在 6 GHz 上适当增加发射功率才能实现与 5 GHz 相似的覆盖面积<sup>[4]</sup>。好消息是：这正好留下了功率余量来实现平衡。</p>
+    </div>
+
+    <!-- 1.6 室内传播 -->
+    <h3>1.6 室内传播：墙壁、地板和多径效应</h3>
+
+    <p>
+      在真实的室内环境中，信号不仅仅会因距离而衰减，还会被建筑材料<strong>吸收</strong>、<strong>反射</strong>、<strong>折射</strong>和<strong>绕射</strong>。这些效应叠加在一起，形成了一个叫做<strong>多径效应</strong>（Multipath）的现象<sup>[2]</sup>：
+    </p>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：空旷山谷中的回声</div>
+      <p>当你在山谷中大喊时，声音会在岩壁之间反弹，你会听到多个延迟版本的回声混合在一起。Wi-Fi 信号在室内也是如此——原始信号和它的多个反射"副本"会在接收端叠加。如果叠加的相位恰好相反，信号就会<strong>被抵消</strong>（衰落）；如果相位一致，信号反而<strong>被增强</strong>。</p>
+    </div>
+
+    <p>不同建筑材料对 Wi-Fi 信号的衰减程度差异显著<sup>[2]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>材料</th><th>典型衰减</th><th>可穿透层数</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>纸面/乙烯基隔墙</td><td>低</td><td>对信号几乎无影响</td></tr>
+          <tr><td>木材/石膏板</td><td>中低</td><td>可穿透 5-6 层墙</td></tr>
+          <tr><td>实心混凝土/砌块</td><td>中高</td><td>可穿透 3-4 层墙</td></tr>
+          <tr><td>预制混凝土/实心墙</td><td>高</td><td>可穿透 1-2 层墙</td></tr>
+          <tr><td>厚金属板</td><td>极高</td><td>几乎完全反射，无法穿透</td></tr>
+          <tr><td>钢筋混凝土楼板</td><td>极高</td><td>楼层间覆盖限于 1-2 层</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">频率越高，穿墙能力越弱</div>
+      <p>波长越短，被建筑材料吸收和散射的概率越高。这意味着 6 GHz 的穿墙能力明显弱于 5 GHz，而 5 GHz 又弱于 2.4 GHz。这也是为什么在三频设计中，2.4 GHz 天然充当了"保底层"——它能穿透更多障碍物到达更远的地方<sup>[2]</sup>。</p>
+    </div>
+
+    <h4>关键结论：现场勘测不可替代</h4>
+    <p>
+      由于室内传播环境极其复杂——每栋建筑的材料、布局、家具、人流都不同——<strong>任何规划工具的预测都必须通过现场勘测（Site Survey）来校准</strong>。正如 Cisco Live 演讲中一再强调的那句话<sup>[4]</sup>：
+    </p>
+    <blockquote style="border-left:4px solid var(--accent); padding:16px 24px; margin:20px 0; font-size:20px; color:var(--primary); font-weight:600; font-style:italic; background:#F8FAFC; border-radius:0 var(--radius-sm) var(--radius-sm) 0;">
+      "所有模型都是错的，但其中一些是有用的。规划工具能帮你制定初步设计，但最终方案必须在现场验证。"
+    </blockquote>
+
+  </div>
+</section>
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 2: 调制与吞吐 ==================== -->
+<section class="section" id="ch2">
+  <div class="container">
+    <div class="section-label">◆ 第二章</div>
+    <h2>调制与吞吐：Wi-Fi 速率的三重阶梯</h2>
+    <p class="section-desc">
+      Wi-Fi 的"标称速率"动辄上千兆、甚至数十千兆，但你的实际体验却远没有那么快。要理解速率从何而来、又因何打折，我们需要拆解构成 Wi-Fi 速率的三个独立维度。
+    </p>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：一条高速公路的通行能力</div>
+      <p>Wi-Fi 速率就像一条高速公路的通行能力，由三个因素共同决定：<strong>①车速</strong>（每秒能传多少比特＝调制阶数）、<strong>②车道数</strong>（频谱宽度＝信道聚合）、<strong>③并行车队数</strong>（同时传输的独立数据流＝空间复用）。任何一个维度的提升都能增加总吞吐量，但每个维度都受到物理条件的硬约束。</p>
+    </div>
+
+    <!-- 2.1 调制 -->
+    <h3>2.1 第一维度：数字调制——"每个符号装多少比特"</h3>
+
+    <p>
+      Wi-Fi 使用一种叫做<strong>正交幅度调制</strong>（QAM, Quadrature Amplitude Modulation）的技术，通过同时改变信号的<strong>幅度</strong>和<strong>相位</strong>来在每个"符号"中编码多个比特<sup>[4]</sup>。调制阶数越高，单个符号携带的比特越多，但对信噪比的要求也越苛刻：
+    </p>
+
+    <!-- SVG: QAM constellation comparison -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- QPSK -->
+        <g transform="translate(130,150)">
+          <rect x="-90" y="-90" width="180" height="180" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="-90" y1="0" x2="90" y2="0" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="0" y1="-90" x2="0" y2="90" stroke="#E2E8F0" stroke-width="1"/>
+          <circle cx="-45" cy="-45" r="8" fill="#0078D4"/>
+          <circle cx="45" cy="-45" r="8" fill="#0078D4"/>
+          <circle cx="-45" cy="45" r="8" fill="#0078D4"/>
+          <circle cx="45" cy="45" r="8" fill="#0078D4"/>
+          <text x="-45" y="-58" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">00</text>
+          <text x="45" y="-58" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">01</text>
+          <text x="-45" y="68" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">10</text>
+          <text x="45" y="68" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">11</text>
+          <text x="0" y="-110" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">QPSK</text>
+          <text x="0" y="-95" text-anchor="middle" font-size="12" fill="#5A6B7C">每符号 2 比特</text>
+          <text x="0" y="115" text-anchor="middle" font-size="12" fill="#10B981" font-weight="600">SNR 要求：≈10 dB</text>
+        </g>
+        <!-- 256-QAM -->
+        <g transform="translate(380,150)">
+          <rect x="-90" y="-90" width="180" height="180" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="-90" y1="0" x2="90" y2="0" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="0" y1="-90" x2="0" y2="90" stroke="#E2E8F0" stroke-width="1"/>
+          <!-- 16x16 grid dots (simplified as 4x4 cluster in each quadrant) -->
+          <g fill="#7C3AED">
+            <circle cx="-68" cy="-68" r="3"/><circle cx="-45" cy="-68" r="3"/><circle cx="-23" cy="-68" r="3"/><circle cx="-68" cy="-45" r="3"/>
+            <circle cx="-45" cy="-45" r="3"/><circle cx="-23" cy="-45" r="3"/><circle cx="-68" cy="-23" r="3"/><circle cx="-45" cy="-23" r="3"/>
+            <circle cx="-23" cy="-23" r="3"/>
+            <circle cx="23" cy="-68" r="3"/><circle cx="45" cy="-68" r="3"/><circle cx="68" cy="-68" r="3"/><circle cx="23" cy="-45" r="3"/>
+            <circle cx="45" cy="-45" r="3"/><circle cx="68" cy="-45" r="3"/><circle cx="23" cy="-23" r="3"/><circle cx="45" cy="-23" r="3"/>
+            <circle cx="68" cy="-23" r="3"/>
+            <circle cx="-68" cy="23" r="3"/><circle cx="-45" cy="23" r="3"/><circle cx="-23" cy="23" r="3"/><circle cx="-68" cy="45" r="3"/>
+            <circle cx="-45" cy="45" r="3"/><circle cx="-23" cy="45" r="3"/><circle cx="-68" cy="68" r="3"/><circle cx="-45" cy="68" r="3"/>
+            <circle cx="-23" cy="68" r="3"/>
+            <circle cx="23" cy="23" r="3"/><circle cx="45" cy="23" r="3"/><circle cx="68" cy="23" r="3"/><circle cx="23" cy="45" r="3"/>
+            <circle cx="45" cy="45" r="3"/><circle cx="68" cy="45" r="3"/><circle cx="23" cy="68" r="3"/><circle cx="45" cy="68" r="3"/>
+            <circle cx="68" cy="68" r="3"/>
+          </g>
+          <text x="0" y="-110" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">256-QAM</text>
+          <text x="0" y="-95" text-anchor="middle" font-size="12" fill="#5A6B7C">每符号 8 比特</text>
+          <text x="0" y="115" text-anchor="middle" font-size="12" fill="#F59E0B" font-weight="600">SNR 要求：≈30 dB</text>
+        </g>
+        <!-- 4096-QAM -->
+        <g transform="translate(640,150)">
+          <rect x="-90" y="-90" width="180" height="180" fill="#EF4444" fill-opacity="0.04" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="-90" y1="0" x2="90" y2="0" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="0" y1="-90" x2="0" y2="90" stroke="#E2E8F0" stroke-width="1"/>
+          <!-- Dense dot field -->
+          <g fill="#EF4444" opacity="0.7">
+            <circle cx="-78" cy="-78" r="2"/><circle cx="-65" cy="-78" r="2"/><circle cx="-52" cy="-78" r="2"/><circle cx="-39" cy="-78" r="2"/><circle cx="-26" cy="-78" r="2"/><circle cx="-13" cy="-78" r="2"/>
+            <circle cx="13" cy="-78" r="2"/><circle cx="26" cy="-78" r="2"/><circle cx="39" cy="-78" r="2"/><circle cx="52" cy="-78" r="2"/><circle cx="65" cy="-78" r="2"/><circle cx="78" cy="-78" r="2"/>
+            <circle cx="-78" cy="-52" r="2"/><circle cx="-65" cy="-52" r="2"/><circle cx="-52" cy="-52" r="2"/><circle cx="-39" cy="-52" r="2"/><circle cx="-26" cy="-52" r="2"/><circle cx="-13" cy="-52" r="2"/>
+            <circle cx="13" cy="-52" r="2"/><circle cx="26" cy="-52" r="2"/><circle cx="39" cy="-52" r="2"/><circle cx="52" cy="-52" r="2"/><circle cx="65" cy="-52" r="2"/><circle cx="78" cy="-52" r="2"/>
+            <circle cx="-78" cy="-26" r="2"/><circle cx="-65" cy="-26" r="2"/><circle cx="-52" cy="-26" r="2"/><circle cx="-39" cy="-26" r="2"/><circle cx="-26" cy="-26" r="2"/><circle cx="-13" cy="-26" r="2"/>
+            <circle cx="13" cy="-26" r="2"/><circle cx="26" cy="-26" r="2"/><circle cx="39" cy="-26" r="2"/><circle cx="52" cy="-26" r="2"/><circle cx="65" cy="-26" r="2"/><circle cx="78" cy="-26" r="2"/>
+            <circle cx="-78" cy="26" r="2"/><circle cx="-65" cy="26" r="2"/><circle cx="-52" cy="26" r="2"/><circle cx="-39" cy="26" r="2"/><circle cx="-26" cy="26" r="2"/><circle cx="-13" cy="26" r="2"/>
+            <circle cx="13" cy="26" r="2"/><circle cx="26" cy="26" r="2"/><circle cx="39" cy="26" r="2"/><circle cx="52" cy="26" r="2"/><circle cx="65" cy="26" r="2"/><circle cx="78" cy="26" r="2"/>
+            <circle cx="-78" cy="52" r="2"/><circle cx="-65" cy="52" r="2"/><circle cx="-52" cy="52" r="2"/><circle cx="-39" cy="52" r="2"/><circle cx="-26" cy="52" r="2"/><circle cx="-13" cy="52" r="2"/>
+            <circle cx="13" cy="52" r="2"/><circle cx="26" cy="52" r="2"/><circle cx="39" cy="52" r="2"/><circle cx="52" cy="52" r="2"/><circle cx="65" cy="52" r="2"/><circle cx="78" cy="52" r="2"/>
+            <circle cx="-78" cy="78" r="2"/><circle cx="-65" cy="78" r="2"/><circle cx="-52" cy="78" r="2"/><circle cx="-39" cy="78" r="2"/><circle cx="-26" cy="78" r="2"/><circle cx="-13" cy="78" r="2"/>
+            <circle cx="13" cy="78" r="2"/><circle cx="26" cy="78" r="2"/><circle cx="39" cy="78" r="2"/><circle cx="52" cy="78" r="2"/><circle cx="65" cy="78" r="2"/><circle cx="78" cy="78" r="2"/>
+          </g>
+          <text x="0" y="-110" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">4096-QAM (Wi-Fi 7)</text>
+          <text x="0" y="-95" text-anchor="middle" font-size="12" fill="#5A6B7C">每符号 12 比特</text>
+          <text x="0" y="115" text-anchor="middle" font-size="12" fill="#EF4444" font-weight="600">SNR 要求：≈34 dB</text>
+        </g>
+      </svg>
+      <div class="diagram-caption">图 2-1：QAM 星座图对比——调制阶数越高，符号点越密集，对 SNR 要求越严格</div>
+    </div>
+
+    <p>
+      Wi-Fi 7 引入了 <strong>4096-QAM</strong>（4K-QAM），将每个符号编码的比特数从 Wi-Fi 6 的 10 位（1024-QAM）提升到 12 位。这带来了约 <strong>20% 的峰值速率提升</strong>，但代价是：客户端必须在距离 AP 很近、信噪比非常高（≈34 dB）的区域才能享受到这一优势<sup>[5][6]</sup>。
+    </p>
+
+    <div class="insight">
+      <div class="insight-title">设计启示：高阶调制是"近距福利"</div>
+      <p>4K-QAM 和 MCS12/13 只在 AP 附近的"黄金区域"可用。随着距离增加、SNR 下降，调制阶数会自动降级（Rate Adaptation）。这意味着<strong>提升调制阶数的收益更多是"锦上添花"，而非解决覆盖问题的手段</strong>。真正影响大多数用户体验的，是下面两个维度。</p>
+    </div>
+
+    <!-- 2.2 信道聚合 -->
+    <h3>2.2 第二维度：信道聚合——"把车道拓宽"</h3>
+
+    <p>
+      信道宽度直接决定了单位时间内可传输的子载波数量。Wi-Fi 的演进史，很大程度上就是一部"信道拓宽史"<sup>[4]</sup>：
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Wi-Fi 代次</th><th>最大信道宽度</th><th>频段</th><th>速率提升倍数（相对 20 MHz）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>802.11a/g</td><td>20 MHz</td><td>5 / 2.4 GHz</td><td>1×（基准）</td></tr>
+          <tr><td>802.11n (Wi-Fi 4)</td><td>40 MHz</td><td>2.4 / 5 GHz</td><td>≈2.1×</td></tr>
+          <tr><td>802.11ac (Wi-Fi 5)</td><td>80 / 160 MHz</td><td>5 GHz</td><td>≈4.2× / ≈8.4×</td></tr>
+          <tr><td>802.11ax (Wi-Fi 6/6E)</td><td>160 MHz</td><td>5 / 6 GHz</td><td>≈8.6×</td></tr>
+          <tr><td style="font-weight:700; color:#0078D4;">802.11be (Wi-Fi 7)</td><td style="font-weight:700; color:#0078D4;">320 MHz</td><td style="font-weight:700; color:#0078D4;">6 GHz</td><td style="font-weight:700; color:#0078D4;">≈17×</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SVG: Channel width vs spectrum -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 240" xmlns="http://www.w3.org/2000/svg">
+        <!-- 2.4 GHz -->
+        <rect x="30" y="30" width="180" height="40" rx="6" fill="#F59E0B" fill-opacity="0.15" stroke="#F59E0B" stroke-width="2"/>
+        <text x="120" y="55" text-anchor="middle" font-size="13" fill="#92400E" font-weight="600">2.4 GHz ≈ 70 MHz 可用</text>
+        <text x="120" y="22" text-anchor="middle" font-size="11" fill="#5A6B7C">仅 3 个不重叠 20 MHz 信道</text>
+        <!-- 5 GHz -->
+        <rect x="30" y="90" width="400" height="40" rx="6" fill="#0078D4" fill-opacity="0.12" stroke="#0078D4" stroke-width="2"/>
+        <text x="230" y="115" text-anchor="middle" font-size="13" fill="#1E40AF" font-weight="600">5 GHz ≈ 500 MHz 可用</text>
+        <text x="230" y="82" text-anchor="middle" font-size="11" fill="#5A6B7C">最多 25 个 20 MHz 信道 / 最大 160 MHz 聚合</text>
+        <!-- 6 GHz -->
+        <rect x="30" y="150" width="800" height="50" rx="6" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2"/>
+        <text x="430" y="180" text-anchor="middle" font-size="14" fill="#065F46" font-weight="700">6 GHz ≈ 1200 MHz 可用</text>
+        <text x="430" y="142" text-anchor="middle" font-size="11" fill="#5A6B7C">最多 59 个 20 MHz 信道 / 可容纳 3 个 320 MHz 信道 ★</text>
+        <!-- Annotation -->
+        <text x="430" y="220" text-anchor="middle" font-size="13" fill="#5A6B7C" font-style="italic">6 GHz 的频谱空间是 2.4 GHz 的 17 倍——这是 Wi-Fi 7 最大的"物理红利"</text>
+      </svg>
+      <div class="diagram-caption">图 2-2：三个频段的可用频谱对比（比例近似示意）</div>
+    </div>
+
+    <div class="principle">
+      <div class="principle-title">核心权衡：更宽的信道 ≠ 更好的设计</div>
+      <p>信道越宽，单个 AP 的峰值速率越高，但可用信道数越少，意味着<strong>相邻 AP 之间更难避开同频干扰</strong>。在密集部署场景中，使用<strong>多个 40 MHz 信道</strong>往往比使用一个 160 MHz 信道提供更高的<strong>总体容量</strong>——因为你可以同时让更多 AP 独立工作、互不干扰<sup>[4]</sup>。</p>
+    </div>
+
+    <p>以 Cisco Live 演讲中的实例为例<sup>[4]</sup>：假设某区域需要 1 Gbps 的总数据承载能力，使用 Wi-Fi 6+ 设备、256-QAM、2 空间流：</p>
+
+    <div class="card card-teal">
+      <h4>方案对比：1×80 MHz vs 3×40 MHz</h4>
+      <div class="table-wrap" style="margin-top:12px;">
+        <table>
+          <thead>
+            <tr><th>方案</th><th>单 AP 数据速率</th><th>AP 数量</th><th>总容量</th><th>信道复用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1 个 AP @ 80 MHz</td><td>≈961 Mbps</td><td>1</td><td>≈961 Mbps</td><td>差（占用 4 个 20 MHz 信道）</td></tr>
+            <tr><td>2 个 AP @ 40 MHz</td><td>≈459 Mbps/AP</td><td>2</td><td>≈918 Mbps</td><td>中</td></tr>
+            <tr style="background:#F0FDF4;"><td><strong>3 个 AP @ 40 MHz</strong></td><td>≈390 Mbps/AP</td><td>3</td><td><strong>≈1170 Mbps</strong></td><td><strong>好（更多独立信道可用）</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px; font-size:16px; color:var(--text-secondary);">多个较窄信道的组合，往往在容量和抗干扰方面优于单个宽信道——这是密集部署的核心策略。</p>
+    </div>
+
+    <!-- 2.3 空间复用 -->
+    <h3>2.3 第三维度：空间复用——"增加并行车队"</h3>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：分工搬运</div>
+      <p>假设你要把一段话传给朋友。如果只有一个人传话，速度受限于这个人的语速。但如果你有 4 个人同时传话、每人负责句子的不同部分、朋友那边也有 4 个人同时接收——这就是<strong>空间复用（Spatial Multiplexing）</strong>。每增加一路"独立传话人"，就增加一个<strong>空间流（Spatial Stream）</strong>，吞吐量线性增长<sup>[4]</sup>。</p>
+    </div>
+
+    <!-- SVG: Spatial Streams -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- AP -->
+        <rect x="30" y="60" width="80" height="80" rx="10" fill="#0D274D"/>
+        <text x="70" y="95" text-anchor="middle" font-size="12" fill="white" font-weight="700">AP 4×4</text>
+        <text x="70" y="115" text-anchor="middle" font-size="11" fill="#93C5FD">4根天线</text>
+        <!-- Arrows / Streams -->
+        <line x1="115" y1="75" x2="540" y2="45" stroke="#0078D4" stroke-width="3" opacity="0.8"/>
+        <line x1="115" y1="90" x2="540" y2="75" stroke="#10B981" stroke-width="3" opacity="0.8"/>
+        <line x1="115" y1="105" x2="540" y2="105" stroke="#7C3AED" stroke-width="3" opacity="0.8"/>
+        <line x1="115" y1="120" x2="540" y2="135" stroke="#F59E0B" stroke-width="3" opacity="0.8"/>
+        <!-- Labels on streams -->
+        <text x="330" y="42" font-size="12" fill="#0078D4" font-weight="600">流 1: "The"</text>
+        <text x="330" y="72" font-size="12" fill="#10B981" font-weight="600">流 2: "quick"</text>
+        <text x="330" y="102" font-size="12" fill="#7C3AED" font-weight="600">流 3: "brown"</text>
+        <text x="330" y="132" font-size="12" fill="#F59E0B" font-weight="600">流 4: "fox"</text>
+        <!-- Client -->
+        <rect x="545" y="55" width="80" height="65" rx="8" fill="#5A6B7C"/>
+        <text x="585" y="85" text-anchor="middle" font-size="11" fill="white" font-weight="700">客户端</text>
+        <text x="585" y="100" text-anchor="middle" font-size="10" fill="#CBD5E1">2×2</text>
+        <!-- Result -->
+        <rect x="660" y="50" width="120" height="75" rx="8" fill="#FFF7ED" stroke="#F59E0B" stroke-width="1.5"/>
+        <text x="720" y="72" text-anchor="middle" font-size="11" fill="#92400E" font-weight="600">接收结果</text>
+        <text x="720" y="92" text-anchor="middle" font-size="13" fill="#0D274D" font-weight="700">"The quick"</text>
+        <text x="720" y="112" text-anchor="middle" font-size="11" fill="#EF4444">仅 2 个流被解码</text>
+        <!-- Note -->
+        <text x="400" y="185" text-anchor="middle" font-size="14" fill="#5A6B7C" font-style="italic">客户端只有 2 根天线 → 只能接收 2 个空间流 → 实际速率 = 2SS 速率</text>
+      </svg>
+      <div class="diagram-caption">图 2-3：空间复用——AP 有 4 个空间流，但 2×2 客户端只能使用其中 2 个</div>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">残酷的现实：瓶颈在客户端</div>
+      <p>绝大多数手机和平板只有 <strong>2×2</strong> 天线（2 个空间流），许多笔记本电脑也只有 2×2。即使你的 AP 是 4×4，客户端的空间流数量决定了<strong>实际速率的天花板</strong>。AP 多出来的天线并非浪费——它们用于<strong>发射分集</strong>（提升客户端接收信号强度约 3 dB）和<strong>接收分集</strong>（帮助 AP 更好地接收来自客户端的微弱上行信号）<sup>[4]</sup>。</p>
+    </div>
+
+    <p>因此，AP 天线配置的命名规则 <strong>M×N:S</strong> 具有非常明确的含义：</p>
+    <ul>
+      <li><strong>M</strong> = 发射天线数（Tx chains）</li>
+      <li><strong>N</strong> = 接收天线数（Rx chains）</li>
+      <li><strong>S</strong> = 最大空间流数</li>
+    </ul>
+    <p>
+      例如，CW9176 的 5 GHz 和 6 GHz 均为 <strong>4×4:4</strong><sup>[3]</sup>，意味着 4 根发射天线、4 根接收天线、最多 4 个空间流。但面对 2×2 的手机客户端，实际只能使用 2 个空间流。
+    </p>
+
+    <!-- 2.4 三维综合 -->
+    <h3>2.4 三维综合：Wi-Fi 速率公式</h3>
+
+    <div class="card card-accent" style="text-align:center;">
+      <p style="font-size:22px; font-weight:700; color:var(--primary); margin-bottom:8px;">
+        Wi-Fi 数据速率 = 调制效率 × 信道宽度 × 空间流数
+      </p>
+      <p style="font-size:16px; color:var(--text-secondary);">
+        调制效率受限于 <strong>SNR</strong> · 信道宽度受限于 <strong>频谱可用性</strong> · 空间流受限于 <strong>客户端能力</strong>
+      </p>
+    </div>
+
+    <p>以典型企业环境为例，使用 Cisco CW9176I 和各类客户端<sup>[4]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>场景</th><th>调制</th><th>信道宽度</th><th>空间流</th><th>PHY 速率</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>手机 @ 5 GHz，距 AP 较近</td><td>256-QAM (MCS9)</td><td>80 MHz</td><td>2SS</td><td>≈961 Mbps</td></tr>
+          <tr><td>笔记本 @ 6 GHz，距 AP 很近</td><td>4096-QAM (MCS13)</td><td>320 MHz</td><td>2SS</td><td>≈5.8 Gbps</td></tr>
+          <tr><td>手机 @ 5 GHz，距 AP 较远</td><td>64-QAM (MCS5)</td><td>40 MHz</td><td>2SS</td><td>≈234 Mbps</td></tr>
+          <tr><td>老旧设备 @ 2.4 GHz</td><td>QPSK (MCS0)</td><td>20 MHz</td><td>1SS</td><td>≈7 Mbps</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="principle">
+      <div class="principle-title">设计黄金法则</div>
+      <p>不要追逐标称峰值速率，而要关注<strong>实际工作场景下的可持续速率</strong>。典型企业 Wi-Fi 的实际工作参数是：2.4 GHz @ 20 MHz、5 GHz @ 40 MHz、6 GHz @ 80 MHz，在这些参数下做容量规划才有意义<sup>[4]</sup>。</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 3: 天线选型 ==================== -->
+<section class="section" id="ch3">
+  <div class="container">
+    <div class="section-label">◆ 第三章</div>
+    <h2>天线选型：全向 vs 定向的工程抉择</h2>
+    <p class="section-desc">
+      天线是 AP 的"耳朵和嘴巴"，它决定了信号往哪里走、走多远。选错天线，就像在音乐厅里用大喇叭广播——覆盖了整个大厅，但前排观众被震得耳朵疼，后排依然听不清。
+    </p>
+
+    <!-- 3.1 全向天线 -->
+    <h3>3.1 全向天线：360° 的"天花板灯"</h3>
+
+    <p>全向天线在水平面上提供 360° 的均匀覆盖，在垂直面上形成一个压缩的"甜甜圈"形辐射图案<sup>[2]</sup>。绝大多数室内 AP 默认使用全向天线，因为：</p>
+
+    <ul>
+      <li><strong>安装简便</strong>：吸顶安装后，自然向四周均匀覆盖，无需精确对准。</li>
+      <li><strong>全方向服务</strong>：适合开放式办公、会议室、走廊等需要环绕覆盖的场所。</li>
+      <li><strong>低增益 = 近距离全覆盖</strong>：在多径环境中，低增益全向天线能增加 AP 附近的信号接收概率。</li>
+    </ul>
+
+    <!-- SVG: Omni antenna coverage top and side view -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
+        <!-- Top view -->
+        <g transform="translate(200,140)">
+          <text x="0" y="-120" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">俯视图（水平面）</text>
+          <circle cx="0" cy="0" r="100" fill="#10B981" fill-opacity="0.08" stroke="#10B981" stroke-width="2" stroke-dasharray="6,4"/>
+          <circle cx="0" cy="0" r="70" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2"/>
+          <circle cx="0" cy="0" r="8" fill="#0D274D"/>
+          <text x="0" y="4" text-anchor="middle" font-size="9" fill="white" font-weight="700">AP</text>
+          <!-- 360 label -->
+          <path d="M50,-10 A52,52 0 1,1 50,10" fill="none" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrowOmni)"/>
+          <text x="75" y="0" font-size="12" fill="#10B981" font-weight="600">360°</text>
+        </g>
+        <!-- Side view -->
+        <g transform="translate(580,140)">
+          <text x="0" y="-120" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">侧视图（垂直面）</text>
+          <ellipse cx="0" cy="0" rx="110" ry="32" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2"/>
+          <rect x="-2" y="-50" width="4" height="100" rx="2" fill="#0D274D"/>
+          <!-- Arrows showing horizontal spread -->
+          <line x1="115" y1="0" x2="140" y2="0" stroke="#10B981" stroke-width="2" marker-end="url(#arrowOmni)"/>
+          <line x1="-115" y1="0" x2="-140" y2="0" stroke="#10B981" stroke-width="2" marker-end="url(#arrowOmni)"/>
+          <!-- Weak zone labels -->
+          <text x="0" y="-75" text-anchor="middle" font-size="12" fill="#EF4444" font-weight="600">⚠ 正上方弱</text>
+          <text x="0" y="85" text-anchor="middle" font-size="12" fill="#EF4444" font-weight="600">⚠ 正下方弱</text>
+        </g>
+        <defs>
+          <marker id="arrowOmni" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8Z" fill="#10B981"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">图 3-1：全向天线辐射图案——水平 360° 均匀，但正上方和正下方是"盲区"</div>
+    </div>
+
+    <div class="card card-warning">
+      <h4>⚠ 全向天线的"高增益陷阱"</h4>
+      <p>全向天线的增益越高，垂直方向的波束越窄（就像把气球压得越扁）。如果从很高的天花板向下覆盖，高增益全向天线正下方会出现一个<strong>覆盖盲区</strong>——信号从 AP 正下方的设备角度看，几乎接收不到<sup>[2]</sup>。</p>
+      <p>定向天线可以通过"下倾"（Downtilt）来补偿这个问题，但全向天线由于辐射图案的对称性，<strong>无法实现下倾</strong>。因此，如果安装高度超过 5 米，应考虑使用定向天线。</p>
+    </div>
+
+    <div class="card card-accent">
+      <h4>全向天线的安装方向至关重要</h4>
+      <p>由于全向天线的能量集中在水平面，<strong>吸顶安装</strong>（天线朝下）是最佳方式——信号向四周水平扩散，覆盖下方的办公区域。如果<strong>壁挂安装</strong>（天线竖直），主要覆盖区域变成了 AP 左右两侧的水平面，而非正前方的空间——这在大多数场景下是不理想的<sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 3.2 定向天线 -->
+    <h3>3.2 定向天线：精准照射的"聚光灯"</h3>
+
+    <p>
+      定向天线将 RF 能量集中在特定方向上。随着增益增加，覆盖距离变远，但有效覆盖角度变小<sup>[2]</sup>。一个重要的度量指标是<strong>前后比</strong>（Front-to-Back Ratio）——衡量天线正前方与正后方信号强度的差异，优秀的定向天线通常有 20 dB 以上的前后比。
+    </p>
+
+    <p>Cisco 的 Wi-Fi 7 产品线提供了丰富的定向天线选择：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>AP 型号</th><th>天线类型</th><th>波束宽度</th><th>增益（6 GHz）</th><th>典型场景</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CW9176D1<sup>[3]</sup></td><td>内置定向</td><td>70°×70°（5/6 GHz）<br>80°×80°（2.4 GHz）</td><td>8 dBi</td><td>礼堂、仓库、高天花板</td></tr>
+          <tr><td>CW9174E + CW-ANT-T-D2-D8<sup>[5]</sup></td><td>外置定向贴片</td><td>75°×75°</td><td>5.7 dBi</td><td>仓库、走廊、开放货架区</td></tr>
+          <tr><td>CW9174E + CW-ANT-T-O2-D8<sup>[5]</sup></td><td>外置全向</td><td>360°（水平）</td><td>5 dBi</td><td>常规吸顶覆盖</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SVG: Directional coverage use cases -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 320" xmlns="http://www.w3.org/2000/svg">
+        <!-- Use case 1: Warehouse wall mount -->
+        <g transform="translate(0,0)">
+          <rect x="20" y="10" width="250" height="200" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+          <text x="145" y="35" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">场景 1：仓库壁挂</text>
+          <!-- Wall -->
+          <rect x="40" y="60" width="8" height="130" fill="#94A3B8"/>
+          <text x="44" y="55" text-anchor="middle" font-size="10" fill="#5A6B7C">墙壁</text>
+          <!-- AP on wall -->
+          <rect x="48" y="90" width="20" height="14" rx="3" fill="#0D274D"/>
+          <text x="58" y="100" text-anchor="middle" font-size="7" fill="white" font-weight="700">AP</text>
+          <!-- Coverage cone -->
+          <path d="M68,97 L230,50 L230,150 Z" fill="#7C3AED" fill-opacity="0.1" stroke="#7C3AED" stroke-width="1.5"/>
+          <!-- Shelves -->
+          <rect x="130" y="65" width="4" height="80" fill="#CBD5E1"/>
+          <rect x="170" y="65" width="4" height="80" fill="#CBD5E1"/>
+          <rect x="210" y="65" width="4" height="80" fill="#CBD5E1"/>
+          <text x="145" y="165" text-anchor="middle" font-size="11" fill="#5A6B7C">覆盖货架通道</text>
+          <text x="145" y="185" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">定向天线穿越多排货架</text>
+        </g>
+        <!-- Use case 2: Auditorium ceiling -->
+        <g transform="translate(300,0)">
+          <rect x="20" y="10" width="250" height="200" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+          <text x="145" y="35" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">场景 2：礼堂高天花板</text>
+          <!-- Ceiling -->
+          <line x1="40" y1="55" x2="250" y2="55" stroke="#94A3B8" stroke-width="2"/>
+          <text x="145" y="50" text-anchor="middle" font-size="10" fill="#5A6B7C">天花板 &gt;6m</text>
+          <!-- AP -->
+          <rect x="135" y="58" width="20" height="12" rx="3" fill="#0D274D"/>
+          <text x="145" y="67" text-anchor="middle" font-size="7" fill="white" font-weight="700">AP</text>
+          <!-- Downward cone -->
+          <path d="M145,72 L80,175 L210,175 Z" fill="#0078D4" fill-opacity="0.1" stroke="#0078D4" stroke-width="1.5"/>
+          <!-- Audience seats -->
+          <g fill="#CBD5E1">
+            <circle cx="100" cy="170" r="5"/><circle cx="120" cy="170" r="5"/><circle cx="140" cy="170" r="5"/>
+            <circle cx="160" cy="170" r="5"/><circle cx="180" cy="170" r="5"/>
+          </g>
+          <text x="145" y="195" text-anchor="middle" font-size="11" fill="#0078D4" font-weight="600">定向天线向下聚焦观众区</text>
+        </g>
+        <!-- Use case 3: Hallway wall mount -->
+        <g transform="translate(590,0)">
+          <rect x="20" y="10" width="250" height="200" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+          <text x="145" y="35" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">场景 3：长走廊壁挂</text>
+          <!-- Walls -->
+          <rect x="40" y="60" width="200" height="6" fill="#94A3B8"/>
+          <rect x="40" y="145" width="200" height="6" fill="#94A3B8"/>
+          <!-- AP on wall -->
+          <rect x="50" y="90" width="16" height="12" rx="3" fill="#0D274D"/>
+          <text x="58" y="99" text-anchor="middle" font-size="7" fill="white" font-weight="700">AP</text>
+          <!-- Coverage beam along hallway -->
+          <path d="M66,96 L230,80 L230,115 Z" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="1.5"/>
+          <text x="145" y="175" text-anchor="middle" font-size="11" fill="#10B981" font-weight="600">定向天线沿走廊延伸</text>
+          <text x="145" y="193" text-anchor="middle" font-size="11" fill="#5A6B7C">替代传统吸顶方案</text>
+        </g>
+        <!-- Bottom summary -->
+        <text x="430" y="260" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="600">定向天线的三大经典应用场景</text>
+        <text x="430" y="280" text-anchor="middle" font-size="13" fill="#5A6B7C">通过精确控制辐射方向，解决全向天线无法有效覆盖的环境</text>
+        <text x="430" y="300" text-anchor="middle" font-size="12" fill="#5A6B7C" font-style="italic">来源：CW9176 / CW9174 部署指南 — 定向天线用例</text>
+      </svg>
+      <div class="diagram-caption">图 3-2：定向天线的三大经典使用场景</div>
+    </div>
+
+    <!-- 3.3 选型决策树 -->
+    <h3>3.3 天线选型决策：一张图搞定</h3>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 460" xmlns="http://www.w3.org/2000/svg">
+        <!-- Start -->
+        <rect x="280" y="10" width="240" height="44" rx="22" fill="#0D274D"/>
+        <text x="400" y="37" text-anchor="middle" font-size="14" fill="white" font-weight="700">开始：确定安装环境</text>
+        <!-- Arrow -->
+        <line x1="400" y1="54" x2="400" y2="80" stroke="#0D274D" stroke-width="2" marker-end="url(#arrowD)"/>
+        <!-- Q1 -->
+        <rect x="250" y="80" width="300" height="44" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="2"/>
+        <text x="400" y="107" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="600">安装高度 &gt; 5 米？</text>
+        <!-- Yes -->
+        <line x1="550" y1="102" x2="650" y2="102" stroke="#10B981" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="595" y="95" font-size="12" fill="#10B981" font-weight="700">是</text>
+        <rect x="650" y="80" width="140" height="44" rx="8" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2"/>
+        <text x="720" y="100" text-anchor="middle" font-size="13" fill="#065F46" font-weight="700">→ 定向天线</text>
+        <text x="720" y="116" text-anchor="middle" font-size="11" fill="#5A6B7C">如 CW9176D1</text>
+        <!-- No -->
+        <line x1="400" y1="124" x2="400" y2="155" stroke="#0D274D" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="415" y="142" font-size="12" fill="#EF4444" font-weight="700">否</text>
+        <!-- Q2 -->
+        <rect x="230" y="155" width="340" height="44" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="2"/>
+        <text x="400" y="182" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="600">需要覆盖的是长条形区域？</text>
+        <!-- Yes -->
+        <line x1="570" y1="177" x2="650" y2="177" stroke="#10B981" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="605" y="170" font-size="12" fill="#10B981" font-weight="700">是</text>
+        <rect x="650" y="155" width="140" height="44" rx="8" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2"/>
+        <text x="720" y="175" text-anchor="middle" font-size="13" fill="#065F46" font-weight="700">→ 定向天线</text>
+        <text x="720" y="191" text-anchor="middle" font-size="11" fill="#5A6B7C">壁挂沿走廊覆盖</text>
+        <!-- No -->
+        <line x1="400" y1="199" x2="400" y2="230" stroke="#0D274D" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="415" y="218" font-size="12" fill="#EF4444" font-weight="700">否</text>
+        <!-- Q3 -->
+        <rect x="210" y="230" width="380" height="44" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="2"/>
+        <text x="400" y="257" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="600">是否需要精确控制覆盖范围/减少泄漏？</text>
+        <!-- Yes -->
+        <line x1="590" y1="252" x2="650" y2="252" stroke="#10B981" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="615" y="245" font-size="12" fill="#10B981" font-weight="700">是</text>
+        <rect x="650" y="230" width="140" height="44" rx="8" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2"/>
+        <text x="720" y="250" text-anchor="middle" font-size="13" fill="#065F46" font-weight="700">→ 定向天线</text>
+        <text x="720" y="266" text-anchor="middle" font-size="11" fill="#5A6B7C">如展厅、礼堂</text>
+        <!-- No -->
+        <line x1="400" y1="274" x2="400" y2="305" stroke="#0D274D" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="415" y="293" font-size="12" fill="#EF4444" font-weight="700">否</text>
+        <!-- Q4 -->
+        <rect x="230" y="305" width="340" height="44" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="2"/>
+        <text x="400" y="332" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="600">是否需要更换/调整天线模式？</text>
+        <!-- Yes -->
+        <line x1="570" y1="327" x2="650" y2="327" stroke="#10B981" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="605" y="320" font-size="12" fill="#10B981" font-weight="700">是</text>
+        <rect x="650" y="305" width="140" height="44" rx="8" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-width="2"/>
+        <text x="720" y="325" text-anchor="middle" font-size="13" fill="#92400E" font-weight="700">→ 外置天线 AP</text>
+        <text x="720" y="341" text-anchor="middle" font-size="11" fill="#5A6B7C">如 CW9174E</text>
+        <!-- No = Omni -->
+        <line x1="400" y1="349" x2="400" y2="385" stroke="#0D274D" stroke-width="2" marker-end="url(#arrowD)"/>
+        <text x="415" y="370" font-size="12" fill="#EF4444" font-weight="700">否</text>
+        <rect x="295" y="385" width="210" height="50" rx="25" fill="#0078D4"/>
+        <text x="400" y="408" text-anchor="middle" font-size="15" fill="white" font-weight="700">→ 内置全向天线 AP</text>
+        <text x="400" y="427" text-anchor="middle" font-size="12" fill="#93C5FD">适用于绝大多数室内场景</text>
+        <defs>
+          <marker id="arrowD" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8Z" fill="#0D274D"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">图 3-3：天线选型决策流程图——大多数室内场景使用全向天线即可</div>
+    </div>
+
+    <!-- 3.4 关键安装注意事项 -->
+    <h3>3.4 安装注意事项</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>全向天线务必吸顶安装</h4>
+          <p>全向天线的主覆盖面是水平面。吸顶安装时信号向四周扩散、覆盖下方区域最优。壁挂全向天线会导致覆盖方向不可控，除非经过现场勘测验证，否则<strong>不建议</strong>壁挂安装内置全向天线的 AP<sup>[4]</sup>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>定向天线面板朝向目标区域</h4>
+          <p>定向天线的阵列面必须对准希望覆盖的方向。CW9176D1 的壁挂设计使其自然面向对面区域，CW9174E 的外置定向天线可通过<strong>铰接支架</strong>（CW-MNT-ART2-00）调节角度<sup>[5]</sup>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>避免近距离同频干扰</h4>
+          <p>当两个 AP 间距小于 5 米时，即使使用不同信道，NDP（邻居发现协议）帧也会以最高功率被对方检测到，可能触发 RRM 降低发射功率，导致覆盖不足<sup>[4]</sup>。建议在密集部署时，相邻 AP 间距至少保持 5 米以上，并通过<strong>RF Profile 设置最低发射功率阈值</strong>来防止功率被压得过低。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>使用加速度计验证安装姿态</h4>
+          <p>Cisco 的 CW9176I/D1、CW9178I 等新型号内置了<strong>加速度计</strong>，可以在部署后远程验证 AP 的安装方向是否正确（例如：是否被错误地倒置或侧挂）<sup>[4][5]</sup>。这一功能可以在 Catalyst 9800 WLC 或 Meraki Dashboard 中查看。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3.5 Cisco Wi-Fi 7 天线增益速查 -->
+    <h3>3.5 Cisco Wi-Fi 7 天线增益速查表</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>AP 型号</th><th>天线类型</th><th>2.4 GHz</th><th>5 GHz</th><th>6 GHz</th><th>IoT</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>CW9172I</strong><sup>[7]</sup></td><td>内置全向</td><td>4 dBi</td><td>5.5 dBi</td><td>6 dBi</td><td>2 dBi</td></tr>
+          <tr><td><strong>CW9172H</strong><sup>[7]</sup></td><td>内置全向（壁板）</td><td>4 dBi</td><td>7 dBi</td><td>6 dBi</td><td>1.25 dBi</td></tr>
+          <tr><td><strong>CW9174I</strong><sup>[5]</sup></td><td>内置全向</td><td>5 dBi</td><td>5 dBi</td><td>6 dBi</td><td>4 dBi</td></tr>
+          <tr><td><strong>CW9174E</strong> + 全向<sup>[5]</sup></td><td>外置全向</td><td>2 dBi</td><td>5 dBi</td><td>5 dBi</td><td>2 dBi</td></tr>
+          <tr><td><strong>CW9174E</strong> + 定向<sup>[5]</sup></td><td>外置定向</td><td>6.6 dBi</td><td>5.7 dBi</td><td>5.7 dBi</td><td>6 dBi</td></tr>
+          <tr><td><strong>CW9176I</strong><sup>[3]</sup></td><td>内置全向</td><td>5 dBi</td><td>5 dBi</td><td>6 dBi</td><td>4 dBi</td></tr>
+          <tr><td><strong>CW9176D1</strong><sup>[3]</sup></td><td>内置定向</td><td>7 dBi</td><td>8 dBi</td><td>8 dBi</td><td>7 dBi</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="principle">
+      <div class="principle-title">记住核心原则</div>
+      <p>天线选型的最终判据不是规格参数，而是<strong>现场勘测的实测结果</strong>。参数表上的增益值是在标准暗室中测量的理想值，实际部署环境中的表现会受到反射、遮挡、多径等复杂因素的影响。正如 Cisco 文档反复强调的那句话<sup>[2]</sup>：<em>"选择全向还是定向天线，应严格由正确、规范的现场勘测来决定。"</em></p>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 4: 蜂窝设计 ==================== -->
+<section class="section" id="ch4">
+  <div class="container">
+    <div class="section-label">◆ 第四章</div>
+    <h2>蜂窝设计：从客户端视角定义边缘</h2>
+    <p class="section-desc">
+      无线网络设计的核心不是"AP 能发射多远"，而是"客户端在哪里能获得可靠服务"。本章将颠覆一个常见误解：蜂窝边缘不是由 AP 决定的，而是由你最弱的那个客户端决定的。
+    </p>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：对讲机通话</div>
+      <p>想象你和同事各拿一部对讲机。你的对讲机功率是 5 瓦，同事的只有 1 瓦。你能听到她的声音的距离，取决于<strong>她的 1 瓦发射功率</strong>，而不是你的 5 瓦。无线网络完全一样——AP 功率再大，如果客户端（手机/平板）的上行信号无法被 AP 可靠接收，通信就会失败。这叫做<strong>链路不对称</strong>（Link Asymmetry）。</p>
+    </div>
+
+    <!-- 4.1 设备差异 -->
+    <h3>4.1 设备发射功率差异：被忽视的关键因素</h3>
+
+    <p>
+      Cisco Live 演讲中分享了一组来自真实企业网络的统计数据<sup>[4]</sup>，在一个"从天花板向下设计"、AP 使用最大发射功率的网络中：
+    </p>
+
+    <div class="card card-warning">
+      <h4>🔍 真实网络数据揭示的残酷现实</h4>
+      <p><strong>六个月的聚合数据显示：</strong></p>
+      <ul>
+        <li>AP 看到客户端的 RSSI 比客户端看到 AP 的 RSSI <strong>始终要低</strong></li>
+        <li><strong>50% 的时间</strong>，RSSI 差异达到 <strong>6 dB</strong></li>
+        <li><strong>90% 的时间</strong>，RSSI 差异达到 <strong>15 dB</strong></li>
+      </ul>
+      <p>这意味着：客户端说"我看到 AP 信号是 -56 dBm，很好"，但 AP 说"我看到你的信号只有 -71 dBm，很挣扎"。</p>
+    </div>
+
+    <p>不同类型客户端的发射功率差异巨大<sup>[4]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>设备类型</th><th>典型发射功率</th><th>与 AP（23 dBm）的差距</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>笔记本电脑</td><td>20-23 dBm</td><td>0-3 dB</td></tr>
+          <tr><td>现代智能手机/平板</td><td>17 dBm</td><td>6 dB</td></tr>
+          <tr><td>低端/老旧手机</td><td>11-14 dBm</td><td>9-12 dB</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="principle">
+      <div class="principle-title">设计原则：AP 发射功率应匹配最弱客户端</div>
+      <p>AP 的最大发射功率应设定为与你环境中<strong>最弱客户端</strong>的发射功率相匹配（留 3 dB 余量）。对大多数现代企业环境（手机+笔记本混合），最弱客户端约为 14 dBm，因此 AP 最大发射功率建议设为 <strong>17 dBm</strong><sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 4.2 客户端漫游行为 -->
+    <h3>4.2 客户端漫游行为：蜂窝边缘的真正定义者</h3>
+
+    <p>
+      蜂窝边缘不是一个由网络管理员设定的固定数值，而是由<strong>客户端的漫游逻辑</strong>动态决定的。不同厂商、不同操作系统的客户端有着截然不同的漫游触发条件<sup>[4]</sup>：
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>客户端</th><th>开始扫描新 AP 的 RSSI 阈值</th><th>漫游到新 AP 的条件</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>iOS 设备</strong></td><td>-70 dBm</td><td>新 AP 信号比当前好 <strong>8 dB</strong>（活跃状态）<br>新 AP 信号比当前好 <strong>12 dB</strong>（空闲状态）</td></tr>
+          <tr><td><strong>macOS 设备</strong></td><td>-75 dBm</td><td>新 AP 信号比当前好 <strong>12 dB</strong></td></tr>
+          <tr><td><strong>Samsung 设备</strong></td><td>-75 dBm（正常）<br>-65 dBm（信道利用率 70% 时）</td><td>新 AP 信号比当前好 <strong>10 dB</strong></td></tr>
+          <tr><td><strong>Intel 笔记本</strong></td><td>-65 ~ -75 dBm（取决于天线类型和 OEM）</td><td>5-20 dB 差异（取决于漫游激进度设置）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SVG: Cell edge definition -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg">
+        <!-- AP A -->
+        <g transform="translate(200,170)">
+          <circle cx="0" cy="0" r="130" fill="#0078D4" fill-opacity="0.06" stroke="#0078D4" stroke-width="1" stroke-dasharray="6,4"/>
+          <circle cx="0" cy="0" r="90" fill="#0078D4" fill-opacity="0.1" stroke="#0078D4" stroke-width="2"/>
+          <circle cx="0" cy="0" r="10" fill="#0D274D"/>
+          <text x="0" y="4" text-anchor="middle" font-size="9" fill="white" font-weight="700">A</text>
+          <text x="0" y="-100" text-anchor="middle" font-size="12" fill="#0078D4" font-weight="600">-62 dBm</text>
+          <text x="-95" y="4" text-anchor="end" font-size="11" fill="#5A6B7C">-70 dBm</text>
+        </g>
+        <!-- AP B -->
+        <g transform="translate(560,170)">
+          <circle cx="0" cy="0" r="130" fill="#10B981" fill-opacity="0.06" stroke="#10B981" stroke-width="1" stroke-dasharray="6,4"/>
+          <circle cx="0" cy="0" r="90" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="2"/>
+          <circle cx="0" cy="0" r="10" fill="#0D274D"/>
+          <text x="0" y="4" text-anchor="middle" font-size="9" fill="white" font-weight="700">B</text>
+          <text x="0" y="-100" text-anchor="middle" font-size="12" fill="#10B981" font-weight="600">-62 dBm</text>
+        </g>
+        <!-- Overlap zone -->
+        <rect x="345" y="100" width="70" height="140" rx="8" fill="#F59E0B" fill-opacity="0.15" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="380" y="90" text-anchor="middle" font-size="12" fill="#92400E" font-weight="700">重叠区</text>
+        <!-- Client at edge -->
+        <g transform="translate(340,170)">
+          <rect x="-12" y="-8" width="24" height="16" rx="4" fill="#F59E0B"/>
+          <text x="0" y="3" text-anchor="middle" font-size="8" fill="white" font-weight="700">📱</text>
+        </g>
+        <!-- Annotations -->
+        <text x="380" y="280" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="700">-66 dBm 中间点</text>
+        <!-- Top explanation -->
+        <rect x="100" y="10" width="600" height="50" rx="8" fill="#FFF7ED" stroke="#FDE68A" stroke-width="1"/>
+        <text x="400" y="32" text-anchor="middle" font-size="14" fill="#0D274D" font-weight="600">客户端在 -70 dBm 开始扫描 → 必须在 -62 dBm 找到下一个 AP</text>
+        <text x="400" y="50" text-anchor="middle" font-size="12" fill="#5A6B7C">（以 iOS 设备活跃状态为例：8 dB 漫游差值）</text>
+      </svg>
+      <div class="diagram-caption">图 4-1：蜂窝重叠区设计——客户端在 -70 dBm 触发扫描时，必须"看到"信号不低于 -62 dBm 的邻居 AP</div>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">蜂窝重叠的黄金法则</div>
+      <p>如果客户端在 <strong>-70 dBm</strong> 开始寻找新 AP，它需要找到一个信号<strong>至少好 8 dB</strong> 的邻居 AP（即 <strong>-62 dBm</strong>）。两个 AP 的覆盖区域必须在 <strong>-66 dBm 中间点</strong>处充分重叠，才能确保无缝漫游<sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 4.3 跨频段漫游陷阱 -->
+    <h3>4.3 跨频段漫游陷阱：2.4 GHz 的"磁铁效应"</h3>
+
+    <p>
+      在三频环境中，一个经常被忽视的问题是<strong>5 GHz 到 2.4 GHz 的不期望漫游</strong>。由于 2.4 GHz 的路径损耗比 5 GHz 约低 7 dB，在相同发射功率下，客户端"看到"的 2.4 GHz 信号天然比 5 GHz 强约 7 dB<sup>[4]</sup>：
+    </p>
+
+    <!-- SVG: Cross-band roaming problem -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg">
+        <!-- Scenario 1: Same power -->
+        <g transform="translate(0,0)">
+          <rect x="20" y="10" width="360" height="230" rx="10" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/>
+          <text x="200" y="36" text-anchor="middle" font-size="14" font-weight="700" fill="#991B1B">❌ 错误：2.4 GHz 和 5 GHz 使用相同功率</text>
+          <!-- AP -->
+          <rect x="160" y="55" width="80" height="30" rx="6" fill="#0D274D"/>
+          <text x="200" y="74" text-anchor="middle" font-size="11" fill="white" font-weight="700">AP（双频同功率）</text>
+          <!-- 5GHz cell -->
+          <ellipse cx="200" cy="140" rx="100" ry="60" fill="#0078D4" fill-opacity="0.1" stroke="#0078D4" stroke-width="2"/>
+          <text x="200" y="125" text-anchor="middle" font-size="12" fill="#0078D4" font-weight="600">5 GHz: -70 dBm</text>
+          <!-- 2.4 GHz cell (bigger) -->
+          <ellipse cx="200" cy="140" rx="150" ry="85" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="200" y="210" text-anchor="middle" font-size="12" fill="#92400E" font-weight="600">2.4 GHz: -63 dBm</text>
+          <text x="200" y="228" text-anchor="middle" font-size="11" fill="#EF4444">← 比 5 GHz 强 7 dB！</text>
+        </g>
+        <!-- Scenario 2: Reduced 2.4 GHz power -->
+        <g transform="translate(410,0)">
+          <rect x="20" y="10" width="360" height="230" rx="10" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5"/>
+          <text x="200" y="36" text-anchor="middle" font-size="14" font-weight="700" fill="#065F46">✅ 正确：降低 2.4 GHz 功率</text>
+          <!-- AP -->
+          <rect x="160" y="55" width="80" height="30" rx="6" fill="#0D274D"/>
+          <text x="200" y="74" text-anchor="middle" font-size="11" fill="white" font-weight="700">AP（2.4G 降功率）</text>
+          <!-- 5GHz cell -->
+          <ellipse cx="200" cy="140" rx="100" ry="60" fill="#0078D4" fill-opacity="0.1" stroke="#0078D4" stroke-width="2"/>
+          <text x="200" y="125" text-anchor="middle" font-size="12" fill="#0078D4" font-weight="600">5 GHz: -70 dBm</text>
+          <!-- 2.4 GHz cell (matched) -->
+          <ellipse cx="200" cy="140" rx="108" ry="65" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="200" y="195" text-anchor="middle" font-size="12" fill="#065F46" font-weight="600">2.4 GHz: -70 dBm</text>
+          <text x="200" y="213" text-anchor="middle" font-size="11" fill="#10B981">← 覆盖范围匹配 ✓</text>
+        </g>
+      </svg>
+      <div class="diagram-caption">图 4-2：跨频段漫游陷阱——降低 2.4 GHz 发射功率，使其覆盖范围与 5 GHz 匹配</div>
+    </div>
+
+    <div class="card card-accent">
+      <h4>解决方案：三频功率平衡策略</h4>
+      <ul>
+        <li><strong>2.4 GHz</strong>：将发射功率降低约 6-7 dB，使覆盖范围与 5 GHz 近似匹配</li>
+        <li><strong>5 GHz</strong>：作为基准频段，典型企业功率为 11-15 dBm（PL3-4）</li>
+        <li><strong>6 GHz</strong>：适当增加功率（比 5 GHz 高 2-3 dB），补偿更高的路径损耗<sup>[4]</sup></li>
+      </ul>
+    </div>
+
+    <!-- 4.4 管理蜂窝边缘的三个旋钮 -->
+    <h3>4.4 管理蜂窝边缘的三个"旋钮"</h3>
+
+    <p>除了调整发射功率，还有两个工具可以帮助精确控制蜂窝边缘<sup>[4]</sup>：</p>
+
+    <div class="card card-teal">
+      <h4>旋钮 ①：发射功率（Tx Power）</h4>
+      <p>最直接的控制手段。降低功率 = 缩小蜂窝。RRM（无线电资源管理）会自动调节，但你可以通过 RF Profile 设定上限和下限来约束其范围。</p>
+    </div>
+
+    <div class="card card-purple">
+      <h4>旋钮 ②：强制最低速率（Mandatory Data Rates）</h4>
+      <p>通过禁用低速率（如 1/2/5.5/6/9/11 Mbps），远距离、低 SNR 的客户端将无法连接——等效于缩小了蜂窝范围。这种方法的好处是不影响近距离客户端的体验。</p>
+    </div>
+
+    <div class="card card-orange">
+      <h4>旋钮 ③：接收起始检测（RX-SOP）</h4>
+      <p>RX-SOP 阈值决定了 AP 愿意"听到"多微弱的信号。提高 RX-SOP 阈值 = 降低 AP 的接收灵敏度 = 等效缩小蜂窝。适用于极高密度环境中的精细调优，但通常使用 Auto 设置即可。</p>
+    </div>
+
+    <!-- SVG: Three knobs illustration -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Big cell -->
+        <ellipse cx="400" cy="100" rx="350" ry="80" fill="none" stroke="#E2E8F0" stroke-width="2" stroke-dasharray="8,4"/>
+        <text x="755" y="70" font-size="11" fill="#94A3B8">-82 dBm 截止</text>
+        <!-- Medium cell -->
+        <ellipse cx="400" cy="100" rx="260" ry="65" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="665" y="85" font-size="11" fill="#F59E0B" font-weight="600">-76 dBm（强制速率）</text>
+        <!-- Small cell -->
+        <ellipse cx="400" cy="100" rx="170" ry="50" fill="#0078D4" fill-opacity="0.08" stroke="#0078D4" stroke-width="2.5"/>
+        <text x="575" y="100" font-size="11" fill="#0078D4" font-weight="600">-72 dBm（功率控制）</text>
+        <!-- AP -->
+        <circle cx="400" cy="100" r="12" fill="#0D274D"/>
+        <text x="400" y="104" text-anchor="middle" font-size="9" fill="white" font-weight="700">AP</text>
+        <!-- Labels -->
+        <text x="400" y="195" text-anchor="middle" font-size="13" fill="#5A6B7C" font-style="italic">三个"旋钮"从外到内逐层缩小有效蜂窝边界</text>
+      </svg>
+      <div class="diagram-caption">图 4-3：蜂窝边缘管理的三个旋钮——发射功率、强制速率、RX-SOP</div>
+    </div>
+
+    <!-- 4.5 避免乒乓漫游 -->
+    <h3>4.5 避免"乒乓漫游"：AP 布局的几何学</h3>
+
+    <p>
+      当客户端处于两个 AP 信号强度几乎相等的区域时，可能在两个 AP 之间反复漫游，造成连接不稳定。这被称为<strong>"乒乓漫游"</strong>（Ping-Pong Roaming）<sup>[4]</sup>。
+    </p>
+
+    <p>避免乒乓漫游的关键是<strong>AP 布局的几何形状</strong>——确保在任何位置，一个 AP 的信号明显强于其邻居：</p>
+
+    <div class="card card-accent">
+      <h4>最佳实践：交错蜂窝网格</h4>
+      <ul>
+        <li>AP 应按<strong>交错网格</strong>（蜂窝状）而非正方形网格排布</li>
+        <li>相邻 AP 使用<strong>不同信道</strong>，避免同频干扰</li>
+        <li>确保客户端从一个 AP 覆盖区域移出时，有且仅有一个明显更优的邻居 AP，而非同时"看到"多个信号强度相近的 AP</li>
+        <li>利用 <strong>802.11v BSS Transition Management</strong>（AP 辅助漫游）帮助客户端做出更好的漫游决策</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 5: 场景实战 ==================== -->
+<section class="section" id="ch5">
+  <div class="container">
+    <div class="section-label">◆ 第五章</div>
+    <h2>场景实战：办公 / 仓储 / 高密度</h2>
+    <p class="section-desc">
+      理解了物理基础和设计原则后，让我们把它们应用到三种最具代表性的实际场景中。每个场景都有独特的挑战和最佳实践。
+    </p>
+
+    <!-- 5.1 容量规划方法论 -->
+    <h3>5.1 容量规划方法论：从需求反推设计</h3>
+
+    <p>在画蜂窝之前，你需要回答四个问题<sup>[4]</sup>：</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>有多少用户和设备？</h4>
+          <p>估算高峰时段同时在线的设备数量。一般经验值：每个用户 ≈1.5 个终端设备（手机+笔记本）。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>每个设备需要多少带宽？</h4>
+          <p>根据应用类型估算。注意：<strong>数据速率 ≈ 2× 应用吞吐量</strong>（因为 Wi-Fi 半双工、开销、重传等因素导致实际可用带宽约为 PHY 速率的 50%）。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>设备是什么类型和能力？</h4>
+          <p>手机通常是 2×2，笔记本可能是 2×2 或 3×3。设备支持 Wi-Fi 6 还是 Wi-Fi 7 决定了可用的调制和特性。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>环境物理特征是什么？</h4>
+          <p>开放空间、隔断办公室、混凝土仓库？天花板高度？建筑材料？这些决定了 AP 间距和天线选型。</p>
+        </div>
+      </div>
+    </div>
+
+    <p>一个常用的应用带宽参考表<sup>[4]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>应用类型</th><th>典型吞吐量需求</th><th>等效数据速率（×2）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>网页浏览</td><td>0.5 – 1 Mbps</td><td>1 – 2 Mbps</td></tr>
+          <tr><td>语音通话（VoIP）</td><td>0.1 – 1 Mbps</td><td>0.2 – 2 Mbps</td></tr>
+          <tr><td>视频会议（如 Webex）</td><td>1 – 5 Mbps</td><td>2 – 10 Mbps</td></tr>
+          <tr><td>打印</td><td>1 Mbps</td><td>2 Mbps</td></tr>
+          <tr><td>文件共享</td><td>1 – 8 Mbps</td><td>2 – 16 Mbps</td></tr>
+          <tr><td>设备备份</td><td>10 – 50 Mbps</td><td>20 – 100 Mbps</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">实例推算：66 人的会议室</div>
+      <p>66 名用户 × 1.5 设备/人 ≈ <strong>100 个终端</strong>。每设备需要约 10 Mbps 数据速率（视频会议级别）。总需求 = <strong>1 Gbps</strong>。使用 Wi-Fi 6+ 设备、MCS9（256-QAM）、2SS、40 MHz 信道：单 AP 速率 ≈ 390 Mbps。因此需要至少 <strong>3 个 AP</strong>，各自使用不同的 40 MHz 信道<sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 5.2 办公环境 -->
+    <h3>5.2 场景一：典型办公环境</h3>
+
+    <div class="card card-accent">
+      <h4>环境特征</h4>
+      <ul>
+        <li>天花板高度：2.5 – 4 米</li>
+        <li>隔断和会议室混合，石膏板/玻璃隔墙</li>
+        <li>设备密度：中等（每 AP 20-40 台设备）</li>
+        <li>主要应用：视频会议、云办公、文件共享</li>
+      </ul>
+    </div>
+
+    <!-- SVG: Office layout with AP placement -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+        <!-- Floor plan outline -->
+        <rect x="40" y="40" width="720" height="280" rx="4" fill="#FAFBFC" stroke="#CBD5E1" stroke-width="2"/>
+        <!-- Rooms -->
+        <rect x="40" y="40" width="180" height="140" fill="none" stroke="#94A3B8" stroke-width="1.5"/>
+        <text x="130" y="75" text-anchor="middle" font-size="11" fill="#5A6B7C">会议室 A</text>
+        <rect x="40" y="180" width="180" height="140" fill="none" stroke="#94A3B8" stroke-width="1.5"/>
+        <text x="130" y="215" text-anchor="middle" font-size="11" fill="#5A6B7C">会议室 B</text>
+        <rect x="580" y="40" width="180" height="280" fill="none" stroke="#94A3B8" stroke-width="1.5"/>
+        <text x="670" y="130" text-anchor="middle" font-size="11" fill="#5A6B7C">经理办公室</text>
+        <!-- Open office area -->
+        <text x="380" y="175" text-anchor="middle" font-size="14" fill="#94A3B8">开放办公区</text>
+        <!-- APs with coverage circles -->
+        <g opacity="0.85">
+          <!-- AP1 - Meeting room A -->
+          <circle cx="130" cy="110" r="70" fill="#0078D4" fill-opacity="0.08" stroke="#0078D4" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <circle cx="130" cy="110" r="8" fill="#0078D4"/>
+          <text x="130" y="113" text-anchor="middle" font-size="7" fill="white" font-weight="700">1</text>
+          <!-- AP2 - Meeting room B -->
+          <circle cx="130" cy="250" r="70" fill="#10B981" fill-opacity="0.08" stroke="#10B981" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <circle cx="130" cy="250" r="8" fill="#10B981"/>
+          <text x="130" y="253" text-anchor="middle" font-size="7" fill="white" font-weight="700">2</text>
+          <!-- AP3 - Open office left -->
+          <circle cx="350" cy="110" r="95" fill="#7C3AED" fill-opacity="0.06" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <circle cx="350" cy="110" r="8" fill="#7C3AED"/>
+          <text x="350" y="113" text-anchor="middle" font-size="7" fill="white" font-weight="700">3</text>
+          <!-- AP4 - Open office right -->
+          <circle cx="350" cy="260" r="95" fill="#F59E0B" fill-opacity="0.06" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <circle cx="350" cy="260" r="8" fill="#F59E0B"/>
+          <text x="350" y="263" text-anchor="middle" font-size="7" fill="white" font-weight="700">4</text>
+          <!-- AP5 - Manager office -->
+          <circle cx="670" cy="180" r="85" fill="#EF4444" fill-opacity="0.06" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <circle cx="670" cy="180" r="8" fill="#EF4444"/>
+          <text x="670" y="183" text-anchor="middle" font-size="7" fill="white" font-weight="700">5</text>
+        </g>
+        <!-- Legend -->
+        <text x="400" y="355" text-anchor="middle" font-size="13" fill="#0D274D" font-weight="600">推荐配置：CW9176I / CW9174I（内置全向天线）· 吸顶安装 · 5 GHz @ 40 MHz</text>
+        <text x="400" y="374" text-anchor="middle" font-size="12" fill="#5A6B7C">会议室单独配置 AP，确保高密度视频会议不影响开放区</text>
+      </svg>
+      <div class="diagram-caption">图 5-1：典型办公环境 AP 布局示意——会议室独立部署，开放区交错覆盖</div>
+    </div>
+
+    <div class="card card-success">
+      <h4>办公环境设计要点</h4>
+      <ul>
+        <li><strong>会议室单独部署 AP</strong>：视频会议对带宽和延迟敏感，不应与开放区共享 AP</li>
+        <li><strong>AP 间距</strong>：开放区约 12-15 米一个（1.2-2K ft²/110-185 m² 每 AP）<sup>[4]</sup></li>
+        <li><strong>信道宽度</strong>：2.4 GHz @ 20 MHz、5 GHz @ 40 MHz、6 GHz @ 80 MHz</li>
+        <li><strong>功率</strong>：5 GHz 典型 11-15 dBm，由 RRM 自动管理</li>
+        <li><strong>有线上联</strong>：推荐 mGig 交换机 + Cat6/6A 线缆<sup>[4]</sup></li>
+      </ul>
+    </div>
+
+    <!-- 5.3 仓储环境 -->
+    <h3>5.3 场景二：仓储与物流环境</h3>
+
+    <div class="card card-warning">
+      <h4>环境特征与挑战</h4>
+      <ul>
+        <li>天花板高度：8 – 15+ 米</li>
+        <li>大量金属货架造成严重的多径效应和信号遮挡</li>
+        <li>温度范围宽、粉尘、振动等恶劣条件</li>
+        <li>设备：手持扫描器、叉车终端、AGV、IoT 传感器</li>
+        <li>要求：可靠的漫游（叉车高速移动）、低延迟（实时库存系统）</li>
+      </ul>
+    </div>
+
+    <!-- SVG: Warehouse design -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg">
+        <!-- Warehouse side view -->
+        <rect x="40" y="30" width="720" height="250" rx="4" fill="#FAFBFC" stroke="#CBD5E1" stroke-width="2"/>
+        <!-- High ceiling -->
+        <line x1="40" y1="30" x2="760" y2="30" stroke="#94A3B8" stroke-width="3"/>
+        <text x="400" y="22" text-anchor="middle" font-size="12" fill="#5A6B7C">天花板 ≈ 12 米</text>
+        <!-- Shelving racks -->
+        <g fill="#CBD5E1" stroke="#94A3B8" stroke-width="1">
+          <rect x="120" y="100" width="15" height="170"/><rect x="200" y="100" width="15" height="170"/>
+          <rect x="300" y="100" width="15" height="170"/><rect x="380" y="100" width="15" height="170"/>
+          <rect x="480" y="100" width="15" height="170"/><rect x="560" y="100" width="15" height="170"/>
+          <rect x="660" y="100" width="15" height="170"/>
+        </g>
+        <text x="160" y="290" text-anchor="middle" font-size="10" fill="#5A6B7C">通道</text>
+        <text x="250" y="290" text-anchor="middle" font-size="10" fill="#5A6B7C">货架</text>
+        <text x="340" y="290" text-anchor="middle" font-size="10" fill="#5A6B7C">通道</text>
+        <!-- Wall-mounted directional APs -->
+        <!-- AP on left wall -->
+        <rect x="42" y="70" width="18" height="14" rx="3" fill="#0D274D"/>
+        <text x="51" y="80" text-anchor="middle" font-size="7" fill="white" font-weight="700">AP</text>
+        <path d="M62,77 L350,50 L350,130 Z" fill="#7C3AED" fill-opacity="0.06" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- AP on right wall -->
+        <rect x="740" y="70" width="18" height="14" rx="3" fill="#0D274D"/>
+        <text x="749" y="80" text-anchor="middle" font-size="7" fill="white" font-weight="700">AP</text>
+        <path d="M738,77 L450,50 L450,130 Z" fill="#0078D4" fill-opacity="0.06" stroke="#0078D4" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- Ceiling directional AP -->
+        <rect x="391" y="33" width="18" height="12" rx="3" fill="#EF4444"/>
+        <text x="400" y="42" text-anchor="middle" font-size="7" fill="white" font-weight="700">AP</text>
+        <path d="M400,47 L300,260 L500,260 Z" fill="#EF4444" fill-opacity="0.05" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- Annotations -->
+        <text x="150" y="60" font-size="11" fill="#7C3AED" font-weight="600">壁挂定向 → 穿越货架</text>
+        <text x="500" y="60" font-size="11" fill="#0078D4" font-weight="600">壁挂定向 → 穿越货架</text>
+        <text x="400" y="310" text-anchor="middle" font-size="13" fill="#0D274D" font-weight="600">推荐：CW9176D1 / CW9174E + 定向天线 · 壁挂或高位吊顶安装</text>
+        <text x="400" y="330" text-anchor="middle" font-size="12" fill="#5A6B7C">安装高度超过 5.5 米时，务必使用定向天线聚焦覆盖区域</text>
+      </svg>
+      <div class="diagram-caption">图 5-2：仓储环境侧视图——定向天线壁挂穿越货架通道 + 高位吊顶向下聚焦</div>
+    </div>
+
+    <div class="card card-teal">
+      <h4>仓储环境设计要点</h4>
+      <ul>
+        <li><strong>天线选型</strong>：优先使用<strong>定向天线</strong>（CW9176D1 或 CW9174E + 定向贴片天线），将能量聚焦到货架通道<sup>[5][6]</sup></li>
+        <li><strong>安装高度</strong>：建议尽量靠近用户。天花板超过 5.5 米时，考虑壁挂或中间层安装。超过 18 英尺（约 5.5 米）时，必须在安装过程中实测验证连接性<sup>[5]</sup></li>
+        <li><strong>近距离共站</strong>：多台 AP 近距离部署时，务必测试同时满载运行的性能，确认不会相互干扰。尽量将工作信道拉开最大频率间距<sup>[5][6]</sup></li>
+        <li><strong>布线</strong>：使用 Cat6/Cat6A，支持 mGig 速度。Cat5e 可用但可能限制 AP 性能<sup>[5]</sup></li>
+        <li><strong>PoE 供电</strong>：802.3bt（UPOE）可确保 AP 全部功能启用（含全部射频、USB、IoT 射频）<sup>[5][6]</sup></li>
+      </ul>
+    </div>
+
+    <!-- 5.4 高密度环境 -->
+    <h3>5.4 场景三：高密度环境（会场 / 报告厅 / 体育场）</h3>
+
+    <div class="card card-purple">
+      <h4>环境特征与挑战</h4>
+      <ul>
+        <li>设备密度极高：每 AP 可能需服务 50-200+ 台设备</li>
+        <li>空间集中：所有用户在有限面积内</li>
+        <li>应用需求高：直播、社交媒体分享、实时互动</li>
+        <li>核心挑战：<strong>空口竞争</strong>——所有设备共享有限的频谱时间</li>
+      </ul>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：大蜂窝 vs 小蜂窝 = 大教室 vs 小班</div>
+      <p>一个大蜂窝覆盖整个区域 = 一个老师带 200 个学生，每个学生发言时间很短。把区域分成多个小蜂窝 = 拆成多个小班，每个老师带 30 个学生——每个学生获得更多"说话时间"。<strong>高密度设计的核心就是"小蜂窝 + 多信道"</strong><sup>[4]</sup>。</p>
+    </div>
+
+    <!-- SVG: High density small cells -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- Left: Large cell -->
+        <g transform="translate(0,0)">
+          <rect x="20" y="20" width="340" height="260" rx="8" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/>
+          <text x="190" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#991B1B">❌ 大蜂窝 = 过度共享</text>
+          <circle cx="190" cy="150" r="100" fill="#EF4444" fill-opacity="0.08" stroke="#EF4444" stroke-width="2"/>
+          <circle cx="190" cy="150" r="10" fill="#0D274D"/>
+          <text x="190" y="154" text-anchor="middle" font-size="8" fill="white" font-weight="700">AP</text>
+          <!-- Many clients -->
+          <g fill="#94A3B8" font-size="14">
+            <text x="140" y="110">📱</text><text x="170" y="95">📱</text><text x="200" y="105">📱</text>
+            <text x="230" y="115">📱</text><text x="155" y="140">📱</text><text x="220" y="140">📱</text>
+            <text x="140" y="170">📱</text><text x="180" y="180">📱</text><text x="215" y="170">📱</text>
+            <text x="250" y="160">📱</text><text x="125" y="195">📱</text><text x="250" y="185">📱</text>
+          </g>
+          <text x="190" y="268" text-anchor="middle" font-size="12" fill="#EF4444" font-weight="600">100 台设备争抢 1 个信道</text>
+        </g>
+        <!-- Right: Small cells -->
+        <g transform="translate(400,0)">
+          <rect x="20" y="20" width="370" height="260" rx="8" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5"/>
+          <text x="205" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#065F46">✅ 小蜂窝 = 高效并行</text>
+          <!-- Cell 1 -->
+          <circle cx="120" cy="115" r="55" fill="#0078D4" fill-opacity="0.1" stroke="#0078D4" stroke-width="1.5"/>
+          <circle cx="120" cy="115" r="7" fill="#0078D4"/>
+          <text x="120" y="118" text-anchor="middle" font-size="7" fill="white" font-weight="700">1</text>
+          <text x="120" y="80" text-anchor="middle" font-size="10" fill="#0078D4" font-weight="600">Ch.36</text>
+          <!-- Cell 2 -->
+          <circle cx="250" cy="115" r="55" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1.5"/>
+          <circle cx="250" cy="115" r="7" fill="#10B981"/>
+          <text x="250" y="118" text-anchor="middle" font-size="7" fill="white" font-weight="700">2</text>
+          <text x="250" y="80" text-anchor="middle" font-size="10" fill="#10B981" font-weight="600">Ch.52</text>
+          <!-- Cell 3 -->
+          <circle cx="120" cy="205" r="55" fill="#7C3AED" fill-opacity="0.1" stroke="#7C3AED" stroke-width="1.5"/>
+          <circle cx="120" cy="205" r="7" fill="#7C3AED"/>
+          <text x="120" y="208" text-anchor="middle" font-size="7" fill="white" font-weight="700">3</text>
+          <text x="120" y="240" text-anchor="middle" font-size="10" fill="#7C3AED" font-weight="600">Ch.100</text>
+          <!-- Cell 4 -->
+          <circle cx="250" cy="205" r="55" fill="#F59E0B" fill-opacity="0.1" stroke="#F59E0B" stroke-width="1.5"/>
+          <circle cx="250" cy="205" r="7" fill="#F59E0B"/>
+          <text x="250" y="208" text-anchor="middle" font-size="7" fill="white" font-weight="700">4</text>
+          <text x="250" y="240" text-anchor="middle" font-size="10" fill="#F59E0B" font-weight="600">Ch.132</text>
+          <!-- Clients in each -->
+          <g fill="#64748B" font-size="10">
+            <text x="100" y="115">📱📱📱</text>
+            <text x="230" y="115">📱📱📱</text>
+            <text x="100" y="205">📱📱📱</text>
+            <text x="230" y="205">📱📱📱</text>
+          </g>
+          <text x="205" y="268" text-anchor="middle" font-size="12" fill="#065F46" font-weight="600">每个小蜂窝 ≈25 台 · 4 个独立信道并行</text>
+        </g>
+      </svg>
+      <div class="diagram-caption">图 5-3：高密度设计的核心策略——用小蜂窝+多信道取代大蜂窝</div>
+    </div>
+
+    <div class="card card-accent">
+      <h4>高密度环境设计要点</h4>
+      <ul>
+        <li><strong>缩小蜂窝</strong>：降低发射功率，减小 AP 间距（5 GHz 典型间距 6-7.5 米，客户端到 AP 最大距离 20-25 英尺/6-7.5 米）<sup>[4]</sup></li>
+        <li><strong>缩窄信道</strong>：使用 20 MHz 或 40 MHz 信道，最大化可用信道数</li>
+        <li><strong>使用定向天线</strong>：如 CW9176D1，将能量精确聚焦到观众区域，减少向非目标区域的泄漏</li>
+        <li><strong>RF Profile 设置最低功率阈值</strong>：防止相邻 AP 的 NDP 检测导致 RRM 将功率压到过低<sup>[4]</sup>
+          <ul style="font-size:16px;">
+            <li>低高度（≤3 米）：最低功率 5 dBm</li>
+            <li>中高度（4-6 米）：最低功率 8 dBm</li>
+            <li>高高度（>6 米）：最低功率 11 dBm</li>
+          </ul>
+        </li>
+        <li><strong>人体衰减余量</strong>：满员状态下，人体可额外引入约 <strong>10 dB 衰减</strong>。如果空场设计目标为 -65 dBm，满场可能降至 -75 dBm——不可接受！应将空场设计目标提升至 <strong>-55 ~ -58 dBm</strong><sup>[4]</sup></li>
+      </ul>
+    </div>
+
+    <!-- 5.5 RSSI 设计基准 -->
+    <h3>5.5 RSSI 设计基准速查</h3>
+
+    <p>根据 Cisco Live 演讲中的经验法则<sup>[4]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>RSSI 范围</th><th>评级</th><th>适用场景</th></tr>
+        </thead>
+        <tbody>
+          <tr style="background:#FEF2F2;"><td>≤ -80 dBm</td><td>🔴 不可用</td><td>基本无法可靠通信</td></tr>
+          <tr style="background:#FEF2F2;"><td>-80 ~ -75 dBm</td><td>🔴 很差</td><td>偶尔能连接，大量重传</td></tr>
+          <tr style="background:#FFFBEB;"><td>-75 ~ -70 dBm</td><td>🟡 差</td><td>低速数据可勉强使用</td></tr>
+          <tr style="background:#FFFBEB;"><td>-70 ~ -65 dBm</td><td>🟡 一般</td><td>轻量级应用</td></tr>
+          <tr style="background:#F0FDF4;"><td>-65 ~ -60 dBm</td><td>🟢 良好</td><td>视频会议、VoIP</td></tr>
+          <tr style="background:#F0FDF4;"><td>≥ -60 dBm</td><td>🟢 优秀</td><td>高密度、高吞吐应用</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">记住人体衰减</div>
+      <p><strong>空场 RSSI 不等于满场 RSSI</strong>。人体可引入 5-10 dB 的额外衰减。设计时应在目标 RSSI 上加 10 dB 的裕量。例如：如果目标是满场 -65 dBm，则空场勘测应达到 <strong>-55 dBm</strong><sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 5.6 有线基础设施 -->
+    <h3>5.6 有线基础设施配合</h3>
+
+    <p>无线网络只是"最后一跳"——如果有线侧成为瓶颈，再好的无线设计也无法发挥全部性能<sup>[4]</sup>：</p>
+
+    <div class="card card-accent">
+      <h4>有线侧配合要点</h4>
+      <ul>
+        <li><strong>交换机端口</strong>：推荐 Multigigabit（mGig）交换机。Wi-Fi 7 AP 在典型企业配置（2.4@20 + 5@40 + 6@80 MHz）下的聚合吞吐量可超过 <strong>1.2 Gbps</strong>，传统 1 GbE 端口会成为瓶颈</li>
+        <li><strong>PoE 供电</strong>：
+          <ul>
+            <li><strong>802.3bt（UPOE）</strong>：确保 AP 全部功能启用（全部射频 + USB + IoT + GPS）</li>
+            <li><strong>802.3at（PoE+）</strong>：Cisco 9172/9174 系列仍可使用几乎全部射频功能，但 USB 和部分功率密集功能会被禁用<sup>[7][5]</sup></li>
+            <li><strong>802.3af（PoE）</strong>：仅能支持 1×1 射频和 1G 以太网——<strong>仅用于暂存配置，不适合生产部署</strong></li>
+          </ul>
+        </li>
+        <li><strong>布线</strong>：Cat6 或 Cat6A 线缆支持 10 Gbps（Cat5e 最高仅 5 Gbps，可能限制高端 AP 性能）<sup>[5][6]</sup></li>
+      </ul>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>线缆类型</th><th>支持速度</th><th>10G 最大距离</th><th>建议</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cat 5e</td><td>最高 5 Gbps</td><td>不支持 10G</td><td>可用，但可能限制性能</td></tr>
+          <tr><td>Cat 6</td><td>最高 10 Gbps</td><td>50 米</td><td>推荐</td></tr>
+          <tr style="background:#F0FDF4;"><td><strong>Cat 6A</strong></td><td><strong>10 Gbps</strong></td><td><strong>100 米</strong></td><td><strong>最佳选择</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 6: AP 选型 ==================== -->
+<section class="section" id="ch6">
+  <div class="container">
+    <div class="section-label">◆ 第六章</div>
+    <h2>AP 选型：Cisco Wi-Fi 7 产品矩阵</h2>
+    <p class="section-desc">
+      Cisco 的 Wi-Fi 7 产品线由三个系列组成——入门级 9172、中端 9174、旗舰级 9176——它们共享同一个"全球通用 SKU"架构，可在 Catalyst 控制器或 Meraki 云平台之间自由切换。选型的关键不是"买最贵的"，而是根据场景需求精确匹配。
+    </p>
+
+    <!-- 6.1 产品矩阵总览 -->
+    <h3>6.1 三大系列一览</h3>
+
+    <!-- SVG: Product tier pyramid -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 320" xmlns="http://www.w3.org/2000/svg">
+        <!-- Tier 3: 9176 -->
+        <path d="M430,30 L580,110 L280,110 Z" fill="#0078D4" fill-opacity="0.12" stroke="#0078D4" stroke-width="2"/>
+        <text x="430" y="68" text-anchor="middle" font-size="16" font-weight="800" fill="#0D274D">CW9176</text>
+        <text x="430" y="88" text-anchor="middle" font-size="12" fill="#0078D4">旗舰级 · 六射频 · 4×4:4 全频段</text>
+        <text x="430" y="104" text-anchor="middle" font-size="11" fill="#5A6B7C">12 空间流 · 10G mGig · GPS · UWB</text>
+        <!-- Tier 2: 9174 -->
+        <path d="M280,115 L580,115 L650,195 L210,195 Z" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="2"/>
+        <text x="430" y="145" text-anchor="middle" font-size="16" font-weight="800" fill="#0D274D">CW9174</text>
+        <text x="430" y="165" text-anchor="middle" font-size="12" fill="#10B981">中端级 · 五射频 · 4×4:4 (5/6G) + 2×2:2 (2.4G)</text>
+        <text x="430" y="181" text-anchor="middle" font-size="11" fill="#5A6B7C">10 空间流 · 5G mGig · 内/外置天线</text>
+        <!-- Tier 1: 9172 -->
+        <path d="M210,200 L650,200 L720,280 L140,280 Z" fill="#F59E0B" fill-opacity="0.1" stroke="#F59E0B" stroke-width="2"/>
+        <text x="430" y="230" text-anchor="middle" font-size="16" font-weight="800" fill="#0D274D">CW9172</text>
+        <text x="430" y="250" text-anchor="middle" font-size="12" fill="#F59E0B">入门级 · 三射频 · 2×2:2 全频段</text>
+        <text x="430" y="266" text-anchor="middle" font-size="11" fill="#5A6B7C">紧凑设计 · 2.5G mGig · 酒店/零售/分支</text>
+        <!-- Side labels -->
+        <text x="80" y="72" font-size="12" fill="#0078D4" font-weight="700">高密度</text>
+        <text x="80" y="88" font-size="12" fill="#0078D4">企业总部</text>
+        <text x="80" y="155" font-size="12" fill="#10B981" font-weight="700">通用企业</text>
+        <text x="80" y="171" font-size="12" fill="#10B981">仓储/教育</text>
+        <text x="80" y="240" font-size="12" fill="#F59E0B" font-weight="700">小型场所</text>
+        <text x="80" y="256" font-size="12" fill="#F59E0B">酒店/零售</text>
+        <!-- Arrow -->
+        <text x="790" y="155" text-anchor="middle" font-size="24" fill="#CBD5E1">→</text>
+        <text x="815" y="135" text-anchor="middle" font-size="11" fill="#5A6B7C" transform="rotate(90,815,155)">性能 / 密度 / 价格</text>
+      </svg>
+      <div class="diagram-caption">图 6-1：Cisco Wi-Fi 7 三级产品金字塔</div>
+    </div>
+
+    <!-- 6.2 详细对比表 -->
+    <h3>6.2 核心规格对比</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>规格</th>
+            <th style="color:#F59E0B">CW9172 系列</th>
+            <th style="color:#10B981">CW9174 系列</th>
+            <th style="color:#0078D4">CW9176 系列</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>型号</strong></td>
+            <td>CW9172I（全向）<br>CW9172H（壁板）</td>
+            <td>CW9174I（内置全向）<br>CW9174E（外置天线）</td>
+            <td>CW9176I（内置全向）<br>CW9176D1（内置定向）</td>
+          </tr>
+          <tr>
+            <td><strong>射频架构</strong></td>
+            <td>三射频（含扫描+IoT）</td>
+            <td>五射频（含扫描+IoT）</td>
+            <td>六射频（含扫描+IoT+UWB+GPS）</td>
+          </tr>
+          <tr>
+            <td><strong>2.4 GHz</strong></td>
+            <td>2×2:2</td>
+            <td>2×2:2（三频模式）<br>4×4:4（双频模式）</td>
+            <td>4×4:4</td>
+          </tr>
+          <tr>
+            <td><strong>5 GHz</strong></td>
+            <td>2×2:2 或 4×4:4（双频模式）</td>
+            <td>4×4:4</td>
+            <td>4×4:4（可配置双 5G）</td>
+          </tr>
+          <tr>
+            <td><strong>6 GHz</strong></td>
+            <td>2×2:2</td>
+            <td>4×4:4</td>
+            <td>4×4:4</td>
+          </tr>
+          <tr>
+            <td><strong>最大空间流</strong></td>
+            <td>6SS（三频）</td>
+            <td>10SS（三频）/ 8SS（双频）</td>
+            <td>12SS（三频）</td>
+          </tr>
+          <tr>
+            <td><strong>最大聚合 PHY 速率</strong></td>
+            <td>9 Gbps</td>
+            <td>约 17 Gbps（三频）</td>
+            <td>约 23 Gbps（双 5G+6G）</td>
+          </tr>
+          <tr>
+            <td><strong>客户端规模</strong></td>
+            <td>—</td>
+            <td>768（256/射频）</td>
+            <td>1200（400/射频）</td>
+          </tr>
+          <tr>
+            <td><strong>以太网上联</strong></td>
+            <td>1× 2.5G mGig</td>
+            <td>1× 5G mGig</td>
+            <td>1× 10G mGig</td>
+          </tr>
+          <tr>
+            <td><strong>USB</strong></td>
+            <td>USB 2.0（4.5W）</td>
+            <td>USB 2.0（9W）</td>
+            <td>USB 2.0（9W）</td>
+          </tr>
+          <tr>
+            <td><strong>内置 GPS/GNSS</strong></td>
+            <td>外接可选（CW-ACC-GPS1=）</td>
+            <td>外接可选</td>
+            <td>✅ 内置 + 外接</td>
+          </tr>
+          <tr>
+            <td><strong>UWB 射频</strong></td>
+            <td>—</td>
+            <td>—</td>
+            <td>✅ 内置</td>
+          </tr>
+          <tr>
+            <td><strong>CleanAir Pro</strong></td>
+            <td>扫描射频</td>
+            <td>AI/ML 扫描射频</td>
+            <td>AI/ML 扫描射频</td>
+          </tr>
+          <tr>
+            <td><strong>SSID 数量</strong></td>
+            <td>—</td>
+            <td>每频段 16 个</td>
+            <td>每频段 16 个</td>
+          </tr>
+          <tr>
+            <td><strong>供电要求（全功能）</strong></td>
+            <td>802.3bt Class 5（含 USB）<br>802.3at（不含 USB）</td>
+            <td>802.3bt Class 5</td>
+            <td>802.3bt Class 6</td>
+          </tr>
+          <tr>
+            <td><strong>最大功耗</strong></td>
+            <td>≈30.5W（9172I）<br>≈41W（9172H）</td>
+            <td>≈40-45W</td>
+            <td>≈39W</td>
+          </tr>
+          <tr>
+            <td><strong>软件支持</strong></td>
+            <td>IOS XE 17.15.2b+（9172I）<br>IOS XE 17.17.1+（9172H）</td>
+            <td>IOS XE 17.18.2+<br>Meraki 32.1.5+</td>
+            <td>IOS XE 17.15.2+</td>
+          </tr>
+          <tr>
+            <td><strong>尺寸（厘米）</strong></td>
+            <td>20×20×5.3（9172I）<br>13×18×2.6（9172H）</td>
+            <td>22.6×22.6×6.3</td>
+            <td>24×24×5.1（9176I）<br>24×25×5.1（9176D1）</td>
+          </tr>
+          <tr>
+            <td><strong>重量</strong></td>
+            <td>874g（9172I）<br>572g（9172H）</td>
+            <td>1.52 kg（9174I）<br>1.47 kg（9174E）</td>
+            <td>1.56 kg</td>
+          </tr>
+          <tr>
+            <td><strong>典型场景</strong></td>
+            <td>精品酒店、学生宿舍<br>零售门店、诊所、分支</td>
+            <td>企业办公、教育<br>仓储、医疗、零售</td>
+            <td>企业总部、高密度场馆<br>大型仓储、关键任务场所</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 6.3 特色子型号 -->
+    <h3>6.3 特色子型号深入解读</h3>
+
+    <div class="card card-orange">
+      <h4>CW9172H：酒店/多居室壁板 AP</h4>
+      <p>专为酒店客房和学生宿舍设计，安装在墙面上。除 Wi-Fi 外，还提供<sup>[7]</sup>：</p>
+      <ul>
+        <li><strong>3 个 100M/1G LAN 口</strong>：为 IP 电视、POS 终端等有线设备提供连接</li>
+        <li><strong>1 个 PoE 输出口</strong>：可为下游设备（如 IP 电话）供电（最大 15.4W，需 UPOE 供电）</li>
+        <li><strong>1 个直通口</strong>：扩展连接能力</li>
+        <li><strong>BLE IoT 射频</strong>：支持智能客房自动化、资产追踪</li>
+      </ul>
+    </div>
+
+    <div class="card card-teal">
+      <h4>CW9174E：外置天线 AP——最大灵活性</h4>
+      <p>与 CW9174I（内置天线）共享同一硬件平台，但通过 <strong>DART8 连接器</strong>支持多种外置天线<sup>[5]</sup>：</p>
+      <ul>
+        <li><strong>CW-ANT-T-O2-D8</strong>（全向天线）：吸顶安装，增益 2/5/5 dBi（2.4/5/6 GHz），内置加速度计</li>
+        <li><strong>CW-ANT-T-D2-D8</strong>（定向贴片天线）：75°×75° 波束，增益 6/5.7/5.7 dBi，可使用铰接支架 CW-MNT-ART2-00 调节角度</li>
+        <li><strong>传统 RP-TNC 偶极天线</strong>：通过 AIR-CAB002-D8-R= 转接线缆使用</li>
+        <li>还支持多款<strong>旧有天线</strong>（如 AIR-ANT2524V4C-R 等），但使用旧天线时 IoT 射频和/或 6 GHz 会被禁用</li>
+      </ul>
+      <p style="margin-top:12px; font-size:16px; color:var(--text-secondary);">
+        ⚠ <strong>6 GHz 频段注意</strong>：在美国（FCC）和加拿大（ISED），CW9174E 外置天线 AP 仅允许在<strong>标准功率（Standard Power）模式</strong>下使用 6 GHz，需配合 AFC（自动频率协调）。在其他国家，外置天线 AP 可能被限制为仅双频段<sup>[5]</sup>。
+      </p>
+    </div>
+
+    <div class="card card-accent">
+      <h4>CW9176D1：旗舰内置定向天线</h4>
+      <p>Cisco 旗舰系列中唯一的内置定向天线型号<sup>[3][6]</sup>：</p>
+      <ul>
+        <li>4×4:4 全频段，12 空间流</li>
+        <li>波束宽度：70°×70°（5/6 GHz）、80°×80°（2.4 GHz）</li>
+        <li>增益高达 8 dBi（5/6 GHz），适合远距离聚焦覆盖</li>
+        <li>默认使用 <strong>AIR-AP-BRACKET-2</strong> 壁挂支架，主要设计用于壁挂安装</li>
+        <li>内置 GPS/GNSS 和 UWB，同时具备精确位置服务能力</li>
+        <li>典型场景：礼堂、仓库、高天花板、长走廊</li>
+      </ul>
+    </div>
+
+    <!-- 6.4 选型决策 -->
+    <h3>6.4 快速选型指南</h3>
+
+    <div class="diagram">
+      <svg viewBox="0 0 860 480" xmlns="http://www.w3.org/2000/svg">
+        <!-- Start -->
+        <rect x="310" y="10" width="240" height="40" rx="20" fill="#0D274D"/>
+        <text x="430" y="35" text-anchor="middle" font-size="14" fill="white" font-weight="700">你的场景是什么？</text>
+
+        <!-- Branch 1: Small -->
+        <line x1="310" y1="30" x2="130" y2="80" stroke="#F59E0B" stroke-width="2"/>
+        <rect x="30" y="80" width="200" height="36" rx="8" fill="#FFF7ED" stroke="#F59E0B" stroke-width="2"/>
+        <text x="130" y="103" text-anchor="middle" font-size="13" fill="#92400E" font-weight="600">小型 / 分支 / 酒店</text>
+        <!-- Sub-branch -->
+        <line x1="90" y1="116" x2="90" y2="145" stroke="#F59E0B" stroke-width="1.5"/>
+        <rect x="15" y="145" width="150" height="70" rx="8" fill="#FFF7ED" stroke="#F59E0B" stroke-width="1.5"/>
+        <text x="90" y="167" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="700">CW9172I</text>
+        <text x="90" y="183" text-anchor="middle" font-size="11" fill="#5A6B7C">常规室内吸顶</text>
+        <text x="90" y="198" text-anchor="middle" font-size="11" fill="#5A6B7C">零售·诊所·分支</text>
+
+        <line x1="170" y1="116" x2="170" y2="145" stroke="#F59E0B" stroke-width="1.5"/>
+        <rect x="170" y="145" width="150" height="70" rx="8" fill="#FFF7ED" stroke="#F59E0B" stroke-width="1.5"/>
+        <text x="245" y="167" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="700">CW9172H</text>
+        <text x="245" y="183" text-anchor="middle" font-size="11" fill="#5A6B7C">壁板 + LAN 口</text>
+        <text x="245" y="198" text-anchor="middle" font-size="11" fill="#5A6B7C">酒店·宿舍·MDU</text>
+
+        <!-- Branch 2: Mid -->
+        <line x1="430" y1="50" x2="430" y2="80" stroke="#10B981" stroke-width="2"/>
+        <rect x="330" y="80" width="200" height="36" rx="8" fill="#F0FDF4" stroke="#10B981" stroke-width="2"/>
+        <text x="430" y="103" text-anchor="middle" font-size="13" fill="#065F46" font-weight="600">通用企业 / 教育 / 仓储</text>
+
+        <line x1="390" y1="116" x2="390" y2="145" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="330" y="145" width="120" height="70" rx="8" fill="#F0FDF4" stroke="#10B981" stroke-width="1.5"/>
+        <text x="390" y="167" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="700">CW9174I</text>
+        <text x="390" y="183" text-anchor="middle" font-size="11" fill="#5A6B7C">内置全向</text>
+        <text x="390" y="198" text-anchor="middle" font-size="11" fill="#5A6B7C">办公·教室</text>
+
+        <line x1="490" y1="116" x2="490" y2="145" stroke="#10B981" stroke-width="1.5"/>
+        <rect x="460" y="145" width="120" height="70" rx="8" fill="#F0FDF4" stroke="#10B981" stroke-width="1.5"/>
+        <text x="520" y="167" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="700">CW9174E</text>
+        <text x="520" y="183" text-anchor="middle" font-size="11" fill="#5A6B7C">外置天线</text>
+        <text x="520" y="198" text-anchor="middle" font-size="11" fill="#5A6B7C">仓库·走廊</text>
+
+        <!-- Branch 3: High-end -->
+        <line x1="550" y1="30" x2="720" y2="80" stroke="#0078D4" stroke-width="2"/>
+        <rect x="620" y="80" width="220" height="36" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="2"/>
+        <text x="730" y="103" text-anchor="middle" font-size="13" fill="#1E40AF" font-weight="600">旗舰 / 高密度 / 关键任务</text>
+
+        <line x1="690" y1="116" x2="690" y2="145" stroke="#0078D4" stroke-width="1.5"/>
+        <rect x="620" y="145" width="140" height="70" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="1.5"/>
+        <text x="690" y="167" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="700">CW9176I</text>
+        <text x="690" y="183" text-anchor="middle" font-size="11" fill="#5A6B7C">内置全向 · 12SS</text>
+        <text x="690" y="198" text-anchor="middle" font-size="11" fill="#5A6B7C">总部·高密度办公</text>
+
+        <line x1="790" y1="116" x2="790" y2="145" stroke="#0078D4" stroke-width="1.5"/>
+        <rect x="762" y="145" width="90" height="70" rx="8" fill="#E8F4FD" stroke="#0078D4" stroke-width="1.5"/>
+        <text x="807" y="167" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="700">CW9176D1</text>
+        <text x="807" y="183" text-anchor="middle" font-size="10" fill="#5A6B7C">内置定向</text>
+        <text x="807" y="198" text-anchor="middle" font-size="10" fill="#5A6B7C">礼堂·场馆</text>
+
+        <!-- Bottom: Unified Features -->
+        <rect x="130" y="260" width="600" height="90" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+        <text x="430" y="285" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">所有 Wi-Fi 7 AP 共享的统一架构</text>
+        <text x="430" y="308" text-anchor="middle" font-size="13" fill="#5A6B7C">全球通用单 SKU · Catalyst / Meraki 双模式切换 · Wi-Fi 7 全特性（4K-QAM / MLO / 320 MHz）</text>
+        <text x="430" y="328" text-anchor="middle" font-size="13" fill="#5A6B7C">Cisco Networking Subscription 统一许可 · CleanAir Pro · 站点勘测模式 · 802.11be 安全</text>
+
+        <!-- Arrows to bottom -->
+        <line x1="130" y1="215" x2="250" y2="258" stroke="#E2E8F0" stroke-width="1.5"/>
+        <line x1="430" y1="215" x2="430" y2="258" stroke="#E2E8F0" stroke-width="1.5"/>
+        <line x1="730" y1="215" x2="600" y2="258" stroke="#E2E8F0" stroke-width="1.5"/>
+
+        <!-- Mounting bracket note -->
+        <rect x="130" y="375" width="600" height="80" rx="10" fill="#FFF7ED" stroke="#FDE68A" stroke-width="1.5"/>
+        <text x="430" y="398" text-anchor="middle" font-size="14" font-weight="700" fill="#92400E">🔧 安装支架向后兼容</text>
+        <text x="430" y="418" text-anchor="middle" font-size="13" fill="#5A6B7C">所有型号均兼容 AIR-AP-BRACKET-1（吸顶，默认）和 AIR-AP-BRACKET-2（壁挂/电箱）</text>
+        <text x="430" y="438" text-anchor="middle" font-size="13" fill="#5A6B7C">与过去 15 年以上的企业级 AP 支架通用——棕地升级零额外安装成本</text>
+      </svg>
+      <div class="diagram-caption">图 6-2：Cisco Wi-Fi 7 快速选型指南</div>
+    </div>
+
+    <!-- 6.5 全球通用 AP -->
+    <h3>6.5 全球通用 AP 与管理模式切换</h3>
+
+    <p>
+      Cisco Wi-Fi 7 全线 AP 采用<strong>全球通用单 SKU</strong> 设计——无论部署在哪个国家/地区，都使用同一个产品编号，AP 会通过 GPS/GNSS 定位、邻近发现或监管激活文件自动获取所在国的无线法规配置<sup>[3][5][6][7]</sup>。
+    </p>
+
+    <div class="card card-accent">
+      <h4>管理模式发现与切换</h4>
+      <p>AP 开箱加电后，会自动进行管理模式发现<sup>[5][6]</sup>：</p>
+      <ol>
+        <li><strong>检查云连接</strong>：如果能访问 Meraki 云平台，优先尝试加入 Meraki Dashboard</li>
+        <li><strong>快速离线迁移</strong>：如果无云连接，通过 DHCP、DNS、L2 发现查找 Catalyst 9800 WLC</li>
+        <li><strong>后续切换</strong>：可随时从 Catalyst 模式迁移到 Meraki 模式（通过 WLC UI 一键操作），反之亦然</li>
+      </ol>
+      <p style="font-size:16px; color:var(--text-secondary); margin-top:12px;">
+        💡 <strong>提示</strong>：如果 AP 目标是加入 Catalyst WLC，应确保其子网<strong>没有</strong>云连接（或使用快速离线迁移）。如果 AP 已加入 Meraki Dashboard，后续仍可迁移到 WLC。
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 7: 设计验证 ==================== -->
+<section class="section" id="ch7">
+  <div class="container">
+    <div class="section-label">◆ 第七章</div>
+    <h2>设计验证：勘测、工具与优化闭环</h2>
+    <p class="section-desc">
+      无线网络设计不是"画完图纸就结束"的一次性工程——它是一个"设计 → 部署 → 验证 → 优化"的持续闭环。本章将详细介绍如何用工具和方法论确保你的设计在现实世界中真正有效。
+    </p>
+
+    <!-- 7.1 勘测 -->
+    <h3>7.1 现场勘测：设计验证的"最终裁判"</h3>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：建筑竣工验收</div>
+      <p>建筑师画了完美的图纸（预测性规划），但施工完成后，你一定会做竣工验收——检查墙壁是否笔直、水电是否通畅。无线网络也一样：规划工具给出的是"理想模型"，现场勘测是"验收实测"。<strong>永远用实测数据覆盖预测数据</strong><sup>[4]</sup>。</p>
+    </div>
+
+    <p>现场勘测分为两种模式<sup>[4]</sup>：</p>
+
+    <div class="card card-accent">
+      <h4>被动勘测（Passive Survey）</h4>
+      <p>采集所有 AP 的信标帧和探测帧，测量以下指标：</p>
+      <ul>
+        <li><strong>信号强度（RSSI）</strong>：绘制覆盖热力图</li>
+        <li><strong>信噪比（SNR）</strong>：评估信号质量</li>
+        <li><strong>干扰水平</strong>：识别同频和邻频干扰</li>
+        <li><strong>覆盖重叠</strong>：验证蜂窝边缘的漫游连续性</li>
+      </ul>
+      <p style="font-size:16px; color:var(--text-secondary); margin-top:8px;">工具：Ekahau、Hamina、NetAlly AirCheck G3</p>
+    </div>
+
+    <div class="card card-success">
+      <h4>主动勘测（Active Survey）</h4>
+      <p>实际连接到 SSID，测量端到端性能：</p>
+      <ul>
+        <li><strong>关联/认证时间</strong>：客户端从发现到连接的延迟</li>
+        <li><strong>吞吐量测试</strong>：实际数据传输速率</li>
+        <li><strong>丢包率</strong>：数据传输可靠性</li>
+        <li><strong>往返延迟（RTT）</strong>：实时应用的响应时间</li>
+        <li><strong>漫游测试</strong>：在移动中观察切换行为</li>
+      </ul>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">勘测的最佳时机</div>
+      <p><strong>部署前（Pre-deployment）</strong>：用临时安装的 AP 验证预测性设计——特别是 -66 dBm 蜂窝边缘的实际位置。<strong>部署后（Post-deployment）</strong>：在所有 AP 安装完毕、网络稳定后，进行全面的被动+主动勘测。<strong>位置服务</strong>：如果需要定位精度，需确认任何位置至少能被 3 个 AP 以 -75 dBm 或更好的信号"听到"<sup>[4]</sup>。</p>
+    </div>
+
+    <!-- 7.2 站点勘测模式 -->
+    <h3>7.2 Cisco AP 内置站点勘测模式</h3>
+
+    <p>
+      Cisco 9174 和 9176 系列 AP 支持一项强大的内置功能——<strong>站点勘测模式（Site Survey Mode）</strong>。无需控制器，仅需一台 AP 和电源即可完成 RF 传播评估<sup>[5][6]</sup>：
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>进入勘测模式</h4>
+          <p>在 AP 控制台输入 <code style="background:#F1F5F9; padding:2px 8px; border-radius:4px; font-size:16px;">ap site-survey</code>，AP 重启后自动获得 IP 10.0.23.1</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>AP 广播测试 SSID</h4>
+          <p>AP 自动广播 <code style="background:#F1F5F9; padding:2px 8px; border-radius:4px; font-size:16px;">C9178_site_survey</code> SSID（开放/OWE 安全），2.4/5/6 GHz 全频段</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>连接并配置</h4>
+          <p>用无线客户端连接测试 SSID，从 10.0.23.0/24 获取 IP。通过浏览器访问 10.0.23.1 的 WebUI，配置信道、信道宽度、发射功率、数据速率等参数</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>采集 RF 数据</h4>
+          <p>WebUI 实时显示各项 RF 指标，用于评估覆盖范围和信号质量</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>退出勘测模式</h4>
+          <p>输入 <code style="background:#F1F5F9; padding:2px 8px; border-radius:4px; font-size:16px;">ap capwap</code> 恢复正常 CAPWAP 模式，重新加入控制器</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-warning">
+      <h4>⚠ 注意事项</h4>
+      <ul>
+        <li>AP 必须<strong>至少加入过一次</strong> Catalyst 9800 WLC，才会出现 site-survey 命令</li>
+        <li>进入勘测模式会断开与 WLC 的连接，进入独立模式</li>
+        <li>AP 会保留之前从 WLC 获取的国家代码配置</li>
+        <li>首次登录 WebUI 的默认凭据为 admin/admin，首登时必须修改密码</li>
+      </ul>
+    </div>
+
+    <!-- 7.3 规划工具与平台集成 -->
+    <h3>7.3 规划工具与平台集成</h3>
+
+    <p>Cisco 支持将第三方勘测工具的项目文件直接导入管理平台<sup>[4]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>工具</th><th>导入平台</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Ekahau</td><td>Catalyst Center / Meraki Dashboard</td><td>预测性规划 + 实测勘测数据导入</td></tr>
+          <tr><td>Hamina</td><td>Catalyst Center / Meraki Dashboard</td><td>预测性规划导入</td></tr>
+          <tr><td>WCAE（Wireless Config Analyzer Express）</td><td>独立桌面/云工具</td><td>WLC 配置审计 + RF 优化建议</td></tr>
+          <tr><td>WiFi Hawk</td><td>独立工具</td><td>无线抓包分析 · 协议问题诊断</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 7.4 WCAE -->
+    <h3>7.4 WCAE：免费的配置审计利器</h3>
+
+    <p>
+      <strong>Wireless Config Analyzer Express (WCAE)</strong> 是 Cisco 无线事业部开发的免费工具<sup>[4]</sup>，用于验证和优化基于 WLC 的无线部署。它能自动分析 <code style="background:#F1F5F9; padding:2px 8px; border-radius:4px;">show tech wireless</code> 的输出，提供：
+    </p>
+
+    <ul>
+      <li><strong>快速定位问题</strong>：自动发现配置偏差和潜在故障</li>
+      <li><strong>RF 优化建议</strong>：识别信道规划、功率设置、邻居关系中的改进机会</li>
+      <li><strong>最佳实践核查</strong>：对照 Cisco 推荐配置逐项检查</li>
+      <li><strong>RF 概览</strong>：用 RF Summary 视图提供全网无线健康度一览</li>
+      <li><strong>NDP 邻居验证</strong>：检查每个 AP 的邻居关系是否合理，辨识潜在的同频干扰热点</li>
+    </ul>
+
+    <div class="card card-teal">
+      <h4>WCAE 有两种版本</h4>
+      <ul>
+        <li><strong>云版本</strong>：上传 show tech 文件到云端分析，无需安装</li>
+        <li><strong>桌面版本</strong>：本地运行，支持离线分析</li>
+      </ul>
+      <p style="margin-top:8px;">下载地址：<code style="background:#F1F5F9; padding:2px 8px; border-radius:4px; font-size:15px;">https://developer.cisco.com/docs/wireless-troubleshooting-tools/</code></p>
+    </div>
+
+    <!-- 7.5 安装姿态验证 -->
+    <h3>7.5 远程验证 AP 安装姿态</h3>
+
+    <p>
+      CW9176I/D1、CW9178I、CW9174E（带加速度计的天线）等型号支持<strong>远程安装姿态验证</strong><sup>[4][5]</sup>。管理员可以在 Catalyst 9800 WLC 或 Meraki Dashboard 中查看每台 AP 的物理安装方向（吸顶 / 壁挂 / 倒置 / 倾斜角度），无需亲自到现场检查。
+    </p>
+
+    <p>这对于大规模部署（如连锁零售、多校区）尤其有价值——你可以在远程办公室就发现"某店面的 AP 被错误地侧挂在墙上"。</p>
+
+    <!-- 7.6 信道健康与干扰分析 -->
+    <h3>7.6 信道健康与干扰分析</h3>
+
+    <p>部署完成后，持续监控信道健康度至关重要<sup>[4]</sup>：</p>
+
+    <div class="card card-purple">
+      <h4>802.11 同频干扰</h4>
+      <p><strong>信道利用率（Channel Utilization）</strong>是衡量同频干扰最直接的指标——它显示当前信道被本 AP 及其周围所有 Wi-Fi 设备占用的比例。高信道利用率意味着"空口时间"稀缺，所有设备都在"排队等待"。</p>
+      <p>在 Catalyst 9800 WLC 上查看：<code style="background:#F1F5F9; padding:2px 8px; border-radius:4px; font-size:15px;">show ap dot11 {24ghz|5ghz} load-info</code></p>
+    </div>
+
+    <div class="card card-orange">
+      <h4>非 802.11 干扰</h4>
+      <p>微波炉、蓝牙设备、无线摄像头、雷达信号等非 Wi-Fi 设备也占用相同的频谱。Cisco 的 <strong>CleanAir Pro</strong> 技术通过专用扫描射频和 AI/ML 算法实时识别和分类这些干扰源<sup>[5][6]</sup>：</p>
+      <ul>
+        <li>支持 2.4/5/6 GHz 全频段频谱分析</li>
+        <li>可解码 802.11be（EHT）帧——这是上一代 CleanAir 无法做到的</li>
+        <li>未来将支持 ML-based 干扰分类器直接在 AP 上运行，减轻 WLC/Catalyst Center 的负担</li>
+      </ul>
+    </div>
+
+    <!-- 7.7 验证发射功率 -->
+    <h3>7.7 验证发射功率与 RRM 行为</h3>
+
+    <p>部署后，验证 RRM 是否在合理范围内管理发射功率非常重要<sup>[4]</sup>：</p>
+
+    <div class="card card-accent">
+      <h4>常用验证命令（Catalyst 9800 WLC）</h4>
+      <div style="background:#F1F5F9; padding:16px 20px; border-radius:8px; font-family:monospace; font-size:15px; line-height:1.7; overflow-x:auto; margin-top:12px;">
+        <span style="color:#10B981;"># 查看所有 5GHz AP 的信道和功率</span><br>
+        show ap dot11 5ghz summary<br><br>
+        <span style="color:#10B981;"># 查看特定 AP 的射频邻居关系</span><br>
+        show ap name &lt;AP-NAME&gt; auto-rf dot11 dual-band<br><br>
+        <span style="color:#10B981;"># 查看 DCA（动态信道分配）状态</span><br>
+        show ap dot11 5ghz channel<br><br>
+        <span style="color:#10B981;"># 查看恶意 AP 摘要</span><br>
+        show wireless wps rogue ap summary
+      </div>
+    </div>
+
+    <p>需要关注的关键信号<sup>[4]</sup>：</p>
+    <ul>
+      <li>如果大量 AP 的功率被 RRM 压到了 RF Profile 设定的<strong>最低值</strong>，说明 AP 密度可能过高，或最低功率阈值设得太低</li>
+      <li>如果某些 AP 的功率远高于邻居，可能存在覆盖空洞（Coverage Hole）需要排查</li>
+      <li>如果 DCA 频繁变更信道（可通过日志或 RRM 事件查看），可能是存在间歇性干扰源或大量瞬态恶意 AP</li>
+    </ul>
+
+    <!-- 7.8 优化闭环 -->
+    <h3>7.8 优化闭环：设计不止于部署</h3>
+
+    <!-- SVG: Optimization loop -->
+    <div class="diagram">
+      <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+        <!-- Circle flow -->
+        <g transform="translate(350,140)">
+          <!-- Outer circle path -->
+          <circle cx="0" cy="0" r="110" fill="none" stroke="#E2E8F0" stroke-width="3"/>
+          <!-- Nodes -->
+          <g>
+            <!-- Design -->
+            <circle cx="0" cy="-110" r="36" fill="#0078D4" fill-opacity="0.12" stroke="#0078D4" stroke-width="2.5"/>
+            <text x="0" y="-115" text-anchor="middle" font-size="11" fill="#0078D4" font-weight="700">📐</text>
+            <text x="0" y="-100" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">设计</text>
+            <!-- Deploy -->
+            <circle cx="110" cy="0" r="36" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2.5"/>
+            <text x="110" y="-5" text-anchor="middle" font-size="11" fill="#10B981" font-weight="700">🔧</text>
+            <text x="110" y="10" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">部署</text>
+            <!-- Verify -->
+            <circle cx="0" cy="110" r="36" fill="#7C3AED" fill-opacity="0.12" stroke="#7C3AED" stroke-width="2.5"/>
+            <text x="0" y="105" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="700">📊</text>
+            <text x="0" y="120" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">验证</text>
+            <!-- Optimize -->
+            <circle cx="-110" cy="0" r="36" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-width="2.5"/>
+            <text x="-110" y="-5" text-anchor="middle" font-size="11" fill="#F59E0B" font-weight="700">⚡</text>
+            <text x="-110" y="10" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">优化</text>
+          </g>
+          <!-- Arrows between nodes -->
+          <path d="M25,-102 A110,110 0 0,1 102,-25" fill="none" stroke="#0078D4" stroke-width="2" marker-end="url(#arrowLoop)"/>
+          <path d="M102,25 A110,110 0 0,1 25,102" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowLoop)"/>
+          <path d="M-25,102 A110,110 0 0,1 -102,25" fill="none" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrowLoop)"/>
+          <path d="M-102,-25 A110,110 0 0,1 -25,-102" fill="none" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrowLoop)"/>
+        </g>
+        <!-- Tools annotations -->
+        <text x="560" y="30" font-size="12" fill="#0078D4" font-weight="600">Ekahau / Hamina</text>
+        <text x="560" y="47" font-size="11" fill="#5A6B7C">预测性规划</text>
+        <text x="560" y="90" font-size="12" fill="#10B981" font-weight="600">Catalyst Center / Meraki</text>
+        <text x="560" y="107" font-size="11" fill="#5A6B7C">自动化部署</text>
+        <text x="560" y="165" font-size="12" fill="#7C3AED" font-weight="600">Site Survey / WCAE</text>
+        <text x="560" y="182" font-size="11" fill="#5A6B7C">实测验证</text>
+        <text x="560" y="230" font-size="12" fill="#F59E0B" font-weight="600">AI-RRM / CleanAir Pro</text>
+        <text x="560" y="247" font-size="11" fill="#5A6B7C">持续优化</text>
+        <defs>
+          <marker id="arrowLoop" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,1 L7,4 L0,7Z" fill="#5A6B7C"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">图 7-1：无线网络的持续优化闭环——设计 → 部署 → 验证 → 优化 → 设计…</div>
+    </div>
+
+    <div class="principle">
+      <div class="principle-title">核心理念</div>
+      <p>无线网络是一个<strong>活的有机体</strong>。用户在变化、设备在更新、建筑在改造、干扰源在出现和消失。优秀的无线网络不是一次性"交付"的工程，而是一个<strong>持续运营</strong>的系统。RRM 和 AI-RRM 提供自动化的日常调优，但定期的人工审计（使用 WCAE、勘测工具）和架构层面的优化仍然不可替代。</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 8: Wi-Fi 7 新特性 ==================== -->
+<section class="section" id="ch8">
+  <div class="container">
+    <div class="section-label">◆ 第八章</div>
+    <h2>Wi-Fi 7 新特性与迁移策略</h2>
+    <p class="section-desc">
+      Wi-Fi 7（802.11be）不仅仅是"更快"——它从根本上改变了无线通信的工作方式。本章将逐一拆解五大核心特性，并给出从 Wi-Fi 5/6 迁移到 Wi-Fi 7 的务实策略。
+    </p>
+
+    <!-- 8.1 五大核心特性 -->
+    <h3>8.1 Wi-Fi 7 五大核心特性</h3>
+
+    <!-- SVG: Wi-Fi 7 features overview -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg">
+        <!-- Central hub -->
+        <circle cx="430" cy="210" r="55" fill="#0D274D"/>
+        <text x="430" y="200" text-anchor="middle" font-size="16" fill="white" font-weight="800">Wi-Fi 7</text>
+        <text x="430" y="220" text-anchor="middle" font-size="11" fill="#93C5FD">802.11be</text>
+        <!-- Feature 1: 4K-QAM -->
+        <line x1="375" y1="175" x2="200" y2="80" stroke="#0078D4" stroke-width="2"/>
+        <rect x="70" y="40" width="260" height="80" rx="12" fill="#E8F4FD" stroke="#0078D4" stroke-width="2"/>
+        <text x="200" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">① 4096-QAM（4K-QAM）</text>
+        <text x="200" y="83" text-anchor="middle" font-size="12" fill="#5A6B7C">每符号 12 比特 → 峰值速率提升 ≈20%</text>
+        <text x="200" y="100" text-anchor="middle" font-size="11" fill="#0078D4">需要 ≈34 dB SNR · 近距离"黄金区域"专属</text>
+        <!-- Feature 2: 320 MHz -->
+        <line x1="485" y1="175" x2="660" y2="80" stroke="#10B981" stroke-width="2"/>
+        <rect x="530" y="40" width="260" height="80" rx="12" fill="#F0FDF4" stroke="#10B981" stroke-width="2"/>
+        <text x="660" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">② 320 MHz 信道宽度</text>
+        <text x="660" y="83" text-anchor="middle" font-size="12" fill="#5A6B7C">仅 6 GHz 频段 · 最多 3 个 320 MHz 信道</text>
+        <text x="660" y="100" text-anchor="middle" font-size="11" fill="#10B981">低密度大带宽场景收益最大</text>
+        <!-- Feature 3: MLO -->
+        <line x1="375" y1="240" x2="170" y2="310" stroke="#7C3AED" stroke-width="2"/>
+        <rect x="30" y="280" width="280" height="100" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+        <text x="170" y="305" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">③ 多链路操作（MLO）</text>
+        <text x="170" y="323" text-anchor="middle" font-size="12" fill="#5A6B7C">同时在多个频段收发数据</text>
+        <text x="170" y="341" text-anchor="middle" font-size="11" fill="#7C3AED">聚合 → 更高吞吐 · 冗余 → 更高可靠性</text>
+        <text x="170" y="359" text-anchor="middle" font-size="11" fill="#7C3AED">转向 → 更低延迟 · Wi-Fi 7 强制认证特性</text>
+        <!-- Feature 4: Preamble Puncturing -->
+        <line x1="485" y1="240" x2="660" y2="310" stroke="#F59E0B" stroke-width="2"/>
+        <rect x="530" y="280" width="260" height="100" rx="12" fill="#FFF7ED" stroke="#F59E0B" stroke-width="2"/>
+        <text x="660" y="305" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D">④ 前导码打孔</text>
+        <text x="660" y="323" text-anchor="middle" font-size="12" fill="#5A6B7C">"剔除"受干扰的子信道</text>
+        <text x="660" y="341" text-anchor="middle" font-size="11" fill="#F59E0B">80 MHz 可打孔 20 MHz</text>
+        <text x="660" y="359" text-anchor="middle" font-size="11" fill="#F59E0B">320 MHz 可打孔 40+80 MHz · Wi-Fi 7 强制</text>
+        <!-- Feature 5: Multi-RU -->
+        <line x1="430" y1="265" x2="430" y2="380" stroke="#EF4444" stroke-width="2"/>
+        <rect x="290" y="385" width="280" height="35" rx="8" fill="#FEF2F2" stroke="#EF4444" stroke-width="2"/>
+        <text x="430" y="407" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">⑤ 多资源单元（Multi-RU）· 提升 OFDMA 效率</text>
+      </svg>
+      <div class="diagram-caption">图 8-1：Wi-Fi 7 五大核心特性总览</div>
+    </div>
+
+    <p>下面逐一深入每项特性的设计含义：</p>
+
+    <!-- 8.1.1 MLO 深入 -->
+    <h4>多链路操作（MLO）——Wi-Fi 7 最具变革性的特性</h4>
+
+    <div class="analogy">
+      <div class="analogy-title">类比：多车道收费站</div>
+      <p>过去的 Wi-Fi 像一个单通道收费站——你的车（数据流）只能排一条队。MLO 就像同时开放多个收费通道——你的车可以同时走 2.4 GHz、5 GHz 和 6 GHz 三条通道。如果一条堵了（干扰），自动切到另一条；如果都通畅，三条一起用，速度翻倍。</p>
+    </div>
+
+    <p>MLO 支持三种工作模式<sup>[4][5][6]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>模式</th><th>工作方式</th><th>主要收益</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>聚合（Aggregation）</strong></td><td>同时在多个频段传输数据，合并吞吐</td><td>更高吞吐量</td></tr>
+          <tr><td><strong>冗余（Redundancy）</strong></td><td>在多个频段发送相同数据</td><td>更高可靠性</td></tr>
+          <tr><td><strong>转向（Steering）</strong></td><td>根据实时信道质量选择最佳频段</td><td>更低延迟</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>当前客户端对 MLO 的支持情况<sup>[4]</sup>：</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>客户端</th><th>MLO 链路数</th><th>MLSR</th><th>eMLSR</th><th>MLMR-STR</th><th>320 MHz</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Intel BE200</td><td>2</td><td>✅</td><td>✅</td><td>—</td><td>✅</td></tr>
+          <tr><td>Qualcomm QCA 7850</td><td>2</td><td>✅</td><td>—</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Google Pixel 8+</td><td>2</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Samsung S24 Ultra</td><td>3</td><td>✅</td><td>—</td><td>✅</td><td>✅</td></tr>
+          <tr><td>MediaTek（Windows）</td><td>3</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+          <tr><td>Apple（最新系统）</td><td>3</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 8.1.2 前导码打孔深入 -->
+    <h4>前导码打孔（Preamble Puncturing）——干扰下的自救机制</h4>
+
+    <!-- SVG: Preamble puncturing illustration -->
+    <div class="diagram">
+      <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Without puncturing -->
+        <g transform="translate(0,0)">
+          <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="#991B1B">❌ 无打孔：整个宽信道被废弃</text>
+          <rect x="40" y="40" width="80" height="50" rx="4" fill="#10B981" fill-opacity="0.2" stroke="#10B981" stroke-width="1.5"/>
+          <text x="80" y="70" text-anchor="middle" font-size="11" fill="#065F46">20M ✓</text>
+          <rect x="120" y="40" width="80" height="50" rx="4" fill="#EF4444" fill-opacity="0.2" stroke="#EF4444" stroke-width="2"/>
+          <text x="160" y="65" text-anchor="middle" font-size="11" fill="#991B1B">20M ✗</text>
+          <text x="160" y="80" text-anchor="middle" font-size="10" fill="#EF4444">干扰!</text>
+          <rect x="200" y="40" width="80" height="50" rx="4" fill="#10B981" fill-opacity="0.2" stroke="#10B981" stroke-width="1.5"/>
+          <text x="240" y="70" text-anchor="middle" font-size="11" fill="#065F46">20M ✓</text>
+          <rect x="280" y="40" width="80" height="50" rx="4" fill="#10B981" fill-opacity="0.2" stroke="#10B981" stroke-width="1.5"/>
+          <text x="320" y="70" text-anchor="middle" font-size="11" fill="#065F46">20M ✓</text>
+          <!-- Cross out entire block -->
+          <line x1="40" y1="40" x2="360" y2="90" stroke="#EF4444" stroke-width="3" opacity="0.5"/>
+          <line x1="40" y1="90" x2="360" y2="40" stroke="#EF4444" stroke-width="3" opacity="0.5"/>
+          <text x="200" y="115" text-anchor="middle" font-size="12" fill="#EF4444" font-weight="600">降级到 20 MHz 或放弃传输</text>
+        </g>
+        <!-- With puncturing -->
+        <g transform="translate(420,0)">
+          <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="#065F46">✅ Wi-Fi 7 打孔：剔除坏子信道</text>
+          <rect x="40" y="40" width="80" height="50" rx="4" fill="#10B981" fill-opacity="0.3" stroke="#10B981" stroke-width="2"/>
+          <text x="80" y="70" text-anchor="middle" font-size="11" fill="#065F46" font-weight="600">20M ✓</text>
+          <rect x="120" y="40" width="80" height="50" rx="4" fill="#94A3B8" fill-opacity="0.15" stroke="#94A3B8" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="160" y="65" text-anchor="middle" font-size="11" fill="#94A3B8">已打孔</text>
+          <text x="160" y="80" text-anchor="middle" font-size="10" fill="#94A3B8">跳过</text>
+          <rect x="200" y="40" width="80" height="50" rx="4" fill="#10B981" fill-opacity="0.3" stroke="#10B981" stroke-width="2"/>
+          <text x="240" y="70" text-anchor="middle" font-size="11" fill="#065F46" font-weight="600">20M ✓</text>
+          <rect x="280" y="40" width="80" height="50" rx="4" fill="#10B981" fill-opacity="0.3" stroke="#10B981" stroke-width="2"/>
+          <text x="320" y="70" text-anchor="middle" font-size="11" fill="#065F46" font-weight="600">20M ✓</text>
+          <text x="200" y="115" text-anchor="middle" font-size="12" fill="#10B981" font-weight="600">仍使用 60 MHz 有效带宽 ✓</text>
+        </g>
+        <!-- Allowed puncturing table -->
+        <text x="400" y="160" text-anchor="middle" font-size="13" fill="#0D274D" font-weight="600">允许的打孔组合：</text>
+        <text x="400" y="180" text-anchor="middle" font-size="12" fill="#5A6B7C">80 MHz → 打孔 20M ｜ 160 MHz → 打孔 20M 或 40M ｜ 320 MHz → 打孔 40M、80M 或 40M+80M</text>
+      </svg>
+      <div class="diagram-caption">图 8-2：前导码打孔——在干扰存在时最大化可用带宽</div>
+    </div>
+
+    <!-- 8.2 安全要求 -->
+    <h3>8.2 Wi-Fi 7 的安全要求：必须升级到 WPA3</h3>
+
+    <p>
+      Wi-Fi 7 <strong>强制要求</strong> WPA3 和增强开放（Enhanced Open / OWE），以及保护管理帧（PMF）。这对现有网络的 WLAN 设计有直接影响<sup>[5][6]</sup>：
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>安全类型</th><th>Wi-Fi 5/6</th><th>Wi-Fi 7 要求</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>开放网络</td><td>Open（明文）</td><td><strong>OWE（Enhanced Open）</strong> · AKM 18 · CCMP128 或 GCMP256</td></tr>
+          <tr><td>个人安全</td><td>WPA2-PSK</td><td><strong>WPA3-SAE</strong> · AKM 24/25 · CCMP128 或 GCMP256</td></tr>
+          <tr><td>企业安全</td><td>WPA2-Enterprise</td><td><strong>WPA3-Enterprise</strong> · AKM 3/5 · 802.1x-SHA256</td></tr>
+          <tr><td>管理帧保护</td><td>可选</td><td><strong>强制（PMF）</strong></td></tr>
+          <tr><td>信标保护</td><td>不支持</td><td><strong>强制（Beacon Protection）</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 8.3 WLAN 迁移策略 -->
+    <h3>8.3 WLAN 迁移策略：三种务实方案</h3>
+
+    <p>由于许多现有客户端尚不支持 WPA3，Cisco 建议以下三种渐进式迁移方案<sup>[5][6]</sup>：</p>
+
+    <div class="card card-success">
+      <h4>方案一：重新配置现有 SSID 为 WPA3（激进方式）</h4>
+      <p>将所有 SSID 切换到 WPA3/OWE。<strong>优点</strong>：最高安全性，单一 SSID。<strong>缺点</strong>：不支持 WPA3 的旧设备将无法连接。</p>
+      <p style="color:var(--text-secondary); font-size:16px;">适合：新建网络或全部设备已升级的环境。</p>
+    </div>
+
+    <div class="card card-accent">
+      <h4>方案二：新增 Wi-Fi 7 SSID（灵活方式）</h4>
+      <p>保留现有 WPA2 SSID 给旧设备，新增 WPA3 SSID 给 Wi-Fi 7 设备。<strong>优点</strong>：灵活、零影响。<strong>缺点</strong>：需要维护更多 SSID。</p>
+      <p style="color:var(--text-secondary); font-size:16px;">适合：需要快速启用 Wi-Fi 7 又不能中断现有服务的环境。</p>
+    </div>
+
+    <div class="card card-teal">
+      <h4>方案三：WPA3 过渡模式（推荐方式）</h4>
+      <p>将 SSID 配置为 <strong>WPA2 + WPA3 混合模式</strong>（Transition Mode），新旧客户端共存：</p>
+      <ul>
+        <li><strong>开放网络</strong>：配置 OWE Transition——一个隐藏的 OWE SSID + 一个可见的 Open SSID（映射到 OWE）</li>
+        <li><strong>个人安全</strong>：配置 WPA3 Transition——同时启用 PSK、SAE 和 SAE-EXT-KEY，PMF 设为 Optional</li>
+        <li><strong>企业安全</strong>：配置 WPA3 Transition——同时启用 802.1x 和 802.1x-SHA256</li>
+      </ul>
+      <p style="color:var(--text-secondary); font-size:16px; margin-top:8px;">适合：大多数企业环境。旧设备使用 WPA2，新设备自动协商 WPA3，Wi-Fi 7 客户端享受 MLO 等高级特性。</p>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">Meraki 环境的特殊考虑</div>
+      <p>在 Meraki Dashboard 中，802.11be 的启用是<strong>按 SSID 组</strong>进行的（每 4 个 SSID 一组）。同一组内的所有 SSID 必须满足 Wi-Fi 7 安全要求，才能为该组开启 802.11be。建议将符合要求的 SSID 归入同一组，不符合的放到其他组<sup>[5]</sup>。</p>
+    </div>
+
+    <!-- 8.4 启用 Wi-Fi 7 -->
+    <h3>8.4 在 Catalyst 9800 上启用 Wi-Fi 7</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>启用 802.11be</h4>
+          <p>导航到 <strong>Configurations → Radio Configurations → High Throughput</strong>，为 2.4/5/6 GHz 频段勾选 <em>Enable 11be</em>，点击 Apply。启用后 MLO 自动激活<sup>[5][6]</sup>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>配置 320 MHz 信道宽度</h4>
+          <p>编辑 6 GHz RF Profile → 将 DBS 最大信道宽度设为 320 MHz。也可在单个 AP 上手动指定<sup>[5][6]</sup>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>启用前导码打孔</h4>
+          <p>编辑 5 GHz 和 6 GHz 的 RF Profile → 在 802.11be 标签页中启用 Preamble Puncturing<sup>[5][6]</sup>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>配置 WPA3 安全</h4>
+          <p>按 8.3 节的方案配置 WLAN 安全策略，确保满足 Wi-Fi 7 的 AKM 和加密要求。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8.5 迁移路线图 -->
+    <h3>8.5 从 Wi-Fi 5/6 到 Wi-Fi 7 的迁移路线图</h3>
+
+    <!-- SVG: Migration timeline -->
+    <div class="diagram">
+      <svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Timeline -->
+        <line x1="60" y1="100" x2="800" y2="100" stroke="#E2E8F0" stroke-width="3"/>
+        <!-- Phase 1 -->
+        <circle cx="150" cy="100" r="20" fill="#F59E0B" fill-opacity="0.15" stroke="#F59E0B" stroke-width="2.5"/>
+        <text x="150" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">1</text>
+        <text x="150" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">评估</text>
+        <text x="150" y="140" text-anchor="middle" font-size="11" fill="#5A6B7C">盘点客户端能力</text>
+        <text x="150" y="156" text-anchor="middle" font-size="11" fill="#5A6B7C">评估安全合规性</text>
+        <text x="150" y="172" text-anchor="middle" font-size="11" fill="#5A6B7C">审计有线基础设施</text>
+        <!-- Phase 2 -->
+        <circle cx="340" cy="100" r="20" fill="#0078D4" fill-opacity="0.15" stroke="#0078D4" stroke-width="2.5"/>
+        <text x="340" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">2</text>
+        <text x="340" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">试点</text>
+        <text x="340" y="140" text-anchor="middle" font-size="11" fill="#5A6B7C">选择 1-2 个区域</text>
+        <text x="340" y="156" text-anchor="middle" font-size="11" fill="#5A6B7C">部署 Wi-Fi 7 AP</text>
+        <text x="340" y="172" text-anchor="middle" font-size="11" fill="#5A6B7C">配置 WPA3 过渡模式</text>
+        <!-- Phase 3 -->
+        <circle cx="530" cy="100" r="20" fill="#10B981" fill-opacity="0.15" stroke="#10B981" stroke-width="2.5"/>
+        <text x="530" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">3</text>
+        <text x="530" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">扩展</text>
+        <text x="530" y="140" text-anchor="middle" font-size="11" fill="#5A6B7C">逐步替换旧 AP</text>
+        <text x="530" y="156" text-anchor="middle" font-size="11" fill="#5A6B7C">复用原有支架</text>
+        <text x="530" y="172" text-anchor="middle" font-size="11" fill="#5A6B7C">验证勘测+RRM 收敛</text>
+        <!-- Phase 4 -->
+        <circle cx="720" cy="100" r="20" fill="#7C3AED" fill-opacity="0.15" stroke="#7C3AED" stroke-width="2.5"/>
+        <text x="720" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#5B21B6">4</text>
+        <text x="720" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">优化</text>
+        <text x="720" y="140" text-anchor="middle" font-size="11" fill="#5A6B7C">启用 6 GHz + MLO</text>
+        <text x="720" y="156" text-anchor="middle" font-size="11" fill="#5A6B7C">逐步收紧安全策略</text>
+        <text x="720" y="172" text-anchor="middle" font-size="11" fill="#5A6B7C">AI-RRM 持续调优</text>
+        <!-- Arrows -->
+        <line x1="170" y1="100" x2="318" y2="100" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowMig)"/>
+        <line x1="360" y1="100" x2="508" y2="100" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowMig)"/>
+        <line x1="550" y1="100" x2="698" y2="100" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowMig)"/>
+        <defs>
+          <marker id="arrowMig" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,1 L7,4 L0,7Z" fill="#CBD5E1"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">图 8-3：Wi-Fi 7 四阶段迁移路线图</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="container"><div class="sep"></div></div>
+
+<!-- ==================== Chapter 9: 总结 ==================== -->
+<section class="section" id="ch9">
+  <div class="container">
+    <div class="section-label">◆ 第九章</div>
+    <h2>总结：无线网络设计十大黄金法则</h2>
+    <p class="section-desc">
+      回顾全文，我们从电磁波的第一性原理出发，一路推导到具体的 AP 选型和部署验证。现在，让我们把所有洞见浓缩成十条可直接指导实践的设计法则。
+    </p>
+
+    <div class="card" style="border:2px solid var(--accent); background:linear-gradient(135deg, #F8FAFC, #E8F4FD); padding:40px;">
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">1</div>
+          <div class="step-content">
+            <h4>从客户端视角设计，而非 AP 视角</h4>
+            <p>蜂窝边缘由最弱客户端的发射功率和漫游逻辑决定，AP 发射功率应匹配客户端能力。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">2</div>
+          <div class="step-content">
+            <h4>追求高信噪比，而非高信号强度</h4>
+            <p>RSSI -50 dBm + 噪声 -55 dBm 的效果远不如 RSSI -65 dBm + 噪声 -95 dBm。降低干扰比增强信号更重要。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">3</div>
+          <div class="step-content">
+            <h4>容量优先于覆盖</h4>
+            <p>多个小蜂窝（窄信道 + 低功率）提供的总容量远大于少数大蜂窝（宽信道 + 高功率）。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">4</div>
+          <div class="step-content">
+            <h4>三频功率平衡</h4>
+            <p>降低 2.4 GHz 功率匹配 5 GHz 覆盖；提高 6 GHz 功率补偿额外路径损耗。避免跨频段不期望漫游。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">5</div>
+          <div class="step-content">
+            <h4>天线选型取决于环境，而非品牌偏好</h4>
+            <p>内置天线和外置天线没有物理优劣之分。全向适合常规吸顶，定向适合高天花板、长走廊、聚焦覆盖。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">6</div>
+          <div class="step-content">
+            <h4>人体衰减不可忽视</h4>
+            <p>满员状态下额外 5-10 dB 衰减。空场设计目标应比满场目标高 10 dB。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">7</div>
+          <div class="step-content">
+            <h4>现场勘测不可替代</h4>
+            <p>所有规划工具的预测都必须通过现场实测校准。"所有模型都是错的，但一些是有用的。"</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">8</div>
+          <div class="step-content">
+            <h4>有线侧不能成为瓶颈</h4>
+            <p>mGig 交换机 + Cat6/6A 线缆 + 充足的 PoE 供电预算，才能释放 Wi-Fi 7 的全部潜力。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">9</div>
+          <div class="step-content">
+            <h4>安全升级是 Wi-Fi 7 的门票</h4>
+            <p>Wi-Fi 7 强制 WPA3 + PMF。推荐使用 WPA3 Transition Mode 实现新旧共存的平滑迁移。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--primary);">10</div>
+          <div class="step-content">
+            <h4>设计是持续闭环，不是一次性交付</h4>
+            <p>设计 → 部署 → 验证 → 优化。利用 RRM/AI-RRM 自动调优 + 定期人工审计（WCAE / 勘测）。</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="analogy" style="margin-top:40px;">
+      <div class="analogy-title">写在最后</div>
+      <p>无线网络设计既是科学，也是艺术。科学的部分是物理定律——电磁波的传播、衰减、干扰，这些不以人的意志为转移。艺术的部分是在约束条件下做出最优权衡——覆盖与容量、成本与性能、当下与未来。</p>
+      <p>希望这篇文章帮助你建立了从第一性原理出发的思维框架。带着这个框架，无论技术如何演进——Wi-Fi 8、Wi-Fi 9……你都能从容应对。因为<strong>变化的是协议和参数，不变的是物理定律和设计哲学</strong>。</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==================== 术语表 ==================== -->
+<section class="section" id="glossary" style="background:#F8FAFC; border-top:2px solid var(--border); padding-top:50px;">
+  <div class="container">
+    <div class="section-label">◆ 附录</div>
+    <h2>术语表 / Glossary</h2>
+    <p style="color:var(--text-secondary); margin-bottom:28px;">本文涉及的核心术语速查，按字母顺序排列。</p>
+
+    <div class="glossary-grid">
+      <div class="glossary-item"><div class="glossary-term">4K-QAM</div><div class="glossary-def">4096 正交幅度调制，Wi-Fi 7 引入，每符号编码 12 比特</div></div>
+      <div class="glossary-item"><div class="glossary-term">AFC</div><div class="glossary-def">Automated Frequency Coordination，自动频率协调，6 GHz 标准功率模式所需</div></div>
+      <div class="glossary-item"><div class="glossary-term">AI-RRM</div><div class="glossary-def">基于 AI/ML 的无线电资源管理，自动优化信道和功率</div></div>
+      <div class="glossary-item"><div class="glossary-term">BLE</div><div class="glossary-def">Bluetooth Low Energy，蓝牙低功耗，用于 IoT/定位</div></div>
+      <div class="glossary-item"><div class="glossary-term">BSS Coloring</div><div class="glossary-def">基本服务集着色，Wi-Fi 6 引入，用于区分同频 BSS 以提升空间复用</div></div>
+      <div class="glossary-item"><div class="glossary-term">CAPWAP</div><div class="glossary-def">Control And Provisioning of Wireless Access Points，AP 与 WLC 的管理隧道协议</div></div>
+      <div class="glossary-item"><div class="glossary-term">CCA</div><div class="glossary-def">Clear Channel Assessment，空闲信道评估，发送前侦听机制</div></div>
+      <div class="glossary-item"><div class="glossary-term">CleanAir Pro</div><div class="glossary-def">Cisco 的频谱智能技术，支持 6 GHz，可解码 EHT 帧并识别干扰源</div></div>
+      <div class="glossary-item"><div class="glossary-term">DCA</div><div class="glossary-def">Dynamic Channel Assignment，动态信道分配，RRM 的核心功能之一</div></div>
+      <div class="glossary-item"><div class="glossary-term">dBi</div><div class="glossary-def">天线增益单位，相对于各向同性天线的增益值</div></div>
+      <div class="glossary-item"><div class="glossary-term">dBm</div><div class="glossary-def">功率的绝对度量单位（相对于 1 毫瓦）</div></div>
+      <div class="glossary-item"><div class="glossary-term">EHT</div><div class="glossary-def">Extremely High Throughput，802.11be 的技术名称</div></div>
+      <div class="glossary-item"><div class="glossary-term">EIRP</div><div class="glossary-def">Effective Isotropic Radiated Power，等效各向同性辐射功率</div></div>
+      <div class="glossary-item"><div class="glossary-term">eMLSR</div><div class="glossary-def">Enhanced Multi-Link Single Radio，增强型多链路单射频操作</div></div>
+      <div class="glossary-item"><div class="glossary-term">FRA</div><div class="glossary-def">Flexible Radio Assignment，灵活射频分配（如双 5 GHz 模式）</div></div>
+      <div class="glossary-item"><div class="glossary-term">FSPL</div><div class="glossary-def">Free Space Path Loss，自由空间路径损耗</div></div>
+      <div class="glossary-item"><div class="glossary-term">GNSS/GPS</div><div class="glossary-def">全球导航卫星系统，用于 AP 自动定位和法规配置</div></div>
+      <div class="glossary-item"><div class="glossary-term">LPI</div><div class="glossary-def">Low Power Indoor，低功率室内设备类别（6 GHz）</div></div>
+      <div class="glossary-item"><div class="glossary-term">MCS</div><div class="glossary-def">Modulation and Coding Scheme，调制编码方案索引</div></div>
+      <div class="glossary-item"><div class="glossary-term">mGig</div><div class="glossary-def">Multigigabit Ethernet，支持 2.5/5/10 Gbps 的以太网技术</div></div>
+      <div class="glossary-item"><div class="glossary-term">MLO</div><div class="glossary-def">Multi-Link Operation，多链路操作，Wi-Fi 7 核心特性</div></div>
+      <div class="glossary-item"><div class="glossary-term">MRU</div><div class="glossary-def">Multiple Resource Unit，多资源单元，增强的 OFDMA</div></div>
+      <div class="glossary-item"><div class="glossary-term">MU-MIMO</div><div class="glossary-def">Multi-User MIMO，多用户多输入多输出</div></div>
+      <div class="glossary-item"><div class="glossary-term">NDP</div><div class="glossary-def">Neighbor Discovery Protocol，Cisco 专有的 AP 邻居发现协议</div></div>
+      <div class="glossary-item"><div class="glossary-term">OFDMA</div><div class="glossary-def">Orthogonal Frequency Division Multiple Access，正交频分多址接入</div></div>
+      <div class="glossary-item"><div class="glossary-term">OWE</div><div class="glossary-def">Opportunistic Wireless Encryption，增强开放安全（替代传统 Open）</div></div>
+      <div class="glossary-item"><div class="glossary-term">PMF</div><div class="glossary-def">Protected Management Frames，保护管理帧，Wi-Fi 7 强制要求</div></div>
+      <div class="glossary-item"><div class="glossary-term">PoE / PoE+ / UPOE</div><div class="glossary-def">802.3af / 802.3at / 802.3bt，以太网供电标准</div></div>
+      <div class="glossary-item"><div class="glossary-term">QAM</div><div class="glossary-def">Quadrature Amplitude Modulation，正交幅度调制</div></div>
+      <div class="glossary-item"><div class="glossary-term">RRM</div><div class="glossary-def">Radio Resource Management，无线电资源管理</div></div>
+      <div class="glossary-item"><div class="glossary-term">RSSI</div><div class="glossary-def">Received Signal Strength Indicator，接收信号强度指示</div></div>
+      <div class="glossary-item"><div class="glossary-term">RX-SOP</div><div class="glossary-def">Receiver Start of Packet，接收起始检测阈值</div></div>
+      <div class="glossary-item"><div class="glossary-term">SNR</div><div class="glossary-def">Signal-to-Noise Ratio，信噪比</div></div>
+      <div class="glossary-item"><div class="glossary-term">TPC</div><div class="glossary-def">Transmit Power Control，发射功率控制</div></div>
+      <div class="glossary-item"><div class="glossary-term">TWT</div><div class="glossary-def">Target Wake Time，目标唤醒时间，Wi-Fi 6 引入的节能机制</div></div>
+      <div class="glossary-item"><div class="glossary-term">UWB</div><div class="glossary-def">Ultra-Wideband，超宽带无线技术，用于精密定位</div></div>
+      <div class="glossary-item"><div class="glossary-term">WCAE</div><div class="glossary-def">Wireless Config Analyzer Express，Cisco 免费 WLC 配置审计工具</div></div>
+      <div class="glossary-item"><div class="glossary-term">WLC</div><div class="glossary-def">Wireless LAN Controller，无线局域网控制器</div></div>
+      <div class="glossary-item"><div class="glossary-term">WPA3</div><div class="glossary-def">Wi-Fi Protected Access 3，最新一代 Wi-Fi 安全协议</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 脚注引用 ==================== -->
+<footer class="footnotes">
+  <div class="container">
+    <h2>📖 参考文献与引用来源</h2>
+    <p style="color:var(--text-secondary); margin-bottom:20px; font-size:15px;">本文所有技术论点均基于以下 Cisco 官方文档和技术演讲。方括号编号对应正文中的上标引用。</p>
+
+    <div class="footnote-item" data-num="[1]">
+      <strong>b-hig-cw9172i.pdf</strong> — Cisco Wireless 9172I Series Wi-Fi 7 Access Point Hardware Installation Guide，第 1 章"About the Access Point"，天线与射频部分。关于内置天线为无源金属振子的物理本质。
+    </div>
+    <div class="footnote-item" data-num="[2]">
+      <strong>82068-omni-vs-direct.pdf</strong> — Cisco Document ID: 82068, "Omni Antenna vs. Directional Antenna"。关于天线增益/方向/极化基本定义、辐射图案、全向与定向天线优劣对比、室内多径效应、建筑材料衰减。
+    </div>
+    <div class="footnote-item" data-num="[3]">
+      <strong>wireless-9176-series-acc-point-ds.pdf</strong> — Cisco Wireless 9176 Series Access Points Data Sheet (C78-4767491-01, 05/25)。关于 CW9176I/D1 规格参数、天线增益、PoE 供电要求、功率消耗、环境参数等。
+    </div>
+    <div class="footnote-item" data-num="[4]">
+      <strong>TECEWN-2007 - Cisco Live 2026 EMEA.pdf</strong> — "Wireless Network Design for a Wireless First World" 技术研讨会（Mark Krischer, Jim Florwick, Federico Ziliotto）。关于 RF 基础、调制与吞吐三维度、蜂窝设计、客户端漫游逻辑、6 dB 法则、场景设计、RSSI 基准、有线配合、勘测方法、WCAE 工具、RRM/DCA/TPC 原理、信道 OBSS 竞争测试等。
+    </div>
+    <div class="footnote-item" data-num="[5]">
+      <strong>cw9174-dg.pdf</strong> — Cisco Wireless CW9174 Deployment Guide。关于 CW9174x 技术规格、外置天线选项（DART8 连接器）、PoE 表格、线缆要求、全球通用 AP、Wi-Fi 7 特性启用（11be/320 MHz/前导码打孔）、安全要求与 WLAN 设计选项、Meraki 11be per-SSID 配置、CleanAir Pro、站点勘测模式。
+    </div>
+    <div class="footnote-item" data-num="[6]">
+      <strong>cw9176-dg.pdf</strong> — Cisco Wireless CW9176 Deployment Guide。关于 CW9176x 六射频架构、技术规格、定向天线用例、支架与安装、PoE 表格、Wi-Fi 7 特性启用、安全要求与三种迁移方案（OWE Transition / WPA3 Transition / WPA3 Enterprise Transition）详细配置、IoT 集成（Cisco Spaces）、站点勘测模式。
+    </div>
+    <div class="footnote-item" data-num="[7]">
+      <strong>wireless-9172-series-access-points-ds.pdf</strong> — Cisco Wireless 9172 Series Access Points Data Sheet (C78-4886586-01, 04/25)。关于 CW9172I/9172H 规格参数、天线增益、接口（LAN 口/PoE out/直通口）、PoE 供电与功耗、环境参数、可持续性设计。
+    </div>
+
+    <div style="margin-top:40px; padding-top:24px; border-top:1px solid var(--border);">
+      <p style="font-size:14px; color:#94A3B8; line-height:1.6;">
+        本文基于公开发布的 Cisco 技术文档和 Cisco Live 2026 EMEA 演讲资料编写，仅供技术学习参考。所有产品名称、商标均为其各自所有者的财产。文中 Wi-Fi 7 特性和产品功能可能因软件版本和国家法规差异而有所不同，请以 Cisco 官方文档为准。
+      </p>
+      <p style="font-size:14px; color:#94A3B8; margin-top:12px;">
+        📅 最后更新：2026 年 4 月 · 作者：CircuIT · 技术内容基于 Cisco 官方资料
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- 返回顶部 -->
+<div style="text-align:center; padding:40px 0; background:var(--bg);">
+  <a href="#toc" style="display:inline-flex; align-items:center; gap:8px; padding:12px 28px; background:var(--primary); color:white; border-radius:24px; text-decoration:none; font-weight:600; font-size:15px; box-shadow:var(--shadow-md); transition:all 0.2s;">
+    ↑ 返回文章导览
+  </a>
+</div>
+
+</main>
+</body>
+</html>
