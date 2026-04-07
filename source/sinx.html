@@ -1,0 +1,301 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角函数动态探索器</title>
+    <!-- 引入 Tailwind CSS 库 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body class="bg-slate-100 p-4 md:p-8 min-h-screen flex items-center justify-center font-sans">
+
+    <div class="flex flex-col bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-200 w-full max-w-4xl mx-auto">
+        <!-- 头部区 -->
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <!-- SVG Icon for Settings -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-500"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="7" r="3"/><circle cx="8" cy="17" r="3"/></svg>
+                    三角函数“变身”探索器
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">拖动滑块，观察图像是怎么随着参数变化的。红线是你最终研究的目标！</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- 左侧控制区 -->
+            <div class="w-full lg:w-1/3 bg-white p-5 rounded-lg shadow-sm border border-slate-100 flex flex-col gap-6">
+                
+                <!-- 公式展示 -->
+                <div class="bg-blue-50 text-blue-900 p-4 rounded-md text-center font-mono text-lg font-semibold tracking-wider">
+                    y = sin(<span id="disp-omega" class="text-blue-600">1</span>(x - <span id="disp-shift" class="text-red-500">0</span>) + <span id="disp-phi" class="text-green-600">0</span>)
+                </div>
+
+                <!-- 控制滑块 -->
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 font-medium text-slate-700">
+                            <span>1. 改变 ω (挤压/拉伸)</span>
+                            <span id="val-omega" class="text-blue-600">1</span>
+                        </div>
+                        <input type="range" id="slider-omega" min="0.5" max="3" step="0.5" value="1" class="w-full accent-blue-500" />
+                        <p class="text-xs text-slate-400 mt-1">注意：变成2x时，图像是被压缩了！</p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 font-medium text-slate-700">
+                            <span>2. 改变 φ (原图初始相位)</span>
+                            <span id="val-phi" class="text-green-600">0</span>
+                        </div>
+                        <input type="range" id="slider-phi" min="0" max="1" step="0.25" value="0" class="w-full accent-green-500" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 font-medium text-slate-700">
+                            <span>3. 左右平移 (向右为正)</span>
+                            <span id="val-shift" class="text-red-500">0</span>
+                        </div>
+                        <input type="range" id="slider-shift" min="-0.5" max="0.5" step="0.125" value="0" class="w-full accent-red-500" />
+                        <p class="text-xs text-slate-400 mt-1">观察：当红点在原点(0,0)时，图形关于原点对称；当最高/低点在Y轴时，关于Y轴对称。</p>
+                    </div>
+                </div>
+
+                <!-- 学习路径预设 -->
+                <div class="mt-2 pt-4 border-t border-slate-100">
+                    <p class="text-sm font-medium text-slate-700 mb-2">跟着老师的步骤体验：</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button id="btn-step1" class="text-left px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-md transition-colors text-slate-700">① 看最基础的 y=sin(x)</button>
+                        <button id="btn-step2" class="text-left px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 rounded-md transition-colors text-blue-700">② 变成 2x (感受水平压缩)</button>
+                        <button id="btn-step3" class="text-left px-3 py-2 text-sm bg-green-50 hover:bg-green-100 rounded-md transition-colors text-green-700">③ 加上 φ=π/4 (蓝虚线原图)</button>
+                        <button id="btn-step4" class="text-left px-3 py-2 text-sm bg-red-50 hover:bg-red-100 rounded-md transition-colors text-red-700">④ 向右平移 π/8 (原点对称！)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧画布区 -->
+            <div class="w-full lg:w-2/3 bg-white p-2 rounded-lg shadow-sm border border-slate-100 relative">
+                <!-- 图例 -->
+                <div class="absolute top-4 right-4 bg-white/90 p-2 rounded border border-slate-200 text-xs flex flex-col gap-2 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-0.5 bg-gray-300"></div><span>基准 y=sin(x)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 border-t-2 border-dashed border-blue-500"></div><span>平移前(虚线)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-0.5 bg-red-500"></div><span>平移后(红线)</span>
+                    </div>
+                </div>
+                <div id="canvas-wrapper" class="w-full relative flex-grow" style="min-height: 250px;">
+                    <canvas id="math-canvas" width="600" height="400" class="w-full h-full bg-slate-50/50 rounded touch-none"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 核心状态 ---
+        let omega = 1;
+        let phiPi = 0;
+        let shiftPi = 0;
+
+        // --- 获取 DOM 元素 ---
+        const canvas = document.getElementById('math-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const sliderOmega = document.getElementById('slider-omega');
+        const sliderPhi = document.getElementById('slider-phi');
+        const sliderShift = document.getElementById('slider-shift');
+
+        // 显示数值的元素
+        const valOmega = document.getElementById('val-omega');
+        const valPhi = document.getElementById('val-phi');
+        const valShift = document.getElementById('val-shift');
+        const dispOmega = document.getElementById('disp-omega');
+        const dispPhi = document.getElementById('disp-phi');
+        const dispShift = document.getElementById('disp-shift');
+
+        // --- 辅助函数 ---
+        // 将数值转换为更易读的 π 分数形式
+        function formatPi(val) {
+            if (val === 0) return "0";
+            if (val === 1) return "π";
+            if (val === -1) return "-π";
+            const fraction = val > 0 ? `${(val).toFixed(2)}π` : `-${Math.abs(val).toFixed(2)}π`;
+            return fraction.replace("0.25π", "π/4")
+                           .replace("0.50π", "π/2")
+                           .replace("1.00π", "π");
+        }
+
+        // 更新文字显示
+        function updateUI() {
+            const phiStr = formatPi(phiPi);
+            const shiftStr = formatPi(shiftPi);
+
+            sliderOmega.value = omega;
+            sliderPhi.value = phiPi;
+            sliderShift.value = shiftPi;
+
+            valOmega.textContent = omega;
+            valPhi.textContent = phiStr;
+            valShift.textContent = shiftStr;
+            
+            dispOmega.textContent = omega;
+            dispPhi.textContent = phiStr;
+            dispShift.textContent = shiftStr;
+        }
+
+        // --- 画布自适应处理 ---
+        function resizeCanvas() {
+            // 获取容器节点，增加多次降级回退策略（即使找不到也能保底使用 document.body）
+            const wrapper = document.getElementById('canvas-wrapper') || (canvas ? canvas.parentElement : null) || document.body;
+            
+            // 安全检查：如果极其特殊情况下连 body 都没有加载完，或者对象没有该方法，直接中止，防止报错
+            if (!wrapper || typeof wrapper.getBoundingClientRect !== 'function') return; 
+            
+            const rect = wrapper.getBoundingClientRect();
+            // 让画布的物理像素尺寸等于容器的实际像素尺寸，防止手机上模糊和变形
+            const width = document.getElementById('canvas-wrapper') ? rect.width : Math.max(rect.width - 16, 300);
+            
+            if (canvas) {
+                canvas.width = width || 600;
+                canvas.height = Math.max((width || 600) * 0.66, 250); // 设定一个合理的比例，且最低不能低于 250px
+                draw();
+            }
+        }
+
+        // --- 核心绘图逻辑 ---
+        function draw() {
+            if (!canvas || !ctx) return; // 增加防空指针保护
+            
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+
+            // 坐标系设置
+            const originX = width / 2;
+            const originY = height / 2;
+            const scaleX = width / (4 * Math.PI); // X轴范围大约 -2π 到 2π
+            const scaleY = height / 4; // Y轴范围 -2 到 2
+
+            // 1. 绘制网格和坐标轴
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = 0; x <= width; x += scaleX * (Math.PI / 2)) {
+                ctx.moveTo(x, 0); ctx.lineTo(x, height);
+            }
+            for (let y = 0; y <= height; y += scaleY) {
+                ctx.moveTo(0, y); ctx.lineTo(width, y);
+            }
+            ctx.stroke();
+
+            // 绘制主坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, originY); ctx.lineTo(width, originY); // X轴
+            ctx.moveTo(originX, 0); ctx.lineTo(originX, height); // Y轴
+            ctx.stroke();
+
+            // 绘制刻度
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('0', originX + 5, originY + 15);
+            ctx.fillText('π/2', originX + scaleX * (Math.PI / 2) - 10, originY + 15);
+            ctx.fillText('π', originX + scaleX * Math.PI - 5, originY + 15);
+            ctx.fillText('1', originX + 5, originY - scaleY + 4);
+            ctx.fillText('-1', originX + 5, originY + scaleY + 4);
+
+            // 绘制函数图像的通用函数
+            const drawWave = (fn, color, isDashed = false) => {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                if (isDashed) ctx.setLineDash([5, 5]);
+                else ctx.setLineDash([]);
+                
+                ctx.beginPath();
+                for (let px = 0; px <= width; px++) {
+                    const mathX = (px - originX) / scaleX;
+                    const mathY = fn(mathX);
+                    const py = originY - mathY * scaleY;
+                    
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]); // 恢复实线
+            };
+
+            // 2. 绘制基础参考图：y = sin(x) （浅灰色）
+            drawWave((x) => Math.sin(x), '#d1d5db');
+
+            // 3. 绘制平移前的原图：y = sin(ωx + φ) （蓝色虚线）
+            const phi = phiPi * Math.PI;
+            drawWave((x) => Math.sin(omega * x + phi), '#3b82f6', true);
+
+            // 4. 绘制平移后的图像：y = sin(ω(x - shift) + φ) （红色实线）
+            const shift = shiftPi * Math.PI;
+            drawWave((x) => Math.sin(omega * (x - shift) + phi), '#ef4444');
+
+            // 突出显示与原点/Y轴的关系（帮助理解对称性）
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(originX, originY - Math.sin(omega * (0 - shift) + phi) * scaleY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // --- 响应事件绑定 ---
+        function handleStateChange() {
+            updateUI();
+            draw();
+        }
+
+        sliderOmega.addEventListener('input', (e) => {
+            omega = Number(e.target.value);
+            handleStateChange();
+        });
+
+        sliderPhi.addEventListener('input', (e) => {
+            phiPi = Number(e.target.value);
+            handleStateChange();
+        });
+
+        sliderShift.addEventListener('input', (e) => {
+            shiftPi = Number(e.target.value);
+            handleStateChange();
+        });
+
+        // 预设按钮事件
+        document.getElementById('btn-step1').addEventListener('click', () => {
+            omega = 1; phiPi = 0; shiftPi = 0; handleStateChange();
+        });
+        document.getElementById('btn-step2').addEventListener('click', () => {
+            omega = 2; phiPi = 0; shiftPi = 0; handleStateChange();
+        });
+        document.getElementById('btn-step3').addEventListener('click', () => {
+            omega = 2; phiPi = 0.25; shiftPi = 0; handleStateChange();
+        });
+        document.getElementById('btn-step4').addEventListener('click', () => {
+            omega = 2; phiPi = 0.25; shiftPi = 0.125; handleStateChange();
+        });
+
+        // 重点：监听手机横竖屏切换和窗口大小变化
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- 初始化 ---
+        updateUI();
+        resizeCanvas(); // 第一次加载时，自动侦测屏幕大小并绘制
+    </script>
+</body>
+</html>
