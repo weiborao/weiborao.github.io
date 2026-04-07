@@ -1,0 +1,158 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小希的专属数学推演画板 - 北京十一学校</title>
+    <style>
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #2c3e50; }
+        canvas { width: 100%; height: auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: crosshair; }
+        .controls { margin-top: 20px; padding: 15px; background: #eef2f5; border-radius: 8px; }
+        .slider-container { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        input[type=range] { flex-grow: 1; height: 6px; background: #bdc3c7; border-radius: 5px; outline: none; }
+        .data-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 15px; }
+        .data-box { background: #fff; padding: 10px; border-radius: 6px; border-left: 4px solid #3498db; }
+        .data-box.highlight { border-left-color: #e74c3c; background: #fdedec; font-weight: bold; }
+        .warning { color: #e74c3c; font-size: 14px; margin-top: 5px; min-height: 20px;}
+    </style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+    <div class="container">
+        <h2>抛物线与对数绝对值：交点动态分析</h2>
+        <canvas id="mathCanvas" width="800" height="400"></canvas>
+        
+        <div class="controls">
+            <div class="slider-container">
+                <label for="a-slider"><b>拖动水平线 y = a :</b></label>
+                <input type="range" id="a-slider" min="-0.5" max="1.5" step="0.01" value="0.5">
+                <span id="a-value" style="font-weight: bold; color: #e74c3c; width: 60px;">0.50</span>
+            </div>
+            <div class="warning" id="warning-msg"></div>
+
+            <div class="data-panel">
+                <div class="data-box">抛物线交点: <br><span id="x1x2-val">x₁=?, x₂=?</span></div>
+                <div class="data-box">对数交点: <br><span id="x3x4-val">x₃=?, x₄=?</span></div>
+                <div class="data-box">核心性质(对称): <br><span id="sum-val">(x₁ + x₂) = -10</span></div>
+                <div class="data-box highlight">终极目标值:<br>(x₁+x₂)(x₃-x₄) = <span id="final-val">?</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mathCanvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('a-slider');
+        const aValDisplay = document.getElementById('a-value');
+        const warningMsg = document.getElementById('warning-msg');
+        
+        // 坐标系映射参数
+        const mathXMin = -12, mathXMax = 12;
+        const mathYMin = -2, mathYMax = 3;
+        
+        function mapX(x) { return (x - mathXMin) / (mathXMax - mathXMin) * canvas.width; }
+        function mapY(y) { return canvas.height - (y - mathYMin) / (mathYMax - mathYMin) * canvas.height; }
+
+        function drawAxes() {
+            ctx.beginPath();
+            ctx.strokeStyle = '#95a5a6'; ctx.lineWidth = 1;
+            ctx.moveTo(mapX(mathXMin), mapY(0)); ctx.lineTo(mapX(mathXMax), mapY(0)); // X轴
+            ctx.moveTo(mapX(0), mapY(mathYMin)); ctx.lineTo(mapX(0), mapY(mathYMax)); // Y轴
+            ctx.stroke();
+            ctx.fillStyle = '#7f8c8d'; ctx.font = '14px Arial';
+            ctx.fillText('O', mapX(0) + 5, mapY(0) + 15);
+            ctx.fillText('x', mapX(mathXMax) - 15, mapY(0) - 10);
+            ctx.fillText('y', mapX(0) + 10, mapY(mathYMax) + 15);
+        }
+
+        function drawFunctions() {
+            ctx.lineWidth = 2.5;
+            // 画左侧二次函数 (x <= 0)
+            ctx.beginPath();
+            ctx.strokeStyle = '#2980b9';
+            for (let x = mathXMin; x <= 0; x += 0.05) {
+                let y = x*x + 10*x + 1;
+                if (x === mathXMin) ctx.moveTo(mapX(x), mapY(y));
+                else ctx.lineTo(mapX(x), mapY(y));
+            }
+            ctx.stroke();
+
+            // 画右侧对数绝对值函数 (x > 0)
+            ctx.beginPath();
+            ctx.strokeStyle = '#27ae60';
+            let start = true;
+            for (let x = 0.01; x <= mathXMax; x += 0.05) {
+                let y = Math.abs(Math.log10(x));
+                if (start) { ctx.moveTo(mapX(x), mapY(y)); start = false; }
+                else { ctx.lineTo(mapX(x), mapY(y)); }
+            }
+            ctx.stroke();
+        }
+
+        function update() {
+            const a = parseFloat(slider.value);
+            aValDisplay.innerText = a.toFixed(2);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawAxes();
+            drawFunctions();
+
+            // 画水平线 y = a
+            ctx.beginPath();
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(mapX(mathXMin), mapY(a));
+            ctx.lineTo(mapX(mathXMax), mapY(a));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 判断交点情况
+            if (a > 0 && a <= 1) {
+                warningMsg.innerText = "完美！产生4个交点，符合题意。";
+                warningMsg.style.color = "#27ae60";
+                
+                let x1 = -5 - Math.sqrt(24 + a);
+                let x2 = -5 + Math.sqrt(24 + a);
+                let x3 = Math.pow(10, -a);
+                let x4 = Math.pow(10, a);
+                
+                // 画交点
+                ctx.fillStyle = '#e74c3c';
+                [x1, x2, x3, x4].forEach(x => {
+                    ctx.beginPath();
+                    ctx.arc(mapX(x), mapY(a), 5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                document.getElementById('x1x2-val').innerText = `x₁ ≈ ${x1.toFixed(2)}, x₂ ≈ ${x2.toFixed(2)}`;
+                document.getElementById('x3x4-val').innerText = `x₃ ≈ ${x3.toFixed(2)}, x₄ ≈ ${x4.toFixed(2)}`;
+                
+                let finalVal = (-10) * (x3 - x4);
+                document.getElementById('final-val').innerText = finalVal.toFixed(2);
+                
+            } else {
+                if(a <= 0) warningMsg.innerText = "注意：a ≤ 0 时，右侧没有交点了！不符合4个实数解的要求。";
+                if(a > 1) warningMsg.innerText = "注意：a > 1 时，左侧抛物线只剩1个交点了！不符合4个实数解的要求。";
+                warningMsg.style.color = "#e74c3c";
+                
+                document.getElementById('x1x2-val').innerText = "x₁, x₂ 数量不符";
+                document.getElementById('x3x4-val').innerText = "x₃, x₄ 数量不符";
+                document.getElementById('final-val').innerText = "无效";
+            }
+        }
+
+        slider.addEventListener('input', update);
+        update(); // 初始化调用
+    </script>
+</body>
+</html>
