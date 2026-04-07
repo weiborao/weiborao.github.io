@@ -1,0 +1,388 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小希的专属数学互动课堂</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 KaTeX 用于数学公式渲染 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <style>
+        /* 自定义一些平滑过渡的样式 */
+        .tab-btn { transition: all 0.3s ease; }
+        .tab-content { display: none; animation: fadeIn 0.5s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* 自定义滑动条样式 */
+        input[type=range] { accent-color: #3b82f6; }
+    </style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800 pb-12">
+
+    <!-- 顶部欢迎区 -->
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xl shadow-sm">
+                    👨‍🏫
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800">十一学校数学课堂</h1>
+                    <p class="text-xs text-slate-500">专属学员：小希 | 课题：三角函数平移与对称</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <!-- 鼓励话语 -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 shadow-sm">
+            <p class="text-blue-800 text-sm md:text-base leading-relaxed">
+                <strong>老师寄语：</strong> 小希，数学是一门“讲理”的学科。我们不背套路，只找规律。按照你“一步一步来”的思路，老师把这道题拆解成了三关。你先玩一玩前两关的滑块，找找感觉，第三关咱们一起秒杀它！
+            </p>
+        </div>
+
+        <!-- 导航 Tabs -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-2">
+            <button onclick="switchTab(1)" id="btn-tab-1" class="tab-btn active px-4 py-2 rounded-t-lg bg-blue-600 text-white font-medium text-sm md:text-base shadow-sm">第一关：打破“拉伸”错觉</button>
+            <button onclick="switchTab(2)" id="btn-tab-2" class="tab-btn px-4 py-2 rounded-t-lg bg-slate-200 text-slate-600 hover:bg-slate-300 font-medium text-sm md:text-base">第二关：躲开“平移”陷阱</button>
+            <button onclick="switchTab(3)" id="btn-tab-3" class="tab-btn px-4 py-2 rounded-t-lg bg-slate-200 text-slate-600 hover:bg-slate-300 font-medium text-sm md:text-base">第三关：决战高考题</button>
+        </div>
+
+        <!-- 画布显示区 (共用) -->
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6 relative">
+            <div class="w-full relative overflow-hidden rounded-lg" style="padding-top: 50%;">
+                <canvas id="mathCanvas" class="absolute top-0 left-0 w-full h-full bg-slate-50"></canvas>
+            </div>
+            <!-- 第一关控制区 -->
+            <div id="controls-1" class="mt-6 flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <label class="font-medium text-slate-700">调整 \(\omega\) 的值：<span id="omega-val" class="text-blue-600 font-bold">1.0</span></label>
+                </div>
+                <input type="range" id="omega-slider" min="0.5" max="3" step="0.5" value="1" class="w-full">
+                <p class="text-sm text-slate-600 bg-slate-100 p-3 rounded-md">
+                    <strong>老师解说：</strong> 虚线是基础模型 \(y = \sin(x)\)。现在拖动滑块，把它变成 \(y = \sin(2x)\)。你看！周期变短了，波浪变密了，所以是<strong>水平压缩</strong>哦！
+                </p>
+            </div>
+
+            <!-- 第二关控制区 -->
+            <div id="controls-2" class="mt-6 flex flex-col gap-4 hidden">
+                <div class="flex items-center justify-between">
+                    <label class="font-medium text-slate-700">向右平移距离 \(a\)：<span id="shift-val" class="text-green-600 font-bold">0</span></label>
+                </div>
+                <input type="range" id="shift-slider" min="0" max="3.14159" step="0.1" value="0" class="w-full">
+                <p class="text-sm text-slate-600 bg-slate-100 p-3 rounded-md">
+                    <strong>老师解说：</strong> 灰色虚线是 \(y = \sin(2x)\)。向右平移 \(a\) 时，一定记住<strong>“见 \(x\) 就替换”</strong>的法则。正确写法是 \(y = \sin(2(x-a))\)（实线）。展开就是 \(y = \sin(2x - 2a)\)。千万别写成 \(\sin(2x - a)\) 啦！
+                </p>
+            </div>
+            
+            <!-- 第三关控制区 (无需控件，纯展示) -->
+            <div id="controls-3" class="mt-6 hidden">
+                 <p class="text-sm text-slate-600 bg-indigo-50 p-3 rounded-md border border-indigo-100 text-center">
+                    这里展示的是 \(y = \sin(2x + \frac{\pi}{4})\) 的图像。这正是本题的正确答案！往下滑动，看老师一步步带你算出来。👇
+                </p>
+            </div>
+        </div>
+
+        <!-- 内容解说区 -->
+        <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+            
+            <!-- 第一关文字 -->
+            <div id="content-1" class="tab-content active space-y-4">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">1</span>
+                    第一性原理：研究的核心到底是谁？
+                </h2>
+                <p class="text-slate-600 leading-relaxed">
+                    小希，处理复杂的三角函数，我们永远从最简单的 \(y = \sin(x)\) 出发（这叫建立<strong>最小模型</strong>）。
+                </p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 ml-2">
+                    <li>函数里的 \(x\) 就像是时间的流逝，\(\omega\)（比如 \(\sin(2x)\) 里面的 2）是“时间加速器”。</li>
+                    <li>因为时间加速了2倍，本来跑完一圈需要 \(2\pi\) 的时间，现在只需要 \(\pi\) 就能跑完。</li>
+                    <li><strong>结论：</strong> \(y = \sin(2x)\) 的图像相对于 \(y = \sin(x)\) 不是拉长，而是<strong>横向压缩了一半</strong>。</li>
+                </ul>
+            </div>
+
+            <!-- 第二关文字 -->
+            <div id="content-2" class="tab-content space-y-4">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-sm">2</span>
+                    避坑指南：平移的“名花有主”法则
+                </h2>
+                <p class="text-slate-600 leading-relaxed">
+                    这是北京高考特别喜欢考察的基础易错点！当我们说“把函数图像向右平移 \(a\) 个单位”时，我们要进行的操作是<strong>替换自变量</strong>。
+                </p>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r">
+                    <p class="text-amber-800 text-sm font-medium">⚠️ 错误示范：\(y = \sin(2x) \rightarrow y = \sin(2x - a)\) （这是直接在外面减，相当于只平移了 \(\frac{a}{2}\)）</p>
+                    <p class="text-green-700 text-sm font-medium mt-2">✅ 正确操作：把公式里的 \(x\) 挖掉，原封不动地替换成 \((x-a)\)！<br>
+                    \(y = \sin(2[\ \ ]) \rightarrow y = \sin(2(x-a)) = \sin(2x - 2a)\)</p>
+                </div>
+                <p class="text-slate-600 leading-relaxed">
+                    小希，你仔细看上面的动画，当你拖动滑块时，是不是能清楚感觉到整个波形在平行移动？这就是 \((x-a)\) 的魔力。
+                </p>
+            </div>
+
+            <!-- 第三关文字（核心解题） -->
+            <div id="content-3" class="tab-content space-y-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">3</span>
+                    步步为营：翻译题目的两句话
+                </h2>
+                <p class="text-slate-600 leading-relaxed">
+                    好啦，基础打牢，我们来对付这道原题：原函数是 \(y = \sin(2x + \varphi)\)。
+                    我们要像解密码一样，把题目的两句话“翻译”成数学算式。
+                </p>
+
+                <!-- 步骤1 -->
+                <div class="border border-slate-200 rounded-lg p-4">
+                    <h3 class="font-bold text-slate-800 mb-2">第一步：翻译“向右平移 \(a\)”</h3>
+                    <p class="text-slate-600 mb-2">根据刚才的“名花有主”法则，把 \(x\) 换成 \((x-a)\)：</p>
+                    <p class="text-center font-mono text-blue-700 bg-blue-50 py-2 rounded">\( f_1(x) = \sin(2(x-a) + \varphi) = \sin(2x - 2a + \varphi) \)</p>
+                    <p class="text-slate-600 mt-2">题目说这个新函数<strong>关于原点对称（奇函数）</strong>。小希你想，正弦函数 \(\sin(\square)\) 什么时候是奇函数？就是当后面的常数项是 \(\pi\) 的整数倍时（因为 \(\sin(2x)\) 过原点）！</p>
+                    <p class="font-bold text-slate-800 text-center mt-2">得出方程 ①： \(-2a + \varphi = k\pi \quad (k \in \mathbb{Z})\)</p>
+                </div>
+
+                <!-- 步骤2 -->
+                <div class="border border-slate-200 rounded-lg p-4 mt-4">
+                    <h3 class="font-bold text-slate-800 mb-2">第二步：翻译“向左平移 \(a\)”</h3>
+                    <p class="text-slate-600 mb-2">同理，把原函数里的 \(x\) 换成 \((x+a)\)：</p>
+                    <p class="text-center font-mono text-green-700 bg-green-50 py-2 rounded">\( f_2(x) = \sin(2(x+a) + \varphi) = \sin(2x + 2a + \varphi) \)</p>
+                    <p class="text-slate-600 mt-2">题目说这个函数<strong>关于 \(y\) 轴对称（偶函数）</strong>。正弦曲线要变成偶函数（就像余弦曲线那样），波峰或波谷必须落在 \(y\) 轴上，所以常数项必须是 \(\frac{\pi}{2}\) 加上 \(\pi\) 的整数倍！</p>
+                    <p class="font-bold text-slate-800 text-center mt-2">得出方程 ②： \(2a + \varphi = m\pi + \frac{\pi}{2} \quad (m \in \mathbb{Z})\)</p>
+                </div>
+
+                <!-- 步骤3 -->
+                <div class="border border-indigo-200 bg-indigo-50 rounded-lg p-4 mt-4 shadow-sm">
+                    <h3 class="font-bold text-indigo-800 mb-2">第三步：联立消元，水落石出！</h3>
+                    <p class="text-slate-700 mb-2">现在我们有两个式子，题目要求的是 \(\varphi\)，我们想办法把讨厌的 \(a\) 消掉！<br>
+                    直接把方程 ① 和方程 ② <strong>相加</strong>：</p>
+                    <p class="text-center bg-white p-2 rounded mb-2">
+                        \((-2a + \varphi) + (2a + \varphi) = k\pi + m\pi + \frac{\pi}{2}\)
+                    </p>
+                    <p class="text-center bg-white p-2 rounded mb-2">
+                        \(2\varphi = (k+m)\pi + \frac{\pi}{2}\)
+                    </p>
+                    <p class="text-center bg-white p-2 rounded font-bold text-lg text-red-600">
+                        \(\varphi = \frac{(k+m)\pi}{2} + \frac{\pi}{4}\)
+                    </p>
+                    <p class="text-slate-700 mt-4">
+                        因为 \(k\) 和 \(m\) 都是整数，所以 \((k+m)\) 也是整数（我们可以设它为 \(n\)）。<br>
+                        题目条件给了一个非常重要的范围： \(0 \le \varphi \le \frac{\pi}{2}\)。<br>
+                        我们来代入试试：<br>
+                        当 \(n=0\) 时，\(\varphi = 0 + \frac{\pi}{4} = \frac{\pi}{4}\) （完美符合范围！🎉）<br>
+                        当 \(n=1\) 时，\(\varphi = \frac{\pi}{2} + \frac{\pi}{4} = \frac{3\pi}{4}\) （超出了！）
+                    </p>
+                    <p class="font-bold text-xl text-center text-indigo-700 mt-4">
+                        所以答案是： D. \(\frac{\pi}{4}\)
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 初始化变量
+        let currentTab = 1;
+        let canvas = document.getElementById('mathCanvas');
+        let ctx = canvas.getContext('2d');
+        
+        // 绑定 DOM 元素
+        const omegaSlider = document.getElementById('omega-slider');
+        const omegaValTxt = document.getElementById('omega-val');
+        const shiftSlider = document.getElementById('shift-slider');
+        const shiftValTxt = document.getElementById('shift-val');
+
+        // 监听滑块变化
+        omegaSlider.addEventListener('input', (e) => {
+            omegaValTxt.innerText = parseFloat(e.target.value).toFixed(1);
+            draw();
+        });
+        shiftSlider.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            // 简单格式化显示，如果是 pi 的近似值
+            let displayStr = val.toFixed(2);
+            if (Math.abs(val - Math.PI) < 0.1) displayStr = "π";
+            else if (Math.abs(val - Math.PI/2) < 0.1) displayStr = "π/2";
+            shiftValTxt.innerText = displayStr;
+            draw();
+        });
+
+        // 切换 Tab 函数
+        window.switchTab = function(tabId) {
+            currentTab = tabId;
+            // 更新按钮样式
+            document.querySelectorAll('.tab-btn').forEach((btn, index) => {
+                let id = index + 1;
+                if (id === tabId) {
+                    btn.className = `tab-btn active px-4 py-2 rounded-t-lg text-white font-medium text-sm md:text-base shadow-sm ${tabId===1?'bg-blue-600':(tabId===2?'bg-green-600':'bg-indigo-600')}`;
+                } else {
+                    btn.className = 'tab-btn px-4 py-2 rounded-t-lg bg-slate-200 text-slate-600 hover:bg-slate-300 font-medium text-sm md:text-base';
+                }
+            });
+            // 更新内容显示
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`content-${tabId}`).classList.add('active');
+            
+            // 更新控制区显示
+            document.getElementById('controls-1').classList.add('hidden');
+            document.getElementById('controls-2').classList.add('hidden');
+            document.getElementById('controls-3').classList.add('hidden');
+            document.getElementById(`controls-${tabId}`).classList.remove('hidden');
+
+            draw(); // 重新绘图
+        }
+
+        // 处理画布自适应尺寸
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // 核心绘图函数
+        function draw() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const originY = height / 2;
+            const originX = width / 2;
+            
+            // 坐标系设定：数学 x 轴 [-2π, 2π]，y 轴 [-2, 2]
+            const mathXMin = -2 * Math.PI;
+            const mathXMax = 2 * Math.PI;
+            const mathYMax = 2.5;
+            const xScale = width / (mathXMax - mathXMin);
+            const yScale = height / (2 * mathYMax);
+
+            // 绘制坐标轴与网格
+            drawAxes(ctx, width, height, originX, originY, xScale);
+
+            if (currentTab === 1) {
+                // 第一关：展示 sin(x) 和 sin(wx)
+                const omega = parseFloat(omegaSlider.value);
+                // 画基础函数 y = sin(x) （灰色虚线）
+                drawFunction(ctx, (x) => Math.sin(x), mathXMin, mathXMax, xScale, yScale, originX, originY, '#94a3b8', 2, true);
+                // 画缩放函数 y = sin(wx) （蓝色实线）
+                drawFunction(ctx, (x) => Math.sin(omega * x), mathXMin, mathXMax, xScale, yScale, originX, originY, '#2563eb', 3, false);
+                
+            } else if (currentTab === 2) {
+                // 第二关：展示平移陷阱
+                const a = parseFloat(shiftSlider.value);
+                // 原函数 y = sin(2x) （灰色虚线）
+                drawFunction(ctx, (x) => Math.sin(2*x), mathXMin, mathXMax, xScale, yScale, originX, originY, '#cbd5e1', 2, true);
+                // 正确平移 y = sin(2(x-a)) （绿色实线）
+                drawFunction(ctx, (x) => Math.sin(2*(x - a)), mathXMin, mathXMax, xScale, yScale, originX, originY, '#16a34a', 3, false);
+            } else if (currentTab === 3) {
+                // 第三关：展示最终题目的函数 y = sin(2x + PI/4)
+                const phi = Math.PI / 4;
+                // 画出原函数 y = sin(2x) 对比
+                drawFunction(ctx, (x) => Math.sin(2*x), mathXMin, mathXMax, xScale, yScale, originX, originY, '#e2e8f0', 2, true);
+                // 画出目标函数 (紫色实线)
+                drawFunction(ctx, (x) => Math.sin(2*x + phi), mathXMin, mathXMax, xScale, yScale, originX, originY, '#4f46e5', 3, false);
+            }
+        }
+
+        // 辅助函数：绘制坐标系
+        function drawAxes(ctx, width, height, originX, originY, xScale) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            // X 轴
+            ctx.moveTo(0, originY);
+            ctx.lineTo(width, originY);
+            // Y 轴
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, height);
+            ctx.stroke();
+
+            // X 轴刻度 (每 PI/2 一个刻度)
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            for (let i = -4; i <= 4; i++) {
+                if (i === 0) continue;
+                let mathX = i * Math.PI / 2;
+                let px = originX + mathX * xScale;
+                ctx.beginPath();
+                ctx.moveTo(px, originY - 4);
+                ctx.lineTo(px, originY + 4);
+                ctx.stroke();
+                
+                // 标记文字
+                let label = '';
+                if (i === 1) label = 'π/2';
+                else if (i === 2) label = 'π';
+                else if (i === 3) label = '3π/2';
+                else if (i === 4) label = '2π';
+                else if (i === -1) label = '-π/2';
+                else if (i === -2) label = '-π';
+                else if (i === -3) label = '-3π/2';
+                else if (i === -4) label = '-2π';
+                ctx.fillText(label, px, originY + 20);
+            }
+            // 原点标记
+            ctx.fillText('0', originX - 10, originY + 15);
+        }
+
+        // 辅助函数：绘制数学函数曲线
+        function drawFunction(ctx, mathFunc, xMin, xMax, xScale, yScale, originX, originY, color, lineWidth, isDashed) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            if (isDashed) {
+                ctx.setLineDash([5, 5]);
+            } else {
+                ctx.setLineDash([]);
+            }
+
+            const canvasWidth = canvas.width;
+            for (let px = 0; px <= canvasWidth; px += 2) {
+                // 将像素 x 转换为数学 x
+                let mathX = (px - originX) / xScale;
+                // 计算数学 y
+                let mathY = mathFunc(mathX);
+                // 将数学 y 转换为像素 y
+                let py = originY - mathY * yScale;
+                
+                if (px === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            // 重置虚线样式以免影响后续绘制
+            ctx.setLineDash([]);
+        }
+
+        // 初始化
+        window.onload = function() {
+            // 渲染数学公式
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ]
+            });
+            resizeCanvas();
+        };
+
+    </script>
+</body>
+</html>
