@@ -1,0 +1,2840 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>锁好工厂的"数字后门" — 制造业第三方远程维护安全接入方案</title>
+    <style>
+        /* ==================== CSS Reset & Base ==================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 18px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: #F7F8FC;
+            color: #2D3748;
+            line-height: 1.85;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==================== Container ==================== */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ==================== Hero Section ==================== */
+        .hero {
+            background: linear-gradient(135deg, #049fd9 0%, #00bceb 40%, #6abf4b 100%);
+            padding: 5rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #F7F8FC;
+            clip-path: ellipse(55% 100% at 50% 100%);
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            padding: 0.35rem 1.1rem;
+            border-radius: 50px;
+            margin-bottom: 1.6rem;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .hero h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 1.2rem;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.10);
+        }
+
+        .hero h1 .accent {
+            color: #FFF176;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.92);
+            max-width: 680px;
+            margin: 0 auto 2rem;
+            line-height: 1.75;
+        }
+
+        .hero-meta {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* ==================== Table of Contents ==================== */
+        .toc-section {
+            padding: 3rem 0 1rem;
+        }
+
+        .toc-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+            border: 1px solid #E8ECF1;
+        }
+
+        .toc-card h2 {
+            font-size: 1.15rem;
+            color: #049fd9;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toc-list {
+            list-style: none;
+            columns: 2;
+            column-gap: 2rem;
+        }
+
+        .toc-list li {
+            break-inside: avoid;
+            margin-bottom: 0.6rem;
+        }
+
+        .toc-list a {
+            color: #4A5568;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px dashed transparent;
+            transition: all 0.2s;
+        }
+
+        .toc-list a:hover {
+            color: #049fd9;
+            border-bottom-color: #049fd9;
+        }
+
+        .toc-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: #EBF8FF;
+            color: #049fd9;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ==================== Section Styles ==================== */
+        .section {
+            padding: 3.5rem 0 2rem;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #049fd9;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.6rem;
+        }
+
+        .section-label .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #049fd9;
+        }
+
+        .section h2 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin-bottom: 1rem;
+            line-height: 1.35;
+        }
+
+        .section h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #2D3748;
+            margin: 2.2rem 0 0.8rem;
+            line-height: 1.4;
+        }
+
+        .section h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4A5568;
+            margin: 1.5rem 0 0.6rem;
+        }
+
+        .section p {
+            font-size: 1.02rem;
+            color: #4A5568;
+            margin-bottom: 1.1rem;
+        }
+
+        .lead {
+            font-size: 1.12rem;
+            color: #2D3748;
+            font-weight: 500;
+            border-left: 4px solid #049fd9;
+            padding-left: 1.2rem;
+            margin: 1.5rem 0;
+            line-height: 1.8;
+        }
+
+        /* ==================== Story Card ==================== */
+        .story-card {
+            background: linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 100%);
+            border: 1px solid #FFE082;
+            border-radius: 16px;
+            padding: 2.2rem 2.5rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .story-card::before {
+            content: '📖';
+            position: absolute;
+            top: -14px;
+            left: 24px;
+            font-size: 1.6rem;
+            background: #FFFDE7;
+            padding: 0 0.4rem;
+        }
+
+        .story-card .story-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #E65100;
+            margin-bottom: 0.8rem;
+        }
+
+        .story-card p {
+            color: #5D4037;
+            font-size: 1rem;
+            line-height: 1.9;
+        }
+
+        .story-card .story-highlight {
+            background: rgba(255,111,0,0.1);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #E65100;
+        }
+
+        /* ==================== Info Cards ==================== */
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem 2.2rem;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            border: 1px solid #E8ECF1;
+            margin: 1.5rem 0;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+
+        .card-grid .card {
+            margin: 0;
+        }
+
+        .card .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .card .card-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #1A202C;
+            margin-bottom: 0.5rem;
+        }
+
+        .card .card-text {
+            font-size: 0.95rem;
+            color: #718096;
+            line-height: 1.75;
+        }
+
+        /* ==================== Risk Tag ==================== */
+        .risk-high {
+            display: inline-block;
+            background: #FEE2E2;
+            color: #DC2626;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+        }
+
+        .risk-medium {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #D97706;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+        }
+
+        .risk-critical {
+            display: inline-block;
+            background: #DC2626;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+        }
+
+        /* ==================== Alert Box ==================== */
+        .alert-box {
+            border-radius: 12px;
+            padding: 1.5rem 1.8rem;
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .alert-box.danger {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+        }
+
+        .alert-box.info {
+            background: #EBF8FF;
+            border: 1px solid #BEE3F8;
+        }
+
+        .alert-box.success {
+            background: #F0FFF4;
+            border: 1px solid #C6F6D5;
+        }
+
+        .alert-box .alert-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .alert-box .alert-content {
+            flex: 1;
+        }
+
+        .alert-box .alert-title {
+            font-weight: 700;
+            font-size: 0.98rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .alert-box.danger .alert-title { color: #DC2626; }
+        .alert-box.info .alert-title { color: #049fd9; }
+        .alert-box.success .alert-title { color: #16A34A; }
+
+        .alert-box .alert-text {
+            font-size: 0.93rem;
+            color: #4A5568;
+            line-height: 1.7;
+        }
+
+        /* ==================== Table ==================== */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid #E8ECF1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.93rem;
+        }
+
+        thead th {
+            background: #049fd9;
+            color: #fff;
+            padding: 0.85rem 1.2rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.88rem;
+            letter-spacing: 0.02em;
+        }
+
+        tbody td {
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid #EDF2F7;
+            color: #4A5568;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #F7FAFC;
+        }
+
+        /* ==================== Numbered List ==================== */
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+            padding: 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            padding: 1rem 0 1rem 3.5rem;
+            position: relative;
+            border-bottom: 1px dashed #E8ECF1;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #049fd9, #00bceb);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-list li strong {
+            color: #1A202C;
+        }
+
+        /* ==================== Divider ==================== */
+        .divider {
+            border: none;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #CBD5E0, transparent);
+            margin: 3rem 0;
+        }
+
+        /* ==================== Quote ==================== */
+        .quote-block {
+            background: linear-gradient(135deg, #EBF8FF 0%, #F0FFF4 100%);
+            border-left: 5px solid #049fd9;
+            border-radius: 0 12px 12px 0;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: #2D3748;
+            font-size: 1.05rem;
+            line-height: 1.85;
+        }
+
+        .quote-block .quote-author {
+            display: block;
+            font-style: normal;
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 0.6rem;
+            font-weight: 600;
+        }
+
+        /* ==================== SVG Container ==================== */
+        .svg-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            border: 1px solid #E8ECF1;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .svg-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .svg-caption {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        /* ==================== Source Reference ==================== */
+        .source-ref {
+            font-size: 0.8rem;
+            color: #A0AEC0;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 768px) {
+            html { font-size: 16px; }
+            .hero { padding: 3.5rem 1rem 3rem; }
+            .hero h1 { font-size: 1.85rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .section h2 { font-size: 1.5rem; }
+            .toc-list { columns: 1; }
+            .card-grid { grid-template-columns: 1fr; }
+            .story-card { padding: 1.8rem 1.5rem; }
+            .card { padding: 1.5rem; }
+            .step-list li { padding-left: 3rem; }
+        }
+
+        @media (max-width: 480px) {
+            html { font-size: 15px; }
+            .hero h1 { font-size: 1.55rem; }
+            .container { padding: 0 1rem; }
+        }
+    </style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<!-- ======================== HERO ======================== -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-badge">CISCO 制造业安全实践</div>
+        <h1>锁好工厂的<span class="accent">"数字后门"</span><br>制造业第三方远程维护安全接入方案</h1>
+        <p class="hero-subtitle">当向日葵远程控制成为黑客的"任意门"——用 Cisco VPN + ISE + 堡垒机构建零信任远程维护通道，让每一次远程连接都可信、可控、可审计。</p>
+        <p class="hero-meta">Cisco 安全架构设计白皮书 · 2026 年 4 月 · 阅读约 18 分钟</p>
+    </div>
+</header>
+
+<!-- ======================== TOC ======================== -->
+<nav class="toc-section">
+    <div class="container">
+        <div class="toc-card">
+            <h2>📑 目录导航</h2>
+            <ol class="toc-list">
+                <li><a href="#story"><span class="toc-num">1</span>故事：一次"远程维护"引发的产线停摆</a></li>
+                <li><a href="#status"><span class="toc-num">2</span>现状扫描：向日葵模式的普遍困境</a></li>
+                <li><a href="#risk"><span class="toc-num">3</span>风险剖析：四重暗礁逐一拆解</a></li>
+                <li><a href="#architecture"><span class="toc-num">4</span>方案总览：三道门的零信任架构</a></li>
+                <li><a href="#vpn"><span class="toc-num">5</span>第一道门：VPN 网关部署详解</a></li>
+                <li><a href="#ise"><span class="toc-num">6</span>第二道门：ISE 身份认证与证书管理</a></li>
+                <li><a href="#mfa"><span class="toc-num">7</span>加固之锁：Duo MFA 多因素认证</a></li>
+                <li><a href="#bastion"><span class="toc-num">8</span>第三道门：堡垒机选型与部署</a></li>
+                <li><a href="#audit"><span class="toc-num">9</span>审计与合规：让每一步操作都有据可查</a></li>
+                <li><a href="#ending"><span class="toc-num">10</span>故事结局：当远程维护不再令人心惊</a></li>
+                <li><a href="#action"><span class="toc-num">11</span>行动指南：30 天落地路线图</a></li>
+                <li><a href="#glossary"><span class="toc-num">12</span>术语表</a></li>
+            </ol>
+        </div>
+    </div>
+</nav>
+
+<!-- ======================== SECTION 1: Story ======================== -->
+<section id="story" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 01</div>
+        <h2>一次"远程维护"引发的产线停摆</h2>
+
+        <div class="story-card">
+            <div class="story-title">⚠️ 2025 年 11 月，华东某精密制造工厂</div>
+            <p>
+                凌晨 2:17，工厂 MES 系统弹出一条刺眼的告警：<strong>3 号 CNC 五轴加工中心状态异常</strong>。值班工程师老张揉着惺忪的睡眼查看监控——加工参数被篡改，主轴转速飙升到远超材料承受极限的数值。他立刻按下急停按钮，但为时已晚：一批价值 <span class="story-highlight">87 万元</span> 的航空零件已经报废，主轴刀具崩裂，设备需要返厂维修，产线被迫停摆 <span class="story-highlight">11 天</span>。
+            </p>
+            <p>
+                事后调查发现，攻击的入口竟是一个再普通不过的工具——<span class="story-highlight">向日葵远程控制软件</span>。三个月前，一家数控机床供应商的工程师为了方便远程调试参数，在这台 CNC 的操作终端上安装了向日葵。识别码和验证码被记录在一个共享的 Excel 表格中，在供应商内部的微信群里传来传去。没有人知道这串数字已经流转到了多少人手中，更没有人知道，一个心怀不满的前外包人员，在离职后仍然持有这串"钥匙"。
+            </p>
+            <p>
+                老张后来说了一句让所有人沉默的话：<strong>"我们给车间装了三道门禁，却在网络上给陌生人留了一扇敞开的窗。"</strong>
+            </p>
+        </div>
+
+        <p>这个故事并非杜撰。在中国制造业的车间里，类似的场景每天都在上演——只是大多数时候，没有人意识到那扇"窗"正在敞开。</p>
+
+        <div class="quote-block">
+            "物理世界里，没有工厂会允许一个身份不明的人径直走进车间，随意操作价值百万的设备。但在数字世界里，我们正在做的恰恰是这件事。"
+            <span class="quote-author">— 来自一位制造业 CIO 在安全复盘会上的反思</span>
+        </div>
+
+        <p>本文将从这扇"敞开的窗"出发，用一套成熟的 <strong>Cisco VPN + ISE 身份认证 + 堡垒机</strong> 方案，帮你彻底关上它——并装上门禁、监控和门锁。</p>
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 2: Status ======================== -->
+<section id="status" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 02</div>
+        <h2>现状扫描：向日葵模式的普遍困境</h2>
+
+        <p>在深入解决方案之前，我们需要先看清问题的全貌。让我们用"第一性原理"来思考：<strong>制造业工厂为什么需要第三方远程维护？</strong></p>
+
+        <h3>2.1 远程维护是刚需，不是可选项</h3>
+        <p>现代制造业的核心设备——CNC 数控机床、PLC 可编程控制器、DCS 集散控制系统——复杂度越来越高。一台五轴联动加工中心的控制系统可能包含数十万行代码，其调试和维护高度依赖原厂工程师。但原厂工程师不可能常驻每一个客户的工厂。</p>
+
+        <p>于是，<strong>远程维护</strong>成了制造业的标配：设备厂商的工程师通过网络远程接入工厂的设备，进行参数调整、故障诊断、固件升级等操作。这是一个无法回避的业务需求。</p>
+
+        <h3>2.2 向日葵：被"方便"绑架的选择</h3>
+        <p>面对这个需求，大量工厂选择了最简单的路径——安装向日葵、TeamViewer、AnyDesk 等消费级远程控制工具。原因很简单：</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">上手极快</div>
+                <div class="card-text">安装即用，无需任何网络架构调整，车间技术员五分钟就能搞定。</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">💰</div>
+                <div class="card-title">近乎免费</div>
+                <div class="card-text">个人版免费，企业版年费也不高，对中小制造企业没有预算压力。</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔧</div>
+                <div class="card-title">供应商驱动</div>
+                <div class="card-text">往往是设备供应商主动要求安装，工厂 IT 部门甚至不知情，由车间自行操作。</div>
+            </div>
+        </div>
+
+        <p>这看起来是一个"完美"的方案，但它背后隐藏着一个根本性矛盾：</p>
+
+        <div class="alert-box danger">
+            <div class="alert-icon">🎯</div>
+            <div class="alert-content">
+                <div class="alert-title">核心矛盾</div>
+                <div class="alert-text">
+                    <strong>向日葵等工具的设计初衷是"便利性优先"</strong>，而工厂 OT 网络的第一要务是<strong>"安全性优先"</strong>。这两者在基因上就是冲突的。向日葵像是一把万能钥匙——它确实能打开门，但你无法控制谁持有这把钥匙，什么时候用，用了之后做了什么。
+                </div>
+            </div>
+        </div>
+
+        <h3>2.3 现状全景：一张令人不安的图谱</h3>
+        <p>基于对众多制造业客户的现场调研，我们梳理出当前第三方远程维护的典型现状：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:22%;">维度</th>
+                        <th style="width:42%;">当前现状（向日葵模式）</th>
+                        <th style="width:36%;">隐患</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>身份认证</strong></td>
+                        <td>仅依赖 9 位识别码 + 4~6 位验证码，或固定密码</td>
+                        <td>无法验证操作者真实身份，易被分享或泄露</td>
+                    </tr>
+                    <tr>
+                        <td><strong>访问控制</strong></td>
+                        <td>远程用户获得操作终端的完整桌面权限</td>
+                        <td>可访问终端上所有资源，包括其他生产系统</td>
+                    </tr>
+                    <tr>
+                        <td><strong>网络边界</strong></td>
+                        <td>向日葵通过互联网中继穿透，绕过防火墙</td>
+                        <td>OT 网络边界形同虚设，防火墙策略完全失效</td>
+                    </tr>
+                    <tr>
+                        <td><strong>操作审计</strong></td>
+                        <td>无录像、无日志、无操作记录</td>
+                        <td>出了问题无法追溯、无法定责、无法取证</td>
+                    </tr>
+                    <tr>
+                        <td><strong>生命周期管理</strong></td>
+                        <td>维护完成后软件持续运行，无人关闭或卸载</td>
+                        <td>长期暴露攻击面，成为永久性后门</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IT 管控</strong></td>
+                        <td>车间自行安装，IT/安全部门不知情</td>
+                        <td>影子 IT，完全脱离企业安全管理体系</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="source-ref">资料来源：基于 Cisco 制造业安全评估项目实践汇总</p>
+
+        <p>如果我们把工厂比作一座城堡，那么向日葵就相当于在城墙上凿了一个洞，挂了一块布帘子，上面写着"仅供送货员使用"——但任何人都可以掀开帘子走进来。</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 3: Risk ======================== -->
+<section id="risk" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 03</div>
+        <h2>风险剖析：四重暗礁逐一拆解</h2>
+
+        <p>了解了现状，我们需要更深入地剖析风险。不是笼统地说"不安全"，而是具体地拆解：<strong>到底哪里不安全？后果有多严重？</strong>我们将风险分为四个层次，逐一剖析。</p>
+
+        <!-- Risk 1 -->
+        <h3>🔴 风险一：身份失控——"谁在操作我的设备？"</h3>
+
+        <div class="card">
+            <div class="card-title">问题本质</div>
+            <div class="card-text">
+                <p>向日葵的认证机制是一组<strong>静态凭据</strong>（识别码 + 验证码/密码），而非绑定到具体个人。这意味着：</p>
+                <ul style="margin: 0.8rem 0; padding-left: 1.5rem;">
+                    <li style="margin-bottom:0.4rem;">凭据可以在微信群、邮件、便签纸上随意传递</li>
+                    <li style="margin-bottom:0.4rem;">供应商 A 的工程师离职后，凭据不会自动失效</li>
+                    <li style="margin-bottom:0.4rem;">多人共用同一组凭据，无法区分具体操作者</li>
+                    <li style="margin-bottom:0.4rem;">无法设定凭据有效期，也无法按时间窗口限制接入</li>
+                </ul>
+            </div>
+        </div>
+
+        <p><strong>类比：</strong>这就像小区的单元门密码被贴在外卖柜上——本来是方便快递员的，但所有人都能看到、都能进来，而你永远不知道半夜按下密码进门的那个人是谁。</p>
+
+        <p class="source-ref">资料来源：NIST SP 800-82 Rev.3《工业控制系统安全指南》——"远程访问必须实施强身份认证和个人账户责任制"</p>
+
+        <!-- Risk 2 -->
+        <h3>🔴 风险二：边界瓦解——"防火墙白装了"</h3>
+
+        <div class="card">
+            <div class="card-title">问题本质</div>
+            <div class="card-text">
+                <p>向日葵、TeamViewer 等工具使用<strong>反向连接 + 云中继</strong>的穿透技术。被控端主动向公网中继服务器发起 HTTPS 外连，绕过了工厂防火墙的所有入站规则。</p>
+                <p style="margin-top:0.6rem;">这意味着：</p>
+                <ul style="margin: 0.8rem 0; padding-left: 1.5rem;">
+                    <li style="margin-bottom:0.4rem;">即使防火墙设置了严格的入站策略，向日葵依然畅通无阻</li>
+                    <li style="margin-bottom:0.4rem;">流量经过第三方云服务器中继，工厂对数据路径无可视性</li>
+                    <li style="margin-bottom:0.4rem;">IT 团队从防火墙日志中几乎看不到异常——因为它看起来就是普通 HTTPS 出站流量</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SVG Diagram: Sunflower穿透原理 -->
+        <div class="svg-container">
+            <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+                <!-- Factory side -->
+                <rect x="20" y="40" width="220" height="200" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+                <text x="130" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">工厂 OT 网络</text>
+                <rect x="55" y="95" width="150" height="40" rx="8" fill="#fff" stroke="#D97706" stroke-width="1.5"/>
+                <text x="130" y="120" text-anchor="middle" font-size="11" fill="#92400E">CNC 操作终端</text>
+                <text x="130" y="136" text-anchor="middle" font-size="9" fill="#B45309">（安装向日葵）</text>
+                <rect x="55" y="155" width="150" height="35" rx="8" fill="#fff" stroke="#D97706" stroke-width="1.5"/>
+                <text x="130" y="177" text-anchor="middle" font-size="11" fill="#92400E">🔥 防火墙</text>
+
+                <!-- Arrow out -->
+                <path d="M 205 115 Q 280 115 280 140 L 280 155" stroke="#DC2626" stroke-width="2.5" fill="none" marker-end="url(#arrowRed)"/>
+                <text x="260" y="108" font-size="9" fill="#DC2626" font-weight="600">HTTPS 外连</text>
+                <text x="246" y="120" font-size="8" fill="#DC2626">（绕过防火墙）</text>
+
+                <!-- Cloud -->
+                <ellipse cx="420" cy="140" rx="100" ry="50" fill="#DBEAFE" stroke="#3B82F6" stroke-width="2"/>
+                <text x="420" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">☁️ 第三方云中继</text>
+                <text x="420" y="152" text-anchor="middle" font-size="10" fill="#3B82F6">（向日葵服务器）</text>
+
+                <!-- Arrow to cloud -->
+                <line x1="240" y1="172" x2="325" y2="150" stroke="#DC2626" stroke-width="2" stroke-dasharray="6,3"/>
+
+                <!-- Attacker side -->
+                <rect x="580" y="60" width="200" height="160" rx="12" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+                <text x="680" y="90" text-anchor="middle" font-size="13" font-weight="700" fill="#DC2626">外部人员</text>
+                <text x="680" y="130" text-anchor="middle" font-size="28">👤</text>
+                <text x="680" y="160" text-anchor="middle" font-size="10" fill="#991B1B">持有识别码 + 验证码</text>
+                <text x="680" y="178" text-anchor="middle" font-size="10" fill="#991B1B">身份不可验证</text>
+                <text x="680" y="196" text-anchor="middle" font-size="10" fill="#991B1B">操作不可审计</text>
+
+                <!-- Arrow from attacker to cloud -->
+                <line x1="580" y1="140" x2="520" y2="140" stroke="#DC2626" stroke-width="2" stroke-dasharray="6,3"/>
+
+                <!-- Legend -->
+                <line x1="30" y1="268" x2="55" y2="268" stroke="#DC2626" stroke-width="2.5" stroke-dasharray="6,3"/>
+                <text x="60" y="272" font-size="10" fill="#718096">不受控的远程连接路径</text>
+
+                <defs>
+                    <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#DC2626"/>
+                    </marker>
+                </defs>
+            </svg>
+            <div class="svg-caption">图 1：向日葵远程控制的穿透原理——利用 HTTPS 外连绕过防火墙，经第三方云中继建立连接</div>
+        </div>
+
+        <p><strong>类比：</strong>防火墙就像工厂的围墙和大门，向日葵相当于从围墙内部挖了一条地道通到外面——保安（防火墙）守着大门，却不知道地道的存在。</p>
+
+        <p class="source-ref">资料来源：Cisco Talos 威胁情报——"合法远程工具的恶意利用已成为针对 ICS 的主要攻击向量之一"</p>
+
+        <!-- Risk 3 -->
+        <h3>🔴 风险三：权限泛滥——"维修工拿到了厂长的钥匙"</h3>
+
+        <div class="card">
+            <div class="card-title">问题本质</div>
+            <div class="card-text">
+                <p>向日葵建立连接后，远程用户获得的是<strong>操作终端的完整桌面控制权</strong>。但这台终端通常不仅仅连接着一台设备——在很多工厂的实际环境中：</p>
+                <ul style="margin: 0.8rem 0; padding-left: 1.5rem;">
+                    <li style="margin-bottom:0.4rem;">同一台工控机可能同时连接多台 CNC 或 PLC</li>
+                    <li style="margin-bottom:0.4rem;">终端上可能运行着 SCADA 客户端，可查看整条产线的数据</li>
+                    <li style="margin-bottom:0.4rem;">终端与工厂 IT 网络（MES、ERP）之间可能存在网络可达性</li>
+                    <li style="margin-bottom:0.4rem;">终端上可能保存着设备配置文件、工艺参数、图纸等敏感资料</li>
+                </ul>
+                <p>也就是说，你本来只想让供应商工程师远程调一个参数，但他实际上可以"看到"并"触达"远超授权范围的资源。</p>
+            </div>
+        </div>
+
+        <p><strong>类比：</strong>你请锁匠来换卧室的门锁，但给了他整栋房子所有房间的钥匙——包括保险箱的。</p>
+
+        <!-- Risk 4 -->
+        <h3>🔴 风险四：审计真空——"出了事，查无此人"</h3>
+
+        <div class="card">
+            <div class="card-title">问题本质</div>
+            <div class="card-text">
+                <p>向日葵的免费版和大部分企业版方案<strong>不提供操作录像和完整审计日志</strong>。即使付费版本有部分日志功能，也存在以下问题：</p>
+                <ul style="margin: 0.8rem 0; padding-left: 1.5rem;">
+                    <li style="margin-bottom:0.4rem;">日志存储在向日葵的云平台上，工厂无法自主管控</li>
+                    <li style="margin-bottom:0.4rem;">日志记录粒度不够——只知道"有人连了"，不知道"做了什么"</li>
+                    <li style="margin-bottom:0.4rem;">多人共用凭据时，日志无法关联到具体个人</li>
+                    <li style="margin-bottom:0.4rem;">无法满足 ISO 27001、等保 2.0、NIST CSF 等合规要求</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="alert-box danger">
+            <div class="alert-icon">⚖️</div>
+            <div class="alert-content">
+                <div class="alert-title">合规红线</div>
+                <div class="alert-text">
+                    《网络安全等级保护基本要求》（等保 2.0）明确规定：对于远程访问，必须实现<strong>身份鉴别、访问控制、安全审计</strong>三项基本要求。使用向日葵进行不受控的远程维护，在等保测评中几乎必然被判定为<strong>高风险项</strong>。
+                </div>
+            </div>
+        </div>
+
+        <h3>3.1 风险矩阵总览</h3>
+        <p>将上述四大风险汇总，我们可以得到如下风险矩阵：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>风险类别</th>
+                        <th>威胁场景</th>
+                        <th>影响范围</th>
+                        <th>风险等级</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>身份失控</strong></td>
+                        <td>离职人员 / 未授权人员利用泄露凭据接入</td>
+                        <td>生产设备被非法操控，工艺参数被窃取</td>
+                        <td><span class="risk-critical">严重</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>边界瓦解</strong></td>
+                        <td>恶意软件通过远控通道横向渗透 OT 网络</td>
+                        <td>整条产线乃至整个工厂网络被感染</td>
+                        <td><span class="risk-critical">严重</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>权限泛滥</strong></td>
+                        <td>远程用户越权访问 MES/SCADA/其他设备</td>
+                        <td>核心工艺数据泄露，关联设备被误操作</td>
+                        <td><span class="risk-high">高</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>审计真空</strong></td>
+                        <td>安全事件发生后无法追溯定责</td>
+                        <td>法律纠纷被动，合规审计不通过</td>
+                        <td><span class="risk-high">高</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="source-ref">资料来源：风险评估方法参照 NIST SP 800-30《信息安全风险评估指南》及 IEC 62443 工业安全标准</p>
+
+        <div class="quote-block">
+            "安全的本质不是堵住所有的路，而是确保每一条路都有门禁、有监控、有记录。远程维护是必要的路，我们要做的是把它从一条暗道，变成一条透明的走廊。"
+        </div>
+
+        <p>看到这里，问题已经非常清晰了。接下来，我们将展开完整的解决方案——用<strong>三道门</strong>的架构思想，系统性地化解上述所有风险。</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 4: Architecture ======================== -->
+<section id="architecture" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 04</div>
+        <h2>方案总览：三道门的零信任架构</h2>
+
+        <p>在上一章，我们拆解了向日葵模式的四重风险：身份失控、边界瓦解、权限泛滥、审计真空。现在，我们需要一个方案，<strong>同时、系统性地</strong>解决所有这些问题，而不是头痛医头。</p>
+
+        <p>我们的设计哲学很简单——借鉴物理世界的安保逻辑：</p>
+
+        <div class="quote-block">
+            想象一下你去银行的金库取东西。你不会直接从大街上走进金库，而是要经过：<strong>第一道门</strong>（银行大门，出示身份证）→ <strong>第二道门</strong>（金库前厅，刷卡 + 指纹）→ <strong>第三道门</strong>（金库操作间，全程录像，保安陪同）。每道门都有独立的认证机制，每一步操作都有记录。
+        </div>
+
+        <p>我们的第三方远程维护方案，遵循完全相同的逻辑：</p>
+
+        <!-- Three Doors Cards -->
+        <div class="card-grid" style="grid-template-columns: repeat(3, 1fr); margin: 2rem 0;">
+            <div class="card" style="border-top: 4px solid #049fd9; text-align:center;">
+                <div class="card-icon">🚪</div>
+                <div class="card-title" style="color:#049fd9;">第一道门</div>
+                <div class="card-title">VPN 安全接入网关</div>
+                <div class="card-text" style="margin-top:0.6rem;">
+                    <p>第三方工程师必须通过 <strong>Cisco Secure Firewall</strong> 建立 VPN 隧道，才能进入工厂网络。</p>
+                    <p style="margin-top:0.5rem;"><strong>解决：</strong>边界瓦解</p>
+                    <p><span class="risk-critical" style="background:#049fd9;">加密隧道</span></p>
+                </div>
+            </div>
+            <div class="card" style="border-top: 4px solid #6abf4b; text-align:center;">
+                <div class="card-icon">🔐</div>
+                <div class="card-title" style="color:#6abf4b;">第二道门</div>
+                <div class="card-title">ISE 身份认证 + 证书 + MFA</div>
+                <div class="card-text" style="margin-top:0.6rem;">
+                    <p>VPN 接入前，必须通过 <strong>Cisco ISE</strong> 的用户名密码 + 机器证书 + Duo MFA 三重认证。</p>
+                    <p style="margin-top:0.5rem;"><strong>解决：</strong>身份失控</p>
+                    <p><span class="risk-critical" style="background:#6abf4b;">三重验证</span></p>
+                </div>
+            </div>
+            <div class="card" style="border-top: 4px solid #FF8F00; text-align:center;">
+                <div class="card-icon">🖥️</div>
+                <div class="card-title" style="color:#FF8F00;">第三道门</div>
+                <div class="card-title">堡垒机（JumpServer）</div>
+                <div class="card-text" style="margin-top:0.6rem;">
+                    <p>VPN 接入后，<strong>只能访问堡垒机</strong>，再通过堡垒机跳转到指定设备，全程录像审计。</p>
+                    <p style="margin-top:0.5rem;"><strong>解决：</strong>权限泛滥 + 审计真空</p>
+                    <p><span class="risk-critical" style="background:#FF8F00;">最小权限 + 全程录像</span></p>
+                </div>
+            </div>
+        </div>
+
+        <h3>4.1 整体架构拓扑</h3>
+        <p>下面这张架构图展示了完整的数据流——从第三方工程师发起连接，到最终触达工厂设备的每一步：</p>
+
+        <!-- Main Architecture SVG -->
+        <div class="svg-container">
+            <svg viewBox="0 0 900 580" xmlns="http://www.w3.org/2000/svg" style="max-width:860px;">
+                <defs>
+                    <marker id="arrBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#049fd9"/>
+                    </marker>
+                    <marker id="arrGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#6abf4b"/>
+                    </marker>
+                    <marker id="arrOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#FF8F00"/>
+                    </marker>
+                    <marker id="arrGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#A0AEC0"/>
+                    </marker>
+                    <linearGradient id="gradVPN" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#049fd9;stop-opacity:0.12"/>
+                        <stop offset="100%" style="stop-color:#00bceb;stop-opacity:0.06"/>
+                    </linearGradient>
+                    <linearGradient id="gradOT" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FF8F00;stop-opacity:0.10"/>
+                        <stop offset="100%" style="stop-color:#FFC107;stop-opacity:0.05"/>
+                    </linearGradient>
+                    <filter id="shadow1">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+
+                <!-- ===== INTERNET ZONE ===== -->
+                <rect x="20" y="15" width="195" height="240" rx="14" fill="#F7F8FC" stroke="#CBD5E0" stroke-width="1.5" stroke-dasharray="6,4"/>
+                <text x="117" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#718096">互联网侧</text>
+
+                <!-- Third-party Engineer -->
+                <rect x="42" y="62" width="150" height="72" rx="10" fill="#fff" stroke="#049fd9" stroke-width="2" filter="url(#shadow1)"/>
+                <text x="117" y="88" text-anchor="middle" font-size="22">👨‍🔧</text>
+                <text x="117" y="108" text-anchor="middle" font-size="11" font-weight="600" fill="#2D3748">第三方工程师</text>
+                <text x="117" y="124" text-anchor="middle" font-size="9" fill="#718096">设备供应商维护人员</text>
+
+                <!-- Cisco AnyConnect -->
+                <rect x="42" y="152" width="150" height="48" rx="8" fill="#EBF8FF" stroke="#049fd9" stroke-width="1.5"/>
+                <text x="117" y="175" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">📱 Cisco Secure Client</text>
+                <text x="117" y="191" text-anchor="middle" font-size="9" fill="#718096">(AnyConnect VPN)</text>
+
+                <!-- Duo MFA -->
+                <rect x="42" y="210" width="150" height="36" rx="8" fill="#F0FFF4" stroke="#6abf4b" stroke-width="1.5"/>
+                <text x="117" y="233" text-anchor="middle" font-size="10" font-weight="600" fill="#6abf4b">🔑 Duo MFA 推送验证</text>
+
+                <!-- Arrow: Engineer -> AnyConnect -->
+                <line x1="117" y1="134" x2="117" y2="150" stroke="#049fd9" stroke-width="2" marker-end="url(#arrBlue)"/>
+
+                <!-- ===== GATE 1: VPN GATEWAY ===== -->
+                <rect x="255" y="15" width="160" height="240" rx="14" fill="url(#gradVPN)" stroke="#049fd9" stroke-width="2"/>
+                <text x="335" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#049fd9">🚪 第一道门</text>
+
+                <!-- Firewall -->
+                <rect x="275" y="62" width="120" height="60" rx="10" fill="#fff" stroke="#049fd9" stroke-width="2" filter="url(#shadow1)"/>
+                <text x="335" y="86" text-anchor="middle" font-size="11" font-weight="700" fill="#049fd9">🔥 Cisco Secure</text>
+                <text x="335" y="102" text-anchor="middle" font-size="11" font-weight="700" fill="#049fd9">Firewall (FTD)</text>
+                <text x="335" y="116" text-anchor="middle" font-size="9" fill="#718096">RA-VPN 网关</text>
+
+                <!-- ISE -->
+                <rect x="275" y="142" width="120" height="55" rx="10" fill="#fff" stroke="#6abf4b" stroke-width="2" filter="url(#shadow1)"/>
+                <text x="335" y="165" text-anchor="middle" font-size="11" font-weight="700" fill="#6abf4b">🛡️ Cisco ISE</text>
+                <text x="335" y="182" text-anchor="middle" font-size="9" fill="#718096">RADIUS 认证</text>
+                <text x="335" y="193" text-anchor="middle" font-size="9" fill="#718096">证书 + 用户名密码</text>
+
+                <!-- Arrow: FTD <-> ISE -->
+                <line x1="335" y1="122" x2="335" y2="140" stroke="#6abf4b" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="360" y="134" font-size="8" fill="#6abf4b">RADIUS</text>
+
+                <!-- Arrow: AnyConnect -> FTD (VPN tunnel) -->
+                <line x1="192" y1="176" x2="273" y2="92" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrBlue)"/>
+                <rect x="204" y="110" width="66" height="20" rx="4" fill="#049fd9"/>
+                <text x="237" y="124" text-anchor="middle" font-size="8.5" font-weight="600" fill="#fff">VPN 隧道</text>
+
+                <!-- ===== DMZ / BASTION ZONE ===== -->
+                <rect x="455" y="15" width="160" height="240" rx="14" fill="#FFF8E1" stroke="#FF8F00" stroke-width="2"/>
+                <text x="535" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#FF8F00">🖥️ 第三道门</text>
+
+                <!-- Bastion Host -->
+                <rect x="475" y="70" width="120" height="80" rx="10" fill="#fff" stroke="#FF8F00" stroke-width="2" filter="url(#shadow1)"/>
+                <text x="535" y="95" text-anchor="middle" font-size="11" font-weight="700" fill="#FF8F00">🏰 堡垒机</text>
+                <text x="535" y="112" text-anchor="middle" font-size="10" font-weight="600" fill="#E65100">JumpServer</text>
+                <text x="535" y="128" text-anchor="middle" font-size="9" fill="#718096">访问控制 · 命令过滤</text>
+                <text x="535" y="142" text-anchor="middle" font-size="9" fill="#718096">全程录像 · 审计日志</text>
+
+                <!-- ACL Note -->
+                <rect x="475" y="168" width="120" height="40" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+                <text x="535" y="186" text-anchor="middle" font-size="9" font-weight="600" fill="#92400E">🔒 VPN ACL 策略</text>
+                <text x="535" y="200" text-anchor="middle" font-size="8" fill="#B45309">仅允许访问堡垒机 IP</text>
+
+                <!-- Arrow: FTD -> Bastion -->
+                <line x1="395" y1="92" x2="473" y2="100" stroke="#FF8F00" stroke-width="2.5" marker-end="url(#arrOrange)"/>
+                <text x="428" y="84" font-size="8.5" fill="#FF8F00" font-weight="600">ACL 过滤</text>
+
+                <!-- ===== OT NETWORK ===== -->
+                <rect x="20" y="310" width="860" height="250" rx="14" fill="url(#gradOT)" stroke="#FF8F00" stroke-width="1.5" stroke-dasharray="6,4"/>
+                <text x="450" y="340" text-anchor="middle" font-size="13" font-weight="700" fill="#E65100">🏭 工厂 OT 网络（生产区）</text>
+
+                <!-- OT Devices -->
+                <rect x="60" y="370" width="140" height="70" rx="10" fill="#fff" stroke="#FF8F00" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="130" y="398" text-anchor="middle" font-size="20">⚙️</text>
+                <text x="130" y="418" text-anchor="middle" font-size="10" font-weight="600" fill="#2D3748">CNC 数控机床</text>
+                <text x="130" y="432" text-anchor="middle" font-size="9" fill="#718096">五轴加工中心</text>
+
+                <rect x="240" y="370" width="140" height="70" rx="10" fill="#fff" stroke="#FF8F00" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="310" y="398" text-anchor="middle" font-size="20">🎛️</text>
+                <text x="310" y="418" text-anchor="middle" font-size="10" font-weight="600" fill="#2D3748">PLC 控制器</text>
+                <text x="310" y="432" text-anchor="middle" font-size="9" fill="#718096">西门子 / 三菱</text>
+
+                <rect x="420" y="370" width="140" height="70" rx="10" fill="#fff" stroke="#FF8F00" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="490" y="398" text-anchor="middle" font-size="20">📊</text>
+                <text x="490" y="418" text-anchor="middle" font-size="10" font-weight="600" fill="#2D3748">SCADA 系统</text>
+                <text x="490" y="432" text-anchor="middle" font-size="9" fill="#718096">产线监控</text>
+
+                <rect x="600" y="370" width="140" height="70" rx="10" fill="#fff" stroke="#FF8F00" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="670" y="398" text-anchor="middle" font-size="20">🤖</text>
+                <text x="670" y="418" text-anchor="middle" font-size="10" font-weight="600" fill="#2D3748">工业机器人</text>
+                <text x="670" y="432" text-anchor="middle" font-size="9" fill="#718096">ABB / FANUC</text>
+
+                <!-- Arrow: Bastion -> OT Devices -->
+                <path d="M 535 150 L 535 260 Q 535 280 515 290 L 130 355" stroke="#FF8F00" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrOrange)"/>
+                <path d="M 535 260 Q 535 280 525 290 L 310 355" stroke="#FF8F00" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrOrange)"/>
+                <path d="M 535 260 Q 535 280 535 290 L 490 355" stroke="#FF8F00" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrOrange)"/>
+                <path d="M 535 260 Q 535 280 555 290 L 670 355" stroke="#FF8F00" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrOrange)"/>
+
+                <!-- Splunk / Log -->
+                <rect x="680" y="80" width="180" height="90" rx="10" fill="#fff" stroke="#A0AEC0" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="770" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#4A5568">📋 日志与 SIEM</text>
+                <text x="770" y="128" text-anchor="middle" font-size="10" fill="#718096">Splunk / SNA</text>
+                <text x="770" y="145" text-anchor="middle" font-size="9" fill="#A0AEC0">ISE 日志 + 堡垒机录像</text>
+                <text x="770" y="158" text-anchor="middle" font-size="9" fill="#A0AEC0">防火墙日志 + 告警</text>
+
+                <!-- Arrow: ISE -> Splunk -->
+                <line x1="395" y1="168" x2="678" y2="130" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrGray)"/>
+                <!-- Arrow: Bastion -> Splunk -->
+                <line x1="595" y1="100" x2="678" y2="110" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrGray)"/>
+
+                <!-- Legend -->
+                <rect x="40" y="470" width="820" height="75" rx="10" fill="#fff" stroke="#E8ECF1" stroke-width="1"/>
+                <text x="60" y="495" font-size="10" font-weight="700" fill="#4A5568">图例说明：</text>
+                <line x1="60" y1="515" x2="95" y2="515" stroke="#049fd9" stroke-width="2.5"/>
+                <text x="100" y="519" font-size="9" fill="#718096">VPN 加密隧道</text>
+                <line x1="200" y1="515" x2="235" y2="515" stroke="#FF8F00" stroke-width="2" stroke-dasharray="6,3"/>
+                <text x="240" y="519" font-size="9" fill="#718096">受控跳转路径</text>
+                <line x1="370" y1="515" x2="405" y2="515" stroke="#6abf4b" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="410" y="519" font-size="9" fill="#718096">认证交互</text>
+                <line x1="510" y1="515" x2="545" y2="515" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="550" y="519" font-size="9" fill="#718096">日志上报</text>
+                <text x="60" y="537" font-size="9" fill="#A0AEC0">数据流方向：工程师 → VPN 隧道 → Cisco Firewall（ACL 过滤）→ 堡垒机（录像审计）→ 指定 OT 设备</text>
+            </svg>
+            <div class="svg-caption">图 2：第三方远程维护安全接入整体架构——三道门零信任设计</div>
+        </div>
+
+        <h3>4.2 方案核心原则</h3>
+        <p>在展开每一层的技术细节之前，先明确这套方案遵循的五个核心设计原则：</p>
+
+        <div class="card">
+            <ol class="step-list">
+                <li>
+                    <strong>最小权限原则（Least Privilege）</strong><br>
+                    <span style="color:#718096;">第三方用户接入 VPN 后，ACL 严格限制其只能访问堡垒机的 IP 和端口，无法触达 OT 网络中的任何其他资源。在堡垒机上，再按用户角色授权其只能跳转到指定的设备。</span>
+                </li>
+                <li>
+                    <strong>纵深防御原则（Defense in Depth）</strong><br>
+                    <span style="color:#718096;">三道门层层递进，每道门独立发挥作用。即使某一层被突破（例如 VPN 凭据泄露），攻击者仍面对堡垒机的二次认证和权限控制。</span>
+                </li>
+                <li>
+                    <strong>身份可信原则（Identity Assurance）</strong><br>
+                    <span style="color:#718096;">通过 ISE 的用户名密码 + 机器证书 + Duo MFA 三因素认证，确保每一个连接都可以追溯到具体的个人和具体的设备。</span>
+                </li>
+                <li>
+                    <strong>全程可审计原则（Full Auditability）</strong><br>
+                    <span style="color:#718096;">从 VPN 连接建立、身份认证、到堡垒机操作的每一步，都产生日志和录像，汇聚到 Splunk 进行统一分析和存储。</span>
+                </li>
+                <li>
+                    <strong>按需接入原则（Just-in-Time Access）</strong><br>
+                    <span style="color:#718096;">第三方用户账号默认禁用，仅在提交维护工单并经审批后临时激活，维护完成后自动禁用。杜绝"永久在线"的后门。</span>
+                </li>
+            </ol>
+        </div>
+
+        <p class="source-ref">资料来源：Cisco Validated Design (CVD) — "Secure Remote Access for Industrial Networks"; NIST SP 800-207《零信任架构》</p>
+
+        <h3>4.3 产品选型一览</h3>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>角色</th>
+                        <th>推荐产品</th>
+                        <th>型号 / 版本</th>
+                        <th>核心职责</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>VPN 网关</strong></td>
+                        <td>Cisco Secure Firewall</td>
+                        <td>Firepower 1010 / 1120（入门级）</td>
+                        <td>RA-VPN 终结、ACL 过滤、流量加密</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VPN 客户端</strong></td>
+                        <td>Cisco Secure Client</td>
+                        <td>5.x（原 AnyConnect）</td>
+                        <td>建立 IPSec/SSL VPN 隧道</td>
+                    </tr>
+                    <tr>
+                        <td><strong>身份认证</strong></td>
+                        <td>Cisco ISE</td>
+                        <td>3.3 或更高</td>
+                        <td>RADIUS 认证、证书颁发、用户生命周期管理</td>
+                    </tr>
+                    <tr>
+                        <td><strong>多因素认证</strong></td>
+                        <td>Cisco Duo（可选）</td>
+                        <td>Duo MFA</td>
+                        <td>手机推送二次验证，防凭据泄露</td>
+                    </tr>
+                    <tr>
+                        <td><strong>堡垒机</strong></td>
+                        <td>JumpServer（开源）</td>
+                        <td>v3.x / v4.x</td>
+                        <td>资产授权、操作录像、命令审计、文件传输管控</td>
+                    </tr>
+                    <tr>
+                        <td><strong>日志分析</strong></td>
+                        <td>Splunk / Cisco SNA</td>
+                        <td>—</td>
+                        <td>集中日志存储、关联分析、合规报告</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert-box info">
+            <div class="alert-icon">💡</div>
+            <div class="alert-content">
+                <div class="alert-title">为什么选择入门级防火墙即可？</div>
+                <div class="alert-text">
+                    第三方远程维护场景的并发 VPN 连接数通常在 <strong>5~20 个</strong>之间，流量以远程桌面协议为主（RDP/SSH/VNC），带宽需求不高。Cisco Firepower 1010 支持高达 75 个 AnyConnect 并发用户，对于这个场景绰绰有余，且价格亲民（通常在 <strong>几千元至一万多人民币</strong> 区间），是性价比极高的选择。如果未来用户数增长，可平滑升级到 1120 或更高型号。
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 5: VPN Gateway ======================== -->
+<section id="vpn" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 05</div>
+        <h2>第一道门：VPN 安全接入网关部署详解</h2>
+
+        <p>三道门中的第一道——VPN 网关——承担着<strong>重建网络边界</strong>的关键使命。它要解决的问题是：让第三方工程师的远程连接从"不受控的互联网穿透"变成"受控的加密隧道"。</p>
+
+        <h3>5.1 为什么是 VPN 而不是向日葵？</h3>
+        <p>先用一张对比表，让差异一目了然：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:22%;">对比维度</th>
+                        <th style="width:39%;">向日葵远程控制</th>
+                        <th style="width:39%;">Cisco RA-VPN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>连接方式</strong></td>
+                        <td>经第三方云中继，穿透防火墙</td>
+                        <td>直接与企业 VPN 网关建立加密隧道</td>
+                    </tr>
+                    <tr>
+                        <td><strong>数据路径</strong></td>
+                        <td>数据经过第三方服务器，路径不透明</td>
+                        <td>端到端加密，数据不经任何第三方</td>
+                    </tr>
+                    <tr>
+                        <td><strong>身份认证</strong></td>
+                        <td>静态识别码 + 验证码</td>
+                        <td>用户名密码 + 机器证书 + MFA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>访问控制</strong></td>
+                        <td>获得完整桌面权限，无网络级别限制</td>
+                        <td>VPN ACL 精确控制可达 IP 和端口</td>
+                    </tr>
+                    <tr>
+                        <td><strong>日志审计</strong></td>
+                        <td>日志在第三方平台，粒度粗</td>
+                        <td>企业本地日志，精确到用户、时间、流量</td>
+                    </tr>
+                    <tr>
+                        <td><strong>生命周期</strong></td>
+                        <td>装了就一直在，无人管理</td>
+                        <td>账号按需激活，VPN 配置集中管理</td>
+                    </tr>
+                    <tr>
+                        <td><strong>合规性</strong></td>
+                        <td>❌ 不满足等保 / ISO 27001 要求</td>
+                        <td>✅ 满足等保 2.0、NIST、IEC 62443 要求</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>5.2 部署架构与网络位置</h3>
+        <p>Cisco Secure Firewall（FTD）部署在工厂网络的边界，作为 VPN 接入的唯一入口。推荐采用如下部署模式：</p>
+
+        <!-- VPN Deployment SVG -->
+        <div class="svg-container">
+            <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="max-width:760px;">
+                <defs>
+                    <marker id="arrB2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#049fd9"/>
+                    </marker>
+                </defs>
+
+                <!-- Internet -->
+                <rect x="20" y="100" width="140" height="80" rx="12" fill="#EDF2F7" stroke="#CBD5E0" stroke-width="1.5"/>
+                <text x="90" y="135" text-anchor="middle" font-size="20">🌐</text>
+                <text x="90" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">互联网</text>
+                <text x="90" y="173" text-anchor="middle" font-size="9" fill="#A0AEC0">第三方工程师接入</text>
+
+                <!-- FTD -->
+                <rect x="230" y="50" width="180" height="220" rx="14" fill="#EBF8FF" stroke="#049fd9" stroke-width="2"/>
+                <text x="320" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#049fd9">Cisco Secure Firewall</text>
+                <text x="320" y="98" text-anchor="middle" font-size="10" fill="#718096">Firepower 1010 / 1120</text>
+
+                <rect x="250" y="112" width="140" height="32" rx="6" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+                <text x="320" y="133" text-anchor="middle" font-size="10" fill="#049fd9">Outside 接口 → 公网 IP</text>
+
+                <rect x="250" y="152" width="140" height="32" rx="6" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+                <text x="320" y="173" text-anchor="middle" font-size="10" fill="#049fd9">Inside 接口 → DMZ 网段</text>
+
+                <rect x="250" y="192" width="140" height="32" rx="6" fill="#fff" stroke="#6abf4b" stroke-width="1"/>
+                <text x="320" y="213" text-anchor="middle" font-size="10" fill="#6abf4b">RA-VPN 地址池分配</text>
+
+                <rect x="250" y="232" width="140" height="28" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+                <text x="320" y="251" text-anchor="middle" font-size="9" font-weight="600" fill="#92400E">ACL：仅放行堡垒机</text>
+
+                <!-- Arrow: Internet -> FTD -->
+                <line x1="160" y1="140" x2="228" y2="128" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrB2)"/>
+                <text x="178" y="122" font-size="8.5" fill="#049fd9" font-weight="600">SSL/IPSec</text>
+
+                <!-- DMZ -->
+                <rect x="480" y="70" width="140" height="80" rx="12" fill="#FFF8E1" stroke="#FF8F00" stroke-width="1.5"/>
+                <text x="550" y="100" text-anchor="middle" font-size="16">🏰</text>
+                <text x="550" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#E65100">堡垒机</text>
+                <text x="550" y="136" text-anchor="middle" font-size="9" fill="#B45309">DMZ 网段</text>
+
+                <!-- Arrow: FTD -> Bastion -->
+                <line x1="410" y1="168" x2="478" y2="120" stroke="#FF8F00" stroke-width="2" marker-end="url(#arrOrange)"/>
+
+                <!-- OT Network -->
+                <rect x="480" y="190" width="290" height="100" rx="12" fill="#FEF3C7" stroke="#FF8F00" stroke-width="1.5" stroke-dasharray="6,4"/>
+                <text x="625" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="#E65100">工厂 OT 网络</text>
+                <rect x="500" y="240" width="80" height="35" rx="6" fill="#fff" stroke="#F59E0B" stroke-width="1"/>
+                <text x="540" y="262" text-anchor="middle" font-size="9" fill="#92400E">CNC</text>
+                <rect x="595" y="240" width="80" height="35" rx="6" fill="#fff" stroke="#F59E0B" stroke-width="1"/>
+                <text x="635" y="262" text-anchor="middle" font-size="9" fill="#92400E">PLC</text>
+                <rect x="690" y="240" width="65" height="35" rx="6" fill="#fff" stroke="#F59E0B" stroke-width="1"/>
+                <text x="722" y="262" text-anchor="middle" font-size="9" fill="#92400E">SCADA</text>
+
+                <!-- Arrow: Bastion -> OT -->
+                <line x1="550" y1="150" x2="580" y2="188" stroke="#FF8F00" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrOrange)"/>
+
+                <!-- ISE (side) -->
+                <rect x="660" y="55" width="120" height="50" rx="8" fill="#F0FFF4" stroke="#6abf4b" stroke-width="1.5"/>
+                <text x="720" y="78" text-anchor="middle" font-size="10" font-weight="600" fill="#6abf4b">🛡️ Cisco ISE</text>
+                <text x="720" y="95" text-anchor="middle" font-size="9" fill="#718096">RADIUS 服务</text>
+                <line x1="410" y1="92" x2="658" y2="80" stroke="#6abf4b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrGreen)"/>
+            </svg>
+            <div class="svg-caption">图 3：VPN 网关部署位置——Firewall 位于边界，堡垒机位于 DMZ</div>
+        </div>
+
+        <h3>5.3 关键配置要点</h3>
+
+        <div class="card">
+            <h4 style="margin-top:0;">① RA-VPN（Remote Access VPN）配置</h4>
+            <ul style="padding-left:1.5rem; margin:0.6rem 0;">
+                <li style="margin-bottom:0.6rem;"><strong>VPN 协议选择：</strong>推荐 <strong>SSL VPN（TLS 1.2/1.3）</strong>。原因是第三方工程师的网络环境多样（家庭宽带、咖啡厅 Wi-Fi、4G/5G 热点），SSL VPN 使用 443 端口，穿透性最好，不会被中间网络设备拦截。IPSec IKEv2 也是优秀选择，性能更高，但在部分 NAT 环境下可能需要额外配置。</li>
+                <li style="margin-bottom:0.6rem;"><strong>客户端：</strong>使用 <strong>Cisco Secure Client（原 AnyConnect）</strong>，支持 Windows、macOS、Linux、iOS、Android。第三方工程师需预先安装，或通过 Web Portal 首次连接时自动下载安装。</li>
+                <li style="margin-bottom:0.6rem;"><strong>地址池分配：</strong>为第三方 VPN 用户分配一个<strong>独立的 IP 地址池</strong>（例如 10.99.99.0/24），与内部员工 VPN 地址池完全隔离。这确保了可以针对第三方用户单独制定 ACL。</li>
+                <li style="margin-bottom:0.6rem;"><strong>Split Tunneling 策略：</strong>启用 Split Tunnel，仅将访问堡垒机的流量通过 VPN 隧道传输，其余互联网流量走本地出口。这既节约带宽，也降低了攻击面。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">② ACL 访问控制——方案的"灵魂条款"</h4>
+            <p style="color:#718096;">这是整个方案中<strong>最关键的一条配置</strong>：VPN 用户接入后的网络可达性必须被严格限制。</p>
+            <div style="background:#F7FAFC; border-radius:10px; padding:1.2rem 1.5rem; margin:1rem 0; font-family:'Courier New',monospace; font-size:0.88rem; line-height:1.8; overflow-x:auto;">
+                <span style="color:#718096;"># VPN Group Policy 绑定的 ACL（示例）</span><br>
+                <span style="color:#049fd9; font-weight:600;">access-list</span> THIRD-PARTY-VPN-ACL <span style="color:#6abf4b;">extended permit</span> tcp <span style="color:#E65100;">10.99.99.0 255.255.255.0</span> host <span style="color:#DC2626; font-weight:600;">10.10.10.100</span> eq <span style="color:#6abf4b;">443</span><br>
+                <span style="color:#718096;"># 10.99.99.0/24 = VPN 地址池</span><br>
+                <span style="color:#718096;"># 10.10.10.100   = 堡垒机 IP</span><br>
+                <span style="color:#718096;"># 端口 443        = 堡垒机 Web 控制台</span><br><br>
+                <span style="color:#049fd9; font-weight:600;">access-list</span> THIRD-PARTY-VPN-ACL <span style="color:#6abf4b;">extended permit</span> tcp <span style="color:#E65100;">10.99.99.0 255.255.255.0</span> host <span style="color:#DC2626; font-weight:600;">10.10.10.100</span> eq <span style="color:#6abf4b;">22</span><br>
+                <span style="color:#718096;"># 端口 22 = SSH（如需 SSH 方式登录堡垒机）</span><br><br>
+                <span style="color:#049fd9; font-weight:600;">access-list</span> THIRD-PARTY-VPN-ACL <span style="color:#DC2626; font-weight:600;">extended deny</span> ip <span style="color:#E65100;">10.99.99.0 255.255.255.0</span> <span style="color:#DC2626;">any</span><br>
+                <span style="color:#718096;"># 拒绝所有其他流量——这是最重要的一行！</span>
+            </div>
+            <p style="color:#4A5568; margin-top:0.8rem;">
+                <strong>关键要点：</strong>最后一行 <code style="background:#FEE2E2; padding:0.15rem 0.4rem; border-radius:4px; color:#DC2626;">deny ip any</code> 确保了 VPN 用户<strong>除了堡垒机之外，无法访问工厂网络中的任何其他资源</strong>——无论是 MES、ERP、SCADA，还是其他 CNC 设备。所有横向移动的可能性都被彻底封堵。
+            </p>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">③ 会话超时与连接管控</h4>
+            <ul style="padding-left:1.5rem; margin:0.6rem 0;">
+                <li style="margin-bottom:0.5rem;"><strong>空闲超时（Idle Timeout）：</strong>建议设为 <strong>30 分钟</strong>。如果 VPN 连接空闲超过 30 分钟，自动断开。</li>
+                <li style="margin-bottom:0.5rem;"><strong>最大会话时长（Max Session Duration）：</strong>建议设为 <strong>4~8 小时</strong>。即使持续活跃，到时间也会强制断开，需要重新认证。</li>
+                <li style="margin-bottom:0.5rem;"><strong>并发连接限制：</strong>每个第三方用户账号仅允许 <strong>1 个并发 VPN 会话</strong>，防止凭据被同时分享使用。</li>
+                <li style="margin-bottom:0.5rem;"><strong>连接时段限制：</strong>结合 ISE 的时间条件策略，可以限制只在<strong>工作日 8:00-18:00</strong> 或预约的维护窗口内允许 VPN 连接。</li>
+            </ul>
+        </div>
+
+        <div class="alert-box success">
+            <div class="alert-icon">✅</div>
+            <div class="alert-content">
+                <div class="alert-title">第一道门建成效果</div>
+                <div class="alert-text">
+                    部署完 VPN 网关后，向日葵等工具可以从所有 OT 终端上<strong>彻底卸载</strong>。第三方工程师必须通过 Cisco Secure Client 建立加密 VPN 隧道，才能进入工厂网络——而进入后，他只能看到堡垒机一台设备。防火墙重新成为名副其实的"城墙"。
+                </div>
+            </div>
+        </div>
+
+        <p class="source-ref">资料来源：Cisco Secure Firewall 官方配置指南——"Remote Access VPN Configuration on FTD"; Cisco Firepower 1000 系列数据手册</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 6: ISE ======================== -->
+<section id="ise" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 06</div>
+        <h2>第二道门：ISE 身份认证与证书管理</h2>
+
+        <p>VPN 网关搭好了，加密隧道也建了——但还有一个核心问题没解决：<strong>谁有资格连这条隧道？</strong>这就是第二道门的使命：确保只有经过严格验证的人和设备，才能打开 VPN 的大门。</p>
+
+        <div class="quote-block">
+            如果 VPN 网关是城墙，那么 Cisco ISE 就是城门口的身份核验系统——它不仅要检查你的"身份证"（用户名密码），还要检查你开的"车"是不是登记在册的（机器证书），甚至要给你的手机打个电话确认是你本人（MFA）。三关都过了，城门才会打开。
+        </div>
+
+        <h3>6.1 认证架构：三因素联合验证</h3>
+        <p>我们设计的认证方案采用<strong>三因素联合验证</strong>，每一个因素对应一类安全威胁的防御：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>认证因素</th>
+                        <th>类型</th>
+                        <th>实现方式</th>
+                        <th>防御的威胁</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>① 用户名 + 密码</strong></td>
+                        <td>你知道的东西（Something You Know）</td>
+                        <td>ISE 内部用户数据库 或 对接 AD/LDAP</td>
+                        <td>防止匿名接入，建立个人责任制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>② 机器证书</strong></td>
+                        <td>你拥有的东西（Something You Have）</td>
+                        <td>ISE 内置 CA 颁发客户端证书，安装到指定电脑</td>
+                        <td>防止凭据被复制到未授权设备上使用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>③ Duo MFA 推送</strong></td>
+                        <td>你是谁（Something You Are/Have）</td>
+                        <td>Duo 向工程师手机推送验证请求</td>
+                        <td>防止密码泄露后的冒用（可选但强烈推荐）</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><strong>类比：</strong>用户名密码就像一把钥匙，机器证书就像门禁卡，Duo MFA 就像保安的人脸识别——三者缺一不可。即使有人偷了你的钥匙（密码泄露），他没有你的门禁卡（证书未安装在他的电脑上），城门依然打不开。</p>
+
+        <!-- Authentication Flow SVG -->
+        <div class="svg-container">
+            <svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" style="max-width:800px;">
+                <defs>
+                    <marker id="arrFlow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#049fd9"/>
+                    </marker>
+                    <marker id="arrFlowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#6abf4b"/>
+                    </marker>
+                </defs>
+
+                <!-- Title -->
+                <text x="410" y="28" text-anchor="middle" font-size="13" font-weight="700" fill="#2D3748">第三方工程师 VPN 接入认证流程</text>
+
+                <!-- Step boxes -->
+                <!-- 1. Engineer -->
+                <rect x="20" y="55" width="130" height="70" rx="10" fill="#EBF8FF" stroke="#049fd9" stroke-width="2"/>
+                <text x="85" y="82" text-anchor="middle" font-size="18">👨‍🔧</text>
+                <text x="85" y="103" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">工程师发起</text>
+                <text x="85" y="117" text-anchor="middle" font-size="9" fill="#718096">VPN 连接请求</text>
+
+                <!-- 2. Secure Client -->
+                <rect x="190" y="55" width="130" height="70" rx="10" fill="#fff" stroke="#049fd9" stroke-width="1.5"/>
+                <text x="255" y="80" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">Cisco Secure Client</text>
+                <text x="255" y="97" text-anchor="middle" font-size="9" fill="#718096">发送机器证书</text>
+                <text x="255" y="111" text-anchor="middle" font-size="9" fill="#718096">+ 用户名密码</text>
+
+                <!-- 3. FTD -->
+                <rect x="360" y="55" width="130" height="70" rx="10" fill="#fff" stroke="#049fd9" stroke-width="2"/>
+                <text x="425" y="80" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">🔥 Cisco FTD</text>
+                <text x="425" y="97" text-anchor="middle" font-size="9" fill="#718096">收到请求</text>
+                <text x="425" y="111" text-anchor="middle" font-size="9" fill="#718096">转发至 ISE (RADIUS)</text>
+
+                <!-- 4. ISE -->
+                <rect x="530" y="45" width="140" height="90" rx="10" fill="#F0FFF4" stroke="#6abf4b" stroke-width="2"/>
+                <text x="600" y="72" text-anchor="middle" font-size="11" font-weight="700" fill="#6abf4b">🛡️ Cisco ISE</text>
+                <text x="600" y="92" text-anchor="middle" font-size="9" fill="#4A5568">① 验证机器证书有效性</text>
+                <text x="600" y="107" text-anchor="middle" font-size="9" fill="#4A5568">② 验证用户名密码</text>
+                <text x="600" y="122" text-anchor="middle" font-size="9" fill="#4A5568">③ 触发 Duo MFA 推送</text>
+
+                <!-- 5. Duo -->
+                <rect x="710" y="55" width="95" height="70" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+                <text x="757" y="82" text-anchor="middle" font-size="18">📱</text>
+                <text x="757" y="103" text-anchor="middle" font-size="10" font-weight="600" fill="#7C3AED">Duo MFA</text>
+                <text x="757" y="117" text-anchor="middle" font-size="9" fill="#718096">手机推送</text>
+
+                <!-- Arrows row 1 -->
+                <line x1="150" y1="90" x2="188" y2="90" stroke="#049fd9" stroke-width="2" marker-end="url(#arrFlow)"/>
+                <line x1="320" y1="90" x2="358" y2="90" stroke="#049fd9" stroke-width="2" marker-end="url(#arrFlow)"/>
+                <line x1="490" y1="90" x2="528" y2="90" stroke="#6abf4b" stroke-width="2" marker-end="url(#arrFlowG)"/>
+                <line x1="670" y1="90" x2="708" y2="90" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrFlow)"/>
+
+                <!-- Decision -->
+                <polygon points="600,170 650,200 600,230 550,200" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+                <text x="600" y="204" text-anchor="middle" font-size="10" font-weight="700" fill="#92400E">三项全过？</text>
+
+                <line x1="600" y1="135" x2="600" y2="168" stroke="#6abf4b" stroke-width="2" marker-end="url(#arrFlowG)"/>
+
+                <!-- Yes path -->
+                <line x1="550" y1="200" x2="380" y2="200" stroke="#6abf4b" stroke-width="2" marker-end="url(#arrFlowG)"/>
+                <text x="460" y="193" text-anchor="middle" font-size="10" font-weight="700" fill="#16A34A">✅ 全部通过</text>
+
+                <!-- Result: Access Granted -->
+                <rect x="230" y="175" width="150" height="55" rx="10" fill="#F0FFF4" stroke="#16A34A" stroke-width="2"/>
+                <text x="305" y="198" text-anchor="middle" font-size="11" font-weight="700" fill="#16A34A">✅ 认证成功</text>
+                <text x="305" y="216" text-anchor="middle" font-size="9" fill="#718096">下发 ACL + 分配 VPN IP</text>
+                <text x="305" y="228" text-anchor="middle" font-size="9" fill="#718096">仅允许访问堡垒机</text>
+
+                <!-- No path -->
+                <line x1="650" y1="200" x2="730" y2="200" stroke="#DC2626" stroke-width="2"/>
+                <text x="690" y="193" text-anchor="middle" font-size="10" font-weight="700" fill="#DC2626">❌ 任一失败</text>
+
+                <rect x="730" y="178" width="80" height="45" rx="8" fill="#FEE2E2" stroke="#DC2626" stroke-width="1.5"/>
+                <text x="770" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="#DC2626">🚫 拒绝</text>
+                <text x="770" y="215" text-anchor="middle" font-size="9" fill="#991B1B">连接断开</text>
+
+                <!-- Flow to Bastion -->
+                <path d="M 305 230 L 305 290 L 400 290" stroke="#FF8F00" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrOrange)"/>
+                <rect x="400" y="268" width="150" height="50" rx="10" fill="#FFF8E1" stroke="#FF8F00" stroke-width="2"/>
+                <text x="475" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#E65100">🏰 堡垒机</text>
+                <text x="475" y="308" text-anchor="middle" font-size="9" fill="#B45309">二次登录 → 跳转设备</text>
+
+                <!-- Timeline bar -->
+                <rect x="30" y="345" width="760" height="28" rx="6" fill="#F7FAFC" stroke="#E8ECF1" stroke-width="1"/>
+                <text x="80" y="364" font-size="9" fill="#718096">⏱️ 全流程耗时约 15~30 秒（含 MFA 推送确认）</text>
+            </svg>
+            <div class="svg-caption">图 4：三因素认证流程——证书验证 → 密码验证 → MFA 推送 → ACL 下发 → 访问堡垒机</div>
+        </div>
+
+        <h3>6.2 ISE 用户管理：为第三方用户创建独立身份体系</h3>
+        <p>第三方供应商的工程师不属于企业 AD 域，因此我们需要在 ISE 上为他们建立<strong>独立的身份管理体系</strong>。以下是详细的设置方法：</p>
+
+        <div class="card">
+            <h4 style="margin-top:0;">① 用户名命名规范</h4>
+            <p style="color:#718096;">建议采用结构化命名，便于管理和审计：</p>
+            <div style="background:#F7FAFC; border-radius:10px; padding:1rem 1.5rem; margin:0.8rem 0; font-family:'Courier New',monospace; font-size:0.88rem; line-height:2;">
+                <span style="color:#718096;"># 命名格式：ext-{供应商缩写}-{姓名拼音}-{工号}</span><br>
+                <span style="color:#049fd9;">ext-fanuc-zhangwei-0012</span> &nbsp; <span style="color:#718096;">← FANUC 公司的张伟工程师</span><br>
+                <span style="color:#049fd9;">ext-siemens-lina-0045</span> &nbsp; <span style="color:#718096;">← 西门子的李娜工程师</span><br>
+                <span style="color:#049fd9;">ext-dmgmori-wanglei-0003</span> &nbsp; <span style="color:#718096;">← DMG MORI 的王磊工程师</span>
+            </div>
+            <p style="color:#718096; margin-top:0.6rem;"><strong>关键原则：</strong>一人一号，绝不共享。每个工程师都有自己独立的用户名，确保所有操作可追溯到个人。</p>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">② 密码策略</h4>
+            <p style="color:#718096;">在 ISE 的 <strong>Administration → Identity Management → Settings → User Password Policy</strong> 中配置：</p>
+            <ul style="padding-left:1.5rem; margin:0.6rem 0;">
+                <li style="margin-bottom:0.5rem;"><strong>最小长度：</strong>12 位以上</li>
+                <li style="margin-bottom:0.5rem;"><strong>复杂度要求：</strong>必须包含大写字母、小写字母、数字、特殊字符中的至少三类</li>
+                <li style="margin-bottom:0.5rem;"><strong>有效期：</strong>90 天强制更换</li>
+                <li style="margin-bottom:0.5rem;"><strong>历史记录：</strong>不得重复最近 5 次使用过的密码</li>
+                <li style="margin-bottom:0.5rem;"><strong>锁定策略：</strong>连续 5 次输入错误，账号锁定 30 分钟</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">③ 用户组与生命周期管理</h4>
+            <p style="color:#718096;">在 ISE 中创建专用用户组和管理流程：</p>
+            <ul style="padding-left:1.5rem; margin:0.6rem 0;">
+                <li style="margin-bottom:0.6rem;">
+                    <strong>创建用户组：</strong>在 <strong>Identity Groups</strong> 中创建 <code style="background:#EBF8FF; padding:0.15rem 0.4rem; border-radius:4px; color:#049fd9;">EXT-Vendor-VPN</code> 组，所有第三方 VPN 用户归入此组。后续的认证策略、授权策略都基于此组进行匹配。
+                </li>
+                <li style="margin-bottom:0.6rem;">
+                    <strong>账号默认禁用：</strong>新创建的用户账号初始状态为 <strong>Disabled</strong>。只有当供应商提交维护工单、工厂审批通过后，运维人员才手动启用账号。
+                </li>
+                <li style="margin-bottom:0.6rem;">
+                    <strong>账号有效期：</strong>每个账号设置 <strong>到期日期（Account Expiry Date）</strong>。例如，某次维护窗口为 4 月 10 日 9:00 ~ 18:00，则账号有效期设为 4 月 10 日 23:59，过期后自动失效。对于长期合作的供应商，可以设置季度到期，定期审查续期。
+                </li>
+                <li style="margin-bottom:0.6rem;">
+                    <strong>定期审查：</strong>每季度由 IT 安全团队审查所有 <code style="background:#EBF8FF; padding:0.15rem 0.4rem; border-radius:4px; color:#049fd9;">EXT-Vendor-VPN</code> 组的用户列表，清理不再需要的账号。
+                </li>
+            </ul>
+        </div>
+
+        <h3>6.3 机器证书：绑定"人 + 设备"的双重保险</h3>
+        <p>用户名密码解决了"谁在连接"的问题，但还有一个漏洞：<strong>如果密码被泄露，攻击者在任何一台电脑上都能用这组凭据接入</strong>。机器证书就是为了堵住这个漏洞——它将认证绑定到<strong>特定的设备</strong>上。</p>
+
+        <div class="alert-box info">
+            <div class="alert-icon">🔐</div>
+            <div class="alert-content">
+                <div class="alert-title">什么是机器证书？</div>
+                <div class="alert-text">
+                    简单理解：机器证书就像电脑的"身份证"。它是一个由权威机构（CA）签发的数字文件，安装在特定电脑上，包含该电脑的唯一标识信息。VPN 网关在认证时会验证这张"电脑身份证"——只有持有合法证书的电脑才被允许建立连接。即使密码泄露，没有证书的电脑也连不上来。
+                </div>
+            </div>
+        </div>
+
+        <h4>实施步骤：使用 ISE 内置 CA 颁发证书</h4>
+        <p>Cisco ISE 自带证书颁发机构（Internal CA），无需额外购买第三方 CA 服务，非常适合这个场景。以下是完整实施流程：</p>
+
+        <ol class="step-list">
+            <li>
+                <strong>启用 ISE 内置 CA</strong><br>
+                <span style="color:#718096;">
+                    路径：<strong>Administration → System → Certificates → Internal CA Settings</strong>。确认 Internal CA 已启用。ISE 会自动生成 Root CA 证书和 Subordinate CA 证书。此步骤在 ISE 初始部署时通常已完成。
+                </span>
+            </li>
+            <li>
+                <strong>创建证书模板</strong><br>
+                <span style="color:#718096;">
+                    路径：<strong>Administration → System → Certificates → Certificate Templates</strong>。创建一个名为 <code style="background:#EBF8FF; padding:0.1rem 0.3rem; border-radius:3px; color:#049fd9;">EXT-Vendor-Machine-Cert</code> 的模板。关键参数：<br>
+                    · Key Type: RSA 2048 位或更高<br>
+                    · Validity: 180 天（半年），到期前需续签<br>
+                    · Extended Key Usage: Client Authentication<br>
+                    · Subject: CN=ext-{vendor}-{name}, O=YourFactory
+                </span>
+            </li>
+            <li>
+                <strong>为每台授权设备签发证书</strong><br>
+                <span style="color:#718096;">
+                    通过 ISE 的 <strong>SCEP（Simple Certificate Enrollment Protocol）</strong> 或<strong>手动导出 PKCS#12</strong> 文件的方式，将证书部署到第三方工程师的笔记本电脑上。<br><br>
+                    <strong>推荐方式：手动导出 + 线下分发</strong><br>
+                    ① 在 ISE 上为指定用户生成证书，导出为 .p12 文件（包含私钥，设置导出密码）<br>
+                    ② 通过安全渠道（加密邮件或当面 U 盘拷贝）将 .p12 文件发给供应商工程师<br>
+                    ③ 工程师在其笔记本上导入证书到系统证书存储<br>
+                    ④ 配置 Cisco Secure Client 在连接时自动选择该证书
+                </span>
+            </li>
+            <li>
+                <strong>在 FTD VPN 配置中启用证书认证</strong><br>
+                <span style="color:#718096;">
+                    在 FTD 的 RA-VPN Connection Profile 中，设置认证方式为 <strong>"Certificate + AAA"（双因素）</strong>：<br>
+                    · 先验证客户端证书（由 ISE CA 签发，FTD 信任 ISE 的 Root CA）<br>
+                    · 证书验证通过后，再弹出用户名密码输入框<br>
+                    · 用户名密码通过 RADIUS 发送到 ISE 进行验证
+                </span>
+            </li>
+            <li>
+                <strong>证书吊销管理</strong><br>
+                <span style="color:#718096;">
+                    当某位工程师不再需要接入权限（项目结束、人员变动）时：<br>
+                    · 在 ISE 上<strong>吊销（Revoke）</strong>其证书<br>
+                    · 吊销后的证书会加入 CRL（证书吊销列表）<br>
+                    · FTD 定期从 ISE 获取最新 CRL，拒绝持有已吊销证书的连接<br>
+                    · <strong>同时禁用对应的 ISE 用户账号</strong>（双保险）
+                </span>
+            </li>
+        </ol>
+
+        <h3>6.4 ISE 认证与授权策略配置</h3>
+        <p>最后，我们需要在 ISE 上配置认证策略和授权策略，将上述所有元素串联起来：</p>
+
+        <div class="card">
+            <h4 style="margin-top:0;">认证策略（Authentication Policy）</h4>
+            <div style="background:#F7FAFC; border-radius:10px; padding:1rem 1.5rem; margin:0.8rem 0; font-size:0.9rem; line-height:1.9;">
+                <strong>Rule Name:</strong> <span style="color:#049fd9;">Third-Party-VPN-AuthN</span><br>
+                <strong>Condition:</strong> <span style="color:#718096;">RADIUS:NAS-Port-Type EQUALS Virtual AND RADIUS:Cisco-AV-Pair CONTAINS "mdm-tlv=device-platform"</span><br>
+                <strong>Allowed Protocols:</strong> <span style="color:#6abf4b;">EAP-TLS（证书认证）+ 内部密码验证</span><br>
+                <strong>Identity Source:</strong> <span style="color:#E65100;">ISE Internal Users（EXT-Vendor-VPN 组）</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">授权策略（Authorization Policy）</h4>
+            <div style="background:#F7FAFC; border-radius:10px; padding:1rem 1.5rem; margin:0.8rem 0; font-size:0.9rem; line-height:1.9;">
+                <strong>Rule Name:</strong> <span style="color:#049fd9;">Third-Party-VPN-AuthZ</span><br>
+                <strong>Condition:</strong> <span style="color:#718096;">IdentityGroup = EXT-Vendor-VPN AND Certificate:Subject CN CONTAINS "ext-" AND Network Access:AuthenticationStatus = Authenticated</span><br>
+                <strong>Authorization Profile:</strong><br>
+                &nbsp;&nbsp;· <span style="color:#6abf4b;">Access Type: ACCESS_ACCEPT</span><br>
+                &nbsp;&nbsp;· <span style="color:#E65100;">Downloadable ACL / Named ACL: THIRD-PARTY-VPN-ACL</span>（仅允许访问堡垒机）<br>
+                &nbsp;&nbsp;· <span style="color:#049fd9;">VPN Group Policy: ThirdParty-GP</span>（包含地址池、超时、Split Tunnel 配置）
+            </div>
+        </div>
+
+        <div class="alert-box info">
+            <div class="alert-icon">💡</div>
+            <div class="alert-content">
+                <div class="alert-title">ISE 授权的精妙之处</div>
+                <div class="alert-text">
+                    注意授权条件中包含 <strong>Certificate:Subject CN CONTAINS "ext-"</strong> 这一条。这意味着不仅用户名密码要对、证书要合法，<strong>证书中嵌入的身份信息还必须与用户名规则匹配</strong>。这形成了用户凭据和设备证书的<strong>交叉验证</strong>——进一步提高了伪造接入的难度。
+                </div>
+            </div>
+        </div>
+
+        <p class="source-ref">资料来源：Cisco ISE 3.3 管理指南——"Certificate-Based Authentication for VPN Users"; Cisco ISE Internal Certificate Authority 配置文档</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 7: DUO MFA ======================== -->
+<section id="mfa" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 07</div>
+        <h2>加固之锁：Duo MFA 多因素认证</h2>
+
+        <p>用户名密码 + 机器证书已经构成了相当强的认证体系。但在安全领域有一句话：<strong>"没有绝对安全，只有层层加固。"</strong> Duo MFA 是这套方案中的<strong>可选但强烈推荐</strong>的加固层——它解决的是一个极端但现实的场景：<strong>如果密码和证书同时被盗怎么办？</strong></p>
+
+        <div class="quote-block">
+            想象一个场景：供应商工程师的笔记本电脑在出差途中被盗，电脑上安装着机器证书，浏览器里保存着 VPN 密码。窃贼打开电脑就能连上你工厂的 VPN。<br><br>
+            但如果有 Duo MFA——VPN 连接的最后一步，需要工程师<strong>本人手机</strong>上的 Duo App 点击"批准"。窃贼没有工程师的手机，连接就会被拒绝。一道手机推送，就是最后的安全屏障。
+        </div>
+
+        <h3>7.1 Duo 与 Cisco ISE / FTD 的集成架构</h3>
+        <p>Duo 集成到现有方案中非常优雅，不需要对已有架构做大的改动。它以 <strong>RADIUS Proxy</strong> 的方式嵌入认证链路：</p>
+
+        <!-- Duo Integration SVG -->
+        <div class="svg-container">
+            <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" style="max-width:780px;">
+                <defs>
+                    <marker id="arrDuo1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#049fd9"/>
+                    </marker>
+                    <marker id="arrDuo2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#7C3AED"/>
+                    </marker>
+                    <marker id="arrDuo3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#6abf4b"/>
+                    </marker>
+                </defs>
+
+                <text x="410" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="#2D3748">Duo MFA 集成认证流程（RADIUS Proxy 模式）</text>
+
+                <!-- 1. Secure Client -->
+                <rect x="15" y="60" width="120" height="65" rx="10" fill="#EBF8FF" stroke="#049fd9" stroke-width="2"/>
+                <text x="75" y="85" text-anchor="middle" font-size="15">💻</text>
+                <text x="75" y="104" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">Secure Client</text>
+                <text x="75" y="118" text-anchor="middle" font-size="9" fill="#718096">证书 + 用户名密码</text>
+
+                <!-- 2. FTD -->
+                <rect x="175" y="60" width="120" height="65" rx="10" fill="#fff" stroke="#049fd9" stroke-width="2"/>
+                <text x="235" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#049fd9">🔥 FTD</text>
+                <text x="235" y="104" text-anchor="middle" font-size="9" fill="#718096">验证证书 ✓</text>
+                <text x="235" y="118" text-anchor="middle" font-size="9" fill="#718096">转发 RADIUS</text>
+
+                <!-- 3. Duo Auth Proxy -->
+                <rect x="340" y="50" width="140" height="80" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/>
+                <text x="410" y="78" text-anchor="middle" font-size="11" font-weight="700" fill="#7C3AED">🔀 Duo Auth Proxy</text>
+                <text x="410" y="96" text-anchor="middle" font-size="9" fill="#718096">部署在企业内网</text>
+                <text x="410" y="112" text-anchor="middle" font-size="9" fill="#718096">接收 RADIUS 请求</text>
+                <text x="410" y="124" text-anchor="middle" font-size="9" fill="#718096">同时联系 ISE + Duo 云</text>
+
+                <!-- 4. ISE -->
+                <rect x="530" y="45" width="120" height="55" rx="10" fill="#F0FFF4" stroke="#6abf4b" stroke-width="2"/>
+                <text x="590" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#6abf4b">🛡️ ISE</text>
+                <text x="590" y="88" text-anchor="middle" font-size="9" fill="#718096">验证密码 ✓</text>
+                <text x="590" y="100" text-anchor="middle" font-size="9" fill="#718096">返回用户属性</text>
+
+                <!-- 5. Duo Cloud -->
+                <rect x="530" y="120" width="120" height="55" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+                <text x="590" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#7C3AED">☁️ Duo Cloud</text>
+                <text x="590" y="164" text-anchor="middle" font-size="9" fill="#718096">触发手机推送</text>
+
+                <!-- 6. Phone -->
+                <rect x="700" y="110" width="100" height="75" rx="10" fill="#fff" stroke="#7C3AED" stroke-width="2"/>
+                <text x="750" y="140" text-anchor="middle" font-size="26">📱</text>
+                <text x="750" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#7C3AED">工程师手机</text>
+                <text x="750" y="178" text-anchor="middle" font-size="9" fill="#718096">Duo Mobile App</text>
+
+                <!-- Arrows -->
+                <line x1="135" y1="92" x2="173" y2="92" stroke="#049fd9" stroke-width="2" marker-end="url(#arrDuo1)"/>
+                <text x="154" y="86" text-anchor="middle" font-size="7.5" fill="#049fd9">①</text>
+
+                <line x1="295" y1="92" x2="338" y2="90" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrDuo2)"/>
+                <text x="316" y="84" text-anchor="middle" font-size="7.5" fill="#7C3AED">②</text>
+
+                <line x1="480" y1="72" x2="528" y2="72" stroke="#6abf4b" stroke-width="1.5" marker-end="url(#arrDuo3)"/>
+                <text x="504" y="66" text-anchor="middle" font-size="7.5" fill="#6abf4b">③</text>
+
+                <line x1="480" y1="105" x2="528" y2="140" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrDuo2)"/>
+                <text x="492" y="118" text-anchor="middle" font-size="7.5" fill="#7C3AED">④</text>
+
+                <line x1="650" y1="147" x2="698" y2="147" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrDuo2)"/>
+                <text x="674" y="141" text-anchor="middle" font-size="7.5" fill="#7C3AED">⑤</text>
+
+                <!-- Result -->
+                <rect x="280" y="200" width="260" height="55" rx="10" fill="#F0FFF4" stroke="#16A34A" stroke-width="2"/>
+                <text x="410" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#16A34A">✅ 三因素全部通过 → VPN 接入成功</text>
+                <text x="410" y="244" text-anchor="middle" font-size="9" fill="#718096">Duo Auth Proxy 返回 RADIUS Accept → FTD 建立隧道</text>
+
+                <path d="M 410 130 L 410 198" stroke="#16A34A" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrDuo3)"/>
+                <text x="425" y="170" font-size="8" fill="#16A34A">⑥ 密码 ✓ + MFA ✓</text>
+
+                <!-- Legend -->
+                <text x="20" y="285" font-size="9" fill="#A0AEC0">流程：① 发起连接 → ② FTD 证书验证通过，转发 RADIUS → ③ Duo Proxy 询问 ISE 验证密码 → ④ 同时触发 Duo Cloud 推送 → ⑤ 工程师手机批准 → ⑥ 全部通过，接入成功</text>
+            </svg>
+            <div class="svg-caption">图 5：Duo MFA 集成架构——Duo Authentication Proxy 作为 RADIUS 中间人，同时对接 ISE 和 Duo Cloud</div>
+        </div>
+
+        <h3>7.2 Duo Authentication Proxy 部署详解</h3>
+
+        <div class="card">
+            <h4 style="margin-top:0;">什么是 Duo Authentication Proxy？</h4>
+            <div class="card-text">
+                <p>Duo Authentication Proxy 是一个轻量级软件，部署在企业内网的一台 Linux 或 Windows 服务器上（甚至可以是虚拟机）。它充当 <strong>RADIUS 代理</strong>的角色：</p>
+                <ul style="padding-left:1.5rem; margin:0.8rem 0;">
+                    <li style="margin-bottom:0.5rem;">接收来自 FTD 的 RADIUS 认证请求</li>
+                    <li style="margin-bottom:0.5rem;">将用户名密码转发给后端的 ISE 进行<strong>一次认证（Primary Authentication）</strong></li>
+                    <li style="margin-bottom:0.5rem;">ISE 验证通过后，Duo Proxy 自动向 <strong>Duo Cloud</strong> 发起 MFA 请求（<strong>二次认证</strong>）</li>
+                    <li style="margin-bottom:0.5rem;">Duo Cloud 向工程师手机推送验证通知</li>
+                    <li style="margin-bottom:0.5rem;">工程师在 Duo Mobile App 上点击"Approve"</li>
+                    <li style="margin-bottom:0.5rem;">两步都通过后，Duo Proxy 向 FTD 返回 RADIUS Access-Accept</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">部署要求与关键配置</h4>
+            <div class="table-wrapper" style="margin:0.8rem 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:30%;">配置项</th>
+                            <th>详情</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>部署平台</strong></td>
+                            <td>Windows Server 2016+ 或 CentOS/RHEL 7+，最低 1 vCPU / 1GB RAM / 10GB 磁盘</td>
+                        </tr>
+                        <tr>
+                            <td><strong>网络要求</strong></td>
+                            <td>可达 ISE（RADIUS UDP 1812/1813）、可达 Duo Cloud（HTTPS 443 出站）、可从 FTD 到达（RADIUS UDP 1812）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Duo 账号</strong></td>
+                            <td>需注册 Duo 管理面板，获取 Integration Key、Secret Key、API Hostname</td>
+                        </tr>
+                        <tr>
+                            <td><strong>配置文件</strong></td>
+                            <td><code>authproxy.cfg</code> 文件中配置 [radius_client]（指向 ISE）和 [radius_server_auto]（监听 FTD 请求）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FTD 修改</strong></td>
+                            <td>将 VPN 的 RADIUS 服务器地址从 ISE 改为 Duo Auth Proxy 的 IP（Duo Proxy 再转发给 ISE）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">Duo Auth Proxy 核心配置示例</h4>
+            <div style="background:#1A202C; border-radius:10px; padding:1.2rem 1.5rem; margin:0.8rem 0; font-family:'Courier New',monospace; font-size:0.82rem; line-height:2; overflow-x:auto; color:#E2E8F0;">
+                <span style="color:#6abf4b;"># authproxy.cfg</span><br><br>
+                <span style="color:#F59E0B;">[radius_client]</span><br>
+                <span style="color:#63B3ED;">host</span>=<span style="color:#FC8181;">10.10.10.50</span> &nbsp;&nbsp;&nbsp;<span style="color:#718096;"># ISE 的 IP 地址</span><br>
+                <span style="color:#63B3ED;">secret</span>=<span style="color:#FC8181;">YourRADIUSSecret</span><br>
+                <span style="color:#63B3ED;">port</span>=<span style="color:#FC8181;">1812</span><br><br>
+                <span style="color:#F59E0B;">[radius_server_auto]</span><br>
+                <span style="color:#63B3ED;">ikey</span>=<span style="color:#FC8181;">DIXXXXXXXXXXXXXXXXXX</span> &nbsp;&nbsp;&nbsp;<span style="color:#718096;"># Duo Integration Key</span><br>
+                <span style="color:#63B3ED;">skey</span>=<span style="color:#FC8181;">YourDuoSecretKeyHere</span> &nbsp;&nbsp;&nbsp;<span style="color:#718096;"># Duo Secret Key</span><br>
+                <span style="color:#63B3ED;">api_host</span>=<span style="color:#FC8181;">api-XXXXXXXX.duosecurity.com</span><br>
+                <span style="color:#63B3ED;">radius_ip_1</span>=<span style="color:#FC8181;">10.10.10.1</span> &nbsp;&nbsp;&nbsp;<span style="color:#718096;"># FTD 的 IP（允许发送 RADIUS 请求的源）</span><br>
+                <span style="color:#63B3ED;">radius_secret_1</span>=<span style="color:#FC8181;">YourRADIUSSecret</span><br>
+                <span style="color:#63B3ED;">client</span>=<span style="color:#FC8181;">radius_client</span> &nbsp;&nbsp;&nbsp;<span style="color:#718096;"># 指向上方的 [radius_client] 块（即 ISE）</span><br>
+                <span style="color:#63B3ED;">port</span>=<span style="color:#FC8181;">1812</span><br>
+                <span style="color:#63B3ED;">failmode</span>=<span style="color:#FC8181;">secure</span> &nbsp;&nbsp;&nbsp;<span style="color:#718096;"># Duo 不可达时拒绝登录（安全优先）</span>
+            </div>
+        </div>
+
+        <h3>7.3 第三方工程师的 Duo 注册流程</h3>
+        <p>每位第三方工程师在首次使用前，需要完成 Duo 注册（Self-Enrollment）：</p>
+
+        <ol class="step-list">
+            <li>
+                <strong>管理员在 Duo 管理面板创建用户</strong><br>
+                <span style="color:#718096;">用户名与 ISE 中的用户名保持一致（如 <code style="background:#EBF8FF; padding:0.1rem 0.3rem; border-radius:3px; color:#049fd9;">ext-fanuc-zhangwei-0012</code>）。填写工程师的手机号码和邮箱。</span>
+            </li>
+            <li>
+                <strong>工程师收到注册邮件</strong><br>
+                <span style="color:#718096;">Duo 自动发送注册链接到工程师邮箱，工程师点击链接，按指引在手机上安装 <strong>Duo Mobile App</strong> 并扫描二维码完成绑定。</span>
+            </li>
+            <li>
+                <strong>测试验证</strong><br>
+                <span style="color:#718096;">管理员在 Duo 管理面板发送测试推送，确认工程师手机能正常收到通知并批准。</span>
+            </li>
+            <li>
+                <strong>后续使用</strong><br>
+                <span style="color:#718096;">每次 VPN 连接时，输入用户名密码后，Duo 自动推送通知到手机。工程师只需在 Duo Mobile App 上点击"Approve"即可。整个过程仅需 <strong>5~10 秒</strong>。</span>
+            </li>
+        </ol>
+
+        <div class="alert-box info">
+            <div class="alert-icon">💡</div>
+            <div class="alert-content">
+                <div class="alert-title">Duo 的成本与许可</div>
+                <div class="alert-text">
+                    Duo 提供多种许可层级：<strong>Duo Free</strong>（最多 10 用户免费）、<strong>Duo Essentials</strong>、<strong>Duo Advantage</strong>、<strong>Duo Premier</strong>。对于第三方远程维护场景，用户数通常较少（5~20 人），<strong>Duo Essentials</strong> 即可满足需求，按用户/月计费，成本非常可控。如果第三方用户少于 10 人，甚至可以使用免费版进行初期验证。
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-box success">
+            <div class="alert-icon">🔒</div>
+            <div class="alert-content">
+                <div class="alert-title">加固效果总结</div>
+                <div class="alert-text">
+                    添加 Duo MFA 后，攻击者要突破第二道门，需要<strong>同时</strong>持有：① 有效的用户名密码 ② 安装了合法机器证书的特定电脑 ③ 绑定了该用户 Duo 账号的手机。三者缺一不可。这已经达到了银行级别的认证强度——对于工厂远程维护场景而言，可以说是"铜墙铁壁"。
+                </div>
+            </div>
+        </div>
+
+        <p class="source-ref">资料来源：Cisco Duo 官方文档——"Duo Authentication Proxy Reference"; "Cisco ASA/FTD with Duo RADIUS Proxy Integration Guide"</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 8: Bastion Host ======================== -->
+<section id="bastion" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 08</div>
+        <h2>第三道门：堡垒机选型与部署</h2>
+
+        <p>VPN 网关（第一道门）确保了网络边界安全，ISE + Duo（第二道门）确保了接入者身份可信。但通过这两道门之后，第三方工程师仍需要实际操作工厂设备——<strong>怎么操作、能操作什么、操作过程如何记录？</strong>这就是第三道门——堡垒机——要解决的问题。</p>
+
+        <div class="quote-block">
+            如果说 VPN 是城墙，ISE 是城门口的身份核验，那么堡垒机就是城内的<strong>"访客接待中心"</strong>——所有外来访客必须先到接待中心登记，由专人带领前往指定区域，全程有监控录像，不允许自由行动。
+        </div>
+
+        <h3>8.1 为什么需要堡垒机？VPN + ACL 还不够吗？</h3>
+        <p>有人可能会问：我们已经用 ACL 限制了 VPN 用户只能访问堡垒机的 IP，这不就够了吗？为什么还要多加一层堡垒机？</p>
+
+        <p>答案是：<strong>ACL 只能做网络层的控制，而堡垒机做的是应用层和操作层的控制。</strong></p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:22%;">能力维度</th>
+                        <th style="width:38%;">仅靠 VPN ACL</th>
+                        <th style="width:40%;">VPN ACL + 堡垒机</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>网络可达性控制</strong></td>
+                        <td>✅ 能限制可访问的 IP 和端口</td>
+                        <td>✅ 同上 + 堡垒机进一步细化</td>
+                    </tr>
+                    <tr>
+                        <td><strong>设备级授权</strong></td>
+                        <td>❌ 无法区分同一 IP 下的不同设备</td>
+                        <td>✅ 精确到每台设备的访问授权</td>
+                    </tr>
+                    <tr>
+                        <td><strong>操作录像</strong></td>
+                        <td>❌ 无</td>
+                        <td>✅ 全程录像，可回放</td>
+                    </tr>
+                    <tr>
+                        <td><strong>命令审计</strong></td>
+                        <td>❌ 无</td>
+                        <td>✅ 记录每一条命令，支持命令过滤</td>
+                    </tr>
+                    <tr>
+                        <td><strong>危险操作拦截</strong></td>
+                        <td>❌ 无</td>
+                        <td>✅ 可配置命令黑名单（如禁止 format / reboot）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>文件传输管控</strong></td>
+                        <td>❌ 无</td>
+                        <td>✅ 控制上传/下载权限，防止数据外泄</td>
+                    </tr>
+                    <tr>
+                        <td><strong>协同与审批</strong></td>
+                        <td>❌ 无</td>
+                        <td>✅ 高危操作可要求管理员在线审批</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>简言之：<strong>VPN ACL 解决"能不能到"的问题，堡垒机解决"到了之后能做什么"和"做了什么留下证据"的问题。</strong> 二者缺一不可。</p>
+
+        <h3>8.2 堡垒机选型：JumpServer 开源方案</h3>
+
+        <p>在堡垒机市场上，有商业产品（如齐治堡垒机、Teleport Enterprise）和开源产品。对于制造业第三方远程维护场景，我们推荐 <strong>JumpServer</strong>——它是国内最流行的开源堡垒机，功能完善，社区活跃，且对中文环境支持极佳。</p>
+
+        <div class="card">
+            <h4 style="margin-top:0;">JumpServer 核心优势</h4>
+            <div class="card-grid" style="grid-template-columns: repeat(2, 1fr); margin-top:1rem;">
+                <div style="display:flex; gap:0.8rem; align-items:flex-start;">
+                    <span style="font-size:1.5rem;">🆓</span>
+                    <div>
+                        <strong style="color:#1A202C;">开源免费</strong>
+                        <p style="font-size:0.9rem; color:#718096; margin:0.2rem 0 0;">社区版功能已覆盖 90% 以上的需求，无许可费用。企业版提供更多高级功能和技术支持。</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.8rem; align-items:flex-start;">
+                    <span style="font-size:1.5rem;">🎬</span>
+                    <div>
+                        <strong style="color:#1A202C;">操作录像</strong>
+                        <p style="font-size:0.9rem; color:#718096; margin:0.2rem 0 0;">RDP、SSH、VNC 等全协议操作录像，支持在线回放、倍速播放、关键帧搜索。</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.8rem; align-items:flex-start;">
+                    <span style="font-size:1.5rem;">📋</span>
+                    <div>
+                        <strong style="color:#1A202C;">命令审计与过滤</strong>
+                        <p style="font-size:0.9rem; color:#718096; margin:0.2rem 0 0;">实时记录 SSH 命令，支持命令黑名单（如禁止 <code>rm -rf</code>、<code>shutdown</code> 等危险命令）。</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.8rem; align-items:flex-start;">
+                    <span style="font-size:1.5rem;">🔗</span>
+                    <div>
+                        <strong style="color:#1A202C;">多协议支持</strong>
+                        <p style="font-size:0.9rem; color:#718096; margin:0.2rem 0 0;">SSH、RDP、VNC、Telnet、SFTP、MySQL、Kubernetes——覆盖主流运维场景。</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.8rem; align-items:flex-start;">
+                    <span style="font-size:1.5rem;">👥</span>
+                    <div>
+                        <strong style="color:#1A202C;">精细化授权</strong>
+                        <p style="font-size:0.9rem; color:#718096; margin:0.2rem 0 0;">按用户/用户组 × 资产/资产组的矩阵授权，精确到"谁能访问哪台设备的哪个账号"。</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.8rem; align-items:flex-start;">
+                    <span style="font-size:1.5rem;">🌐</span>
+                    <div>
+                        <strong style="color:#1A202C;">Web 化操作</strong>
+                        <p style="font-size:0.9rem; color:#718096; margin:0.2rem 0 0;">用户通过浏览器即可操作，无需安装额外客户端。VPN 接入后打开浏览器访问堡垒机 Web 界面即可。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0;">JumpServer 版本与部署要求</h4>
+            <div class="table-wrapper" style="margin:0.8rem 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:28%;">项目</th>
+                            <th>推荐配置</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>版本</strong></td>
+                            <td>JumpServer v3.x 或 v4.x（社区版即可满足需求）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>部署方式</strong></td>
+                            <td>推荐 Docker 一键部署（官方提供 <code>quick_start.sh</code>），也支持 Kubernetes 部署</td>
+                        </tr>
+                        <tr>
+                            <td><strong>服务器配置</strong></td>
+                            <td>最低：4 vCPU / 8GB RAM / 100GB SSD；推荐：8 vCPU / 16GB RAM / 200GB SSD（录像存储需求较大）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>操作系统</strong></td>
+                            <td>CentOS 7+、Ubuntu 18.04+、Debian 10+</td>
+                        </tr>
+                        <tr>
+                            <td><strong>网络位置</strong></td>
+                            <td><strong>DMZ 区</strong>——VPN 用户可达，同时可访问 OT 网络中的目标设备</td>
+                        </tr>
+                        <tr>
+                            <td><strong>高可用</strong></td>
+                            <td>生产环境建议部署两台，使用 Nginx 做负载均衡</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3>8.3 堡垒机配置：以第三方维护场景为例</h3>
+        <p>JumpServer 部署完成后，需要按照以下步骤配置第三方远程维护场景：</p>
+
+        <ol class="step-list">
+            <li>
+                <strong>创建第三方用户</strong><br>
+                <span style="color:#718096;">
+                    在 JumpServer 中创建用户，<strong>用户名与 ISE 中保持一致</strong>（如 <code style="background:#EBF8FF; padding:0.1rem 0.3rem; border-radius:3px; color:#049fd9;">ext-fanuc-zhangwei-0012</code>）。建议启用 JumpServer 的 <strong>LDAP 或 RADIUS 对接功能</strong>，直接对接 ISE 的用户数据库，实现用户信息单一来源管理（Single Source of Truth）。
+                </span>
+            </li>
+            <li>
+                <strong>录入资产（OT 设备）</strong><br>
+                <span style="color:#718096;">
+                    将需要远程维护的设备录入 JumpServer 资产列表：<br>
+                    · <strong>资产名称：</strong>如"3号车间-CNC五轴-001"<br>
+                    · <strong>IP 地址：</strong>设备的 OT 网络 IP<br>
+                    · <strong>协议：</strong>RDP（Windows 工控机）/ SSH（Linux 系统）/ VNC（部分设备控制台）<br>
+                    · <strong>特权账号：</strong>设备的登录账号密码由堡垒机托管，第三方用户<strong>无需也不会知道</strong>设备的实际密码
+                </span>
+            </li>
+            <li>
+                <strong>创建授权规则</strong><br>
+                <span style="color:#718096;">
+                    这是堡垒机最核心的配置——精确定义"谁能访问什么"：<br>
+                    · <strong>用户/用户组：</strong>选择"FANUC维护组"<br>
+                    · <strong>资产/资产组：</strong>选择"FANUC 品牌设备组"（只包含 FANUC 的 CNC）<br>
+                    · <strong>系统用户：</strong>选择对应的设备登录账号<br>
+                    · <strong>有效期：</strong>与维护工单的时间窗口对齐<br><br>
+                    <strong>关键原则：FANUC 的工程师只能看到 FANUC 的设备，西门子的工程师只能看到西门子的设备。</strong>不同供应商之间完全隔离。
+                </span>
+            </li>
+            <li>
+                <strong>配置命令过滤规则</strong><br>
+                <span style="color:#718096;">
+                    对于 SSH 连接的设备，配置命令黑名单：<br>
+                    · 禁止：<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">reboot</code>、<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">shutdown</code>、<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">rm -rf</code>、<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">format</code>、<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">fdisk</code><br>
+                    · 禁止：<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">wget</code>、<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">curl</code>（防止从外部下载恶意文件）<br>
+                    · 禁止：<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">passwd</code>、<code style="background:#FEE2E2; padding:0.1rem 0.3rem; border-radius:3px; color:#DC2626;">useradd</code>（防止修改设备账号）<br>
+                    触发黑名单命令时，会被实时阻断并告警。
+                </span>
+            </li>
+            <li>
+                <strong>配置文件传输策略</strong><br>
+                <span style="color:#718096;">
+                    · <strong>上传：</strong>允许（工程师可能需要上传固件或配置文件），但限制文件类型和大小<br>
+                    · <strong>下载：</strong>默认禁止或需要审批（防止工艺数据、图纸等敏感文件被下载外泄）<br>
+                    · 所有文件传输操作都会被记录
+                </span>
+            </li>
+            <li>
+                <strong>启用操作录像</strong><br>
+                <span style="color:#718096;">
+                    确保所有会话类型（RDP / SSH / VNC）的录像功能已开启。录像存储路径建议使用独立的 NAS 或对象存储，保留期限建议 <strong>≥ 180 天</strong>（满足等保合规要求）。
+                </span>
+            </li>
+        </ol>
+
+        <h3>8.4 第三方工程师的使用体验</h3>
+        <p>整套方案虽然安全机制层层叠加，但对第三方工程师来说，使用流程依然是<strong>简洁顺滑</strong>的：</p>
+
+        <!-- User Experience Flow -->
+        <div class="svg-container">
+            <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" style="max-width:800px;">
+                <defs>
+                    <marker id="arrUX" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#049fd9"/>
+                    </marker>
+                </defs>
+
+                <!-- Step 1 -->
+                <rect x="10" y="30" width="135" height="110" rx="12" fill="#EBF8FF" stroke="#049fd9" stroke-width="2"/>
+                <text x="77" y="60" text-anchor="middle" font-size="24">💻</text>
+                <text x="77" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#049fd9">Step 1</text>
+                <text x="77" y="98" text-anchor="middle" font-size="9" fill="#4A5568">打开 Secure Client</text>
+                <text x="77" y="112" text-anchor="middle" font-size="9" fill="#4A5568">输入用户名密码</text>
+                <text x="77" y="126" text-anchor="middle" font-size="9" fill="#718096">⏱ 10 秒</text>
+
+                <!-- Arrow -->
+                <line x1="147" y1="85" x2="172" y2="85" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrUX)"/>
+
+                <!-- Step 2 -->
+                <rect x="175" y="30" width="135" height="110" rx="12" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/>
+                <text x="242" y="60" text-anchor="middle" font-size="24">📱</text>
+                <text x="242" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#7C3AED">Step 2</text>
+                <text x="242" y="98" text-anchor="middle" font-size="9" fill="#4A5568">手机收到 Duo 推送</text>
+                <text x="242" y="112" text-anchor="middle" font-size="9" fill="#4A5568">点击"Approve"</text>
+                <text x="242" y="126" text-anchor="middle" font-size="9" fill="#718096">⏱ 5 秒</text>
+
+                <!-- Arrow -->
+                <line x1="312" y1="85" x2="337" y2="85" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrUX)"/>
+
+                <!-- Step 3 -->
+                <rect x="340" y="30" width="135" height="110" rx="12" fill="#F0FFF4" stroke="#6abf4b" stroke-width="2"/>
+                <text x="407" y="60" text-anchor="middle" font-size="24">🌐</text>
+                <text x="407" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#6abf4b">Step 3</text>
+                <text x="407" y="98" text-anchor="middle" font-size="9" fill="#4A5568">VPN 连接成功</text>
+                <text x="407" y="112" text-anchor="middle" font-size="9" fill="#4A5568">浏览器打开堡垒机</text>
+                <text x="407" y="126" text-anchor="middle" font-size="9" fill="#718096">⏱ 10 秒</text>
+
+                <!-- Arrow -->
+                <line x1="477" y1="85" x2="502" y2="85" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrUX)"/>
+
+                <!-- Step 4 -->
+                <rect x="505" y="30" width="135" height="110" rx="12" fill="#FFF8E1" stroke="#FF8F00" stroke-width="2"/>
+                <text x="572" y="60" text-anchor="middle" font-size="24">🏰</text>
+                <text x="572" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#FF8F00">Step 4</text>
+                <text x="572" y="98" text-anchor="middle" font-size="9" fill="#4A5568">登录堡垒机</text>
+                <text x="572" y="112" text-anchor="middle" font-size="9" fill="#4A5568">看到授权设备列表</text>
+                <text x="572" y="126" text-anchor="middle" font-size="9" fill="#718096">⏱ 10 秒</text>
+
+                <!-- Arrow -->
+                <line x1="642" y1="85" x2="667" y2="85" stroke="#049fd9" stroke-width="2.5" marker-end="url(#arrUX)"/>
+
+                <!-- Step 5 -->
+                <rect x="670" y="30" width="135" height="110" rx="12" fill="#fff" stroke="#16A34A" stroke-width="2"/>
+                <text x="737" y="60" text-anchor="middle" font-size="24">⚙️</text>
+                <text x="737" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#16A34A">Step 5</text>
+                <text x="737" y="98" text-anchor="middle" font-size="9" fill="#4A5568">点击目标设备</text>
+                <text x="737" y="112" text-anchor="middle" font-size="9" fill="#4A5568">开始远程维护</text>
+                <text x="737" y="126" text-anchor="middle" font-size="9" fill="#718096">⏱ 5 秒</text>
+
+                <!-- Total time -->
+                <rect x="250" y="160" width="320" height="32" rx="8" fill="#F0FFF4" stroke="#16A34A" stroke-width="1.5"/>
+                <text x="410" y="181" text-anchor="middle" font-size="11" font-weight="700" fill="#16A34A">✅ 全程约 40 秒即可开始工作——与向日葵体验几乎无差</text>
+            </svg>
+            <div class="svg-caption">图 6：第三方工程师使用体验——5 步 40 秒，简洁顺滑</div>
+        </div>
+
+        <h3>8.5 注意事项与最佳实践</h3>
+
+        <div class="card-grid">
+            <div class="card" style="border-left:4px solid #DC2626;">
+                <div class="card-title" style="color:#DC2626;">⚠️ 密码托管安全</div>
+                <div class="card-text">堡垒机托管了 OT 设备的登录密码，这意味着堡垒机本身成为高价值目标。务必：<br>① 堡垒机管理员密码必须使用高强度密码 + MFA<br>② 数据库加密存储<br>③ 定期备份</div>
+            </div>
+            <div class="card" style="border-left:4px solid #D97706;">
+                <div class="card-title" style="color:#D97706;">⚠️ 网络区域隔离</div>
+                <div class="card-text">堡垒机部署在 DMZ 区，它需要同时可达 VPN 地址池和 OT 网络。务必在 DMZ 与 OT 之间的防火墙上配置精细 ACL：堡垒机只能访问已录入资产的 IP + 端口，而非整个 OT 网段。</div>
+            </div>
+            <div class="card" style="border-left:4px solid #049fd9;">
+                <div class="card-title" style="color:#049fd9;">💡 录像存储规划</div>
+                <div class="card-text">RDP 录像文件较大（约 5~15 MB/分钟），SSH 录像较小。按每天 4 小时远程维护估算，一个月约 50~100 GB。建议使用 NAS 存储，保留 180 天以上。</div>
+            </div>
+            <div class="card" style="border-left:4px solid #6abf4b;">
+                <div class="card-title" style="color:#6abf4b;">💡 会话协同</div>
+                <div class="card-text">JumpServer 支持<strong>会话监控和实时中断</strong>——工厂运维人员可以在管理后台实时观看第三方工程师的操作画面，发现异常操作时一键中断会话。建议在关键维护时开启此功能。</div>
+            </div>
+        </div>
+
+        <p class="source-ref">资料来源：JumpServer 官方文档 (docs.jumpserver.org); NIST SP 800-82 Rev.3——"所有远程维护会话应使用中间跳板机并记录完整审计日志"</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 9: Audit ======================== -->
+<section id="audit" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 09</div>
+        <h2>审计与合规：让每一步操作都有据可查</h2>
+
+        <p>三道门搭建完成，我们已经实现了"可信接入"和"最小权限"。但安全体系的最后一块拼图是<strong>审计</strong>——出了问题，能不能查？查出来的证据，能不能用于定责和合规？</p>
+
+        <div class="quote-block">
+            安全圈有句名言：<strong>"Prevention is ideal, but detection is a must."</strong>（预防是理想，检测是必须。）再完美的防护也无法保证 100% 不出问题，但完善的审计能力确保我们在问题发生后，能够快速定位、追溯、止损。
+        </div>
+
+        <h3>9.1 四层审计体系</h3>
+        <p>这套方案天然形成了<strong>四层审计数据源</strong>，层层嵌套、互相印证：</p>
+
+        <!-- Audit Layers SVG -->
+        <div class="svg-container">
+            <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+                <!-- Layer 1 -->
+                <rect x="30" y="20" width="700" height="70" rx="12" fill="#EBF8FF" stroke="#049fd9" stroke-width="2"/>
+                <text x="60" y="50" font-size="20">🔥</text>
+                <text x="90" y="50" font-size="12" font-weight="700" fill="#049fd9">第一层：VPN 网关日志（Cisco FTD）</text>
+                <text x="90" y="72" font-size="10" fill="#718096">记录：谁连接了 VPN、源 IP、连接时间、断开时间、分配的 VPN IP、流量统计</text>
+
+                <!-- Layer 2 -->
+                <rect x="60" y="100" width="640" height="70" rx="12" fill="#F0FFF4" stroke="#6abf4b" stroke-width="2"/>
+                <text x="90" y="130" font-size="20">🛡️</text>
+                <text x="120" y="130" font-size="12" font-weight="700" fill="#6abf4b">第二层：身份认证日志（Cisco ISE）</text>
+                <text x="120" y="152" font-size="10" fill="#718096">记录：认证成功/失败、用户名、证书信息、认证方式、授权策略命中、下发的 ACL</text>
+
+                <!-- Layer 3 -->
+                <rect x="90" y="180" width="580" height="70" rx="12" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/>
+                <text x="120" y="210" font-size="20">📱</text>
+                <text x="150" y="210" font-size="12" font-weight="700" fill="#7C3AED">第三层：MFA 验证日志（Duo）</text>
+                <text x="150" y="232" font-size="10" fill="#718096">记录：MFA 推送时间、推送目标设备、批准/拒绝结果、设备位置信息</text>
+
+                <!-- Layer 4 -->
+                <rect x="120" y="260" width="520" height="70" rx="12" fill="#FFF8E1" stroke="#FF8F00" stroke-width="2"/>
+                <text x="150" y="290" font-size="20">🏰</text>
+                <text x="180" y="290" font-size="12" font-weight="700" fill="#FF8F00">第四层：操作审计日志 + 录像（JumpServer）</text>
+                <text x="180" y="312" font-size="10" fill="#718096">记录：访问了哪台设备、每条命令、文件传输、全程操作录像、会话时长</text>
+
+                <!-- Splunk aggregation -->
+                <line x1="730" y1="55" x2="745" y2="55" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="700" y1="135" x2="745" y2="135" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="670" y1="215" x2="745" y2="215" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="640" y1="295" x2="745" y2="295" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+            </svg>
+            <div class="svg-caption">图 7：四层审计体系——从网络层到操作层，层层记录、互相印证</div>
+        </div>
+
+        <h3>9.2 Splunk 集中日志分析</h3>
+        <p>上述四层日志数据，建议统一汇聚到 <strong>Splunk</strong>（或 Cisco Secure Network Analytics）进行集中存储和关联分析。Splunk 在这个场景中的价值体现在：</p>
+
+        <div class="card">
+            <ul style="padding-left:1.5rem; margin:0.5rem 0;">
+                <li style="margin-bottom:0.7rem;">
+                    <strong>关联分析：</strong>将 VPN 日志、ISE 认证日志、堡垒机操作日志通过时间戳和用户名进行关联，形成完整的<strong>用户行为链</strong>——从"何时连接"到"做了什么"到"何时断开"，一条链路清晰完整。
+                </li>
+                <li style="margin-bottom:0.7rem;">
+                    <strong>异常告警：</strong>设置自动告警规则，例如：<br>
+                    · 同一用户在短时间内从不同地理位置连接 VPN（可能凭据被盗）<br>
+                    · 非工作时间的 VPN 连接<br>
+                    · 堡垒机上触发命令黑名单的操作<br>
+                    · 认证连续失败超过阈值
+                </li>
+                <li style="margin-bottom:0.7rem;">
+                    <strong>合规报告：</strong>自动生成周/月度审计报告，包含所有第三方远程访问记录，直接用于等保测评和 ISO 27001 审计。
+                </li>
+                <li style="margin-bottom:0.7rem;">
+                    <strong>长期存储：</strong>日志保留 ≥ 180 天（满足等保 2.0 三级要求），录像保留 ≥ 180 天。
+                </li>
+            </ul>
+        </div>
+
+        <h3>9.3 合规对标</h3>
+        <p>这套方案在设计之初就对齐了主流安全合规框架的要求：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:22%;">合规标准</th>
+                        <th style="width:40%;">相关要求</th>
+                        <th style="width:38%;">本方案如何满足</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>等保 2.0<br>（三级）</strong></td>
+                        <td>远程访问身份鉴别、访问控制、安全审计、数据传输加密</td>
+                        <td>ISE 三因素认证 + VPN ACL + 堡垒机审计 + TLS/IPSec 加密</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IEC 62443</strong></td>
+                        <td>工业控制系统远程访问控制、区域与管道模型、最小权限</td>
+                        <td>VPN 为受控管道，堡垒机为唯一跳转点，ACL 实现区域隔离</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NIST CSF</strong></td>
+                        <td>身份管理（PR.AC）、审计日志（DE.AE）、远程访问保护（PR.AC-3）</td>
+                        <td>ISE 统一身份管理 + Splunk 日志分析 + VPN 远程访问保护</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISO 27001</strong></td>
+                        <td>A.9 访问控制、A.12 操作安全、A.14 通信安全</td>
+                        <td>全链路加密 + 最小权限 + 全程审计</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NIST SP 800-82</strong></td>
+                        <td>ICS 远程访问使用跳板机、多因素认证、会话录制</td>
+                        <td>JumpServer 堡垒机 + Duo MFA + 操作录像</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert-box success">
+            <div class="alert-icon">✅</div>
+            <div class="alert-content">
+                <div class="alert-title">审计能力总结</div>
+                <div class="alert-text">
+                    有了这套四层审计体系，当任何安全事件发生时，我们可以在 <strong>5 分钟内</strong>回答以下所有问题：<br>
+                    <strong>谁</strong>（ISE 用户名）在<strong>什么时间</strong>（VPN 日志时间戳）从<strong>哪里</strong>（源 IP + Duo 设备位置）连接进来，访问了<strong>哪台设备</strong>（堡垒机资产日志），执行了<strong>什么操作</strong>（命令审计 + 操作录像）。<br><br>
+                    回忆一下开篇的故事——如果那家工厂有这套体系，事件发生后就不会是"查无此人"，而是 5 分钟内锁定嫌疑人、5 小时内完成取证。
+                </div>
+            </div>
+        </div>
+
+        <p class="source-ref">资料来源：《网络安全等级保护基本要求》（GB/T 22239-2019）; IEC 62443-3-3; NIST SP 800-82 Rev.3; Splunk 官方文档——"Security Use Cases for OT Environments"</p>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+<!-- ======================== SECTION 10: Ending Story ======================== -->
+<section id="ending" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 10</div>
+        <h2>故事结局：当远程维护不再令人心惊</h2>
+
+        <div class="story-card" style="background:linear-gradient(135deg, #F0FFF4 0%, #E6FFFA 100%); border-color:#6abf4b;">
+            <div class="story-title" style="color:#16A34A;">✅ 2026 年 3 月，同一家华东精密制造工厂</div>
+            <p>
+                凌晨 1:43，FANUC 的工程师田中先生（驻上海办事处）收到工厂发来的紧急维护工单——5 号车间的 FANUC ROBODRILL 加工中心报出主轴定位偏差告警，需要远程调整参数。
+            </p>
+            <p>
+                田中打开笔记本电脑，启动 <strong>Cisco Secure Client</strong>，输入自己的专属用户名 <span style="background:rgba(22,163,74,0.1); padding:0.1rem 0.4rem; border-radius:4px; font-weight:600; color:#16A34A;">ext-fanuc-tanaka-0008</span> 和密码。几秒后，他的手机上弹出 <strong>Duo Mobile</strong> 的推送通知——他点击"批准"。VPN 连接建立成功。
+            </p>
+            <p>
+                他打开浏览器，访问堡垒机地址。登录后，屏幕上只显示他被授权的那一台设备：<strong>"5号车间-ROBODRILL-α-D21MiB5-005"</strong>。他点击连接，远程桌面打开。堡垒机右下角显示一行小字：<span style="background:rgba(22,163,74,0.1); padding:0.1rem 0.4rem; border-radius:4px; color:#16A34A;">"本次会话正在录像中"</span>。
+            </p>
+            <p>
+                与此同时，工厂的值班运维工程师老张——是的，就是一年前那位在凌晨按下急停按钮的老张——在堡垒机管理后台打开了<strong>会话监控</strong>。他的屏幕上实时显示着田中先生的操作画面：调出主轴参数界面、修改定位补偿值、执行校验程序……每一步操作都清清楚楚。
+            </p>
+            <p>
+                35 分钟后，田中先生完成维护，关闭远程连接。VPN 会话自动断开。堡垒机上生成了一段 <strong>35 分 12 秒</strong>的操作录像和完整的命令日志。ISE 和 FTD 上记录了精确的连接时间、源 IP 和流量信息。所有日志已自动同步到 Splunk。
+            </p>
+            <p>
+                老张看着监控大屏，端起保温杯喝了口茶，踏实地说了一句：
+            </p>
+            <p style="font-size:1.15rem; font-weight:700; color:#16A34A; text-align:center; margin:1.2rem 0 0.5rem;">
+                "这回心里敞亮了。谁来的、干了啥、什么时候走的，门儿清。"
+            </p>
+        </div>
+
+        <p>对比一年前的那个惊魂夜晚——同样是凌晨，同样是远程维护，但结局截然不同。</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:22%;">维度</th>
+                        <th style="width:39%;">一年前（向日葵模式）</th>
+                        <th style="width:39%;">现在（VPN + ISE + 堡垒机）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>操作者身份</strong></td>
+                        <td>❌ 不知道是谁——凭据在微信群里传</td>
+                        <td>✅ 精确到人——田中先生，FANUC 工号 0008</td>
+                    </tr>
+                    <tr>
+                        <td><strong>接入路径</strong></td>
+                        <td>❌ 经第三方云穿透，绕过防火墙</td>
+                        <td>✅ 企业 VPN 加密隧道，防火墙完全掌控</td>
+                    </tr>
+                    <tr>
+                        <td><strong>可达范围</strong></td>
+                        <td>❌ 整台终端 + 所有网络可达资源</td>
+                        <td>✅ 仅堡垒机 → 仅授权的那一台 ROBODRILL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>操作记录</strong></td>
+                        <td>❌ 无日志、无录像、无法追溯</td>
+                        <td>✅ 全程录像 + 命令日志 + 四层审计链</td>
+                    </tr>
+                    <tr>
+                        <td><strong>异常处置</strong></td>
+                        <td>❌ 出事后只能亡羊补牢</td>
+                        <td>✅ 实时监控，一键中断异常会话</td>
+                    </tr>
+                    <tr>
+                        <td><strong>合规状态</strong></td>
+                        <td>❌ 等保测评高风险项</td>
+                        <td>✅ 满足等保 2.0 / IEC 62443 / ISO 27001</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>这不是一个关于技术复杂度的故事，而是一个关于<strong>用正确的方式做正确的事</strong>的故事。工具的便利性固然重要，但当便利性以安全为代价时，迟早会付出远超预期的成本——87 万元的报废零件、11 天的停产损失、以及团队对信息安全的信心崩塌。</p>
+
+        <div class="quote-block">
+            正确的远程维护方案，不是让远程维护变得"更麻烦"，而是让它变得<strong>"更透明"</strong>。工程师多花 30 秒完成认证，换来的是整个工厂 OT 网络的安全底线。这笔账，怎么算都值。
+        </div>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 11: Action Plan ======================== -->
+<section id="action" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 11</div>
+        <h2>行动指南：30 天落地路线图</h2>
+
+        <p>读到这里，如果你已经决定行动，下面是一份经过验证的 <strong>30 天实施路线图</strong>，帮助你从零开始将这套方案落地：</p>
+
+        <!-- Timeline SVG -->
+        <div class="svg-container">
+            <svg viewBox="0 0 820 430" xmlns="http://www.w3.org/2000/svg" style="max-width:800px;">
+                <!-- Timeline line -->
+                <line x1="80" y1="50" x2="80" y2="410" stroke="#E8ECF1" stroke-width="3"/>
+
+                <!-- Week 1 -->
+                <circle cx="80" cy="70" r="18" fill="#049fd9" stroke="#fff" stroke-width="3"/>
+                <text x="80" y="75" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">W1</text>
+                <rect x="120" y="42" width="670" height="78" rx="10" fill="#EBF8FF" stroke="#049fd9" stroke-width="1.5"/>
+                <text x="140" y="65" font-size="12" font-weight="700" fill="#049fd9">第 1 周：规划与采购</text>
+                <text x="140" y="84" font-size="10" fill="#4A5568">• 梳理所有第三方远程维护场景，列出供应商清单和设备清单</text>
+                <text x="140" y="100" font-size="10" fill="#4A5568">• 采购 Cisco Firepower 1010/1120 + ISE 许可（如无现有部署）</text>
+                <text x="140" y="116" font-size="10" fill="#4A5568">• 确定 VPN 地址池网段、堡垒机 DMZ 网段、防火墙部署位置</text>
+
+                <!-- Week 2 -->
+                <circle cx="80" cy="165" r="18" fill="#6abf4b" stroke="#fff" stroke-width="3"/>
+                <text x="80" y="170" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">W2</text>
+                <rect x="120" y="137" width="670" height="78" rx="10" fill="#F0FFF4" stroke="#6abf4b" stroke-width="1.5"/>
+                <text x="140" y="160" font-size="12" font-weight="700" fill="#6abf4b">第 2 周：基础设施部署</text>
+                <text x="140" y="179" font-size="10" fill="#4A5568">• 部署 Cisco Secure Firewall，配置 RA-VPN（SSL VPN + 地址池 + ACL）</text>
+                <text x="140" y="195" font-size="10" fill="#4A5568">• 部署 ISE（或配置现有 ISE），启用 Internal CA，创建证书模板</text>
+                <text x="140" y="211" font-size="10" fill="#4A5568">• 部署 JumpServer 堡垒机（Docker 一键部署），录入 OT 资产</text>
+
+                <!-- Week 3 -->
+                <circle cx="80" cy="260" r="18" fill="#7C3AED" stroke="#fff" stroke-width="3"/>
+                <text x="80" y="265" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">W3</text>
+                <rect x="120" y="232" width="670" height="78" rx="10" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+                <text x="140" y="255" font-size="12" font-weight="700" fill="#7C3AED">第 3 周：身份体系与策略配置</text>
+                <text x="140" y="274" font-size="10" fill="#4A5568">• 创建第三方用户账号（ISE + JumpServer + Duo），签发机器证书</text>
+                <text x="140" y="290" font-size="10" fill="#4A5568">• 配置 ISE 认证/授权策略，配置 Duo Auth Proxy（如选用 MFA）</text>
+                <text x="140" y="306" font-size="10" fill="#4A5568">• 配置堡垒机授权规则、命令过滤、文件传输策略、录像策略</text>
+
+                <!-- Week 4 -->
+                <circle cx="80" cy="355" r="18" fill="#FF8F00" stroke="#fff" stroke-width="3"/>
+                <text x="80" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">W4</text>
+                <rect x="120" y="327" width="670" height="78" rx="10" fill="#FFF8E1" stroke="#FF8F00" stroke-width="1.5"/>
+                <text x="140" y="350" font-size="12" font-weight="700" fill="#FF8F00">第 4 周：测试、培训与切换上线</text>
+                <text x="140" y="369" font-size="10" fill="#4A5568">• 选择 1~2 家核心供应商进行试点测试，走完全流程并验证审计链路</text>
+                <text x="140" y="385" font-size="10" fill="#4A5568">• 对第三方工程师进行培训（安装 Secure Client + Duo 注册 + 堡垒机使用）</text>
+                <text x="140" y="401" font-size="10" fill="#4A5568">• 全面卸载向日葵等远控工具，正式切换到新方案。配置 Splunk 日志接收与告警</text>
+            </svg>
+            <div class="svg-caption">图 8：30 天落地路线图——从规划到上线，四周完成</div>
+        </div>
+
+        <h3>11.1 关键里程碑 Checklist</h3>
+
+        <div class="card">
+            <div style="display:grid; grid-template-columns:auto 1fr; gap:0.5rem 1rem; font-size:0.95rem;">
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 3：</strong>完成供应商和设备清单梳理，确定网络架构方案</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 5：</strong>设备采购下单（Firepower 1010 + 必要许可）</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 10：</strong>FTD 上架、RA-VPN 配置完成、基础连通性测试通过</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 12：</strong>ISE 用户/证书体系就绪，认证策略配置完成</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 14：</strong>JumpServer 部署完成，资产录入，授权规则配置完成</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 17：</strong>Duo Auth Proxy 部署完成（如选用），MFA 流程验证通过</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 21：</strong>首家供应商试点测试通过，全链路审计验证通过</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 25：</strong>第三方工程师培训完成，文档分发</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 28：</strong>所有设备上的向日葵等远控工具彻底卸载</span>
+                <span style="color:#049fd9; font-size:1.2rem;">☐</span> <span><strong>Day 30：</strong>正式上线，Splunk 告警就绪，进入运营阶段 🎉</span>
+            </div>
+        </div>
+
+        <h3>11.2 预算估算参考</h3>
+        <p>这套方案的一大优势是<strong>成本可控</strong>，尤其适合预算有限的中小制造企业：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:28%;">项目</th>
+                        <th style="width:32%;">选型</th>
+                        <th style="width:20%;">估算费用（人民币）</th>
+                        <th style="width:20%;">备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>VPN 网关</strong></td>
+                        <td>Cisco Firepower 1010 + AnyConnect 许可</td>
+                        <td>¥8,000 ~ ¥25,000</td>
+                        <td>一次性采购</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISE</strong></td>
+                        <td>Cisco ISE Essentials 许可</td>
+                        <td>按端点数计费</td>
+                        <td>如已有部署则无额外费用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Duo MFA</strong></td>
+                        <td>Duo Essentials</td>
+                        <td>~$3/用户/月</td>
+                        <td>10 用户以下可用免费版</td>
+                    </tr>
+                    <tr>
+                        <td><strong>堡垒机</strong></td>
+                        <td>JumpServer 社区版</td>
+                        <td>¥0（开源免费）</td>
+                        <td>需自备服务器/虚拟机</td>
+                    </tr>
+                    <tr>
+                        <td><strong>服务器（堡垒机用）</strong></td>
+                        <td>虚拟机或物理服务器</td>
+                        <td>¥3,000 ~ ¥10,000</td>
+                        <td>利用现有虚拟化平台则为零</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Splunk</strong></td>
+                        <td>Splunk Free（500MB/天）或现有平台</td>
+                        <td>¥0 ~ 按量计费</td>
+                        <td>日志量小，免费版通常够用</td>
+                    </tr>
+                    <tr style="background:#F0FFF4;">
+                        <td><strong>合计（典型场景）</strong></td>
+                        <td colspan="3" style="font-weight:700; color:#16A34A;">¥15,000 ~ ¥40,000 一次性投入 + 少量年度订阅费</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert-box info">
+            <div class="alert-icon">💰</div>
+            <div class="alert-content">
+                <div class="alert-title">投资回报视角</div>
+                <div class="alert-text">
+                    回顾开篇故事——一次安全事件造成的直接损失是 <strong>87 万元报废零件 + 11 天停产（按日均产值 50 万计算 = 550 万元）</strong>，合计损失超过 <strong>600 万元</strong>。而这套方案的总投入不到 <strong>4 万元</strong>。仅从风险防控的角度看，投资回报比超过 <strong>150 : 1</strong>。这还不包括合规罚款、客户信任损失、品牌声誉等无形成本。
+                </div>
+            </div>
+        </div>
+
+        <h3>11.3 持续运营建议</h3>
+        <p>上线不是终点，而是安全运营的起点。以下是持续运营的关键动作：</p>
+
+        <div class="card-grid">
+            <div class="card" style="border-top:3px solid #049fd9;">
+                <div class="card-title" style="color:#049fd9;">📅 每月</div>
+                <div class="card-text">
+                    • 审查 Splunk 月度报告，关注异常连接<br>
+                    • 检查即将过期的用户账号和证书<br>
+                    • 抽查 2~3 段堡垒机操作录像
+                </div>
+            </div>
+            <div class="card" style="border-top:3px solid #6abf4b;">
+                <div class="card-title" style="color:#6abf4b;">📅 每季度</div>
+                <div class="card-text">
+                    • 全面审查第三方用户列表，清理无效账号<br>
+                    • 更新命令过滤黑名单<br>
+                    • 检查 FTD / ISE / JumpServer 软件更新
+                </div>
+            </div>
+            <div class="card" style="border-top:3px solid #FF8F00;">
+                <div class="card-title" style="color:#FF8F00;">📅 每半年</div>
+                <div class="card-text">
+                    • 证书续签（180 天有效期到期前）<br>
+                    • 组织一次模拟安全事件演练<br>
+                    • 评估方案有效性，优化策略
+                </div>
+            </div>
+            <div class="card" style="border-top:3px solid #7C3AED;">
+                <div class="card-title" style="color:#7C3AED;">📅 每年</div>
+                <div class="card-text">
+                    • 配合等保 / ISO 27001 年度审计<br>
+                    • 更新方案文档和操作手册<br>
+                    • 评估新增供应商和设备的接入需求
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== SECTION 12: Glossary ======================== -->
+<section id="glossary" class="section">
+    <div class="container">
+        <div class="section-label"><span class="dot"></span>Chapter 12</div>
+        <h2>术语表（Glossary）</h2>
+
+        <p>为方便不同背景的读者理解全文，以下汇总了本文涉及的关键术语及其简明释义：</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:22%;">术语 / 缩写</th>
+                        <th style="width:28%;">全称</th>
+                        <th style="width:50%;">简明释义</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>RA-VPN</strong></td>
+                        <td>Remote Access VPN</td>
+                        <td>远程接入 VPN，允许外部用户通过互联网安全地接入企业内部网络</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SSL VPN</strong></td>
+                        <td>Secure Sockets Layer VPN</td>
+                        <td>基于 TLS/SSL 协议的 VPN，使用 443 端口，穿透性好，主流远程接入方式</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FTD</strong></td>
+                        <td>Firepower Threat Defense</td>
+                        <td>Cisco 下一代防火墙运行的统一软件镜像，集成防火墙、VPN、IPS 等功能</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISE</strong></td>
+                        <td>Identity Services Engine</td>
+                        <td>Cisco 身份服务引擎，提供认证、授权、记账（AAA）和网络准入控制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RADIUS</strong></td>
+                        <td>Remote Authentication Dial-In User Service</td>
+                        <td>网络认证协议，用于集中管理用户认证和授权。ISE 作为 RADIUS 服务器</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MFA</strong></td>
+                        <td>Multi-Factor Authentication</td>
+                        <td>多因素认证，要求用户提供两种以上验证因素（如密码 + 手机推送）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ACL</strong></td>
+                        <td>Access Control List</td>
+                        <td>访问控制列表，定义网络流量的允许/拒绝规则，精确到 IP 和端口</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CA</strong></td>
+                        <td>Certificate Authority</td>
+                        <td>证书颁发机构，负责签发和管理数字证书。ISE 内置 CA 功能</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CRL</strong></td>
+                        <td>Certificate Revocation List</td>
+                        <td>证书吊销列表，记录已被撤销的证书，防止已失效证书被继续使用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SCEP</strong></td>
+                        <td>Simple Certificate Enrollment Protocol</td>
+                        <td>简单证书注册协议，用于自动化证书的申请和颁发</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DMZ</strong></td>
+                        <td>Demilitarized Zone</td>
+                        <td>隔离区 / 非军事区，位于内外网之间的缓冲网段，堡垒机部署于此</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OT</strong></td>
+                        <td>Operational Technology</td>
+                        <td>运营技术，指工业环境中用于监控和控制物理设备的软硬件系统</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CNC</strong></td>
+                        <td>Computer Numerical Control</td>
+                        <td>计算机数控，用计算机控制的自动化机床（如五轴加工中心）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PLC</strong></td>
+                        <td>Programmable Logic Controller</td>
+                        <td>可编程逻辑控制器，工业自动化的核心控制设备</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SCADA</strong></td>
+                        <td>Supervisory Control and Data Acquisition</td>
+                        <td>数据采集与监控系统，用于大规模工业过程的集中监控</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DCS</strong></td>
+                        <td>Distributed Control System</td>
+                        <td>集散控制系统，用于流程工业（如化工、电力）的分布式控制</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MES</strong></td>
+                        <td>Manufacturing Execution System</td>
+                        <td>制造执行系统，连接 ERP 与车间设备，管理生产执行过程</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ERP</strong></td>
+                        <td>Enterprise Resource Planning</td>
+                        <td>企业资源计划系统，管理企业的核心业务流程（财务、供应链、生产等）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IEC 62443</strong></td>
+                        <td>—</td>
+                        <td>工业自动化和控制系统安全国际标准系列，定义了 OT 安全的框架和要求</td>
+                    </tr>
+                    <tr>
+                        <td><strong>等保 2.0</strong></td>
+                        <td>网络安全等级保护 2.0</td>
+                        <td>中国网络安全等级保护制度的最新标准，对不同等级系统提出安全要求</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NIST SP 800-82</strong></td>
+                        <td>—</td>
+                        <td>美国 NIST 发布的《工业控制系统安全指南》，ICS 安全的权威参考</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Splunk</strong></td>
+                        <td>—</td>
+                        <td>行业领先的 SIEM 和日志分析平台，2023 年被 Cisco 收购</td>
+                    </tr>
+                    <tr>
+                        <td><strong>JumpServer</strong></td>
+                        <td>—</td>
+                        <td>国内最流行的开源堡垒机（跳板机），提供操作审计和权限管控</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CVD</strong></td>
+                        <td>Cisco Validated Design</td>
+                        <td>Cisco 验证设计，经过测试和验证的最佳实践架构指南</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="container"><hr class="divider"></div>
+
+<!-- ======================== FOOTER ======================== -->
+<footer style="background:#1A202C; padding:3rem 1.5rem 2rem; color:#A0AEC0;">
+    <div class="container">
+        <div style="text-align:center; margin-bottom:2rem;">
+            <svg width="80" height="46" viewBox="0 0 80 46" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.5 23C16.5 13.06 24.06 5 34 5h12c9.94 0 18 8.06 18 18s-8.06 18-18 18H34c-9.94 0-17.5-8.06-17.5-18z" fill="none" stroke="#049fd9" stroke-width="2.5"/>
+                <circle cx="32" cy="23" r="4" fill="#049fd9"/>
+                <circle cx="48" cy="23" r="4" fill="#6abf4b"/>
+                <line x1="36" y1="23" x2="44" y2="23" stroke="#049fd9" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <div style="text-align:center; max-width:680px; margin:0 auto;">
+            <p style="font-size:1.05rem; color:#E2E8F0; font-weight:600; margin-bottom:0.8rem;">锁好工厂的"数字后门"</p>
+            <p style="font-size:0.88rem; line-height:1.8; color:#718096;">
+                本文基于 Cisco 企业网络与安全产品体系及制造业 OT 安全最佳实践编写。所有技术方案均参考 Cisco Validated Design (CVD)、NIST SP 800-82、IEC 62443 等权威标准。文中提及的产品型号和功能以发布时最新版本为准，实际部署请以官方文档为依据。
+            </p>
+            <div style="margin:1.5rem 0; display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem; font-size:0.82rem; color:#718096;">
+                <span>📄 Cisco Secure Firewall 官方文档</span>
+                <span>📄 Cisco ISE 管理指南</span>
+                <span>📄 Duo Authentication Proxy 参考文档</span>
+                <span>📄 JumpServer 开源文档</span>
+                <span>📄 NIST SP 800-82 Rev.3</span>
+                <span>📄 IEC 62443 系列标准</span>
+                <span>📄 GB/T 22239-2019 等保 2.0</span>
+            </div>
+        </div>
+
+        <hr style="border:none; height:1px; background:#2D3748; margin:1.5rem 0;">
+
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1rem; font-size:0.8rem; color:#4A5568;">
+            <span>© 2026 Cisco Systems, Inc. All rights reserved.</span>
+            <span>发布日期：2026 年 4 月 8 日 · 版本 1.0</span>
+            <span>本文仅供技术参考，不构成具体项目承诺</span>
+        </div>
+    </div>
+</footer>
+
+<!-- Back to top -->
+<a href="#" style="position:fixed; bottom:2rem; right:2rem; width:48px; height:48px; border-radius:50%; background:#049fd9; color:#fff; display:flex; align-items:center; justify-content:center; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 16px rgba(4,159,217,0.3); transition:transform 0.2s; z-index:999;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</a>
+
+</body>
+</html>
