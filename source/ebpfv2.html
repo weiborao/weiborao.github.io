@@ -1155,6 +1155,165 @@ body.en .lang-en { display: block; }
   body { font-size: 11pt; }
   pre { white-space: pre-wrap; word-break: break-all; }
 }
+
+/* ============================================================
+   Interactive Browser-Window: Static vs Programmable Kernel
+   ============================================================ */
+.analogy-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2.5rem 0 3rem;
+}
+
+/* ---------- browser chrome ---------- */
+.browser-window {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .12);
+  border: 1px solid var(--border);
+  background: var(--card-bg, #fff);
+  transition: box-shadow .4s, border-color .4s;
+}
+.browser-window.active-power {
+  border-color: var(--cisco-blue);
+  box-shadow: 0 4px 24px rgba(4, 159, 217, .25),
+              0 0 0 2px rgba(4, 159, 217, .10);
+}
+
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #f1f3f5;
+  border-bottom: 1px solid var(--border);
+  transition: background .4s;
+}
+.active-power .browser-bar {
+  background: #1a1a2e;
+}
+
+.dot-ui {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-ui.red   { background: #ff5f57; }
+.dot-ui.yel   { background: #ffbd2e; }
+.dot-ui.grn   { background: #28c840; }
+
+.browser-bar span.bar-label {
+  margin-left: auto;
+  font-size: .75rem;
+  font-family: var(--font-mono);
+  color: #868e96;
+  transition: color .4s;
+}
+.active-power .browser-bar span.bar-label {
+  color: #adb5bd;
+}
+
+/* ---------- preview / body area ---------- */
+.preview-content {
+  padding: 1.5rem;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: background .4s, color .4s;
+}
+.active-power .preview-content {
+  background: #0d1117;
+  color: #c9d1d9;
+}
+
+.preview-content .static-text {
+  font-size: .92rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.preview-content .static-text code {
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: .84rem;
+}
+
+/* ---------- ignite button ---------- */
+.btn-ignite {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: 1rem;
+  padding: .65rem 1.6rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--cisco-blue), #0277bd);
+  color: #fff;
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 14px rgba(4, 159, 217, .35);
+}
+.btn-ignite:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(4, 159, 217, .5);
+}
+.btn-ignite:active {
+  transform: scale(.97);
+}
+
+/* ---------- typewriter area ---------- */
+.typewriter-box {
+  margin-top: 1.2rem;
+  min-height: 80px;
+}
+.typewriter-text {
+  font-family: var(--font-mono);
+  font-size: .88rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--cisco-green);
+}
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--cisco-green);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: tw-blink .7s steps(2) infinite;
+}
+@keyframes tw-blink {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 768px) {
+  .analogy-showcase {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .preview-content {
+    min-height: 180px;
+    padding: 1rem;
+  }
+}
+
+/* ---------- print ---------- */
+@media print {
+  .analogy-showcase {
+    grid-template-columns: 1fr 1fr;
+    gap: .5cm;
+  }
+  .btn-ignite { display: none; }
+  .typewriter-cursor { display: none; }
+}
+
 </style>
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -2571,7 +2730,71 @@ body.en .lang-en { display: block; }
           </p>
         </div>
       </div>
+<!-- ── Interactive Demo: Static vs Programmable Kernel ────────── -->
+<h3>
+  <span class="lang-zh">🖥️ 亲自感受：静态内核 vs 可编程内核</span>
+  <span class="lang-en">🖥️ See It Yourself: Static Kernel vs Programmable Kernel</span>
+</h3>
+<p>
+  <span class="lang-zh">左边是传统的"出厂固化"内核——你只能使用编译时决定的功能。点击右边的 <strong>Ignite</strong> 按钮，看看 eBPF 如何让内核在运行时"活过来"。</span>
+  <span class="lang-en">On the left is a traditional "factory-sealed" kernel — you can only use features decided at compile time. Click the <strong>Ignite</strong> button on the right to see how eBPF brings the kernel to life at runtime.</span>
+</p>
 
+<div class="analogy-showcase">
+
+  <!-- ── Left: Static Kernel ── -->
+  <div class="browser-window" id="bw-static">
+    <div class="browser-bar">
+      <span class="dot-ui red"></span>
+      <span class="dot-ui yel"></span>
+      <span class="dot-ui grn"></span>
+      <span class="bar-label">static-kernel.sys</span>
+    </div>
+    <div class="preview-content">
+      <div class="static-text">
+        <span class="lang-zh">
+          ⚙️ 内核版本 <code>5.15.0-generic</code><br><br>
+          🔒 网络栈：<code>iptables</code> — 固定规则，逐条匹配<br>
+          🔒 可观测性：<code>syslog</code> + <code>ftrace</code>（手动插桩）<br>
+          🔒 安全策略：<code>AppArmor / SELinux</code>（静态配置文件）<br><br>
+          💡 如需新功能 → 编写内核模块 → 编译 → 重启 → 祈祷不 panic 🙏
+        </span>
+        <span class="lang-en">
+          ⚙️ Kernel version <code>5.15.0-generic</code><br><br>
+          🔒 Networking: <code>iptables</code> — fixed rules, linear match<br>
+          🔒 Observability: <code>syslog</code> + <code>ftrace</code> (manual instrumentation)<br>
+          🔒 Security: <code>AppArmor / SELinux</code> (static config files)<br><br>
+          💡 Need a new feature? → Write kernel module → Compile → Reboot → Pray for no panic 🙏
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right: Programmable Kernel ── -->
+  <div class="browser-window" id="bw-programmable">
+    <div class="browser-bar">
+      <span class="dot-ui red"></span>
+      <span class="dot-ui yel"></span>
+      <span class="dot-ui grn"></span>
+      <span class="bar-label">ebpf-kernel.sys</span>
+    </div>
+    <div class="preview-content">
+      <p style="margin:0 0 .5rem; font-weight:600;">
+        <span class="lang-zh">🧬 eBPF 可编程内核</span>
+        <span class="lang-en">🧬 eBPF Programmable Kernel</span>
+      </p>
+      <button class="btn-ignite" id="btn-ignite" onclick="igniteTypewriter()">
+        🚀 <span class="lang-zh">Ignite — 点亮内核</span><span class="lang-en">Ignite — Light Up the Kernel</span>
+      </button>
+      <div class="typewriter-box" id="typewriter-box">
+        <span class="typewriter-text" id="typewriter-text"></span>
+        <span class="typewriter-cursor" id="typewriter-cursor" style="display:none;"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- ── /Interactive Demo ──────────────────────────────────────── -->
       <h4>类比的边界</h4>
       <p>
         任何类比都有其适用范围。eBPF 与 JavaScript 有几个重要差异值得注意：
@@ -7385,6 +7608,106 @@ if (sections.length > 0 && 'IntersectionObserver' in window) {
 
   sections.forEach(s => observer.observe(s.el));
 }
+
+/* ============================================================
+   Interactive Typewriter: Programmable Kernel Ignite
+   ============================================================ */
+(function () {
+  let twTimer = null;      // track animation so we can reset
+  let twRunning = false;
+
+  // Lines to type — bilingual; we pick based on body.classList
+  const linesCN = [
+    '✅ XDP 程序已加载 → 10M pps DDoS 流量在网卡层丢弃',
+    '✅ kprobe::tcp_connect 已挂载 → 实时追踪每条 TCP 连接',
+    '✅ LSM/eBPF 策略已激活 → 阻止容器内 mount namespace 逃逸',
+    '✅ Ring Buffer 已就绪 → 零拷贝事件流推送至用户态',
+    '✅ struct_ops/sched_ext 已注册 → 自定义调度器热加载完成',
+    '🎉 内核已进化 — 无需重启，无需重新编译。',
+  ];
+  const linesEN = [
+    '✅ XDP program loaded → 10 M pps DDoS traffic dropped at NIC',
+    '✅ kprobe::tcp_connect attached → tracing every TCP connection live',
+    '✅ LSM/eBPF policy activated → blocking container mount-ns escape',
+    '✅ Ring Buffer ready → zero-copy event stream to userspace',
+    '✅ struct_ops/sched_ext registered → custom scheduler hot-loaded',
+    '🎉 Kernel evolved — no reboot, no recompile.',
+  ];
+
+  window.igniteTypewriter = function () {
+    // Prevent double-fire while running
+    if (twRunning) return;
+    twRunning = true;
+
+    const isEN = document.body.classList.contains('en');
+    const lines = isEN ? linesEN : linesCN;
+
+    const textEl   = document.getElementById('typewriter-text');
+    const cursorEl = document.getElementById('typewriter-cursor');
+    const btnEl    = document.getElementById('btn-ignite');
+    const bwEl     = document.getElementById('bw-programmable');
+
+    // Visual state
+    bwEl.classList.add('active-power');
+    btnEl.disabled = true;
+    btnEl.style.opacity = '0.5';
+    textEl.textContent = '';
+    cursorEl.style.display = 'inline-block';
+
+    let lineIdx = 0;
+    let charIdx = 0;
+    let buffer  = '';
+
+    function tick() {
+      if (lineIdx >= lines.length) {
+        // All lines done → pause, then loop
+        cursorEl.style.display = 'none';
+        twTimer = setTimeout(() => {
+          twRunning = false;
+          bwEl.classList.remove('active-power');
+          btnEl.disabled = false;
+          btnEl.style.opacity = '1';
+          textEl.textContent = '';
+        }, 3500);
+        return;
+      }
+
+      const currentLine = lines[lineIdx];
+
+      if (charIdx <= currentLine.length) {
+        textEl.textContent = buffer + currentLine.substring(0, charIdx);
+        charIdx++;
+        twTimer = setTimeout(tick, 32);          // typing speed
+      } else {
+        // Line finished
+        buffer += currentLine + '\n';
+        lineIdx++;
+        charIdx = 0;
+        twTimer = setTimeout(tick, 400);         // pause between lines
+      }
+    }
+
+    tick();
+  };
+
+  // Clean up on language switch so state resets
+  const langBtn = document.getElementById('lang-toggle') ||
+                  document.querySelector('[onclick*="lang"]');
+  if (langBtn) {
+    langBtn.addEventListener('click', function () {
+      clearTimeout(twTimer);
+      twRunning = false;
+      const bwEl = document.getElementById('bw-programmable');
+      if (bwEl) bwEl.classList.remove('active-power');
+      const textEl = document.getElementById('typewriter-text');
+      if (textEl) textEl.textContent = '';
+      const cursorEl = document.getElementById('typewriter-cursor');
+      if (cursorEl) cursorEl.style.display = 'none';
+      const btnEl = document.getElementById('btn-ignite');
+      if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; }
+    });
+  }
+})();
 
 // ============================================================
 // INTERACTIVE TERMINAL
