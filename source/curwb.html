@@ -5,8 +5,37 @@ layout: false
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cisco CURWB 超可靠无线回传技术</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>
+        Cisco CURWB 超可靠无线回传技术：面向工业移动场景的下一代无线基础设施
+    </title>
+
+    <meta name="description" content="[ZH] 深入解析 Cisco CURWB (超可靠无线回传) 技术架构。探讨 Fluidity 零中断漫游、MPO 多路径优化、L2 Overlay 以及 Catalyst 9800 WLC 在工业 AGV、港口与矿山场景中的最佳实践。[EN] Deep dive into Cisco CURWB (Ultra-Reliable Wireless Backhaul) architecture, featuring Fluidity zero-packet-loss roaming, MPO, and Catalyst 9800 WLC integration for industrial AGV and mining scenarios.">
+
+    <meta name="keywords" content="Cisco CURWB, 超可靠无线回传, URWB, 工业无线, Fluidmesh, Fluidity 漫游, Make-Before-Break, MPO 多路径优化, Catalyst 9800, IW9165, IW9167, AGV 无线通信, 工业互联网">
+
+    <meta name="revised" content="Thursday, April 16th, 2026, 13:35 pm" />
+    <meta property="og:title" content="Cisco CURWB 超可靠无线回传技术 | 工业无线深度解析">
+    <meta property="og:description" content="从第一性原理拆解 Cisco URWB 技术栈：详解 Fluidity 无缝漫游、MPO 路径冗余及 L2 MPLS Overlay 架构，赋能工业 AGV 与高可靠移动场景。">
+    <meta property="og:type" content="article">
+    <meta property="og:updated_time" content="2026-04-16T13:35:00+08:00" />
+
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Cisco CURWB 超可靠无线回传技术：面向工业移动场景的下一代无线基础设施",
+    "description": "一份详尽的 Cisco URWB 知识图谱。涵盖 CURWB 与传统 WLAN 对比、网络拓扑、Fluidity 漫游机制、MPO 多路径优化及低时延设计。A comprehensive technical guide to Cisco Ultra-Reliable Wireless Backhaul (CURWB).",
+    "datePublished": "2026-04-16T09:00:00+08:00",
+    "dateModified": "2026-04-16T13:35:00+08:00",
+    "proficiencyLevel": "Expert",
+    "author": { 
+        "@type": "Person", 
+        "name": "Weibo Rao" 
+    },
+    "keywords": "Cisco CURWB, URWB, Fluidmesh, 工业无线网络, Fluidity, AGV"
+    }
+    </script>
 <style>
 /* ========== RESET & BASE ========== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -151,6 +180,156 @@ pre, code {
   .hero{padding:2.2rem 1rem 2rem;border-radius:0 0 1rem 1rem}
   h1{font-size:1.7rem}
 }
+
+/* ============================================
+   表格 & SVG 响应式滚动优化
+   ============================================ */
+
+/* --- 1. 通用滚动容器包装器 --- */
+.table-scroll-wrapper,
+.svg-scroll-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 2rem auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
+    scrollbar-width: thin; /* Firefox 细滚动条 */
+    scrollbar-color: #c5ccd6 transparent; /* Firefox 滚动条配色 */
+}
+
+/* Webkit 系浏览器滚动条美化 */
+.table-scroll-wrapper::-webkit-scrollbar,
+.svg-scroll-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+.table-scroll-wrapper::-webkit-scrollbar-track,
+.svg-scroll-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+.table-scroll-wrapper::-webkit-scrollbar-thumb,
+.svg-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #c5ccd6;
+    border-radius: 3px;
+}
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover,
+.svg-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #9aa5b4;
+}
+
+/* --- 2. 滚动阴影提示（右侧渐变暗示更多内容）--- */
+.table-scroll-wrapper::after,
+.svg-scroll-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+/* 当内容可滚动时显示阴影提示 */
+.table-scroll-wrapper.has-overflow::after,
+.svg-scroll-wrapper.has-overflow::after {
+    opacity: 1;
+}
+/* 滚动到底时隐藏右侧阴影 */
+.table-scroll-wrapper.scrolled-end::after,
+.svg-scroll-wrapper.scrolled-end::after {
+    opacity: 0;
+}
+
+/* --- 3. 表格本体样式优化 --- */
+.table-scroll-wrapper table {
+    min-width: 680px;   /* 表格最小宽度：防止被过度压缩 */
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+/* 窄屏下的表格单元格保护 */
+.table-scroll-wrapper th,
+.table-scroll-wrapper td {
+    white-space: nowrap;   /* 防止文字在窄屏下疯狂换行 */
+    padding: 0.65rem 1rem;
+}
+
+/* 允许特定列换行（内容较长的描述列）*/
+.table-scroll-wrapper td:last-child,
+.table-scroll-wrapper th:last-child {
+    white-space: normal;
+    min-width: 200px;
+}
+
+/* 对于 5 列以上的宽表格，提升最小宽度 */
+.table-scroll-wrapper table tr td:nth-child(5),
+.table-scroll-wrapper table tr th:nth-child(5) {
+    white-space: normal;
+}
+
+/* --- 4. SVG 容器优化 --- */
+.svg-scroll-wrapper svg {
+    min-width: 700px;   /* SVG 最小宽度：防止文字缩小到无法辨认 */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* --- 5. 宽屏居中 & 最大宽度约束 --- */
+@media (min-width: 1024px) {
+    .table-scroll-wrapper,
+    .svg-scroll-wrapper {
+        overflow-x: visible; /* 宽屏不需要滚动 */
+    }
+    .table-scroll-wrapper::after,
+    .svg-scroll-wrapper::after {
+        display: none; /* 宽屏隐藏滚动提示阴影 */
+    }
+    .table-scroll-wrapper table {
+        min-width: unset;
+    }
+    .table-scroll-wrapper th,
+    .table-scroll-wrapper td {
+        white-space: normal; /* 宽屏恢复正常换行 */
+    }
+    .svg-scroll-wrapper svg {
+        min-width: unset;
+        width: 100%;
+    }
+}
+
+/* --- 6. iPad 竖屏特殊处理 (768px - 1023px) --- */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .table-scroll-wrapper table {
+        min-width: 600px;
+    }
+    .svg-scroll-wrapper svg {
+        min-width: 600px;
+    }
+}
+
+/* --- 7. 手机竖屏 (<768px) --- */
+@media (max-width: 767px) {
+    .table-scroll-wrapper,
+    .svg-scroll-wrapper {
+        margin: 1.5rem -1rem;       /* 向两侧微扩，利用更多屏幕空间 */
+        padding: 0 1rem;
+        width: calc(100% + 2rem);
+    }
+    .table-scroll-wrapper table {
+        min-width: 580px;
+        font-size: 0.85rem;
+    }
+    .svg-scroll-wrapper svg {
+        min-width: 580px;
+    }
+}
+
 </style>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 
@@ -1726,7 +1905,7 @@ pre, code {
 <h4>9.1.2 传统漫游流程的时序图</h4>
 <p>为了更直观地展示 Break-Before-Make 的问题，下面用一个简化的时序示意说明传统漫游中数据中断的窗口：</p>
 
-<div class="svg-container">
+<div class="svg-diagram">
 <svg viewBox="0 0 820 420" xmlns="http://www.w3.org/2000/svg" style="max-width:820px;">
   <!-- Background -->
   <rect width="820" height="420" fill="#fafbfc" rx="8"/>
@@ -1846,7 +2025,7 @@ pre, code {
 
 <h4>9.2.3 MBB 漫游时序图</h4>
 
-<div class="svg-container">
+<div class="svg-diagram">
 <svg viewBox="0 0 860 520" xmlns="http://www.w3.org/2000/svg" style="max-width:860px;">
   <rect width="860" height="520" fill="#fafbfc" rx="8"/>
   
@@ -2175,7 +2354,7 @@ pre, code {
 
 <p>以下示意图展示了 IW9165E 在 Mobility Client 模式下双射频的工作逻辑：</p>
 
-<div class="svg-container">
+<div class="svg-diagram">
 <svg viewBox="0 0 750 340" xmlns="http://www.w3.org/2000/svg" style="max-width:750px;">
   <rect width="750" height="340" fill="#fafbfc" rx="8"/>
   <text x="375" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">IW9165E 双射频 MBB 工作示意</text>
@@ -5773,7 +5952,7 @@ show fluidity roaming-history
   
   <p>当 E80 的 AGV（Mesh Client）高速移动时，底层的 Fluidity 协议允许它同时与多个工厂基站（Mobility Base）维持激活状态的 MPLS 隧道。这就像一位<strong>空中飞人</strong>，在彻底松开旧秋千之前，双手已经紧紧抓住了新秋千。</p>
 
-  <figure style="text-align: center; margin: 2rem 0;">
+  <div class="svg-diagram">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" style="max-width: 100%; height: auto; background: #FAFAFC; border: 1px solid #EAEAEA; border-radius: 8px;">
       <defs>
         <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -5818,7 +5997,7 @@ show fluidity roaming-history
       <text x="400" y="337" font-family="Arial, sans-serif" font-size="12" fill="#B38600" text-anchor="middle" font-weight="bold">底层 MPLS Overlay：数据包去重合并</text>
     </svg>
     <figcaption style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图：CURWB Fluidity 移动性架构模型（先搭后拆）</figcaption>
-  </figure>
+  </div>
   
   
 
@@ -6067,5 +6246,64 @@ show fluidity roaming-history
 </footer>
 
 </div><!-- /.container 页面主容器结束 -->
+
+<script>
+// ============================================
+// 自动为所有表格和 SVG 添加滚动容器包装
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- 包装所有表格 ---
+    document.querySelectorAll('.content table').forEach(function(table) {
+        // 避免重复包装
+        if (table.parentElement.classList.contains('table-scroll-wrapper')) return;
+        
+        var wrapper = document.createElement('div');
+        wrapper.className = 'table-scroll-wrapper';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+
+    // --- 包装所有 SVG ---
+    document.querySelectorAll('.content svg').forEach(function(svg) {
+        if (svg.parentElement.classList.contains('svg-scroll-wrapper')) return;
+        
+        var wrapper = document.createElement('div');
+        wrapper.className = 'svg-scroll-wrapper';
+        svg.parentNode.insertBefore(wrapper, svg);
+        wrapper.appendChild(svg);
+    });
+
+    // --- 检测溢出 & 滚动状态 ---
+    function checkOverflow() {
+        document.querySelectorAll('.table-scroll-wrapper, .svg-scroll-wrapper').forEach(function(wrapper) {
+            var hasOverflow = wrapper.scrollWidth > wrapper.clientWidth + 2;
+            wrapper.classList.toggle('has-overflow', hasOverflow);
+            
+            // 检测是否滚动到末尾
+            var atEnd = wrapper.scrollLeft + wrapper.clientWidth >= wrapper.scrollWidth - 5;
+            wrapper.classList.toggle('scrolled-end', atEnd);
+        });
+    }
+
+    // 初始检测
+    checkOverflow();
+    
+    // 窗口大小变化时重新检测
+    window.addEventListener('resize', checkOverflow);
+
+    // 滚动时更新阴影状态
+    document.querySelectorAll('.table-scroll-wrapper, .svg-scroll-wrapper').forEach(function(wrapper) {
+        wrapper.addEventListener('scroll', function() {
+            var hasOverflow = this.scrollWidth > this.clientWidth + 2;
+            this.classList.toggle('has-overflow', hasOverflow);
+            var atEnd = this.scrollLeft + this.clientWidth >= this.scrollWidth - 5;
+            this.classList.toggle('scrolled-end', atEnd);
+        });
+    });
+
+});
+</script>
+
 </body>
 </html>
