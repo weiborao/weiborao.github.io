@@ -199,6 +199,7 @@ pre, code {
     <li><a href="#ch17">快速入门：Layer 2 部署指南</a></li>
     <li><a href="#e80">案例深度解析：E80 Group 如何借助 Cisco URWB 突破工业 AGV 联网瓶颈</a></li>
     <li><a href="#glossary">术语表</a></li>
+    <li><a href="#known-limitations">附录：已知约束与设计注意事项</a></li>
   </ol>
 </nav>
 
@@ -249,7 +250,7 @@ pre, code {
   <ul>
     <li><strong>2020</strong>：收购完成，Fluidmesh 产品继续以独立品牌运营。</li>
     <li><strong>2022</strong>：推出 <strong>IW9167E/I</strong>——首批原生支持 URWB 的 Cisco 工业 AP，采用 Wi-Fi 6（802.11ax）射频。</li>
-    <li><strong>2023</strong>：推出 <strong>IW9165E</strong>（外置天线、三射频）与 <strong>IW9165D</strong>（内置定向天线、双射频），面向小型化与成本敏感的工业场景。IOS-XE 17.14 开始支持 Catalyst 9800 WLC 纳管 URWB AP。</li>
+    <li><strong>2023</strong>：推出 <strong>IW9165E</strong>（外置天线、双射频）与 <strong>IW9165D</strong>（内置定向天线、双射频），面向小型化与成本敏感的工业场景。IOS-XE 17.14 开始支持 Catalyst 9800 WLC 纳管 URWB AP。</li>
     <li><strong>2024–2025</strong>：IOS-XE 17.18.1 引入对 <strong>Wi-Fi 6E/7 AP</strong>（CW9166、CW9176、CW9178）的 URWB 支持，实现 URWB 与传统 WLAN 在同一 AP 上共存。新增 <strong>6 GHz URWB</strong> 频段支持、增强型 MPO、以及 Catalyst Center（原 DNAC）的 URWB 分析仪表板。</li>
   </ul>
 
@@ -382,6 +383,26 @@ pre, code {
     <li><strong>传统 WLAN</strong>：使用标准 802.11 MAC——CSMA/CA 信道竞争、RTS/CTS、ACK、BSS 管理帧（Beacon、Probe、Auth、Assoc）。所有客户端公平竞争信道，高负载下延迟不可预测。</li>
     <li><strong>CURWB</strong>：在 MAC 层接入上，CURWB 采用基于无线的 Prodigy 2.0 专有 MPLS Overlay 协议，深度重构并极致优化了标准 802.11 MAC 的 EDCA 竞争机制。在 Mesh/Fluidity（移动性）模式下，系统使用优化的 CSMA/CA 机制，通过大幅压缩 AIFS 和竞争窗口（CWmin/CWmax）实现类确定性的智能退避与超低时延。Fluidmesh 的早期设备（如 FM1200、FM3200、FM4200）为了解决固定点对多点（Fixed PtMP）场景下的隐藏节点问题，开发并使用了名为 Fluidmax 的专有 TDMA 时分多址协议。在被 Cisco 深度整合并演进至 Catalyst IOS-XE 架构（如 IW9165、IW9167、CW9178）后，特别是在移动（Fluidity）场景下，底层并不使用 TDMA（时分多址）固定时隙调度，而是采用极端优化的 CSMA/CA（基于 WMM 的 EDCA 机制）。</li>
   </ul>
+    <div class="callout critical">
+    <p>
+      当前 Cisco Catalyst IW 平台（IW9165、IW9167、CW9178）上运行的 CURWB (IOS-XE URWB) 
+      采用标准 <strong>IEEE 802.11 CSMA/CA</strong> 信道访问机制，并通过深度优化 
+      <strong>EDCA（增强型分布式信道访问）</strong>参数实现近确定性的无线信道访问行为。
+    </p>
+    <p>
+      具体优化方式包括：
+    </p>
+    <ul>
+      <li>为回传流量设置极小的 CWmin（最小竞争窗口），降低信道竞争延迟</li>
+      <li>配置较大的 TXOP（发送机会）持续时间，减少竞争开销</li>
+      <li>通过优先级映射将基础设施流量与客户端流量分离</li>
+    </ul>
+    <p>
+      <strong>历史背景：</strong>早期 Fluidmesh 设备（FM1200/FM3200 等）在固定点对多点 
+      (Prodigy) 模式下曾使用 TDMA 机制。该机制<strong>未被移植</strong>到当前 Catalyst IW 
+      平台的 IOS-XE URWB 软件中。在阅读早期技术文档时请注意区分。
+    </p>
+  </div>
   <h4>网络层 / Overlay</h4>
   <ul>
     <li><strong>传统 WLAN</strong>：AP 充当透明的 L2 网桥（或通过 CAPWAP 隧道将流量送回 WLC）。路由、VLAN、QoS 由上游有线交换机处理。</li>
@@ -755,7 +776,7 @@ pre, code {
 
   <p><strong>典型硬件选型：</strong></p>
   <ul>
-    <li><strong>室内仓储 / 工厂车间：</strong>IW9165DH（内置定向天线，壁挂安装，覆盖角度约 60°×60°，适合巷道式覆盖）。</li>
+    <li><strong>室内仓储 / 工厂车间：</strong>IW9165DH（内置定向天线，壁挂安装，覆盖角度约 30°×30°，适合巷道式覆盖）。</li>
     <li><strong>室外港区 / 矿区 / 铁路：</strong>IW9167EH（IP67 重型外壳，支持外接扇区天线，可覆盖更广区域），或 IW9165DH（IP67 版）用于中近距覆盖。</li>
     <li><strong>室内企业/仓储混合：</strong>CW9178I（Wi-Fi 7 室内型，自 IOS-XE 17.18.1 起支持 URWB Mobility Base 角色，适合已有 Catalyst 基础设施的场景）。</li>
   </ul>
@@ -903,7 +924,7 @@ pre, code {
     </tbody>
   </table>
 
-  <p><small>* IW9165DH 的内置定向天线波束较窄（约 60°），作为 Mobility Client 安装在移动载体上时，需确保行驶方向与 Base 方向基本一致，否则漫游性能受限。推荐在需要全向覆盖的移动场景中使用 IW9165E + 全向天线。</small></p>
+  <p><small>* IW9165DH 的内置定向天线波束较窄（约 30°），作为 Mobility Client 安装在移动载体上时，需确保行驶方向与 Base 方向基本一致，否则漫游性能受限。推荐在需要全向覆盖的移动场景中使用 IW9165E + 全向天线。</small></p>
 
 </section>
 
@@ -1219,7 +1240,7 @@ pre, code {
   <h4>7.1.7 设计注意事项</h4>
   <ul>
     <li>若对可用性有高要求（如 99.99%），应考虑部署<strong>双 PtP 冗余链路</strong>——两对设备使用不同信道，上游交换机配置 LACP 或 STP 冗余。</li>
-    <li>天线对准精度对长距离链路至关重要。IW9165DH 的内置定向天线波束宽度约 60°，在 &gt; 2 km 链路中可能需要更窄波束的外接天线。</li>
+    <li>天线对准精度对长距离链路至关重要。IW9165DH 的内置定向天线波束宽度约 30°，在 &gt; 2 km 链路中可能需要更窄波束的外接天线。</li>
     <li>在潮湿、多雨或沿海环境中，需额外增加 10–15 dB 的衰落余量以应对雨衰效应（Rain Fade）。</li>
   </ul>
 
@@ -2086,6 +2107,39 @@ pre, code {
 <li><strong>数据面加密（需显式启用）：</strong>用户的数据有效载荷（Data Plane）在默认状态下是不加密传输的。为了达到工业级的安全合规，必须在每一个无线射频接口上手动启用 AES 加密。启用后，底层使用 AES-CCMP 128 位引擎对 MPLS Overlay 隧道进行端到端加密。</li>
 <li><strong>动态密钥轮换（Key Rotation）：</strong>为防范重放攻击和长期破解，Cisco 推荐在射频上进一步配置 Key Controller 算法，以设定周期实现数据面密钥的动态轮换。</li>
 </ol>
+
+  <table class="spec-table">
+    <thead>
+      <tr>
+        <th>平面</th>
+        <th>加密标准</th>
+        <th>默认状态</th>
+        <th>配置要求</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>控制平面（Control Plane）</td>
+        <td>AES 加密</td>
+        <td style="color: green; font-weight: bold;">默认启用 ✓</td>
+        <td>无需额外配置，始终加密</td>
+      </tr>
+      <tr>
+        <td>数据平面（Data Plane）</td>
+        <td><strong>AES-CCMP 128-bit</strong></td>
+        <td style="color: red; font-weight: bold;">默认禁用 ✗</td>
+        <td>需显式启用加密并配置密码短语（Passphrase）</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="callout warning" style="border-left: 4px solid #f39c12; background: #fef9e7; padding: 16px; margin: 16px 0; border-radius: 4px;">
+    <h4 style="color: #f39c12; margin-top: 0;">⚠️ 安全建议</h4>
+    <p>
+      在生产环境中，<strong>强烈建议启用数据平面加密</strong>。未加密的数据平面意味着
+      用户流量以明文在无线链路上传输，存在被截获的风险。
+    </p>
+  </div>
 
 <h3>10.4 QoS（服务质量）机制对比</h3>
 
@@ -3130,6 +3184,18 @@ pre, code {
 </table>
 
 <p>最关键的区别在于<strong>数据复制能力</strong>。LACP 和 ECMP 本质上是"分流"——将不同的数据流分散到不同路径以增加聚合带宽，但任何一条路径的故障都会导致该路径上承载的流量丢失，直到故障被检测并重新分配（通常需要秒级时间）。而 MPO 的复制模式是"全量冗余"——同一数据帧在多条路径上同时传输，任何单一路径的故障都不会导致数据丢失，且切换延迟为亚毫秒级。</p>
+
+<p>MPO 可同时维护多条活跃传输路径，通过数据包级别的智能负载均衡实现带宽聚合与冗余切换。</p>
+<div class="note-box">
+  <strong>📌 路径数量说明：</strong>
+  <ul>
+    <li><strong>单射频接口</strong>：通过 CLI 命令 <code>configure fluidity mpo path max</code>
+        可配置的路径数范围为 <strong>1–4</strong>（默认值为 3）。</li>
+    <li><strong>多射频叠加</strong>：在配备多射频的设备（如 IW9167E 三射频平台）上，
+        每个射频接口独立运行 MPO，系统级总路径数最多可达 <strong>8 条</strong>，
+        横跨不同频段和射频接口。</li>
+  </ul>
+</div>
 
 <h3>13.4　MPO 与 Make-Before-Break 的协同机制</h3>
 
@@ -5606,6 +5672,47 @@ show fluidity roaming-history
         <td><strong>WMM</strong><br>(Wi-Fi Multimedia)</td>
         <td>Wi-Fi 多媒体</td>
         <td>基于 IEEE 802.11e 标准的无线 QoS 机制，定义四个接入类别（AC）：Voice (VO)、Video (VI)、Best Effort (BE)、Background (BK)。CURWB 将 MPLS EXP 8 级优先级映射到 WMM 四级队列中——关键控制帧（EXP 5-7）映射到 VO 队列并以极端 EDCA 参数获得近乎绝对的信道接入优先权，形成 MPLS EXP + WMM 双层 QoS 体系。</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="known-limitations">
+  <h2>附录：已知约束与设计注意事项</h2>
+  
+  <table class="spec-table">
+    <thead>
+      <tr>
+        <th>约束项</th>
+        <th>说明</th>
+        <th>设计建议</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>每跳吞吐量衰减</td>
+        <td>在 Mesh 拓扑中，每增加一跳，可用吞吐量大约减半（共享无线介质的固有特性）</td>
+        <td>对时延敏感的应用，建议最多 3-4 跳</td>
+      </tr>
+      <tr>
+        <td>URWB 模式 MIMO</td>
+        <td>在 URWB 模式下，每个 5 GHz 射频工作在 <strong>2x2 MIMO</strong>（非 Wi-Fi 模式的 4x4）</td>
+        <td>天线规划时按 2x2 计算链路预算</td>
+      </tr>
+      <tr>
+        <td>WLC 管理 URWB</td>
+        <td>通过 Catalyst 9800 WLC 管理 URWB 功能在 17.18.1 中为受控可用状态</td>
+        <td>生产部署前请确认最新软件版本的支持状态</td>
+      </tr>
+      <tr>
+        <td>信道规划</td>
+        <td>Radio 0 和 Radio 1 同为 5 GHz 时，需确保足够的频率间隔以避免自干扰</td>
+        <td>建议两个射频间至少间隔一个完整信道带宽</td>
+      </tr>
+      <tr>
+        <td>国家/地区法规</td>
+        <td>可用信道、最大发射功率、DFS 要求因国家/地区而异</td>
+        <td>部署前查阅 Cisco 国家支持文档确认中国 (-C) 法规域的具体限制</td>
       </tr>
     </tbody>
   </table>
