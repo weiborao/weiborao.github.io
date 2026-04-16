@@ -834,7 +834,7 @@ pre, code {
     <li><strong>天线对准：</strong>Fixed Client 通常使用定向天线对准 Fixed Base，以获得最大链路增益。IW9165DH 的内置定向天线在安装时需精确调整方位角和俯仰角。</li>
   </ul>
 
-  <p><strong>典型硬件：</strong>IW9165DH（内置 60° 定向天线，直接壁挂瞄准 Base 方向）、IW9165E + 外接定向天线（需要更远距离或特殊角度时）。</p>
+  <p><strong>典型硬件：</strong>IW9165DH（内置 30° 定向天线，直接壁挂瞄准 Base 方向）、IW9165E + 外接定向天线（需要更远距离或特殊角度时）。</p>
 
   <!-- Mobility Client / Vehicle -->
   <h4 id="ch5-2-6">5.2.6 &nbsp; Mobility Client（Vehicle）——移动载体上的"随行网关"</h4>
@@ -1664,7 +1664,7 @@ pre, code {
 </table>
 
 <div class="note">
-<strong>📌 硬件实现</strong>：IW9165E 具备 2×2 MIMO 双射频（5 GHz + 5 GHz 可配）；IW9167E 具备 4 射频（含 6 GHz），可同时维持更多候选链路。CW9178I 则利用其三射频架构实现在 5 GHz 与 6 GHz 间的跨频段 Make-Before-Break。
+<strong>📌 硬件实现</strong>：IW9165E 具备 2×2 MIMO 双射频（5 GHz + 5 GHz 可配）；IW9167E 具备 3 射频（含 6 GHz），可同时维持更多候选链路。CW9178I 则利用其三射频架构实现在 5 GHz 与 6 GHz 间的跨频段 Make-Before-Break。
 </div>
 
 <h4>9.2.2   漫游决策引擎（Handoff Decision Engine）</h4>
@@ -2104,7 +2104,8 @@ pre, code {
 <ol>
 <li><strong>密钥预配置：</strong>管理员在每台 CURWB 节点上配置相同的 Network Key（通常为一个高强度的字符串），这类似于 WPA-PSK 的概念，但用途不同。</li>
 <li><strong>控制面加密（默认强制）</strong>整个 URWB 域配置的 Network Key (或 Shared Passphrase) 默认仅用于加密控制平面的信令（如节点发现、Fluidity 邻居交换）并作为加入网络的凭据。</li>
-<li><strong>数据面加密（需显式启用）：</strong>用户的数据有效载荷（Data Plane）在默认状态下是不加密传输的。为了达到工业级的安全合规，必须在每一个无线射频接口上手动启用 AES 加密。启用后，底层使用 AES-CCMP 128 位引擎对 MPLS Overlay 隧道进行端到端加密。</li>
+<li><strong>数据面加密（需显式启用）：</strong>用户的数据有效载荷（Data Plane）在默认状态下是不加密传输的。为了达到工业级的安全合规，必须在每一个无线射频接口上手动启用 AES 加密。启用后，底层使用 AES-CCMP 128 位引擎对每条 URWB 无线链路上的
+MPLS Overlay 数据帧进行加密。</li>
 <li><strong>动态密钥轮换（Key Rotation）：</strong>为防范重放攻击和长期破解，Cisco 推荐在射频上进一步配置 Key Controller 算法，以设定周期实现数据面密钥的动态轮换。</li>
 </ol>
 
@@ -2223,7 +2224,14 @@ pre, code {
 <p>使用高增益定向天线（如 IW9165DH 的集成定向天线，或外接抛物面天线）时，发射端和接收端的天线必须精确对准。即使偏差几度，也可能导致信号损失 3–6 dB，对长距离链路是致命的。CURWB 提供实时 RSSI 指示（通过 Web UI 或 LED），协助现场对准。</p>
 </li>
 </ol>
-
+<div class="callout warning">
+  <h4>🇨🇳 中国法规域 (-C) 注意事项</h4>
+  <p>截至本文档编写时（2026 年 4 月），<strong>6 GHz 频段（5.925–7.125 GHz）
+  在中国大陆尚未开放用于 Wi-Fi / URWB 使用</strong>。
+  文中涉及 6 GHz 的性能数据和功能描述仅适用于已开放 6 GHz 的法规域
+  （如 FCC/US、ETSI/EU）。中国部署应使用 5 GHz 频段规划。
+  请关注工信部最新频谱政策公告。</p>
+</div>
 <h3>10.6 IEEE 802.11 合规性问题：CURWB 是"标准 Wi-Fi"吗？</h3>
 
 <p>这是一个经常被问到的问题，也是理解 CURWB 本质的关键。答案是：<strong>取决于你在哪一层讨论</strong>。</p>
@@ -5417,7 +5425,7 @@ show fluidity roaming-history
         </tr>
         <tr>
           <td><strong>漫游切换机制 (移动性)</strong></td>
-          <td><strong>Make-Before-Break</strong> (先搭后拆)。0 毫秒数据平面中断，PLC 毫无察觉。</td>
+          <td><strong>Make-Before-Break</strong> (先搭后拆)。<strong>≈0 ms</strong> 数据平面中断，PLC 毫无察觉。</td>
           <td>Hard Handover (硬切换)。尽管 5G 优化了时延，但底层仍存在瞬间中断的可能。</td>
           <td>对于高速运动的 AGV 而言，0ms 与 50ms 的区别就是“顺滑运行”与“紧急刹车”的区别。</td>
         </tr>
