@@ -380,7 +380,7 @@ pre, code {
   <p>这里开始出现本质分歧：</p>
   <ul>
     <li><strong>传统 WLAN</strong>：使用标准 802.11 MAC——CSMA/CA 信道竞争、RTS/CTS、ACK、BSS 管理帧（Beacon、Probe、Auth、Assoc）。所有客户端公平竞争信道，高负载下延迟不可预测。</li>
-    <li><strong>CURWB</strong>：在 MAC 层接入上，CURWB 采用基于无线的 Prodigy 2.0 专有 MPLS Overlay 协议，深度重构并极致优化了标准 802.11 MAC 的 EDCA 竞争机制。在 Mesh/Fluidity（移动性）模式下，系统使用优化的 CSMA/CA 机制，通过大幅压缩 AIFS 和竞争窗口（CWmin/CWmax）实现类确定性的智能退避与超低时延；在 Fluidmax（P2MP）模式下，系统可动态支持 TDMA（时分多址）或 CSMA 协议，在 TDMA 模式下由 Primary 基站集中分配时隙并控制频率，从而彻底消除隐藏终端冲突。</li>
+    <li><strong>CURWB</strong>：在 MAC 层接入上，CURWB 采用基于无线的 Prodigy 2.0 专有 MPLS Overlay 协议，深度重构并极致优化了标准 802.11 MAC 的 EDCA 竞争机制。在 Mesh/Fluidity（移动性）模式下，系统使用优化的 CSMA/CA 机制，通过大幅压缩 AIFS 和竞争窗口（CWmin/CWmax）实现类确定性的智能退避与超低时延。Fluidmesh 的早期设备（如 FM1200、FM3200、FM4200）为了解决固定点对多点（Fixed PtMP）场景下的隐藏节点问题，开发并使用了名为 Fluidmax 的专有 TDMA 时分多址协议。在被 Cisco 深度整合并演进至 Catalyst IOS-XE 架构（如 IW9165、IW9167、CW9178）后，特别是在移动（Fluidity）场景下，底层并不使用 TDMA（时分多址）固定时隙调度，而是采用极端优化的 CSMA/CA（基于 WMM 的 EDCA 机制）。</li>
   </ul>
   <h4>网络层 / Overlay</h4>
   <ul>
@@ -3563,16 +3563,17 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 
 <p>在高密度场景（如多台 AGV 同时通信）下，这一过程可能重复多次，导致单帧的信道接入延迟从理论最小值（一个 DIFS + 最小退避 = ~50 μs）膨胀到毫秒甚至十毫秒级别。更糟的是，CSMA/CA 的退避机制是概率性的——延迟不确定，无法给出上界保证。</p>
 
-<p>CURWB 的解决方案是在标准 Wi-Fi PHY 之上叠加<strong>集中式调度优化</strong>。虽然 CURWB 仍然使用 802.11 的 PHY 和基本 MAC 帧格式（以保持合规性），但 Prodigy 2.0 协议在 Overlay 层实现了类似于 TDMA 的调度机制：</p>
-
+<p>CURWB 的解决方案是在标准 Wi-Fi PHY 之上叠加<strong>集中式调度优化</strong>。Prodigy 2.0 协议在 Overlay 层通过<strong>极端调优的 EDCA（Enhanced Distributed Channel Access）参数</strong>，在标准 Wi-Fi 硬件上实现了接近确定性的低时延传输。其核心并非 TDMA 式的固定时隙分配，而是将 CSMA/CA 竞争窗口压缩至极限：</p>
 <ul>
-<li><strong>时隙预分配</strong>：Coordinator 根据各节点的流量需求预先分配发送时隙，减少节点间的竞争冲突。</li>
-<li><strong>优先级抢占</strong>：高优先级流量（如 PLC 控制帧，MPLS EXP 5-7）可以抢占低优先级流量的时隙，确保关键数据的最大延迟有上界。</li>
-<li><strong>短帧优先</strong>：控制流的小帧（通常 &lt;200 字节）被优先调度，不需要等待正在传输的大帧（如视频帧）完成。</li>
-<li><strong>动态信道宽度</strong>：根据干扰环境动态调整信道宽度（20/40/80/160 MHz），在干扰严重时使用窄信道（更强的抗干扰能力），在干净环境中使用宽信道（更低的传输时间）。</li>
+  <li><strong>极端 EDCA 参数</strong>：Voice（VO）队列 AIFS = 1、CW<sub>min</sub> = 2、CW<sub>max</sub> = 3；实际退避时间被压缩到接近零，几乎等同于确定性接入。</li>
+  <li><strong>单客户端 BSS 设计</strong>：Fluidity 模式下每条无线链路仅一个 Client 关联，从根源上消除了多用户竞争，使压缩后的 EDCA 参数不会引发碰撞。</li>
+  <li><strong>RTS/CTS 保护（PtMP 场景）</strong>：在 Fluidmax 一对多拓扑中，Mesh End 通过 RTS/CTS 握手解决隐藏节点问题，替代了早期 Fluidmesh 平台上的 TDMA 轮询。</li>
+  <li><strong>A-MPDU 长度控制</strong>：帧聚合被严格限制（如 <code>ampdu max length 255</code>），防止大聚合帧占据信道过久而引入时延抖动。</li>
 </ul>
-
-<p>这些优化的综合效果使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，<strong>在工程意义上等效于 TDMA 固定调度的确定性表现</strong>——但其底层机制仍然是 CSMA/CA 框架内的极端优化，而非真正的 TDMA 时隙分配。</p>
+<div style="background:#e8f4f8;border-left:4px solid #0d274d;padding:12px;margin:1em 0;border-radius:4px;">
+  <strong>📌 术语澄清：</strong>早期 Fluidmesh 平台（FM1200/FM3200/FM4200）在 Fixed PtMP 模式下确实使用过真正的 TDMA 调度。但在当前 Cisco Catalyst IW9165/IW9167/CW9178 IOS-XE 平台上，Mobility/Fluidity 模式完全基于 <strong>EDCA + 单客户端链路 + RTS/CTS</strong> 的组合实现近似确定性接入，不再使用 TDMA。
+</div>
+<p>这些优化的综合效果使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，<strong>在工程意义上等效于固定调度的确定性表现</strong>——但其底层机制仍然是 CSMA/CA 框架内的极端优化，而非真正的 TDMA 时隙分配。</p>
 
 <p>这些优化使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，且具有更确定性的上界。</p>
 
@@ -3834,15 +3835,15 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
           </svg>
         </div>
 
-        <p>上图清晰展示了 CURWB 与传统 Wi-Fi 在各延迟分量上的巨大差异。传统 Wi-Fi 最大的延迟瓶颈在于<strong>漫游切换</strong>（50–200 ms）和<strong>竞争调度</strong>（2–15 ms），而 CURWB 通过 Make-Before-Break 机制将漫游切换控制在 0 ms 中断，通过 TDMA-Like调度将竞争延迟降至确定性的 0.1–0.3 ms。</p>
+        <p>上图清晰展示了 CURWB 与传统 Wi-Fi 在各延迟分量上的巨大差异。传统 Wi-Fi 最大的延迟瓶颈在于<strong>漫游切换</strong>（50–200 ms）和<strong>竞争调度</strong>（2–15 ms），而 CURWB 通过 Make-Before-Break 机制将漫游切换控制在 0 ms 中断，通过通过极端 EDCA 参数优化（AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3）与单客户端 BSS 设计将竞争延迟降至确定性的 0.1–0.3 ms。</p>
 
         <h3>15.9 本章小结</h3>
 
         <p>本章从六个维度对 CURWB 的超低延迟机制进行了深入剖析：</p>
         <ol>
-          <li><strong>物理层与 MAC 层</strong>：OFDM/OFDMA 调制结合 TDMA 确定性调度，单帧传输延迟低至 0.1–0.3 ms。</li>
+          <li><strong>物理层与 MAC 层</strong>：OFDM/OFDMA 调制结合极端 EDCA 优化实现的近确定性调度，单帧传输延迟低至 0.1–0.3 ms。</li>
           <li><strong>协议栈处理</strong>：二层透明转发、硬件加速引擎、无 STP/ARP 泛洪的精简协议栈，总处理延迟 &lt; 0.2 ms。</li>
-          <li><strong>调度机制</strong>：TDMA 替代 CSMA/CA，消除随机退避和隐藏节点问题，提供严格 QoS 保障。</li>
+          <li><strong>调度机制</strong>：极端 EDCA 调优重构 CSMA/CA（非 TDMA 替代），消除随机退避和隐藏节点问题，提供严格 QoS 保障。</li>
           <li><strong>漫游切换</strong>：Make-Before-Break 实现 0 ms 中断漫游，Fluidity 协议提供 &lt; 5 ms 的 AP 切换。</li>
           <li><strong>重传与纠错</strong>：FEC 前向纠错 + 快速 ARQ（&lt; 1 ms 单次重传），结合 MPO 多路径冗余，丢包恢复延迟极低。</li>
           <li><strong>有线段延迟</strong>：配合工业级交换机（IE3x00/IE4000/IE5000），有线段延迟可控制在 0.1–0.5 ms。</li>
@@ -3851,7 +3852,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
         <p>综合以上六个维度，CURWB 实现了<strong>端到端单向延迟 &lt; 5 ms、往返延迟 &lt; 10 ms</strong> 的工业级超低延迟性能，满足 AGV 导航、机械臂远程控制、视频流实时回传等关键工业应用的严苛要求。</p>
 
         <div class="note">
-          <strong>📊 延迟性能总结：</strong>CURWB 的确定性低延迟并非依赖单一技术，而是物理层优化、协议栈精简、TDMA 调度、Make-Before-Break 漫游、快速重传与 MPO 多路径保护六重机制的协同作用。这种全栈优化的方法论是 CURWB 与传统 Wi-Fi "加补丁" 式优化的根本区别。
+          <strong>📊 延迟性能总结：</strong>CURWB 的确定性低延迟并非依赖单一技术，而是物理层优化、协议栈精简、极端 EDCA 近确定性调度、Make-Before-Break 漫游、快速重传与 MPO 多路径保护六重机制的协同作用。这种全栈优化的方法论是 CURWB 与传统 Wi-Fi "加补丁" 式优化的根本区别。
         </div>
       </section>
 
@@ -4003,7 +4004,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
             <rect x="340" y="70" width="150" height="55" rx="8" fill="url(#pathGrad2)" stroke="#2e7d32" stroke-width="2"/>
             <text x="415" y="90" text-anchor="middle" fill="#1b5e20" font-size="11" font-weight="bold">③ 无线空口传输</text>
             <text x="415" y="106" text-anchor="middle" fill="#2e7d32" font-size="12" font-weight="bold">0.3–0.8 ms</text>
-            <text x="415" y="119" text-anchor="middle" fill="#666" font-size="9">TDMA 调度+OFDM</text>
+            <text x="415" y="119" text-anchor="middle" fill="#666" font-size="9">极端 EDCA 优化 + OFDM</text>
 
             <line x1="490" y1="97" x2="515" y2="97" stroke="#049fd9" stroke-width="1.5" marker-end="url(#arrPath)"/>
 
@@ -4064,7 +4065,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
             <rect x="340" y="200" width="150" height="55" rx="8" fill="url(#pathGrad2)" stroke="#2e7d32" stroke-width="2"/>
             <text x="415" y="220" text-anchor="middle" fill="#1b5e20" font-size="11" font-weight="bold">⑩ 无线空口传输</text>
             <text x="415" y="236" text-anchor="middle" fill="#2e7d32" font-size="12" font-weight="bold">0.3–0.8 ms</text>
-            <text x="415" y="249" text-anchor="middle" fill="#666" font-size="9">TDMA 下行时隙</text>
+            <text x="415" y="249" text-anchor="middle" fill="#666" font-size="9">极端 EDCA 优化</text>
 
             <line x1="340" y1="227" x2="315" y2="227" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#arrPath)"/>
 
@@ -4128,7 +4129,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
             <tr>
               <td>无线空口传输</td>
               <td>0.3–0.8 ms</td>
-              <td>TDMA 确定性时隙分配，MCS9/10 高阶调制，5 GHz 宽频段</td>
+              <td>极端 EDCA 优化 + 单客户端 BSS + RTS/CTS 保护（近确定性接入），MCS9/10 高阶调制，5 GHz 宽频段</td>
               <td>2–15 ms（CSMA/CA 随机竞争）</td>
             </tr>
             <tr>
@@ -4140,7 +4141,16 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
           </tbody>
         </table>
 
-        <p>值得特别说明的是，CURWB 的无线空口延迟具有极高的<strong>确定性</strong>。在 TDMA 调度下，每个 Mobility Client 被分配固定的时隙，不存在竞争冲突。即使在 50 台 AGV 同时在线的场景下，每台 AGV 的时隙分配仍然是确定的——假设 TDMA 帧周期为 2 ms，每台 AGV 的时隙为 40 μs（2000 μs / 50 = 40 μs），足以传输一个 200 bytes 的控制帧（在 MCS9、40 MHz 带宽下，200 bytes 的传输时间约 8 μs）。</p>
+        <p>值得特别说明的是，CURWB 的无线空口延迟具有极高的<strong>确定性</strong>。</p>
+        <p>在 CURWB 的无线接入设计中，每条 Fluidity 链路为<strong>单客户端 BSS</strong>，配合<strong>极端压缩的 EDCA 参数</strong>（VO 队列：AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3），信道接入延迟被压缩至微秒级，接近确定性调度的效果。</p>
+<p>在 PtMP（Fluidmax）场景中，Mesh End 同时服务多个 Mobility Client，通过 <strong>RTS/CTS 握手</strong>协调各 Client 的传输顺序，避免隐藏节点碰撞。由于每个 Client 的 EDCA 退避窗口极小且链路为专用连接，多 Client 轮流传输的效果在宏观上近似于时分复用，但底层机制仍为竞争式接入而非固定时隙分配。</p>
+<p>影响单次传输周期的关键参数包括：</p>
+<ul>
+  <li><strong>A-MPDU 聚合长度</strong>（<code>ampdu max length</code>）：限制单次突发的帧数量，典型设置 255，防止单次传输独占信道过久。</li>
+  <li><strong>EDCA TXOP Limit</strong>：限制单次获得信道后的最大传输时间。</li>
+  <li><strong>RTS/CTS 开销</strong>：每次传输前的握手增加约 50–70 μs 额外延迟。</li>
+  <li><strong>Client 数量</strong>：PtMP 场景中 Client 越多，平均每个 Client 的可用信道时间越少，单向时延随之上升。</li>
+</ul>
 
         <p>关键的延迟分布特征对比：</p>
         <ul>
@@ -4547,7 +4557,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
         <ul>
           <li>控制服务器处理（可通过 DPDK、RTOS 优化）</li>
           <li>AGV 应用层（可通过 RT-PREEMPT 内核优化）</li>
-          <li>无线空口（已由 CURWB TDMA 优化至极限）</li>
+          <li>无线空口（已由 CURWB 极端 EDCA 参数优化至竞争接入的理论极限）</li>
         </ul>
 
         <p><strong>第四步：预留安全余量</strong></p>
@@ -4555,7 +4565,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
         <ul>
           <li>生产环境中的电磁干扰（EMI）可能导致偶发重传。</li>
           <li>设备老化或固件版本差异导致的性能波动。</li>
-          <li>未来扩容时（AGV 数量增加）TDMA 时隙竞争加剧。</li>
+          <li>未来扩容时（AGV 数量增加）EDCA 信道竞争加剧（Client 增多时退避碰撞概率上升）</li>
           <li>网络流量突发峰值（如多台 AGV 同时上传视频流）。</li>
         </ul>
 
@@ -4575,7 +4585,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 
         <ol>
           <li>CURWB 系统的<strong>典型往返延迟 (RTT) 约 3.0 ms</strong>，即使在最坏情况下也不超过 6.1 ms，远低于 AGV 应用的 20 ms SLA 要求。</li>
-          <li>无线空口延迟（上行+下行）合计仅占 RTT 的 31.2%，CURWB 已将其优化至 TDMA 调度的理论极限。</li>
+          <li>无线空口延迟（上行+下行）合计仅占 RTT 的 31.2%，CURWB 已将其优化至极端 EDCA 参数下竞争接入的理论极限。</li>
           <li><strong>控制服务器是最大的单一延迟贡献者</strong>（25.0%），服务器端的优化对整体性能提升至关重要。</li>
           <li>相比之下，传统 Wi-Fi 仅漫游切换一项就可能产生 50–200 ms 的延迟，远超整个 CURWB 系统的最坏 RTT。</li>
           <li>延迟预算分析是系统设计不可或缺的环节，应在项目规划阶段即完成，并在部署后实测验证。</li>
@@ -5268,15 +5278,15 @@ show fluidity roaming-history
         <p>CURWB 从底层架构重新设计，以<strong>"确定性"</strong>为核心理念：</p>
 
         <ul>
-          <li><strong>确定性延迟</strong>：TDMA 调度替代 CSMA/CA 竞争，端到端延迟 &lt; 5 ms，P99 &lt; 10 ms。</li>
+          <li><strong>确定性延迟</strong>：极端 EDCA 优化（AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3），端到端延迟 &lt; 5 ms，P99 &lt; 10 ms。</li>
           <li><strong>确定性漫游</strong>：Make-Before-Break 替代 Break-Before-Make，零中断切换。</li>
           <li><strong>确定性可靠性</strong>：MPO 多路径保护提供 99.999% 以上的链路可用性。</li>
-          <li><strong>确定性覆盖</strong>：TDMA 调度 + 功率控制确保每个移动设备获得稳定的带宽分配。</li>
+          <li><strong>确定性覆盖</strong>：单客户端 BSS + 极端 EDCA 参数实现的近确定性接入 + 功率控制确保每个移动设备获得稳定的带宽分配。</li>
         </ul>
 
         <p>这四个 "确定性" 使得 CURWB 成为工业自动化领域<strong>唯一能够同时满足低延迟、高可靠、无缝移动需求</strong>的无线技术。无论是港口的集装箱起重机、汽车工厂的 AGV 车队、矿山的自动驾驶卡车，还是高速铁路的列车通信系统，CURWB 都已在全球数百个项目中证明了其工业级的性能和可靠性。</p>
 
-        <p>展望未来，随着工业 4.0、智能制造和数字化转型的深入推进，移动设备、机器人和自主系统将在工业场景中扮演越来越重要的角色。<strong>可靠的无线连接不再是锦上添花，而是生产系统的核心基础设施</strong>。CURWB 作为 Cisco 工业无线战略的核心组成部分，将持续进化——更高的吞吐量（Wi-Fi 7 芯片组集成）、更低的延迟（增强型 TDMA 调度）、更强的 AI 驱动射频优化——为工业客户提供面向未来的无线基础设施。</p>
+        <p>展望未来，随着工业 4.0、智能制造和数字化转型的深入推进，移动设备、机器人和自主系统将在工业场景中扮演越来越重要的角色。<strong>可靠的无线连接不再是锦上添花，而是生产系统的核心基础设施</strong>。CURWB 作为 Cisco 工业无线战略的核心组成部分，将持续进化——更高的吞吐量（Wi-Fi 7 芯片组集成）、更低的延迟（极端 EDCA 近确定性调度）、更强的 AI 驱动射频优化——为工业客户提供面向未来的无线基础设施。</p>
 
         <p>我们希望本知识图谱能够帮助工业客户、系统集成商和 OT 工程师深入理解 CURWB 的技术本质，做出基于事实和数据的技术决策，最终为其工业网络选择最合适的无线解决方案。</p>
 
@@ -5585,7 +5595,7 @@ show fluidity roaming-history
       <tr>
         <td><strong>TDMA</strong><br>(Time Division Multiple Access)</td>
         <td>时分多址</td>
-        <td>一种将时间切分为固定时隙并分配给各节点的信道接入技术。<strong>勘误说明</strong>：CURWB 的底层 MAC 并非采用纯 TDMA 固定时隙调度，而是在 802.11 CSMA/CA 框架内通过极端 EDCA 参数优化（VO 队列 AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3）实现"准确定性"的信道接入效果。部分早期文献中的"TDMA-like"表述指的是这种工程等效行为，而非真正的 TDMA 协议实现。</td>
+        <td>一种将时间切分为固定时隙并分配给各节点的信道接入技术。<strong>勘误说明</strong>：在Catalyst IW、CW AP中，URWB 的底层 MAC 并非采用 TDMA 固定时隙调度，而是在 802.11 CSMA/CA 框架内通过极端 EDCA 参数优化（VO 队列 AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3）实现"准确定性"的信道接入效果。部分早期文献中的"TDMA-like"表述指的是这种工程等效行为，而非真正的 TDMA 协议实现。</td>
       </tr>
       <tr>
         <td><strong>TITAN / HA</strong><br>(TITAN High Availability)</td>
