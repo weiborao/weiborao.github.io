@@ -5287,6 +5287,141 @@ show fluidity roaming-history
       <!-- ============================================================
            GLOSSARY: 术语表
            ============================================================ -->
+<section id="e80">
+
+    <h2>案例深度解析：E80 Group 如何借助 Cisco URWB 突破工业 AGV 联网瓶颈</h2>
+  
+  <blockquote>
+    <p><strong>👨‍💻 架构师导读：</strong><br>
+    想象一条高速公路上，数百辆满载货物的汽车正以极高的速度穿梭交织。它们没有驾驶员，全凭无线指令进行厘米级精度的调度。如果信号中断哪怕短短的十分之一秒，所有车辆就会触发安全机制紧急刹车，导致整条供应链瞬间瘫痪。这并非科幻电影，而是现代高度自动化工厂内部的真实写照。在这个严苛的物理世界里，网络不再是“提供便利”的辅助设施，而是维持生产线生命体征的<strong>中枢神经</strong>。</p>
+  </blockquote>
+  
+  <h3>1. 遇见创新者：重塑现代物流的隐形巨手 E80 Group</h3>
+  <p>在快消品（CPG）、食品与饮料制造等行业，<strong>E80 Group</strong> 是全球自动化内部物流领域的绝对先锋。他们提供端到端的自动化解决方案，其中最为核心的拳头产品是 <strong>自动激光导引车（LGV）与自动导引车（AGV）</strong>，以及配套的高度复杂的自动化立体仓库系统（AS/RS）。</p>
+  
+  
+
+  <p>在 E80 构建的未来工厂中，可能同时有数十乃至上百台 LGV 穿梭于高耸的金属货架与密集的生产线之间。它们负责从原材料入库、产线搬运、直到成品装车的全自动流转。将“正确的货物，在正确的时间，送到正确的位置”，这些移动机器人的协同效率，直接决定了整座工厂的产能与利润底线。</p>
+
+  <h3>2. 黄金圈的 "Why"：AGV 联网面临的生死劫与 5G 的局限</h3>
+  <p>为了让庞大的 AGV 车队有条不紊地运行，E80 必须解决一个世界级的物理难题：如何在一个充满金属反射、移动机械臂和复杂电磁干扰的恶劣环境中，为高速移动的设备提供“有线级别”的无线连接？</p>
+  
+  <h4>为何放弃被寄予厚望的 Private 5G？</h4>
+  <p>业界一度将私有 5G（Private 5G）视为工业自动化的银弹。E80 Group 在欧美进行了广泛的 5G 试点与测试，但最终得出了发人深省的结论。以下是我们总结的 CURWB 与 Private 5G 在工业自动化场景下的核心差异：</p>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>评估维度</th>
+          <th>Cisco URWB (超可靠无线回传)</th>
+          <th>Private 5G (私有 5G)</th>
+          <th>架构师点评</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>架构复杂性与成本</strong></td>
+          <td>极简。无需核心网，基于标准 Wi-Fi 芯片组延伸，即插即用。总体 TCO 低。</td>
+          <td>极高。需部署专有核心网 (5GC)、UPF 等组件，频谱申请复杂，运维成本高昂。</td>
+          <td>工厂需要的是搬运效率，而不是为了建网而养一个电信级运维团队。</td>
+        </tr>
+        <tr>
+          <td><strong>IT/OT 基础架构融合</strong></td>
+          <td><strong>完美融合。</strong>在 Cisco 最新 AP (如 CW9178) 上，可同时发射 Wi-Fi 7 (IT 设备) 与 URWB (OT 设备) 信号。</td>
+          <td><strong>割裂。</strong>平板电脑、扫码枪往往仍需部署一套 Wi-Fi，导致两套网络基础设施重复建设。</td>
+          <td>一网多用是企业数字化的终极追求，孤岛式建设违背第一性原理。</td>
+        </tr>
+        <tr>
+          <td><strong>网络控制与数据主权</strong></td>
+          <td>完全掌控。沿用企业熟悉的 WLC / DNA Center 进行可视化管理与安全策略统一下发。</td>
+          <td>受限。部分 5G 架构如同黑盒，企业 IT 团队难以像管理传统局域网那样直观干预底层的路由与切换。</td>
+          <td>失去对数据平面的精细调度权，是工业控制场景的大忌。</td>
+        </tr>
+        <tr>
+          <td><strong>漫游切换机制 (移动性)</strong></td>
+          <td><strong>Make-Before-Break</strong> (先搭后拆)。0 毫秒数据平面中断，PLC 毫无察觉。</td>
+          <td>Hard Handover (硬切换)。尽管 5G 优化了时延，但底层仍存在瞬间中断的可能。</td>
+          <td>对于高速运动的 AGV 而言，0ms 与 50ms 的区别就是“顺滑运行”与“紧急刹车”的区别。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3. 破局之道：基于第一性原理的 CURWB 架构剖析</h3>
+  <p>面对传统 Wi-Fi “先断后连 (Break-before-make)”导致的 200 毫秒延迟（这足以让 AGV 触发紧急安全停车），Cisco 抛弃了修修补补的执念。回归第一性原理：<strong>移动的机器需要的不是一个“热点”，而是一条永不掉线的“虚拟隐形光缆”。</strong></p>
+
+  <h4>Fluidity 移动性框架：先搭后拆的空中飞人</h4>
+  <p>CURWB 在标准的 Wi-Fi 芯片组之上，覆盖了一层类似于运营商级别的 <strong>MPLS Overlay（Prodigy 协议栈）</strong>。数据标签的交换转发与底层 802.11 无线链路的关联动作被完全解耦。</p>
+  
+  <p>当 E80 的 AGV（Mesh Client）高速移动时，底层的 Fluidity 协议允许它同时与多个工厂基站（Mobility Base）维持激活状态的 MPLS 隧道。这就像一位<strong>空中飞人</strong>，在彻底松开旧秋千之前，双手已经紧紧抓住了新秋千。</p>
+
+  <figure style="text-align: center; margin: 2rem 0;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" style="max-width: 100%; height: auto; background: #FAFAFC; border: 1px solid #EAEAEA; border-radius: 8px;">
+      <defs>
+        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0050D8" />
+          <stop offset="100%" stop-color="#00BCEB" />
+        </linearGradient>
+        <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.08"/>
+        </filter>
+      </defs>
+      
+      <g stroke="#E8E8ED" stroke-width="1" fill="none">
+        <path d="M0,50 L800,50 M0,100 L800,100 M0,150 L800,150 M0,200 L800,200 M0,250 L800,250 M0,300 L800,300" />
+      </g>
+
+      <rect x="340" y="20" width="120" height="40" rx="6" fill="#323232" filter="url(#shadow)"/>
+      <text x="400" y="45" font-family="Arial, sans-serif" font-size="14" fill="#FFFFFF" text-anchor="middle" font-weight="bold">WLC / Coordinator</text>
+      
+      <path d="M380,60 L200,100" stroke="#323232" stroke-width="3" fill="none" />
+      <path d="M420,60 L600,100" stroke="#323232" stroke-width="3" fill="none" />
+
+      <rect x="120" y="100" width="160" height="50" rx="8" fill="#FFFFFF" stroke="#0050D8" stroke-width="2" filter="url(#shadow)"/>
+      <circle cx="140" cy="125" r="8" fill="#00BCEB" />
+      <text x="160" y="130" font-family="Arial, sans-serif" font-size="14" fill="#1D1D1D" font-weight="bold">Mobility Base A</text>
+      <text x="200" y="170" font-family="Arial, sans-serif" font-size="12" fill="#666666" text-anchor="middle">链路 1：当前主通信</text>
+
+      <rect x="520" y="100" width="160" height="50" rx="8" fill="#FFFFFF" stroke="#0050D8" stroke-width="2" filter="url(#shadow)"/>
+      <circle cx="540" cy="125" r="8" fill="#88C057" />
+      <text x="560" y="130" font-family="Arial, sans-serif" font-size="14" fill="#1D1D1D" font-weight="bold">Mobility Base B</text>
+      <text x="600" y="170" font-family="Arial, sans-serif" font-size="12" fill="#88C057" text-anchor="middle">链路 2：预建新隧道 (0ms中断)</text>
+
+      <path d="M200,150 L380,240" stroke="#0050D8" stroke-width="4" fill="none" />
+      <path d="M600,150 L420,240" stroke="#88C057" stroke-width="4" stroke-dasharray="8,4" fill="none" />
+
+      <rect x="320" y="240" width="160" height="60" rx="10" fill="url(#blueGrad)" filter="url(#shadow)"/>
+      <circle cx="345" cy="300" r="10" fill="#323232" />
+      <circle cx="455" cy="300" r="10" fill="#323232" />
+      <text x="400" y="265" font-family="Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="middle" font-weight="bold">AGV (Mesh Client)</text>
+      <text x="400" y="285" font-family="Arial, sans-serif" font-size="12" fill="#EAEAEA" text-anchor="middle">正在向右高速行驶 ➔</text>
+      
+      <rect x="290" y="320" width="220" height="25" rx="4" fill="#FFF8E1" stroke="#FFC107" stroke-width="1"/>
+      <text x="400" y="337" font-family="Arial, sans-serif" font-size="12" fill="#B38600" text-anchor="middle" font-weight="bold">底层 MPLS Overlay：数据包去重合并</text>
+    </svg>
+    <figcaption style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图：CURWB Fluidity 移动性架构模型（先搭后拆）</figcaption>
+  </figure>
+  
+  
+
+  <h4>MPO 多路径优化：数据传输的“饱和式救援”</h4>
+  <p>在遍布金属货架的立体仓库中，多径衰落是不可逾越的物理法则。CURWB 独有的 <strong>MPO (Multiple Path Optimization)</strong> 技术允许将最高优先级的控制信令复制多份，通过最多 8 条独立的无线路径同时发射出去。这就像是为了一份绝密军情，你同时派出了顺丰、DHL 和联邦快递。只要有任意一个包裹穿透干扰抵达终点，系统便会进行去重合并，任务即告成功。这种“用带宽换可靠性”的冗余策略，将链路丢包率降低了数个数量级。</p>
+
+  <h3>4. 价值重塑：选择 CURWB 带来的极致收益</h3>
+  <p>通过全面拥抱 CURWB 架构，E80 Group 为其客户解锁了深远的商业与运营价值：</p>
+  <ul>
+    <li><strong>极致连贯，拒绝停机：</strong> AGV 车队获得了真正意义上的零掉线体验。因网络抖动导致的误刹车几率降至冰点，车队能够以更密集的编队、更快的速度运行，工厂的整体设备综合效率（OEE）迎来巨大飞跃。</li>
+    <li><strong>无可比拟的 IT/OT 深度融合：</strong> 得益于 Cisco 强大的系统工程能力，在最新的 Catalyst 室内 AP（如整合了 Wi-Fi 7 技术的 CW9178 等）上，<strong>同一台物理设备可以同时运行 CURWB 协议栈（保障 AGV 超低时延回传）与标准 Wi-Fi 信号（供员工接入）</strong>。</li>
+    <li><strong>重掌网络治理主权：</strong> 借助集中控制平台和统一的安全策略（如 Cisco Cyber Vision 与 ISE），企业的网络团队可以毫无门槛地管理这张庞大的工业网络，保留了传统 Wi-Fi 的简单与透明，却赋予了等同于有线网络的确定性。</li>
+  </ul>
+
+  <hr style="border: none; border-top: 1px solid #EAEAEA; margin: 2rem 0;">
+
+  <p><strong>💡 架构师总结：</strong><br>
+  技术永远服务于业务的最终流转。E80 Group 的成功故事深刻地揭示了：最高级的架构设计，绝不是各种时髦概念的堆砌，而是用最优雅的逻辑去降伏最狂野的物理世界。当我们用第一性原理将 CURWB 协议注入工业车间时，我们交付的不再是单纯的参数，而是现代无人工厂生生不息的澎湃心跳。</p>
+</section>
+
 <section id="glossary">
   <h2>附录：CURWB 完整术语表</h2>
 
