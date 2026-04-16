@@ -379,10 +379,7 @@ pre, code {
   <p>这里开始出现本质分歧：</p>
   <ul>
     <li><strong>传统 WLAN</strong>：使用标准 802.11 MAC——CSMA/CA 信道竞争、RTS/CTS、ACK、BSS 管理帧（Beacon、Probe、Auth、Assoc）。所有客户端公平竞争信道，高负载下延迟不可预测。</li>
-    <li><strong>CURWB</strong>：底层<strong>仍然基于 802.11 CSMA/CA 信道竞争机制</strong>，但通过以下三层优化实现了"准确定性"的低延迟接入：<br>
-<strong>(a) 极端 EDCA 参数</strong>——CURWB 为最高优先级的 VO 队列配置了极激进的退避参数（AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3, TXOP=15），使关键控制帧在信道竞争中以"碾压式优先级"几乎必然胜出。<br>
-<strong>(b) 少节点专用链路</strong>——在 Fluidity/Mobility 模式下，每条无线链路通常只有 1 个 Base + 1 个 Client，信道竞争对象极少，等效为专用链路。<br>
-<strong>(c) Overlay 层帧调度</strong>——Prodigy 2.0 在 MPLS Overlay 层协调帧的发送顺序和优先级，进一步降低延迟抖动。<br></li>
+    <li><strong>CURWB</strong>：在 MAC 层接入上，CURWB 采用基于无线的 Prodigy 2.0 专有 MPLS Overlay 协议，深度重构并极致优化了标准 802.11 MAC 的 EDCA 竞争机制。在 Mesh/Fluidity（移动性）模式下，系统使用优化的 CSMA/CA 机制，通过大幅压缩 AIFS 和竞争窗口（CWmin/CWmax）实现类确定性的智能退避与超低时延；在 Fluidmax（P2MP）模式下，系统可动态支持 TDMA（时分多址）或 CSMA 协议，在 TDMA 模式下由 Primary 基站集中分配时隙并控制频率，从而彻底消除隐藏终端冲突。</li>
   </ul>
   <h4>网络层 / Overlay</h4>
   <ul>
@@ -684,7 +681,7 @@ pre, code {
       <tr><td>11</td><td>Vehicle</td><td>Mobility Client</td><td>安装在移动载体（AGV、机车、龙门吊等）上的车载 AP。</td></tr>
       <tr><td>12</td><td>Vehicle-to-Vehicle</td><td>Mobility Client-to-Client Handoff</td><td>两台移动载体之间的直接无线跳转切换。</td></tr>
       <tr><td>13</td><td>FM Quadro</td><td>URWB Network Topology（监控视图）</td><td>网络拓扑可视化监控工具。</td></tr>
-      <tr><td>14</td><td>Overlay Only</td><td>Autotap（Loop Avoidance）</td><td>环路避免机制，确保桥接拓扑无广播风暴。</td></tr>
+      <tr><td>14</td><td>Overlay Only</td><td>Autotap（Loop Avoidance）</td><td>专有的 L2 环路避免与网络出入口自动识别机制，在 Overlay 层提供毫秒级收敛，且支持通过诊断工具进行无侵入的远程无线链路抓包。</td></tr>
       <tr><td>15</td><td>Fastfail / TITAN</td><td>High Availability (HA)</td><td>快速故障检测与切换机制，实现链路冗余。</td></tr>
     </tbody>
   </table>
@@ -1918,12 +1915,12 @@ pre, code {
 <tbody>
 <tr><td><strong>核心功能</strong></td><td>快速密钥协商（跳过完整 4WHS）</td><td>邻居 AP 报告，辅助扫描</td><td>BSS 转网管理（AP 引导客户端漫游）</td><td>Make-Before-Break 双射频并行漫游</td></tr>
 <tr><td><strong>漫游范式</strong></td><td>Break-Before-Make（优化版）</td><td>辅助 BBM 加速扫描</td><td>辅助 BBM 减少粘性</td><td><strong>Make-Before-Break</strong></td></tr>
-<tr><td><strong>漫游中断</strong></td><td>30–50 ms（理想值）</td><td>不直接减少中断</td><td>不直接减少中断</td><td><strong><1 ms</strong></td></tr>
+<tr><td><strong>漫游中断</strong></td><td>30–50 ms（理想值）</td><td>不直接减少中断</td><td>不直接减少中断</td><td><strong>&lt;1 ms</strong></td></tr>
 <tr><td><strong>丢包</strong></td><td>3–10 帧</td><td>—</td><td>—</td><td><strong>0 帧</strong></td></tr>
 <tr><td><strong>射频要求</strong></td><td>单射频即可</td><td>单射频</td><td>单射频</td><td><strong>双射频（硬件强制要求）</strong></td></tr>
 <tr><td><strong>客户端配合</strong></td><td>客户端必须支持 FT</td><td>客户端需支持 11k</td><td>客户端需支持 11v</td><td>客户端无需任何特殊能力（透明桥接）</td></tr>
 <tr><td><strong>AP/基站配合</strong></td><td>所有 AP 需同一 Mobility Domain</td><td>AP 发送邻居报告</td><td>AP 发送 BTM 帧</td><td>所有 Mobility Base 在同一 URWB 域</td></tr>
-<tr><td><strong>IP 地址保持</strong></td><td>同子网内保持；跨子网需 L3 漫游</td><td>—</td><td>—</td><td><strong>始终保持</strong>（L2 桥接透明）</td></tr>
+<tr><td><strong>IP 地址保持</strong></td><td>L2/L3 无缝保持（支持 Layer 2 Flat 拓扑与 Layer 3 路由拓扑，跨子网漫游同样保持终端 IP 不变）</td><td>—</td><td>—</td><td><strong>始终保持</strong>（L2 桥接透明）</td></tr>
 <tr><td><strong>高速移动</strong></td><td>≤30 km/h（受扫描延迟限制）</td><td>—</td><td>—</td><td><strong>≤300+ km/h</strong>（铁路实测验证）</td></tr>
 <tr><td><strong>协议标准</strong></td><td>IEEE 802.11r-2008</td><td>IEEE 802.11k-2008</td><td>IEEE 802.11v-2011</td><td>Cisco 私有（Fluidity 协议）</td></tr>
 <tr><td><strong>适用场景</strong></td><td>办公移动终端、VoWLAN</td><td>企业 WLAN 辅助</td><td>企业 WLAN 辅助</td><td><strong>工业移动体：AGV、天车、地铁、矿车</strong></td></tr>
@@ -2038,7 +2035,7 @@ pre, code {
 <tr><th>参数</th><th>802.11ax（通用）</th><th>CURWB 典型配置</th><th>备注</th></tr>
 </thead>
 <tbody>
-<tr><td>频段</td><td>2.4 GHz / 5 GHz / 6 GHz（Wi-Fi 6E）</td><td>5 GHz（主力）；部分型号支持 4.9 GHz 公共安全频段；IW9167E 可用 60 GHz 回程；CW9178I 支持 6 GHz</td><td>CURWB 在工业场景中主要使用 5 GHz 频段，信道更多、干扰更少</td></tr>
+<tr><td>频段</td><td>2.4 GHz / 5 GHz / 6 GHz（Wi-Fi 6E）</td><td>5 GHz（主力）；IW9167E 及 CW 系列支持 6 GHz（Wi-Fi 6E）频段</td><td>CURWB 在工业场景中主要使用 5 GHz 频段，信道更多、干扰更少</td></tr>
 <tr><td>信道带宽</td><td>20/40/80/160 MHz</td><td>PtP/PtMP 常用 40/80 MHz；Mobility 场景可能用 20/40 MHz 以保持覆盖</td><td>越窄的信道带宽，覆盖距离越远、抗干扰性越强，但吞吐量降低</td></tr>
 <tr><td>最高 MCS</td><td>MCS 11（1024-QAM）</td><td>取决于链路质量；在 LoS 环境中可达 MCS 11</td><td>CURWB 的自适应速率算法可能更保守——宁可降低 MCS 也不丢帧</td></tr>
 <tr><td>空间流（Spatial Streams）</td><td>最多 8×8（理论）；AP 通常 4×4 或 8×8</td><td>IW9165E: 2×2；IW9167EH: 4×4（5 GHz 射频）</td><td>工业环境中多径效应复杂，过多空间流不一定有效</td></tr>
@@ -2084,9 +2081,9 @@ pre, code {
 
 <ol>
 <li><strong>密钥预配置：</strong>管理员在每台 CURWB 节点上配置相同的 Network Key（通常为一个高强度的字符串），这类似于 WPA-PSK 的概念，但用途不同。</li>
-<li><strong>密钥派生：</strong>CURWB 固件使用 Network Key 派生 AES 加密密钥，用于 Overlay 层（MPLS）数据平面的加密。</li>
-<li><strong>Overlay 层加密：</strong>所有穿越无线链路的 MPLS 帧在进入无线信道之前被 AES 加密。即使攻击者截获了无线帧并能解析 802.11 头部，Overlay 层的有效载荷仍然是加密的。</li>
-<li><strong>双重加密（可选）：</strong>在某些配置下，底层 802.11 链路本身也启用 WPA2/WPA3 加密，形成 <strong>Underlay WPA + Overlay AES</strong> 的双重加密架构。</li>
+<li><strong>控制面加密（默认强制）</strong>整个 URWB 域配置的 Network Key (或 Shared Passphrase) 默认仅用于加密控制平面的信令（如节点发现、Fluidity 邻居交换）并作为加入网络的凭据。</li>
+<li><strong>数据面加密（需显式启用）：</strong>用户的数据有效载荷（Data Plane）在默认状态下是不加密传输的。为了达到工业级的安全合规，必须在每一个无线射频接口上手动启用 AES 加密。启用后，底层使用 AES-CCMP 128 位引擎对 MPLS Overlay 隧道进行端到端加密。</li>
+<li><strong>动态密钥轮换（Key Rotation）：</strong>为防范重放攻击和长期破解，Cisco 推荐在射频上进一步配置 Key Controller 算法，以设定周期实现数据面密钥的动态轮换。</li>
 </ol>
 
 <h3>10.4 QoS（服务质量）机制对比</h3>
@@ -3565,16 +3562,15 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 
 <p>在高密度场景（如多台 AGV 同时通信）下，这一过程可能重复多次，导致单帧的信道接入延迟从理论最小值（一个 DIFS + 最小退避 = ~50 μs）膨胀到毫秒甚至十毫秒级别。更糟的是，CSMA/CA 的退避机制是概率性的——延迟不确定，无法给出上界保证。</p>
 
-<p>CURWB 的解决方案并非替换 CSMA/CA，而是在标准 802.11 CSMA/CA 框架<strong>之内</strong>，通过多层系统级优化将竞争延迟压缩到极限：<br><br></p>
+<p>CURWB 的解决方案是在标准 Wi-Fi PHY 之上叠加<strong>集中式调度优化</strong>。虽然 CURWB 仍然使用 802.11 的 PHY 和基本 MAC 帧格式（以保持合规性），但 Prodigy 2.0 协议在 Overlay 层实现了类似于 TDMA 的调度机制：</p>
+
 <ul>
-<li><strong>极端 EDCA 参数调优</strong>：CURWB 为最高优先级（VO）队列配置了极激进的退避参数——<code>AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3, TXOP=15</code>。相比标准 Wi-Fi 的 VO 默认参数（AIFS=2, CW<sub>min</sub>=3, CW<sub>max</sub>=7），CURWB 的配置使关键控制帧在信道竞争中几乎必然胜出。即使发生碰撞，最大退避窗口仅 3 个时隙（约 27μs），而标准 Wi-Fi 可能退避到 1023 个时隙（约 9ms）。<br><br></li>
-
-<li><strong>少节点专用链路</strong>：在 Mobility 拓扑中，每条无线链路通常只有 1 个 Base + 1 个 Client，CSMA/CA 的竞争对象极少。与企业 Wi-Fi 场景中数十个 STA 共享同一 AP 信道不同，CURWB 的每条链路几乎是"独占"的，碰撞概率接近零。<br><br></li>
-
-<li><strong>Overlay 层优先级抢占</strong>：高优先级流量（如 PLC 控制帧，MPLS EXP 5-7）在 Prodigy 2.0 Overlay 层被优先排入 VO 队列，低优先级流量（如诊断数据）被降级到 BE/BK 队列，确保关键数据总是"插队"发送。<br><br></li>
-
-<li><strong>动态信道宽度</strong>：根据干扰环境动态调整信道宽度（20/40/80/160 MHz），在干扰严重时使用窄信道（更强的抗干扰能力），在干净环境中使用宽信道（更低的传输时间）。<br><br></li>
+<li><strong>时隙预分配</strong>：Coordinator 根据各节点的流量需求预先分配发送时隙，减少节点间的竞争冲突。</li>
+<li><strong>优先级抢占</strong>：高优先级流量（如 PLC 控制帧，MPLS EXP 5-7）可以抢占低优先级流量的时隙，确保关键数据的最大延迟有上界。</li>
+<li><strong>短帧优先</strong>：控制流的小帧（通常 &lt;200 字节）被优先调度，不需要等待正在传输的大帧（如视频帧）完成。</li>
+<li><strong>动态信道宽度</strong>：根据干扰环境动态调整信道宽度（20/40/80/160 MHz），在干扰严重时使用窄信道（更强的抗干扰能力），在干净环境中使用宽信道（更低的传输时间）。</li>
 </ul>
+
 <p>这些优化的综合效果使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，<strong>在工程意义上等效于 TDMA 固定调度的确定性表现</strong>——但其底层机制仍然是 CSMA/CA 框架内的极端优化，而非真正的 TDMA 时隙分配。</p>
 
 <p>这些优化使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，且具有更确定性的上界。</p>
@@ -3837,7 +3833,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
           </svg>
         </div>
 
-        <p>上图清晰展示了 CURWB 与传统 Wi-Fi 在各延迟分量上的巨大差异。传统 Wi-Fi 最大的延迟瓶颈在于<strong>漫游切换</strong>（50–200 ms）和<strong>竞争调度</strong>（2–15 ms），而 CURWB 通过 Make-Before-Break 机制将漫游切换控制在 0 ms 中断，通过 TDMA 调度将竞争延迟降至确定性的 0.1–0.3 ms。</p>
+        <p>上图清晰展示了 CURWB 与传统 Wi-Fi 在各延迟分量上的巨大差异。传统 Wi-Fi 最大的延迟瓶颈在于<strong>漫游切换</strong>（50–200 ms）和<strong>竞争调度</strong>（2–15 ms），而 CURWB 通过 Make-Before-Break 机制将漫游切换控制在 0 ms 中断，通过 TDMA-Like调度将竞争延迟降至确定性的 0.1–0.3 ms。</p>
 
         <h3>15.9 本章小结</h3>
 
@@ -4765,8 +4761,8 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
   流控:    None
 
 默认登录凭据:
-  用户名:  admin
-  密码:    admin（首次登录后强制修改）</pre>
+  用户名:  Cisco
+  密码:    Cisco（首次登录后强制修改）</pre>
 
         <p>首次登录后，系统会提示修改密码。建议设置符合安全策略的强密码（至少 8 位，包含大小写字母、数字和特殊字符）。</p>
 
