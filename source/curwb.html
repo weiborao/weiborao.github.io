@@ -2424,424 +2424,6 @@ pre, code {
 </svg>
 </div>
 
-  <h4 id="mbb-demo">9.2.7 Make-Before-Break 互动演示</h4>
-  <p>拖动下方的 <strong>AGV（移动客户端）</strong>，在两个 Mobility Base 之间移动，观察 MBB 切换过程。</p>
-<div class="svg-scroll-wrapper">
-  <svg id="mbbSvg" viewBox="0 0 750 400" style="width:100%;max-width:800px;display:block;margin:auto;user-select:none;touch-action:none;">
-    <defs>
-      <marker id="arrowGray1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-        <path d="M0,0 L8,3 L0,6 Z" fill="#999"/>
-      </marker>
-      <!-- Gradient for bases -->
-      <linearGradient id="baseGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#e3f0ff"/>
-        <stop offset="100%" stop-color="#b3d4fc"/>
-      </linearGradient>
-      <!-- Gradient for AGV -->
-      <linearGradient id="agvGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#fff3e0"/>
-        <stop offset="100%" stop-color="#ffe0b2"/>
-      </linearGradient>
-    </defs>
-
-    <!-- ====== WIRED BACKBONE ====== -->
-    <!-- Coordinator -->
-    <rect x="325" y="20" width="100" height="40" rx="6" fill="#e8eaf6" stroke="#5c6bc0" stroke-width="1.5"/>
-    <text x="375" y="45" text-anchor="middle" font-size="12" font-weight="bold" fill="#283593">Coordinator</text>
-
-    <!-- Wired links to bases -->
-    <line x1="345" y1="60" x2="200" y2="130" stroke="#999" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowGray1)"/>
-    <line x1="405" y1="60" x2="550" y2="130" stroke="#999" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowGray1)"/>
-    <text x="255" y="88" font-size="9" fill="#888" transform="rotate(-20,255,88)">有线回程</text>
-    <text x="490" y="88" font-size="9" fill="#888" transform="rotate(20,490,88)">有线回程</text>
-
-    <!-- ====== MOBILITY BASES ====== -->
-    <!-- Base 1 -->
-    <rect x="140" y="130" width="120" height="50" rx="8" fill="url(#baseGrad)" stroke="#1565c0" stroke-width="2"/>
-    <text x="200" y="152" text-anchor="middle" font-size="11" font-weight="bold" fill="#0d47a1">Mobility Base 1</text>
-    <text x="200" y="168" text-anchor="middle" font-size="9" fill="#1565c0">📡 CH 36 / 20 MHz</text>
-    <!-- Base 1 antenna point -->
-    <circle cx="200" cy="185" r="3" fill="#1565c0"/>
-
-    <!-- Base 2 -->
-    <rect x="490" y="130" width="120" height="50" rx="8" fill="url(#baseGrad)" stroke="#1565c0" stroke-width="2"/>
-    <text x="550" y="152" text-anchor="middle" font-size="11" font-weight="bold" fill="#0d47a1">Mobility Base 2</text>
-    <text x="550" y="168" text-anchor="middle" font-size="9" fill="#1565c0">📡 CH 149 / 20 MHz</text>
-    <!-- Base 2 antenna point -->
-    <circle cx="550" cy="185" r="3" fill="#1565c0"/>
-
-    <!-- ====== TRACK ====== -->
-    <line x1="120" y1="310" x2="630" y2="310" stroke="#ccc" stroke-width="2" stroke-dasharray="8,4"/>
-    <text x="375" y="330" text-anchor="middle" font-size="9" fill="#aaa">◄─── AGV 行驶轨道 ───►</text>
-
-    <!-- ====== WIRELESS LINKS (dynamic) ====== -->
-    <!-- Link from Base 1 to AGV -->
-    <line id="linkB1" x1="200" y1="185" x2="200" y2="280" stroke="#1e88e5" stroke-width="2.5" stroke-linecap="round"/>
-    <!-- Link from Base 2 to AGV -->
-    <line id="linkB2" x1="550" y1="185" x2="550" y2="280" stroke="none" stroke-width="2.5" stroke-linecap="round"/>
-
-    <!-- RSSI Labels -->
-    <g id="rssiGroup1" visibility="visible">
-      <rect id="rssiBg1" x="0" y="0" width="60" height="18" rx="4" fill="rgba(255,255,255,0.9)" stroke="#90caf9" stroke-width="0.8"/>
-      <text id="rssiText1" x="0" y="0" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565c0"></text>
-    </g>
-    <g id="rssiGroup2" visibility="hidden">
-      <rect id="rssiBg2" x="0" y="0" width="60" height="18" rx="4" fill="rgba(255,255,255,0.9)" stroke="#ff9800" stroke-width="0.8"/>
-      <text id="rssiText2" x="0" y="0" text-anchor="middle" font-size="10" font-weight="bold" fill="#e65100"></text>
-    </g>
-
-    <!-- ====== AGV (draggable) ====== -->
-    <g id="agvGroup" cursor="grab" style="touch-action:none;">
-      <rect id="agvRect" x="-40" y="-25" width="80" height="50" rx="10" fill="url(#agvGrad)" stroke="#e65100" stroke-width="2"/>
-      <text x="0" y="-5" text-anchor="middle" font-size="11" font-weight="bold" fill="#bf360c">🚗 AGV</text>
-      <text x="0" y="10" text-anchor="middle" font-size="8" fill="#e65100">Mobility Client</text>
-      <!-- Antenna dot on top of AGV -->
-      <circle cx="0" cy="-25" r="3" fill="#e65100"/>
-    </g>
-
-    <!-- ====== STATUS DASHBOARD ====== -->
-    <rect x="100" y="350" width="550" height="40" rx="8" fill="#f5f5f5" stroke="#ccc" stroke-width="1"/>
-    <text id="statusLabel" x="375" y="375" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">
-      状态：B1 稳定连接
-    </text>
-  </svg>
-</div>
-  <!-- ====== LEGEND ====== -->
-  <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:8px;font-size:13px;color:#555;">
-    <span>🔵 <b>实线蓝</b> = 活跃数据链路</span>
-    <span>🟠 <b>虚线橙</b> = 扫描 / 预连接</span>
-    <span>🟢 <b>虚线绿</b> = 切换执行中</span>
-    <span>⚪ <b>隐藏</b> = 无连接</span>
-  </div>
-<div>
-    <summary style="cursor:pointer;font-weight:bold;color:#1a237e;">📖 状态机说明</summary>
-    <ol style="margin-top:6px;line-height:1.8;">
-      <li><b>B1_STABLE</b>：AGV 靠近 Base 1，单链路稳定传输（蓝色实线）。</li>
-      <li><b>SCANNING_B2</b>：AGV 移向中间区域，第二无线电开始扫描 Base 2（橙色虚线出现）。</li>
-      <li><b>HANDOFF_TO_B2</b>：AGV 进入切换区，同时持有双链路（MBB 核心阶段，绿色虚线 = 切换中）。</li>
-      <li><b>B2_STABLE</b>：AGV 靠近 Base 2，已完成切换，单链路稳定传输。</li>
-      <li><b>SCANNING_B1</b>：反向移动时扫描 Base 1。</li>
-      <li><b>HANDOFF_TO_B1</b>：反向切换回 Base 1。</li>
-    </ol>
-</div>
-<script>
-(function() {
-  'use strict';
-
-  // ============ CONSTANTS ============
-  const B1_X = 200;      // Base 1 antenna x
-  const B2_X = 550;      // Base 2 antenna x
-  const BASE_Y = 185;    // Base antenna y
-  const TRACK_Y = 285;   // AGV antenna y (top of AGV group, cy=-25 relative)
-  const AGV_MIN_X = 140; // Leftmost AGV center
-  const AGV_MAX_X = 610; // Rightmost AGV center
-  const AGV_START_X = 200; // Starting position (under Base 1)
-
-  // State machine thresholds (AGV center X positions)
-  // Left-to-right: B1_STABLE → SCANNING_B2 → HANDOFF_TO_B2 → B2_STABLE
-  const THRESH_START_SCAN_B2 = 300;  // Start scanning B2
-  const THRESH_HANDOFF_B2    = 375;  // Begin handoff to B2
-  const THRESH_B2_STABLE     = 450;  // B2 fully stable
-
-  // Right-to-left: B2_STABLE → SCANNING_B1 → HANDOFF_TO_B1 → B1_STABLE
-  const THRESH_START_SCAN_B1 = 450;  // Start scanning B1 (moving left)
-  const THRESH_HANDOFF_B1    = 375;  // Begin handoff to B1
-  const THRESH_B1_STABLE     = 300;  // B1 fully stable
-
-  // Hysteresis band to prevent oscillation
-  const HYSTERESIS = 15;
-
-  // RSSI simulation
-  const RSSI_BEST = -30;   // dBm when directly under base
-  const RSSI_WORST = -85;  // dBm at max distance
-  const MAX_DIST = B2_X - B1_X; // 350px
-
-  // ============ STATE ============
-  const STATES = {
-    B1_STABLE:      'B1_STABLE',
-    SCANNING_B2:    'SCANNING_B2',
-    HANDOFF_TO_B2:  'HANDOFF_TO_B2',
-    B2_STABLE:      'B2_STABLE',
-    SCANNING_B1:    'SCANNING_B1',
-    HANDOFF_TO_B1:  'HANDOFF_TO_B1'
-  };
-
-  let currentState = STATES.B1_STABLE;
-  let agvX = AGV_START_X;
-  let isDragging = false;
-  let dragOffsetX = 0;
-
-  // ============ DOM REFS ============
-  const svg        = document.getElementById('mbbSvg');
-  const agvGroup   = document.getElementById('agvGroup');
-  const linkB1     = document.getElementById('linkB1');
-  const linkB2     = document.getElementById('linkB2');
-  const rssiGroup1 = document.getElementById('rssiGroup1');
-  const rssiGroup2 = document.getElementById('rssiGroup2');
-  const rssiBg1    = document.getElementById('rssiBg1');
-  const rssiBg2    = document.getElementById('rssiBg2');
-  const rssiText1  = document.getElementById('rssiText1');
-  const rssiText2  = document.getElementById('rssiText2');
-  const statusLabel = document.getElementById('statusLabel');
-
-  // ============ HELPERS ============
-  function clamp(val, min, max) {
-    return Math.max(min, Math.min(max, val));
-  }
-
-  function calcRSSI(agvCx, baseCx) {
-    const dist = Math.abs(agvCx - baseCx);
-    const ratio = clamp(dist / MAX_DIST, 0, 1);
-    // Quadratic falloff for more realistic feel
-    const rssi = RSSI_BEST + (RSSI_WORST - RSSI_BEST) * (ratio * ratio);
-    return Math.round(rssi);
-  }
-
-  function getSVGPoint(evt) {
-    const pt = svg.createSVGPoint();
-    const touch = evt.touches ? evt.touches[0] : evt;
-    pt.x = touch.clientX;
-    pt.y = touch.clientY;
-    const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
-    return svgPt;
-  }
-
-  // ============ LINK STYLING ============
-  // type: 'active' | 'scanning' | 'handoff' | 'teardown' | 'none'
-  function styleLink(linkEl, type, agvCenterX, rssiGroupEl, rssiBgEl, rssiTextEl, baseCx, rssiVal) {
-    const antennaY = TRACK_Y; // AGV antenna top
-
-    if (type === 'none') {
-      linkEl.setAttribute('stroke', 'none');
-      linkEl.setAttribute('stroke-dasharray', '');
-      rssiGroupEl.setAttribute('visibility', 'hidden');
-      return;
-    }
-
-    // Update endpoint to AGV antenna position
-    linkEl.setAttribute('x2', agvCenterX.toString());
-    linkEl.setAttribute('y2', antennaY.toString());
-
-    switch (type) {
-      case 'active':
-        linkEl.setAttribute('stroke', '#1e88e5');
-        linkEl.setAttribute('stroke-width', '2.5');
-        linkEl.setAttribute('stroke-dasharray', '');
-        break;
-      case 'scanning':
-        linkEl.setAttribute('stroke', '#ff9800');
-        linkEl.setAttribute('stroke-width', '1.8');
-        linkEl.setAttribute('stroke-dasharray', '6,4');
-        break;
-      case 'handoff':
-        linkEl.setAttribute('stroke', '#43a047');
-        linkEl.setAttribute('stroke-width', '2.2');
-        linkEl.setAttribute('stroke-dasharray', '4,3');
-        break;
-      case 'teardown':
-        linkEl.setAttribute('stroke', '#bdbdbd');
-        linkEl.setAttribute('stroke-width', '1.5');
-        linkEl.setAttribute('stroke-dasharray', '3,5');
-        break;
-    }
-
-    // Position RSSI label at midpoint of the link
-    const midX = (baseCx + agvCenterX) / 2;
-    const midY = (BASE_Y + antennaY) / 2;
-
-    rssiGroupEl.setAttribute('visibility', 'visible');
-
-    const labelText = rssiVal + ' dBm';
-    rssiTextEl.textContent = labelText;
-    rssiTextEl.setAttribute('x', midX.toString());
-    rssiTextEl.setAttribute('y', (midY + 4).toString());
-
-    // Size background rect around text
-    const textLen = labelText.length * 6.5;
-    const bgW = Math.max(textLen + 8, 52);
-    rssiBgEl.setAttribute('x', (midX - bgW / 2).toString());
-    rssiBgEl.setAttribute('y', (midY - 9).toString());
-    rssiBgEl.setAttribute('width', bgW.toString());
-    rssiBgEl.setAttribute('height', '18');
-
-    // Color the background stroke to match link type
-    const bgStrokeColors = {
-      active: '#90caf9',
-      scanning: '#ffcc80',
-      handoff: '#a5d6a7',
-      teardown: '#e0e0e0'
-    };
-    rssiBgEl.setAttribute('stroke', bgStrokeColors[type] || '#ccc');
-  }
-
-  // ============ STATE MACHINE ============
-  function updateState(cx) {
-    const prev = currentState;
-
-    switch (currentState) {
-      case STATES.B1_STABLE:
-        if (cx > THRESH_START_SCAN_B2) {
-          currentState = STATES.SCANNING_B2;
-        }
-        break;
-
-      case STATES.SCANNING_B2:
-        if (cx < THRESH_START_SCAN_B2 - HYSTERESIS) {
-          currentState = STATES.B1_STABLE;
-        } else if (cx > THRESH_HANDOFF_B2) {
-          currentState = STATES.HANDOFF_TO_B2;
-        }
-        break;
-
-      case STATES.HANDOFF_TO_B2:
-        if (cx < THRESH_HANDOFF_B2 - HYSTERESIS) {
-          currentState = STATES.SCANNING_B2;
-        } else if (cx > THRESH_B2_STABLE) {
-          currentState = STATES.B2_STABLE;
-        }
-        break;
-
-      case STATES.B2_STABLE:
-        if (cx < THRESH_START_SCAN_B1) {
-          currentState = STATES.SCANNING_B1;
-        }
-        break;
-
-      case STATES.SCANNING_B1:
-        if (cx > THRESH_START_SCAN_B1 + HYSTERESIS) {
-          currentState = STATES.B2_STABLE;
-        } else if (cx < THRESH_HANDOFF_B1) {
-          currentState = STATES.HANDOFF_TO_B1;
-        }
-        break;
-
-      case STATES.HANDOFF_TO_B1:
-        if (cx > THRESH_HANDOFF_B1 + HYSTERESIS) {
-          currentState = STATES.SCANNING_B1;
-        } else if (cx < THRESH_B1_STABLE) {
-          currentState = STATES.B1_STABLE;
-        }
-        break;
-    }
-
-    return currentState !== prev;
-  }
-
-  // ============ RENDER ============
-  const STATUS_TEXT = {
-    B1_STABLE:     '状态：✅ B1 稳定连接 — 单链路传输中',
-    SCANNING_B2:   '状态：🔍 正在扫描 Base 2 — 第二无线电探测中…',
-    HANDOFF_TO_B2: '状态：🔄 MBB 切换中 → B2 — 双链路并存，零丢包切换',
-    B2_STABLE:     '状态：✅ B2 稳定连接 — 单链路传输中',
-    SCANNING_B1:   '状态：🔍 正在扫描 Base 1 — 第二无线电探测中…',
-    HANDOFF_TO_B1: '状态：🔄 MBB 切换中 → B1 — 双链路并存，零丢包切换'
-  };
-
-  function render() {
-    const cx = agvX;
-
-    // Move AGV group
-    agvGroup.setAttribute('transform', 'translate(' + cx + ', 310)');
-
-    // Calculate antenna position (antenna is at cy=-25 in local coords, so world y = 310-25 = 285)
-    const antX = cx;
-    const rssi1 = calcRSSI(cx, B1_X);
-    const rssi2 = calcRSSI(cx, B2_X);
-
-    // Style links based on current state
-    switch (currentState) {
-      case STATES.B1_STABLE:
-        styleLink(linkB1, 'active',   antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
-        styleLink(linkB2, 'none',     antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
-        break;
-
-      case STATES.SCANNING_B2:
-        styleLink(linkB1, 'active',   antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
-        styleLink(linkB2, 'scanning', antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
-        break;
-
-      case STATES.HANDOFF_TO_B2:
-        styleLink(linkB1, 'teardown', antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
-        styleLink(linkB2, 'handoff',  antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
-        break;
-
-      case STATES.B2_STABLE:
-        styleLink(linkB1, 'none',     antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
-        styleLink(linkB2, 'active',   antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
-        break;
-
-      case STATES.SCANNING_B1:
-        styleLink(linkB1, 'scanning', antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
-        styleLink(linkB2, 'active',   antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
-        break;
-
-      case STATES.HANDOFF_TO_B1:
-        styleLink(linkB1, 'handoff',  antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
-        styleLink(linkB2, 'teardown', antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
-        break;
-    }
-
-    // Update status text
-    statusLabel.textContent = STATUS_TEXT[currentState];
-  }
-
-  // ============ DRAG HANDLERS ============
-  function onPointerDown(evt) {
-    evt.preventDefault();
-    isDragging = true;
-    agvGroup.style.cursor = 'grabbing';
-    const pt = getSVGPoint(evt);
-    dragOffsetX = pt.x - agvX;
-
-    // Capture pointer for smooth dragging outside SVG
-    if (evt.pointerId !== undefined) {
-      agvGroup.setPointerCapture(evt.pointerId);
-    }
-  }
-
-  function onPointerMove(evt) {
-    if (!isDragging) return;
-    evt.preventDefault();
-    const pt = getSVGPoint(evt);
-    agvX = clamp(pt.x - dragOffsetX, AGV_MIN_X, AGV_MAX_X);
-    updateState(agvX);
-    render();
-  }
-
-  function onPointerUp(evt) {
-    if (!isDragging) return;
-    isDragging = false;
-    agvGroup.style.cursor = 'grab';
-    if (evt.pointerId !== undefined) {
-      try { agvGroup.releasePointerCapture(evt.pointerId); } catch(e) {}
-    }
-  }
-
-  // Pointer events (covers both mouse and touch)
-  agvGroup.addEventListener('pointerdown', onPointerDown);
-  svg.addEventListener('pointermove', onPointerMove);
-  svg.addEventListener('pointerup', onPointerUp);
-  svg.addEventListener('pointercancel', onPointerUp);
-
-  // Fallback for older touch browsers
-  agvGroup.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    onPointerDown(e.touches[0]);
-  }, {passive: false});
-  svg.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    onPointerMove(e.touches[0]);
-  }, {passive: false});
-  svg.addEventListener('touchend', function(e) {
-    onPointerUp(e);
-  });
-
-  // ============ INITIAL RENDER ============
-  render();
-
-})();
-</script>
 <!-- 9.3 数据包处理细节 -->
 <h3>9.3   漫游期间的数据包处理机制</h3>
 
@@ -6382,55 +5964,304 @@ show fluidity roaming-history
   <p>CURWB 在标准的 Wi-Fi 芯片组之上，覆盖了一层类似于运营商级别的 <strong>MPLS Overlay（Prodigy 协议栈）</strong>。数据标签的交换转发与底层 802.11 无线链路的关联动作被完全解耦。</p>
   
   <p>当 E80 的 AGV（Mesh Client）高速移动时，底层的 Fluidity 协议允许它同时与多个工厂基站（Mobility Base）维持激活状态的 MPLS 隧道。这就像一位<strong>空中飞人</strong>，在彻底松开旧秋千之前，双手已经紧紧抓住了新秋千。</p>
-
-  <div class="svg-scroll-wrapper">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" style="max-width: 100%; height: auto; background: #FAFAFC; border: 1px solid #EAEAEA; border-radius: 8px;">
-      <defs>
-        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0050D8" />
-          <stop offset="100%" stop-color="#00BCEB" />
-        </linearGradient>
-        <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.08"/>
-        </filter>
-      </defs>
-      
-      <g stroke="#E8E8ED" stroke-width="1" fill="none">
-        <path d="M0,50 L800,50 M0,100 L800,100 M0,150 L800,150 M0,200 L800,200 M0,250 L800,250 M0,300 L800,300" />
-      </g>
-
-      <rect x="340" y="20" width="120" height="40" rx="6" fill="#323232" filter="url(#shadow)"/>
-      <text x="400" y="45" font-family="Arial, sans-serif" font-size="14" fill="#FFFFFF" text-anchor="middle" font-weight="bold">WLC / Coordinator</text>
-      
-      <path d="M380,60 L200,100" stroke="#323232" stroke-width="3" fill="none" />
-      <path d="M420,60 L600,100" stroke="#323232" stroke-width="3" fill="none" />
-
-      <rect x="120" y="100" width="160" height="50" rx="8" fill="#FFFFFF" stroke="#0050D8" stroke-width="2" filter="url(#shadow)"/>
-      <circle cx="140" cy="125" r="8" fill="#00BCEB" />
-      <text x="160" y="130" font-family="Arial, sans-serif" font-size="14" fill="#1D1D1D" font-weight="bold">Mobility Base A</text>
-      <text x="200" y="170" font-family="Arial, sans-serif" font-size="12" fill="#666666" text-anchor="middle">链路 1：当前主通信</text>
-
-      <rect x="520" y="100" width="160" height="50" rx="8" fill="#FFFFFF" stroke="#0050D8" stroke-width="2" filter="url(#shadow)"/>
-      <circle cx="540" cy="125" r="8" fill="#88C057" />
-      <text x="560" y="130" font-family="Arial, sans-serif" font-size="14" fill="#1D1D1D" font-weight="bold">Mobility Base B</text>
-      <text x="600" y="170" font-family="Arial, sans-serif" font-size="12" fill="#88C057" text-anchor="middle">链路 2：预建新隧道 (0ms中断)</text>
-
-      <path d="M200,150 L380,240" stroke="#0050D8" stroke-width="4" fill="none" />
-      <path d="M600,150 L420,240" stroke="#88C057" stroke-width="4" stroke-dasharray="8,4" fill="none" />
-
-      <rect x="320" y="240" width="160" height="60" rx="10" fill="url(#blueGrad)" filter="url(#shadow)"/>
-      <circle cx="345" cy="300" r="10" fill="#323232" />
-      <circle cx="455" cy="300" r="10" fill="#323232" />
-      <text x="400" y="265" font-family="Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="middle" font-weight="bold">AGV (Mesh Client)</text>
-      <text x="400" y="285" font-family="Arial, sans-serif" font-size="12" fill="#EAEAEA" text-anchor="middle">正在向右高速行驶 ➔</text>
-      
-      <rect x="290" y="320" width="220" height="25" rx="4" fill="#FFF8E1" stroke="#FFC107" stroke-width="1"/>
-      <text x="400" y="337" font-family="Arial, sans-serif" font-size="12" fill="#B38600" text-anchor="middle" font-weight="bold">底层 MPLS Overlay：数据包去重合并</text>
-    </svg>
-    <figcaption style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图：CURWB Fluidity 移动性架构模型（先搭后拆）</figcaption>
-  </div>
   
-  
+  <!-- ========== E80 CASE STUDY — INTERACTIVE MBB DRAG DEMO ========== -->
+<div class="svg-scroll-wrapper">
+  <svg id="mbbSvg" viewBox="0 0 800 440" width="100%"
+       style="background:#f8fbff; border:1px solid #b0c4de; border-radius:8px;
+              touch-action:none; user-select:none; -webkit-user-select:none;">
+    <defs>
+      <marker id="arrowB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6Z" fill="#1a6fc4"/>
+      </marker>
+      <marker id="arrowO" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6Z" fill="#e88a1a"/>
+      </marker>
+      <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6Z" fill="#27ae60"/>
+      </marker>
+      <marker id="arrowGrayA" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6Z" fill="#999"/>
+      </marker>
+      <linearGradient id="agvGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ffe066"/>
+        <stop offset="100%" stop-color="#f0c030"/>
+      </linearGradient>
+      <linearGradient id="baseGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#dbeafe"/>
+        <stop offset="100%" stop-color="#93c5fd"/>
+      </linearGradient>
+      <filter id="dropSh" x="-4%" y="-4%" width="108%" height="112%">
+        <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+      </filter>
+    </defs>
+
+    <!-- ── Title ── -->
+    <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="bold"
+          fill="#1a3c6e" font-family="'Segoe UI',sans-serif">
+      E80 AGV — Make-Before-Break 漫遊示意 ⟨左右拖动 AGV⟩
+    </text>
+
+    <!-- ── WLC / Coordinator ── -->
+    <rect x="330" y="36" width="140" height="38" rx="6" fill="#e0ecf8"
+          stroke="#3b82c4" stroke-width="1.5" filter="url(#dropSh)"/>
+    <text x="400" y="60" text-anchor="middle" font-size="11.5" font-weight="bold"
+          fill="#1a3c6e" font-family="'Segoe UI',sans-serif">WLC ∕ Coordinator</text>
+
+    <!-- vertical lines from WLC to bases -->
+    <line x1="370" y1="74" x2="200" y2="112" stroke="#3b82c4"
+          stroke-width="1.2" stroke-dasharray="4 3"/>
+    <line x1="430" y1="74" x2="600" y2="112" stroke="#3b82c4"
+          stroke-width="1.2" stroke-dasharray="4 3"/>
+
+    <!-- ── Mobility Base A (left) ── -->
+    <g id="baseA">
+      <rect x="120" y="112" width="160" height="42" rx="6" fill="url(#baseGrad)"
+            stroke="#2563eb" stroke-width="1.5" filter="url(#dropSh)"/>
+      <text x="200" y="138" text-anchor="middle" font-size="11" font-weight="bold"
+            fill="#1e3a5f" font-family="'Segoe UI',sans-serif">📡 Mobility Base A</text>
+    </g>
+
+    <!-- ── Mobility Base B (right) ── -->
+    <g id="baseB">
+      <rect x="520" y="112" width="160" height="42" rx="6" fill="url(#baseGrad)"
+            stroke="#2563eb" stroke-width="1.5" filter="url(#dropSh)"/>
+      <text x="600" y="138" text-anchor="middle" font-size="11" font-weight="bold"
+            fill="#1e3a5f" font-family="'Segoe UI',sans-serif">📡 Mobility Base B</text>
+    </g>
+
+    <!-- ── Wireless Links (dynamic) ── -->
+    <line id="linkA" x1="200" y1="154" x2="310" y2="268"
+          stroke="#1a6fc4" stroke-width="2.5" stroke-linecap="round"
+          marker-end="url(#arrowB)"/>
+    <line id="linkB" x1="600" y1="154" x2="310" y2="268"
+          stroke="transparent" stroke-width="0" stroke-linecap="round"/>
+
+    <!-- ── RSSI Labels ── -->
+    <g id="rssiAGroup" font-family="'Consolas','Courier New',monospace" font-size="10">
+      <rect id="rssiBgA" x="140" y="186" width="90" height="18" rx="4"
+            fill="#e8f5e9" stroke="#66bb6a" stroke-width="0.8"/>
+      <text id="rssiTextA" x="185" y="199" text-anchor="middle"
+            fill="#2e7d32" font-weight="bold">A RSSI: −38 dBm</text>
+    </g>
+    <g id="rssiBGroup" font-family="'Consolas','Courier New',monospace" font-size="10">
+      <rect id="rssiBgB" x="570" y="186" width="90" height="18" rx="4"
+            fill="#fff3e0" stroke="#ffa726" stroke-width="0.8"/>
+      <text id="rssiTextB" x="615" y="199" text-anchor="middle"
+            fill="#e65100" font-weight="bold">B RSSI: −78 dBm</text>
+    </g>
+
+    <!-- ── Track / road ── -->
+    <rect x="100" y="290" width="600" height="6" rx="3" fill="#cbd5e1"/>
+    <text x="90" y="296" text-anchor="end" font-size="9" fill="#64748b"
+          font-family="'Segoe UI',sans-serif">A 端</text>
+    <text x="710" y="296" text-anchor="start" font-size="9" fill="#64748b"
+          font-family="'Segoe UI',sans-serif">B 端</text>
+    <!-- zone markers on the track -->
+    <line x1="280" y1="286" x2="280" y2="300" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2"/>
+    <line x1="400" y1="286" x2="400" y2="300" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2"/>
+    <line x1="520" y1="286" x2="520" y2="300" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="2 2"/>
+    <text x="190" y="310" text-anchor="middle" font-size="8" fill="#94a3b8">A Zone</text>
+    <text x="340" y="310" text-anchor="middle" font-size="8" fill="#94a3b8">Scan</text>
+    <text x="400" y="310" text-anchor="middle" font-size="8" fill="#94a3b8">Handoff</text>
+    <text x="460" y="310" text-anchor="middle" font-size="8" fill="#94a3b8">Scan</text>
+    <text x="610" y="310" text-anchor="middle" font-size="8" fill="#94a3b8">B Zone</text>
+
+    <!-- ── AGV (draggable) ── -->
+    <g id="agvGroup" transform="translate(210, 258)" style="cursor:grab;">
+      <rect x="-50" y="-22" width="100" height="44" rx="8"
+            fill="url(#agvGrad)" stroke="#b8860b" stroke-width="1.8"
+            filter="url(#dropSh)"/>
+      <text x="0" y="-4" text-anchor="middle" font-size="17">🚗</text>
+      <text x="0" y="12" text-anchor="middle" font-size="9.5" font-weight="bold"
+            fill="#5a4000" font-family="'Segoe UI',sans-serif">AGV</text>
+      <!-- wheels -->
+      <circle cx="-30" cy="24" r="5" fill="#555"/>
+      <circle cx="30" cy="24"  r="5" fill="#555"/>
+      <circle cx="-30" cy="24" r="2" fill="#ddd"/>
+      <circle cx="30" cy="24"  r="2" fill="#ddd"/>
+    </g>
+
+    <!-- ── Status Dashboard ── -->
+    <rect x="100" y="336" width="600" height="50" rx="8" fill="#1e293b" opacity="0.92"/>
+    <text id="stateLabel" x="400" y="356" text-anchor="middle"
+          font-size="13" font-weight="bold" fill="#38bdf8"
+          font-family="'Consolas','Courier New',monospace">
+      STATE: B1_STABLE
+    </text>
+    <text id="stateDesc" x="400" y="374" text-anchor="middle"
+          font-size="10.5" fill="#94a3b8"
+          font-family="'Segoe UI',sans-serif">
+      AGV 稳定连接 Base A — 拖动 AGV 观察 MBB 切换过程
+    </text>
+
+    <!-- ── Bottom MPLS label ── -->
+    <rect x="180" y="400" width="440" height="28" rx="6" fill="#e8f0fe"
+          stroke="#90b4de" stroke-width="1"/>
+    <text x="400" y="419" text-anchor="middle" font-size="10.5" fill="#1a3c6e"
+          font-family="'Segoe UI',sans-serif">
+      底层 MPLS Overlay — L2 隧道保持无缝切换
+    </text>
+  </svg>
+
+  <!-- ── State-machine + drag logic ── -->
+  <script>
+  (function(){
+    "use strict";
+    /* ── DOM refs ── */
+    const svg      = document.getElementById("mbbSvg");
+    const agv      = document.getElementById("agvGroup");
+    const linkA    = document.getElementById("linkA");
+    const linkB    = document.getElementById("linkB");
+    const rssiTxA  = document.getElementById("rssiTextA");
+    const rssiTxB  = document.getElementById("rssiTextB");
+    const rssiBgA  = document.getElementById("rssiBgA");
+    const rssiBgB  = document.getElementById("rssiBgB");
+    const stLabel  = document.getElementById("stateLabel");
+    const stDesc   = document.getElementById("stateDesc");
+
+    /* ── Constants ── */
+    const BASE_A_X = 200, BASE_B_X = 600;
+    const BASE_Y   = 154;           /* antenna tip Y */
+    const AGV_Y    = 258;           /* fixed Y of AGV center */
+    const AGV_LINK_Y = AGV_Y - 20;  /* top of AGV box for link endpoint */
+    const MIN_X = 140, MAX_X = 660;
+
+    /* Thresholds (AGV center-X) — with 15 px hysteresis band */
+    const SCAN_A2B    = 290;   /* start scanning B when moving right past here */
+    const HANDOFF_A2B = 400;   /* handoff to B */
+    const STABLE_B    = 520;   /* fully on B */
+    const SCAN_B2A    = 510;   /* start scanning A when moving left past here */
+    const HANDOFF_B2A = 400;   /* handoff to A */
+    const STABLE_A    = 280;   /* fully on A */
+
+    /* ── State ── */
+    let cx = 210;               /* current AGV center X */
+    let state = "B1_STABLE";   /* Base-A stable */
+    let dragging = false;
+
+    /* ── Link style helper ── */
+    const LINK_STYLES = {
+      active:   { color:"#1a6fc4", width:2.8, dash:"",        marker:"url(#arrowB)"    },
+      scanning: { color:"#e88a1a", width:2,   dash:"6 4",     marker:"url(#arrowO)"    },
+      handoff:  { color:"#27ae60", width:2.4, dash:"4 3",     marker:"url(#arrowG)"    },
+      teardown: { color:"#999",    width:1.5, dash:"3 5",     marker:"url(#arrowGrayA)" },
+      none:     { color:"transparent", width:0, dash:"",      marker:""                }
+    };
+
+    function setLink(el, styleName, baseX){
+      const s = LINK_STYLES[styleName];
+      el.setAttribute("stroke",           s.color);
+      el.setAttribute("stroke-width",     s.width);
+      el.setAttribute("stroke-dasharray", s.dash);
+      el.setAttribute("marker-end",       s.marker);
+      el.setAttribute("x1", baseX);
+      el.setAttribute("y1", BASE_Y);
+      el.setAttribute("x2", cx);
+      el.setAttribute("y2", AGV_LINK_Y);
+    }
+
+    /* ── RSSI helpers ── */
+    function calcRSSI(baseCX){
+      const d = Math.abs(cx - baseCX);
+      const maxD = MAX_X - MIN_X;
+      return Math.round(-30 - 55 * (d / maxD) * (d / maxD));   /* −30 … −85 */
+    }
+
+    function updateRSSI(){
+      const rA = calcRSSI(BASE_A_X), rB = calcRSSI(BASE_B_X);
+      rssiTxA.textContent = "A RSSI: " + rA + " dBm";
+      rssiTxB.textContent = "B RSSI: " + rB + " dBm";
+      /* subtle background tint */
+      rssiBgA.setAttribute("fill", rA > -55 ? "#e8f5e9" : "#fff8e1");
+      rssiBgB.setAttribute("fill", rB > -55 ? "#e8f5e9" : "#fff8e1");
+    }
+
+    /* ── State machine ── */
+    const STATE_META = {
+      B1_STABLE:    { txt:"B1_STABLE",        desc:"AGV 稳定连接 Base A",
+                      lA:"active",  lB:"none" },
+      SCANNING_B2:  { txt:"SCANNING → B",     desc:"侦测到 Base B 信号，背景扫描中 …",
+                      lA:"active",  lB:"scanning" },
+      HANDOFF_A2B:  { txt:"HANDOFF A → B",    desc:"Make-Before-Break：双链路并存，MPLS 隧道切换",
+                      lA:"teardown",lB:"handoff" },
+      B2_STABLE:    { txt:"B2_STABLE",        desc:"AGV 稳定连接 Base B",
+                      lA:"none",    lB:"active" },
+      SCANNING_B1:  { txt:"SCANNING → A",     desc:"侦测到 Base A 信号，背景扫描中 …",
+                      lA:"scanning",lB:"active" },
+      HANDOFF_B2A:  { txt:"HANDOFF B → A",    desc:"Make-Before-Break：双链路并存，MPLS 隧道切换",
+                      lA:"handoff", lB:"teardown" }
+    };
+
+    function evalState(){
+      switch(state){
+        case "B1_STABLE":
+          if(cx > SCAN_A2B)   state = "SCANNING_B2";  break;
+        case "SCANNING_B2":
+          if(cx < STABLE_A)   state = "B1_STABLE";
+          else if(cx > HANDOFF_A2B) state = "HANDOFF_A2B"; break;
+        case "HANDOFF_A2B":
+          if(cx < SCAN_A2B)   state = "SCANNING_B2";
+          else if(cx > STABLE_B) state = "B2_STABLE"; break;
+        case "B2_STABLE":
+          if(cx < SCAN_B2A)   state = "SCANNING_B1";  break;
+        case "SCANNING_B1":
+          if(cx > STABLE_B)   state = "B2_STABLE";
+          else if(cx < HANDOFF_B2A) state = "HANDOFF_B2A"; break;
+        case "HANDOFF_B2A":
+          if(cx > SCAN_B2A)   state = "SCANNING_B1";
+          else if(cx < STABLE_A) state = "B1_STABLE"; break;
+      }
+    }
+
+    function render(){
+      /* move AGV */
+      agv.setAttribute("transform", "translate(" + cx + "," + AGV_Y + ")");
+      /* state visuals */
+      const m = STATE_META[state];
+      setLink(linkA, m.lA, BASE_A_X);
+      setLink(linkB, m.lB, BASE_B_X);
+      updateRSSI();
+      stLabel.textContent = "STATE: " + m.txt;
+      stDesc.textContent  = m.desc;
+    }
+
+    /* ── Pointer (drag) handling ── */
+    function svgX(evt){
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse()).x;
+    }
+
+    agv.addEventListener("pointerdown", function(e){
+      dragging = true;
+      agv.style.cursor = "grabbing";
+      agv.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    agv.addEventListener("pointermove", function(e){
+      if(!dragging) return;
+      cx = Math.max(MIN_X, Math.min(MAX_X, svgX(e)));
+      evalState();
+      render();
+    });
+
+    function stopDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      agv.style.cursor = "grab";
+      agv.releasePointerCapture(e.pointerId);
+    }
+    agv.addEventListener("pointerup",     stopDrag);
+    agv.addEventListener("pointercancel", stopDrag);
+
+    /* initial render */
+    render();
+  })();
+  </script>
+</div>
+<!-- ========== END MBB DRAG DEMO ========== -->
 
   <h4>MPO 多路径优化：数据传输的“饱和式救援”</h4>
   <p>在遍布金属货架的立体仓库中，多径衰落是不可逾越的物理法则。CURWB 独有的 <strong>MPO (Multiple Path Optimization)</strong> 技术允许将最高优先级的控制信令复制多份，通过最多 8 条独立的无线路径同时发射出去。这就像是为了一份绝密军情，你同时派出了顺丰、DHL 和联邦快递。只要有任意一个包裹穿透干扰抵达终点，系统便会进行去重合并，任务即告成功。这种“用带宽换可靠性”的冗余策略，将链路丢包率降低了数个数量级。</p>
