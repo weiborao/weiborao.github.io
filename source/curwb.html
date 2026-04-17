@@ -2423,6 +2423,425 @@ pre, code {
   <text x="375" y="325" text-anchor="middle" font-size="10" fill="#333">→ 射频角色动态翻转，数据无中断切换 →</text>
 </svg>
 </div>
+
+  <h4 id="mbb-demo">9.2.7 Make-Before-Break 互动演示</h4>
+  <p>拖动下方的 <strong>AGV（移动客户端）</strong>，在两个 Mobility Base 之间移动，观察 MBB 切换过程。</p>
+<div class="svg-scroll-wrapper">
+  <svg id="mbbSvg" viewBox="0 0 750 400" style="width:100%;max-width:800px;display:block;margin:auto;user-select:none;touch-action:none;">
+    <defs>
+      <marker id="arrowGray1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" fill="#999"/>
+      </marker>
+      <!-- Gradient for bases -->
+      <linearGradient id="baseGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#e3f0ff"/>
+        <stop offset="100%" stop-color="#b3d4fc"/>
+      </linearGradient>
+      <!-- Gradient for AGV -->
+      <linearGradient id="agvGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fff3e0"/>
+        <stop offset="100%" stop-color="#ffe0b2"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ====== WIRED BACKBONE ====== -->
+    <!-- Coordinator -->
+    <rect x="325" y="20" width="100" height="40" rx="6" fill="#e8eaf6" stroke="#5c6bc0" stroke-width="1.5"/>
+    <text x="375" y="45" text-anchor="middle" font-size="12" font-weight="bold" fill="#283593">Coordinator</text>
+
+    <!-- Wired links to bases -->
+    <line x1="345" y1="60" x2="200" y2="130" stroke="#999" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowGray1)"/>
+    <line x1="405" y1="60" x2="550" y2="130" stroke="#999" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowGray1)"/>
+    <text x="255" y="88" font-size="9" fill="#888" transform="rotate(-20,255,88)">有线回程</text>
+    <text x="490" y="88" font-size="9" fill="#888" transform="rotate(20,490,88)">有线回程</text>
+
+    <!-- ====== MOBILITY BASES ====== -->
+    <!-- Base 1 -->
+    <rect x="140" y="130" width="120" height="50" rx="8" fill="url(#baseGrad)" stroke="#1565c0" stroke-width="2"/>
+    <text x="200" y="152" text-anchor="middle" font-size="11" font-weight="bold" fill="#0d47a1">Mobility Base 1</text>
+    <text x="200" y="168" text-anchor="middle" font-size="9" fill="#1565c0">📡 CH 36 / 20 MHz</text>
+    <!-- Base 1 antenna point -->
+    <circle cx="200" cy="185" r="3" fill="#1565c0"/>
+
+    <!-- Base 2 -->
+    <rect x="490" y="130" width="120" height="50" rx="8" fill="url(#baseGrad)" stroke="#1565c0" stroke-width="2"/>
+    <text x="550" y="152" text-anchor="middle" font-size="11" font-weight="bold" fill="#0d47a1">Mobility Base 2</text>
+    <text x="550" y="168" text-anchor="middle" font-size="9" fill="#1565c0">📡 CH 149 / 20 MHz</text>
+    <!-- Base 2 antenna point -->
+    <circle cx="550" cy="185" r="3" fill="#1565c0"/>
+
+    <!-- ====== TRACK ====== -->
+    <line x1="120" y1="310" x2="630" y2="310" stroke="#ccc" stroke-width="2" stroke-dasharray="8,4"/>
+    <text x="375" y="330" text-anchor="middle" font-size="9" fill="#aaa">◄─── AGV 行驶轨道 ───►</text>
+
+    <!-- ====== WIRELESS LINKS (dynamic) ====== -->
+    <!-- Link from Base 1 to AGV -->
+    <line id="linkB1" x1="200" y1="185" x2="200" y2="280" stroke="#1e88e5" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Link from Base 2 to AGV -->
+    <line id="linkB2" x1="550" y1="185" x2="550" y2="280" stroke="none" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- RSSI Labels -->
+    <g id="rssiGroup1" visibility="visible">
+      <rect id="rssiBg1" x="0" y="0" width="60" height="18" rx="4" fill="rgba(255,255,255,0.9)" stroke="#90caf9" stroke-width="0.8"/>
+      <text id="rssiText1" x="0" y="0" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565c0"></text>
+    </g>
+    <g id="rssiGroup2" visibility="hidden">
+      <rect id="rssiBg2" x="0" y="0" width="60" height="18" rx="4" fill="rgba(255,255,255,0.9)" stroke="#ff9800" stroke-width="0.8"/>
+      <text id="rssiText2" x="0" y="0" text-anchor="middle" font-size="10" font-weight="bold" fill="#e65100"></text>
+    </g>
+
+    <!-- ====== AGV (draggable) ====== -->
+    <g id="agvGroup" cursor="grab" style="touch-action:none;">
+      <rect id="agvRect" x="-40" y="-25" width="80" height="50" rx="10" fill="url(#agvGrad)" stroke="#e65100" stroke-width="2"/>
+      <text x="0" y="-5" text-anchor="middle" font-size="11" font-weight="bold" fill="#bf360c">🚗 AGV</text>
+      <text x="0" y="10" text-anchor="middle" font-size="8" fill="#e65100">Mobility Client</text>
+      <!-- Antenna dot on top of AGV -->
+      <circle cx="0" cy="-25" r="3" fill="#e65100"/>
+    </g>
+
+    <!-- ====== STATUS DASHBOARD ====== -->
+    <rect x="100" y="350" width="550" height="40" rx="8" fill="#f5f5f5" stroke="#ccc" stroke-width="1"/>
+    <text id="statusLabel" x="375" y="375" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">
+      状态：B1 稳定连接
+    </text>
+  </svg>
+</div>
+  <!-- ====== LEGEND ====== -->
+  <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:8px;font-size:13px;color:#555;">
+    <span>🔵 <b>实线蓝</b> = 活跃数据链路</span>
+    <span>🟠 <b>虚线橙</b> = 扫描 / 预连接</span>
+    <span>🟢 <b>虚线绿</b> = 切换执行中</span>
+    <span>⚪ <b>隐藏</b> = 无连接</span>
+  </div>
+<div>
+    <summary style="cursor:pointer;font-weight:bold;color:#1a237e;">📖 状态机说明</summary>
+    <ol style="margin-top:6px;line-height:1.8;">
+      <li><b>B1_STABLE</b>：AGV 靠近 Base 1，单链路稳定传输（蓝色实线）。</li>
+      <li><b>SCANNING_B2</b>：AGV 移向中间区域，第二无线电开始扫描 Base 2（橙色虚线出现）。</li>
+      <li><b>HANDOFF_TO_B2</b>：AGV 进入切换区，同时持有双链路（MBB 核心阶段，绿色虚线 = 切换中）。</li>
+      <li><b>B2_STABLE</b>：AGV 靠近 Base 2，已完成切换，单链路稳定传输。</li>
+      <li><b>SCANNING_B1</b>：反向移动时扫描 Base 1。</li>
+      <li><b>HANDOFF_TO_B1</b>：反向切换回 Base 1。</li>
+    </ol>
+</div>
+<script>
+(function() {
+  'use strict';
+
+  // ============ CONSTANTS ============
+  const B1_X = 200;      // Base 1 antenna x
+  const B2_X = 550;      // Base 2 antenna x
+  const BASE_Y = 185;    // Base antenna y
+  const TRACK_Y = 285;   // AGV antenna y (top of AGV group, cy=-25 relative)
+  const AGV_MIN_X = 140; // Leftmost AGV center
+  const AGV_MAX_X = 610; // Rightmost AGV center
+  const AGV_START_X = 200; // Starting position (under Base 1)
+
+  // State machine thresholds (AGV center X positions)
+  // Left-to-right: B1_STABLE → SCANNING_B2 → HANDOFF_TO_B2 → B2_STABLE
+  const THRESH_START_SCAN_B2 = 300;  // Start scanning B2
+  const THRESH_HANDOFF_B2    = 375;  // Begin handoff to B2
+  const THRESH_B2_STABLE     = 450;  // B2 fully stable
+
+  // Right-to-left: B2_STABLE → SCANNING_B1 → HANDOFF_TO_B1 → B1_STABLE
+  const THRESH_START_SCAN_B1 = 450;  // Start scanning B1 (moving left)
+  const THRESH_HANDOFF_B1    = 375;  // Begin handoff to B1
+  const THRESH_B1_STABLE     = 300;  // B1 fully stable
+
+  // Hysteresis band to prevent oscillation
+  const HYSTERESIS = 15;
+
+  // RSSI simulation
+  const RSSI_BEST = -30;   // dBm when directly under base
+  const RSSI_WORST = -85;  // dBm at max distance
+  const MAX_DIST = B2_X - B1_X; // 350px
+
+  // ============ STATE ============
+  const STATES = {
+    B1_STABLE:      'B1_STABLE',
+    SCANNING_B2:    'SCANNING_B2',
+    HANDOFF_TO_B2:  'HANDOFF_TO_B2',
+    B2_STABLE:      'B2_STABLE',
+    SCANNING_B1:    'SCANNING_B1',
+    HANDOFF_TO_B1:  'HANDOFF_TO_B1'
+  };
+
+  let currentState = STATES.B1_STABLE;
+  let agvX = AGV_START_X;
+  let isDragging = false;
+  let dragOffsetX = 0;
+
+  // ============ DOM REFS ============
+  const svg        = document.getElementById('mbbSvg');
+  const agvGroup   = document.getElementById('agvGroup');
+  const linkB1     = document.getElementById('linkB1');
+  const linkB2     = document.getElementById('linkB2');
+  const rssiGroup1 = document.getElementById('rssiGroup1');
+  const rssiGroup2 = document.getElementById('rssiGroup2');
+  const rssiBg1    = document.getElementById('rssiBg1');
+  const rssiBg2    = document.getElementById('rssiBg2');
+  const rssiText1  = document.getElementById('rssiText1');
+  const rssiText2  = document.getElementById('rssiText2');
+  const statusLabel = document.getElementById('statusLabel');
+
+  // ============ HELPERS ============
+  function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+  }
+
+  function calcRSSI(agvCx, baseCx) {
+    const dist = Math.abs(agvCx - baseCx);
+    const ratio = clamp(dist / MAX_DIST, 0, 1);
+    // Quadratic falloff for more realistic feel
+    const rssi = RSSI_BEST + (RSSI_WORST - RSSI_BEST) * (ratio * ratio);
+    return Math.round(rssi);
+  }
+
+  function getSVGPoint(evt) {
+    const pt = svg.createSVGPoint();
+    const touch = evt.touches ? evt.touches[0] : evt;
+    pt.x = touch.clientX;
+    pt.y = touch.clientY;
+    const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return svgPt;
+  }
+
+  // ============ LINK STYLING ============
+  // type: 'active' | 'scanning' | 'handoff' | 'teardown' | 'none'
+  function styleLink(linkEl, type, agvCenterX, rssiGroupEl, rssiBgEl, rssiTextEl, baseCx, rssiVal) {
+    const antennaY = TRACK_Y; // AGV antenna top
+
+    if (type === 'none') {
+      linkEl.setAttribute('stroke', 'none');
+      linkEl.setAttribute('stroke-dasharray', '');
+      rssiGroupEl.setAttribute('visibility', 'hidden');
+      return;
+    }
+
+    // Update endpoint to AGV antenna position
+    linkEl.setAttribute('x2', agvCenterX.toString());
+    linkEl.setAttribute('y2', antennaY.toString());
+
+    switch (type) {
+      case 'active':
+        linkEl.setAttribute('stroke', '#1e88e5');
+        linkEl.setAttribute('stroke-width', '2.5');
+        linkEl.setAttribute('stroke-dasharray', '');
+        break;
+      case 'scanning':
+        linkEl.setAttribute('stroke', '#ff9800');
+        linkEl.setAttribute('stroke-width', '1.8');
+        linkEl.setAttribute('stroke-dasharray', '6,4');
+        break;
+      case 'handoff':
+        linkEl.setAttribute('stroke', '#43a047');
+        linkEl.setAttribute('stroke-width', '2.2');
+        linkEl.setAttribute('stroke-dasharray', '4,3');
+        break;
+      case 'teardown':
+        linkEl.setAttribute('stroke', '#bdbdbd');
+        linkEl.setAttribute('stroke-width', '1.5');
+        linkEl.setAttribute('stroke-dasharray', '3,5');
+        break;
+    }
+
+    // Position RSSI label at midpoint of the link
+    const midX = (baseCx + agvCenterX) / 2;
+    const midY = (BASE_Y + antennaY) / 2;
+
+    rssiGroupEl.setAttribute('visibility', 'visible');
+
+    const labelText = rssiVal + ' dBm';
+    rssiTextEl.textContent = labelText;
+    rssiTextEl.setAttribute('x', midX.toString());
+    rssiTextEl.setAttribute('y', (midY + 4).toString());
+
+    // Size background rect around text
+    const textLen = labelText.length * 6.5;
+    const bgW = Math.max(textLen + 8, 52);
+    rssiBgEl.setAttribute('x', (midX - bgW / 2).toString());
+    rssiBgEl.setAttribute('y', (midY - 9).toString());
+    rssiBgEl.setAttribute('width', bgW.toString());
+    rssiBgEl.setAttribute('height', '18');
+
+    // Color the background stroke to match link type
+    const bgStrokeColors = {
+      active: '#90caf9',
+      scanning: '#ffcc80',
+      handoff: '#a5d6a7',
+      teardown: '#e0e0e0'
+    };
+    rssiBgEl.setAttribute('stroke', bgStrokeColors[type] || '#ccc');
+  }
+
+  // ============ STATE MACHINE ============
+  function updateState(cx) {
+    const prev = currentState;
+
+    switch (currentState) {
+      case STATES.B1_STABLE:
+        if (cx > THRESH_START_SCAN_B2) {
+          currentState = STATES.SCANNING_B2;
+        }
+        break;
+
+      case STATES.SCANNING_B2:
+        if (cx < THRESH_START_SCAN_B2 - HYSTERESIS) {
+          currentState = STATES.B1_STABLE;
+        } else if (cx > THRESH_HANDOFF_B2) {
+          currentState = STATES.HANDOFF_TO_B2;
+        }
+        break;
+
+      case STATES.HANDOFF_TO_B2:
+        if (cx < THRESH_HANDOFF_B2 - HYSTERESIS) {
+          currentState = STATES.SCANNING_B2;
+        } else if (cx > THRESH_B2_STABLE) {
+          currentState = STATES.B2_STABLE;
+        }
+        break;
+
+      case STATES.B2_STABLE:
+        if (cx < THRESH_START_SCAN_B1) {
+          currentState = STATES.SCANNING_B1;
+        }
+        break;
+
+      case STATES.SCANNING_B1:
+        if (cx > THRESH_START_SCAN_B1 + HYSTERESIS) {
+          currentState = STATES.B2_STABLE;
+        } else if (cx < THRESH_HANDOFF_B1) {
+          currentState = STATES.HANDOFF_TO_B1;
+        }
+        break;
+
+      case STATES.HANDOFF_TO_B1:
+        if (cx > THRESH_HANDOFF_B1 + HYSTERESIS) {
+          currentState = STATES.SCANNING_B1;
+        } else if (cx < THRESH_B1_STABLE) {
+          currentState = STATES.B1_STABLE;
+        }
+        break;
+    }
+
+    return currentState !== prev;
+  }
+
+  // ============ RENDER ============
+  const STATUS_TEXT = {
+    B1_STABLE:     '状态：✅ B1 稳定连接 — 单链路传输中',
+    SCANNING_B2:   '状态：🔍 正在扫描 Base 2 — 第二无线电探测中…',
+    HANDOFF_TO_B2: '状态：🔄 MBB 切换中 → B2 — 双链路并存，零丢包切换',
+    B2_STABLE:     '状态：✅ B2 稳定连接 — 单链路传输中',
+    SCANNING_B1:   '状态：🔍 正在扫描 Base 1 — 第二无线电探测中…',
+    HANDOFF_TO_B1: '状态：🔄 MBB 切换中 → B1 — 双链路并存，零丢包切换'
+  };
+
+  function render() {
+    const cx = agvX;
+
+    // Move AGV group
+    agvGroup.setAttribute('transform', 'translate(' + cx + ', 310)');
+
+    // Calculate antenna position (antenna is at cy=-25 in local coords, so world y = 310-25 = 285)
+    const antX = cx;
+    const rssi1 = calcRSSI(cx, B1_X);
+    const rssi2 = calcRSSI(cx, B2_X);
+
+    // Style links based on current state
+    switch (currentState) {
+      case STATES.B1_STABLE:
+        styleLink(linkB1, 'active',   antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
+        styleLink(linkB2, 'none',     antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
+        break;
+
+      case STATES.SCANNING_B2:
+        styleLink(linkB1, 'active',   antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
+        styleLink(linkB2, 'scanning', antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
+        break;
+
+      case STATES.HANDOFF_TO_B2:
+        styleLink(linkB1, 'teardown', antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
+        styleLink(linkB2, 'handoff',  antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
+        break;
+
+      case STATES.B2_STABLE:
+        styleLink(linkB1, 'none',     antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
+        styleLink(linkB2, 'active',   antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
+        break;
+
+      case STATES.SCANNING_B1:
+        styleLink(linkB1, 'scanning', antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
+        styleLink(linkB2, 'active',   antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
+        break;
+
+      case STATES.HANDOFF_TO_B1:
+        styleLink(linkB1, 'handoff',  antX, rssiGroup1, rssiBg1, rssiText1, B1_X, rssi1);
+        styleLink(linkB2, 'teardown', antX, rssiGroup2, rssiBg2, rssiText2, B2_X, rssi2);
+        break;
+    }
+
+    // Update status text
+    statusLabel.textContent = STATUS_TEXT[currentState];
+  }
+
+  // ============ DRAG HANDLERS ============
+  function onPointerDown(evt) {
+    evt.preventDefault();
+    isDragging = true;
+    agvGroup.style.cursor = 'grabbing';
+    const pt = getSVGPoint(evt);
+    dragOffsetX = pt.x - agvX;
+
+    // Capture pointer for smooth dragging outside SVG
+    if (evt.pointerId !== undefined) {
+      agvGroup.setPointerCapture(evt.pointerId);
+    }
+  }
+
+  function onPointerMove(evt) {
+    if (!isDragging) return;
+    evt.preventDefault();
+    const pt = getSVGPoint(evt);
+    agvX = clamp(pt.x - dragOffsetX, AGV_MIN_X, AGV_MAX_X);
+    updateState(agvX);
+    render();
+  }
+
+  function onPointerUp(evt) {
+    if (!isDragging) return;
+    isDragging = false;
+    agvGroup.style.cursor = 'grab';
+    if (evt.pointerId !== undefined) {
+      try { agvGroup.releasePointerCapture(evt.pointerId); } catch(e) {}
+    }
+  }
+
+  // Pointer events (covers both mouse and touch)
+  agvGroup.addEventListener('pointerdown', onPointerDown);
+  svg.addEventListener('pointermove', onPointerMove);
+  svg.addEventListener('pointerup', onPointerUp);
+  svg.addEventListener('pointercancel', onPointerUp);
+
+  // Fallback for older touch browsers
+  agvGroup.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    onPointerDown(e.touches[0]);
+  }, {passive: false});
+  svg.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    onPointerMove(e.touches[0]);
+  }, {passive: false});
+  svg.addEventListener('touchend', function(e) {
+    onPointerUp(e);
+  });
+
+  // ============ INITIAL RENDER ============
+  render();
+
+})();
+</script>
 <!-- 9.3 数据包处理细节 -->
 <h3>9.3   漫游期间的数据包处理机制</h3>
 
