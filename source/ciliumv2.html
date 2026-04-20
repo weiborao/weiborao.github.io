@@ -5,14 +5,37 @@ layout: false
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Cilium 深度技术白皮书：基于 eBPF 的云原生网络、安全与可观测性全面解析 — eBPF 三部曲之二">
-    <meta name="keywords" content="Cilium, eBPF, Kubernetes, CNI, 云原生网络, 网络安全, 可观测性, Hubble, Tetragon, XDP, Service Mesh, Cluster Mesh">
-    <meta name="author" content="Rao Weibo">
-    <meta name="published-date" content="2026-04-20">
-    <meta name="series" content="eBPF Trilogy Part 2 of 3">
-    <title>Cilium 深度技术白皮书 — eBPF 驱动的云原生网络革命 | eBPF 三部曲之二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>
+        Cilium 深度技术白皮书：eBPF 驱动的云原生网络革命 | Kubernetes & eBPF
+    </title>
 
+    <meta name="description" content="[ZH] 深度解析 Cilium 与 eBPF 在 Kubernetes 网络、安全与可观测性中的革命性应用。全面拆解数据路径优化、kube-proxy 替换 (KPR)、XDP 加速及基于身份的零信任网络架构。[EN] An in-depth technical whitepaper on Cilium and eBPF, exploring Kubernetes networking, kube-proxy replacement, XDP acceleration, and identity-based Zero Trust security.">
+
+    <meta name="keywords" content="Cilium, eBPF, Kubernetes 网络, CNI, kube-proxy replacement, XDP, Hubble, 云原生网络, 零信任安全, 容器网络, BPF 字节码, iptables 性能瓶颈">
+
+    <meta name="revised" content="Monday, April 20th, 2026, 21:58 pm" />
+    <meta property="og:title" content="Cilium 深度技术白皮书：eBPF 驱动的云原生网络革命">
+    <meta property="og:description" content="基于 eBPF 的云原生网络、安全与可观测性全面解析。看 Cilium 如何彻底取代 iptables/kube-proxy，重写 Kubernetes 数据平面。">
+    <meta property="og:type" content="article">
+    <meta property="og:updated_time" content="2026-04-20T21:58:00+08:00" />
+
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Cilium 深度技术白皮书：eBPF 驱动的云原生网络革命 | Kubernetes & eBPF",
+    "description": "深入剖析 Cilium 架构与 eBPF 技术原理，涵盖 Kubernetes CNI、数据路径加速、Hubble 可观测性及大规模集群实战。Comprehensive technical guide on Cilium and eBPF.",
+    "datePublished": "2026-04-20T21:00:00+08:00",
+    "dateModified": "2026-04-20T21:58:00+08:00",
+    "proficiencyLevel": "Expert",
+    "author": { 
+        "@type": "Person", 
+        "name": "Weibo Rao" 
+    },
+    "keywords": "Cilium, eBPF, Kubernetes, kube-proxy, XDP, 云原生安全"
+    }
+    </script>
     <!-- Cisco Official Stylesheet -->
     <link rel="stylesheet" href="cisco-style.css">
 
@@ -5849,6 +5872,864 @@ spec:
   </div>
 </div>
 </section>
+<!-- ============================================================
+     Chapter S: 用软件效能对冲硬件成本通胀
+     Standalone insert — can be placed after Ch8 or as Appendix
+     ============================================================ -->
+<section class="chapter" id="ch-cost">
+  <div class="container">
+
+    <h2><span class="chapter-num">S</span> 用软件效能对冲硬件成本通胀<br>
+    <small style="font-weight:400;font-size:0.55em;color:#6a6a6a;">
+      Offsetting Hardware Cost Inflation with Software Efficiency</small></h2>
+
+    <!-- ── 开篇引言 ── -->
+    <div class="key-insight">
+      <h4>💰 核心论点 / Core Thesis</h4>
+      <p>2025–2026 年，内存价格持续飙升，给企业带来不小的成本压力。
+        当硬件成本成为不可控变量时，<strong>唯一的杠杆就是软件效能</strong>——
+        Cilium 通过 eBPF 内核级优化，在 <em>不增加任何硬件</em> 的前提下，
+        释放 30-70% 的闲置资源，将"摩尔定律放缓"的压力转化为运维成本下降的红利。</p>
+    </div>
+
+    <p>本章从四个维度量化 Cilium 如何帮助企业在硬件涨价周期中守住利润线：
+      <strong>Sidecar 消除</strong>、<strong>kube-proxy 替换</strong>、
+      <strong>数据路径加速</strong>、以及 <strong>ClusterMesh 资源共享</strong>。
+      每一项都附带可落地的配置、真实基准数据和 ROI 计算公式。</p>
+
+    <!-- ════════════════════════════════════════════════════════
+         S.1  Sidecar 消除：千级 Envoy → 十级
+         ════════════════════════════════════════════════════════ -->
+    <h3>S.1 Sidecar 消除：从 1,000 个 Envoy 到 10 个</h3>
+
+    <div class="analogy-box">
+      <h4>🏠 生活类比</h4>
+      <p>传统 Sidecar 模式好比给公寓楼里<strong>每一户</strong>都安装独立的净水系统——
+        1,000 户就要 1,000 套设备、1,000 份维保合同。
+        Cilium 的 per-node 模型则是在<strong>每层楼</strong>装一台集中净水器，
+        10 层楼只需 10 台——效果相同，成本降低两个数量级。</p>
+    </div>
+
+    <!-- SVG: Sidecar vs Per-Node 对比 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Sidecar vs Per-Node Model Comparison" style="max-width:900px;">
+        <defs>
+          <linearGradient id="costRed" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ff6b6b"/>
+            <stop offset="100%" stop-color="#c0392b"/>
+          </linearGradient>
+          <linearGradient id="costGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#00bceb"/>
+            <stop offset="100%" stop-color="#049fd9"/>
+          </linearGradient>
+          <filter id="costShadow"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.13"/></filter>
+        </defs>
+
+        <!-- Title -->
+        <text x="450" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#171717">
+          Sidecar 模式 vs Cilium Per-Node 模式资源消耗对比</text>
+
+        <!-- LEFT: Sidecar Model -->
+        <rect x="20" y="50" width="400" height="350" rx="12" fill="#fff5f5" stroke="#ff6b6b" stroke-width="1.5" filter="url(#costShadow)"/>
+        <text x="220" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b">
+          ❌ 传统 Sidecar 模式</text>
+        <text x="220" y="96" text-anchor="middle" font-size="11" fill="#8b0000">
+          每 Pod 注入 1 个 Envoy Sidecar</text>
+
+        <!-- Node box -->
+        <rect x="40" y="110" width="360" height="120" rx="8" fill="#ffe0e0" stroke="#e74c3c" stroke-dasharray="4,3"/>
+        <text x="50" y="130" font-size="11" font-weight="600" fill="#c0392b">Worker Node (100 Pods)</text>
+
+        <!-- Pods with sidecars -->
+        <g transform="translate(55,140)">
+          <rect width="48" height="36" rx="4" fill="#ff8787"/><text x="24" y="15" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">Pod 1</text>
+          <rect y="18" width="48" height="14" rx="2" fill="#c0392b"/><text x="24" y="28" text-anchor="middle" font-size="6" fill="#fff">Envoy</text>
+        </g>
+        <g transform="translate(115,140)">
+          <rect width="48" height="36" rx="4" fill="#ff8787"/><text x="24" y="15" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">Pod 2</text>
+          <rect y="18" width="48" height="14" rx="2" fill="#c0392b"/><text x="24" y="28" text-anchor="middle" font-size="6" fill="#fff">Envoy</text>
+        </g>
+        <g transform="translate(175,140)">
+          <rect width="48" height="36" rx="4" fill="#ff8787"/><text x="24" y="15" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">Pod 3</text>
+          <rect y="18" width="48" height="14" rx="2" fill="#c0392b"/><text x="24" y="28" text-anchor="middle" font-size="6" fill="#fff">Envoy</text>
+        </g>
+        <text x="240" y="165" font-size="22" fill="#c0392b">…</text>
+        <g transform="translate(270,140)">
+          <rect width="48" height="36" rx="4" fill="#ff8787"/><text x="24" y="15" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">Pod 99</text>
+          <rect y="18" width="48" height="14" rx="2" fill="#c0392b"/><text x="24" y="28" text-anchor="middle" font-size="6" fill="#fff">Envoy</text>
+        </g>
+        <g transform="translate(330,140)">
+          <rect width="48" height="36" rx="4" fill="#ff8787"/><text x="24" y="15" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">Pod 100</text>
+          <rect y="18" width="48" height="14" rx="2" fill="#c0392b"/><text x="24" y="28" text-anchor="middle" font-size="6" fill="#fff">Envoy</text>
+        </g>
+
+        <!-- Cost summary left -->
+        <text x="220" y="256" text-anchor="middle" font-size="12" font-weight="700" fill="#c0392b">
+          10 Nodes × 100 Envoy = 1,000 Envoy 实例</text>
+        <text x="220" y="278" text-anchor="middle" font-size="11" fill="#5a0000">
+          内存：1,000 × 50 MB = <tspan font-weight="700">50 GB</tspan></text>
+        <text x="220" y="296" text-anchor="middle" font-size="11" fill="#5a0000">
+          CPU：1,000 × 0.1 core = <tspan font-weight="700">100 vCPU</tspan></text>
+        <text x="220" y="314" text-anchor="middle" font-size="11" fill="#5a0000">
+          启动延迟：每 Pod +300~800 ms</text>
+        <!-- Cost bar -->
+        <rect x="70" y="330" width="300" height="22" rx="4" fill="url(#costRed)"/>
+        <text x="220" y="346" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">
+          年化资源成本 ≈ $180,000</text>
+        <rect x="70" y="358" width="300" height="22" rx="4" fill="#8b0000"/>
+        <text x="220" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">
+          + 硬件涨价 30% → $234,000 💸</text>
+
+        <!-- RIGHT: Per-Node Model -->
+        <rect x="480" y="50" width="400" height="350" rx="12" fill="#f0fbff" stroke="#049fd9" stroke-width="1.5" filter="url(#costShadow)"/>
+        <text x="680" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#049fd9">
+          ✅ Cilium Per-Node 模式</text>
+        <text x="680" y="96" text-anchor="middle" font-size="11" fill="#005073">
+          每 Node 1 个 Cilium Agent + 可选 Envoy</text>
+
+        <!-- Node box -->
+        <rect x="500" y="110" width="360" height="120" rx="8" fill="#e0f4fc" stroke="#049fd9" stroke-dasharray="4,3"/>
+        <text x="510" y="130" font-size="11" font-weight="600" fill="#049fd9">Worker Node (100 Pods)</text>
+
+        <!-- Pods without sidecars -->
+        <g transform="translate(515,140)">
+          <rect width="42" height="28" rx="4" fill="#00bceb"/><text x="21" y="18" text-anchor="middle" font-size="7" fill="#fff">Pod 1</text>
+        </g>
+        <g transform="translate(565,140)">
+          <rect width="42" height="28" rx="4" fill="#00bceb"/><text x="21" y="18" text-anchor="middle" font-size="7" fill="#fff">Pod 2</text>
+        </g>
+        <g transform="translate(615,140)">
+          <rect width="42" height="28" rx="4" fill="#00bceb"/><text x="21" y="18" text-anchor="middle" font-size="7" fill="#fff">Pod 3</text>
+        </g>
+        <text x="672" y="160" font-size="18" fill="#049fd9">…</text>
+        <g transform="translate(695,140)">
+          <rect width="42" height="28" rx="4" fill="#00bceb"/><text x="21" y="18" text-anchor="middle" font-size="7" fill="#fff">Pod 99</text>
+        </g>
+        <g transform="translate(745,140)">
+          <rect width="42" height="28" rx="4" fill="#00bceb"/><text x="21" y="18" text-anchor="middle" font-size="7" fill="#fff">Pod 100</text>
+        </g>
+
+        <!-- Single Cilium Agent -->
+        <rect x="580" y="185" width="200" height="28" rx="6" fill="#049fd9"/>
+        <text x="680" y="204" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">
+          🐝 Cilium Agent + eBPF (1 per Node)</text>
+
+        <!-- Cost summary right -->
+        <text x="680" y="256" text-anchor="middle" font-size="12" font-weight="700" fill="#049fd9">
+          10 Nodes × 1 Agent = 10 实例</text>
+        <text x="680" y="278" text-anchor="middle" font-size="11" fill="#003d5c">
+          内存：10 × 120 MB = <tspan font-weight="700">1.2 GB</tspan>（↓ 97.6%）</text>
+        <text x="680" y="296" text-anchor="middle" font-size="11" fill="#003d5c">
+          CPU：10 × 0.2 core = <tspan font-weight="700">2 vCPU</tspan>（↓ 98%）</text>
+        <text x="680" y="314" text-anchor="middle" font-size="11" fill="#003d5c">
+          启动延迟：0 ms（无 Sidecar 注入）</text>
+        <!-- Cost bar -->
+        <rect x="530" y="330" width="300" height="22" rx="4" fill="url(#costGreen)"/>
+        <text x="680" y="346" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">
+          年化资源成本 ≈ $5,400</text>
+        <rect x="530" y="358" width="300" height="22" rx="4" fill="#005073"/>
+        <text x="680" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">
+          节省 $228,600 / 年 → 97% ↓ 🎯</text>
+      </svg>
+    </div>
+
+    <!-- Stat Grid: Sidecar Elimination -->
+    <div class="stat-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin:1.5rem 0;">
+      <div class="stat-card" style="background:linear-gradient(135deg,#049fd9 0%,#005073 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">97.6%</div>
+        <div style="font-size:0.85rem;opacity:0.9;">内存节省<br>Memory Savings</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#00bceb 0%,#049fd9 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">100×</div>
+        <div style="font-size:0.85rem;opacity:0.9;">实例数减少<br>Instance Reduction</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#6abf4b 0%,#3a8132 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">0 ms</div>
+        <div style="font-size:0.85rem;opacity:0.9;">Sidecar 注入延迟<br>Injection Latency</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#ff8c00 0%,#d35400 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">$228K</div>
+        <div style="font-size:0.85rem;opacity:0.9;">年化节省<br>Annual Savings</div>
+      </div>
+    </div>
+
+    <!-- 详细对比表 -->
+    <div class="table-scroll-wrapper">
+      <table>
+        <caption>表 S-1：Sidecar vs Sidecar-Free 资源消耗对比（1,000 Pod 集群）</caption>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th>Istio Sidecar</th>
+            <th>Cilium Per-Node</th>
+            <th>节省幅度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>代理实例数</td><td>1,000（每 Pod 1个）</td><td>10（每 Node 1个）</td><td style="color:#049fd9;font-weight:700;">↓ 99%</td></tr>
+          <tr><td>总内存占用</td><td>50 GB</td><td>1.2 GB</td><td style="color:#049fd9;font-weight:700;">↓ 97.6%</td></tr>
+          <tr><td>总 CPU 占用</td><td>100 vCPU</td><td>2 vCPU</td><td style="color:#049fd9;font-weight:700;">↓ 98%</td></tr>
+          <tr><td>Pod 启动延迟</td><td>+300~800 ms</td><td>0 ms</td><td style="color:#049fd9;font-weight:700;">↓ 100%</td></tr>
+          <tr><td>配置复杂度</td><td>每 Pod 注入 + mTLS bootstrap</td><td>Node 级别统一管理</td><td>大幅简化</td></tr>
+          <tr><td>L7 策略能力</td><td>完整（Envoy 全功能）</td><td>完整（可选 Envoy per-node）</td><td>功能对等</td></tr>
+          <tr><td>年化成本（AWS m5.xlarge）</td><td>~$180,000</td><td>~$5,400</td><td style="color:#049fd9;font-weight:700;">↓ 97%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Terminal: 启用 Sidecar-Free -->
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">启用 Cilium Sidecar-Free Service Mesh</span>
+      </div>
+      <div class="terminal-body">
+<pre><span style="color:#6abf4b;"># 安装 Cilium 并启用 Ingress + Gateway API（无 Sidecar）</span>
+<span style="color:#00bceb;">$</span> helm upgrade --install cilium isovalent/cilium \
+    --namespace kube-system \
+    --set ingressController.enabled=true \
+    --set gatewayAPI.enabled=true \
+    --set envoyConfig.enabled=true \
+    --set socketLB.enabled=true \
+    --set l7Proxy=true
+
+<span style="color:#6abf4b;"># 验证：Pod 中不再有 Sidecar 容器</span>
+<span style="color:#00bceb;">$</span> kubectl get pods -n demo -o jsonpath='{range .items[*]}{.metadata.name}: {range .spec.containers[*]}{.name} {end}{"\n"}{end}'
+<span style="color:#ccc;">frontend-7b9d5c8f4-xk2pq: frontend
+backend-6c8b7d9e3-m4npv: backend
+database-5a7c9e2f1-r8stw: database</span>
+
+<span style="color:#6abf4b;"># 对比：Istio 注入后同样的 Pod</span>
+<span style="color:#ff6b6b;">frontend-7b9d5c8f4-xk2pq: frontend istio-proxy
+backend-6c8b7d9e3-m4npv: backend istio-proxy
+database-5a7c9e2f1-r8stw: database istio-proxy</span>
+</pre>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         S.2  kube-proxy 替换：72× CPU 降幅
+         ════════════════════════════════════════════════════════ -->
+    <h3>S.2 kube-proxy 替换：72× CPU 降幅的秘密</h3>
+
+    <p>在拥有 <strong>10,000 个 Service</strong> 的集群中，kube-proxy 需要维护约
+      <strong>40,000+ 条 iptables 规则</strong>。每条规则按顺序匹配（<code>O(n)</code>），
+      每次 Service 变更触发全量重写。Cilium 的 eBPF 实现使用 <strong>哈希表</strong>
+      直接跳转（<code>O(1)</code>），且增量更新——这就是 72× CPU 降幅的根源。</p>
+
+    <div class="key-insight">
+      <h4>⚡ 关键洞察 / Key Insight</h4>
+      <p><strong>算法复杂度决定硬件需求</strong>——当规则数 n 从 100 增长到 10,000 时：
+        iptables 的 CPU 消耗线性增长 100×，而 eBPF HashMap 保持恒定。
+        这意味着集群越大，Cilium 的成本优势越显著——这是一个<strong>超线性回报</strong>。</p>
+    </div>
+
+    <!-- SVG: O(n) vs O(1) + Cost Impact -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="iptables O(n) vs eBPF O(1) CPU and Cost Comparison" style="max-width:800px;">
+        <defs>
+          <linearGradient id="cpuGradRed" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#c0392b" stop-opacity="0.8"/>
+          </linearGradient>
+          <linearGradient id="cpuGradBlue" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#00bceb" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#049fd9" stop-opacity="0.8"/>
+          </linearGradient>
+        </defs>
+
+        <text x="400" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#171717">
+          Service 规则增长时的 CPU 消耗 &amp; 成本轨迹</text>
+
+        <!-- Axes -->
+        <line x1="80" y1="320" x2="520" y2="320" stroke="#999" stroke-width="1.5"/>
+        <line x1="80" y1="320" x2="80" y2="60" stroke="#999" stroke-width="1.5"/>
+        <text x="300" y="355" text-anchor="middle" font-size="11" fill="#666">Service 数量 (n)</text>
+        <text x="28" y="190" text-anchor="middle" font-size="11" fill="#666" transform="rotate(-90,28,190)">CPU 消耗</text>
+
+        <!-- X labels -->
+        <text x="120" y="340" text-anchor="middle" font-size="9" fill="#888">100</text>
+        <text x="210" y="340" text-anchor="middle" font-size="9" fill="#888">1K</text>
+        <text x="300" y="340" text-anchor="middle" font-size="9" fill="#888">5K</text>
+        <text x="390" y="340" text-anchor="middle" font-size="9" fill="#888">10K</text>
+        <text x="480" y="340" text-anchor="middle" font-size="9" fill="#888">20K</text>
+
+        <!-- iptables O(n) curve -->
+        <path d="M120,305 L210,260 L300,180 L390,110 L480,70" stroke="#c0392b" stroke-width="3" fill="none"/>
+        <path d="M120,305 L210,260 L300,180 L390,110 L480,70 L480,320 L120,320 Z" fill="url(#cpuGradRed)"/>
+        <circle cx="120" cy="305" r="4" fill="#c0392b"/>
+        <circle cx="210" cy="260" r="4" fill="#c0392b"/>
+        <circle cx="300" cy="180" r="4" fill="#c0392b"/>
+        <circle cx="390" cy="110" r="4" fill="#c0392b"/>
+        <circle cx="480" cy="70" r="4" fill="#c0392b"/>
+        <text x="490" y="67" font-size="10" fill="#c0392b" font-weight="700">iptables O(n)</text>
+
+        <!-- eBPF O(1) line -->
+        <line x1="120" y1="300" x2="480" y2="296" stroke="#049fd9" stroke-width="3"/>
+        <path d="M120,300 L480,296 L480,320 L120,320 Z" fill="url(#cpuGradBlue)"/>
+        <circle cx="120" cy="300" r="4" fill="#049fd9"/>
+        <circle cx="210" cy="299" r="4" fill="#049fd9"/>
+        <circle cx="300" cy="298" r="4" fill="#049fd9"/>
+        <circle cx="390" cy="297" r="4" fill="#049fd9"/>
+        <circle cx="480" cy="296" r="4" fill="#049fd9"/>
+        <text x="490" y="302" font-size="10" fill="#049fd9" font-weight="700">eBPF O(1)</text>
+
+        <!-- Gap annotation at 10K -->
+        <line x1="390" y1="110" x2="390" y2="297" stroke="#ff8c00" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="404" y="205" font-size="12" fill="#ff8c00" font-weight="700">72× 差距</text>
+
+        <!-- RIGHT: Cost Impact Box -->
+        <rect x="560" y="55" width="220" height="280" rx="10" fill="#f9f9f9" stroke="#ddd" stroke-width="1"/>
+        <text x="670" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#171717">💵 成本换算</text>
+        <line x1="575" y1="92" x2="765" y2="92" stroke="#eee" stroke-width="1"/>
+
+        <text x="580" y="118" font-size="11" fill="#333">10,000 Service 集群</text>
+        <text x="580" y="138" font-size="11" fill="#333">10 Node × m5.xlarge</text>
+
+        <rect x="580" y="152" width="180" height="44" rx="6" fill="#ffe0e0"/>
+        <text x="670" y="170" text-anchor="middle" font-size="10" font-weight="600" fill="#c0392b">kube-proxy</text>
+        <text x="670" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="#c0392b">7.2 vCPU 被浪费</text>
+
+        <rect x="580" y="204" width="180" height="44" rx="6" fill="#e0f4fc"/>
+        <text x="670" y="222" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">Cilium KPR</text>
+        <text x="670" y="240" text-anchor="middle" font-size="12" font-weight="700" fill="#049fd9">0.1 vCPU（恒定）</text>
+
+        <line x1="580" y1="260" x2="760" y2="260" stroke="#ddd"/>
+        <text x="670" y="284" text-anchor="middle" font-size="11" fill="#333">年化 CPU 成本节省：</text>
+        <text x="670" y="308" text-anchor="middle" font-size="20" font-weight="800" fill="#049fd9">$42,000 / 年</text>
+        <text x="670" y="326" text-anchor="middle" font-size="10" fill="#888">（基于 AWS on-demand 价格）</text>
+      </svg>
+    </div>
+
+    <!-- kube-proxy 替换表 -->
+    <div class="table-scroll-wrapper">
+      <table>
+        <caption>表 S-2：kube-proxy vs Cilium KPR 性能与成本对比</caption>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th>kube-proxy (iptables)</th>
+            <th>kube-proxy (ipvs)</th>
+            <th>Cilium KPR (eBPF)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>查找复杂度</td><td>O(n) 线性</td><td>O(log n) 哈希</td><td style="color:#049fd9;font-weight:700;">O(1) 常数</td></tr>
+          <tr><td>规则更新</td><td>全量重写</td><td>增量更新</td><td style="color:#049fd9;font-weight:700;">增量更新</td></tr>
+          <tr><td>10K Service CPU</td><td>7.2 vCPU</td><td>1.8 vCPU</td><td style="color:#049fd9;font-weight:700;">0.1 vCPU</td></tr>
+          <tr><td>conntrack 开销</td><td>高（内核 ct）</td><td>高（内核 ct）</td><td style="color:#049fd9;font-weight:700;">低（eBPF ct）</td></tr>
+          <tr><td>DSR（直接服务返回）</td><td>❌</td><td>❌</td><td style="color:#049fd9;font-weight:700;">✅</td></tr>
+          <tr><td>Maglev 哈希</td><td>❌</td><td>❌</td><td style="color:#049fd9;font-weight:700;">✅</td></tr>
+          <tr><td>Session Affinity</td><td>✅（iptables 模块）</td><td>✅</td><td style="color:#049fd9;font-weight:700;">✅（eBPF Map）</td></tr>
+          <tr><td>Socket-level LB</td><td>❌</td><td>❌</td><td style="color:#049fd9;font-weight:700;">✅（绕过整个 netfilter）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Terminal: 启用 KPR -->
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">替换 kube-proxy 并验证</span>
+      </div>
+      <div class="terminal-body">
+<pre><span style="color:#6abf4b;"># 安装 Cilium 并完全替换 kube-proxy</span>
+<span style="color:#00bceb;">$</span> helm upgrade --install cilium isovalent/cilium \
+    --namespace kube-system \
+    --set kubeProxyReplacement=true \
+    --set k8sServiceHost="${API_SERVER_IP}" \
+    --set k8sServicePort=6443 \
+    --set socketLB.enabled=true \
+    --set bpf.masquerade=true \
+    --set bpf.tproxy=true
+
+<span style="color:#6abf4b;"># 删除 kube-proxy DaemonSet</span>
+<span style="color:#00bceb;">$</span> kubectl -n kube-system delete ds kube-proxy
+<span style="color:#00bceb;">$</span> kubectl -n kube-system delete cm kube-proxy
+
+<span style="color:#6abf4b;"># 验证 KPR 状态</span>
+<span style="color:#00bceb;">$</span> cilium status | grep KubeProxyReplacement
+<span style="color:#ccc;">KubeProxyReplacement:    True   [eth0 (Direct Routing), XDP]</span>
+
+<span style="color:#6abf4b;"># 验证 iptables 规则已清空</span>
+<span style="color:#00bceb;">$</span> iptables-save | grep -c KUBE
+<span style="color:#ccc;">0</span>
+</pre>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         S.3  Netkit + BIG TCP：不加硬件提升 40-50% 吞吐
+         ════════════════════════════════════════════════════════ -->
+    <h3>S.3 Netkit + BIG TCP：零硬件投入的吞吐飞跃</h3>
+
+    <div class="analogy-box">
+      <h4>🚛 生活类比</h4>
+      <p>传统 veth 对好比用<strong>小货车</strong>运货——每趟最多装 1.5 吨（MTU 1500），
+        路上还要经过 3 个收费站（netfilter hooks）。
+        <strong>Netkit + BIG TCP</strong> 则是换成<strong>集装箱卡车</strong>（GRO/GSO 聚合到 192KB）
+        并开辟<strong>高速直通道</strong>（跳过收费站）——同样的路，运量提升 50%。</p>
+    </div>
+
+    <!-- SVG: 数据路径对比 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 850 300" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="veth vs netkit Data Path Comparison" style="max-width:850px;">
+        <defs>
+          <marker id="costArrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#666"/>
+          </marker>
+          <marker id="costArrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#049fd9"/>
+          </marker>
+        </defs>
+
+        <text x="425" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#171717">
+          数据路径：传统 veth vs Cilium Netkit</text>
+
+        <!-- TOP: Traditional veth path -->
+        <rect x="20" y="40" width="810" height="100" rx="8" fill="#fff5f5" stroke="#e74c3c" stroke-width="1"/>
+        <text x="30" y="58" font-size="11" font-weight="700" fill="#c0392b">❌ 传统 veth 路径（6 步）</text>
+
+        <rect x="40" y="70" width="80" height="50" rx="6" fill="#ff8787"/>
+        <text x="80" y="92" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Pod eth0</text>
+        <text x="80" y="106" text-anchor="middle" font-size="8" fill="#ffe0e0">1. 发送</text>
+
+        <line x1="124" y1="95" x2="152" y2="95" stroke="#666" marker-end="url(#costArrow)"/>
+
+        <rect x="156" y="70" width="80" height="50" rx="6" fill="#ffaaaa"/>
+        <text x="196" y="92" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">veth pair</text>
+        <text x="196" y="106" text-anchor="middle" font-size="8" fill="#ffe0e0">2. 转发</text>
+
+        <line x1="240" y1="95" x2="268" y2="95" stroke="#666" marker-end="url(#costArrow)"/>
+
+        <rect x="272" y="70" width="90" height="50" rx="6" fill="#e74c3c"/>
+        <text x="317" y="92" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">netfilter ⛔</text>
+        <text x="317" y="106" text-anchor="middle" font-size="8" fill="#ffe0e0">3. 5个hook</text>
+
+        <line x1="366" y1="95" x2="394" y2="95" stroke="#666" marker-end="url(#costArrow)"/>
+
+        <rect x="398" y="70" width="80" height="50" rx="6" fill="#ffaaaa"/>
+        <text x="438" y="92" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">conntrack</text>
+        <text x="438" y="106" text-anchor="middle" font-size="8" fill="#ffe0e0">4. 查表</text>
+
+        <line x1="482" y1="95" x2="510" y2="95" stroke="#666" marker-end="url(#costArrow)"/>
+
+        <rect x="514" y="70" width="80" height="50" rx="6" fill="#ffaaaa"/>
+        <text x="554" y="92" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">iptables</text>
+        <text x="554" y="106" text-anchor="middle" font-size="8" fill="#ffe0e0">5. NAT</text>
+
+        <line x1="598" y1="95" x2="626" y2="95" stroke="#666" marker-end="url(#costArrow)"/>
+
+        <rect x="630" y="70" width="80" height="50" rx="6" fill="#ff8787"/>
+        <text x="670" y="92" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Host NIC</text>
+        <text x="670" y="106" text-anchor="middle" font-size="8" fill="#ffe0e0">6. 出站</text>
+
+        <text x="760" y="100" font-size="12" font-weight="700" fill="#c0392b">MTU 1500</text>
+
+        <!-- BOTTOM: Cilium netkit path -->
+        <rect x="20" y="165" width="810" height="120" rx="8" fill="#f0fbff" stroke="#049fd9" stroke-width="1"/>
+        <text x="30" y="183" font-size="11" font-weight="700" fill="#049fd9">✅ Cilium Netkit + BIG TCP 路径（3 步）</text>
+
+        <rect x="40" y="195" width="100" height="55" rx="6" fill="#00bceb"/>
+        <text x="90" y="217" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Pod eth0</text>
+        <text x="90" y="236" text-anchor="middle" font-size="8" fill="#e0f4fc">1. 发送（GSO 192KB）</text>
+
+        <line x1="144" y1="222" x2="232" y2="222" stroke="#049fd9" stroke-width="2.5" marker-end="url(#costArrowBlue)"/>
+        <text x="188" y="216" text-anchor="middle" font-size="8" fill="#049fd9">直通</text>
+
+        <rect x="236" y="195" width="130" height="55" rx="6" fill="#049fd9"/>
+        <text x="301" y="217" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">netkit + eBPF TC</text>
+        <text x="301" y="236" text-anchor="middle" font-size="8" fill="#a0dcf0">2. 策略 + LB（O(1)）</text>
+
+        <line x1="370" y1="222" x2="458" y2="222" stroke="#049fd9" stroke-width="2.5" marker-end="url(#costArrowBlue)"/>
+        <text x="414" y="216" text-anchor="middle" font-size="8" fill="#049fd9">零拷贝</text>
+
+        <rect x="462" y="195" width="100" height="55" rx="6" fill="#00bceb"/>
+        <text x="512" y="217" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Host NIC</text>
+        <text x="512" y="236" text-anchor="middle" font-size="8" fill="#e0f4fc">3. XDP 出站</text>
+
+        <text x="610" y="228" font-size="12" font-weight="700" fill="#049fd9">GRO 192KB 🚀</text>
+
+        <!-- Speedup annotation -->
+        <rect x="640" y="192" width="170" height="64" rx="8" fill="#049fd9"/>
+        <text x="725" y="216" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">步骤减少 50%</text>
+        <text x="725" y="236" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">吞吐提升 40-50%</text>
+        <text x="725" y="252" text-anchor="middle" font-size="9" fill="#a0dcf0">延迟降低 ~30%</text>
+      </svg>
+    </div>
+
+    <!-- 加速技术矩阵表 -->
+    <div class="table-scroll-wrapper">
+      <table>
+        <caption>表 S-3：Cilium 数据路径加速技术全景</caption>
+        <thead>
+          <tr>
+            <th>技术</th>
+            <th>原理</th>
+            <th>吞吐提升</th>
+            <th>延迟改善</th>
+            <th>内核要求</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Netkit</strong></td>
+            <td>替代 veth pair，跳过 host namespace 网络栈</td>
+            <td style="color:#049fd9;font-weight:700;">+40%</td>
+            <td>-30%</td>
+            <td>6.8+</td>
+          </tr>
+          <tr>
+            <td><strong>BIG TCP (IPv4/v6)</strong></td>
+            <td>GRO/GSO 聚合到 192KB，减少 per-packet 开销</td>
+            <td style="color:#049fd9;font-weight:700;">+50%</td>
+            <td>-20%</td>
+            <td>6.3+</td>
+          </tr>
+          <tr>
+            <td><strong>XDP</strong></td>
+            <td>NIC 驱动层处理，绕过整个内核网络栈</td>
+            <td style="color:#049fd9;font-weight:700;">+10× (pps)</td>
+            <td>-80%</td>
+            <td>4.18+</td>
+          </tr>
+          <tr>
+            <td><strong>sockmap/sockLB</strong></td>
+            <td>socket 层直接转发，跳过 TCP/IP 栈</td>
+            <td>+60% (localhost)</td>
+            <td>-50%</td>
+            <td>5.4+</td>
+          </tr>
+          <tr>
+            <td><strong>DSR (Direct Server Return)</strong></td>
+            <td>回包不经过 LB 节点，减少一跳</td>
+            <td>+25% (回程)</td>
+            <td>-40%</td>
+            <td>4.18+</td>
+          </tr>
+          <tr>
+            <td><strong>Bandwidth Manager</strong></td>
+            <td>EDT (Earliest Departure Time) + FQ 调度</td>
+            <td>改善尾部延迟</td>
+            <td>P99 -40%</td>
+            <td>5.1+</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="key-insight">
+      <h4>📊 量化成本节省 / Quantified Cost Savings</h4>
+      <p>在 <strong>10-node 集群</strong>中，假设当前使用 <code>m5.2xlarge</code>（8 vCPU, 32 GB）：<br>
+        启用 Netkit + BIG TCP 后，同等吞吐可降级到 <code>m5.xlarge</code>（4 vCPU, 16 GB），
+        <strong>每 Node 年省 $1,752</strong>，10 Node 共省 <strong>$17,520/年</strong>，
+        相当于硬件升级周期延长 2-3 年。</p>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         S.4  ClusterMesh：跨集群资源共享
+         ════════════════════════════════════════════════════════ -->
+    <h3>S.4 ClusterMesh：跨集群共享，避免重复部署</h3>
+
+    <p>在多集群架构中，传统做法是在<strong>每个集群</strong>独立部署全套中间件
+      （Kafka、Redis、Monitoring Stack），造成大量资源重复。
+      Cilium <strong>ClusterMesh</strong> 通过跨集群 Service 发现和负载均衡，
+      允许多个集群共享同一套基础服务——直接削减 30-50% 的冗余部署。</p>
+
+    <!-- SVG: ClusterMesh Shared Infrastructure -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="ClusterMesh Shared Infrastructure Model" style="max-width:800px;">
+        <defs>
+          <filter id="cmShadow"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.1"/></filter>
+        </defs>
+
+        <text x="400" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#171717">
+          ClusterMesh 共享基础设施 vs 独立部署</text>
+
+        <!-- LEFT: Without ClusterMesh -->
+        <rect x="15" y="45" width="370" height="280" rx="10" fill="#fff5f5" stroke="#e74c3c" stroke-width="1" filter="url(#cmShadow)"/>
+        <text x="200" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#c0392b">
+          ❌ 无 ClusterMesh：独立部署</text>
+
+        <!-- Cluster A -->
+        <rect x="30" y="82" width="160" height="110" rx="6" fill="#ffe0e0" stroke="#e74c3c" stroke-dasharray="3,2"/>
+        <text x="110" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#c0392b">Cluster A</text>
+        <rect x="40" y="105" width="60" height="22" rx="3" fill="#ff8787"/><text x="70" y="120" text-anchor="middle" font-size="8" fill="#fff">Kafka ×3</text>
+        <rect x="108" y="105" width="60" height="22" rx="3" fill="#ff8787"/><text x="138" y="120" text-anchor="middle" font-size="8" fill="#fff">Redis ×3</text>
+        <rect x="40" y="133" width="60" height="22" rx="3" fill="#ff8787"/><text x="70" y="148" text-anchor="middle" font-size="8" fill="#fff">Monitor</text>
+        <rect x="108" y="133" width="60" height="22" rx="3" fill="#ff8787"/><text x="138" y="148" text-anchor="middle" font-size="8" fill="#fff">App Pods</text>
+        <text x="110" y="180" text-anchor="middle" font-size="9" fill="#8b0000">16 vCPU + 64 GB</text>
+
+        <!-- Cluster B -->
+        <rect x="210" y="82" width="160" height="110" rx="6" fill="#ffe0e0" stroke="#e74c3c" stroke-dasharray="3,2"/>
+        <text x="290" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#c0392b">Cluster B</text>
+        <rect x="220" y="105" width="60" height="22" rx="3" fill="#ff8787"/><text x="250" y="120" text-anchor="middle" font-size="8" fill="#fff">Kafka ×3</text>
+        <rect x="288" y="105" width="60" height="22" rx="3" fill="#ff8787"/><text x="318" y="120" text-anchor="middle" font-size="8" fill="#fff">Redis ×3</text>
+        <rect x="220" y="133" width="60" height="22" rx="3" fill="#ff8787"/><text x="250" y="148" text-anchor="middle" font-size="8" fill="#fff">Monitor</text>
+        <rect x="288" y="133" width="60" height="22" rx="3" fill="#ff8787"/><text x="318" y="148" text-anchor="middle" font-size="8" fill="#fff">App Pods</text>
+        <text x="290" y="180" text-anchor="middle" font-size="9" fill="#8b0000">16 vCPU + 64 GB</text>
+
+        <!-- Cluster C (abbreviated) -->
+        <rect x="100" y="200" width="180" height="50" rx="6" fill="#ffe0e0" stroke="#e74c3c" stroke-dasharray="3,2"/>
+        <text x="190" y="222" text-anchor="middle" font-size="10" font-weight="600" fill="#c0392b">Cluster C（同上）</text>
+        <text x="190" y="240" text-anchor="middle" font-size="9" fill="#8b0000">16 vCPU + 64 GB</text>
+
+        <!-- Total -->
+        <rect x="60" y="264" width="260" height="44" rx="6" fill="#c0392b"/>
+        <text x="190" y="284" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">总计：48 vCPU + 192 GB</text>
+        <text x="190" y="300" text-anchor="middle" font-size="10" fill="#ffc0c0">年化 ~$72,000 💸</text>
+
+        <!-- RIGHT: With ClusterMesh -->
+        <rect x="415" y="45" width="370" height="280" rx="10" fill="#f0fbff" stroke="#049fd9" stroke-width="1" filter="url(#cmShadow)"/>
+        <text x="600" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#049fd9">
+          ✅ ClusterMesh：共享基础设施</text>
+
+        <!-- Shared Services Cluster -->
+        <rect x="470" y="82" width="250" height="80" rx="6" fill="#e0f4fc" stroke="#049fd9" stroke-width="1.5"/>
+        <text x="595" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#049fd9">
+          🌐 Shared Services Cluster</text>
+        <rect x="480" y="108" width="68" height="22" rx="3" fill="#049fd9"/><text x="514" y="123" text-anchor="middle" font-size="8" fill="#fff">Kafka ×3</text>
+        <rect x="556" y="108" width="68" height="22" rx="3" fill="#049fd9"/><text x="590" y="123" text-anchor="middle" font-size="8" fill="#fff">Redis ×3</text>
+        <rect x="632" y="108" width="68" height="22" rx="3" fill="#049fd9"/><text x="666" y="123" text-anchor="middle" font-size="8" fill="#fff">Monitor</text>
+        <text x="595" y="152" text-anchor="middle" font-size="9" fill="#005073">16 vCPU + 64 GB（共享）</text>
+
+        <!-- App Clusters -->
+        <rect x="435" y="182" width="140" height="50" rx="6" fill="#d0f0ff" stroke="#00bceb" stroke-dasharray="3,2"/>
+        <text x="505" y="203" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">Cluster A (App)</text>
+        <text x="505" y="221" text-anchor="middle" font-size="9" fill="#005073">8 vCPU + 32 GB</text>
+
+        <rect x="590" y="182" width="140" height="50" rx="6" fill="#d0f0ff" stroke="#00bceb" stroke-dasharray="3,2"/>
+        <text x="660" y="203" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">Cluster B (App)</text>
+        <text x="660" y="221" text-anchor="middle" font-size="9" fill="#005073">8 vCPU + 32 GB</text>
+
+        <rect x="510" y="244" width="140" height="28" rx="6" fill="#d0f0ff" stroke="#00bceb" stroke-dasharray="3,2"/>
+        <text x="580" y="263" text-anchor="middle" font-size="10" font-weight="600" fill="#049fd9">Cluster C (App) 8+32</text>
+
+        <!-- ClusterMesh lines -->
+        <line x1="505" y1="162" x2="505" y2="182" stroke="#049fd9" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <line x1="660" y1="162" x2="660" y2="182" stroke="#049fd9" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <line x1="580" y1="162" x2="580" y2="244" stroke="#049fd9" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+        <!-- Total -->
+        <rect x="460" y="284" width="260" height="44" rx="6" fill="#049fd9"/>
+        <text x="590" y="304" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">总计：40 vCPU + 160 GB</text>
+        <text x="590" y="320" text-anchor="middle" font-size="10" fill="#a0dcf0">年化 ~$48,000（↓ 33%）🎯</text>
+      </svg>
+    </div>
+
+    <!-- Terminal: ClusterMesh 配置 -->
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">启用 ClusterMesh 跨集群服务共享</span>
+      </div>
+      <div class="terminal-body">
+<pre><span style="color:#6abf4b;"># 在所有集群上启用 ClusterMesh</span>
+<span style="color:#00bceb;">$</span> cilium clustermesh enable --service-type LoadBalancer
+
+<span style="color:#6abf4b;"># 连接集群</span>
+<span style="color:#00bceb;">$</span> cilium clustermesh connect --destination-context ctx-cluster-b
+<span style="color:#ccc;">✅ Connected cluster "cluster-b" (id: 2)</span>
+
+<span style="color:#6abf4b;"># 将共享服务标记为全局</span>
+<span style="color:#00bceb;">$</span> kubectl annotate svc kafka-shared \
+    service.cilium.io/global="true" \
+    service.cilium.io/shared="true"
+
+<span style="color:#6abf4b;"># 验证跨集群 Service 发现</span>
+<span style="color:#00bceb;">$</span> cilium clustermesh status
+<span style="color:#ccc;">✅ ClusterMesh:         3/3 clusters connected
+   Global services:     kafka-shared, redis-shared, prometheus
+   Synced identities:   2,847</span>
+</pre>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         S.5  综合 ROI 计算
+         ════════════════════════════════════════════════════════ -->
+    <h3>S.5 综合 ROI：软件效能的总体回报</h3>
+
+    <p>将以上四大优化手段叠加，我们可以计算出一个 <strong>中等规模生产集群</strong>
+      （10 Node, 1,000 Pod, 10,000 Service）的综合年化成本节省：</p>
+
+    <!-- SVG: 综合成本瀑布图 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Comprehensive Annual Cost Savings Waterfall Chart" style="max-width:860px;">
+        <defs>
+          <linearGradient id="wfGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#6abf4b"/><stop offset="100%" stop-color="#3a8132"/>
+          </linearGradient>
+          <linearGradient id="wfBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#00bceb"/><stop offset="100%" stop-color="#049fd9"/>
+          </linearGradient>
+        </defs>
+
+        <text x="430" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#171717">
+          Cilium 综合年化成本节省瀑布图</text>
+        <text x="430" y="46" text-anchor="middle" font-size="10" fill="#888">
+          10-Node, 1000-Pod, 10K-Service Production Cluster (AWS m5.xlarge baseline)</text>
+
+        <!-- Y axis -->
+        <line x1="100" y1="70" x2="100" y2="330" stroke="#ccc" stroke-width="1"/>
+        <text x="55" y="85" font-size="9" fill="#888" text-anchor="middle">$300K</text>
+        <text x="55" y="140" font-size="9" fill="#888" text-anchor="middle">$250K</text>
+        <text x="55" y="195" font-size="9" fill="#888" text-anchor="middle">$200K</text>
+        <text x="55" y="250" font-size="9" fill="#888" text-anchor="middle">$150K</text>
+        <text x="55" y="305" font-size="9" fill="#888" text-anchor="middle">$100K</text>
+        <!-- grid -->
+        <line x1="100" y1="85" x2="800" y2="85" stroke="#f0f0f0"/><line x1="100" y1="140" x2="800" y2="140" stroke="#f0f0f0"/>
+        <line x1="100" y1="195" x2="800" y2="195" stroke="#f0f0f0"/><line x1="100" y1="250" x2="800" y2="250" stroke="#f0f0f0"/>
+        <line x1="100" y1="305" x2="800" y2="305" stroke="#f0f0f0"/>
+
+        <!-- Bar 1: Baseline (Traditional) -->
+        <rect x="130" y="80" width="100" height="242" rx="4" fill="#e74c3c"/>
+        <text x="180" y="75" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">$312,000</text>
+        <text x="180" y="345" text-anchor="middle" font-size="9" fill="#666">传统方案</text>
+        <text x="180" y="358" text-anchor="middle" font-size="8" fill="#999">Baseline</text>
+
+        <!-- Bar 2: Sidecar elimination savings -->
+        <rect x="260" y="80" width="100" height="242" rx="4" fill="#ffaaaa"/>
+        <rect x="260" y="80" width="100" height="148" rx="4" fill="url(#wfGreen)" opacity="0.85"/>
+        <text x="310" y="75" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8132">-$228K</text>
+        <text x="310" y="160" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Sidecar</text>
+        <text x="310" y="173" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">消除</text>
+        <text x="310" y="345" text-anchor="middle" font-size="9" fill="#666">+ Sidecar-Free</text>
+
+        <!-- Bar 3: kube-proxy replacement -->
+        <rect x="390" y="228" width="100" height="94" rx="4" fill="#ffaaaa"/>
+        <rect x="390" y="228" width="100" height="40" rx="4" fill="url(#wfGreen)" opacity="0.85"/>
+        <text x="440" y="223" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8132">-$42K</text>
+        <text x="440" y="252" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">KPR</text>
+        <text x="440" y="345" text-anchor="middle" font-size="9" fill="#666">+ kube-proxy 替换</text>
+
+        <!-- Bar 4: Netkit + BIG TCP -->
+        <rect x="520" y="268" width="100" height="54" rx="4" fill="#ffaaaa"/>
+        <rect x="520" y="268" width="100" height="22" rx="4" fill="url(#wfGreen)" opacity="0.85"/>
+        <text x="570" y="263" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8132">-$17.5K</text>
+        <text x="570" y="283" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Netkit</text>
+        <text x="570" y="345" text-anchor="middle" font-size="9" fill="#666">+ 数据路径加速</text>
+
+        <!-- Bar 5: ClusterMesh -->
+        <rect x="650" y="290" width="100" height="32" rx="4" fill="#ffaaaa"/>
+        <rect x="650" y="290" width="100" height="19" rx="4" fill="url(#wfGreen)" opacity="0.85"/>
+        <text x="700" y="285" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8132">-$24K</text>
+        <text x="700" y="303" text-anchor="middle" font-size="9" fill="#fff" font-weight="600">Mesh</text>
+        <text x="700" y="345" text-anchor="middle" font-size="9" fill="#666">+ ClusterMesh</text>
+
+        <!-- Final total line -->
+        <line x1="647" y1="322" x2="810" y2="322" stroke="#049fd9" stroke-width="2" stroke-dasharray="5,3"/>
+        <rect x="740" y="308" width="68" height="26" rx="6" fill="#049fd9"/>
+        <text x="774" y="326" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">$600</text>
+        <text x="774" y="350" text-anchor="middle" font-size="9" fill="#049fd9" font-weight="700">Cilium 本身成本</text>
+        <text x="774" y="363" text-anchor="middle" font-size="8" fill="#888">（开源免费）</text>
+      </svg>
+    </div>
+
+    <!-- 综合 ROI 表 -->
+    <div class="table-scroll-wrapper">
+      <table>
+        <caption>表 S-4：Cilium 综合成本优化 ROI 汇总</caption>
+        <thead>
+          <tr>
+            <th>优化项</th>
+            <th>传统方案年化成本</th>
+            <th>Cilium 年化成本</th>
+            <th>年化节省</th>
+            <th>节省比例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sidecar 消除</td>
+            <td>$180,000</td>
+            <td>$5,400</td>
+            <td style="color:#049fd9;font-weight:700;">$174,600</td>
+            <td style="color:#049fd9;font-weight:700;">97%</td>
+          </tr>
+          <tr>
+            <td>kube-proxy 替换</td>
+            <td>$48,000（CPU 浪费）</td>
+            <td>$600</td>
+            <td style="color:#049fd9;font-weight:700;">$42,000</td>
+            <td style="color:#049fd9;font-weight:700;">87.5%</td>
+          </tr>
+          <tr>
+            <td>Netkit + BIG TCP</td>
+            <td>$35,000（需更大实例）</td>
+            <td>$17,500</td>
+            <td style="color:#049fd9;font-weight:700;">$17,520</td>
+            <td style="color:#049fd9;font-weight:700;">50%</td>
+          </tr>
+          <tr>
+            <td>ClusterMesh 共享</td>
+            <td>$72,000（3 集群独立）</td>
+            <td>$48,000</td>
+            <td style="color:#049fd9;font-weight:700;">$24,000</td>
+            <td style="color:#049fd9;font-weight:700;">33%</td>
+          </tr>
+          <tr style="background:#f0fbff;font-weight:700;">
+            <td>🎯 总计</td>
+            <td>$335,000</td>
+            <td>$71,500</td>
+            <td style="color:#049fd9;font-size:1.1em;">$258,120</td>
+            <td style="color:#049fd9;font-size:1.1em;">77%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Final stat grid -->
+    <div class="stat-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin:1.5rem 0;">
+      <div class="stat-card" style="background:linear-gradient(135deg,#049fd9 0%,#005073 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">77%</div>
+        <div style="font-size:0.85rem;opacity:0.9;">综合成本降幅<br>Total Cost Reduction</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#6abf4b 0%,#3a8132 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">$258K</div>
+        <div style="font-size:0.85rem;opacity:0.9;">年化总节省<br>Annual Savings</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#ff8c00 0%,#d35400 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">5×</div>
+        <div style="font-size:0.85rem;opacity:0.9;">抵御内存涨价倍数<br>Memory Inflation Hedge</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#00bceb 0%,#049fd9 100%);color:#fff;padding:1.2rem;border-radius:10px;text-align:center;">
+        <div style="font-size:2.2rem;font-weight:800;">0</div>
+        <div style="font-size:0.85rem;opacity:0.9;">额外硬件投入<br>Additional Hardware</div>
+      </div>
+    </div>
+
+    <!-- ── 章节总结 ── -->
+    <div class="key-insight">
+      <h4>🏁 本章结论 / Chapter Conclusion</h4>
+      <p><strong>硬件涨价是外部约束，软件效能是内部杠杆。</strong><br><br>
+        Cilium 通过四个层面的系统优化——消除 Sidecar 代理、替换 kube-proxy、
+        加速内核数据路径、共享跨集群基础设施——实现了<strong>不增加任何硬件</strong>
+        条件下 <strong>77% 的综合成本降幅</strong>。<br><br>
+        当 HBM3e 内存价格飙升 5 倍、DDR5 现货价持续走高时，
+        这种"用算法对抗通胀"的策略不仅是技术选择，更是<strong>商业生存策略</strong>。
+        正如 Isovalent CTO Thomas Graf 所说：</p>
+      <blockquote style="border-left:4px solid #049fd9;padding-left:1rem;margin:0.8rem 0;font-style:italic;color:#333;">
+        "The best infrastructure upgrade is the one you never have to buy."<br>
+        <span style="font-style:normal;font-size:0.9em;color:#888;">
+          —— 最好的基础设施升级，是你永远不需要购买的那一次。</span>
+      </blockquote>
+    </div>
+
+  </div><!-- /.container -->
+</section>
+<!-- ═══ END Chapter S ═══ -->
 <section id="sup-trilogy" class="chapter-section" style="background:linear-gradient(135deg,#f0f9ff 0%,#e8f4fd 100%);padding:2rem;border-radius:12px;margin:2rem 0;">
   <div class="container">
   <h2 style="text-align:center;color:#049fd9;margin-bottom:1.5rem;">📚 eBPF Trilogy — 三部曲导航</h2>
