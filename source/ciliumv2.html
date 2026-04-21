@@ -603,6 +603,53 @@ layout: false
         margin-bottom: 0.3em;
         }
 
+        /* 增量 CSS：策略选型卡片 */
+.policy-selector-card {
+  background: #F0FFF4;
+  border: 1px solid #C6F6D5;
+  border-left: 4px solid #67B346;
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  margin: 2.5rem 0;
+}
+.policy-selector-card h4 {
+  margin: 0 0 1rem 0;
+  color: #276749;
+  font-size: 1rem;
+}
+.selector-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.selector-table th {
+  background: #C6F6D5;
+  color: #276749;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 2px solid #9AE6B4;
+  font-weight: 700;
+}
+.selector-table td {
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid #C6F6D5;
+  color: #2d3748;
+  vertical-align: top;
+}
+.selector-table code {
+  background: #E6FFFA;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+.selector-tip {
+  font-size: 0.85rem;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.6;
+}
+
         /* === Footnote Reference === */
         .footnote-ref {
             color: #049fd9;
@@ -3141,16 +3188,16 @@ kubectl -n kube-system delete cm kube-proxy</code></pre>
 
 <h4>4.7.1 BIG TCP —— 突破 64KB 限制</h4>
 
-<p>传统 Linux 网络栈中，GRO/GSO（Generic Receive/Segmentation Offload）将多个小包合并为一个大包时，受限于 16 位长度字段，<strong>单个逻辑段最大只能是 ~64KB</strong>。BIG TCP 通过扩展 IPv6 Jumbogram 支持，将 GSO 段大小提升到 <strong>最大 512KB</strong>，从而大幅减少每个逻辑段的协议栈处理次数。</p>
+<p>传统 Linux 网络栈中，GRO/GSO（Generic Receive/Segmentation Offload）将多个小包合并为一个大包时，受限于 16 位长度字段，<strong>单个逻辑段最大只能是 ~64KB</strong>。BIG TCP 通过扩展 IPv6 Jumbogram 支持，将 GRO/GSO 聚合上限从 ~64KB 提升到 <strong>最大约 192KB</strong>（Linux 6.3+ IPv6；IPv4 支持自 Linux 6.3 起逐步加入），从而大幅减少每个逻辑段的协议栈处理次数。</p>
 
 <div class="stat-grid">
   <div class="stat-card">
-    <div class="stat-number">512KB</div>
+    <div class="stat-number">192KB</div>
     <div class="stat-label">最大 GSO 段大小</div>
-    <div class="stat-detail">传统限制: 64KB (8× 提升)</div>
+    <div class="stat-detail">传统限制: 64KB (3× 提升)</div>
   </div>
   <div class="stat-card">
-    <div class="stat-number">40-50%</div>
+    <div class="stat-number">40-50%<cite class="data-src" data-detail="BIG TCP (192KB GSO) vs 标准 64KB GSO，iperf3 单流，Linux 6.3+，Cilium 1.14 Benchmark">BIG TCP</cite></div>
     <div class="stat-label">IPv6 吞吐提升</div>
     <div class="stat-detail">数据中心内部通信场景</div>
   </div>
@@ -4002,6 +4049,48 @@ spec:
     <div class="key-insight">
       <strong>FQDN 策略的工作原理：</strong>Cilium 内置 DNS 代理拦截所有 DNS 查询，学习域名到 IP 的映射关系，然后自动将 FQDN 规则转换为底层 IP 规则并写入 eBPF Map。当 DNS 解析结果变化时（如 CDN IP 轮转），规则自动更新。这意味着你可以写 <code>toFQDNs: api.stripe.com</code>，而不需要维护不断变化的 IP 列表。
     </div>
+
+    <!-- 插入位置：方案 C 的 YAML 代码块结束后，5.6 小节标题之前 -->
+<div class="policy-selector-card">
+  <h4>📋 CNP vs CCNP：快速选型指南</h4>
+  <table class="selector-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th>CiliumNetworkPolicy (CNP)</th>
+        <th>CiliumClusterwideNetworkPolicy (CCNP)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>作用域</strong></td>
+        <td>单一 Namespace</td>
+        <td>整个集群（跨 Namespace）</td>
+      </tr>
+      <tr>
+        <td><strong>典型使用者</strong></td>
+        <td>应用团队 (Dev/SRE)</td>
+        <td>平台团队 (Platform Eng / SecOps)</td>
+      </tr>
+      <tr>
+        <td><strong>常见用途</strong></td>
+        <td>微服务间东西向隔离、L7 API 策略</td>
+        <td>全局 Default Deny 基线、合规审计、Host 防火墙</td>
+      </tr>
+      <tr>
+        <td><strong>Node 选择器</strong></td>
+        <td>❌ 不支持</td>
+        <td>✅ 支持 <code>nodeSelector</code></td>
+      </tr>
+      <tr>
+        <td><strong>K8s NetworkPolicy 兼容</strong></td>
+        <td>✅ 超集</td>
+        <td>❌ Cilium 独有 CRD</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="selector-tip">💡 <strong>最佳实践：</strong>Platform 团队用 CCNP 铺设全局 Default-Deny 基线和合规策略；应用团队在各自 Namespace 内用 CNP 定义细粒度 Allow 规则。两者叠加，形成"平台兜底 + 应用自治"的安全分层。</p>
+</div>
 
     <!-- ── 5.6 透明加密 ── -->
     <h3>5.6 透明加密：零信任网络的基石</h3>
@@ -5274,7 +5363,7 @@ Apr 20 09:16:45.789: default/service-a-7d8f → default/service-b-3k9x
 
 <div class="stat-grid">
   <div class="stat-card">
-    <div class="stat-number">7,500+</div>
+    <div class="stat-number">7,500+<cite class="data-src" data-detail="来源: OpenAI KubeCon NA 2023 演讲，截至 2023 年数据。2025+ 规模未公开披露。">2023</cite></div>
     <div class="stat-label">单集群节点数</div>
   </div>
   <div class="stat-card">
@@ -6260,8 +6349,8 @@ spec:
         </thead>
         <tbody>
           <tr><td>代理实例数</td><td>1,000（每 Pod 1个）</td><td>10（每 Node 1个）</td><td style="color:#049fd9;font-weight:700;">↓ 99%</td></tr>
-          <tr><td>总内存占用</td><td>50 GB</td><td>1.2 GB</td><td style="color:#049fd9;font-weight:700;">↓ 97.6%</td></tr>
-          <tr><td>总 CPU 占用</td><td>100 vCPU</td><td>2 vCPU</td><td style="color:#049fd9;font-weight:700;">↓ 98%</td></tr>
+          <tr><td>总内存占用</td><td>总内存占用 | 100 GB (1,000 Pod × 100 MB) </td><td>1.2 GB (10 Node × 120 MB)</td><td style="color:#049fd9;font-weight:700;">↓ 98.8%</td></tr>
+          <tr><td>总 CPU 占用</td><td>500 vCPU (1,000 Pod × 0.5 vCPU)</td><td>2 vCPU (10 Node × 0.2 vCPU)</td><td style="color:#049fd9;font-weight:700;">↓ 99.6%</td></tr>
           <tr><td>Pod 启动延迟</td><td>+300~800 ms</td><td>0 ms</td><td style="color:#049fd9;font-weight:700;">↓ 100%</td></tr>
           <tr><td>配置复杂度</td><td>每 Pod 注入 + mTLS bootstrap</td><td>Node 级别统一管理</td><td>大幅简化</td></tr>
           <tr><td>L7 策略能力</td><td>完整（Envoy 全功能）</td><td>完整（可选 Envoy per-node）</td><td>功能对等</td></tr>
