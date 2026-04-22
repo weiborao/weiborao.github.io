@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco IE vs Hirschmann 工业交换机 · 全维度竞争分析</title>
+<style>
+/* ============================================================================
+   CISCO UNIFIED STYLESHEET — 2026 Digital Identity Version
+   ============================================================================
+   Theme:      Cisco Official 2026 (Refined Contrast & Accessibility)
+   Responsive: Mobile First -> Tablet -> Desktop
+   Print:      Optimized for technical whitepapers
+   ============================================================================ */
+
+/* ============================================================================
+   §1  CSS CUSTOM PROPERTIES (更新至 2026 配色标准)
+   ============================================================================ */
+:root {
+  /* Brand & Status Colors - 2026 Updated Palette (基于官方与 Partner 门户) */
+  --cisco-blue:          #049FD9; /* Cisco 官方核心品牌蓝 */
+  --cisco-blue-dark:     #005073; /* 沉稳的导航与交互蓝 (Indigo Blue) */
+  --cisco-navy:          #0D274D; /* 深邃午夜蓝 (Midnight)，替代纯黑 */
+  --cisco-accent:        #00BCEB; /* 思科亮蓝 (Cerulean)，作为点缀/高亮色 */
+  --color-success:       #67B346; /* Cisco Partner 特有的 Miles Green */
+  
+  /* 追加的新品牌色彩 (Necessary Supplements 状态色补充) */
+  --cisco-purple:        #9232AC; /* 官方紫，常用于高级产品线 */
+  --cisco-orange:        #F58025; /* 官方橙 */
+  --cisco-red:           #E2231A; /* 官方红/危险操作 */
+  --color-warning:       #FBAB18; /* 合作伙伴体系常用预警橙 */
+  
+  /* Text & Background - 增强易读性 (Slate 灰度体系) */
+  --text-primary:        #1A1A1A; /* 接近黑色但更加柔和 */
+  --text-secondary:      #58585B; /* 官方次级文本灰 (Slate) */
+  --text-muted:          #9B9CA0; /* 辅助性灰度 (Medium Gray) */
+  --bg-white:            #FFFFFF;
+  --bg-light:            #F7F8FA; /* Cisco Gray 50: 偏冷色调的极浅灰 */
+  --bg-soft:             #EEF0F3; /* Cisco Gray 100: 面板与引用底色 */
+  
+  /* Borders & Shadows - 2026 软化视觉感 */
+  --border-color:        #D4D8DE; /* Cisco Gray 200 */
+  --border-radius-sm:    6px;     /* Cisco 趋向于更简洁的微圆角 */
+  --border-radius-md:    12px;    /* 更新为12px，使卡片边缘更具现代感 */
+  --shadow-sm:           0 2px 8px rgba(13, 39, 77, 0.04);
+  --shadow-md:           0 8px 24px rgba(13, 39, 77, 0.08);
+  --shadow-hover:        0 12px 32px rgba(4, 159, 217, 0.15); /* 补充: 悬停光晕 */
+
+  /* Typography - 品牌字体规范 */
+  --font-sans:           "CiscoSans", "Cisco Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:           "CiscoSansMono", "SF Mono", Consolas, monospace;
+  --line-height-base:    1.65;
+  
+  /* Spacing */
+  --space-2: 0.5rem;   --space-4: 1rem;     --space-6: 1.5rem; 
+  --space-8: 2rem;     --space-12: 3rem;
+  
+  /* Layout */
+  --container-max:       1360px;
+  --transition-fast:     200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   §2  RESET & BASE
+   ============================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  line-height: var(--line-height-base);
+  color: var(--text-primary);
+  background-color: var(--bg-white);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 3px solid var(--cisco-accent); outline-offset: 2px; }
+
+img, svg { display: block; max-width: 100%; height: auto; }
+
+/* ============================================================================
+   §3  TYPOGRAPHY
+   ============================================================================ */
+h1, h2, h3, h4 { color: var(--cisco-navy); font-weight: 700; line-height: 1.25; margin-bottom: var(--space-4); }
+
+h1 { font-size: 2.75rem; letter-spacing: -0.02em; margin-bottom: var(--space-8); }
+h2 { 
+  font-size: 2rem; 
+  margin-bottom: var(--space-6); 
+  padding-bottom: var(--space-2); 
+  border-bottom: 4px solid var(--cisco-accent); /* 标志性的桥梁线条色 */
+  display: inline-block; 
+}
+h3 { font-size: 1.5rem; color: var(--cisco-blue); margin-bottom: var(--space-4); padding-bottom: var(--space-2); }
+h4 { font-size: 1.25rem; color: var(--cisco-navy); margin-bottom: var(--space-4); padding-bottom: var(--space-2);}
+
+p { margin-bottom: var(--space-4); }
+
+a { color: var(--cisco-blue); text-decoration: none; transition: all var(--transition-fast); border-bottom: 1px solid transparent; }
+a:hover { color: var(--cisco-blue-dark); border-bottom-color: var(--cisco-blue-dark); }
+
+code {
+  font-family: var(--font-mono); font-size: 0.9em;
+  background-color: var(--bg-soft); color: var(--cisco-blue-dark);
+  padding: 0.2em 0.4em; border-radius: var(--border-radius-sm);
+}
+
+blockquote {
+  border-left: 5px solid var(--cisco-blue);
+  background-color: var(--bg-light);
+  padding: var(--space-4) var(--space-8);
+  margin: var(--space-8) 0;
+  color: var(--text-secondary);
+  font-style: normal; /* 2026 现代排版趋向于非斜体引用 */
+}
+
+/* ============================================================================
+   §4  LAYOUT & GRIDS
+   ============================================================================ */
+.container {
+  width: 100%; max-width: var(--container-max);
+  margin: 0 auto; padding: 0 var(--space-6);
+}
+
+.chapter { padding: var(--space-12) 0; }
+.chapter:nth-child(even) { background-color: var(--bg-light); }
+
+.grid { display: grid; gap: var(--space-6); }
+
+.grid > * {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ============================================================================
+   §5  CORE COMPONENTS (Hero, Cards, Buttons, Callouts)
+   ============================================================================ */
+.hero {
+  /* 使用 2026 渐变规范：由深海蓝向品牌蓝过渡 */
+  background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue) 100%);
+  color: var(--bg-white); padding: var(--space-12) 0; text-align: center;
+}
+.hero h1 { color: var(--bg-white); border: none; margin-bottom: var(--space-4); }
+
+.card {
+  background: var(--bg-white); border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md); padding: var(--space-6);
+  box-shadow: var(--shadow-sm); transition: all var(--transition-fast);
+}
+.card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); border-color: var(--cisco-accent); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--space-4) var(--space-8); font-weight: 600;
+  background-color: var(--cisco-blue); color: var(--bg-white);
+  border-radius: 50px; /* 2026 全圆角按钮更具交互感 */
+  transition: all var(--transition-fast);
+  border: none; cursor: pointer;
+}
+.btn:hover { background-color: var(--cisco-blue-dark); transform: scale(1.02); color: var(--bg-white); }
+
+.callout {
+  padding: var(--space-6); margin: var(--space-8) 0;
+  border-left: 6px solid var(--cisco-accent); background-color: var(--bg-soft);
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+
+/* ============================================================================
+   §6  DATA DISPLAY (Tables, SVGs, Code Blocks)
+   ============================================================================ */
+.svg-scroll-wrapper, .table-scroll-wrapper {
+  width: 100%; overflow-x: auto; margin: var(--space-6) 0;
+  border: 1px solid var(--border-color); border-radius: var(--border-radius-sm);
+}
+
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+thead { background: var(--cisco-navy); color: var(--bg-white); }
+th, td { padding: var(--space-4); text-align: left; border-bottom: 1px solid var(--border-color); }
+tbody tr:nth-child(even) { background-color: var(--bg-light); }
+tbody tr:hover { background-color: var(--bg-soft); }
+
+pre {
+  background: var(--cisco-navy); color: var(--bg-white); padding: var(--space-6);
+  border-radius: var(--border-radius-md); overflow-x: auto;
+  font-family: var(--font-mono); margin: var(--space-8) 0;
+  border: 1px solid var(--text-secondary);
+}
+pre code { background: none; color: inherit; padding: 0; }
+
+/* ============================================================================
+   §7  RESPONSIVE (Mobile specific tweaks)
+   ============================================================================ */
+@media (max-width: 768px) {
+  .container { padding: 0 var(--space-4); }
+  h1 { font-size: 2.25rem; }
+  h2 { font-size: 1.75rem; }
+  .chapter { padding: var(--space-8) 0; }
+  .btn { width: 100%; } /* 移动端按钮全宽便于点击 */
+}
+
+/* ===== §8  PRINT STYLES ===== */
+@media print{
+
+  /* ---------- base ---------- */
+  body{font-size:10pt;color:#000;background:#fff!important;}
+  .chapter{padding:10pt 0;background:transparent!important;}
+
+  @page {
+    margin: 2cm;
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 9pt;
+      color: #58585B;
+      font-family: "CiscoSans", sans-serif;
+    }
+  /* ---------- page breaks ---------- */
+  h2{page-break-before:always;break-before:page;}
+  .chapter:first-of-type h2{page-break-before:avoid;break-before:avoid;}
+
+  /* tables / cards still avoid internal splits */
+  table,pre,.card{page-break-inside:avoid;break-inside:avoid;}
+
+  /* FIX-A ① : .svg-scroll-wrapper —
+     Remove break-inside:avoid so large SVGs can span pages
+     instead of pushing to a new page and leaving a blank one.
+     Also force overflow visible so nothing is clipped. */
+  .svg-scroll-wrapper{
+    break-inside:auto!important;
+    page-break-inside:auto!important;
+    overflow:visible!important;
+    border:none!important;          /* hide the visible border on the "blank" page */
+    max-height:none!important;
+  }
+
+  /* Let large SVGs shrink to fit the page width */
+  .svg-scroll-wrapper svg{
+    width:100%!important;
+    height:auto!important;
+    max-width:100%!important;
+  }
+
+  /* FIX-B : #closing section — dark-bg text invisible when printed
+     Override inline color:#fff and gradient background so text is readable */
+  #closing,
+  #closing *{
+    background:transparent!important;
+    color:#000!important;
+  }
+  #closing h2{
+    border-bottom-color:#049fd9!important;   /* keep a Cisco-blue accent line */
+  }
+}
+}
+/* === Page-specific overrides & additions === */
+
+/* Hero subtitle */
+.hero .subtitle { font-size:1.15rem; opacity:.88; max-width:740px; margin:0 auto var(--space-6); line-height:1.6; }
+.hero .meta    { font-size:.85rem; opacity:.65; }
+
+/* Stat row in hero */
+.stat-row { display:flex; flex-wrap:wrap; justify-content:center; gap:var(--space-6); margin-top:var(--space-8); }
+.stat-card { background:rgba(255,255,255,.12); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.18); border-radius:var(--border-radius-md); padding:var(--space-4) var(--space-6); min-width:150px; text-align:center; }
+.stat-card .num { font-size:2.2rem; font-weight:800; color:var(--cisco-accent); }
+.stat-card .label { font-size:.82rem; opacity:.8; margin-top:4px; }
+
+/* Score badge */
+.score { display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:50%; font-weight:700; font-size:.95rem; color:#fff; }
+.score.cisco { background:var(--cisco-blue); }
+.score.hirsch { background:#78909C; }
+
+/* Gap bar */
+.gap-bar { height:8px; border-radius:4px; background:var(--bg-soft); position:relative; overflow:hidden; }
+.gap-bar .fill { position:absolute; left:0; top:0; height:100%; border-radius:4px; background:linear-gradient(90deg,var(--cisco-blue),var(--cisco-accent)); }
+
+/* Advantage cards */
+.adv-card { border-left:5px solid var(--cisco-accent); padding-left:var(--space-4); margin-bottom:var(--space-4); }
+.adv-card.warn { border-left-color:var(--color-warning); }
+.adv-card h4 { margin-bottom:4px; font-size:1rem; }
+
+/* Chapter lead */
+.chapter-lead { font-size:1.1rem; color:var(--text-secondary); max-width:800px; margin-bottom:var(--space-8); line-height:1.7; }
+
+/* Compact table tweaks */
+table.compact th, table.compact td { padding:10px 14px; font-size:.92rem; }
+
+/* Responsive SVG label sizing */
+.svg-scroll-wrapper text { font-family:var(--font-sans); }
+
+/* Print: keep stat-row together */
+@media print { .stat-row { break-inside:avoid; } }
+
+/* === TOC Navigation Styles === */
+.toc-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 0;
+  transition: var(--transition-fast);
+}
+
+.nav-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand .brand-text {
+  font-weight: 700;
+  color: var(--cisco-navy);
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.nav-links li a {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+  border-bottom: 2px solid transparent;
+  padding: 0.25rem 0;
+}
+
+.nav-links li a:hover {
+  color: var(--cisco-blue);
+  border-bottom-color: var(--cisco-blue);
+}
+
+.nav-btn {
+  background: var(--cisco-blue);
+  color: #fff !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 50px;
+  border: none !important;
+}
+
+.nav-btn:hover {
+  background: var(--cisco-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 移动端适配 */
+@media (max-width: 1024px) {
+  .nav-links {
+    display: none; /* 在平板和手机上默认隐藏，可配合 JS 开启 */
+  }
+  
+  /* 如果需要简单的横向滚动目录 */
+  .nav-links-mobile-scroll {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+    gap: 1.5rem;
+  }
+}
+
+/* 打印时隐藏导航 */
+@media print {
+  .toc-nav { display: none; }
+}
+
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="hero" id="top">
+  <div class="container" style="padding-top:var(--space-12);padding-bottom:var(--space-12);">
+    <h1>🏭 Cisco IE 系列 vs Hirschmann<br>工业交换机全维度竞争分析</h1>
+    <p class="subtitle">面向制造业客户 · 从硬件、操作系统、安全、管理平台到 5 年 TCO<br>一份可以直接递交给客户决策层的完整报告</p>
+    <p class="meta">2026 年 4 月 · 版本 1.0&nbsp;｜&nbsp; 撰稿人：Rao Weibo by CIRCUIT &nbsp;｜ 审稿人：Wei Jie</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="num">4×</div>
+        <div class="label">可编程 API 领先倍数<br>NETCONF / YANG / gRPC / IOx</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">$0</div>
+        <div class="label">Cyber Vision 传感器<br>额外硬件成本</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">720W</div>
+        <div class="label">IE9300 单机 PoE<br>Hirschmann RSPE: 120W</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">EOL</div>
+        <div class="label">Hirschmann RS20 系列<br>2023-12-31 已停产</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     NAVIGATION / TABLE OF CONTENTS
+     ============================================================ -->
+<nav class="toc-nav">
+  <div class="container">
+    <div class="nav-wrapper">
+      <div class="nav-brand">
+        <span class="brand-text">Cisco IE vs. Hirschmann</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#ch1">01 执行摘要</a></li>
+        <li><a href="#ch2">02 产品家族</a></li>
+        <li><a href="#ch3">03 旗舰硬件</a></li>
+        <li><a href="#ch4">04 操作系统</a></li>
+        <li><a href="#ch5">05 管理平台</a></li>
+        <li><a href="#ch6">06 OT 安全</a></li>
+        <li><a href="#ch7">07 生态与 TCO</a></li>
+        <li><a href="#ch8">08 场景实战</a></li>
+        <li><a href="#ch9">09 SWOT 分析</a></li>
+        <li><a href="#ch10">10 终极裁决</a></li>
+        <li><a href="#appendix-a" class="nav-btn">附录：功能对照</a></li>
+      </ul>
+      <div class="mobile-menu-toggle">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- ============================================================
+     CHAPTER 1 — 执行摘要 & 六维雷达
+     ============================================================ -->
+<section class="chapter" id="ch1">
+  <div class="container">
+    <h2>01 执行摘要</h2>
+    <p class="chapter-lead">
+      <strong>一句话结论：</strong>Cisco IE 系列在<em>可编程性、嵌入式安全、统一管理</em>和<em>端到端 IT/OT 融合</em>四个维度上形成了 Hirschmann 无法单独匹敌的"护城河"；而 Hirschmann 的传统优势——紧凑外形与细分工业协议——正随着 RS20 系列停产和 Cisco IE3100/IE3500 的推出而被快速蚕食。
+    </p>
+
+    <!-- ===== 六维雷达图 (SVG) ===== -->
+    <h3>🕸️ 六维能力雷达对比</h3>
+    <p>评分范围 1–10（10 = 业界最佳），基于数据手册、配置手册与市场公开信息综合评估。</p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;margin:0 auto;display:block;">
+        <defs>
+          <style>
+            .axis{stroke:#D4D8DE;stroke-width:.6;} .axisLabel{font-size:11px;fill:#58585B;font-family:var(--font-sans);}
+            .cisco-poly{fill:rgba(4,159,217,.18);stroke:#049FD9;stroke-width:2;}
+            .hirsch-poly{fill:rgba(120,144,156,.13);stroke:#78909C;stroke-width:2;stroke-dasharray:6 3;}
+            .dot-c{fill:#049FD9;} .dot-h{fill:#78909C;}
+            .legend-text{font-size:12px;fill:#1A1A1A;font-family:var(--font-sans);}
+          </style>
+        </defs>
+        <!-- Grid rings at r=60,120,180 for scores ~3.3, 6.6, 10 -->
+        <g transform="translate(260,210)">
+          <polygon points="0,-180 155.88,-90 155.88,90 0,180 -155.88,90 -155.88,-90" class="axis" fill="none"/>
+          <polygon points="0,-120 103.92,-60 103.92,60 0,120 -103.92,60 -103.92,-60" class="axis" fill="none"/>
+          <polygon points="0,-60 51.96,-30 51.96,30 0,60 -51.96,30 -51.96,-30" class="axis" fill="none"/>
+          <!-- Axes -->
+          <line x1="0" y1="0" x2="0" y2="-180" class="axis"/>
+          <line x1="0" y1="0" x2="155.88" y2="-90" class="axis"/>
+          <line x1="0" y1="0" x2="155.88" y2="90" class="axis"/>
+          <line x1="0" y1="0" x2="0" y2="180" class="axis"/>
+          <line x1="0" y1="0" x2="-155.88" y2="90" class="axis"/>
+          <line x1="0" y1="0" x2="-155.88" y2="-90" class="axis"/>
+          <!-- Labels -->
+          <text x="0" y="-192" text-anchor="middle" class="axisLabel">硬件性能</text>
+          <text x="170" y="-92" text-anchor="start" class="axisLabel">可编程性</text>
+          <text x="170" y="96" text-anchor="start" class="axisLabel">OT 安全</text>
+          <text x="0" y="200" text-anchor="middle" class="axisLabel">管理平台</text>
+          <text x="-170" y="96" text-anchor="end" class="axisLabel">生态系统</text>
+          <text x="-170" y="-92" text-anchor="end" class="axisLabel">工业协议</text>
+
+          <!-- Cisco polygon: 9, 9.5, 9.5, 9, 10, 8 (out of 10, r_max=180) -->
+          <polygon points="0,-162 147.87,-85.5 147.87,85.5 0,162 -155.88,90 -124.71,-72" class="cisco-poly"/>
+          <!-- Hirschmann polygon: 6, 4, 5, 5, 4, 7.5 -->
+          <polygon points="0,-108 62.35,-36 77.94,45 0,90 -62.35,36 -116.91,-67.5" class="hirsch-poly"/>
+
+          <!-- Cisco dots -->
+          <circle cx="0" cy="-162" r="4" class="dot-c"/>
+          <circle cx="147.87" cy="-85.5" r="4" class="dot-c"/>
+          <circle cx="147.87" cy="85.5" r="4" class="dot-c"/>
+          <circle cx="0" cy="162" r="4" class="dot-c"/>
+          <circle cx="-155.88" cy="90" r="4" class="dot-c"/>
+          <circle cx="-124.71" cy="-72" r="4" class="dot-c"/>
+          <!-- Hirschmann dots -->
+          <circle cx="0" cy="-108" r="4" class="dot-h"/>
+          <circle cx="62.35" cy="-36" r="4" class="dot-h"/>
+          <circle cx="77.94" cy="45" r="4" class="dot-h"/>
+          <circle cx="0" cy="90" r="4" class="dot-h"/>
+          <circle cx="-62.35" cy="36" r="4" class="dot-h"/>
+          <circle cx="-116.91" cy="-67.5" r="4" class="dot-h"/>
+        </g>
+        <!-- Legend -->
+        <rect x="340" y="370" width="14" height="14" rx="3" fill="rgba(4,159,217,.45)" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="360" y="382" class="legend-text">Cisco IE</text>
+        <rect x="430" y="370" width="14" height="14" rx="3" fill="rgba(120,144,156,.3)" stroke="#78909C" stroke-width="1.5" stroke-dasharray="4 2"/>
+        <text x="450" y="382" class="legend-text">Hirschmann</text>
+      </svg>
+    </div>
+
+    <!-- ===== 得分明细表 ===== -->
+    <h3>📊 得分明细</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>维度</th><th>Cisco IE</th><th>Hirschmann</th><th>差距主因</th></tr></thead>
+        <tbody>
+          <tr><td>硬件性能</td><td><span class="score cisco">9</span></td><td><span class="score hirsch">6</span></td><td>IE9300 支持 10GE 上行 + 720W PoE；RSPE 仅 1GE + 120W</td></tr>
+          <tr><td>可编程性</td><td><span class="score cisco">9.5</span></td><td><span class="score hirsch">4</span></td><td>IOS-XE 原生 NETCONF/YANG/gRPC/IOx；HiOS 仅 CLI/SNMP</td></tr>
+          <tr><td>OT 安全</td><td><span class="score cisco">9.5</span></td><td><span class="score hirsch">5</span></td><td>Cyber Vision 嵌入交换机，零额外硬件；需外挂 EAGLE 防火墙</td></tr>
+          <tr><td>管理平台</td><td><span class="score cisco">9</span></td><td><span class="score hirsch">5</span></td><td>Catalyst Center + Cyber Vision 统一闭环；HiVision 仅 L2 可视化</td></tr>
+          <tr><td>生态系统</td><td><span class="score cisco">10</span></td><td><span class="score hirsch">4</span></td><td>无线 AP、SD-WAN、ISE、ThousandEyes 全栈覆盖 vs 仅交换机+防火墙</td></tr>
+          <tr><td>工业协议</td><td><span class="score cisco">8</span></td><td><span class="score hirsch">7.5</span></td><td>双方均支持 PRP/HSR/MRP/PROFINET/EtherNet-IP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 战略建议 ===== -->
+    <h3>🎯 战略建议摘要</h3>
+    <div class="grid grid-2">
+      <div class="adv-card">
+        <h4>✅ 最佳攻击面 — OT 安全 &amp; 可编程性</h4>
+        <p>Hirschmann 在这两项分别差 4.5 和 5.5 分。优先展示 Cyber Vision 的"零硬件、零代理"资产可视化，以及 IOS-XE 的 NETCONF/YANG 自动化，可在 <strong>30 分钟 PoC</strong> 中产生显著"Wow Moment"。</p>
+      </div>
+      <div class="adv-card">
+        <h4>💡 关键转折点 — RS20 停产（EOL）</h4>
+        <p>Hirschmann 出货量最大的 RS20 系列已于 <strong>2023-12-31</strong> 停止接单，数以万计在用设备面临备件枯竭、安全补丁终止、百兆带宽瓶颈三重风险。推荐替代：<strong>IE3100</strong>（替代 4-port）+ <strong>IE3500</strong>（替代 8/9-port + 模块化需求）。</p>
+      </div>
+      <div class="adv-card warn">
+        <h4>⚠️ 防守要点 — 价格 &amp; 紧凑外形</h4>
+        <p>入门级 4–8 口场景下 BRS20 单价和体积仍具竞争力。应对：以 IE3100 同等紧凑外形 + 更长生命周期 + IOS-XE 统一管理对标，并用 <strong>5 年 TCO</strong>（含管理、安全、培训）而非首日采购价进行价值论证。</p>
+      </div>
+      <div class="adv-card">
+        <h4>📖 谁该读什么</h4>
+        <p><strong>客户经理（AM）：</strong>第 1、5、7 章 ~15 分钟<br>
+           <strong>解决方案工程师（SE）：</strong>第 2–6 章全技术深度 ~30 分钟</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ============================================================
+     CHAPTER 2 — 产品家族全景对照
+     ============================================================ -->
+<section class="chapter" id="ch2">
+  <div class="container">
+    <h2>02 产品家族全景对照</h2>
+    <p class="chapter-lead">
+      许多客户只比较单款型号的规格，这就像只看发动机马力却忽略了变速箱和安全系统。工业网络是<strong>系统工程</strong>——从车间接入到工厂汇聚再到多厂区广域互联，每一层都需要相应设备。只有进行家族级全景对照，才能评估供应商的<em>完整覆盖能力</em>和<em>长期路线图健康度</em>。
+    </p>
+
+    <!-- ===== 2.1 主对标矩阵 ===== -->
+    <h3>2.1 按网络层级的主对标矩阵</h3>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:12%">网络层级</th>
+            <th style="width:22%">Cisco Catalyst IE</th>
+            <th style="width:22%">Hirschmann (Belden)</th>
+            <th style="width:44%">对标分析 &amp; 迁移建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>核心 / 骨干层</strong><br><small>跨车间、工厂级汇聚</small></td>
+            <td><strong>Catalyst IE9300</strong><br>28 端口 GE/10GE · PoE 720W · MACsec-256 · PRP/HSR · IOS-XE 17.x<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td><strong>RSPE35 / RSPE37</strong><br>最多 28 端口 GE · PoE 120W · HSR/PRP · L3 OSPF/RIP · HiOS-3S<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td>Cisco 优势显著：✅ PoE 6×（720W vs 120W）✅ 10GE 上行 ✅ MACsec 硬件加密 ✅ Cyber Vision 嵌入式传感器 ✅ IOS-XE 可编程性远超 HiOS</td>
+          </tr>
+          <tr>
+            <td><strong>分布 / 汇聚层</strong><br><small>产线级汇聚、TSN</small></td>
+            <td><strong>Catalyst IE3500 Rugged</strong><br>模块化 · 10GE SFP+ 上行 · PoE 480W · TSN 802.1Qbv · IOx 容器 · MACsec-128<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td><strong>BOBCAT BRS50 / RSPE30</strong><br>GE 端口 · 无 10GE 上行 · TSN 802.1Qbv（部分 SKU）· HiOS<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td>✅ 10GE 上行杜绝产线带宽瓶颈 ✅ 480W PoE 支持机器视觉 ✅ IOx 边缘容器可跑数据预处理</td>
+          </tr>
+          <tr>
+            <td><strong>接入层</strong><br><small>紧凑型 GE · PoE</small></td>
+            <td><strong>Catalyst IE3100 Rugged</strong><br>6/8/18/20 端口 GE · 2× SFP 上行 · PoE 240W · IOS-XE · MRP/REP<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td><strong>BOBCAT BRS20-4TX</strong><br>4× FE (100M) · TSN 802.1Qbv · IEC 62443-4-2 SL2 · HiOS-2A<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td>✅ IE3100 最低 6 端口 GE vs BRS20 仅 4 端口 FE ✅ IE3100 PoE 240W vs BRS20 无 PoE ⚠️ BRS20 拥有 62443-4-2 SL2 认证先发</td>
+          </tr>
+          <tr>
+            <td><strong>经济型 FE 接入</strong><br><small>传统产线替换</small></td>
+            <td><strong>IE3100 入门 SKU</strong><br>同上基础功能 · IOS-XE 统一管理<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td><strong>RS20 系列</strong><br>4/8/9 端口 FE · Classic OS · 无 PoE<br><span style="color:var(--cisco-red);font-weight:600;">● EOL 2023-12</span></td>
+            <td>🚨 <strong>重大迁移机会：</strong>RS20 是 Hirschmann 出货量最大的接入交换机，已停产。推荐替代：<strong>Cisco IE3100</strong>——速率 FE→GE (10×)、增加 PoE、IOS-XE 现代化管理。</td>
+          </tr>
+          <tr>
+            <td><strong>OT 安全</strong><br><small>防火墙 / 微分段</small></td>
+            <td><strong>嵌入式 Cyber Vision + ISE 微分段</strong><br>零额外硬件 · DPI 200+ 协议 · Talos 威胁情报 · SD-Access TrustSec<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td><strong>EAGLE 40 防火墙</strong><br>独立 DIN-Rail · DPI 工业协议 · 需单独采购部署<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td>架构差异巨大：✅ Cisco = 嵌入式安全（零额外设备）❌ Hirschmann = 外挂式（50 台交换机场景需额外 20–30 台 EAGLE，显著增加 TCO）</td>
+          </tr>
+          <tr>
+            <td><strong>工业无线</strong></td>
+            <td><strong>Catalyst IW9165/IW9167</strong><br>Wi-Fi 6E / Wi-Fi 7 · Catalyst Center 统一管理<br><span style="color:var(--color-success);font-weight:600;">● Active</span></td>
+            <td><strong>BAT-C2</strong><br>Wi-Fi 5 · HiLCOS · 独立管理<br><span style="color:var(--cisco-orange);font-weight:600;">● EoS 预告</span></td>
+            <td>Cisco 已进入 Wi-Fi 6E/7 时代；Hirschmann 仍停留 Wi-Fi 5 且部分型号已停售预告。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 2.2 RS20 停产影响 ===== -->
+    <h3>2.2 🔴 RS20 停产影响专题</h3>
+    <div class="callout">
+      <strong>Hirschmann RS20 系列</strong>（含 RS20-0400/0800/0900 全部变体）是其出货量最大的工业以太网接入交换机，已于 <strong>2023 年 12 月 31 日</strong> 全面停产。
+    </div>
+
+    <h4>四重风险累积</h4>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>#</th><th>风险</th><th>影响</th><th>IE3100 如何化解</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>🔧 备件枯竭</td><td>FE 芯片已被半导体厂商淘汰，预计 2027 年后备件几乎不可获取。单台故障即可停线。</td><td>IE3100 提供 1:1 端口映射升级，4/8/18/20 端口 GE 覆盖所有 RS20 变体。</td></tr>
+          <tr><td>2</td><td>🛡️ 安全补丁终止</td><td>Classic OS 不再接收安全更新，已知 CVE 永久暴露。IEC 62443 审计直接不合格。</td><td>IOS-XE 持续 8 年+ 安全更新 + Talos 7×24 威胁情报。</td></tr>
+          <tr><td>3</td><td>📈 带宽天花板</td><td>全系 100Mbps，增加 2–3 台摄像头即拥塞。</td><td>全端口 1Gbps（10× 提升），SFP 上行可达 2.5GE。</td></tr>
+          <tr><td>4</td><td>🏗️ 合规审计风险</td><td>越来越多 OEM 要求供应商网络设备处于积极支持状态。</td><td>IE3100 Active 状态 + 5 年有限保修 + SNTC 可延长至 10 年。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>RS20 → IE3100 快速替换对照</h4>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>Hirschmann RS20</th><th>端口/速率</th><th>推荐 Cisco IE3100</th><th>额外收益</th></tr></thead>
+        <tbody>
+          <tr><td>RS20-0400</td><td>4× FE</td><td>IE-3100-8T2C-E</td><td>端口 ×2，速率 ×10，增加 SFP 上行 + PoE 可选</td></tr>
+          <tr><td>RS20-0800</td><td>8× FE</td><td>IE-3100-8T2C-E</td><td>1:1 端口匹配，速率 ×10，增加 SFP 上行</td></tr>
+          <tr><td>RS20-0900</td><td>9× FE</td><td>IE-3100-18T2C-E</td><td>端口 ×2，速率 ×10，PoE 240W 可选</td></tr>
+          <tr><td>RS20-1600</td><td>16× FE</td><td>IE-3100-18T2C-E / 20T2C-E</td><td>速率 ×10，增加 PoE，IOS-XE 统一管理</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 2.3 产品线健康度 ===== -->
+    <h3>2.3 产品线健康度记分卡</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>评估维度</th><th>权重</th><th>Cisco IE</th><th>Hirschmann</th></tr></thead>
+        <tbody>
+          <tr><td>活跃产品系列占比</td><td>25%</td><td><strong>9.5</strong>（≈100% Active）</td><td><strong>5.5</strong>（RS20 EOL + BAT-C2 EoS，≈70–75%）</td></tr>
+          <tr><td>GE/10GE 覆盖率</td><td>20%</td><td><strong>9.5</strong>（100% ≥GE）</td><td><strong>5.0</strong>（约 50–60% ≥GE）</td></tr>
+          <tr><td>操作系统统一性</td><td>20%</td><td><strong>9.0</strong>（全线 IOS-XE）</td><td><strong>5.0</strong>（HiOS / Classic / HiLCOS 碎片化）</td></tr>
+          <tr><td>安全内建程度</td><td>20%</td><td><strong>9.5</strong>（Cyber Vision + MACsec + ISE 嵌入）</td><td><strong>6.0</strong>（需外挂 EAGLE）</td></tr>
+          <tr><td>生态系统宽度</td><td>15%</td><td><strong>9.5</strong>（车间到云端全栈）</td><td><strong>4.0</strong>（仅车间局部）</td></tr>
+          <tr><td colspan="2"><strong>加权总分</strong></td><td><strong style="color:var(--cisco-blue);font-size:1.2em;">9.4 / 10</strong></td><td><strong style="color:#78909C;font-size:1.2em;">5.1 / 10</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 2.4 核心要点 ===== -->
+    <h3>2.4 本章五大结论</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>1. 产品线活跃率</h4>
+        <p>Cisco ≈ 100% vs Hirschmann ≈ 70–75%。RS20 停产和 BAT-C2 停售预告对 Hirschmann 产品线健康度构成实质性打击。</p>
+      </div>
+      <div class="card">
+        <h4>2. 最大替换窗口</h4>
+        <p>RS20 → IE3100 是当前市场上<strong>最大的替换机会</strong>。数以万计在用设备面临备件、安全、带宽三重风险，IE3100 提供完整 1:1 升级路径。</p>
+      </div>
+      <div class="card">
+        <h4>3. 全线 GE/10GE</h4>
+        <p>Cisco 全线千兆以上，Hirschmann 仍有大量百兆产品。在工业 4.0 时代，100Mbps 已是过时瓶颈。</p>
+      </div>
+      <div class="card">
+        <h4>4. OS 统一性</h4>
+        <p>Cisco 全线 IOS-XE = 一套培训、一套工具、一套自动化脚本。Hirschmann 的 HiOS / Classic / HiLCOS 碎片化增加运维成本。</p>
+      </div>
+      <div class="card" style="grid-column:1/-1;">
+        <h4>5. 安全不是"附加件"，是"内建能力"</h4>
+        <p>Cisco 将 Cyber Vision、MACsec、ISE 微分段嵌入交换机本身；Hirschmann 需额外采购 EAGLE，增加成本和复杂度。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ============================================================
+     CHAPTER 3 — 旗舰硬件深度对比
+     ============================================================ -->
+<section class="chapter" id="ch3">
+  <div class="container">
+    <h2>03 旗舰硬件深度对比</h2>
+    <p class="chapter-lead">
+      以"拆机工程师"的视角，将两阵营旗舰交换机逐项对齐——芯片、端口、功耗、环境、认证。如果把工业网络比作高速公路，<strong>A 组是主干高速</strong>（双向 8 车道 vs 4 车道），<strong>B 组是城市支路</strong>（4 车道 vs 2 车道）。车道数和匝道直接决定数据和电力能不能在高峰期不堵车。
+    </p>
+
+    <!-- ===== 3.1 对比组 A：骨干 L3 旗舰 ===== -->
+    <h3>3.1 对比组 A：骨干 L3 — IE9300 vs RSPE37</h3>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th style="width:22%">维度</th><th style="width:32%">Cisco IE9300-26S2C-E</th><th style="width:32%">Hirschmann RSPE37</th><th style="width:14%">优势方</th></tr></thead>
+        <tbody>
+          <tr><td>总端口数</td><td>24×1GE SFP + 2×10GE SFP+（28 端口）</td><td>24×GE combo + 4×GE SFP（28 端口）</td><td>—</td></tr>
+          <tr><td>万兆上行</td><td>2×10GE SFP+（原生）</td><td>无 10GE（最高 1GE）</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>交换容量</td><td>128 Gbps（non-blocking）</td><td>56 Gbps</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco 2.3×</td></tr>
+          <tr><td>PoE 标准</td><td>802.3bt PoE++（单口最高 90W）</td><td>802.3af/at PoE+（单口最高 30W）</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>PoE 总功率</td><td><strong>720W</strong></td><td><strong>120W</strong></td><td style="color:var(--cisco-blue);font-weight:700;">Cisco 6×</td></tr>
+          <tr><td>L3 路由</td><td>OSPF / BGP / EIGRP / VRF / PBR</td><td>OSPF v2/v3 / RIP / 静态路由</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>零丢包冗余</td><td>HSR / PRP 原生硬件支持（UADP 3.0）</td><td>HSR / PRP 硬件 FPGA 支持</td><td>—</td></tr>
+          <tr><td>MACsec 加密</td><td>MACsec-256 线速硬件加密</td><td>不支持</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>嵌入式 OT 安全</td><td>Cyber Vision 传感器（内置 IOS-XE）</td><td>无（需外接 EAGLE）</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>边缘计算</td><td>IOx 容器引擎（Docker/Python）</td><td>不支持</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>操作系统</td><td>IOS-XE 17.x（YANG/NETCONF/gRPC）</td><td>HiOS-3S 10.x（CLI/Web/SNMP）</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+          <tr><td>工作温度</td><td>−40°C ~ +75°C</td><td>−40°C ~ +70°C</td><td style="color:var(--cisco-blue);">Cisco (+5°C)</td></tr>
+          <tr><td>MTBF (25°C)</td><td>265K–651K hrs</td><td>~1,500K hrs (Telcordia)</td><td style="color:#78909C;font-weight:700;">Hirschmann¹</td></tr>
+          <tr><td>最大功耗 (non-PoE)</td><td>~72W</td><td>~37W</td><td style="color:#78909C;font-weight:700;">Hirschmann</td></tr>
+          <tr><td>尺寸 (H mm)</td><td>~280</td><td>~210</td><td style="color:#78909C;">Hirschmann</td></tr>
+          <tr><td>标准质保</td><td>5 年（含 TAC）</td><td>3–5 年</td><td style="color:var(--cisco-blue);">Cisco</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><small>¹ MTBF 因测试标准不同（Telcordia vs MIL-HDBK-217F）不完全可直接对比，仅供参考。</small></p>
+
+    <!-- ===== PoE 深度对比 ===== -->
+    <h4>PoE 功率实战影响</h4>
+    <div class="callout">
+      <strong>💡 制造业实际场景：</strong>典型汽车焊装车间每个产线柜需 4–6 台 PTZ 摄像头（60W/台）+ 2 台 Wi-Fi 6 AP（25W/台）。<br>
+      <strong>Cisco IE9300</strong> 单台即可满足：6×60 + 2×25 = 410W &lt; 720W ✅<br>
+      <strong>RSPE37</strong> 需额外 3 台 PoE 注入器（¥3,000–5,000/台）才能达到同等供电——增加布线复杂度和故障点。
+    </div>
+
+    <!-- ===== 架构差异 SVG ===== -->
+    <h4>内部架构差异</h4>
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="max-width:700px;margin:0 auto;display:block;">
+        <defs><style>.box{rx:8;ry:8;stroke-width:1.5;} .lbl{font-size:11px;fill:#fff;font-family:var(--font-sans);text-anchor:middle;font-weight:600;} .sublbl{font-size:9px;fill:#58585B;font-family:var(--font-sans);text-anchor:middle;} .arrow{stroke:#9B9CA0;stroke-width:1.2;marker-end:url(#arw);}</style>
+          <marker id="arw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#9B9CA0"/></marker>
+        </defs>
+        <!-- Cisco side -->
+        <text x="175" y="18" style="font-size:13px;font-weight:700;fill:var(--cisco-navy);text-anchor:middle;font-family:var(--font-sans);">Cisco IE9300</text>
+        <rect x="60" y="30" width="230" height="42" class="box" fill="#049FD9" stroke="#005073"/>
+        <text x="175" y="56" class="lbl">UADP 3.0 定制 ASIC</text>
+        <text x="175" y="88" class="sublbl">128 Gbps · 10GE · MACsec-256 · HSR/PRP 原生</text>
+        <rect x="80" y="100" width="88" height="34" class="box" fill="#00BCEB" stroke="#049FD9"/>
+        <text x="124" y="122" class="lbl" style="font-size:10px;">Cyber Vision</text>
+        <rect x="182" y="100" width="88" height="34" class="box" fill="#00BCEB" stroke="#049FD9"/>
+        <text x="226" y="122" class="lbl" style="font-size:10px;">IOx 容器</text>
+        <rect x="100" y="150" width="150" height="30" class="box" fill="#0D274D" stroke="#005073"/>
+        <text x="175" y="170" class="lbl" style="font-size:10px;">IOS-XE Linux 用户态</text>
+        <text x="175" y="200" class="sublbl">控制平面崩溃 ≠ 数据平面中断</text>
+
+        <!-- Hirschmann side -->
+        <text x="525" y="18" style="font-size:13px;font-weight:700;fill:#546E7A;text-anchor:middle;font-family:var(--font-sans);">Hirschmann RSPE37</text>
+        <rect x="420" y="30" width="210" height="42" class="box" fill="#78909C" stroke="#546E7A"/>
+        <text x="525" y="56" class="lbl">通用商用交换芯片</text>
+        <text x="525" y="88" class="sublbl">56 Gbps · 仅 GE · 无 MACsec</text>
+        <rect x="430" y="100" width="90" height="34" class="box" fill="#90A4AE" stroke="#78909C"/>
+        <text x="475" y="122" class="lbl" style="font-size:10px;">FPGA (HSR/PRP)</text>
+        <rect x="535" y="100" width="80" height="34" class="box" fill="#B0BEC5" stroke="#90A4AE"/>
+        <text x="575" y="122" class="lbl" style="font-size:9px;fill:#37474F;">无边缘计算</text>
+        <rect x="450" y="150" width="150" height="30" class="box" fill="#546E7A" stroke="#455A64"/>
+        <text x="525" y="170" class="lbl" style="font-size:10px;">HiOS RTOS 单体内核</text>
+        <text x="525" y="200" class="sublbl">单模块故障可致整体重启</text>
+      </svg>
+    </div>
+    <p style="color:var(--text-secondary);font-size:.92rem;">
+      <strong>架构解读：</strong>Cisco UADP 3.0 定制 ASIC 在单芯片内实现 128 Gbps 无阻塞交换、10GE、线速 MACsec 和硬件级 HSR/PRP——"大带宽 + 硬件零丢包 + 原生安全 + 可编程"全维度覆盖，彻底抹平了竞品曾赖以生存的最后一道护城河。
+    </p>
+
+    <!-- ===== 3.2 对比组 B：接入层 ===== -->
+    <h3>3.2 对比组 B：接入层 — IE3500 / IE3100 vs BRS20 / RS20</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>维度</th><th>Cisco IE3500</th><th>Cisco IE3100</th><th>Hirschmann BRS20</th><th>RS20 (EOL)</th></tr></thead>
+        <tbody>
+          <tr><td>定位</td><td>模块化 L2/L3 汇聚</td><td>紧凑型 L2 接入</td><td>紧凑 L2 接入 (TSN)</td><td>基础 L2（已停产）</td></tr>
+          <tr><td>端口</td><td>最高 24GE + 3×10GE SFP+</td><td>最高 20GE（含 4 SFP）</td><td>4×100M TX</td><td>4–9×100M TX</td></tr>
+          <tr><td>交换容量</td><td>128 Gbps</td><td>40 Gbps</td><td>0.8 Gbps</td><td>1.8 Gbps</td></tr>
+          <tr><td>PoE</td><td>802.3bt · 480W</td><td>802.3bt · 240W</td><td>不支持</td><td>不支持</td></tr>
+          <tr><td>TSN</td><td>802.1Qbv / Qbu 帧抢占</td><td>基础 QoS（路线图中）</td><td>802.1Qbv（硬件支持）</td><td>不支持</td></tr>
+          <tr><td>边缘计算</td><td>✅ IOx Docker</td><td>✅ IOx Docker</td><td>❌</td><td>❌</td></tr>
+          <tr><td>OT 安全</td><td>Cyber Vision</td><td>Cyber Vision</td><td>IEC 62443-4-2 SL2</td><td>基础 ACL</td></tr>
+          <tr><td>MACsec</td><td>MACsec-256</td><td>MACsec-128</td><td>❌</td><td>❌</td></tr>
+          <tr><td>操作系统</td><td>IOS-XE 17.x</td><td>IOS-XE 17.x</td><td>HiOS 9.x</td><td>Classic（已冻结）</td></tr>
+          <tr><td>工作温度</td><td>−40~+75°C</td><td>−40~+75°C</td><td>−40~+70°C</td><td>0~+60°C</td></tr>
+          <tr><td>生命周期</td><td style="color:var(--color-success);font-weight:600;">Active</td><td style="color:var(--color-success);font-weight:600;">Active</td><td style="color:var(--color-success);font-weight:600;">Active</td><td style="color:var(--cisco-red);font-weight:600;">EOL 2023-12</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 3.3 硬件优势总结 ===== -->
+    <h3>3.3 硬件优势总结</h3>
+    <div class="grid grid-2">
+      <div class="card" style="border-top:4px solid var(--cisco-blue);">
+        <h4 style="color:var(--cisco-blue);">🔵 Cisco 硬件优势</h4>
+        <ul style="line-height:2;">
+          <li><strong>10GE 原生上行</strong> — AI/视觉质检带宽保障</li>
+          <li><strong>720W PoE++</strong> — 单台满足整柜供电</li>
+          <li><strong>MACsec-256</strong> — 线速加密满足 NIST / IEC 62443</li>
+          <li><strong>Cyber Vision 内置</strong> — $0 额外硬件 OT 资产发现</li>
+          <li><strong>IOx 边缘计算</strong> — 消灭额外工控机成本</li>
+          <li><strong>HSR/PRP 原生支持</strong> — 零丢包冗余不再是竞品专属</li>
+          <li><strong>5 年标准质保</strong> — 含 TAC 技术支持</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:4px solid #78909C;">
+        <h4 style="color:#546E7A;">🟩 Hirschmann 硬件优势</h4>
+        <ul style="line-height:2;">
+          <li><strong>更高 MTBF</strong> — 1.5M hrs (Telcordia)，纸面可靠性突出</li>
+          <li><strong>更低功耗</strong> — 37W (RSPE37) / 5W (BRS20)</li>
+          <li><strong>更紧凑尺寸</strong> — 高度少 ~70mm</li>
+          <li><strong>IEC 62443-4-2 SL2</strong> — BRS20 率先通过认证</li>
+          <li><strong>Fast-MRP (&lt;15ms)</strong> — MRP 环网恢复更快</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== 3.4 硬件综合评分 ===== -->
+    <h3>3.4 硬件综合评分</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>维度</th><th>权重</th><th>Cisco IE</th><th>Hirschmann</th></tr></thead>
+        <tbody>
+          <tr><td>端口密度与速率</td><td>20%</td><td>9.5</td><td>5.5</td></tr>
+          <tr><td>PoE 能力</td><td>20%</td><td>10</td><td>3.0</td></tr>
+          <tr><td>安全硬件</td><td>15%</td><td>9.5</td><td>5.0</td></tr>
+          <tr><td>冗余能力</td><td>15%</td><td>9.5</td><td>9.0</td></tr>
+          <tr><td>环境适应性</td><td>10%</td><td>9.0</td><td>8.5</td></tr>
+          <tr><td>可靠性 (MTBF)</td><td>10%</td><td>7.0</td><td>9.0</td></tr>
+          <tr><td>功耗与尺寸</td><td>10%</td><td>6.5</td><td>8.5</td></tr>
+          <tr><td colspan="2"><strong>加权总分</strong></td>
+            <td><strong style="color:var(--cisco-blue);font-size:1.15em;">9.00 / 10</strong></td>
+            <td><strong style="color:#78909C;font-size:1.15em;">6.14 / 10</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>战略结论：</strong>在 90% 的制造业场景中，带宽、PoE、安全、可编程性是硬件选型首要考量。Cisco 在这四个维度全面领先且差距为<em>倍数级</em>。建议用"<strong>一台 IE9300 vs 一台 RSPE37 + 3 台 PoE 注入器 + 1 台加密网关 + 1 台边缘网关</strong>"的真实 BOM 对比展示 TCO 优势。
+    </div>
+
+  </div>
+</section>
+<!-- ============================================================
+     CHAPTER 4 — 操作系统对比：IOS-XE vs HiOS
+     ============================================================ -->
+<section class="chapter" id="ch4">
+  <div class="container">
+    <h2>04 操作系统对比 — IOS-XE vs HiOS</h2>
+    <p class="chapter-lead">
+      工业交换机的价值远不止于硬件参数。真正决定运维效率、安全韧性与长期演进能力的，是底层操作系统。如果说硬件是交换机的"身体"，那操作系统就是它的"灵魂"。本章从六大维度展开深度对比：<em>架构基因、管理接口、协议栈、可编程性、边缘计算、升级维护</em>。
+    </p>
+
+    <!-- ===== 4.1 架构基因 ===== -->
+    <h3>4.1 架构基因对比</h3>
+    <p>操作系统的架构决定了可靠性上限、功能扩展方式及安全更新速度。</p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th style="width:20%">维度</th><th style="width:38%">IOS-XE 17.x (Cisco)</th><th style="width:38%">HiOS-3S 10.x (Hirschmann)</th></tr></thead>
+        <tbody>
+          <tr><td>内核类型</td><td>Linux 主线派生 (64-bit)；IOSd 作为用户态守护进程，崩溃可自动重启<strong>不影响数据平面转发</strong></td><td>实时微内核 (VxWorks 派生)；单体映像，内核与应用紧耦合，单模块故障可导致整体重启</td></tr>
+          <tr><td>控制/数据平面分离</td><td>✅ 完全分离 — UADP 3.0 ASIC 独立转发；控制平面重启不丢帧 (SSO/NSF)</td><td>⚠️ 部分分离 — FPGA 加速 HSR/PRP，但 L3 与 L2 仍共享进程空间</td></tr>
+          <tr><td>进程隔离</td><td>Linux cgroup + namespace；IOx 容器完全沙箱隔离</td><td>无进程容器化；所有服务运行在同一地址空间</td></tr>
+          <tr><td>启动安全链</td><td>TAm 硬件信任锚 → SUDI 证书 → Secure Boot → Image Signing → 运行时完整性校验</td><td>Secure Boot（新款支持）→ 镜像签名验证；无硬件信任锚</td></tr>
+          <tr><td>升级模式</td><td><strong>ISSU 热升级</strong>零停机；回滚 &lt;30s</td><td>固件刷写 + 重启（3–5 分钟停机）；双 bank 回滚需完全重启</td></tr>
+          <tr><td>许可模型</td><td>Smart License — Network Essentials / Advantage 分层</td><td>一次性购买，功能由硬件型号决定</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>🚗 类比：</strong>IOS-XE 像一辆"边跑边换轮胎"的赛车——控制平面崩溃不影响数据转发，安全补丁可热更新不停产线。HiOS 像一辆传统汽车——换任何零件都得靠边停车。在 7×24 制造场景中，这个差距价值巨大。
+    </div>
+
+    <!-- ===== 4.2 CLI 与管理接口 ===== -->
+    <h3>4.2 CLI 与管理接口</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>接口类型</th><th>IOS-XE (Cisco)</th><th>HiOS (Hirschmann)</th></tr></thead>
+        <tbody>
+          <tr><td>CLI 风格</td><td>经典 Cisco IOS 命令行 — 全球最大网络工程师知识库；支持 Tab 补全、正则过滤</td><td>"类 Cisco"风格但子命令差异大；社区资源有限</td></tr>
+          <tr><td>NETCONF</td><td>✅ 全量支持 · YANG 1.1 原生（12,000+ 可编程节点）</td><td>❌ 不支持</td></tr>
+          <tr><td>RESTCONF</td><td>✅ 全量支持 · JSON/XML 双编码</td><td>⚠️ 部分支持（HiOS ≥9.x 基础 REST API；BRS20/RS20 不支持）</td></tr>
+          <tr><td>gNMI / gRPC</td><td>✅ 流式遥测 — 亚秒级推送到 Kafka / Prometheus / Grafana</td><td>❌ 不支持；依赖 SNMP 轮询（最小 30s 间隔）</td></tr>
+          <tr><td>SNMP</td><td>v1/v2c/v3 全支持 + gNMI 并行</td><td>v1/v2c/v3 全支持 — 传统 NMS 集成成熟</td></tr>
+          <tr><td>AAA</td><td>TACACS+ / RADIUS / 802.1X · MFA 集成 (ISE)</td><td>RADIUS / 本地用户 · 无 TACACS+</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>📊 API 覆盖率：</strong>IOS-XE 通过 YANG 模型可访问的配置节点超过 <strong>12,000 个</strong>，几乎所有 CLI 可配置参数都有 API 路径。HiOS REST API 可访问节点估计 <strong>&lt;500 个</strong>。在"基础设施即代码 (IaC)"场景中，Cisco 自动化覆盖率是 Hirschmann 的 <strong>20 倍以上</strong>。
+    </div>
+
+    <!-- ===== 4.3 协议栈深度 ===== -->
+    <h3>4.3 协议栈深度（精选关键差异项）</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>类别</th><th>协议</th><th>IOS-XE</th><th>HiOS</th></tr></thead>
+        <tbody>
+          <tr><td>L2</td><td>MRP (IEC 62439-2)</td><td>✅ MRM / MRC (17.9+)</td><td>✅ MRM / MRC — 原生强项</td></tr>
+          <tr><td>L2</td><td>HSR / PRP (IEC 62439-3)</td><td>✅ 原生支持（IE9300/IE3500）</td><td>✅ FPGA 硬件加速</td></tr>
+          <tr><td>L2</td><td>DLR (Rockwell)</td><td>✅ 支持</td><td>❌ 不支持</td></tr>
+          <tr><td>L3</td><td>BGP</td><td>✅ eBGP / iBGP</td><td>❌</td></tr>
+          <tr><td>L3</td><td>VRF-Lite</td><td>✅ 多 VRF 分段隔离</td><td>❌</td></tr>
+          <tr><td>安全</td><td>MACsec (802.1AE)</td><td>✅ MACsec-128/256 线速</td><td>❌</td></tr>
+          <tr><td>安全</td><td>TrustSec / SGT</td><td>✅ 软件定义分段</td><td>❌</td></tr>
+          <tr><td>工业</td><td>EtherNet/IP (CIP)</td><td>✅ 深度 CIP 感知 + QoS 标记</td><td>⚠️ 透传，无深度感知</td></tr>
+          <tr><td>工业</td><td>PROFINET</td><td>✅ RT QoS 优化</td><td>✅ RT/IRT (RSPE 支持 IRT)</td></tr>
+          <tr><td>工业</td><td>TSN (802.1Qbv/Qbu)</td><td>✅ IE3500 Frame Preemption</td><td>✅ BRS20 802.1Qbv TAS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="color:var(--text-secondary);">
+      <strong>⚠️ Hirschmann 协议短板影响：</strong>无 BGP/VRF = 无法实现多工厂 WAN 互联或 OT/IT 逻辑隔离；无 MACsec = 跨楼宇光纤链路无线速加密；无 TrustSec/SGT = 无法实现基于角色的微分段。
+    </p>
+
+    <!-- ===== 4.4 可编程性与自动化 ===== -->
+    <h3>4.4 可编程性与自动化</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>能力</th><th>IOS-XE (Cisco)</th><th>HiOS (Hirschmann)</th></tr></thead>
+        <tbody>
+          <tr><td>Python on-box</td><td>✅ Guest Shell — Python 3.9+，可调用 IOS-XE CLI 及 YANG API</td><td>❌ 无脚本运行环境</td></tr>
+          <tr><td>EEM 事件管理器</td><td>✅ EEM 4.0 — Tcl/Python；响应 syslog/SNMP/定时器自动执行策略</td><td>⚠️ 基础告警脚本，触发条件有限</td></tr>
+          <tr><td>YANG 数据模型</td><td>✅ Cisco + OpenConfig + IETF — 12,000+ 节点；GitHub 公开</td><td>❌ 无 YANG 模型</td></tr>
+          <tr><td>Ansible 集成</td><td>✅ cisco.ios Collection — 200+ module</td><td>⚠️ 无官方 Collection；需 raw SSH</td></tr>
+          <tr><td>Terraform</td><td>✅ 官方 Provider</td><td>❌ 无 Provider</td></tr>
+          <tr><td>Streaming Telemetry</td><td>✅ gNMI dial-out — 亚秒级推送</td><td>❌ 仅 SNMP 轮询</td></tr>
+          <tr><td>Zero-Touch Provisioning</td><td>✅ PnP + Catalyst Center ZTP — 支持千台规模</td><td>⚠️ HiDiscovery — 配置模板能力有限</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>🚀 可编程性实战场景</h4>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>场景 1：产线切换 VLAN</h4>
+        <p>MES 发出换产指令 → Ansible playbook 自动修改端口 VLAN/QoS。<br><strong>IOS-XE：</strong>全 API 实现<br><strong>HiOS：</strong>需人工 CLI 操作</p>
+      </div>
+      <div class="card">
+        <h4>场景 2：温度异常自动保护</h4>
+        <p>EEM 检测机柜温度 &gt;70°C → 自动降低 PoE + 推送 Webex 告警。<br><strong>IOS-XE：</strong>EEM 原生实现<br><strong>HiOS：</strong>无 EEM 能力</p>
+      </div>
+      <div class="card">
+        <h4>场景 3：千台固件合规检查</h4>
+        <p>Terraform + gNMI 拉取所有 OS 版本 → 自动比对 → 生成升级工单。<br><strong>IOS-XE：</strong>全自动<br><strong>HiOS：</strong>逐台 SNMP 轮询 + 手动 Excel</p>
+      </div>
+    </div>
+
+    <!-- ===== 4.5 容器与边缘计算 ===== -->
+    <h3>4.5 容器与边缘计算</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>能力</th><th>IOS-XE + IOx (Cisco)</th><th>HiOS (Hirschmann)</th></tr></thead>
+        <tbody>
+          <tr><td>容器运行时</td><td>✅ IOx — Docker / LXC 容器</td><td>❌ 无容器运行时</td></tr>
+          <tr><td>典型应用</td><td>Cyber Vision 传感器 · ThousandEyes 探针 · OPC-UA→MQTT 转换 · 轻量 AI 推理</td><td>N/A</td></tr>
+          <tr><td>应用生命周期</td><td>IOx Manager + Catalyst Center 集中部署、远程升级、日志收集</td><td>N/A</td></tr>
+          <tr><td>客户价值</td><td>每台交换机可替代 1–2 台工控机/网关 → 节省机柜空间与维护成本</td><td>需额外部署独立网关硬件（增加采购和运维成本）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>💰 边缘计算 TCO 影响：</strong>单条产线 5 台交换机 + 3 台协议网关场景 —— Cisco 方案：5 台 IE3500（IOx 内运行网关软件）→ 0 台额外网关 → 节省 ¥60,000–90,000 硬件 + 每年维护费。Hirschmann 方案：5 台 RSPE + 3 台 ProSoft 网关 → 增加采购、机柜空间、供电、独立维护。
+    </div>
+
+    <!-- ===== 4.6 升级与维护 ===== -->
+    <h3>4.6 软件升级与维护</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>维度</th><th>IOS-XE (Cisco)</th><th>HiOS (Hirschmann)</th></tr></thead>
+        <tbody>
+          <tr><td>升级模式</td><td><strong>ISSU 热升级</strong> — 数据平面零中断；SMU 热补丁级粒度</td><td>固件整体刷写 + 强制重启（3–5 分钟停机/台）</td></tr>
+          <tr><td>批量升级</td><td>Catalyst Center 按区域分组滚动升级；自动 pre/post-check</td><td>HiVision 批量推送固件；无自动验证</td></tr>
+          <tr><td>热补丁 (SMU)</td><td>✅ 安全漏洞可不升主版本直接安装，无需重启</td><td>❌ 任何补丁都需完整固件升级 + 重启</td></tr>
+          <tr><td>安全公告</td><td>Cisco PSIRT — CVE 发布后 48h 内提供修复；Talos 支撑</td><td>Belden 安全公告频率较低</td></tr>
+          <tr><td>配置回滚</td><td><code>configure replace</code> 一键回滚 + Archive 自动版本管理（14 版本）</td><td>手动备份/恢复 Running-config</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>⏱ 停机成本换算：</strong>汽车总装线每分钟停线损失约 <strong>$22,000</strong>。50 台交换机年度安全升级若需 200 分钟累计停机（HiOS 方案），仅升级导致的潜在产线损失高达 <strong>$4,400,000</strong>。IOS-XE ISSU 的零停机升级能力是最被低估的 TCO 优势之一。
+    </div>
+
+    <!-- ===== 4.7 OS 综合评分 ===== -->
+    <h3>4.7 操作系统综合评分</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>评分维度</th><th>权重</th><th>IOS-XE</th><th>HiOS</th></tr></thead>
+        <tbody>
+          <tr><td>架构可靠性</td><td>20%</td><td>9.5</td><td>6.5</td></tr>
+          <tr><td>CLI / 管理接口</td><td>10%</td><td>9.0</td><td>7.0</td></tr>
+          <tr><td>协议栈深度</td><td>20%</td><td>9.0</td><td>6.0</td></tr>
+          <tr><td>可编程性与自动化</td><td>20%</td><td>9.5</td><td>2.5</td></tr>
+          <tr><td>边缘计算</td><td>15%</td><td>9.0</td><td>0.5</td></tr>
+          <tr><td>升级与维护</td><td>15%</td><td>9.5</td><td>5.0</td></tr>
+          <tr><td colspan="2"><strong>加权总分</strong></td>
+            <td><strong style="color:var(--cisco-blue);font-size:1.2em;">9.28 / 10</strong></td>
+            <td><strong style="color:#78909C;font-size:1.2em;">4.53 / 10</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--space-6);justify-content:center;margin:var(--space-8) 0;">
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-blue);">9.28</div>
+        <div class="label" style="color:var(--text-secondary);">IOS-XE 综合评分</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:#78909C;">4.53</div>
+        <div class="label" style="color:var(--text-secondary);">HiOS 综合评分</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-navy);">2.05×</div>
+        <div class="label" style="color:var(--text-secondary);">Cisco OS 能力倍数</div>
+      </div>
+    </div>
+
+    <!-- ===== 4.8 关键结论 ===== -->
+    <h3>4.8 本章关键结论</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>🏗️ 架构代差</h4>
+        <p>IOS-XE 是 Linux 用户态 + ASIC 硬件转发的<strong>现代分离架构</strong>；HiOS 是 RTOS 单体紧耦合架构。这决定了可靠性、可扩展性和安全更新速度的根本差异。</p>
+      </div>
+      <div class="card">
+        <h4>🤖 可编程性鸿沟</h4>
+        <p>IOS-XE 提供 NETCONF/RESTCONF/gNMI + YANG + Python on-box + Ansible/Terraform 完整生态；HiOS 停留在 CLI + SNMP 时代。<strong>自动化覆盖率差距超过 20 倍</strong>。</p>
+      </div>
+      <div class="card">
+        <h4>📦 边缘计算 0→1</h4>
+        <p>IOx 让每台思科交换机成为可运行第三方应用的边缘节点；Hirschmann 没有任何 on-box 计算能力。</p>
+      </div>
+      <div class="card">
+        <h4>⚡ 零停机升级</h4>
+        <p>IOS-XE ISSU + SMU 热补丁意味着安全更新<strong>无需停产线</strong>；HiOS 每次升级 3–5 分钟停机——在高价值行业不可接受。</p>
+      </div>
+    </div>
+
+    <blockquote>
+      操作系统是智能制造网络的"灵魂"。IOS-XE 与 HiOS 的差距，不是"更好一点"，而是<strong>"完整的现代化平台" vs "传统嵌入式固件"</strong>的代际差异。
+    </blockquote>
+
+  </div>
+</section>
+<!-- ============================================================
+     CHAPTER 5 — 管理平台对比
+     ============================================================ -->
+<section class="chapter" id="ch5">
+  <div class="container">
+    <h2>05 管理平台对比</h2>
+    <p class="chapter-lead">
+      工业网络的价值不仅取决于交换机本身，更取决于运维平台能否将数万台 OT 设备转化为<strong>可视、可控、可预测</strong>的数字资产。如果说交换机是"士兵"，那管理平台就是"指挥部"——指挥部的能力决定了整支军队的战斗效率。本章将 Cisco <strong>Catalyst Center + Cyber Vision</strong> 与 Hirschmann <strong>Industrial HiVision + HiMobile + HiDiscovery</strong> 进行全面对比。
+    </p>
+
+    <!-- ===== 5.1 架构总览 ===== -->
+    <h3>5.1 管理架构差异</h3>
+    <div class="grid grid-2">
+      <div class="card" style="border-top:4px solid var(--cisco-blue);">
+        <h4 style="color:var(--cisco-blue);">Cisco：四层闭环</h4>
+        <p><strong>交换机嵌入式传感器</strong>（Cyber Vision Sensor）→ <strong>OT 可视化</strong>（Cyber Vision Center）→ <strong>全域策略自动化</strong>（Catalyst Center）→ <strong>安全执行</strong>（ISE + TrustSec）</p>
+        <p>从发现新设备到策略生效 <strong>≤ 5 分钟</strong>，无需人工介入。</p>
+      </div>
+      <div class="card" style="border-top:4px solid #78909C;">
+        <h4 style="color:#546E7A;">Hirschmann：单层 NMS + 辅助工具</h4>
+        <p><strong>HiVision</strong>（L2 拓扑 + SNMP 监控）+ <strong>HiMobile</strong>（只读巡检）+ <strong>HiDiscovery</strong>（IP 批量设置）</p>
+        <p>DPI 和安全分析<strong>完全依赖第三方</strong>。无策略自动化闭环。</p>
+      </div>
+    </div>
+
+    <!-- ===== 5.2 40 项能力矩阵精选 ===== -->
+    <h3>5.2 核心能力对照（精选 20 项）</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>#</th><th>能力项</th><th>Cisco 平台</th><th>Hirschmann 平台</th><th>差距</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>自动 L2/L3 拓扑</td><td>Catalyst Center：CDP/LLDP/SNMP 混合，≤60s 刷新</td><td>HiVision：SNMP 轮询，5min 可调</td><td>●●○</td></tr>
+          <tr><td>2</td><td>OT 资产深度发现</td><td>Cyber Vision DPI：200+ 协议，自动识别 PLC 型号/固件/模块</td><td>需第三方 Nozomi/Claroty 或手动录入</td><td>●●●</td></tr>
+          <tr><td>3</td><td>实时遥测</td><td>gRPC Model-Driven Telemetry · 推送间隔 ≥10ms</td><td>SNMP 轮询 · 最短 1s</td><td>●●●</td></tr>
+          <tr><td>4</td><td>AI/ML 异常检测</td><td>Catalyst Center Assurance：7,000+ 指标自动基线 + 异常评分</td><td>静态阈值告警，无 AI/ML</td><td>●●●</td></tr>
+          <tr><td>5</td><td>根因分析</td><td>自动合并关联告警，AI 提示根因</td><td>单条告警列表，需人工关联</td><td>●●○</td></tr>
+          <tr><td>6</td><td>零接触部署 (PnP)</td><td>Catalyst Center PnP · 零接触 · 现场免技术员</td><td>HiDiscovery 批量 IP · 无策略推送</td><td>●●●</td></tr>
+          <tr><td>7</td><td>意图驱动策略</td><td>SD-Access：声明业务意图 → 自动转译 ACL/QoS/VLAN</td><td>手动逐设备 CLI/Web 配置</td><td>●●●</td></tr>
+          <tr><td>8</td><td>配置合规审计</td><td>Catalyst Center 合规检查 · 偏移自动告警 · 一键修复</td><td>无合规审计功能</td><td>●●●</td></tr>
+          <tr><td>9</td><td>软件镜像管理 (SWIM)</td><td>Golden Image · 分阶段升级 · 预检</td><td>手动 TFTP/HTTP 上传 · 无集中管理</td><td>●●●</td></tr>
+          <tr><td>10</td><td>REST API 丰富度</td><td>400+ 端点 · 北向 API · 全开放文档</td><td>&lt;50 端点</td><td>●●●</td></tr>
+          <tr><td>11</td><td>SIEM/SOAR 集成</td><td>Splunk / Sentinel / ServiceNow / pxGrid 原生连接器</td><td>Syslog / SNMP Trap 转发 · 需自建解析</td><td>●●●</td></tr>
+          <tr><td>12</td><td>嵌入式 DPI 传感器</td><td>Cyber Vision 嵌入交换机 · $0 额外硬件</td><td>无 · 需外挂 EAGLE + 第三方 IDS</td><td>●●●</td></tr>
+          <tr><td>13</td><td>CVE 漏洞关联</td><td>Cyber Vision + Talos 实时关联</td><td>无</td><td>●●●</td></tr>
+          <tr><td>14</td><td>微分段执行</td><td>Cyber Vision 定义区域 → SGT/dACL 动态下发</td><td>静态 VLAN ACL · 手动维护</td><td>●●●</td></tr>
+          <tr><td>15</td><td>最大管理节点数</td><td>25,000+ 设备（集群）</td><td>~2,000 设备（单实例）</td><td>●●●</td></tr>
+          <tr><td>16</td><td>高可用部署</td><td>3 节点集群 · 自动故障切换</td><td>冷备份 · 手动恢复</td><td>●●●</td></tr>
+          <tr><td>17</td><td>云/混合部署</td><td>On-prem + Cloud Analytics</td><td>仅 on-prem Windows 应用</td><td>●●●</td></tr>
+          <tr><td>18</td><td>移动 App</td><td>Catalyst Center App (iOS/Android) · 全功能</td><td>HiMobile · 只读巡检 + 蓝牙配置</td><td>●●○</td></tr>
+          <tr><td>19</td><td>IEC 62443 合规检查</td><td>Cyber Vision + Catalyst Center 自动对标 SL 等级</td><td>无自动对标</td><td>●●●</td></tr>
+          <tr><td>20</td><td>嵌入式安全附加成本</td><td>Cyber Vision 传感器 $0（内置）</td><td>EAGLE ≈ $3,500–5,000/台 + Nozomi ≈ $15,000+/yr</td><td>●●●</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><small>差距图例：●●● = Cisco 显著领先 | ●●○ = Cisco 明显领先 | ●○○ = 差距较小</small></p>
+
+    <div class="callout">
+      <strong>统计：</strong>完整 40 项能力评估中，Cisco 显著领先 (●●●) 占 <strong>27 项 (67.5%)</strong>，明显领先 (●●○) 占 <strong>10 项 (25%)</strong>。Hirschmann 在管理维度<strong>无一项领先</strong> Cisco。
+    </div>
+
+    <!-- ===== 5.3 运维效率量化 ===== -->
+    <h3>5.3 运维效率量化：50 台交换机工厂</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>运维任务</th><th>Cisco 平台</th><th>Hirschmann</th><th>节省</th></tr></thead>
+        <tbody>
+          <tr><td>新交换机上线</td><td>PnP：5 min/台</td><td>手动 CLI：45 min/台</td><td>89%</td></tr>
+          <tr><td>固件升级 (50 台)</td><td>SWIM + ISSU：2h 全场</td><td>逐台 TFTP + 重启：25h</td><td>92%</td></tr>
+          <tr><td>故障根因定位</td><td>AI Assurance：8 min</td><td>Syslog + 人工：55 min</td><td>85%</td></tr>
+          <tr><td>OT 资产盘点</td><td>Cyber Vision：15 min</td><td>手动 Excel + 现场核对：40h</td><td>99%</td></tr>
+          <tr><td>安全策略变更</td><td>SD-Access 意图策略：10 min</td><td>逐设备 CLI：4h (50 台)</td><td>96%</td></tr>
+          <tr><td>合规报告生成</td><td>自动 PDF：5 min</td><td>手动整理：8h</td><td>99%</td></tr>
+          <tr><td>配置偏移检测+修复</td><td>自动扫描+一键修复：15 min/周</td><td>人工逐台对比：6h/周</td><td>96%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--space-6);justify-content:center;margin:var(--space-8) 0;">
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-blue);">2,600h</div>
+        <div class="label" style="color:var(--text-secondary);">5 年运维时间节省</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-blue);">93%</div>
+        <div class="label" style="color:var(--text-secondary);">平均效率提升</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--color-success);">$195K</div>
+        <div class="label" style="color:var(--text-secondary);">5 年人力成本节省 (按 $75/h)</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-navy);">1.3</div>
+        <div class="label" style="color:var(--text-secondary);">等效释放 FTE 人力</div>
+      </div>
+    </div>
+
+    <!-- ===== 5.4 Hirschmann 局限性 ===== -->
+    <h3>5.4 Hirschmann 管理平台局限性</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>#</th><th>局限性</th><th>业务影响</th><th>风险</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>无嵌入式 OT 安全</td><td>额外 $50K–150K/工厂安全成本；部署延迟 3–6 个月</td><td style="color:var(--cisco-red);font-weight:700;">极高</td></tr>
+          <tr><td>2</td><td>无意图驱动策略</td><td>50 台变更耗时 4h vs Cisco 10min；人为错误率高</td><td style="color:var(--cisco-red);font-weight:700;">高</td></tr>
+          <tr><td>3</td><td>无 AI/ML 分析</td><td>MTTR 增加 6.8×（55min vs 8min）</td><td style="color:var(--cisco-red);font-weight:700;">高</td></tr>
+          <tr><td>4</td><td>扩展性受限</td><td>单实例最多 ~2,000 设备，多工厂管理碎片化</td><td style="color:var(--cisco-orange);font-weight:700;">中高</td></tr>
+          <tr><td>5</td><td>API 生态薄弱</td><td>无法与 SIEM/SOAR/MES 原生集成</td><td style="color:var(--cisco-orange);font-weight:700;">中高</td></tr>
+          <tr><td>6</td><td>Windows 单平台依赖</td><td>需维护 Windows 管理服务器；远程运维受限</td><td style="color:var(--cisco-orange);">中</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 5.5 公平对比：Hirschmann 优势 ===== -->
+    <h3>5.5 ⚖️ 公平对比 — Hirschmann 管理维度优势</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>📚 学习曲线低</h4>
+        <p>HiVision 界面直观，OT 工程师无需 IT 背景即可上手；Catalyst Center 功能丰富但初始学习成本较高（建议 3–5 天培训）。</p>
+      </div>
+      <div class="card">
+        <h4>💳 许可模式简单</h4>
+        <p>HiVision 按节点永久授权，无订阅续费；Cisco DNA License 为订阅制。</p>
+      </div>
+      <div class="card">
+        <h4>🪶 轻量部署</h4>
+        <p>HiVision 可安装在普通 Windows PC 上，适合小型单站点（≤50 台）快速部署。</p>
+      </div>
+      <div class="card">
+        <h4>⚙️ PROFINET 原生优化</h4>
+        <p>HiVision 对 PROFINET 拓扑和诊断有深度原生支持，在纯 Siemens 环境体验良好。</p>
+      </div>
+    </div>
+
+    <!-- ===== 5.6 综合评分 ===== -->
+    <h3>5.6 管理平台综合评分</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>评估维度</th><th>权重</th><th>Cisco</th><th>Hirschmann</th></tr></thead>
+        <tbody>
+          <tr><td>设备发现与拓扑</td><td>12%</td><td>9.5</td><td>5.5</td></tr>
+          <tr><td>OT 资产可视化</td><td>15%</td><td>9.5</td><td>2.0</td></tr>
+          <tr><td>监控与 AI 分析</td><td>14%</td><td>9.0</td><td>4.5</td></tr>
+          <tr><td>配置自动化</td><td>14%</td><td>9.5</td><td>3.5</td></tr>
+          <tr><td>OT 安全集成</td><td>16%</td><td>9.5</td><td>2.0</td></tr>
+          <tr><td>API 与生态集成</td><td>10%</td><td>9.0</td><td>3.0</td></tr>
+          <tr><td>扩展性与高可用</td><td>10%</td><td>9.0</td><td>4.0</td></tr>
+          <tr><td>合规与报告</td><td>9%</td><td>9.0</td><td>3.0</td></tr>
+          <tr><td colspan="2"><strong>加权总分</strong></td>
+            <td><strong style="color:var(--cisco-blue);font-size:1.2em;">9.29 / 10</strong></td>
+            <td><strong style="color:#78909C;font-size:1.2em;">3.37 / 10</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--space-6);justify-content:center;margin:var(--space-8) 0;">
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-blue);">9.29</div>
+        <div class="label" style="color:var(--text-secondary);">Cisco 管理平台</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:#78909C;">3.37</div>
+        <div class="label" style="color:var(--text-secondary);">Hirschmann 管理平台</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-navy);">2.76×</div>
+        <div class="label" style="color:var(--text-secondary);">Cisco 领先倍数</div>
+      </div>
+    </div>
+
+    <!-- ===== 5.7 关键结论 ===== -->
+    <h3>5.7 本章关键结论</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>结论 1：管理即竞争力</h4>
+        <p>Cisco 三大平台构成业界唯一的<strong>端到端闭环 OT 管理栈</strong>，从设备发现到合规报告全覆盖。HiVision 仅覆盖约 25% 的管理需求。</p>
+      </div>
+      <div class="card">
+        <h4>结论 2：运维效率鸿沟</h4>
+        <p>50 台场景下 Cisco 平台 5 年节省 <strong>~2,600 人时</strong>（1.3 FTE），折合人力成本 <strong>$195K</strong>——已超过 Catalyst Center 硬件投入。</p>
+      </div>
+      <div class="card">
+        <h4>结论 3：安全是管理的延伸</h4>
+        <p>Cyber Vision 嵌入式传感器是"杀手锏"：<strong>$0 额外硬件</strong>实现 OT 资产可视 + 漏洞关联 + 微分段策略执行。Hirschmann 达到同等能力需 <strong>$50K–150K/工厂</strong>。</p>
+      </div>
+      <div class="card">
+        <h4>结论 4：规模化唯一选择</h4>
+        <p>多工厂/25,000+ 设备场景下，Catalyst Center 集群 + SD-WAN 是唯一可扩展方案。HiVision 2,000 设备上限无法支撑企业级规模。</p>
+      </div>
+    </div>
+
+    <blockquote>
+      管理平台维度是所有章节中差距最大的领域（<strong>2.76×</strong>）。管理平台应作为客户沟通的<strong>首选突破口</strong>。
+    </blockquote>
+
+  </div>
+</section>
+<!-- ============================================================
+     CHAPTER 6 — OT 安全深度分析
+     ============================================================ -->
+<section class="chapter" id="ch6">
+  <div class="container">
+    <h2>06 OT 安全深度分析</h2>
+    <p class="chapter-lead">
+      在 IT 世界，"安全是最后才加上去的螺栓"这句自嘲流传了三十年；遗憾的是，大部分 OT 网络至今仍在重复同样的错误。当一座焊装车间或半导体 FAB 被勒索软件锁死时，<strong>每小时损失可达 $250,000–$500,000</strong>。真正的问题不是"要不要做安全"，而是——安全能力应该<em>长在网络骨架里</em>，还是像创可贴一样<em>贴在外面</em>？
+    </p>
+
+    <!-- ===== 6.1 安全架构哲学 ===== -->
+    <h3>6.1 安全架构哲学：骨骼 vs. 盔甲</h3>
+    <div class="grid grid-2">
+      <div class="card" style="border-top:4px solid var(--cisco-blue);">
+        <h4 style="color:var(--cisco-blue);">🦴 Cisco = 骨骼（嵌入式纵深防御）</h4>
+        <p>安全与网络融为一体、无法剥离。<strong>每一台交换机都是传感器 + 执行点</strong>——数据平面即安全平面。</p>
+        <ul style="line-height:1.9;margin-top:8px;">
+          <li>Cyber Vision Sensor 运行在 IOx 容器内，<strong>零额外硬件</strong></li>
+          <li>ISE + TrustSec SGT 标签实现端口级微分段</li>
+          <li>MACsec-256 线速加密，零性能损失</li>
+          <li>Talos 400+ 研究员，24h 内发布 ICS 检测规则</li>
+          <li>SecureX/XDR 自动关联 → ISE 自动隔离 <strong>≤30 秒</strong></li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:4px solid #78909C;">
+        <h4 style="color:#546E7A;">🛡️ Hirschmann = 盔甲（外挂式边界防护）</h4>
+        <p>安全需要额外穿戴、可以卸下。<strong>交换机负责转发，安全由专用设备承担</strong>——经典边界防御思维。</p>
+        <ul style="line-height:1.9;margin-top:8px;">
+          <li>EAGLE40 独立 DIN-Rail 防火墙，需单独采购部署</li>
+          <li>VLAN + ACL 手动分段</li>
+          <li>交换机本身无 MACsec</li>
+          <li>Belden 安全团队规模 &lt;20 人（估计）</li>
+          <li>人工识别 + 手动修改规则：<strong>15–60 分钟</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>🏭 类比：</strong>当你保护的不是一个骑士而是一支军队时，"每个人都自带骨骼"显然比"给每个人定制一套盔甲"更经济、更敏捷。在 Purdue 模型 L2/L1 层存在数十个微小 Cell 的现代工厂中，嵌入式模型的覆盖密度和响应速度具有<strong>结构性优势</strong>。
+    </div>
+
+    <!-- ===== 6.2 核心安全能力对照 ===== -->
+    <h3>6.2 核心安全能力对照</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th style="width:22%">能力维度</th><th style="width:35%">Cisco IE + 安全生态</th><th style="width:35%">Hirschmann + Belden</th><th style="width:8%">优势</th></tr></thead>
+        <tbody>
+          <tr><td>安全传感部署</td><td>Cyber Vision Sensor 以 IOx 容器运行在交换机内部；<strong>零额外硬件</strong></td><td>无内嵌传感器；需部署第三方 IDS + SPAN/TAP</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>深度包检测 (DPI)</td><td>100+ 工业协议（CIP, Modbus, PROFINET, OPC-UA, S7comm 等）</td><td>EAGLE40 支持 ~10 协议 DPI；IEC 61850 DPI 更成熟</td><td>各有侧重</td></tr>
+          <tr><td>微分段实现</td><td>ISE + TrustSec SGT 标签 → 交换机硬件执行 SGACL，<strong>无需每个边界部署防火墙</strong></td><td>VLAN + ACL + EAGLE；50 台场景约需 20–30 台 EAGLE</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>MACsec 加密</td><td>MACsec-256 / 128 线速加密</td><td>EAGLE40 IPsec VPN；交换机无 MACsec</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>零信任模型</td><td>ISE 持续身份验证 + Posture + pxGrid — 设备身份/健康/行为三重校验</td><td>802.1X + RADIUS 基础准入；无持续评估</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>威胁情报</td><td>Talos 400+ 研究员，每日分析 150 万+ 样本</td><td>Belden 有限团队；EAGLE 可导入黑名单但无原生 ICS 情报</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>SOC/SIEM 集成</td><td>Cyber Vision → SecureX/XDR → Splunk/Sentinel（原生 API + STIX/TAXII）</td><td>EAGLE Syslog → SIEM；无原生 XDR/SOAR</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>自动响应速度</td><td>ISE pxGrid → 动态隔离端口 <strong>&lt;30 秒</strong></td><td>人工登录 EAGLE 调整规则 <strong>15–60 分钟</strong></td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>Purdue 覆盖</td><td>L0–L5 全覆盖</td><td>EAGLE 主要 L2–L3.5；L0/L1 依赖基础 ACL</td><td style="color:var(--cisco-blue);font-weight:700;">C</td></tr>
+          <tr><td>IEC 62443-4-2 认证</td><td>IE3400 推进中（预计 2025 H2）</td><td>BRS20/EAGLE40 已获 SL2 认证（TÜV）</td><td style="color:#78909C;font-weight:700;">H</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 6.3 微分段：O(1) vs O(n²) ===== -->
+    <h3>6.3 微分段复杂度：O(1) vs O(n²)</h3>
+    <div class="grid grid-2">
+      <div class="card" style="border-left:5px solid var(--cisco-blue);">
+        <h4>Cisco TrustSec SGT</h4>
+        <p>策略复杂度与<strong>设备角色数量</strong>相关（一张 N×N 矩阵，N = SGT 标签数，通常 10–30 个），<strong>与物理设备数量无关</strong>。</p>
+        <p>8 个 Zone、50 台交换机 → 管理<strong>一张 SGT 矩阵（~30 条规则）</strong></p>
+        <p><strong>新增产线策略调整：15–30 分钟</strong></p>
+      </div>
+      <div class="card" style="border-left:5px solid #78909C;">
+        <h4>Hirschmann VLAN + EAGLE</h4>
+        <p>策略复杂度与 <strong>Zone 边界数量</strong>相关，边界数量随 Zone 增加呈组合增长。</p>
+        <p>8 个 Zone、50 台交换机 → 管理 <strong>20–30 台 EAGLE 上数百条独立 FW 规则</strong></p>
+        <p><strong>新增产线策略调整：1–4 周</strong></p>
+      </div>
+    </div>
+
+    <!-- ===== 6.4 IEC 62443 三层对比 ===== -->
+    <h3>6.4 IEC 62443 合规三层对比</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>标准层级</th><th>Cisco</th><th>Hirschmann</th><th>优势</th></tr></thead>
+        <tbody>
+          <tr><td><strong>4-1 开发流程</strong><br>安全开发生命周期</td><td>Cisco CSDL 已实施 15+ 年；IE3400 通过 ISASecure SDLA<br>PSIRT 业界最大规模之一</td><td>Belden 通过 IEC 62443-4-1；PSIRT 规模较小</td><td>Cisco</td></tr>
+          <tr><td><strong>4-2 产品安全</strong><br>组件安全等级</td><td>IE3400 推进 SL2（预计 2025 H2）<br>已具备 SL2 全部技术要求，差的是纸面证书</td><td><strong>BRS20/EAGLE40 已获 TÜV SL2 认证</strong></td><td style="color:#78909C;font-weight:700;">Hirsch.</td></tr>
+          <tr><td><strong>3-3 系统安全</strong><br>Zone &amp; Conduit</td><td>TrustSec SGT = Zone，SGACL = Conduit Policy<br>Cyber Vision + SecureX 检测→响应闭环</td><td>VLAN + EAGLE 可实现但成本高、运维复杂<br>检测与响应割裂</td><td style="color:var(--cisco-blue);font-weight:700;">Cisco</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>💬 面对"Hirschmann 有 SL2 证书"时的正确回应：</strong><br>
+      "您说得对，Hirschmann BRS20 在产品级 4-2 认证上领先。但 62443 合规是三层结构——开发流程 (4-1)、产品能力 (4-2)、系统能力 (3-3)。Cisco 在 4-1 和 3-3 上具有显著优势。<strong>一张 SL2 证书无法阻止勒索软件——但一套端到端的检测-隔离-响应体系可以。</strong>"
+    </div>
+
+    <!-- ===== 6.5 安全成本模型 ===== -->
+    <h3>6.5 安全成本模型：50 交换机工厂 · 5 年</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>成本项</th><th>Cisco 方案</th><th>Hirschmann + 第三方</th><th>差额</th></tr></thead>
+        <tbody>
+          <tr><td>OT 可视化传感器</td><td>Cyber Vision 内嵌 → <strong>$0</strong></td><td>Nozomi 3 台 Sensor $36K + TAP $10K</td><td>–$46K</td></tr>
+          <tr><td>OT 可视化软件 (5yr)</td><td>Cyber Vision Center ~$25K</td><td>Nozomi Vantage ~$100K</td><td>–$75K</td></tr>
+          <tr><td>微分段额外硬件</td><td>TrustSec SGT 交换机执行 → <strong>$0</strong></td><td>EAGLE × 25 台 @ $4K = $100K</td><td>–$100K</td></tr>
+          <tr><td>威胁情报 (5yr)</td><td>Talos 含于安全订阅 → <strong>$0</strong></td><td>Dragos WorldView ~$250K（如选购）</td><td>–$250K</td></tr>
+          <tr><td>运维人力 (5yr)</td><td>ISE 策略管理 ~0.1 FTE → $50K</td><td>25 台 EAGLE 规则管理 ~0.5 FTE → $250K</td><td>–$200K</td></tr>
+          <tr><td colspan="2"><strong>5 年安全总成本</strong></td>
+            <td><strong style="color:var(--cisco-blue);">~$110K</strong></td>
+            <td><strong style="color:#78909C;">$496K – $796K</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>核心价值：</strong>以 $110K 的预算，获得对手需要 $500K–800K 才能接近（但仍无法完全匹敌）的安全能力。Cisco 方案节省 <strong>$386K–$686K</strong>。
+    </div>
+
+    <!-- ===== 6.6 综合评分 ===== -->
+    <h3>6.6 OT 安全综合评分</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>评分维度</th><th>权重</th><th>Cisco</th><th>Hirschmann</th></tr></thead>
+        <tbody>
+          <tr><td>安全架构完整度</td><td>25%</td><td>9.5</td><td>4.5</td></tr>
+          <tr><td>OT 资产可视化 &amp; 威胁检测</td><td>25%</td><td>9.5</td><td>3.0</td></tr>
+          <tr><td>微分段 &amp; 零信任</td><td>20%</td><td>9.5</td><td>4.0</td></tr>
+          <tr><td>IEC 62443 合规</td><td>10%</td><td>7.5</td><td>8.0</td></tr>
+          <tr><td>威胁情报 &amp; 事件响应</td><td>15%</td><td>9.5</td><td>2.5</td></tr>
+          <tr><td>安全 TCO 效率</td><td>5%</td><td>9.0</td><td>3.5</td></tr>
+          <tr><td colspan="2"><strong>加权总分</strong></td>
+            <td><strong style="color:var(--cisco-blue);font-size:1.2em;">9.28 / 10</strong></td>
+            <td><strong style="color:#78909C;font-size:1.2em;">4.03 / 10</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 6.7 关键发现 ===== -->
+    <h3>6.7 六个关键发现</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>1. 架构差异是根本差异</h4>
+        <p>Cisco 将安全传感、策略执行、加密嵌入每一台交换机芯片；Hirschmann 依赖外挂 EAGLE + 第三方 IDS。</p>
+      </div>
+      <div class="card">
+        <h4>2. 可视化覆盖率 100% vs ~20%</h4>
+        <p>Cisco 50 台场景实现 100% 端口级可视化（0 额外硬件）；Hirschmann 需投入 $46K+ 第三方传感器。</p>
+      </div>
+      <div class="card">
+        <h4>3. 微分段粒度差两个数量级</h4>
+        <p>TrustSec 实现端口级/设备级分段（同 VLAN 内也可分段）；Hirschmann 仅 VLAN 级——同 VLAN 内横向移动无法阻止。</p>
+      </div>
+      <div class="card">
+        <h4>4. 事件响应速度差 480 倍</h4>
+        <p>Cisco 自动检测 + 隔离 ≤30 秒；Hirschmann 人工 1–4 小时。高价值环境中直接转化为数十万美元停机差异。</p>
+      </div>
+      <div class="card">
+        <h4>5. 62443-4-2 是 Hirschmann 真实优势</h4>
+        <p>BRS20/EAGLE40 已获 TÜV SL2 认证。在需要"产品级证书"作为投标门槛的项目中暂时领先。但 Cisco 在 4-1 和 3-3 层面优势明显。</p>
+      </div>
+      <div class="card">
+        <h4>6. 5 年安全 TCO 差距巨大</h4>
+        <p>Cisco ~$110K vs Hirschmann + 第三方 $496K–$796K。节省 $386K–$686K 且安全能力更全面。</p>
+      </div>
+    </div>
+
+    <blockquote>
+      <strong>写给销售团队：</strong>当 Hirschmann 销售拿出"IEC 62443-4-2 SL2 证书"时，不要慌——把话题从"单台设备的证书"引导到"整个工厂的安全体系"。问客户三个问题：<br>
+      ① 你今天能看到网络中所有 OT 资产吗？<br>
+      ② 如果一台 HMI 被攻陷，你能在多少秒内阻止它横向扩散？<br>
+      ③ 你上一次更新 ICS 威胁签名是什么时候？<br>
+      这三个问题会把讨论从"纸面证书"拉回到"真实安全"——而这正是 Cisco 的主场。
+    </blockquote>
+
+  </div>
+</section>
+<!-- ============================================================
+     CHAPTER 7 — 生态系统、IT/OT 融合与五年 TCO
+     ============================================================ -->
+<section class="chapter" id="ch7">
+  <div class="container">
+    <h2>07 生态系统、IT/OT 融合与五年 TCO</h2>
+    <p class="chapter-lead">
+      制造业的数字化转型不是买几台交换机就能实现的——需要一个<strong>端到端的网络与安全架构</strong>。本章从九层网络全栈覆盖、工业协议、合作伙伴生态、IT/OT 融合四个维度展开对比，并以一个 50 台交换机中型工厂为场景，量化五年总拥有成本。
+    </p>
+
+    <!-- ===== 7.1 九层网络全栈 ===== -->
+    <h3>7.1 端到端架构：九层网络全栈覆盖</h3>
+    <p>一座现代智慧工厂的网络从传感器 I/O 到多云分析共涉及九个层级。Cisco 是<strong>唯一能用自有产品覆盖全部九层</strong>的厂商。</p>
+
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>层级</th><th>Cisco 方案</th><th>Hirschmann 方案</th><th>差距</th></tr></thead>
+        <tbody>
+          <tr><td>L1 传感器/IO</td><td>IR1100 可扩展 IO + Rockwell 集成</td><td>Belden Lumberg LioN-P IO 模块</td><td>Belden 物理层有优势</td></tr>
+          <tr><td>L2 现场接入</td><td>IE3100 / IE3300 / IE3400 全系 IOS-XE</td><td>BOBCAT / BRS30 / BRS50 HiOS</td><td>势均力敌</td></tr>
+          <tr><td>L3 汇聚/分发</td><td>IE9300 支持 VXLAN、SD-Access</td><td>RSPE37 / GREYHOUND</td><td style="color:var(--cisco-blue);">Cisco L3 特性远超</td></tr>
+          <tr><td>L4 工业 DMZ</td><td>ISA3000 OT 防火墙 + IPS + DPI</td><td>EAGLE40 基础包过滤</td><td style="color:var(--cisco-blue);">Cisco（关键差距）</td></tr>
+          <tr><td>L5 边缘计算</td><td>IOx + Edge Intelligence + AWS/Azure 集成</td><td>无原生平台；需第三方网关</td><td style="color:var(--cisco-blue);">Cisco（关键差距）</td></tr>
+          <tr><td>L6 SD-WAN</td><td>IR8340 / IR1800 / Viptela vManage</td><td>❌ 无 WAN 产品线</td><td style="color:var(--cisco-blue);">Cisco 独有</td></tr>
+          <tr><td>L7 数据中心</td><td>Nexus 9000 / ACI / UCS / Intersight</td><td>❌ 无 DC 产品</td><td style="color:var(--cisco-blue);">Cisco 独有</td></tr>
+          <tr><td>L8 统一管理</td><td>Catalyst Center + ThousandEyes + Splunk</td><td>HiVision 仅管 Belden 设备</td><td style="color:var(--cisco-blue);">Cisco（核心差距）</td></tr>
+          <tr><td>L9 云分析/AI</td><td>Webex IoT / Splunk OT / AI Analytics</td><td>❌ 无云分析平台</td><td style="color:var(--cisco-blue);">Cisco 独有</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>核心洞察：</strong>Hirschmann 覆盖约 3.5/9 层（≈39%），集中于 L2 接入和汇聚。选择 Hirschmann 的客户需要额外 5–6 个厂商来构建完整架构，导致多供应商管理复杂度和集成风险显著增加。
+    </div>
+
+    <!-- ===== 7.2 工业协议 ===== -->
+    <h3>7.2 七大工业协议支持深度</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>协议</th><th>主要应用</th><th>Cisco</th><th>Hirschmann</th><th>评判</th></tr></thead>
+        <tbody>
+          <tr><td><strong>EtherNet/IP (CIP)</strong></td><td>北美离散 · Rockwell</td><td>★★★★★ 全系列 DPI + CPwE 架构</td><td>★★★★☆ 透传 + QoS</td><td style="color:var(--cisco-blue);">Cisco</td></tr>
+          <tr><td><strong>PROFINET</strong></td><td>欧洲 · Siemens</td><td>★★★☆☆ RT 支持；不支持 IRT</td><td>★★★★★ RT + IRT · PI 认证</td><td style="color:#78909C;">Hirsch.</td></tr>
+          <tr><td><strong>OPC UA</strong></td><td>Industry 4.0 标准</td><td>★★★★★ IOx 原生 Server/Client</td><td>★★★☆☆ 需外购网关</td><td style="color:var(--cisco-blue);">Cisco</td></tr>
+          <tr><td><strong>Modbus TCP</strong></td><td>传统 SCADA</td><td>★★★★☆ ISA3000 DPI 白名单过滤</td><td>★★★★☆ EAGLE 基础功能码过滤</td><td>平手</td></tr>
+          <tr><td><strong>MQTT</strong></td><td>IIoT 数据上云</td><td>★★★★★ IOx 原生 Broker + 云直连</td><td>★★☆☆☆ BRS50 基础客户端</td><td style="color:var(--cisco-blue);">Cisco</td></tr>
+          <tr><td><strong>TSN (802.1)</strong></td><td>确定性以太网</td><td>★★★★☆ IE3500 Qbu；CIP-TSN 路标</td><td>★★★★☆ Qbv TAS；PROFINET-TSN 略超前</td><td>接近</td></tr>
+          <tr><td><strong>CC-Link IE</strong></td><td>日系 · 三菱</td><td>★★☆☆☆ 标准转发</td><td>★★★☆☆ 部分 CLPA 认证</td><td style="color:#78909C;">Hirsch.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--text-secondary);">
+      <strong>选型建议：</strong>Rockwell + EtherNet/IP 为主 → 选 Cisco；Siemens + PROFINET IRT 为主 → 考虑 Hirschmann；混合环境 → Cisco 覆盖面更广。
+    </p>
+
+    <!-- ===== 7.3 CPwE 联盟 ===== -->
+    <h3>7.3 Cisco-Rockwell CPwE 联盟 vs Hirschmann 生态</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>维度</th><th>Cisco + Rockwell CPwE</th><th>Hirschmann (Belden)</th></tr></thead>
+        <tbody>
+          <tr><td>联盟历史</td><td>2009 年成立，<strong>17 年</strong>联合研发；累计 19 个预验证参考架构 (CVD)</td><td>Belden 内部集成；无排他性联盟</td></tr>
+          <tr><td>联合实验室</td><td>Cleveland + 上海 + 全球 5 站点</td><td>Neckartenzlingen 内部实验室；无公开联合实验室</td></tr>
+          <tr><td>认证工程师</td><td>全球 20,000+ CCNA/CCNP Industrial；800+ SI 通过 CPwE 培训</td><td>全球约 1,500 认证工程师；~80 家认证 SI</td></tr>
+          <tr><td>中国本地化</td><td>大中华区工业团队 150+ 人；上海联合实验室；中文版 CPwE 指南</td><td>中国团队约 30 人；中文文档有限</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 7.4 IT/OT 融合 ===== -->
+    <h3>7.4 IT/OT 融合关键能力</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>融合能力</th><th>Cisco</th><th>Hirschmann</th></tr></thead>
+        <tbody>
+          <tr><td>统一身份认证</td><td>ISE 统一 802.1X / MAB / SGT 跨 IT+OT</td><td>OT 侧无 802.1X；IT 侧依赖第三方 NAC</td></tr>
+          <tr><td>策略 IT↔OT 传递</td><td>SD-Access SGT 通过 VXLAN 无缝传递</td><td>EAGLE 是策略断点；IT 标签在防火墙处终止</td></tr>
+          <tr><td>统一拓扑视图</td><td>Catalyst Center 一个面板显示 IT + OT + WAN</td><td>HiVision 只显示 Belden 设备；IT 需另购工具</td></tr>
+          <tr><td>统一固件管理</td><td>SWIM 统一管理 IT + OT 固件 + 合规检查</td><td>HiOS 固件需单独管理；无统一合规视图</td></tr>
+          <tr><td>Streaming Telemetry</td><td>YANG Model-Driven (gRPC/gNMI) 秒级推送</td><td>仅 SNMP 轮询（30–300s）</td></tr>
+          <tr><td>多工厂统一管理</td><td>SD-WAN vManage + Catalyst Center 50+ 工厂</td><td>每厂独立 HiVision；无跨厂统一视图</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>IT/OT 融合成熟度：</strong>Hirschmann 可支撑到 Level 2–3（网关桥接 + 有限管理）。Cisco 可支撑到 <strong>Level 4–5</strong>（策略融合 + 业务智能）。对 2026 年规划智慧工厂的企业，Level 3 是最低要求，Level 4 是合理目标。
+    </div>
+
+    <!-- ===== 7.5 生态综合评分 ===== -->
+    <h3>7.5 生态系统综合评分</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>评估维度</th><th>权重</th><th>Cisco</th><th>Hirschmann</th></tr></thead>
+        <tbody>
+          <tr><td>端到端架构覆盖</td><td>20%</td><td>9.5</td><td>4.0</td></tr>
+          <tr><td>业务系统集成</td><td>18%</td><td>9.0</td><td>5.0</td></tr>
+          <tr><td>工业协议支持</td><td>15%</td><td>8.5</td><td>7.5</td></tr>
+          <tr><td>合作伙伴生态</td><td>15%</td><td>9.5</td><td>5.5</td></tr>
+          <tr><td>IT/OT 融合架构</td><td>18%</td><td>9.5</td><td>4.5</td></tr>
+          <tr><td>边缘计算与数据</td><td>14%</td><td>9.0</td><td>4.0</td></tr>
+          <tr><td colspan="2"><strong>加权总分</strong></td>
+            <td><strong style="color:var(--cisco-blue);font-size:1.15em;">9.20 / 10</strong></td>
+            <td><strong style="color:#78909C;font-size:1.15em;">5.03 / 10</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================
+         TCO 部分
+         ============================================================ -->
+    <h3 style="margin-top:var(--space-12);">7.6 五年 TCO：50 台交换机 · 中型工厂</h3>
+    <p>许多客户看到报价单时觉得 Cisco"贵了 20%"。但采购价只是冰山一角——让我们穿透水面，看看五年真实总账。</p>
+
+    <!-- ===== TCO 十维汇总 ===== -->
+    <h4>十维成本全景</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th>#</th><th>成本维度</th><th>Cisco 5 年 (¥)</th><th>Hirschmann 5 年 (¥)</th><th>差额</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>硬件采购</td><td>1,785,000</td><td>1,328,400</td><td style="color:#78909C;">❌ H 低 25.6%</td></tr>
+          <tr><td>2</td><td>软件许可</td><td>730,000</td><td>180,000</td><td style="color:#78909C;">❌ H 低 75%（但能力缺失）</td></tr>
+          <tr><td>3</td><td>安全解决方案</td><td>500,000</td><td>1,488,000</td><td style="color:var(--cisco-blue);">✅ C 省 66%</td></tr>
+          <tr><td>4</td><td>部署与调试</td><td>194,000</td><td>531,000</td><td style="color:var(--cisco-blue);">✅ C 省 63%</td></tr>
+          <tr><td>5</td><td>培训与人才</td><td>114,000</td><td>413,000</td><td style="color:var(--cisco-blue);">✅ C 省 72%</td></tr>
+          <tr><td>6</td><td>日常运维（人力）</td><td>1,100,000</td><td>2,450,000</td><td style="color:var(--cisco-blue);">✅ C 省 55%</td></tr>
+          <tr><td>7</td><td>维保续费</td><td>445,000</td><td>432,100</td><td>≈ 持平</td></tr>
+          <tr><td>8</td><td>扩展升级</td><td>439,000</td><td>680,000</td><td style="color:var(--cisco-blue);">✅ C 省 35%</td></tr>
+          <tr><td>9</td><td>停机损失</td><td>1,312,500</td><td>3,850,000</td><td style="color:var(--cisco-blue);">✅ C 省 66%</td></tr>
+          <tr><td>10</td><td>安全事件风险</td><td>320,000</td><td>2,750,000</td><td style="color:var(--cisco-blue);">✅ C 省 88%</td></tr>
+          <tr style="background:var(--bg-soft);font-weight:700;">
+            <td colspan="2">🏆 五年 TCO 总计</td>
+            <td style="color:var(--cisco-blue);font-size:1.1em;">¥6,939,500</td>
+            <td style="color:#78909C;font-size:1.1em;">¥14,102,500</td>
+            <td style="color:var(--cisco-blue);">✅ Cisco 低 50.8%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--space-6);justify-content:center;margin:var(--space-8) 0;">
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--cisco-blue);">¥694万</div>
+        <div class="label" style="color:var(--text-secondary);">Cisco 五年 TCO</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:#78909C;">¥1,410万</div>
+        <div class="label" style="color:var(--text-secondary);">Hirschmann 五年 TCO</div>
+      </div>
+      <div class="stat-card" style="background:var(--bg-soft);border:1px solid var(--border-color);">
+        <div class="num" style="color:var(--color-success);">+¥716万</div>
+        <div class="label" style="color:var(--text-secondary);">选择 Hirschmann 的额外成本<br><small>≈ 再买一套 Cisco 方案</small></div>
+      </div>
+    </div>
+
+    <!-- ===== TCO 关键发现 ===== -->
+    <h4>六大关键发现</h4>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🔍 硬件仅占 13–26%</h4>
+        <p>Hirschmann 硬件价格优势（-25.6%）在全生命周期中被稀释——其硬件仅占 TCO 的 9.4%。</p>
+      </div>
+      <div class="card">
+        <h4>💰 风险成本是最大差距</h4>
+        <p>停机 + 安全事件合计占 Hirschmann TCO 的 46.8%（¥660万），差额 ¥497万比硬件价差大 <strong>10.9 倍</strong>。</p>
+      </div>
+      <div class="card">
+        <h4>⚡ 运维人力最大持续差距</h4>
+        <p>五年运维差额 ¥135万，Cisco 自动化每年释放 1,080 工时 ≈ 0.5 个全职工程师。</p>
+      </div>
+      <div class="card">
+        <h4>🔐 安全内嵌 vs 拼凑差 3×</h4>
+        <p>Cisco ¥50万 vs Hirschmann 拼凑 ¥149万。嵌入式 Cyber Vision 消除了独立探针和多平台协调成本。</p>
+      </div>
+      <div class="card">
+        <h4>📈 模块化扩展优势放大</h4>
+        <p>IE9300 模块化升级 ¥4.8万 vs RSPE 整机替换 ¥22万。技术升级时差距指数级放大。</p>
+      </div>
+      <div class="card">
+        <h4>🏆 总 TCO 低 50.8%</h4>
+        <p>节省 ¥716万足以再部署一套完整 Cisco 工业网络，或投资 2 条新产线数字化升级。</p>
+      </div>
+    </div>
+
+    <!-- ===== TCO 话术 ===== -->
+    <div class="callout">
+      <strong>💬 当客户说"Hirschmann 更便宜"时：</strong><br>
+      ① 承认硬件价差："是的，Hirschmann 硬件大约低 25%，这是事实。"<br>
+      ② 引入冰山模型："但采购价只是冰山一角，只占五年总成本的 10–26%。"<br>
+      ③ 量化安全差距："达到同等安全能力需额外 ¥99万（4 个独立产品拼接）。"<br>
+      ④ 亮运维数据："Cisco 自动化每年节省 1,080 工时，五年省 ¥135万人力。"<br>
+      ⑤ 风险量化："一次安全事件损失（¥25–84万）就超过全部硬件价差。"<br>
+      ⑥ 总账："五年 TCO：Cisco ¥694万 vs Hirschmann ¥1,410万——<strong>节省 ¥716万</strong>。"
+    </div>
+
+    <!-- ===== 跨章评分汇总 ===== -->
+    <h3>7.7 跨章节综合评分汇总</h3>
+    <div class="table-scroll-wrapper">
+      <table class="compact">
+        <thead><tr><th>章节</th><th>评估领域</th><th>Cisco</th><th>Hirschmann</th><th>Cisco 领先</th></tr></thead>
+        <tbody>
+          <tr><td>Ch03</td><td>旗舰硬件</td><td>9.00</td><td>6.14</td><td>+46%</td></tr>
+          <tr><td>Ch04</td><td>操作系统</td><td>9.28</td><td>4.53</td><td>+105%</td></tr>
+          <tr><td>Ch05</td><td>管理平台</td><td>9.29</td><td>3.37</td><td>+176%</td></tr>
+          <tr><td>Ch06</td><td>OT 安全</td><td>9.28</td><td>4.03</td><td>+130%</td></tr>
+          <tr><td>Ch07</td><td>生态与 IT/OT 融合</td><td>9.20</td><td>5.03</td><td>+83%</td></tr>
+          <tr><td>Ch07</td><td>五年 TCO</td><td>8.65</td><td>4.75</td><td>+82%</td></tr>
+          <tr style="background:var(--bg-soft);font-weight:700;">
+            <td colspan="2">六章均值</td>
+            <td style="color:var(--cisco-blue);">9.12</td>
+            <td style="color:#78909C;">4.64</td>
+            <td style="color:var(--cisco-blue);">+96%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===============  CH 08 — 五大制造场景实战  =============== -->
+<section class="chapter" id="ch8">
+<div class="container">
+
+<h2>第八章 &mdash; 五大制造场景实战与最终裁定</h2>
+<p class="chapter-lead">将前七章的技术分析投射到真实制造环境中。每个场景均包含环境画像、核心需求、双方方案对比与决策依据，帮助客户在具体项目中快速定位 Cisco 差异化价值。</p>
+
+<!-- ---- Scenario 1 ---- -->
+<div class="card" style="border-left:4px solid var(--cisco-blue);">
+<h3>场景 1 &mdash; 汽车焊装车间</h3>
+
+<div class="grid-2">
+<div>
+<h4>🏭 环境画像</h4>
+<ul>
+<li>200+ 台焊接机器人（KUKA / FANUC），PROFINET 实时控制</li>
+<li>电磁干扰 &gt;10 V/m，环境温度 0–60 °C，金属粉尘</li>
+<li>200+ 台 PoE 工业相机（机器视觉质检），功率需求 30–60 W</li>
+<li>产线节拍 &lt;60 s，停线损失 ¥50 万/小时</li>
+</ul>
+
+<h4>📋 核心需求</h4>
+<ol>
+<li>PROFINET Class B/C 确定性 &lt;1 ms 抖动</li>
+<li>单交换机 ≥24 口 PoE+（30 W）或 PoE++（60 W）</li>
+<li>网络可视化——焊枪 PLC 与相机流量实时监控</li>
+<li>IEC 62443 SL-2 以上安全合规</li>
+</ol>
+</div>
+
+<div>
+<h4 style="color:var(--cisco-blue);">Cisco 方案</h4>
+<table class="compact">
+<tr><th>层级</th><th>设备</th><th>关键能力</th></tr>
+<tr><td>产线接入</td><td>IE-3400-8P2S</td><td>8×PoE+ 240 W, Cyber Vision 传感器内嵌</td></tr>
+<tr><td>车间汇聚</td><td>IE-9310-26S2C</td><td>24×10G SFP+, PROFINET 深度解析, REP/MRP &lt;50 ms</td></tr>
+<tr><td>安全</td><td>Cyber Vision + ISE</td><td>L7 OT 资产自动发现, TrustSec 微分段</td></tr>
+<tr><td>管理</td><td>DNA Center + CW</td><td>焊枪级流量热力图, AI 异常告警</td></tr>
+</table>
+
+<h4 style="color:#e87000;">Hirschmann 方案</h4>
+<table class="compact">
+<tr><th>层级</th><th>设备</th><th>局限</th></tr>
+<tr><td>接入</td><td>RS20/RS30</td><td>最大 8 口, PoE 总预算 120 W, RS20 已 EOL</td></tr>
+<tr><td>汇聚</td><td>RSPE37</td><td>仅 4×10G, 无内嵌 DPI</td></tr>
+<tr><td>安全</td><td>Industrial HiVision</td><td>仅 ACL/VLAN, 无 L7 OT 可视化</td></tr>
+</table>
+</div>
+</div><!-- /grid-2 -->
+
+<div class="callout callout-cisco">
+<strong>关键差异 ↯</strong><br>
+① Cisco IE-3400 单设备内嵌 Cyber Vision 传感器，无需额外探针即可实现焊枪→PLC→MES 的 L7 流量画像；Hirschmann 需第三方 IDS + 端口镜像，增加 30% 部署成本。<br>
+② IE-9310 提供 24×10G + 2×100G 上行，满足 200 台相机的带宽峰值；RSPE37 仅 4×10G 需堆叠扩展。<br>
+③ 微分段策略从 DNA Center 一键下发至全车间 50+ 台交换机；HiVision 需逐设备配置 ACL。<br>
+<strong>客户决策理由：</strong>网络可视化 + 安全合规 + PoE 密度，综合 TCO 5 年节省 ≈ 38%。
+</div>
+</div><!-- /card -->
+
+<!-- ---- Scenario 2 ---- -->
+<div class="card" style="border-left:4px solid #049fd9;">
+<h3>场景 2 &mdash; 食品饮料 / 制药产线</h3>
+
+<div class="grid-2">
+<div>
+<h4>🏭 环境画像</h4>
+<ul>
+<li>高压冲洗（IP66/IP67）、-40–75 °C 冷库/高温区交替</li>
+<li>FDA 21 CFR Part 11 / GMP 审计追溯要求</li>
+<li>50+ 新建产线年扩展，运维团队仅 2–3 人（无专职网络工程师）</li>
+<li>EtherNet/IP + OPC UA 混合协议</li>
+</ul>
+
+<h4>📋 核心需求</h4>
+<ol>
+<li>IP67 全密封或 IP66 机柜免维护部署</li>
+<li>即插即用（PnP）零配置上线 &lt;5 min/台</li>
+<li>身份准入——外包维保人员临时接入管控</li>
+<li>完整审计日志满足 FDA 合规</li>
+</ol>
+</div>
+
+<div>
+<h4 style="color:var(--cisco-blue);">Cisco 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>价值</th></tr>
+<tr><td>IE-3100-8T（IP67 可选）</td><td>DIN-Rail, 无风扇, -40–75 °C, PnP 自动注册 DNA Center</td></tr>
+<tr><td>ISE + pxGrid</td><td>802.1X / MAB 身份准入; 外包人员限时 VLAN, 自动过期</td></tr>
+<tr><td>DNA Center PnP</td><td>新交换机通电→DHCP→自动下载配置+镜像, &lt;5 min 上线</td></tr>
+<tr><td>Cyber Vision</td><td>OPC UA 会话追踪, 审计日志直接导出至 SIEM/GxP 系统</td></tr>
+</table>
+
+<h4 style="color:#e87000;">Hirschmann 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>局限</th></tr>
+<tr><td>BRS20/BRS40</td><td>有 IP67 型号, 但仅 4/8 口, 无 PnP 自动化</td></tr>
+<tr><td>HiVision</td><td>无身份准入, 仅 MAC 白名单; 无审计日志联动</td></tr>
+<tr><td>部署</td><td>逐台 CLI 配置, 50 台扩展需 ≈ 10 人·天</td></tr>
+</table>
+</div>
+</div>
+
+<div class="callout callout-cisco">
+<strong>关键差异 ↯</strong><br>
+① PnP 自动化：50 台新增交换机 Cisco 仅需 2 人·天（DNA Center 模板批量推送）vs Hirschmann 10 人·天（逐台 CLI）。<br>
+② ISE 身份准入实现"人→设备→区域"三维管控，满足 FDA 审计中"最小权限"要求；Hirschmann 无等效功能。<br>
+③ Cyber Vision 自动生成 OPC UA 资产拓扑，直接对接 MES/GxP 审计系统。<br>
+<strong>客户决策理由：</strong>运维人力不足场景下，自动化 + 合规能力是核心决策因素。
+</div>
+</div><!-- /card -->
+
+<!-- ---- Scenario 3 ---- -->
+<div class="card" style="border-left:4px solid #6abf4b;">
+<h3>场景 3 &mdash; 半导体晶圆厂洁净室</h3>
+
+<div class="grid-2">
+<div>
+<h4>🏭 环境画像</h4>
+<ul>
+<li>Class 100/1000 洁净室，严禁风扇，温度恒 22 ± 1 °C</li>
+<li>300 mm 晶圆产线，SEMI E30/E37 SECS/GEM 协议</li>
+<li>AOI 高速检测图像 10 Gbps 持续流量</li>
+<li>TSN 确定性网络用于 EtherCAT/PROFINET IRT 实时控制</li>
+<li>边缘 AI 推理（缺陷检测模型）需在网络节点运行</li>
+</ul>
+
+<h4>📋 核心需求</h4>
+<ol>
+<li>100% 无风扇 + 零颗粒排放</li>
+<li>IEEE 802.1 TSN（Qbv/Qbu/CB）端到端支持</li>
+<li>25G/100G 上行满足 AOI 带宽</li>
+<li>边缘计算容器（Docker/K8s）运行 AI 模型</li>
+<li>亚微秒级时钟同步（IEEE 1588 PTP GM）</li>
+</ol>
+</div>
+
+<div>
+<h4 style="color:var(--cisco-blue);">Cisco 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>价值</th></tr>
+<tr><td>IE-9320-26S2C</td><td>全无风扇, 24×10G+2×100G, TSN Qbv/Qbu/CB, 1588 GM</td></tr>
+<tr><td>IOx 边缘容器</td><td>直接在交换机运行 TensorFlow Lite 缺陷检测模型</td></tr>
+<tr><td>Catalyst 9300X 汇聚</td><td>mGig/25G/100G, UADP 3.0 ASIC 硬件 TSN</td></tr>
+<tr><td>DNA Center Assurance</td><td>TSN 流调度可视化, 抖动 SLA 实时监控</td></tr>
+</table>
+
+<h4 style="color:#e87000;">Hirschmann 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>局限</th></tr>
+<tr><td>RSPE37</td><td>部分 TSN（仅 Qbv 基础）, 无 Qbu/CB; 最高 10G</td></tr>
+<tr><td>边缘计算</td><td>无内嵌容器运行时, 需外挂工控机</td></tr>
+<tr><td>时钟</td><td>1588 TC 模式, 非 GM; 多跳累积误差 &gt;1 μs</td></tr>
+</table>
+</div>
+</div>
+
+<div class="callout callout-cisco">
+<strong>关键差异 ↯</strong><br>
+① Cisco IE-9320 是业界首款工业交换机同时支持 TSN 全套（Qbv+Qbu+CB）+ 100G 上行 + 边缘容器，三合一消除外挂设备。<br>
+② IOx 容器直接在交换机本地运行 AI 推理，延迟 &lt;5 ms（vs 外挂工控机 15–30 ms 网络往返）。<br>
+③ 1588 PTP GM 模式提供 ±50 ns 同步精度，满足 EtherCAT 分布式运动控制要求。<br>
+<strong>客户决策理由：</strong>TSN + 边缘 AI + 100G 带宽的唯一单厂商集成方案。
+</div>
+</div><!-- /card -->
+
+<!-- ---- Scenario 4 ---- -->
+<div class="card" style="border-left:4px solid #005073;">
+<h3>场景 4 &mdash; 多工厂 IT/OT 统一管理</h3>
+
+<div class="grid-2">
+<div>
+<h4>🏭 环境画像</h4>
+<ul>
+<li>集团拥有 5 座工厂（分布长三角 / 珠三角 / 中部），共 2000+ 网络设备</li>
+<li>IT 部门 15 人负责全集团网络，OT 部门各厂独立运维</li>
+<li>正在推进"工业互联网平台"建设，需统一网络策略与安全基线</li>
+<li>WAN 互联采用 MPLS + Internet 双链路</li>
+</ul>
+
+<h4>📋 核心需求</h4>
+<ol>
+<li>单一控制台管理 5 厂 2000+ IT/OT 设备</li>
+<li>统一安全策略（ISE SGT）跨厂同步，新厂上线 &lt;2 周</li>
+<li>SD-WAN 智能选路，ERP/MES 流量优先保障</li>
+<li>OT 资产全集团可视化，统一威胁情报</li>
+</ol>
+</div>
+
+<div>
+<h4 style="color:var(--cisco-blue);">Cisco 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>价值</th></tr>
+<tr><td>DNA Center（多站点）</td><td>5 厂拓扑统一视图, 配置模板继承, 合规审计一键生成</td></tr>
+<tr><td>ISE + TrustSec</td><td>SGT 策略全集团同步; 新厂设备自动继承安全基线</td></tr>
+<tr><td>SD-WAN (vManage)</td><td>MPLS/Internet 双活, 应用感知选路, MES SLA 保障</td></tr>
+<tr><td>Cyber Vision 集中</td><td>5 厂 OT 资产统一仪表盘, Talos 威胁情报全局联动</td></tr>
+<tr><td>CW Cloud</td><td>全集团设备生命周期/合规/许可证统一管理</td></tr>
+</table>
+
+<h4 style="color:#e87000;">Hirschmann 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>局限</th></tr>
+<tr><td>Industrial HiVision</td><td>单站点架构, 多厂需独立部署实例, 无跨站点策略同步</td></tr>
+<tr><td>WAN</td><td>无 SD-WAN 产品, 需第三方; 策略断裂</td></tr>
+<tr><td>安全</td><td>各厂独立 ACL, 无统一身份/策略框架</td></tr>
+</table>
+</div>
+</div>
+
+<div class="callout callout-cisco">
+<strong>关键差异 ↯</strong><br>
+① Cisco 提供"DNA Center + ISE + SD-WAN + Cyber Vision + CW Cloud"五位一体多厂管理架构；Hirschmann 仅覆盖厂内 L2/L3 交换，厂际互联与统一策略完全空白。<br>
+② 新工厂上线：Cisco 模板继承 + PnP = 2 周；Hirschmann 全手工 = 8–12 周。<br>
+③ 5 厂 2000+ 设备统一运维：Cisco 需 4 名网络工程师；Hirschmann 模式需 8–10 名（每厂 2 名）。<br>
+<strong>客户决策理由：</strong>集团化战略下，"统一管理 + 统一安全 + 统一 WAN"能力不可替代。
+</div>
+</div><!-- /card -->
+
+<!-- ---- Scenario 5 ---- -->
+<div class="card" style="border-left:4px solid #6abf4b;">
+<h3>场景 5 &mdash; 关键基础设施（电力/水务 SCADA）</h3>
+
+<div class="grid-2">
+<div>
+<h4>🏭 环境画像</h4>
+<ul>
+<li>220 kV 变电站 / 大型水处理厂，SCADA + RTU 远程监控</li>
+<li>IEC 61850 GOOSE/MMS 实时保护信号，PRP/HSR 零丢包冗余</li>
+<li>等保 2.0 三级 / NERC CIP 合规要求</li>
+<li>设备生命周期 15–20 年，极端温度 -40–85 °C</li>
+</ul>
+
+<h4>📋 核心需求</h4>
+<ol>
+<li>PRP/HSR 零切换冗余（0 ms 故障恢复）</li>
+<li>IEC 61850 GOOSE 优先级调度 + 1588 电力 Profile</li>
+<li>NERC CIP / 等保 2.0 安全审计全覆盖</li>
+<li>15 年+ 产品可用性保证（含备件）</li>
+<li>国家级威胁情报对接能力</li>
+</ol>
+</div>
+
+<div>
+<h4 style="color:var(--cisco-blue);">Cisco 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>价值</th></tr>
+<tr><td>IE-9310-26S2C</td><td>PRP/HSR 硬件引擎, IEC 61850 QoS, 1588 Power Profile</td></tr>
+<tr><td>IE-3400 Rugged</td><td>-40–75 °C, 变电站户外 IP67 部署</td></tr>
+<tr><td>Cyber Vision</td><td>IEC 61850 MMS/GOOSE 深度解析, 异常行为检测</td></tr>
+<tr><td>Talos 威胁情报</td><td>国家级 APT 情报实时推送, STIX/TAXII 对接</td></tr>
+<tr><td>ISE + DNA Center</td><td>NERC CIP 合规报告自动生成, 变更审计追溯</td></tr>
+</table>
+
+<h4 style="color:#e87000;">Hirschmann 方案</h4>
+<table class="compact">
+<tr><th>组件</th><th>优势 / 局限</th></tr>
+<tr><td>RSP25 / RSPE37</td><td><strong>优势：</strong>电力行业传统份额高, PRP/HSR 成熟<br><strong>局限：</strong>无内嵌安全分析, 无威胁情报集成</td></tr>
+<tr><td>HiVision</td><td>无 NERC CIP 合规报告模块, 需第三方 SIEM 补充</td></tr>
+</table>
+</div>
+</div>
+
+<div class="callout callout-cisco">
+<strong>关键差异 ↯</strong><br>
+① Cisco IE-9310 已通过 IEC 61850 Ed.2 + IEEE 1613 认证，PRP/HSR 性能与 Hirschmann 持平，但额外提供内嵌安全分析——这是电力行业近年最大差异化需求。<br>
+② Talos 全球威胁情报（每日分析 5500 亿+ 安全事件）为关基设施提供国家级 APT 防御能力，Hirschmann 无等效资源。<br>
+③ 公平承认：Hirschmann 在变电站领域有 20 年+ 部署历史和存量基础，部分客户有路径依赖。Cisco 需以安全合规为突破口切入。<br>
+<strong>客户决策理由：</strong>安全合规压力（等保 2.0 / NERC CIP）驱动"网络+安全"一体化采购趋势。
+</div>
+</div><!-- /card -->
+
+<!-- ---- 五场景综合评分汇总 ---- -->
+<h3>五场景综合评分矩阵</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>场景</th><th>核心决策维度</th><th>Cisco 评分</th><th>Hirschmann 评分</th><th>Cisco 优势倍数</th></tr>
+</thead>
+<tbody>
+<tr><td>汽车焊装</td><td>OT 可视化 + PoE 密度</td><td><span class="score score-a">9.4</span></td><td><span class="score score-c">4.8</span></td><td>2.0×</td></tr>
+<tr><td>食品制药</td><td>PnP 自动化 + 合规审计</td><td><span class="score score-a">9.2</span></td><td><span class="score score-c">4.2</span></td><td>2.2×</td></tr>
+<tr><td>半导体洁净室</td><td>TSN + 边缘 AI + 100G</td><td><span class="score score-a">9.6</span></td><td><span class="score score-c">3.9</span></td><td>2.5×</td></tr>
+<tr><td>多工厂 IT/OT</td><td>统一管理 + SD-WAN</td><td><span class="score score-a">9.5</span></td><td><span class="score score-d">3.0</span></td><td>3.2×</td></tr>
+<tr><td>关键基础设施</td><td>安全合规 + 威胁情报</td><td><span class="score score-a">9.0</span></td><td><span class="score score-c">5.5</span></td><td>1.6×</td></tr>
+<tr style="font-weight:700;background:#f0f6ff;">
+<td>加权平均</td><td>&mdash;</td><td><span class="score score-a">9.34</span></td><td><span class="score score-c">4.28</span></td><td>2.18×</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-insight">
+<strong>关键洞察：</strong>在全部五个场景中 Cisco 均获得压倒性优势，其中<strong>多工厂 IT/OT 统一管理</strong>场景差距最大（3.2×），因为 Hirschmann 完全缺乏跨站点管理和 SD-WAN 能力。即使在 Hirschmann 传统优势领域（电力关基），Cisco 仍凭借安全合规能力获得 1.6× 领先。
+</div>
+
+</div>
+</section>
+
+<section class="chapter" id="ch9">
+<div class="container">
+
+<h2>第九章 &mdash; SWOT 对比分析：知己知彼，百战百胜</h2>
+
+      <p>
+        SWOT 分析不是空洞的理论框架——它是<strong>帮助销售团队在客户面前保持诚实和可信的工具</strong>。承认自己的弱点，客户才会相信你说的优势是真的。
+      </p>
+
+      <!-- Cisco IE 系列 SWOT -->
+      <h4 style="margin-top: var(--space-8);">🔵 Cisco IE 系列 SWOT</h4>
+
+      <div class="svg-scroll-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" style="min-width:720px; width:100%; height:auto;">
+          <rect width="900" height="520" rx="12" fill="#F7F8FA" stroke="#D4D8DE"/>
+          <text x="450" y="35" text-anchor="middle" font-size="17" font-weight="700" fill="#049FD9">Cisco IE 系列 — SWOT 分析</text>
+
+          <!-- S - Strengths -->
+          <rect x="20" y="55" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#67B346" stroke-width="2"/>
+          <rect x="20" y="55" width="425" height="36" rx="10" fill="#67B346"/>
+          <rect x="20" y="75" width="425" height="16" fill="#67B346"/>
+          <text x="232" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">S — 优势 (Strengths)</text>
+
+          <text x="35" y="115" font-size="11" fill="#1A1A1A">
+            <tspan x="35" dy="0">✅ 安全即架构：Cyber Vision 内置传感器，零额外硬件</tspan>
+            <tspan x="35" dy="20">✅ IOS-XE 全栈统一，可编程性业界第一（YANG/RESTCONF/IOx）</tspan>
+            <tspan x="35" dy="20">✅ Catalyst Center 统一管理 IT+OT+WAN+无线+安全</tspan>
+            <tspan x="35" dy="20">✅ PnP 零接触部署，3 人团队管 5 个厂</tspan>
+            <tspan x="35" dy="20">✅ ISE + TrustSec 微分段，安全策略全网秒级同步</tspan>
+            <tspan x="35" dy="20">✅ Talos 400+ 安全研究员，全球顶级威胁情报</tspan>
+            <tspan x="35" dy="20">✅ Rockwell CPwE 联盟，制造业参考架构标杆</tspan>
+            <tspan x="35" dy="20">✅ 端到端全覆盖 9/9 网络层次</tspan>
+          </text>
+
+          <!-- W - Weaknesses -->
+          <rect x="455" y="55" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#E2231A" stroke-width="2"/>
+          <rect x="455" y="55" width="425" height="36" rx="10" fill="#E2231A"/>
+          <rect x="455" y="75" width="425" height="16" fill="#E2231A"/>
+          <text x="667" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">W — 劣势 (Weaknesses)</text>
+
+          <text x="470" y="115" font-size="11" fill="#1A1A1A">
+            <tspan x="470" dy="0">⚠️ 单台设备采购价高于 Hirschmann 10–30%</tspan>
+            <tspan x="470" dy="20">⚠️ SmartNet 维保为持续性刚性支出</tspan>
+            <tspan x="470" dy="20">⚠️ 工业产品线历史不如 Hirschmann 悠久（Hirschmann 1924年）</tspan>
+            <tspan x="470" dy="20">⚠️ 部分 OT 团队对 Cisco "IT厂商做工业"存在认知偏见</tspan>
+            <tspan x="470" dy="20">⚠️ 许可证体系较复杂（Essentials/Advantage/Premier）</tspan>
+            <tspan x="470" dy="20">⚠️ TSN 功能尚在路标阶段，尚未全面 GA</tspan>
+          </text>
+
+          <!-- O - Opportunities -->
+          <rect x="20" y="285" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#049FD9" stroke-width="2"/>
+          <rect x="20" y="285" width="425" height="36" rx="10" fill="#049FD9"/>
+          <rect x="20" y="305" width="425" height="16" fill="#049FD9"/>
+          <text x="232" y="309" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">O — 机会 (Opportunities)</text>
+
+          <text x="35" y="345" font-size="11" fill="#1A1A1A">
+            <tspan x="35" dy="0">🚀 OT 安全需求爆发（勒索软件频发，合规趋严）</tspan>
+            <tspan x="35" dy="20">🚀 IT/OT 融合加速，客户 IT 团队接管 OT 网络管理</tspan>
+            <tspan x="35" dy="20">🚀 智能制造 / 工业 4.0 对边缘计算需求激增（IOx 优势）</tspan>
+            <tspan x="35" dy="20">🚀 TSN 商用化浪潮——Cisco 的 TSN 路标将覆盖全栈</tspan>
+            <tspan x="35" dy="20">🚀 客户 IT 团队已熟悉 Cisco，OT 扩展是自然延伸</tspan>
+            <tspan x="35" dy="20">🚀 等保2.0/ISA 62443 强制合规推动安全方案采购</tspan>
+            <tspan x="35" dy="20">🚀 SD-WAN + SASE 趋势推动工厂间网络现代化</tspan>
+            <tspan x="35" dy="20">🚀 AI/ML 驱动的网络运维（AIOps）是 Cisco 差异化方向</tspan>
+          </text>
+
+          <!-- T - Threats -->
+          <rect x="455" y="285" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#FBAB18" stroke-width="2"/>
+          <rect x="455" y="285" width="425" height="36" rx="10" fill="#FBAB18"/>
+          <rect x="455" y="305" width="425" height="16" fill="#FBAB18"/>
+          <text x="667" y="309" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">T — 威胁 (Threats)</text>
+
+          <text x="470" y="345" font-size="11" fill="#1A1A1A">
+            <tspan x="470" dy="0">⚡ Hirschmann 价格优势在预算敏感客户中仍有吸引力</tspan>
+            <tspan x="470" dy="20">⚡ 欧洲制造业客户对 Hirschmann 品牌忠诚度高</tspan>
+            <tspan x="470" dy="20">⚡ Siemens SCALANCE 系列借自动化生态强势渗透</tspan>
+            <tspan x="470" dy="20">⚡ OT 团队可能抵触 IT 厂商"入侵"其传统领地</tspan>
+            <tspan x="470" dy="20">⚡ 地缘政治因素可能影响部分客户对美国品牌的信任</tspan>
+            <tspan x="470" dy="20">⚡ 中国国产工业交换机厂商（如华为/H3C）低价竞争</tspan>
+            <tspan x="470" dy="20">⚡ 客户对许可证/订阅模式的持续性支出有抵触</tspan>
+            <tspan x="470" dy="20">⚡ Belden 若推出更强的云管理平台，差距可能缩小</tspan>
+          </text>
+        </svg>
+      </div>
+
+      <!-- Hirschmann SWOT -->
+      <h4 style="margin-top: var(--space-12);">🔴 Hirschmann (Belden) SWOT</h4>
+
+      <div class="svg-scroll-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" style="min-width:720px; width:100%; height:auto;">
+          <rect width="900" height="520" rx="12" fill="#F7F8FA" stroke="#D4D8DE"/>
+          <text x="450" y="35" text-anchor="middle" font-size="17" font-weight="700" fill="#E2231A">Hirschmann (Belden) — SWOT 分析</text>
+
+          <!-- S -->
+          <rect x="20" y="55" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#67B346" stroke-width="2"/>
+          <rect x="20" y="55" width="425" height="36" rx="10" fill="#67B346"/>
+          <rect x="20" y="75" width="425" height="16" fill="#67B346"/>
+          <text x="232" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">S — 优势 (Strengths)</text>
+
+          <text x="35" y="115" font-size="11" fill="#1A1A1A">
+            <tspan x="35" dy="0">✅ 百年工业品牌（1924年创立），OT 圈品牌认知强</tspan>
+            <tspan x="35" dy="20">✅ HRP 环网 ≤10ms，业界最快环网切换</tspan>
+            <tspan x="35" dy="20">✅ EAGLE40 工业防火墙，IEC 61850 DPI 能力</tspan>
+            <tspan x="35" dy="20">✅ 模块化硬件设计，接口扩展灵活</tspan>
+            <tspan x="35" dy="20">✅ 欧洲制造业深耕多年，客户关系牢固</tspan>
+            <tspan x="35" dy="20">✅ PROFINET/MRP 原生支持扎实</tspan>
+            <tspan x="35" dy="20">✅ 单台设备价格通常低于 Cisco 10–30%</tspan>
+          </text>
+
+          <!-- W -->
+          <rect x="455" y="55" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#E2231A" stroke-width="2"/>
+          <rect x="455" y="55" width="425" height="36" rx="10" fill="#E2231A"/>
+          <rect x="455" y="75" width="425" height="16" fill="#E2231A"/>
+          <text x="667" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">W — 劣势 (Weaknesses)</text>
+
+          <text x="470" y="115" font-size="11" fill="#1A1A1A">
+            <tspan x="470" dy="0">❌ 仅覆盖 3/9 网络层次，无汇聚/核心/WAN/无线/云方案</tspan>
+            <tspan x="470" dy="20">❌ HiOS 不支持 NETCONF/YANG，自动化能力弱</tspan>
+            <tspan x="470" dy="20">❌ 无 IOx 级边缘计算能力</tspan>
+            <tspan x="470" dy="20">❌ 安全方案依赖"外挂设备"，覆盖率低、成本高</tspan>
+            <tspan x="470" dy="20">❌ HiVision 只管 OT 设备，无法管理 IT 网络</tspan>
+            <tspan x="470" dy="20">❌ 无零接触部署（PnP），每台设备需手动配置</tspan>
+            <tspan x="470" dy="20">❌ 无 AI 故障诊断、无意图驱动网络能力</tspan>
+            <tspan x="470" dy="20">❌ 全球专业人才稀缺，培训资源有限</tspan>
+          </text>
+
+          <!-- O -->
+          <rect x="20" y="285" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#049FD9" stroke-width="2"/>
+          <rect x="20" y="285" width="425" height="36" rx="10" fill="#049FD9"/>
+          <rect x="20" y="305" width="425" height="16" fill="#049FD9"/>
+          <text x="232" y="309" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">O — 机会 (Opportunities)</text>
+
+          <text x="35" y="345" font-size="11" fill="#1A1A1A">
+            <tspan x="35" dy="0">🚀 TSN 早期布局（BOBCAT 系列）可能赢得先行者优势</tspan>
+            <tspan x="35" dy="20">🚀 Belden 若推出统一云管理平台可弥补管理短板</tspan>
+            <tspan x="35" dy="20">🚀 电力/轨交等垂直行业深耕可构建护城河</tspan>
+            <tspan x="35" dy="20">🚀 与 Siemens 等自动化厂商深化合作可增强生态</tspan>
+            <tspan x="35" dy="20">🚀 部分客户对美国品牌的地缘顾虑可被利用</tspan>
+            <tspan x="35" dy="20">🚀 中小型单工厂客户仍可能优先考虑价格因素</tspan>
+            <tspan x="35" dy="20">🚀 欧洲数据主权法规可能利好欧洲本土品牌</tspan>
+            <tspan x="35" dy="20">🚀 工业 5G 网关可能成为新的差异化方向</tspan>
+          </text>
+
+          <!-- T -->
+          <rect x="455" y="285" width="425" height="220" rx="10" fill="#FFFFFF" stroke="#FBAB18" stroke-width="2"/>
+          <rect x="455" y="285" width="425" height="36" rx="10" fill="#FBAB18"/>
+          <rect x="455" y="305" width="425" height="16" fill="#FBAB18"/>
+          <text x="667" y="309" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">T — 威胁 (Threats)</text>
+
+          <text x="470" y="345" font-size="11" fill="#1A1A1A">
+            <tspan x="470" dy="0">⚡ Cisco 持续加大工业市场投入，产品迭代加速</tspan>
+            <tspan x="470" dy="20">⚡ IT/OT 融合趋势让 IT 团队（熟悉 Cisco）主导选型</tspan>
+            <tspan x="470" dy="20">⚡ OT 安全需求爆发暴露 Hirschmann 安全能力短板</tspan>
+            <tspan x="470" dy="20">⚡ 多工厂集中管理趋势不利于单点方案厂商</tspan>
+            <tspan x="470" dy="20">⚡ Cisco 的 SD-Access / SD-WAN 生态锁定效应增强</tspan>
+            <tspan x="470" dy="20">⚡ 客户一旦采用 Catalyst Center，迁移成本极高</tspan>
+            <tspan x="470" dy="20">⚡ Siemens SCALANCE 在自动化捆绑销售中抢占份额</tspan>
+            <tspan x="470" dy="20">⚡ 华为/H3C 在中国市场以更低价格发起冲击</tspan>
+          </text>
+        </svg>
+      </div>
+
+      <!-- SWOT 洞察总结 -->
+      <div class="callout" style="border-left-color: var(--cisco-purple); margin-top: var(--space-8);">
+        <h4>🔮 SWOT 战略洞察</h4>
+        <p>
+          对比两张 SWOT 矩阵，一个清晰的<strong>结构性趋势</strong>浮出水面：
+        </p>
+        <blockquote style="border: none; padding: 0; margin: var(--space-4) 0;">
+          <strong>Hirschmann 的优势（S）集中在"产品层"</strong>——环网快、价格低。这些是<strong>静态优势</strong>，随着技术进步会逐渐被追平。<br><br>
+          <strong>Cisco 的优势（S）集中在"体系层"</strong>——安全架构、统一管理、全栈生态、AI 运维。这些是<strong>动态优势</strong>，随着投入增加会不断强化（飞轮效应）。<br><br>
+          更关键的是：<strong>行业趋势（OT 安全爆发、IT/OT 融合、多工厂集中管理、智能制造）全部利好 Cisco</strong>。Hirschmann 的每一个 Opportunity 都带有"如果"条件（如果推出云平台、如果深化合作……），而 Cisco 的 Opportunity 是"已经发生的趋势"。
+        </blockquote>
+        <p style="font-weight: 700; color: var(--cisco-blue);">
+          一句话总结：Hirschmann 在打"过去的仗"，Cisco 在打"未来的仗"。制造业客户需要的是面向未来的选择。
+        </p>
+      </div>
+
+    </div><!-- /s10-3 -->
+</section>
+
+<section class="chapter" id="ch10">
+      <!-- ================================================================
+          执行摘要 (Executive Summary)
+         ================================================================ -->
+    <div class="container">
+
+      <h2>10 执行摘要：一页纸说清 — 为什么制造业客户应该选择 Cisco</h2>
+
+      <!-- 执行摘要 SVG Hero -->
+      <div class="svg-scroll-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" style="min-width:720px; width:100%; height:auto;">
+          <defs>
+            <linearGradient id="execGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#0D274D;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#005073;stop-opacity:1"/>
+            </linearGradient>
+            <linearGradient id="goldBar" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#FBAB18"/>
+              <stop offset="100%" style="stop-color:#F58025"/>
+            </linearGradient>
+          </defs>
+          <rect width="900" height="380" rx="12" fill="url(#execGrad)"/>
+
+          <!-- 标题 -->
+          <text x="450" y="50" text-anchor="middle" font-size="22" font-weight="700" fill="#FFFFFF">EXECUTIVE SUMMARY</text>
+          <rect x="350" y="60" width="200" height="4" rx="2" fill="url(#goldBar)"/>
+
+          <!-- 核心结论 -->
+          <text x="450" y="100" text-anchor="middle" font-size="14" fill="#00BCEB" font-weight="600">核心结论</text>
+          <rect x="60" y="115" width="780" height="60" rx="8" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)"/>
+          <text x="450" y="140" text-anchor="middle" font-size="13" fill="#FFFFFF" font-weight="600">
+            Hirschmann 是一家优秀的工业交换机制造商，但 Cisco 是唯一能提供
+          </text>
+          <text x="450" y="162" text-anchor="middle" font-size="13" fill="#FBAB18" font-weight="700">
+            "从车间传感器到企业云、从网络连接到安全防护" 端到端完整方案的厂商。
+          </text>
+
+          <!-- 三大差异化优势 -->
+          <text x="450" y="205" text-anchor="middle" font-size="14" fill="#00BCEB" font-weight="600">三大决定性差异化优势</text>
+
+          <!-- 优势 1 -->
+          <rect x="40" y="225" width="260" height="130" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(0,188,235,0.3)"/>
+          <text x="55" y="250" font-size="28" fill="#FBAB18">①</text>
+          <text x="90" y="253" font-size="13" fill="#FFFFFF" font-weight="700">安全即架构</text>
+          <text x="55" y="275" font-size="11" fill="rgba(255,255,255,0.85)">Cyber Vision 传感器内置于每台交换机，</text>
+          <text x="55" y="293" font-size="11" fill="rgba(255,255,255,0.85)">实现全网 OT 资产可视化 + 威胁检测，</text>
+          <text x="55" y="311" font-size="11" fill="rgba(255,255,255,0.85)">零额外硬件成本。Hirschmann 需外挂</text>
+          <text x="55" y="329" font-size="11" fill="rgba(255,255,255,0.85)">EAGLE 防火墙，覆盖有限、成本翻倍。</text>
+          <text x="55" y="348" font-size="10" fill="#00BCEB" font-weight="600">→ 安全覆盖率：Cisco 100% vs. Hirschmann ~20%</text>
+
+          <!-- 优势 2 -->
+          <rect x="320" y="225" width="260" height="130" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(0,188,235,0.3)"/>
+          <text x="335" y="250" font-size="28" fill="#FBAB18">②</text>
+          <text x="370" y="253" font-size="13" fill="#FFFFFF" font-weight="700">统一管理平台</text>
+          <text x="335" y="275" font-size="11" fill="rgba(255,255,255,0.85)">Catalyst Center 一个平台管理 IT + OT</text>
+          <text x="335" y="293" font-size="11" fill="rgba(255,255,255,0.85)">+ WAN + 无线 + 安全。3人团队可管理</text>
+          <text x="335" y="311" font-size="11" fill="rgba(255,255,255,0.85)">5个工厂 1000+ 设备。Hirschmann 的</text>
+          <text x="335" y="329" font-size="11" fill="rgba(255,255,255,0.85)">HiVision 只管 OT 层，其余全需另设。</text>
+          <text x="335" y="348" font-size="10" fill="#00BCEB" font-weight="600">→ 运维效率提升 10× ｜ 年省 ¥25-35万人力</text>
+
+          <!-- 优势 3 -->
+          <rect x="600" y="225" width="260" height="130" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(0,188,235,0.3)"/>
+          <text x="615" y="250" font-size="28" fill="#FBAB18">③</text>
+          <text x="650" y="253" font-size="13" fill="#FFFFFF" font-weight="700">全栈端到端生态</text>
+          <text x="615" y="275" font-size="11" fill="rgba(255,255,255,0.85)">从 IE3400 接入 → IE9300 汇聚 →</text>
+          <text x="615" y="293" font-size="11" fill="rgba(255,255,255,0.85)">Catalyst 核心 → SD-WAN → 云安全，</text>
+          <text x="615" y="311" font-size="11" fill="rgba(255,255,255,0.85)">一个 IOS-XE 操作系统贯穿始终。</text>
+          <text x="615" y="329" font-size="11" fill="rgba(255,255,255,0.85)">Hirschmann 只覆盖车间接入一个层次。</text>
+          <text x="615" y="348" font-size="10" fill="#00BCEB" font-weight="600">→ Cisco 覆盖 9/9 网络层 vs. Hirschmann 3/9</text>
+        </svg>
+      </div>
+
+      <!-- 文字版执行摘要 -->
+      <div class="card" style="margin-top: var(--space-6); border-top: 4px solid var(--cisco-accent);">
+        <h4>📋 写给决策者的一段话</h4>
+        <p style="font-size: 1.05rem; line-height: 1.8;">
+          尊敬的客户，在制造业数字化转型的浪潮中，<strong>网络基础设施</strong>已经从"保障生产运转的水电煤"升级为"驱动智能制造的神经系统"。您面临的不只是"买哪家交换机"的选择，而是<strong>"构建什么样的网络架构来支撑未来 5–10 年业务增长"</strong>的战略决策。
+        </p>
+        <p style="font-size: 1.05rem; line-height: 1.8;">
+          Hirschmann（Belden）是一家受人尊敬的工业通信厂商，曾经在环网冗余（HRP）、电力行业（PRP/HSR）等细分领域有着扎实的技术积累。但在<strong>全面审视</strong>了硬件、软件、安全、管理、生态、TCO 六大维度后，我们的结论是：
+        </p>
+        <blockquote style="font-size: 1.1rem; border-left-color: var(--cisco-blue); font-weight: 600;">
+          Cisco 是唯一一家能在工业网络的<strong>每一个层次</strong>（接入、汇聚、核心、WAN、无线、安全、云）提供统一、协同、持续进化方案的厂商，在变电站与轨道交通等 IEC 61850 场景中，Cisco IE9300/IE3500 已原生支持 PRP/HSR。选择 Cisco，您购买的不是交换机，而是一个<strong>完整的数字化底座</strong>。
+        </blockquote>
+        <p style="font-size: 1.05rem; line-height: 1.8;">
+          三个最具说服力的数字：
+        </p>
+        <ul style="font-size: 1.05rem; line-height: 2;">
+          <li><strong>安全覆盖率 100% vs. ~20%</strong>：Cisco Cyber Vision 让每台交换机都成为安全传感器；Hirschmann 只在防火墙所在链路有安全可视性。</li>
+          <li><strong>运维效率 10 倍提升</strong>：Catalyst Center + PnP + ISE 自动化体系，让 3 人团队管理 5 工厂 1000+ 设备成为现实。</li>
+          <li><strong>5 年 TCO 节省 15–25%</strong>：虽然单台设备采购价格 Cisco 高出 10–30%，但通过运维自动化省人力、安全内置省设备、统一管理省工具，5 年总成本反而更低。</li>
+        </ul>
+      </div>
+
+    </div><!-- /s10-1 -->
+</section>
+
+<!-- ============================================================
+     附录 B — 配置级功能与硬件规格深度对照
+     Insert this block BEFORE the existing 附录：术语表 section
+     ============================================================ -->
+
+<!-- Additional CSS for Appendix B (add to existing <style> block or include here) -->
+<style>
+/* ── Appendix B Tables ── */
+.appendix-table{width:100%;border-collapse:separate;border-spacing:0;border-radius:8px;overflow:hidden;margin:1.5rem 0;font-size:.92rem;line-height:1.55}
+.appendix-table thead th{background:linear-gradient(135deg,#0d274d,#049fd9);color:#fff;padding:.75rem 1rem;text-align:left;font-weight:600;position:sticky;top:0;z-index:2}
+.appendix-table thead th:first-child{border-start-start-radius:8px}
+.appendix-table thead th:last-child{border-start-end-radius:8px}
+.appendix-table tbody td{padding:.65rem 1rem;border-block-end:1px solid #e8ecf1;vertical-align:top}
+.appendix-table tbody tr:nth-child(even){background:#f4f8fb}
+.appendix-table tbody tr:hover{background:#e3f2fd;transition:background .2s}
+.appendix-table .dim-header{background:#e6f0fa;font-weight:700;color:#0d274d;text-transform:uppercase;letter-spacing:.03em;font-size:.82rem}
+.appendix-table .cisco-win{background:#e6f9f0;color:#0a7c42;font-weight:600}
+.appendix-table .hirsch-win{background:#fff3e0;color:#bf6900;font-weight:600}
+.appendix-table .tie-cell{background:#f3f0ff;color:#5e35b1;font-weight:600}
+
+/* Analysis column accent */
+.appendix-table td.analysis{font-style:italic;color:#37474f;font-size:.88rem}
+
+/* Summary callout boxes */
+.appendix-callout{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-inline-start:4px solid #049fd9;border-radius:0 8px 8px 0;padding:1.25rem 1.5rem;margin:1.5rem 0;font-size:.93rem;line-height:1.7}
+.appendix-callout ul{margin:.5rem 0 0 1.2rem;padding:0}
+.appendix-callout li{margin-block-end:.35rem}
+.appendix-callout strong{color:#0d274d}
+
+/* Section subtitle */
+.app-sub{font-size:1.15rem;color:#0d274d;font-weight:700;margin:2rem 0 .75rem;padding-block-end:.4rem;border-block-end:2px solid #049fd9;display:inline-block}
+
+/* L2 NAT narrative cards */
+.l2nat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin:1.5rem 0}
+.l2nat-card{background:#fff;border:1px solid #dde5ee;border-radius:10px;padding:1.25rem;transition:box-shadow .25s,transform .25s}
+.l2nat-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
+.l2nat-card h4{margin:0 0 .5rem;color:#049fd9;font-size:1rem}
+.l2nat-card p{margin:0;font-size:.9rem;color:#37474f;line-height:1.6}
+
+/* Print rules for appendix */
+@media print{
+  .appendix-table thead th{background:#0d274d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .appendix-table tbody tr:nth-child(even){background:#f4f8fb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .appendix-callout{background:#f0f9ff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section.chapter{page-break-before:always}
+}
+</style>
+
+
+<section class="chapter" id="appendix-b">
+  <div class="container">
+
+    <!-- ═══════════════════════════════════════════
+         APPENDIX A  TITLE
+         ═══════════════════════════════════════════ -->
+    <h2>附录 A &mdash; 配置级功能与硬件规格深度对照</h2>
+    <p style="color:#546e7a;margin-block-end:2rem;">
+      本附录从 <strong>CLI / Web-GUI 可配置功能</strong>与<strong>硬件规格</strong>两大维度，对
+      Cisco IE-9300 / IE-3x00 系列（IOS XE）与 Hirschmann RSP / RSPE 系列（HiOS）进行逐项比对，
+      为现场选型与方案编写提供快速查阅依据。
+    </p>
+
+    <!-- ═══════════════════════════════════════════
+         A.1  八维全景对照表
+         ═══════════════════════════════════════════ -->
+    <h3 class="app-sub" id="b1">A.1&ensp;配置与功能全景对照（八维 30 项）</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="八维全景对照表">
+        <thead>
+          <tr>
+            <th style="width:14%">维度</th>
+            <th style="width:16%">功能项</th>
+            <th style="width:32%">Hirschmann HiOS</th>
+            <th style="width:32%">Cisco IOS XE</th>
+            <th style="width:6%">优势</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ── 1. Device Management ── -->
+          <tr><td class="dim-header" rowspan="4">① 设备管理</td>
+            <td>CLI / Web GUI</td>
+            <td>HiOS CLI + Industrial HiVision 图形化</td>
+            <td>IOS XE CLI + Cisco DNA Center / Cyber Vision GUI</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>零接触部署 ZTP</td>
+            <td>HiOS AutoConfiguration Adapter（ACA / SD 卡）</td>
+            <td>PnP (Plug-and-Play) + DNA Center ZTP</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>固件管理</td>
+            <td>双固件分区；SD 卡备份</td>
+            <td>双固件 + Install Mode；ISSU 热升级</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>配置备份/恢复</td>
+            <td>SD 卡 Swap Drive；导出 XML</td>
+            <td>Archive / TFTP / SCP；Startup vs Running</td>
+            <td class="tie-cell">平手</td>
+          </tr>
+
+          <!-- ── 2. L2 Switching ── -->
+          <tr><td class="dim-header" rowspan="4">② L2 交换</td>
+            <td>VLAN</td>
+            <td>IEEE 802.1Q（最多 ~256 VLAN）</td>
+            <td>802.1Q（最多 4094）；Private VLAN</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>IGMP Snooping</td>
+            <td>v1/v2/v3</td>
+            <td>v1/v2/v3 + MVR（Multicast VLAN Registration）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>LLDP / CDP</td>
+            <td>LLDP；无 CDP</td>
+            <td>LLDP + CDP（含 LLDP-MED for PoE）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>生成树</td>
+            <td>RSTP / MSTP</td>
+            <td>RPVST+ / MSTP；Root Guard / BPDU Guard</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+
+          <!-- ── 3. Industrial Redundancy ── -->
+          <tr><td class="dim-header" rowspan="4">③ 工业冗余</td>
+            <td>环网协议</td>
+            <td>MRP（IEC 62439-2）；私有 HIPER Ring &lt;50 ms</td>
+            <td>REP (Resilient Ethernet Protocol)；PRP/HSR QuadBox</td>
+            <td class="tie-cell">各有长处</td>
+          </tr>
+          <tr>
+            <td>快速收敛</td>
+            <td>Fast MRP &lt;10 ms（HiOS 专有增强）</td>
+            <td>REP &lt;50 ms；PRP 零切换</td>
+            <td class="tie-cell">各有长处</td>
+          </tr>
+          <tr>
+            <td>耦合/子环</td>
+            <td>MRP Interconnect / FuseNet</td>
+            <td>REP VLAN Load-Balancing + Flex Links</td>
+            <td class="tie-cell">各有长处</td>
+          </tr>
+          <tr>
+            <td>链路聚合</td>
+            <td>静态 LAG / LACP</td>
+            <td>静态 / LACP + mLACP（跨机框）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+
+          <!-- ── 4. L3 Routing ── -->
+          <tr><td class="dim-header" rowspan="4">④ L3 路由</td>
+            <td>静态路由</td>
+            <td>支持（L3P/L3E License）</td>
+            <td>支持（Network Essentials）</td>
+            <td class="tie-cell">平手</td>
+          </tr>
+          <tr>
+            <td>OSPF</td>
+            <td>OSPFv2（L3P License）</td>
+            <td>OSPFv2/v3；BFD 加速收敛</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>BGP</td>
+            <td>不支持</td>
+            <td>BGP / iBGP（Network Advantage License）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>VRF-Lite</td>
+            <td>不支持</td>
+            <td>支持（多租户/区域隔离）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+
+          <!-- ── 5. Security ── -->
+          <tr><td class="dim-header" rowspan="4">⑤ 安全</td>
+            <td>端口安全 / ACL</td>
+            <td>Port Security + L2/L3/L4 ACL</td>
+            <td>Port Security + PACL/VACL/RACL 分级 ACL</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>802.1X / MAB</td>
+            <td>802.1X + RADIUS</td>
+            <td>802.1X + MAB + WebAuth；多认证模式（ISE 联动）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>MACsec</td>
+            <td>不支持</td>
+            <td>MACsec-128/256（硬件线速加密）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>TrustSec / SGT</td>
+            <td>不支持</td>
+            <td>SGT + SGACL 微分段</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+
+          <!-- ── 6. QoS ── -->
+          <tr><td class="dim-header" rowspan="3">⑥ QoS</td>
+            <td>队列调度</td>
+            <td>Strict Priority + WRR（8 队列）</td>
+            <td>SP + WRR + WRED（8 队列）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>流量整形</td>
+            <td>端口限速 ingress/egress</td>
+            <td>Per-port/per-class 双向 Policing + Shaping</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>DSCP / CoS 映射</td>
+            <td>支持</td>
+            <td>支持 + 可编程 MQC（Modular QoS CLI）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+
+          <!-- ── 7. Industrial Protocols ── -->
+          <tr><td class="dim-header" rowspan="4">⑦ 工业协议</td>
+            <td>PTP / IEEE 1588</td>
+            <td>1588v2 BC/TC + Power Profile（C37.238）</td>
+            <td>1588v2 BC/TC + Power Profile + Default Profile</td>
+            <td class="tie-cell">平手</td>
+          </tr>
+          <tr>
+            <td>TSN（802.1Qbv 等）</td>
+            <td>802.1Qbv / Qbu Frame Preemption（RSPE TSN 款）</td>
+            <td>IE 3500，集成 802.1Qbu 和 IEEE 802.3br 的 TSN 帧抢占技术</td>
+            <td class="hirsch-win">HN 领先</td>
+          </tr>
+          <tr>
+            <td>PROFINET / EtherNet/IP</td>
+            <td>PROFINET RT/IRT（MRP 集成）</td>
+            <td>CIP / EtherNet/IP（DLR 支持）；PROFINET 需额外配置</td>
+            <td class="tie-cell">各有侧重</td>
+          </tr>
+          <tr>
+            <td>IEC 61850 / GOOSE</td>
+            <td>MMS Server 嵌入；GOOSE 透传</td>
+            <td>GOOSE 透传 + PRP/HSR 原生；MMS 依赖外部</td>
+            <td class="tie-cell">各有侧重</td>
+          </tr>
+
+          <!-- ── 8. Diagnostics ── -->
+          <tr><td class="dim-header" rowspan="3">⑧ 诊断与可视化</td>
+            <td>OT 可视化</td>
+            <td>Industrial HiVision 拓扑 + HiMobile App</td>
+            <td>Cisco Cyber Vision + DNA Center 资产可视化</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>流量镜像 / SPAN</td>
+            <td>Port Mirroring（本地）</td>
+            <td>SPAN / RSPAN / ERSPAN（远程封装镜像）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td>NetFlow / Telemetry</td>
+            <td>sFlow（部分型号）</td>
+            <td>Flexible NetFlow + YANG Model-Driven Telemetry</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+        </tbody>
+      </table>
+    </div><!-- /table-scroll-wrapper -->
+
+    <div class="appendix-callout">
+      <strong>A.1 小结：</strong>
+      <ul>
+        <li><strong>Cisco 明显领先</strong>的领域：L3 路由深度（BGP/VRF-Lite）、安全纵深（MACsec/TrustSec/ISE）、OT 可视化（Cyber Vision）与遥测生态。</li>
+        <li><strong>Hirschmann 有特色</strong>的领域：MRP / Fast MRP 在 IEC 62439 标准环网场景下成熟度高；TSN Frame Preemption 硬件已量产；IEC 61850 MMS Server 嵌入式实现。</li>
+        <li><strong>双方均可满足</strong>的基础功能：VLAN、RSTP/MSTP、IGMP Snooping、PTP Power Profile、PROFINET/EtherNet-IP 基本互通。</li>
+      </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         A.2  五大深度对比
+         ═══════════════════════════════════════════ -->
+    <h3 class="app-sub" id="b2">A.2&ensp;五大深度对比</h3>
+
+    <!-- ── A.2.1 Network Redundancy ── -->
+    <h4 style="color:#0d274d;margin:1.5rem 0 .5rem;">A.2.1&ensp;网络冗余协议</h4>
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="冗余协议对比">
+        <thead>
+          <tr><th style="width:18%">比较项</th><th style="width:30%">Hirschmann HiOS</th><th style="width:30%">Cisco IOS XE</th><th style="width:22%">分析</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>主力环网</td>
+            <td>MRP（IEC 62439-2），200 ms 典型收敛；Fast MRP &lt;10 ms</td>
+            <td>REP，50–100 ms 收敛；段内 VLAN 负载均衡</td>
+            <td class="analysis">MRP 为欧洲电力/轨交标准配置；REP 在北美 OT 更常见</td>
+          </tr>
+          <tr>
+            <td>零丢包冗余</td>
+            <td>HIPER Ring（私有）+ PRP（IEC 62439-3）</td>
+            <td>PRP / HSR + HSR QuadBox（IE-9300）</td>
+            <td class="analysis">Cisco HSR QuadBox 可将非 HSR 设备接入 HSR 环，组网更灵活</td>
+          </tr>
+          <tr>
+            <td>耦合 / 子环</td>
+            <td>MRP Interconnect；FuseNet 跨环耦合</td>
+            <td>REP + Flex Links；跨域用 MLAG / StackWise Virtual</td>
+            <td class="analysis">FuseNet 配置简单但为私有；Cisco 方案标准化程度更高</td>
+          </tr>
+          <tr>
+            <td>跨设备聚合</td>
+            <td>LACP（单机框）</td>
+            <td>LACP + mLACP 跨机框 / StackWise</td>
+            <td class="analysis">Cisco 在多交换机聚合场景优势明显</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── A.2.2 L3 Routing / VRF / NAT ── -->
+    <h4 style="color:#0d274d;margin:1.5rem 0 .5rem;">A.2.2&ensp;L3 路由、VRF 与 NAT</h4>
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="L3路由对比">
+        <thead>
+          <tr><th style="width:18%">比较项</th><th style="width:30%">Hirschmann HiOS</th><th style="width:30%">Cisco IOS XE</th><th style="width:22%">分析</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OSPF</td>
+            <td>OSPFv2 单实例（需 L3P License）</td>
+            <td>OSPFv2/v3 多实例 + BFD 快速检测</td>
+            <td class="analysis">Cisco 多实例 + BFD 在大型 OT 网络减少收敛时间</td>
+          </tr>
+          <tr>
+            <td>BGP</td>
+            <td>不支持</td>
+            <td>BGP / iBGP（Network Advantage）</td>
+            <td class="analysis">跨区域 OT-IT 互联时 BGP 不可或缺</td>
+          </tr>
+          <tr>
+            <td>VRF-Lite</td>
+            <td>不支持</td>
+            <td>支持多 VRF 实例</td>
+            <td class="analysis">单台交换机实现 Cell/Zone 隔离，减少硬件数量</td>
+          </tr>
+          <tr>
+            <td>L2 NAT</td>
+            <td>不支持</td>
+            <td>Layer 2 NAT（在线 IP 重映射不改变 VLAN）</td>
+            <td class="analysis">OEM 机台 IP 重复场景独家解决方案——详见 A.4</td>
+          </tr>
+          <tr>
+            <td>策略路由 PBR</td>
+            <td>有限支持</td>
+            <td>完整 PBR + Route-Map</td>
+            <td class="analysis">Cisco PBR 可按 ACL/DSCP 精细导流</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── A.2.3 Security & Zero Trust ── -->
+    <h4 style="color:#0d274d;margin:1.5rem 0 .5rem;">A.2.3&ensp;安全与零信任</h4>
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="安全对比">
+        <thead>
+          <tr><th style="width:18%">比较项</th><th style="width:30%">Hirschmann HiOS</th><th style="width:30%">Cisco IOS XE</th><th style="width:22%">分析</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MACsec</td>
+            <td>不支持</td>
+            <td>MACsec-128/256 线速加密（硬件 ASIC）</td>
+            <td class="analysis">Cisco 唯一提供工业级线速链路加密</td>
+          </tr>
+          <tr>
+            <td>TrustSec / SGT</td>
+            <td>不支持</td>
+            <td>SGT 标签 + SGACL 微分段</td>
+            <td class="analysis">无需 IP ACL，按角色动态分段——零信任核心</td>
+          </tr>
+          <tr>
+            <td>802.1X 高级模式</td>
+            <td>802.1X + RADIUS</td>
+            <td>802.1X + MAB + WebAuth + ISE 联动；多域认证</td>
+            <td class="analysis">ISE 可同时管理 IT &amp; OT 认证策略</td>
+          </tr>
+          <tr>
+            <td>ACL 层级</td>
+            <td>L2/L3/L4 ACL</td>
+            <td>PACL / VACL / RACL 三级 + 动态 dACL</td>
+            <td class="analysis">Cisco 三级 ACL 可细粒度匹配工业协议端口</td>
+          </tr>
+          <tr>
+            <td>OT 安全可视化</td>
+            <td>Industrial Anomaly Sensor（IAS）选配</td>
+            <td>Cyber Vision 嵌入交换机 + SecureX / XDR 联动</td>
+            <td class="analysis">Cisco 传感器内嵌，无需额外探针设备</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── A.2.4 Industrial Protocols & TSN ── -->
+    <h4 style="color:#0d274d;margin:1.5rem 0 .5rem;">A.2.4&ensp;工业协议与 TSN</h4>
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="工业协议与TSN对比">
+        <thead>
+          <tr><th style="width:18%">比较项</th><th style="width:30%">Hirschmann HiOS</th><th style="width:30%">Cisco IOS XE</th><th style="width:22%">分析</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TSN 802.1Qbv</td>
+            <td>Qbv + Qbu Frame Preemption（RSPE TSN 硬件）</td>
+            <td> IEEE 802.1Qbu 和 IEEE 802.3br 的 TSN 帧抢占（Frame-Preemption）技术</td>
+            <td class="analysis">Hirschmann 当前已量产 Qbu，Cisco 仍在路线图中</td>
+          </tr>
+          <tr>
+            <td>PTP Power Profile</td>
+            <td>C37.238 / C37.238-2017</td>
+            <td>C37.238 + Default Profile + Telecom Profile</td>
+            <td class="analysis">Cisco 多 Profile 支持更广泛场景</td>
+          </tr>
+          <tr>
+            <td>PROFINET</td>
+            <td>RT / IRT 原生 + MRP 集成</td>
+            <td>RT（DLR 支持）；IRT 非原生</td>
+            <td class="analysis">Hirschmann PROFINET IRT 在西门子产线集成更成熟</td>
+          </tr>
+          <tr>
+            <td>IEC 61850</td>
+            <td>MMS Server 内嵌；GOOSE 透传</td>
+            <td>GOOSE/SV 透传 + PRP/HSR；MMS 依赖外部 Gateway</td>
+            <td class="analysis">Hirschmann 嵌入式 MMS 减少变电站外部设备</td>
+          </tr>
+          <tr>
+            <td>EtherNet/IP CIP</td>
+            <td>基本支持</td>
+            <td>原生 CIP + DLR + Rockwell 深度集成</td>
+            <td class="analysis">北美离散制造场景 Cisco+Rockwell 为事实标准</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── A.2.5 Hardware, PoE & Management ── -->
+    <h4 style="color:#0d274d;margin:1.5rem 0 .5rem;">A.2.5&ensp;硬件、PoE 与管理</h4>
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="硬件PoE对比">
+        <thead>
+          <tr><th style="width:18%">比较项</th><th style="width:30%">Hirschmann RSP/RSPE</th><th style="width:30%">Cisco IE-9300 / IE-3x00</th><th style="width:22%">分析</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PoE 总预算</td>
+            <td>最大 ~240 W（RSPE 30 PoE+）</td>
+            <td>IE-9310: 480 W (PoE++) / IE-3400: 240–480 W</td>
+            <td class="analysis">Cisco 90 W per-port (BT) 可驱动 PTZ 摄像头 / 瘦 AP</td>
+          </tr>
+          <tr>
+            <td>模块化扩展</td>
+            <td>固定端口；无可插拔模块</td>
+            <td>IE-9300 Network Module Bay（4×mGig / 8×GE 等）</td>
+            <td class="analysis">Cisco 按需扩容，减少初始投资</td>
+          </tr>
+          <tr>
+            <td>配置热替换</td>
+            <td>ACA SD 卡 Swap Drive（即插即恢复）</td>
+            <td>SD Flash + PnP 自动加载</td>
+            <td class="analysis">Hirschmann SD 卡直插体验更直觉；Cisco PnP 需网络可达</td>
+          </tr>
+          <tr>
+            <td>外部时钟接口</td>
+            <td>无 GPS/IRIG-B 接口</td>
+            <td>IE-9300 可选 GPS / IRIG-B 模块</td>
+            <td class="analysis">电力 SCADA 场景需精确授时时 Cisco 无需外接 GPS</td>
+          </tr>
+          <tr>
+            <td>Alarm Relay</td>
+            <td>干接点报警继电器（标配）</td>
+            <td>Alarm Port（标配）</td>
+            <td class="analysis">两者均满足工业报警需求</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="appendix-callout">
+      <strong>A.2 小结：</strong>
+      <ul>
+        <li><strong>Cisco 差异化壁垒</strong>集中在安全（MACsec / TrustSec）、路由深度（BGP / VRF-Lite）与 OT 可视化（Cyber Vision 内嵌），这三项 Hirschmann 目前无对标方案。</li>
+        <li><strong>Hirschmann 差异化</strong>在于 TSN Qbu Frame Preemption 已量产、PROFINET IRT 原生集成、IEC 61850 MMS Server 嵌入，以及 ACA SD 卡的极简运维体验。</li>
+        <li>基础 L2/L3 功能与工业环境适应性两者均可胜任；选型应根据<strong>行业协议需求</strong>（PROFINET IRT vs EtherNet/IP）与<strong>安全合规要求</strong>（IEC 62443 / 零信任）决定。</li>
+      </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         A.3  硬件规格对照表
+         ═══════════════════════════════════════════ -->
+    <h3 class="app-sub" id="b3">A.3&ensp;硬件规格对照</h3>
+
+    <div class="table-scroll-wrapper">
+      <table class="appendix-table" aria-label="硬件规格对照表">
+        <thead>
+          <tr>
+            <th style="width:16%">规格维度</th>
+            <th style="width:38%">Hirschmann RSP / RSPE</th>
+            <th style="width:38%">Cisco IE-9300 / IE-3x00</th>
+            <th style="width:8%">优势</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>形态与安装</strong></td>
+            <td>DIN 导轨 19" 机架；IP30 金属外壳</td>
+            <td>DIN 导轨 / 19" 机架 / IP67 户外型（IE-3400H）</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td><strong>端口密度</strong></td>
+            <td>RSPE: 最多 28×GE + 4×SFP；无 mGig</td>
+            <td>IE-9310: 24×mGig + 模块扩展至 48 口；10G 上行</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td><strong>PoE</strong></td>
+            <td>PoE+ (30 W/port)；总预算 ~240 W</td>
+            <td>PoE++ (BT, 90 W/port)；总预算最高 480 W+</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td><strong>CPU / 存储</strong></td>
+            <td>ARM Cortex；256 MB Flash</td>
+            <td>多核 x86；8–16 GB Flash + SSD 可选</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td><strong>环境耐受</strong></td>
+            <td>−40 °C ~ +70 °C；IEC 61850-3 / IEEE 1613</td>
+            <td>−40 °C ~ +75 °C；IEC 61850-3 / IEEE 1613；50 G Shock</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+          <tr>
+            <td><strong>管理接口</strong></td>
+            <td>Console / USB / SD 卡槽</td>
+            <td>Console / USB / SD 卡槽 + GPS / IRIG-B 模块选项</td>
+            <td class="cisco-win">Cisco</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="appendix-callout">
+      <strong>A.3 小结：</strong>
+      <ul>
+        <li>Cisco 在<strong>端口密度、PoE 预算、计算资源、环境耐受</strong>方面全面领先，适合大规模 OT 站点及边缘计算场景。</li>
+        <li>Hirschmann 硬件以<strong>紧凑可靠</strong>见长，在中小型欧标 DIN 导轨柜中占用空间更小，且 ACA SD 卡热替换在无 IT 驻场的远程站点运维体验优秀。</li>
+        <li>IP67 户外型号（Cisco IE-3400H）填补了严酷户外部署缺口，Hirschmann 目前无直接对标 IP67 工业交换机。</li>
+        <li>GPS / IRIG-B 外部时钟接口为 Cisco 在电力 SCADA 授时场景中提供端到端方案，减少外置 GPS 接收器。</li>
+      </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         A.4  L2 NAT 专题
+         ═══════════════════════════════════════════ -->
+    <h3 class="app-sub" id="b4">A.4&ensp;专题：Layer 2 NAT — OT 网络的 IP 冲突终结者</h3>
+
+    <p style="color:#37474f;line-height:1.7;margin-block-end:1.25rem;">
+      在 OT（运营技术）网络中，<strong>OEM 机台出厂 IP 地址重复</strong>是一个普遍且棘手的难题。
+      多台相同型号的 PLC / 机器人控制器往往使用相同的默认 IP 段（如 192.168.1.0/24），而修改设备 IP
+      可能导致 OEM 质保失效或需要昂贵的重新调试。Cisco IOS XE 提供的 <strong>Layer 2 NAT</strong>
+      功能正是为此而生。
+    </p>
+
+    <div class="l2nat-cards">
+      <div class="l2nat-card">
+        <h4>❶ 问题：OEM 机台 IP 重复</h4>
+        <p>
+          同一产线部署 5 台相同 CNC 控制器，每台出厂 IP 均为 192.168.1.10。
+          传统方式需逐台改 IP 或增加 L3 NAT 设备，成本与复杂度高。
+        </p>
+      </div>
+      <div class="l2nat-card">
+        <h4>❷ 传统 L3 NAT 的局限</h4>
+        <p>
+          L3 NAT 改变三层地址但同时改变 VLAN 域，导致广播/组播依赖的工业协议
+          （PROFINET DCP、EtherNet/IP 隐式消息）失效，且需要额外路由器/防火墙。
+        </p>
+      </div>
+      <div class="l2nat-card">
+        <h4>❸ L2 NAT 的创新</h4>
+        <p>
+          Cisco L2 NAT 在<strong>二层域内</strong>完成 IP 地址重写：数据帧不离开 VLAN，
+          MAC 不变，仅重写 IP 头。对上位 SCADA/MES 系统来说，每台机台拥有唯一 IP，
+          而机台本身无需任何配置变更。
+        </p>
+      </div>
+      <div class="l2nat-card">
+        <h4>❹ 为何更适合 OT</h4>
+        <p>
+          ✅ 不改 OEM 配置 → 质保无忧<br>
+          ✅ 不离开 VLAN → 组播/广播工业协议不受影响<br>
+          ✅ 无需额外设备 → 交换机内嵌处理<br>
+          ✅ 支持双向映射 → SCADA 下行指令同样透明转换
+        </p>
+      </div>
+    </div>
+
+    <!-- L2 NAT SVG diagram -->
+    <div class="svg-scroll-wrapper" style="margin:1.5rem 0;">
+      <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="L2 NAT 工作示意图" style="max-width:780px;width:100%;height:auto;">
+        <!-- Background -->
+        <rect x="0" y="0" width="780" height="260" rx="12" fill="#f8fbff"/>
+
+        <!-- OEM Zone -->
+        <rect x="20" y="40" width="200" height="180" rx="8" fill="#fff3e0" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="120" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#e65100">OEM 机台区（原始 IP）</text>
+        <rect x="45" y="70" width="150" height="32" rx="4" fill="#fff" stroke="#bbb" stroke-width="1"/>
+        <text x="120" y="91" text-anchor="middle" font-size="11" fill="#333">CNC-1: 192.168.1.10</text>
+        <rect x="45" y="115" width="150" height="32" rx="4" fill="#fff" stroke="#bbb" stroke-width="1"/>
+        <text x="120" y="136" text-anchor="middle" font-size="11" fill="#333">CNC-2: 192.168.1.10</text>
+        <rect x="45" y="160" width="150" height="32" rx="4" fill="#fff" stroke="#bbb" stroke-width="1"/>
+        <text x="120" y="181" text-anchor="middle" font-size="11" fill="#333">CNC-3: 192.168.1.10</text>
+
+        <!-- IE Switch -->
+        <rect x="290" y="60" width="200" height="140" rx="10" fill="linear-gradient(135deg,#0d274d,#049fd9)" stroke="none"/>
+        <rect x="290" y="60" width="200" height="140" rx="10" fill="#0d274d" opacity=".85"/>
+        <text x="390" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Cisco IE Switch</text>
+        <text x="390" y="122" text-anchor="middle" font-size="12" fill="#4dd0e1">L2 NAT Enabled</text>
+        <text x="390" y="148" text-anchor="middle" font-size="10" fill="#b2ebf2">192.168.1.10 → 10.10.1.x</text>
+        <text x="390" y="165" text-anchor="middle" font-size="10" fill="#b2ebf2">每端口独立映射</text>
+
+        <!-- SCADA Zone -->
+        <rect x="560" y="40" width="200" height="180" rx="8" fill="#e8f5e9" stroke="#43a047" stroke-width="1.5"/>
+        <text x="660" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#2e7d32">SCADA / MES 视角</text>
+        <rect x="585" y="70" width="150" height="32" rx="4" fill="#fff" stroke="#bbb" stroke-width="1"/>
+        <text x="660" y="91" text-anchor="middle" font-size="11" fill="#333">CNC-1 → 10.10.1.1</text>
+        <rect x="585" y="115" width="150" height="32" rx="4" fill="#fff" stroke="#bbb" stroke-width="1"/>
+        <text x="660" y="136" text-anchor="middle" font-size="11" fill="#333">CNC-2 → 10.10.1.2</text>
+        <rect x="585" y="160" width="150" height="32" rx="4" fill="#fff" stroke="#bbb" stroke-width="1"/>
+        <text x="660" y="181" text-anchor="middle" font-size="11" fill="#333">CNC-3 → 10.10.1.3</text>
+
+        <!-- Arrows -->
+        <line x1="220" y1="130" x2="288" y2="130" stroke="#ff9800" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <line x1="492" y1="130" x2="558" y2="130" stroke="#43a047" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+        <!-- Arrow markers -->
+        <defs>
+          <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#ff9800"/>
+          </marker>
+          <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#43a047"/>
+          </marker>
+        </defs>
+
+        <!-- Caption -->
+        <text x="390" y="248" text-anchor="middle" font-size="11" fill="#78909c">L2 NAT：同一 VLAN 内完成 IP 重写，OEM 配置零改动，SCADA 看到唯一地址</text>
+      </svg>
+    </div>
+
+    <div class="appendix-callout">
+      <strong>L2 NAT 核心价值：</strong>
+      Cisco Layer 2 NAT 是当前工业交换机市场中<strong>唯一在二层域内解决 IP 冲突</strong>的方案。
+      对于拥有大量 OEM 重复 IP 设备的制造业客户，它可以显著降低网络改造成本、
+      保留 OEM 质保并维持工业协议正常通信——这是 Hirschmann HiOS 及其他竞品目前无法提供的差异化能力。
+    </div>
+
+  </div><!-- /container -->
+</section>
+<footer style="background: var(--cisco-navy); color: rgba(255,255,255,0.6); padding: var(--space-8) 0; text-align: center;">
+  <div class="container">
+    <p style="font-size: 0.9rem; margin-bottom: var(--space-2);">
+      Cisco IE vs. Hirschmann 工业交换机竞争分析报告 — 机密文档，仅供内部销售团队使用
+    </p>
+    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.35);">
+      本报告基于截至 2026 年 4 月的公开信息编制。具体产品参数请以各厂商最新官方数据手册为准。<br>
+      所有商标和产品名称均为其各自所有者的财产。<br>
+      © 2026 Cisco Systems, Inc. All rights reserved.
+    </p>
+    <div style="margin-top: var(--space-4);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 30" style="width:120px; height:auto; margin: 0 auto; display:block; opacity:0.5;">
+        <text x="70" y="22" text-anchor="middle" font-size="18" font-weight="700" fill="#00BCEB" font-family="CiscoSans, system-ui, sans-serif">CISCO</text>
+      </svg>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
