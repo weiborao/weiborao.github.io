@@ -1,0 +1,2260 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optical 101 — 光与信息的第一性原理 | Cisco Optical Fundamentals</title>
+<link rel="stylesheet" href="cisco-style.css">
+<style>
+/* ============================================================================
+   Page-specific styles for Optical 101
+   ============================================================================ */
+
+/* --- Hero enhancements --- */
+.hero .subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 720px;
+  margin: 0 auto var(--space-6);
+  line-height: 1.6;
+}
+.hero .badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50px;
+  padding: 0.35em 1.1em;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-6);
+  backdrop-filter: blur(6px);
+}
+.hero .series-nav {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-6);
+}
+.hero .series-nav a {
+  display: inline-block;
+  padding: 0.5em 1.2em;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 2px solid rgba(255,255,255,0.5);
+  color: #fff;
+  transition: all var(--transition-fast);
+}
+.hero .series-nav a:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #fff;
+}
+.hero .series-nav a.active {
+  background: #fff;
+  color: var(--cisco-navy);
+  border-color: #fff;
+}
+
+/* --- Chapter lead --- */
+.chapter-lead {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 780px;
+  margin-bottom: var(--space-8);
+  line-height: 1.7;
+}
+
+/* --- Analogy / Story callout --- */
+.analogy {
+  background: linear-gradient(135deg, #f0faff 0%, #e8f7ee 100%);
+  border-left: 6px solid var(--color-success);
+  padding: var(--space-6);
+  margin: var(--space-8) 0;
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+.analogy .analogy-title {
+  font-weight: 700;
+  color: var(--cisco-navy);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+/* --- Key formula / equation box --- */
+.formula-box {
+  background: var(--bg-soft);
+  border: 2px solid var(--cisco-accent);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-6);
+  margin: var(--space-6) 0;
+  text-align: center;
+}
+.formula-box .formula {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--cisco-navy);
+  font-family: var(--font-mono);
+  margin: var(--space-4) 0;
+  letter-spacing: 0.02em;
+}
+.formula-box .formula-note {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* --- Definition term --- */
+.def-term {
+  font-weight: 700;
+  color: var(--cisco-blue-dark);
+}
+
+/* --- SVG diagram wrapper helpers --- */
+.svg-scroll-wrapper {
+  background: var(--bg-white);
+}
+.svg-scroll-wrapper svg text {
+  font-family: var(--font-sans);
+}
+
+/* --- Table caption --- */
+.table-scroll-wrapper + .table-caption,
+.table-caption {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+/* --- Insight box (blue) --- */
+.insight {
+  border-left: 6px solid var(--cisco-blue);
+  background: #f0f8ff;
+  padding: var(--space-6);
+  margin: var(--space-8) 0;
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+.insight .insight-title {
+  font-weight: 700;
+  color: var(--cisco-blue-dark);
+  margin-bottom: var(--space-2);
+}
+
+/* --- Warning / caution box --- */
+.caution {
+  border-left: 6px solid var(--cisco-orange);
+  background: #fff8f0;
+  padding: var(--space-6);
+  margin: var(--space-8) 0;
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+.caution .caution-title {
+  font-weight: 700;
+  color: var(--cisco-orange);
+  margin-bottom: var(--space-2);
+}
+
+/* --- Constellation diagram helper --- */
+.constellation-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+@media (min-width: 768px) {
+  .constellation-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* --- Closing section (echo hero) --- */
+#closing {
+  background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue) 100%);
+  color: #fff;
+  text-align: center;
+  padding: var(--space-12) 0;
+}
+#closing h2 {
+  color: #fff;
+  border-bottom-color: var(--cisco-accent);
+}
+#closing p { color: rgba(255,255,255,0.88); }
+
+/* --- Glossary --- */
+.glossary-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+.glossary-grid dt {
+  font-weight: 700;
+  color: var(--cisco-blue-dark);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color);
+}
+.glossary-grid dt:first-of-type { border-top: none; padding-top: 0; }
+.glossary-grid dd {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+  padding-left: 1em;
+}
+
+/* --- Print tweaks for this page --- */
+@media print {
+  .hero { background: var(--cisco-navy) !important; }
+  .analogy, .insight, .caution { break-inside: avoid; }
+}
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+
+<!-- ====================================================================
+     HERO SECTION
+     ==================================================================== -->
+<section class="hero" id="hero">
+  <div class="container">
+    <span class="badge">Cisco Optical Fundamentals Series</span>
+    <h1>Optical 101<br>光与信息的第一性原理</h1>
+    <p class="subtitle">
+      从一束光到万亿比特——用第一性原理拆解光通信的底层物理与数学，
+      让你在一杯咖啡的时间里，从"完全不懂"到"彻底看透"。
+    </p>
+    <nav class="series-nav" aria-label="系列导航">
+      <a href="#" class="active">101 · 光 · 光纤 · 调制</a>
+      <a href="Optical102.html">102 · 激光器 · 系统 · AI时代</a>
+      <a href="Optical201.html">201 · DWDM · 相干光</a>
+      <a href="Optical202.html">202 · Routed Optical · 硅光子</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ====================================================================
+     CHAPTER 1 — 光与信息的本质
+     ==================================================================== -->
+<section class="chapter" id="ch1">
+  <div class="container">
+    <h2>第一章 &nbsp;光与信息的本质</h2>
+    <p class="chapter-lead">
+      在我们讨论任何设备、协议或网络架构之前，需要先回答一个最根本的问题：<strong>光究竟是什么？它为什么能携带信息？</strong>这一章将带你从电磁波谱走到香农信息论，建立光通信最底层的认知地基。
+    </p>
+
+    <!-- 1.1 光的本质 -->
+    <h3>1.1 &nbsp;光的本质——电磁波谱中的一束"彩虹"</h3>
+
+    <p>
+      让我们先把"光"这个日常词汇还原成物理概念。<span class="def-term">光（Light）</span>本质上是一种<strong>电磁波（Electromagnetic Wave）</strong>——它由相互垂直、同步振荡的电场和磁场组成，以真空光速 <em>c ≈ 3×10⁸ m/s</em> 在空间中传播。
+    </p>
+
+    <div class="analogy">
+      <p class="analogy-title">🌊 类比时间</p>
+      <p>
+        想象你在湖面上扔一颗石头，水波一圈一圈向外扩散——光也类似，只不过它振荡的不是水面，而是看不见的电场和磁场。而且它不需要任何介质就能传播（这就是为什么阳光能穿越真空的太空照到地球）。
+      </p>
+    </div>
+
+    <p>
+      电磁波的"家谱"——<span class="def-term">电磁波谱（Electromagnetic Spectrum）</span>——按波长从长到短排列，包括：无线电波 → 微波 → 红外线 → <strong>可见光</strong> → 紫外线 → X射线 → 伽马射线。人眼能看到的"可见光"只是电磁波谱中极窄的一段，波长约380nm到780nm。
+    </p>
+    <p>
+      而光通信使用的波长，主要在 <strong>近红外区域（Near-Infrared, NIR）</strong>，大约 <strong>850nm、1310nm 和 1550nm</strong>——它们比红色光的波长更长，人眼看不见，但恰恰是光纤传输的"甜蜜点"。
+    </p>
+
+    <!-- SVG: 电磁波谱示意图 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="电磁波谱示意图，标注了光通信使用的近红外区域">
+        <defs>
+          <linearGradient id="specGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#a00"/>
+            <stop offset="12%" stop-color="#e44"/>
+            <stop offset="22%" stop-color="#f80"/>
+            <stop offset="33%" stop-color="#fc0"/>
+            <stop offset="45%" stop-color="#0b0"/>
+            <stop offset="58%" stop-color="#08f"/>
+            <stop offset="72%" stop-color="#44f"/>
+            <stop offset="85%" stop-color="#80f"/>
+            <stop offset="100%" stop-color="#a0f"/>
+          </linearGradient>
+          <marker id="arrowR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="#0D274D"/>
+          </marker>
+        </defs>
+        <!-- Spectrum bar -->
+        <rect x="60" y="110" width="840" height="44" rx="6" fill="url(#specGrad)" opacity="0.85"/>
+        <!-- Labels above -->
+        <text x="80" y="100" font-size="11" fill="#0D274D" font-weight="600">无线电波</text>
+        <text x="200" y="100" font-size="11" fill="#0D274D" font-weight="600">微波</text>
+        <text x="310" y="100" font-size="11" fill="#0D274D" font-weight="600">红外线</text>
+        <text x="450" y="100" font-size="11" fill="#0D274D" font-weight="600">可见光</text>
+        <text x="590" y="100" font-size="11" fill="#0D274D" font-weight="600">紫外线</text>
+        <text x="720" y="100" font-size="11" fill="#0D274D" font-weight="600">X 射线</text>
+        <text x="850" y="100" font-size="11" fill="#0D274D" font-weight="600">γ 射线</text>
+        <!-- Arrow: wavelength -->
+        <line x1="60" y1="180" x2="900" y2="180" stroke="#0D274D" stroke-width="1.5" marker-end="url(#arrowR)"/>
+        <text x="460" y="198" font-size="11" fill="#58585B" text-anchor="middle">波长 λ 递减 →  频率 f 递增 →</text>
+        <!-- Near-IR highlight -->
+        <rect x="340" y="215" width="140" height="64" rx="8" fill="#049FD9" opacity="0.12" stroke="#049FD9" stroke-width="2"/>
+        <text x="410" y="237" font-size="12" fill="#005073" text-anchor="middle" font-weight="700">光通信波段</text>
+        <text x="410" y="255" font-size="11" fill="#005073" text-anchor="middle">850 / 1310 / 1550 nm</text>
+        <text x="410" y="271" font-size="10" fill="#58585B" text-anchor="middle">（近红外 · 人眼不可见）</text>
+        <!-- connector line -->
+        <line x1="380" y1="154" x2="380" y2="215" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="440" y1="154" x2="440" y2="215" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="4,3"/>
+      </svg>
+    </div>
+    <p class="table-caption">图 1-1 &nbsp;电磁波谱概览 · 光通信使用的近红外波段（850 / 1310 / 1550nm）</p>
+
+    <h4>波粒二象性——光的双重人格</h4>
+    <p>
+      物理学告诉我们，光同时具有<strong>波动性</strong>和<strong>粒子性</strong>——这就是<span class="def-term">波粒二象性（Wave-Particle Duality）</span>。作为波，光有波长、频率、相位；作为粒子，光由一个个"光子（Photon）"组成，每个光子携带的能量为：
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">E = h · f = h · c / λ</div>
+      <p class="formula-note">
+        其中 <em>h</em> 是普朗克常数（≈ 6.626×10⁻³⁴ J·s），<em>f</em> 是频率，<em>c</em> 是光速，<em>λ</em> 是波长。<br>
+        波长越短 → 频率越高 → 单个光子能量越大。
+      </p>
+    </div>
+
+    <p>
+      在光通信中，我们<strong>主要利用光的波动性</strong>：通过改变光波的<strong>振幅、频率或相位</strong>来编码信息。不过，在光的检测端（光电二极管），我们又会用到光的粒子性——光子打到探测器上产生电流。可以说，"发送端靠波，接收端靠粒子"。
+    </p>
+
+    <h4>为什么偏偏选850nm、1310nm和1550nm？</h4>
+    <p>
+      这并非随意选择，而是由光纤的物理特性决定的。光在玻璃光纤中传输时会有<strong>衰减（Attenuation）</strong>——信号会随距离变弱。不同波长的光在玻璃中的衰减程度不同，科学家通过测量发现了三个"低损耗窗口"：
+    </p>
+    <ul>
+      <li><strong>850nm 窗口</strong> — 损耗约 2–3 dB/km，最早被开发使用，成本低，但损耗较大，适合短距离（数据中心内部）。</li>
+      <li><strong>1310nm 窗口</strong> — 损耗约 0.35 dB/km，且在此波长附近，标准单模光纤的色散接近于零（"零色散点"），非常适合中距离传输。</li>
+      <li><strong>1550nm 窗口</strong> — 损耗最低，仅约 <strong>0.2 dB/km</strong>（典型值 0.25 dB/km），是长距离传输和 DWDM 系统的核心波段。</li>
+    </ul>
+
+    <!-- SVG: 光纤衰减曲线 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 760 370" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="石英光纤衰减曲线示意图，标注三个低损耗窗口">
+        <!-- Axes -->
+        <line x1="80" y1="30" x2="80" y2="300" stroke="#0D274D" stroke-width="1.5"/>
+        <line x1="80" y1="300" x2="720" y2="300" stroke="#0D274D" stroke-width="1.5"/>
+        <!-- Y axis label -->
+        <text x="28" y="170" font-size="12" fill="#0D274D" text-anchor="middle" transform="rotate(-90,28,170)" font-weight="600">衰减 (dB/km)</text>
+        <!-- X axis label -->
+        <text x="400" y="340" font-size="12" fill="#0D274D" text-anchor="middle" font-weight="600">波长 (nm)</text>
+        <!-- Y ticks -->
+        <text x="72" y="304" font-size="10" fill="#58585B" text-anchor="end">0</text>
+        <text x="72" y="250" font-size="10" fill="#58585B" text-anchor="end">0.5</text>
+        <text x="72" y="196" font-size="10" fill="#58585B" text-anchor="end">1.0</text>
+        <text x="72" y="142" font-size="10" fill="#58585B" text-anchor="end">2.0</text>
+        <text x="72" y="88" font-size="10" fill="#58585B" text-anchor="end">3.0</text>
+        <text x="72" y="50" font-size="10" fill="#58585B" text-anchor="end">4.0</text>
+        <line x1="80" y1="250" x2="720" y2="250" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="80" y1="196" x2="720" y2="196" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="80" y1="142" x2="720" y2="142" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- X ticks -->
+        <text x="140" y="318" font-size="10" fill="#58585B" text-anchor="middle">800</text>
+        <text x="240" y="318" font-size="10" fill="#58585B" text-anchor="middle">1000</text>
+        <text x="380" y="318" font-size="10" fill="#58585B" text-anchor="middle">1200</text>
+        <text x="480" y="318" font-size="10" fill="#58585B" text-anchor="middle">1310</text>
+        <text x="580" y="318" font-size="10" fill="#58585B" text-anchor="middle">1550</text>
+        <text x="680" y="318" font-size="10" fill="#58585B" text-anchor="middle">1650</text>
+        <!-- Attenuation curve (simplified) -->
+        <path d="M110,62 C150,75 160,90 175,120 Q200,180 240,196 Q280,210 340,230 Q400,255 440,260 Q460,270 472,268 Q490,258 510,250 Q540,265 560,275 Q570,276 580,276 Q610,278 640,280 Q680,284 700,286"
+              fill="none" stroke="#049FD9" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- OH absorption peak ~1383nm -->
+        <path d="M440,260 Q452,220 460,200 Q468,220 472,268" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+        <text x="458" y="188" font-size="9" fill="#E2231A" text-anchor="middle">OH⁻ 吸收峰</text>
+        <!-- Window markers -->
+        <!-- 850nm -->
+        <rect x="125" y="88" width="40" height="16" rx="4" fill="#F58025" opacity="0.15"/>
+        <circle cx="145" cy="96" r="4" fill="#F58025"/>
+        <text x="145" y="82" font-size="10" fill="#F58025" text-anchor="middle" font-weight="700">850nm</text>
+        <text x="145" y="68" font-size="9" fill="#58585B" text-anchor="middle">~2.5 dB/km</text>
+        <!-- 1310nm -->
+        <rect x="460" y="254" width="44" height="16" rx="4" fill="#67B346" opacity="0.15"/>
+        <circle cx="480" cy="262" r="4" fill="#67B346"/>
+        <text x="480" y="248" font-size="10" fill="#67B346" text-anchor="middle" font-weight="700">1310nm</text>
+        <text x="480" y="236" font-size="9" fill="#58585B" text-anchor="middle">~0.35 dB/km</text>
+        <!-- 1550nm -->
+        <rect x="565" y="270" width="44" height="16" rx="4" fill="#049FD9" opacity="0.15"/>
+        <circle cx="587" cy="278" r="4" fill="#049FD9"/>
+        <text x="587" y="264" font-size="10" fill="#049FD9" text-anchor="middle" font-weight="700">1550nm</text>
+        <text x="587" y="252" font-size="9" fill="#58585B" text-anchor="middle">~0.2 dB/km</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 1-2 &nbsp;石英玻璃光纤的衰减曲线 · 三个"低损耗窗口"分别位于 850nm、1310nm 和 1550nm 附近</p>
+
+    <div class="insight">
+      <p class="insight-title">💡 关键洞察</p>
+      <p>
+        光通信选择 1550nm 作为长途传输的主力波长，不是因为它"好看"或"方便"，而是纯粹的物理规律使然——<strong>在这个波长上，玻璃对光的吸收和散射最小</strong>。这就好比你在一条高速公路上开车，1550nm 是路面最平坦、摩擦最小的那一段，车子跑得最远、油耗最少。
+      </p>
+    </div>
+
+    <!-- 1.2 信息如何被"装进"光信号中 -->
+    <h3>1.2 &nbsp;信息如何被"装进"光信号中</h3>
+
+    <h4>信息的本质——不确定性的消除</h4>
+    <p>
+      在正式讨论"光如何携带信息"之前，我们得先回答一个更根本的问题：<strong>信息是什么？</strong>
+    </p>
+    <p>
+      1948年，克劳德·香农（Claude Shannon）在他那篇划时代的论文《通信的数学理论》中给出了精确定义：<span class="def-term">信息（Information）</span>就是<strong>"不确定性的消除"</strong>。当你不知道某件事会怎样（有不确定性），而一条消息告诉了你结果，那条消息就携带了信息。不确定性越大，消除它所需的信息量越大。
+    </p>
+
+    <div class="analogy">
+      <p class="analogy-title">🎲 类比时间</p>
+      <p>
+        假设朋友抛一枚硬币，你不知道结果是正面还是反面——你有 1 比特（bit）的不确定性。他告诉你"正面"，这条消息携带了 1 bit 信息。如果他扔一个六面骰子，不确定性更大（约 2.58 bits），你需要更多的信息才能知道结果。<br><br>
+        <strong>信息量的单位是"比特（bit）"</strong>，这也是为什么数字通信的一切都围绕着 0 和 1 展开——每个 bit 就是一次"二选一"的回答。
+      </p>
+    </div>
+
+    <h4>光信号携带信息的原理——改变光波的"属性"</h4>
+    <p>
+      现在我们知道了：信息可以用一串 0 和 1 来表示。那么，如何把这串 0 和 1"写到"光上面呢？
+    </p>
+    <p>
+      回到物理。一束持续发光的激光，就像一条平直的高速公路——它本身不携带任何"消息"，因为它没有变化、没有不确定性。要让光携带信息，我们必须<strong>让光发生有规律的变化</strong>。
+    </p>
+    <p>
+      一束光波可以被数学描述为：
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">E(t) = A · cos(2πft + φ)</div>
+      <p class="formula-note">
+        <em>A</em> = 振幅（光的强度/亮度）&emsp;
+        <em>f</em> = 频率（光的颜色）&emsp;
+        <em>φ</em> = 相位（波形的起始位置）
+      </p>
+    </div>
+
+    <p>
+      我们可以通过改变这三个参数中的任意一个（或多个），来"编码"信息：
+    </p>
+    <ul>
+      <li><strong>改变振幅 A</strong>：光亮 = 1，光暗 = 0（最直观的方式）</li>
+      <li><strong>改变频率 f</strong>：不同频率代表不同信息（类似调频广播 FM）</li>
+      <li><strong>改变相位 φ</strong>：波形往前挪一点 = 1，不挪 = 0（肉眼看不出，但仪器能测到）</li>
+    </ul>
+
+    <div class="analogy">
+      <p class="analogy-title">🔦 类比时间 — 手电筒摩尔斯电码</p>
+      <p>
+        想象你和朋友站在两座山头上，天黑了，你们只有一支手电筒。你约定："亮一下=短信号（·）、亮久一点=长信号（—）、灭掉=间隔"。于是你通过开关手电筒，一闪一灭地把"SOS"（· · · — — — · · ·）发送了出去。
+      </p>
+      <p>
+        <strong>这就是最原始的光通信！</strong>你改变的是光的<strong>振幅</strong>（亮 vs 灭），编码方式是<strong>摩尔斯电码</strong>，传输介质是<strong>空气</strong>。现代光通信的本质完全一样，只不过：手电筒变成了激光器，空气变成了光纤，摩尔斯电码变成了数字调制。
+      </p>
+    </div>
+
+    <!-- SVG: 手电筒类比 → 光通信对照 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 880 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="手电筒摩尔斯电码 vs 现代光通信对照示意图">
+        <defs>
+          <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#0D274D"/></marker>
+        </defs>
+        <!-- Left: flashlight -->
+        <rect x="20" y="10" width="400" height="110" rx="10" fill="#FFF8F0" stroke="#F58025" stroke-width="1.5"/>
+        <text x="220" y="32" font-size="13" fill="#F58025" text-anchor="middle" font-weight="700">🔦 手电筒时代</text>
+        <text x="40" y="56" font-size="11" fill="#0D274D">光源：手电筒（白光）</text>
+        <text x="40" y="76" font-size="11" fill="#0D274D">编码：摩尔斯电码（亮/灭）</text>
+        <text x="40" y="96" font-size="11" fill="#0D274D">介质：空气（容易受干扰、距离短）</text>
+        <text x="40" y="114" font-size="11" fill="#0D274D">检测：人眼</text>
+        <!-- Arrow -->
+        <line x1="440" y1="65" x2="460" y2="65" stroke="#0D274D" stroke-width="2" marker-end="url(#arr2)"/>
+        <!-- Right: modern fiber -->
+        <rect x="470" y="10" width="400" height="110" rx="10" fill="#F0FAFF" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="670" y="32" font-size="13" fill="#049FD9" text-anchor="middle" font-weight="700">🌐 现代光通信</text>
+        <text x="490" y="56" font-size="11" fill="#0D274D">光源：半导体激光器（单波长）</text>
+        <text x="490" y="76" font-size="11" fill="#0D274D">编码：数字调制（OOK / QPSK / 16QAM …）</text>
+        <text x="490" y="96" font-size="11" fill="#0D274D">介质：光纤（低损耗、抗干扰、超远距离）</text>
+        <text x="490" y="114" font-size="11" fill="#0D274D">检测：光电探测器 + DSP</text>
+        <!-- Bottom note -->
+        <text x="440" y="160" font-size="12" fill="#58585B" text-anchor="middle" font-weight="600">本质相同：改变光的属性来编码信息</text>
+        <text x="440" y="180" font-size="11" fill="#9B9CA0" text-anchor="middle">区别在于：更精密的光源、更高效的编码、更优的传输介质</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 1-3 &nbsp;从手电筒到光纤——光通信的本质从未改变</p>
+
+    <!-- 1.3 从模拟到数字 -->
+    <h3>1.3 &nbsp;从模拟到数字——为什么现代光通信是数字通信？</h3>
+
+    <p>
+      早期的通信系统（比如固定电话、AM/FM广播）传输的是<strong>模拟信号（Analog Signal）</strong>——信号是连续变化的波形，直接对应声音、图像等物理量。理论上，光也可以直接承载模拟信号（比如让光的亮度随声音的振幅实时变化）。
+    </p>
+    <p>
+      但模拟光通信有一个<strong>致命缺陷</strong>：
+    </p>
+
+    <div class="caution">
+      <p class="caution-title">⚠️ 模拟信号的根本问题——噪声累积不可逆</p>
+      <p>
+        模拟信号在传输过程中会不可避免地叠加<strong>噪声（Noise）</strong>。每经过一次放大器，信号和噪声被一起放大——噪声像滚雪球一样越来越大，而你<strong>无法把噪声从信号中分离出去</strong>，因为它们在形态上是一样的连续波形。传输得越远，信号就越"脏"，最终面目全非。
+      </p>
+    </div>
+
+    <p>
+      数字信号则完全不同。它只有两种状态：<strong>0 和 1</strong>（对应光的"灭"和"亮"，或者"低功率"和"高功率"）。即使信号在传输中受到噪声污染、波形变了形，只要接收端还能分辨出"这大概是个 1"和"这大概是个 0"，就能<strong>完美恢复</strong>原始信息——因为只需要做一个简单的二选一判断。
+    </p>
+
+    <div class="analogy">
+      <p class="analogy-title">📝 类比时间 — 手写 vs 印刷</p>
+      <p>
+        模拟信号就像手写信件：每抄写一次都会走样一点，抄十遍后可能面目全非。<br>
+        数字信号就像印刷术：不管复印多少次，只要墨迹还能辨认出是"A"还是"B"，每一份都和原稿一模一样——因为你只需要判断它是26个字母中的哪一个，然后用标准字体重新印一遍。
+      </p>
+    </div>
+
+    <!-- SVG: 模拟 vs 数字信号 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="模拟信号与数字信号在传输中的噪声表现对比">
+        <!-- Analog row -->
+        <text x="440" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">模拟信号 vs 数字信号在传输中的表现</text>
+        <!-- Analog original -->
+        <rect x="30" y="40" width="180" height="90" rx="6" fill="#FFF8F0" stroke="#F58025" stroke-width="1"/>
+        <text x="120" y="58" font-size="10" fill="#F58025" text-anchor="middle" font-weight="700">模拟 · 原始信号</text>
+        <path d="M50,100 Q80,65 110,100 Q140,135 170,100 Q190,75 200,100" fill="none" stroke="#F58025" stroke-width="2"/>
+        <!-- Arrow -->
+        <text x="240" y="88" font-size="11" fill="#58585B" text-anchor="middle">传输 +</text>
+        <text x="240" y="104" font-size="11" fill="#E2231A" text-anchor="middle">噪声</text>
+        <!-- Analog degraded -->
+        <rect x="290" y="40" width="180" height="90" rx="6" fill="#FFF8F0" stroke="#E2231A" stroke-width="1"/>
+        <text x="380" y="58" font-size="10" fill="#E2231A" text-anchor="middle" font-weight="700">模拟 · 接收信号</text>
+        <path d="M310,100 Q325,70 340,95 Q350,110 365,102 Q375,85 390,108 Q405,130 420,97 Q435,78 455,105" fill="none" stroke="#E2231A" stroke-width="2"/>
+        <path d="M310,100 Q340,68 370,100 Q400,132 430,100 Q450,78 460,100" fill="none" stroke="#F58025" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        <!-- Verdict -->
+        <rect x="500" y="55" width="160" height="55" rx="8" fill="#E2231A" opacity="0.08" stroke="#E2231A" stroke-width="1"/>
+        <text x="580" y="78" font-size="11" fill="#E2231A" text-anchor="middle" font-weight="700">❌ 无法恢复</text>
+        <text x="580" y="96" font-size="10" fill="#58585B" text-anchor="middle">噪声与信号混为一体</text>
+
+        <!-- Digital row -->
+        <!-- Digital original -->
+        <rect x="30" y="160" width="180" height="90" rx="6" fill="#F0FAFF" stroke="#049FD9" stroke-width="1"/>
+        <text x="120" y="178" font-size="10" fill="#049FD9" text-anchor="middle" font-weight="700">数字 · 原始信号</text>
+        <path d="M50,230 L50,200 L80,200 L80,230 L110,230 L110,200 L140,200 L140,230 L170,230 L170,200 L200,200" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+        <text x="65" y="195" font-size="9" fill="#005073" text-anchor="middle">1</text>
+        <text x="95" y="245" font-size="9" fill="#005073" text-anchor="middle">0</text>
+        <text x="125" y="195" font-size="9" fill="#005073" text-anchor="middle">1</text>
+        <text x="155" y="245" font-size="9" fill="#005073" text-anchor="middle">0</text>
+        <text x="185" y="195" font-size="9" fill="#005073" text-anchor="middle">1</text>
+        <!-- Arrow -->
+        <text x="240" y="208" font-size="11" fill="#58585B" text-anchor="middle">传输 +</text>
+        <text x="240" y="224" font-size="11" fill="#E2231A" text-anchor="middle">噪声</text>
+        <!-- Digital degraded -->
+        <rect x="290" y="160" width="180" height="90" rx="6" fill="#F0FAFF" stroke="#049FD9" stroke-width="1"/>
+        <text x="380" y="178" font-size="10" fill="#049FD9" text-anchor="middle" font-weight="700">数字 · 接收信号</text>
+        <path d="M310,230 Q315,225 318,202 Q322,196 330,200 L340,202 Q348,205 350,228 Q352,235 358,232 L368,230 Q372,225 375,204 Q378,198 385,200 L395,203 Q400,208 402,228 Q405,236 410,232 L418,230 Q422,224 425,203 Q430,197 440,200 L450,202 Q458,207 460,202" fill="none" stroke="#9B9CA0" stroke-width="2"/>
+        <!-- Decision threshold -->
+        <line x1="305" y1="215" x2="475" y2="215" stroke="#E2231A" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="478" y="218" font-size="9" fill="#E2231A">判决阈值</text>
+        <!-- Verdict -->
+        <rect x="500" y="175" width="160" height="55" rx="8" fill="#67B346" opacity="0.08" stroke="#67B346" stroke-width="1"/>
+        <text x="580" y="198" font-size="11" fill="#67B346" text-anchor="middle" font-weight="700">✅ 完美恢复</text>
+        <text x="580" y="216" font-size="10" fill="#58585B" text-anchor="middle">高于阈值=1，低于阈值=0</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 1-4 &nbsp;模拟信号 vs 数字信号：噪声对信号质量的不同影响</p>
+
+    <h4>数字信号的 0 和 1 如何对应到光的状态？</h4>
+    <p>
+      最简单的方式（也是最早的光通信方式）叫做 <span class="def-term">OOK（On-Off Keying，开关键控）</span>：
+    </p>
+    <ul>
+      <li><strong>光亮（有光）= 1</strong></li>
+      <li><strong>光灭（无光）= 0</strong></li>
+    </ul>
+    <p>
+      激光器以极高的速度开关——每秒开关100亿次（10 Gbps），就能在一秒内传递100亿个 bit。这已经是巨大的信息量了，但现代光通信通过更高阶的调制方式（QPSK、16QAM等），可以在每次"闪烁"中携带更多 bit——我们将在第三章详细展开。
+    </p>
+
+    <div class="callout">
+      <strong>本章小结 — 三个核心认知：</strong>
+      <ol>
+        <li><strong>光是电磁波</strong>，光通信使用的是人眼不可见的近红外波段（850/1310/1550nm），因为它们在玻璃光纤中损耗最低。</li>
+        <li><strong>信息 = 不确定性的消除</strong>，通过改变光波的振幅、频率或相位来"编码"0 和 1。</li>
+        <li><strong>数字优于模拟</strong>，因为数字信号可以在噪声中被完美恢复——这是现代光通信的基石。</li>
+      </ol>
+    </div>
+
+  </div>
+</section>
+<!-- END OF CHAPTER 1 OUTPUT — 请回复"继续"以获取第二章 -->
+ <!-- ====================================================================
+CHAPTER 2 — 光纤：光信号的传输介质
+==================================================================== -->
+<section class="chapter" id="ch2">
+<div class="container">
+<h2>第二章  光纤——光的高速公路</h2>
+<p class="chapter-lead">
+上一章我们知道了光可以携带信息。但光在空气中传播会散射、被遮挡、受天气影响——它需要一条专属的"高速公路"。这条公路，就是<strong>光纤（Optical Fiber）</strong>：一根比头发还细的玻璃丝，却能把光锁在里面跑上几千公里。这一章，我们将从制造工艺到物理原理，彻底拆解光纤的一切。
+</p>
+<!-- ============================================================
+     2.1 光纤的本质
+     ============================================================ -->
+<h3>2.1 &nbsp;光纤的本质——一根神奇的玻璃丝</h3>
+
+<p>
+  光纤的本质出奇地简单：它就是一根<strong>极纯的玻璃丝</strong>（二氧化硅 SiO₂）。但"极纯"二字背后，蕴含着人类材料科学的巅峰成就——光纤玻璃的纯度比饮用水还高数百万倍，每十亿个硅原子中的杂质不超过一个。
+</p>
+
+<div class="analogy">
+  <p class="analogy-title">🏊 类比时间</p>
+  <p>
+    如果把光纤玻璃放大到游泳池的尺寸，你透过这么深的"水"往下看，仍然能清清楚楚地看见池底的硬币。普通窗户玻璃呢？大概几厘米厚就开始模糊了。这就是"通信级玻璃"与日常玻璃的差距。
+  </p>
+</div>
+
+<h4>光纤是怎么造出来的？——预制棒与拉丝</h4>
+<p>
+  光纤的制造分为两大步骤：
+</p>
+<ol>
+  <li>
+    <strong>制造预制棒（Preform）</strong>：先用化学气相沉积法（MCVD / OVD / VAD 等工艺），在高温下将极纯的气态硅化物沉积成一根约 1 米长、直径数厘米的玻璃棒。这根棒的截面结构就是光纤的"放大版"——中心是高折射率的纤芯材料，外围是低折射率的包层材料。
+  </li>
+  <li>
+    <strong>拉丝（Drawing）</strong>：把预制棒放进拉丝塔顶部的高温炉中（约 2000°C），玻璃软化后靠重力自然下垂，在精密控制下被拉成直径仅 <strong>125 微米（µm）</strong> 的光纤——比人的头发（约 50µm）粗不了多少。拉丝速度可达每秒数十米，一根预制棒可以拉出几百公里的光纤。
+  </li>
+</ol>
+<p>
+  拉出的光纤立即被涂上一层保护性的丙烯酸酯涂覆层（Coating），使总直径达到约 <strong>245µm</strong>，以保护脆弱的玻璃不受划伤和潮气侵蚀。
+</p>
+
+<h4>光纤的三层结构——Core、Cladding、Coating</h4>
+
+<!-- SVG: 光纤截面结构 -->
+<div class="svg-scroll-wrapper">
+  <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="光纤截面三层结构示意图：纤芯、包层、涂覆层">
+    <!-- Coating circle -->
+    <circle cx="280" cy="200" r="145" fill="#FBAB18" opacity="0.18" stroke="#F58025" stroke-width="2"/>
+    <text x="280" y="365" font-size="11" fill="#F58025" text-anchor="middle" font-weight="600">涂覆层 Coating (245 µm)</text>
+    <!-- Cladding circle -->
+    <circle cx="280" cy="200" r="100" fill="#E8F7EE" stroke="#67B346" stroke-width="2"/>
+    <text x="280" y="320" font-size="11" fill="#67B346" text-anchor="middle" font-weight="600">包层 Cladding (125 µm)</text>
+    <!-- Core circle — SMF -->
+    <circle cx="280" cy="200" r="20" fill="#049FD9" opacity="0.35" stroke="#049FD9" stroke-width="2.5"/>
+    <text x="280" y="205" font-size="10" fill="#005073" text-anchor="middle" font-weight="700">纤芯</text>
+    <text x="280" y="218" font-size="9" fill="#005073" text-anchor="middle">Core</text>
+    <!-- Dimension lines -->
+    <line x1="425" y1="200" x2="425" y2="55" stroke="#58585B" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="425" y1="200" x2="425" y2="345" stroke="#58585B" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <!-- Right side explanation cards -->
+    <rect x="480" y="40" width="300" height="80" rx="8" fill="#F0FAFF" stroke="#049FD9" stroke-width="1.5"/>
+    <text x="500" y="62" font-size="12" fill="#049FD9" font-weight="700">纤芯 Core</text>
+    <text x="500" y="80" font-size="11" fill="#0D274D">光信号在此传播。折射率较高。</text>
+    <text x="500" y="96" font-size="11" fill="#0D274D">直径：单模 8-10µm / 多模 50-62.5µm</text>
+    <text x="500" y="112" font-size="10" fill="#58585B">材料：掺锗二氧化硅（GeO₂-SiO₂）</text>
+
+    <rect x="480" y="145" width="300" height="80" rx="8" fill="#E8F7EE" stroke="#67B346" stroke-width="1.5"/>
+    <text x="500" y="167" font-size="12" fill="#67B346" font-weight="700">包层 Cladding</text>
+    <text x="500" y="185" font-size="11" fill="#0D274D">折射率低于纤芯，将光"锁"在纤芯中。</text>
+    <text x="500" y="201" font-size="11" fill="#0D274D">直径：125µm（行业标准统一尺寸）</text>
+    <text x="500" y="217" font-size="10" fill="#58585B">材料：纯二氧化硅（SiO₂）</text>
+
+    <rect x="480" y="250" width="300" height="80" rx="8" fill="#FFF8F0" stroke="#F58025" stroke-width="1.5"/>
+    <text x="500" y="272" font-size="12" fill="#F58025" font-weight="700">涂覆层 Coating</text>
+    <text x="500" y="290" font-size="11" fill="#0D274D">保护玻璃免受物理损伤和湿气侵蚀。</text>
+    <text x="500" y="306" font-size="11" fill="#0D274D">直径：245µm</text>
+    <text x="500" y="322" font-size="10" fill="#58585B">材料：丙烯酸酯（Acrylate）聚合物</text>
+
+    <!-- Reference: human hair -->
+    <line x1="80" y1="370" x2="130" y2="370" stroke="#9B9CA0" stroke-width="1.5"/>
+    <text x="140" y="374" font-size="10" fill="#9B9CA0">← 人类头发 ~50µm</text>
+  </svg>
+</div>
+<p class="table-caption">图 2-1 &nbsp;光纤的三层同心圆结构：纤芯传光、包层锁光、涂覆层护光</p>
+
+<div class="insight">
+  <p class="insight-title">💡 关键洞察</p>
+  <p>
+    光纤之所以能把光"锁住"，并不是靠管壁反射（那是空心管道的思路），而是靠<strong>纤芯与包层之间的折射率差异</strong>。纤芯的折射率比包层高那么一点点（通常只高 0.3%–1%），就足以产生"全内反射"，让光永远无法逃出纤芯。接下来我们详细推导这个原理。
+  </p>
+</div>
+
+<!-- ============================================================
+     2.2 全反射原理
+     ============================================================ -->
+<h3>2.2 &nbsp;全内反射——光如何被"锁"在玻璃中</h3>
+
+<p>
+  要理解光纤的工作原理，必须从一个中学物理实验说起：<strong>光从水中射向空气时，会发生什么？</strong>
+</p>
+
+<h4>从折射定律到全反射</h4>
+<p>
+  当光从一种介质（如玻璃）进入另一种介质（如空气），它的传播方向会发生改变——这就是<span class="def-term">折射（Refraction）</span>。控制折射方向的定律叫做<strong>斯涅尔定律（Snell's Law）</strong>：
+</p>
+
+<div class="formula-box">
+  <div class="formula">n₁ · sin θ₁ = n₂ · sin θ₂</div>
+  <p class="formula-note">
+    <em>n₁</em> = 入射介质的折射率 &emsp;
+    <em>n₂</em> = 出射介质的折射率<br>
+    <em>θ₁</em> = 入射角（光线与法线的夹角） &emsp;
+    <em>θ₂</em> = 折射角
+  </p>
+</div>
+
+<p>
+  <span class="def-term">折射率（Refractive Index, n）</span>是什么？它描述了光在某种材料中传播速度与真空光速的比值：<code>n = c / v</code>。折射率越大，光在其中跑得越慢。例如：真空 n=1.00，空气 n≈1.00，水 n≈1.33，玻璃 n≈1.45–1.50。
+</p>
+
+<div class="analogy">
+  <p class="analogy-title">🚗 类比时间</p>
+  <p>
+    想象一辆汽车斜着从柏油路（光速快的介质）开上沙地（光速慢的介质）。先接触沙地的那个轮子会先减速，导致车子偏转方向——这就是折射。反过来，从沙地斜着开回柏油路，先上路的轮子先加速，车子朝另一个方向偏转。
+  </p>
+</div>
+
+<p>
+  现在关键来了：当光从<strong>高折射率介质（如纤芯 n₁=1.48）</strong>射向<strong>低折射率介质（如包层 n₂=1.465）</strong>时，折射角 θ₂ > 入射角 θ₁。随着入射角逐渐增大，折射角也越来越大。当折射角达到 90° 时——折射光沿界面平行滑行——此时的入射角称为<span class="def-term">临界角（Critical Angle, θc）</span>：
+</p>
+
+<div class="formula-box">
+  <div class="formula">sin θc = n₂ / n₁</div>
+  <p class="formula-note">
+    当入射角 θ₁ > θc 时，光<strong>完全不会</strong>穿过界面，100% 被反射回来——<br>
+    这就是 <strong>全内反射（Total Internal Reflection, TIR）</strong>。
+  </p>
+</div>
+
+<!-- SVG: 全内反射三种情况 -->
+<div class="svg-scroll-wrapper">
+  <svg viewBox="0 0 920 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="全内反射原理示意图：折射、临界角、全反射三种情况">
+    <defs>
+      <marker id="arr3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5" fill="#049FD9"/></marker>
+      <marker id="arr3r" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5" fill="#E2231A"/></marker>
+      <marker id="arr3g" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5" fill="#67B346"/></marker>
+    </defs>
+
+    <!-- Case 1: Normal refraction -->
+    <rect x="20" y="10" width="270" height="295" rx="8" fill="#F7F8FA" stroke="#D4D8DE" stroke-width="1"/>
+    <text x="155" y="35" font-size="12" fill="#0D274D" text-anchor="middle" font-weight="700">① 普通折射</text>
+    <text x="155" y="52" font-size="10" fill="#58585B" text-anchor="middle">θ₁ &lt; θc</text>
+    <!-- Interface -->
+    <line x1="40" y1="175" x2="270" y2="175" stroke="#0D274D" stroke-width="1.5"/>
+    <text x="55" y="168" font-size="10" fill="#049FD9" font-weight="600">纤芯 n₁(高)</text>
+    <text x="55" y="195" font-size="10" fill="#67B346" font-weight="600">包层 n₂(低)</text>
+    <!-- Normal line -->
+    <line x1="155" y1="80" x2="155" y2="270" stroke="#9B9CA0" stroke-width="1" stroke-dasharray="4,3"/>
+    <!-- Incident ray -->
+    <line x1="80" y1="80" x2="155" y2="175" stroke="#049FD9" stroke-width="2.5" marker-end="url(#arr3)"/>
+    <!-- Refracted ray -->
+    <line x1="155" y1="175" x2="240" y2="270" stroke="#67B346" stroke-width="2" marker-end="url(#arr3g)"/>
+    <!-- Reflected ray (partial) -->
+    <line x1="155" y1="175" x2="230" y2="80" stroke="#E2231A" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr3r)"/>
+    <text x="235" y="73" font-size="9" fill="#E2231A">部分反射</text>
+    <text x="248" y="265" font-size="9" fill="#67B346">折射光</text>
+
+    <!-- Case 2: Critical angle -->
+    <rect x="320" y="10" width="270" height="295" rx="8" fill="#F7F8FA" stroke="#D4D8DE" stroke-width="1"/>
+    <text x="455" y="35" font-size="12" fill="#0D274D" text-anchor="middle" font-weight="700">② 临界角</text>
+    <text x="455" y="52" font-size="10" fill="#58585B" text-anchor="middle">θ₁ = θc</text>
+    <line x1="340" y1="175" x2="570" y2="175" stroke="#0D274D" stroke-width="1.5"/>
+    <line x1="455" y1="80" x2="455" y2="270" stroke="#9B9CA0" stroke-width="1" stroke-dasharray="4,3"/>
+    <!-- Incident ray (steeper) -->
+    <line x1="355" y1="95" x2="455" y2="175" stroke="#049FD9" stroke-width="2.5" marker-end="url(#arr3)"/>
+    <!-- Refracted ray along surface -->
+    <line x1="455" y1="175" x2="570" y2="175" stroke="#67B346" stroke-width="2" marker-end="url(#arr3g)"/>
+    <text x="530" y="168" font-size="9" fill="#67B346">沿界面滑行</text>
+    <text x="530" y="192" font-size="9" fill="#58585B">θ₂ = 90°</text>
+
+    <!-- Case 3: Total internal reflection -->
+    <rect x="620" y="10" width="270" height="295" rx="8" fill="#F0FAFF" stroke="#049FD9" stroke-width="2"/>
+    <text x="755" y="35" font-size="12" fill="#049FD9" text-anchor="middle" font-weight="700">③ 全内反射 ✅</text>
+    <text x="755" y="52" font-size="10" fill="#005073" text-anchor="middle">θ₁ &gt; θc → 光被完全锁住</text>
+    <line x1="640" y1="175" x2="870" y2="175" stroke="#0D274D" stroke-width="1.5"/>
+    <line x1="755" y1="80" x2="755" y2="270" stroke="#9B9CA0" stroke-width="1" stroke-dasharray="4,3"/>
+    <!-- Incident ray (very steep) -->
+    <line x1="660" y1="105" x2="755" y2="175" stroke="#049FD9" stroke-width="2.5" marker-end="url(#arr3)"/>
+    <!-- Reflected ray (full) -->
+    <line x1="755" y1="175" x2="850" y2="105" stroke="#E2231A" stroke-width="2.5" marker-end="url(#arr3r)"/>
+    <text x="862" y="100" font-size="9" fill="#E2231A" font-weight="700">100% 反射</text>
+    <!-- No refracted ray -->
+    <text x="810" y="210" font-size="9" fill="#9B9CA0">无折射光透出</text>
+  </svg>
+</div>
+<p class="table-caption">图 2-2 &nbsp;Snell 定律的三种情况：当入射角超过临界角 θc，光被 100% 反射——这就是光纤的核心原理</p>
+
+<h4>为什么纤芯折射率必须大于包层？——数学推导</h4>
+<p>
+  让我们做一个简洁的推导。全内反射要求：
+</p>
+<ol>
+  <li>光从纤芯（n₁）射向包层（n₂）的界面；</li>
+  <li>入射角 θ₁ 大于临界角 θc；</li>
+  <li>临界角由 <code>sin θc = n₂ / n₁</code> 决定。</li>
+</ol>
+<p>
+  <code>sin θc</code> 必须是一个有意义的值（≤ 1），因此需要 <code>n₂ / n₁ ≤ 1</code>，即 <strong>n₁ ≥ n₂</strong>。如果 n₁ < n₂（纤芯折射率低于包层），sin θc 会大于 1，临界角不存在，全内反射永远不会发生——光全部泄漏到包层中。
+</p>
+<p>
+  <strong>结论</strong>：纤芯折射率必须大于包层折射率，才能形成全内反射，把光锁在纤芯中。这就是光纤能传导光的根本物理原因。
+</p>
+
+<div class="insight">
+  <p class="insight-title">💡 数值示例</p>
+  <p>
+    假设纤芯 n₁ = 1.48，包层 n₂ = 1.465：<br>
+    <code>sin θc = 1.465 / 1.48 = 0.9899</code> → <code>θc ≈ 81.9°</code><br>
+    只要光以大于 81.9° 的入射角（接近"擦着"界面的角度）进入纤芯-包层界面，就会被全反射回来。在光纤中，这个条件很容易满足。
+  </p>
+</div>
+
+<h4>数值孔径（NA）——光纤能"吃进"多少光？</h4>
+<p>
+  <span class="def-term">数值孔径（Numerical Aperture, NA）</span>描述了光纤能接受的最大入射光锥角度。它由纤芯和包层的折射率差决定：
+</p>
+
+<div class="formula-box">
+  <div class="formula">NA = √(n₁² − n₂²)</div>
+  <p class="formula-note">
+    NA 越大 → 光纤能接受的入射角范围越宽 → 耦合光更容易<br>
+    但 NA 越大也意味着更多的传导模式 → 对单模光纤来说 NA 需要精确控制
+  </p>
+</div>
+
+<div class="analogy">
+  <p class="analogy-title">🏀 类比时间</p>
+  <p>
+    NA 就像篮筐的大小。篮筐（NA）越大，投篮（把光耦合进光纤）越容易；但大篮筐意味着"什么角度的球都能进"，球在筐里的弹跳路径（光的模式）就更多、更混乱。小篮筐（低 NA，单模光纤）只接受非常精准的投篮，但球的轨迹极其干净、一致。
+  </p>
+</div>
+
+<!-- ============================================================
+     2.3 多模光纤 vs 单模光纤
+     ============================================================ -->
+<h3>2.3 &nbsp;多模光纤与单模光纤——"多车道"与"单车道"</h3>
+
+<h4>什么是"模式（Mode）"？</h4>
+<p>
+  在几何光学的简化视角下，你可以把"模式"理解为光在光纤中弹跳前进的不同<strong>路径</strong>——有的光近乎直线前进，有的大角度反弹、走"之"字形路线。
+</p>
+<p>
+  但更准确地说（从<strong>波动光学</strong>的角度），<span class="def-term">模式（Mode）</span>是光波在光纤横截面上形成的<strong>稳定驻波（Standing Wave）图案</strong>。就像吉他弦只能振出特定的驻波频率（基频、二次谐波、三次谐波……），光纤也只能支持特定的电磁场分布模式。每种模式有不同的传播速度和场分布形状。
+</p>
+
+<div class="analogy">
+  <p class="analogy-title">🎸 类比时间</p>
+  <p>
+    吉他弦的振动只能以特定的"和弦模式"存在——基频（最低音）、二次谐波、三次谐波……你不可能让弦振出"任意"形状。光纤纤芯里的光也是一样：电磁场在纤芯截面上只能形成有限数量的稳定分布图案，每个图案就是一个"模式"。
+  </p>
+</div>
+
+<p>
+  光纤能支持多少个模式，主要由一个无量纲参数 <span class="def-term">V 参数（归一化频率）</span>决定：
+</p>
+
+<div class="formula-box">
+  <div class="formula">V = (π · d / λ) · NA</div>
+  <p class="formula-note">
+    <em>d</em> = 纤芯直径 &emsp; <em>λ</em> = 光波长 &emsp; <em>NA</em> = 数值孔径<br>
+    当 <strong>V &lt; 2.405</strong> 时，光纤只能传导一个模式 → <strong>单模光纤</strong><br>
+    当 <strong>V &gt;&gt; 2.405</strong> 时，支持多个模式 → <strong>多模光纤</strong>（模式数 ≈ V²/2）
+  </p>
+</div>
+
+<p>
+  从这个公式可以直观理解：<strong>纤芯越细（d 小）、波长越长（λ 大）、NA 越小，V 值就越小</strong>，支持的模式越少。这就是为什么单模光纤的纤芯只有 8–10µm——足够细，让 V < 2.405，只允许一个基本模式通过。
+</p>
+
+<h4>多模光纤 vs 单模光纤——全方位对比</h4>
+
+<div class="table-scroll-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>特性</th>
+        <th>多模光纤 (MMF)</th>
+        <th>单模光纤 (SMF)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>纤芯直径</strong></td>
+        <td>50µm 或 62.5µm</td>
+        <td>8–10µm</td>
+      </tr>
+      <tr>
+        <td><strong>包层直径</strong></td>
+        <td>125µm</td>
+        <td>125µm</td>
+      </tr>
+      <tr>
+        <td><strong>传导模式数</strong></td>
+        <td>数百到数千个</td>
+        <td>仅 1 个（基模 LP₀₁）</td>
+      </tr>
+      <tr>
+        <td><strong>典型波长</strong></td>
+        <td>850nm、1310nm</td>
+        <td>1310nm、1550nm</td>
+      </tr>
+      <tr>
+        <td><strong>光源</strong></td>
+        <td>LED 或 VCSEL</td>
+        <td>分布反馈激光器（DFB Laser）</td>
+      </tr>
+      <tr>
+        <td><strong>典型传输距离</strong></td>
+        <td>数百米至 ~2km</td>
+        <td>数十公里至数千公里</td>
+      </tr>
+      <tr>
+        <td><strong>带宽能力</strong></td>
+        <td>受模式色散限制，较低</td>
+        <td>极高（无模式色散）</td>
+      </tr>
+      <tr>
+        <td><strong>典型应用场景</strong></td>
+        <td>数据中心内部、楼内互联</td>
+        <td>城域网、长途骨干、DWDM 系统</td>
+      </tr>
+      <tr>
+        <td><strong>成本</strong></td>
+        <td>光纤和连接器便宜，光源便宜</td>
+        <td>光纤便宜，但精密激光器和对准成本较高</td>
+      </tr>
+      <tr>
+        <td><strong>护套颜色（惯例）</strong></td>
+        <td>橙色 或 浅蓝色（Aqua）</td>
+        <td>黄色（UPC）或 绿色（APC）</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p class="table-caption">表 2-1 &nbsp;多模光纤 vs 单模光纤全方位对比</p>
+
+<!-- SVG: MMF vs SMF 光路对比 -->
+<div class="svg-scroll-wrapper">
+  <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="多模光纤与单模光纤中光的传播路径对比">
+    <!-- MMF -->
+    <text x="450" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">多模光纤 vs 单模光纤 · 光传播路径对比</text>
+    <!-- MMF fiber body -->
+    <rect x="120" y="50" width="660" height="100" rx="10" fill="#F58025" opacity="0.08" stroke="#F58025" stroke-width="1.5"/>
+    <text x="80" y="105" font-size="11" fill="#F58025" text-anchor="end" font-weight="700">MMF</text>
+    <text x="80" y="120" font-size="9" fill="#58585B" text-anchor="end">50/62.5µm</text>
+    <!-- MMF core (wide) -->
+    <rect x="120" y="65" width="660" height="70" rx="6" fill="#F58025" opacity="0.12"/>
+    <!-- Rays bouncing at different angles -->
+    <polyline points="130,100 220,70 310,130 400,70 490,130 580,70 670,130 770,100" fill="none" stroke="#E2231A" stroke-width="1.8" opacity="0.7"/>
+    <polyline points="130,95 250,80 370,115 490,80 610,115 730,80 770,95" fill="none" stroke="#F58025" stroke-width="1.8" opacity="0.7"/>
+    <line x1="130" y1="100" x2="770" y2="100" stroke="#049FD9" stroke-width="1.8" opacity="0.7"/>
+    <text x="800" y="80" font-size="9" fill="#E2231A">高阶模式</text>
+    <text x="800" y="95" font-size="9" fill="#F58025">中阶模式</text>
+    <text x="800" y="110" font-size="9" fill="#049FD9">基模（直线）</text>
+
+    <!-- SMF -->
+    <rect x="120" y="200" width="660" height="100" rx="10" fill="#049FD9" opacity="0.06" stroke="#049FD9" stroke-width="1.5"/>
+    <text x="80" y="255" font-size="11" fill="#049FD9" text-anchor="end" font-weight="700">SMF</text>
+    <text x="80" y="270" font-size="9" fill="#58585B" text-anchor="end">8-10µm</text>
+    <!-- SMF core (narrow) -->
+    <rect x="120" y="242" width="660" height="16" rx="3" fill="#049FD9" opacity="0.18"/>
+    <!-- Single straight ray -->
+    <line x1="130" y1="250" x2="770" y2="250" stroke="#049FD9" stroke-width="2.5"/>
+    <text x="800" y="254" font-size="9" fill="#049FD9" font-weight="600">唯一基模</text>
+
+    <!-- Pulse shape comparison -->
+    <!-- Input pulse -->
+    <rect x="15" y="88" width="90" height="24" rx="4" fill="#67B346" opacity="0.15"/>
+    <text x="60" y="104" font-size="9" fill="#67B346" text-anchor="middle" font-weight="600">窄脉冲输入</text>
+    <rect x="15" y="238" width="90" height="24" rx="4" fill="#67B346" opacity="0.15"/>
+    <text x="60" y="254" font-size="9" fill="#67B346" text-anchor="middle" font-weight="600">窄脉冲输入</text>
+    <!-- Output pulse MMF (spread) -->
+    <ellipse cx="820" cy="100" rx="38" ry="14" fill="#E2231A" opacity="0.2" stroke="#E2231A" stroke-width="1.5"/>
+    <text x="820" y="134" font-size="9" fill="#E2231A" text-anchor="middle" font-weight="600">脉冲展宽 😟</text>
+    <!-- Output pulse SMF (sharp) -->
+    <rect x="800" y="243" width="40" height="14" rx="3" fill="#67B346" opacity="0.2" stroke="#67B346" stroke-width="1.5"/>
+    <text x="820" y="278" font-size="9" fill="#67B346" text-anchor="middle" font-weight="600">脉冲保持 😊</text>
+  </svg>
+</div>
+<p class="table-caption">图 2-3 &nbsp;多模光纤中不同模式走不同路径导致脉冲展宽；单模光纤只有一条路径，脉冲保持尖锐</p>
+
+<h4>模式色散——多模光纤的"天花板"</h4>
+<p>
+  在多模光纤中，不同模式（不同角度的光路）走的物理路径长度不同。走直线的基模最先到达终点，大角度反弹的高阶模式绕了远路、最后才到。一个原本尖锐的脉冲，到了接收端就被"拉宽"了——这就是<span class="def-term">模式色散（Modal Dispersion / Intermodal Dispersion）</span>。
+</p>
+<p>
+  脉冲被拉宽后，相邻的脉冲会重叠在一起，接收端无法分辨哪个是 1、哪个是 0——这就是<span class="def-term">码间干扰（Inter-Symbol Interference, ISI）</span>。模式色散是多模光纤传输距离和带宽的<strong>根本瓶颈</strong>。
+</p>
+<p>
+  <strong>结论</strong>：要长距离（数十公里以上）、高带宽传输，<strong>必须使用单模光纤</strong>——因为只有一个模式，没有模式色散。
+</p>
+
+<h4>阶跃折射率 vs 渐变折射率</h4>
+<p>
+  多模光纤按折射率分布可分为两种：
+</p>
+<ul>
+  <li>
+    <strong>阶跃折射率光纤（Step-Index）</strong>：纤芯折射率均匀一致，到了纤芯-包层边界突然"阶跃"下降。光通过反射在纤芯中弹跳前进。模式色散严重，目前极少用于高速通信。
+  </li>
+  <li>
+    <strong>渐变折射率光纤（Graded-Index）</strong>：纤芯中心折射率最高，向外逐渐降低（通常呈抛物线分布）。高阶模式虽然路径更长，但它们经过的外围区域折射率低、光速快，从而补偿了路径差——各模式到达终点的时间更接近，大幅减小模式色散。<strong>现代多模光纤几乎都是渐变折射率型</strong>（如 OM3、OM4、OM5）。
+  </li>
+</ul>
+
+<!-- SVG: Step-Index vs Graded-Index -->
+<div class="svg-scroll-wrapper">
+  <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="阶跃折射率光纤 vs 渐变折射率光纤折射率分布与光路对比">
+    <!-- Step-Index -->
+    <rect x="20" y="10" width="420" height="275" rx="8" fill="#FFF8F0" stroke="#F58025" stroke-width="1"/>
+    <text x="230" y="35" font-size="12" fill="#F58025" text-anchor="middle" font-weight="700">阶跃折射率 Step-Index</text>
+    <!-- Refractive index profile -->
+    <text x="50" y="75" font-size="10" fill="#58585B">折射率分布:</text>
+    <!-- Vertical axis -->
+    <line x1="100" y1="60" x2="100" y2="140" stroke="#0D274D" stroke-width="1"/>
+    <line x1="100" y1="140" x2="290" y2="140" stroke="#0D274D" stroke-width="1"/>
+    <!-- Step profile -->
+    <polyline points="110,130 130,130 130,80 250,80 250,130 270,130" fill="none" stroke="#F58025" stroke-width="2.5"/>
+    <text x="190" y="75" font-size="9" fill="#005073" text-anchor="middle">n₁ (纤芯)</text>
+    <text x="280" y="128" font-size="9" fill="#58585B">n₂ (包层)</text>
+    <!-- Light path -->
+    <rect x="60" y="170" width="340" height="60" rx="6" fill="#F58025" opacity="0.08"/>
+    <polyline points="70,200 120,175 170,225 220,175 270,225 320,175 380,200" fill="none" stroke="#E2231A" stroke-width="1.5"/>
+    <line x1="70" y1="200" x2="380" y2="200" stroke="#049FD9" stroke-width="1.5"/>
+    <text x="230" y="252" font-size="9" fill="#E2231A" text-anchor="middle">高阶模式路径长 → 到达时间晚 → 色散严重</text>
+
+    <!-- Graded-Index -->
+    <rect x="470" y="10" width="420" height="275" rx="8" fill="#F0FAFF" stroke="#049FD9" stroke-width="1"/>
+    <text x="680" y="35" font-size="12" fill="#049FD9" text-anchor="middle" font-weight="700">渐变折射率 Graded-Index</text>
+    <text x="500" y="75" font-size="10" fill="#58585B">折射率分布:</text>
+    <line x1="550" y1="60" x2="550" y2="140" stroke="#0D274D" stroke-width="1"/>
+    <line x1="550" y1="140" x2="740" y2="140" stroke="#0D274D" stroke-width="1"/>
+    <!-- Graded profile (parabolic) -->
+    <path d="M560,130 Q570,125 585,110 Q610,80 645,70 Q680,80 705,110 Q720,125 730,130" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+    <text x="645" y="65" font-size="9" fill="#005073" text-anchor="middle">n 最高</text>
+    <text x="740" y="128" font-size="9" fill="#58585B">n₂</text>
+    <!-- Light path (sinusoidal — smooth curves) -->
+    <rect x="510" y="170" width="340" height="60" rx="6" fill="#049FD9" opacity="0.06"/>
+    <path d="M520,200 Q555,178 590,200 Q625,222 660,200 Q695,178 730,200 Q765,222 800,200 Q820,190 840,200" fill="none" stroke="#67B346" stroke-width="1.8"/>
+    <line x1="520" y1="200" x2="840" y2="200" stroke="#049FD9" stroke-width="1.5"/>
+    <text x="680" y="252" font-size="9" fill="#67B346" text-anchor="middle">各模式弯曲前进，路径差被速度补偿 → 色散大幅减小</text>
+  </svg>
+</div>
+<p class="table-caption">图 2-4 &nbsp;阶跃折射率（左）vs 渐变折射率（右）：折射率分布与光路对比</p>
+
+<!-- ============================================================
+     2.4 光纤中的损耗与色散
+     ============================================================ -->
+<h3>2.4 &nbsp;光纤中的损耗与色散——信号的两大"天敌"</h3>
+
+<p>
+  光在光纤中并非无损传播——它会<strong>衰减（变弱）</strong>，也会<strong>色散（变形）</strong>。理解这两大损伤机制，是设计任何光通信系统的前提。
+</p>
+
+<h4>2.4.1 &nbsp;衰减（Attenuation）——信号越跑越弱</h4>
+<p>
+  <span class="def-term">衰减（Attenuation）</span>是指光信号在光纤中传播时功率逐渐降低的现象，以 <strong>dB/km</strong> 为单位。造成衰减的主要机制有三种：
+</p>
+
+<div class="grid grid-3">
+  <div class="card">
+    <h4>吸收损耗</h4>
+    <p>光纤材料（SiO₂）和其中的微量杂质（如 OH⁻ 离子）吸收光能并转化为热能。OH⁻ 在 1383nm 附近有一个明显的吸收峰（图 1-2 中可见），现代 "低水峰光纤"（G.652.D）已大幅降低此吸收。</p>
+  </div>
+  <div class="card">
+    <h4>散射损耗（瑞利散射）</h4>
+    <p>玻璃在凝固过程中，分子排列存在微观密度波动。当光的波长与这些波动尺度可比时，光被向各方向散射。<strong>瑞利散射（Rayleigh Scattering）</strong>与波长的四次方成反比（∝ 1/λ⁴），所以短波长损耗更大——这就是为什么 850nm 窗口的损耗远高于 1550nm。</p>
+  </div>
+  <div class="card">
+    <h4>弯曲损耗</h4>
+    <p>光纤被弯曲时，外侧的光以超过临界角的方式"泄漏"到包层外。弯曲半径越小，损耗越大。<strong>规则：不要将光纤弯曲到小于 1 英寸（约 2.5cm）的半径。</strong>1550nm 比 1310nm 对弯曲更敏感。</p>
+  </div>
+</div>
+
+<div class="callout">
+  <strong>典型损耗值（单模光纤 G.652）</strong><br>
+  • 1310nm：约 <strong>0.35 dB/km</strong><br>
+  • 1550nm：约 <strong>0.20–0.25 dB/km</strong><br>
+  举例：一段 100km 的光纤在 1550nm 约有 100 × 0.25 = <strong>25 dB</strong> 的损耗。这意味着光信号功率只剩下原来的约 0.3%！
+</div>
+
+<h4>2.4.2 &nbsp;色散（Dispersion）——脉冲越跑越宽</h4>
+<p>
+  如果说衰减让信号"变弱"，那色散就让信号"变模糊"。<span class="def-term">色散（Dispersion）</span>是指不同频率成分或不同偏振状态的光，在光纤中以不同速度传播，导致脉冲展宽的现象。在单模光纤中，色散主要有三种类型：
+</p>
+
+<div class="grid grid-3">
+  <div class="card">
+    <h4>① 材料色散<br><small>(Material Dispersion)</small></h4>
+    <p>玻璃的折射率随波长变化（即 n = n(λ)），所以不同波长的光在玻璃中速度不同。激光器发出的光并非完美的单一波长，而是有一定谱宽——这些略有差异的波长成分以不同速度传播，导致脉冲展宽。</p>
+    <p><strong>类比</strong>：一群跑步者速度不同，出发时挤在一起，跑远了就拉开了差距。</p>
+  </div>
+  <div class="card">
+    <h4>② 波导色散<br><small>(Waveguide Dispersion)</small></h4>
+    <p>光在纤芯中并非 100% 被束缚——约有 20% 的光能量延伸到包层中。不同波长的光，其能量在纤芯与包层中的分布比例不同，因此有效折射率不同、传播速度不同。波导色散通常与材料色散符号相反，两者叠加后形成<strong>色度色散（Chromatic Dispersion, CD）</strong>。</p>
+  </div>
+  <div class="card">
+    <h4>③ 偏振模色散<br><small>(PMD)</small></h4>
+    <p>理想光纤是完美圆形截面，但实际光纤总有微小的椭圆度和内应力，导致两个正交偏振模式（X 和 Y 方向）的传播速度略有差异。脉冲在两个偏振方向上的分量到达时间不同，造成展宽。PMD 是随机的、时变的，难以简单补偿。</p>
+    <p><strong>单位：ps/√km</strong>；10G 系统容忍约 10ps，100G 以上需要相干 DSP 补偿。</p>
+  </div>
+</div>
+
+<div class="insight">
+  <p class="insight-title">💡 色度色散（CD）= 材料色散 + 波导色散</p>
+  <p>
+    色度色散的大小用 <strong>ps/(nm·km)</strong> 表示——在 1550nm 处，标准单模光纤的 CD 约为 <strong>17 ps/(nm·km)</strong>。<br>
+    含义：每公里光纤，每纳米谱宽的光，到达时间差 17 皮秒。100km 光纤上，CD 累积到 1700 ps/nm。<br>
+    对 10G OOK 系统，CD 容限约 1200 ps/nm（约 70km）；对 40G，仅约 200 ps/nm（约 12km）——速率越高，对色散越敏感。
+  </p>
+</div>
+
+<h4>色散为什么是"敌人"？——脉冲展宽与码间干扰</h4>
+
+<!-- SVG: 脉冲展宽导致ISI -->
+<div class="svg-scroll-wrapper">
+  <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="色散导致脉冲展宽和码间干扰(ISI)示意图">
+    <text x="450" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">色散导致脉冲展宽 → 码间干扰 (ISI)</text>
+    <!-- Input pulses -->
+    <text x="80" y="55" font-size="11" fill="#67B346" text-anchor="middle" font-weight="600">发送端</text>
+    <rect x="30" y="65" width="100" height="80" rx="6" fill="#E8F7EE" stroke="#67B346" stroke-width="1"/>
+    <!-- Sharp pulses: 1 0 1 1 -->
+    <rect x="40" y="90" width="15" height="40" rx="2" fill="#67B346"/>
+    <rect x="72" y="90" width="15" height="40" rx="2" fill="#67B346"/>
+    <rect x="88" y="90" width="15" height="40" rx="2" fill="#67B346"/>
+    <text x="47" y="82" font-size="8" fill="#005073" text-anchor="middle">1</text>
+    <text x="63" y="82" font-size="8" fill="#9B9CA0" text-anchor="middle">0</text>
+    <text x="79" y="82" font-size="8" fill="#005073" text-anchor="middle">1</text>
+    <text x="95" y="82" font-size="8" fill="#005073" text-anchor="middle">1</text>
+
+    <!-- Arrow -->
+    <line x1="145" y1="105" x2="230" y2="105" stroke="#0D274D" stroke-width="1.5" marker-end="url(#arr2)"/>
+    <text x="188" y="98" font-size="9" fill="#58585B" text-anchor="middle">传输 + 色散</text>
+
+    <!-- Mildly spread pulses -->
+    <text x="330" y="55" font-size="11" fill="#F58025" text-anchor="middle" font-weight="600">短距离后</text>
+    <rect x="250" y="65" width="160" height="80" rx="6" fill="#FFF8F0" stroke="#F58025" stroke-width="1"/>
+    <ellipse cx="280" cy="110" rx="18" ry="20" fill="#F58025" opacity="0.3"/>
+    <ellipse cx="330" cy="110" rx="18" ry="20" fill="#F58025" opacity="0.3"/>
+    <ellipse cx="370" cy="110" rx="18" ry="20" fill="#F58025" opacity="0.3"/>
+    <text x="330" y="160" font-size="9" fill="#F58025" text-anchor="middle">脉冲开始展宽</text>
+
+    <!-- Arrow -->
+    <line x1="425" y1="105" x2="500" y2="105" stroke="#0D274D" stroke-width="1.5" marker-end="url(#arr2)"/>
+    <text x="463" y="98" font-size="9" fill="#58585B" text-anchor="middle">继续传输</text>
+
+    <!-- Heavily spread & overlapping -->
+    <text x="620" y="55" font-size="11" fill="#E2231A" text-anchor="middle" font-weight="600">长距离后</text>
+    <rect x="510" y="65" width="220" height="80" rx="6" fill="#FFE8E8" stroke="#E2231A" stroke-width="1"/>
+    <ellipse cx="560" cy="110" rx="40" ry="22" fill="#E2231A" opacity="0.2"/>
+    <ellipse cx="620" cy="110" rx="40" ry="22" fill="#E2231A" opacity="0.2"/>
+    <ellipse cx="680" cy="110" rx="40" ry="22" fill="#E2231A" opacity="0.2"/>
+    <text x="620" y="160" font-size="9" fill="#E2231A" text-anchor="middle" font-weight="600">脉冲严重重叠 → ISI → 无法分辨 0 和 1</text>
+
+    <!-- Final: receiver confusion -->
+    <rect x="760" y="75" width="120" height="60" rx="8" fill="#E2231A" opacity="0.08" stroke="#E2231A" stroke-width="1.5"/>
+    <text x="820" y="100" font-size="11" fill="#E2231A" text-anchor="middle" font-weight="700">❌ 误码</text>
+    <text x="820" y="118" font-size="9" fill="#58585B" text-anchor="middle">BER 升高</text>
+
+    <!-- Bottom timeline -->
+    <text x="450" y="210" font-size="11" fill="#0D274D" text-anchor="middle" font-weight="600">速率越高，每个比特的时间窗越窄，对色散越敏感：</text>
+    <text x="450" y="230" font-size="10" fill="#58585B" text-anchor="middle">10G → 比特周期 100ps &emsp;|&emsp; 40G → 25ps &emsp;|&emsp; 100G → 10ps &emsp;|&emsp; 400G → 2.5ps</text>
+    <text x="450" y="250" font-size="10" fill="#E2231A" text-anchor="middle">↑ 速率越高，能容忍的色散越少，传输距离越受限</text>
+  </svg>
+</div>
+<p class="table-caption">图 2-5 &nbsp;色散使脉冲在传输过程中逐渐展宽、重叠，导致接收端无法正确判别 0 和 1</p>
+
+<h4>1550nm——为什么是"甜蜜点"？</h4>
+<p>
+  回到图 1-2 的衰减曲线，1550nm 是光纤损耗的<strong>全局最低点</strong>（约 0.2 dB/km）。虽然 1310nm 的色散更低（接近零色散点），但 1310nm 的损耗（约 0.35 dB/km）几乎是 1550nm 的两倍。对于长距离传输，<strong>损耗是更致命的瓶颈</strong>——因为衰减到一定程度信号就淹没在噪声中了，而色散可以通过技术手段补偿。
+</p>
+<p>
+  1550nm 的色散（17 ps/nm/km）虽然不为零，但可以通过以下方式补偿：
+</p>
+<ul>
+  <li><strong>色散补偿光纤 / DCU（Dispersion Compensating Unit）</strong>：使用具有负色散的特殊光纤，串联接入链路中，让正、负色散相互抵消。</li>
+  <li><strong>电子色散补偿（EDC）</strong>：在接收端用 DSP 芯片数字化处理。</li>
+  <li><strong>相干检测 + DSP</strong>：40G、100G 及以上的相干系统，可以在接收端<strong>完全用电子方式补偿数万 ps/nm 的色散</strong>，彻底消除了对 DCU 的依赖。这是光通信的一次革命——我们将在后续课程中详细讲解。</li>
+</ul>
+
+<h4>为什么不能无限增大光功率来克服损耗？</h4>
+<p>
+  这是一个非常好的直觉："信号弱了？那就把光打得更亮！"但光纤有一个隐藏的"红线"——当光功率超过一定阈值，光纤的非线性效应会被激发：
+</p>
+<ul>
+  <li><strong>自相位调制（SPM）</strong>：高功率光自身改变了光纤的折射率，导致频率展宽。</li>
+  <li><strong>交叉相位调制（XPM）</strong>：DWDM 系统中，一个波长的高功率影响了相邻波长。</li>
+  <li><strong>四波混频（FWM）</strong>：多个波长互相作用，产生新的"鬼影"波长，干扰通信。</li>
+  <li><strong>受激布里渊散射（SBS）/ 受激拉曼散射（SRS）</strong>：超过功率阈值后，光能被散射甚至反射回来。</li>
+</ul>
+<p>
+  因此，每根光纤对每个波长的入纤功率都有<strong>上限</strong>（通常几到十几 dBm）。克服损耗的正确方式不是"暴力加功率"，而是在合适的位置部署<strong>光放大器（EDFA）</strong>，以及使用<strong>相干检测和前向纠错（FEC）</strong>来在更低的信噪比下正确恢复信号。
+</p>
+
+<div class="callout">
+  <strong>本章小结 — 四个核心认知：</strong>
+  <ol>
+    <li><strong>光纤 = 纤芯（传光）+ 包层（锁光）+ 涂覆层（护光）</strong>，全内反射让光在纤芯中无限弹跳前进。</li>
+    <li><strong>单模 vs 多模</strong>：单模纤芯极细（8-10µm），只允许一个模式传播，无模式色散，适合长距离；多模纤芯粗（50/62.5µm），适合短距离、低成本场景。</li>
+    <li><strong>衰减三杀手</strong>：吸收、散射、弯曲；1550nm 损耗最低 → 长途传输首选波段。</li>
+    <li><strong>色散三类型</strong>：材料色散、波导色散（合称色度色散 CD）、偏振模色散（PMD）——它们让脉冲展宽，导致码间干扰，是限制传输距离和速率的关键因素。</li>
+  </ol>
+</div>
+</div>
+</section>
+<!-- END OF CHAPTER 2 OUTPUT — 请回复"继续"以获取第三章（调制与解调） -->
+<!-- ====================================================================
+     CHAPTER 3 — 调制与解调
+     ==================================================================== -->
+<section class="chapter" id="ch3">
+  <div class="container">
+    <h2>第三章 &nbsp;调制与解调——将信息编码到光信号</h2>
+    <p class="chapter-lead">
+      前两章我们确认了两件事：光可以携带信息（第一章），光纤可以高效传输光（第二章）。现在进入最核心的工程问题：<strong>信息到底是怎样被"写进"光波里的？又是怎样在另一端被"读出来"的？</strong>这就是<strong>调制（Modulation）</strong>与<strong>解调（Demodulation）</strong>的故事——从最简单的"开灯关灯"到令人惊叹的相位星座图，每一步都有清晰的物理和数学逻辑。
+    </p>
+
+    <!-- ============================================================
+         3.1 调制的本质
+         ============================================================ -->
+    <h3>3.1 &nbsp;调制的本质——为什么需要"载波"？</h3>
+
+    <p>
+      我们想传递的原始信息（比如一段视频、一份邮件）被数字化后，变成了一串 0 和 1 的序列——这叫做<span class="def-term">基带信号（Baseband Signal）</span>。基带信号的频率很低（相对于光波而言），直接把它放到光纤上传输，就像试图用自行车轮在高速公路上行驶——完全不匹配。
+    </p>
+    <p>
+      我们需要一个<strong>高频载波（Carrier）</strong>来"搭载"这些低频信息。在光通信中，载波就是激光器发出的<strong>单频光波</strong>（比如频率 193.1 THz，波长 1552.52nm）。
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">E(t) = A · cos(2πft + φ)</div>
+      <p class="formula-note">
+        光载波的数学表达。<em>A</em> = 振幅，<em>f</em> = 频率，<em>φ</em> = 相位。<br>
+        <strong>调制 = 按照信息数据，有规律地改变 A、f 或 φ 中的一个或多个。</strong>
+      </p>
+    </div>
+
+    <div class="analogy">
+      <p class="analogy-title">🚚 类比时间 — 快递卡车与包裹</p>
+      <p>
+        载波就像一辆匀速行驶的快递卡车——空车跑在路上没有意义。<strong>调制</strong>就是把"包裹"（信息）装上车。你可以改变<strong>车厢装载量</strong>（振幅调制）、<strong>车速/车道</strong>（频率调制）、或者<strong>出发时刻</strong>（相位调制）来编码不同的信息。到了目的地，<strong>解调</strong>就是"卸货"——把包裹从卡车上取下来还原为原始信息。
+      </p>
+    </div>
+
+    <!-- SVG: 三种调制维度 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 940 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="光载波可调制的三个维度：振幅、频率、相位">
+        <text x="470" y="24" font-size="14" fill="#0D274D" text-anchor="middle" font-weight="700">光载波的三个可调制维度</text>
+
+        <!-- Unmodulated carrier -->
+        <rect x="30" y="40" width="880" height="70" rx="8" fill="#F7F8FA" stroke="#D4D8DE" stroke-width="1"/>
+        <text x="50" y="62" font-size="11" fill="#58585B" font-weight="600">未调制载波（纯净光波）</text>
+        <path d="M160,78 Q180,55 200,78 Q220,101 240,78 Q260,55 280,78 Q300,101 320,78 Q340,55 360,78 Q380,101 400,78 Q420,55 440,78 Q460,101 480,78 Q500,55 520,78 Q540,101 560,78 Q580,55 600,78 Q620,101 640,78 Q660,55 680,78 Q700,101 720,78 Q740,55 760,78 Q780,101 800,78 Q820,55 840,78 Q860,101 880,78" fill="none" stroke="#049FD9" stroke-width="2"/>
+
+        <!-- Amplitude Modulation -->
+        <rect x="30" y="125" width="280" height="110" rx="8" fill="#F0FAFF" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="170" y="148" font-size="12" fill="#049FD9" text-anchor="middle" font-weight="700">① 振幅调制 (AM)</text>
+        <text x="170" y="165" font-size="10" fill="#58585B" text-anchor="middle">改变光的"亮度"</text>
+        <!-- Large amplitude then small amplitude -->
+        <path d="M50,200 Q60,170 70,200 Q80,230 90,200 Q100,170 110,200 Q120,230 130,200" fill="none" stroke="#049FD9" stroke-width="2.2"/>
+        <path d="M145,200 Q152,190 160,200 Q167,210 175,200 Q182,190 190,200 Q197,210 205,200 Q212,190 220,200 Q227,210 235,200" fill="none" stroke="#049FD9" stroke-width="1.5" opacity="0.5"/>
+        <text x="90" y="222" font-size="9" fill="#005073" text-anchor="middle">"1" 强</text>
+        <text x="190" y="222" font-size="9" fill="#9B9CA0" text-anchor="middle">"0" 弱</text>
+
+        <!-- Frequency Modulation -->
+        <rect x="330" y="125" width="280" height="110" rx="8" fill="#E8F7EE" stroke="#67B346" stroke-width="1.5"/>
+        <text x="470" y="148" font-size="12" fill="#67B346" text-anchor="middle" font-weight="700">② 频率调制 (FM)</text>
+        <text x="470" y="165" font-size="10" fill="#58585B" text-anchor="middle">改变光的"颜色/频率"</text>
+        <!-- Tight waves then loose waves -->
+        <path d="M350,200 Q355,180 360,200 Q365,220 370,200 Q375,180 380,200 Q385,220 390,200 Q395,180 400,200 Q405,220 410,200 Q415,180 420,200 Q425,220 430,200" fill="none" stroke="#67B346" stroke-width="2"/>
+        <path d="M445,200 Q460,175 475,200 Q490,225 505,200 Q520,175 535,200 Q550,225 565,200 Q580,175 595,200" fill="none" stroke="#67B346" stroke-width="2"/>
+        <text x="390" y="222" font-size="9" fill="#005073" text-anchor="middle">"1" 高频</text>
+        <text x="520" y="222" font-size="9" fill="#9B9CA0" text-anchor="middle">"0" 低频</text>
+
+        <!-- Phase Modulation -->
+        <rect x="630" y="125" width="280" height="110" rx="8" fill="#FFF8F0" stroke="#F58025" stroke-width="1.5"/>
+        <text x="770" y="148" font-size="12" fill="#F58025" text-anchor="middle" font-weight="700">③ 相位调制 (PM)</text>
+        <text x="770" y="165" font-size="10" fill="#58585B" text-anchor="middle">改变光波的"起始位置"</text>
+        <!-- Normal wave then phase-shifted wave -->
+        <path d="M650,200 Q665,175 680,200 Q695,225 710,200 Q725,175 740,200" fill="none" stroke="#F58025" stroke-width="2"/>
+        <!-- Phase jump indicator -->
+        <line x1="740" y1="185" x2="740" y2="215" stroke="#E2231A" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="740" y="180" font-size="8" fill="#E2231A" text-anchor="middle">相位跳变</text>
+        <path d="M740,200 Q755,225 770,200 Q785,175 800,200 Q815,225 830,200 Q845,175 860,200 Q875,225 890,200" fill="none" stroke="#F58025" stroke-width="2"/>
+        <text x="700" y="222" font-size="9" fill="#005073" text-anchor="middle">"1" φ=0°</text>
+        <text x="830" y="222" font-size="9" fill="#9B9CA0" text-anchor="middle">"0" φ=180°</text>
+
+        <!-- Bottom summary -->
+        <rect x="130" y="260" width="680" height="100" rx="10" fill="#F7F8FA" stroke="#D4D8DE" stroke-width="1"/>
+        <text x="470" y="288" font-size="12" fill="#0D274D" text-anchor="middle" font-weight="700">核心思想</text>
+        <text x="470" y="310" font-size="11" fill="#58585B" text-anchor="middle">一束"空白"光波本身不携带信息。</text>
+        <text x="470" y="330" font-size="11" fill="#58585B" text-anchor="middle">通过有规律地改变振幅 A、频率 f 或相位 φ，就能把 0 和 1 "写"到光上。</text>
+        <text x="470" y="350" font-size="11" fill="#049FD9" text-anchor="middle" font-weight="600">调制阶数越高 → 每次"变化"携带的比特越多 → 频谱效率越高。</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-1 &nbsp;光载波的三个可调制维度：振幅、频率、相位</p>
+
+    <!-- ============================================================
+         3.2 OOK — 最简单的调制方式
+         ============================================================ -->
+    <h3>3.2 &nbsp;OOK（On-Off Keying）——"开灯关灯"的朴素智慧</h3>
+
+    <p>
+      <span class="def-term">OOK（On-Off Keying，开关键控）</span>是最直观的调制方式——它只改变光的振幅，而且只有两个状态：
+    </p>
+    <ul>
+      <li><strong>有光 → 1</strong>（激光器开启）</li>
+      <li><strong>无光 → 0</strong>（激光器关闭或极低功率）</li>
+    </ul>
+    <p>
+      每一个比特周期（bit period），激光器要么开、要么关——就像第一章类比的手电筒摩尔斯电码，只不过速度快了亿万倍。在 10 Gbps 的 OOK 系统中，激光器每秒开关 <strong>100 亿次</strong>，每个比特周期仅 100 皮秒（100 ps = 0.0000000001 秒）。
+    </p>
+
+    <h4>NRZ vs RZ 编码</h4>
+    <p>
+      OOK 有两种常见的编码格式：
+    </p>
+    <ul>
+      <li>
+        <strong>NRZ（Non-Return-to-Zero，不归零码）</strong>：在整个比特周期内，"1"持续保持高电平/有光，"0"持续保持低电平/无光。光脉冲占满整个比特窗口。这是 10G 系统最常用的格式。
+      </li>
+      <li>
+        <strong>RZ（Return-to-Zero，归零码）</strong>：在"1"的比特周期内，光脉冲只占一半时间，然后归零。脉冲更窄，对色散更鲁棒，但占用更多带宽。
+      </li>
+    </ul>
+
+    <!-- SVG: NRZ vs RZ -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 820 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NRZ与RZ编码的光脉冲波形对比">
+        <text x="410" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">OOK 编码：NRZ vs RZ 波形对比</text>
+
+        <!-- Bit sequence label -->
+        <text x="60" y="50" font-size="11" fill="#58585B" font-weight="600">比特序列：</text>
+        <text x="220" y="50" font-size="13" fill="#0D274D" font-weight="700" font-family="monospace">1 &nbsp; 0 &nbsp; 1 &nbsp; 1 &nbsp; 0 &nbsp; 1 &nbsp; 0 &nbsp; 0 &nbsp; 1</text>
+
+        <!-- NRZ -->
+        <text x="40" y="95" font-size="12" fill="#049FD9" font-weight="700">NRZ</text>
+        <rect x="100" y="68" width="630" height="70" rx="6" fill="#F0FAFF" stroke="#049FD9" stroke-width="1"/>
+        <!-- Time grid -->
+        <line x1="170" y1="68" x2="170" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="240" y1="68" x2="240" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="310" y1="68" x2="310" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="380" y1="68" x2="380" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="450" y1="68" x2="450" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="520" y1="68" x2="520" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="590" y1="68" x2="590" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="660" y1="68" x2="660" y2="138" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- NRZ waveform: 1 0 1 1 0 1 0 0 1 -->
+        <path d="M105,125 L105,82 L170,82 L170,125 L240,125 L240,82 L380,82 L380,125 L450,125 L450,82 L520,82 L520,125 L660,125 L660,82 L725,82" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+        <text x="750" y="85" font-size="9" fill="#049FD9" font-weight="600">有光</text>
+        <text x="750" y="128" font-size="9" fill="#9B9CA0">无光</text>
+
+        <!-- RZ -->
+        <text x="40" y="195" font-size="12" fill="#67B346" font-weight="700">RZ</text>
+        <rect x="100" y="168" width="630" height="70" rx="6" fill="#E8F7EE" stroke="#67B346" stroke-width="1"/>
+        <!-- Time grid -->
+        <line x1="170" y1="168" x2="170" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="240" y1="168" x2="240" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="310" y1="168" x2="310" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="380" y1="168" x2="380" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="450" y1="168" x2="450" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="520" y1="168" x2="520" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="590" y1="168" x2="590" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="660" y1="168" x2="660" y2="238" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <!-- RZ waveform: 1 0 1 1 0 1 0 0 1 -->
+        <path d="M105,225 L105,182 L137,182 L137,225 L170,225 L240,225 L240,182 L275,182 L275,225 L310,225 L310,182 L345,182 L345,225 L380,225 L450,225 L450,182 L485,182 L485,225 L520,225 L660,225 L660,182 L695,182 L695,225 L725,225" fill="none" stroke="#67B346" stroke-width="2.5"/>
+        <text x="750" y="185" font-size="9" fill="#67B346" font-weight="600">有光</text>
+        <text x="750" y="228" font-size="9" fill="#9B9CA0">无光</text>
+
+        <!-- Bottom note -->
+        <text x="410" y="268" font-size="11" fill="#58585B" text-anchor="middle">NRZ 脉冲占满整个比特周期 · RZ 脉冲只占一半，然后归零 → 对色散更鲁棒但需要更多带宽</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-2 &nbsp;相同比特序列 "1 0 1 1 0 1 0 0 1" 的 NRZ 与 RZ 波形对比</p>
+
+    <h4>OOK 的优缺点</h4>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4 style="color:var(--color-success)">✅ 优点</h4>
+        <ul>
+          <li>实现极其简单——激光器开关即可</li>
+          <li>接收端只需要一个光电二极管检测光的有无（强度）</li>
+          <li>成本低、技术成熟</li>
+          <li>10G 及以下系统的主力调制方式</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--cisco-red)">❌ 缺点</h4>
+        <ul>
+          <li><strong>频谱效率低</strong>：每个符号（Symbol）只携带 1 个比特</li>
+          <li>要提高速率只能提高波特率（Symbol Rate），但高波特率对色散和 PMD 极为敏感</li>
+          <li>40G OOK 的色散容限仅约 200 ps/nm，传输距离极短</li>
+          <li>无法满足 100G 及以上的传输需求</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="insight">
+      <p class="insight-title">💡 频谱效率：关键概念</p>
+      <p>
+        <span class="def-term">频谱效率（Spectral Efficiency）</span>的单位是 <strong>bit/s/Hz</strong>，表示每赫兹带宽能传输多少比特。OOK 的频谱效率约为 <strong>1 bit/s/Hz</strong>（NRZ 格式）。要在有限的光纤带宽中塞进更多数据，我们需要更高阶的调制——这就引出了下一节。
+      </p>
+    </div>
+
+    <!-- ============================================================
+         3.3 高阶调制格式
+         ============================================================ -->
+    <h3>3.3 &nbsp;高阶调制格式——每次"闪烁"携带更多比特</h3>
+
+    <p>
+      OOK 每个符号只编码 1 比特。这就像一盏灯只会亮和灭——传递信息的效率很低。如果我们让灯有<strong>更多可区分的状态</strong>呢？比如 4 种亮度（2 比特）、16 种亮度（4 比特）？或者利用人眼看不到的"相位"来编码？
+    </p>
+    <p>
+      这就是高阶调制的核心思想：<strong>增加每个符号（Symbol）可能的状态数，从而在不提高波特率的情况下，成倍提升比特率。</strong>
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">比特率 = 波特率 × log₂(M)</div>
+      <p class="formula-note">
+        <em>M</em> = 每个符号的状态数 &emsp; <em>log₂(M)</em> = 每符号携带的比特数<br>
+        例：M=2 (OOK) → 1 bit/symbol &emsp; M=4 (QPSK/PAM4) → 2 bits/symbol &emsp; M=16 (16QAM) → 4 bits/symbol
+      </p>
+    </div>
+
+    <h4>PAM4 — 4 级脉冲振幅调制</h4>
+    <p>
+      <span class="def-term">PAM4（Pulse Amplitude Modulation, 4-level）</span>使用<strong>4 个不同的振幅等级</strong>来编码信息。每个符号可以是 4 种亮度之一，因此携带 <strong>log₂(4) = 2 比特</strong>。
+    </p>
+
+    <!-- SVG: PAM4 -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 820 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PAM4四级振幅调制示意图">
+        <text x="410" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">PAM4：4 个振幅等级 · 每符号 2 比特</text>
+
+        <!-- Amplitude levels -->
+        <line x1="100" y1="55" x2="720" y2="55" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="100" y1="95" x2="720" y2="95" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="100" y1="135" x2="720" y2="135" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="100" y1="175" x2="720" y2="175" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+        <text x="90" y="59" font-size="10" fill="#005073" text-anchor="end" font-weight="600">Level 3</text>
+        <text x="90" y="99" font-size="10" fill="#049FD9" text-anchor="end" font-weight="600">Level 2</text>
+        <text x="90" y="139" font-size="10" fill="#67B346" text-anchor="end" font-weight="600">Level 1</text>
+        <text x="90" y="179" font-size="10" fill="#9B9CA0" text-anchor="end" font-weight="600">Level 0</text>
+
+        <text x="48" y="59" font-size="9" fill="#58585B" text-anchor="end">11</text>
+        <text x="48" y="99" font-size="9" fill="#58585B" text-anchor="end">10</text>
+        <text x="48" y="139" font-size="9" fill="#58585B" text-anchor="end">01</text>
+        <text x="48" y="179" font-size="9" fill="#58585B" text-anchor="end">00</text>
+
+        <!-- PAM4 waveform: 11 00 10 01 11 10 00 01 -->
+        <path d="M110,55 L190,55 L190,175 L270,175 L270,95 L350,95 L350,135 L430,135 L430,55 L510,55 L510,95 L590,95 L590,175 L670,175 L670,135 L720,135" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+
+        <!-- Symbol labels -->
+        <text x="150" y="48" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">11</text>
+        <text x="230" y="192" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">00</text>
+        <text x="310" y="88" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">10</text>
+        <text x="390" y="128" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">01</text>
+        <text x="470" y="48" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">11</text>
+        <text x="550" y="88" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">10</text>
+        <text x="630" y="192" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">00</text>
+        <text x="695" y="128" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">01</text>
+
+        <!-- Note -->
+        <text x="410" y="220" font-size="11" fill="#58585B" text-anchor="middle">广泛应用于数据中心 400GE / 800GE 短距互联（如 400G-DR4，每通道 100G PAM4）</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-3 &nbsp;PAM4 使用 4 种光功率等级编码，每个符号携带 2 比特</p>
+
+    <p>
+      PAM4 的优势是简单——仍然只调制振幅，接收端用<strong>直接检测（光电二极管测量光强度）</strong>即可。代价是振幅等级之间的间距变小，对噪声更敏感，需要更高的信噪比（SNR）。
+    </p>
+
+    <h4>QPSK — 四相移键控</h4>
+    <p>
+      <span class="def-term">QPSK（Quadrature Phase Shift Keying，正交相移键控）</span>不改变光的亮度——它改变光的<strong>相位</strong>。将一个符号周期内的相位设置为四种状态之一：0°、90°、180°、270°。每种状态代表 2 比特。
+    </p>
+    <p>
+      但请注意：相位是人眼看不见的！普通光电二极管也无法检测相位——它只能测量光强度（振幅的平方）。因此 QPSK <strong>无法使用直接检测</strong>，必须使用<strong>相干检测（Coherent Detection）</strong>——这是一个重大的技术转折点，我们会在 3.5 节中铺垫，并在 Optical 201 中详细展开。
+    </p>
+
+    <h4>16QAM — 正交振幅调制</h4>
+    <p>
+      <span class="def-term">16QAM（16-state Quadrature Amplitude Modulation）</span>更加激进：它<strong>同时调制振幅和相位</strong>。16 种不同的振幅-相位组合，每个符号携带 <strong>log₂(16) = 4 比特</strong>。这意味着在相同的波特率下，比特率是 OOK 的 4 倍，是 QPSK 的 2 倍。
+    </p>
+
+    <h4>星座图（Constellation Diagram）——调制的"地图"</h4>
+    <p>
+      为了可视化这些调制格式，工程师使用<span class="def-term">星座图（Constellation Diagram）</span>：以 <strong>I（同相, In-phase）</strong>为横轴、<strong>Q（正交, Quadrature）</strong>为纵轴的二维平面，每个"星座点"代表一种符号状态。点到原点的距离代表振幅，点的角度代表相位。
+    </p>
+
+    <!-- SVG: Constellation Diagrams -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 940 450" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OOK、QPSK、16QAM、DP-16QAM星座图对比">
+        <text x="470" y="24" font-size="14" fill="#0D274D" text-anchor="middle" font-weight="700">星座图对比：从 OOK 到 DP-16QAM</text>
+
+        <!-- ===== OOK ===== -->
+        <rect x="15" y="40" width="210" height="250" rx="10" fill="#F7F8FA" stroke="#D4D8DE" stroke-width="1"/>
+        <text x="120" y="65" font-size="12" fill="#0D274D" text-anchor="middle" font-weight="700">OOK</text>
+        <text x="120" y="82" font-size="10" fill="#58585B" text-anchor="middle">1 bit / symbol</text>
+        <!-- Axes -->
+        <line x1="60" y1="180" x2="190" y2="180" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="120" y1="120" x2="120" y2="240" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="195" y="177" font-size="9" fill="#9B9CA0">I</text>
+        <text x="123" y="117" font-size="9" fill="#9B9CA0">Q</text>
+        <!-- Points -->
+        <circle cx="90" cy="180" r="8" fill="#E2231A" opacity="0.2" stroke="#E2231A" stroke-width="2"/>
+        <text x="90" y="184" font-size="8" fill="#E2231A" text-anchor="middle" font-weight="700">0</text>
+        <circle cx="160" cy="180" r="8" fill="#049FD9" opacity="0.2" stroke="#049FD9" stroke-width="2"/>
+        <text x="160" y="184" font-size="8" fill="#049FD9" text-anchor="middle" font-weight="700">1</text>
+        <text x="120" y="270" font-size="9" fill="#58585B" text-anchor="middle">频谱效率 ~1 bit/s/Hz</text>
+
+        <!-- ===== QPSK ===== -->
+        <rect x="245" y="40" width="210" height="250" rx="10" fill="#F0FAFF" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="350" y="65" font-size="12" fill="#049FD9" text-anchor="middle" font-weight="700">QPSK</text>
+        <text x="350" y="82" font-size="10" fill="#58585B" text-anchor="middle">2 bits / symbol</text>
+        <line x1="290" y1="180" x2="420" y2="180" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="350" y1="120" x2="350" y2="240" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="425" y="177" font-size="9" fill="#9B9CA0">I</text>
+        <text x="353" y="117" font-size="9" fill="#9B9CA0">Q</text>
+        <!-- 4 points at 45° positions -->
+        <circle cx="390" cy="145" r="8" fill="#049FD9" opacity="0.2" stroke="#049FD9" stroke-width="2"/>
+        <text x="390" y="149" font-size="7" fill="#005073" text-anchor="middle" font-weight="700">00</text>
+        <circle cx="310" cy="145" r="8" fill="#049FD9" opacity="0.2" stroke="#049FD9" stroke-width="2"/>
+        <text x="310" y="149" font-size="7" fill="#005073" text-anchor="middle" font-weight="700">01</text>
+        <circle cx="310" cy="215" r="8" fill="#049FD9" opacity="0.2" stroke="#049FD9" stroke-width="2"/>
+        <text x="310" y="219" font-size="7" fill="#005073" text-anchor="middle" font-weight="700">11</text>
+        <circle cx="390" cy="215" r="8" fill="#049FD9" opacity="0.2" stroke="#049FD9" stroke-width="2"/>
+        <text x="390" y="219" font-size="7" fill="#005073" text-anchor="middle" font-weight="700">10</text>
+        <text x="350" y="270" font-size="9" fill="#58585B" text-anchor="middle">频谱效率 ~2 bit/s/Hz</text>
+
+        <!-- ===== 16QAM ===== -->
+        <rect x="475" y="40" width="210" height="250" rx="10" fill="#E8F7EE" stroke="#67B346" stroke-width="1.5"/>
+        <text x="580" y="65" font-size="12" fill="#67B346" text-anchor="middle" font-weight="700">16QAM</text>
+        <text x="580" y="82" font-size="10" fill="#58585B" text-anchor="middle">4 bits / symbol</text>
+        <line x1="510" y1="180" x2="650" y2="180" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="580" y1="110" x2="580" y2="250" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="655" y="177" font-size="9" fill="#9B9CA0">I</text>
+        <text x="583" y="107" font-size="9" fill="#9B9CA0">Q</text>
+        <!-- 16 points in 4x4 grid -->
+        <g fill="#67B346" opacity="0.25" stroke="#67B346" stroke-width="1.5">
+          <circle cx="535" cy="135" r="5"/><circle cx="560" cy="135" r="5"/>
+          <circle cx="600" cy="135" r="5"/><circle cx="625" cy="135" r="5"/>
+          <circle cx="535" cy="160" r="5"/><circle cx="560" cy="160" r="5"/>
+          <circle cx="600" cy="160" r="5"/><circle cx="625" cy="160" r="5"/>
+          <circle cx="535" cy="200" r="5"/><circle cx="560" cy="200" r="5"/>
+          <circle cx="600" cy="200" r="5"/><circle cx="625" cy="200" r="5"/>
+          <circle cx="535" cy="225" r="5"/><circle cx="560" cy="225" r="5"/>
+          <circle cx="600" cy="225" r="5"/><circle cx="625" cy="225" r="5"/>
+        </g>
+        <text x="580" y="270" font-size="9" fill="#58585B" text-anchor="middle">频谱效率 ~4 bit/s/Hz</text>
+
+        <!-- ===== DP-16QAM ===== -->
+        <rect x="705" y="40" width="220" height="250" rx="10" fill="#FFF8F0" stroke="#F58025" stroke-width="1.5"/>
+        <text x="815" y="65" font-size="12" fill="#F58025" text-anchor="middle" font-weight="700">DP-16QAM</text>
+        <text x="815" y="82" font-size="10" fill="#58585B" text-anchor="middle">8 bits / symbol</text>
+        <!-- Two mini constellation grids -->
+        <text x="770" y="110" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">X 偏振</text>
+        <g fill="#F58025" opacity="0.25" stroke="#F58025" stroke-width="1">
+          <circle cx="748" cy="135" r="3.5"/><circle cx="758" cy="135" r="3.5"/>
+          <circle cx="768" cy="135" r="3.5"/><circle cx="778" cy="135" r="3.5"/>
+          <circle cx="748" cy="148" r="3.5"/><circle cx="758" cy="148" r="3.5"/>
+          <circle cx="768" cy="148" r="3.5"/><circle cx="778" cy="148" r="3.5"/>
+          <circle cx="748" cy="161" r="3.5"/><circle cx="758" cy="161" r="3.5"/>
+          <circle cx="768" cy="161" r="3.5"/><circle cx="778" cy="161" r="3.5"/>
+          <circle cx="748" cy="174" r="3.5"/><circle cx="758" cy="174" r="3.5"/>
+          <circle cx="768" cy="174" r="3.5"/><circle cx="778" cy="174" r="3.5"/>
+        </g>
+        <text x="858" y="110" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">Y 偏振</text>
+        <g fill="#9232AC" opacity="0.25" stroke="#9232AC" stroke-width="1">
+          <circle cx="838" cy="135" r="3.5"/><circle cx="848" cy="135" r="3.5"/>
+          <circle cx="858" cy="135" r="3.5"/><circle cx="868" cy="135" r="3.5"/>
+          <circle cx="838" cy="148" r="3.5"/><circle cx="848" cy="148" r="3.5"/>
+          <circle cx="858" cy="148" r="3.5"/><circle cx="868" cy="148" r="3.5"/>
+          <circle cx="838" cy="161" r="3.5"/><circle cx="848" cy="161" r="3.5"/>
+          <circle cx="858" cy="161" r="3.5"/><circle cx="868" cy="161" r="3.5"/>
+          <circle cx="838" cy="174" r="3.5"/><circle cx="848" cy="174" r="3.5"/>
+          <circle cx="858" cy="174" r="3.5"/><circle cx="868" cy="174" r="3.5"/>
+        </g>
+        <text x="815" y="205" font-size="9" fill="#58585B" text-anchor="middle">双偏振 × 16QAM</text>
+        <text x="815" y="220" font-size="9" fill="#58585B" text-anchor="middle">= 两个独立 16QAM</text>
+        <text x="815" y="270" font-size="9" fill="#58585B" text-anchor="middle">频谱效率 ~8 bit/s/Hz</text>
+
+        <!-- Bottom summary row -->
+        <rect x="50" y="310" width="840" height="120" rx="10" fill="#F7F8FA" stroke="#D4D8DE" stroke-width="1"/>
+        <text x="470" y="338" font-size="12" fill="#0D274D" text-anchor="middle" font-weight="700">核心权衡（Trade-off）</text>
+        <text x="470" y="360" font-size="11" fill="#58585B" text-anchor="middle">调制阶数 M ↑ → 每符号比特数 ↑ → 频谱效率 ↑</text>
+        <text x="470" y="382" font-size="11" fill="#E2231A" text-anchor="middle">但同时：星座点间距 ↓ → 对噪声更敏感 → 需要更高 SNR → 传输距离更短</text>
+        <text x="470" y="405" font-size="11" fill="#049FD9" text-anchor="middle" font-weight="600">这就是光通信中"容量 vs 距离"的永恒博弈。</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-4 &nbsp;从 OOK 到 DP-16QAM：星座图越密集，频谱效率越高，但对噪声越敏感</p>
+
+    <!-- Modulation comparison table -->
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>调制格式</th>
+            <th>状态数 M</th>
+            <th>每符号比特</th>
+            <th>调制维度</th>
+            <th>检测方式</th>
+            <th>典型应用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>OOK (NRZ)</strong></td>
+            <td>2</td>
+            <td>1 bit</td>
+            <td>振幅</td>
+            <td>直接检测</td>
+            <td>10G 及以下 · 传统 DWDM</td>
+          </tr>
+          <tr>
+            <td><strong>PAM4</strong></td>
+            <td>4</td>
+            <td>2 bits</td>
+            <td>振幅（4 级）</td>
+            <td>直接检测</td>
+            <td>数据中心短距 · 400G-DR4 · 800G</td>
+          </tr>
+          <tr>
+            <td><strong>QPSK / DP-QPSK</strong></td>
+            <td>4 (×2 偏振)</td>
+            <td>2 bits (4 w/ DP)</td>
+            <td>相位</td>
+            <td>相干检测</td>
+            <td>100G/200G 长途 · 海缆</td>
+          </tr>
+          <tr>
+            <td><strong>16QAM / DP-16QAM</strong></td>
+            <td>16 (×2 偏振)</td>
+            <td>4 bits (8 w/ DP)</td>
+            <td>振幅 + 相位</td>
+            <td>相干检测</td>
+            <td>400G/800G 城域 · DCI</td>
+          </tr>
+          <tr>
+            <td><strong>64QAM / DP-64QAM</strong></td>
+            <td>64 (×2 偏振)</td>
+            <td>6 bits (12 w/ DP)</td>
+            <td>振幅 + 相位</td>
+            <td>相干检测</td>
+            <td>超高容量短距 · 实验前沿</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">表 3-1 &nbsp;主要光调制格式对比总览</p>
+
+    <!-- ============================================================
+         3.4 调制背后的数学原理
+         ============================================================ -->
+    <h3>3.4 &nbsp;调制背后的数学——傅里叶、奈奎斯特与香农</h3>
+
+    <p>
+      调制不仅仅是工程技巧——它建立在三位"数学巨人"的肩膀上。理解这三个定理，就抓住了通信的底层逻辑。
+    </p>
+
+    <h4>① 傅里叶变换——"任何信号都是正弦波的叠加"</h4>
+    <p>
+      <span class="def-term">傅里叶变换（Fourier Transform, FT）</span>告诉我们：<strong>任何信号（无论多复杂）都可以分解为一系列不同频率的正弦波（sin）和余弦波（cos）的叠加。</strong>
+    </p>
+
+    <div class="analogy">
+      <p class="analogy-title">🎵 类比时间</p>
+      <p>
+        一首交响乐听起来无比复杂，但它可以被分解为每一种乐器发出的单音——小提琴的 440Hz、长笛的 880Hz、低音提琴的 110Hz……傅里叶变换就是把"交响乐"（时域复杂信号）拆成"乐谱"（频域各频率成分及其强度）。
+      </p>
+    </div>
+
+    <p>
+      在光通信中，傅里叶变换的意义至关重要：
+    </p>
+    <ul>
+      <li><strong>分析信号带宽</strong>：一个数字脉冲在时域看是方方正正的，但在频域展开后占据了很宽的频率范围。调制格式决定了信号的频谱形状和带宽。</li>
+      <li><strong>理解色散</strong>：色散本质上是不同频率成分以不同速度传播——这在频域中更容易理解和补偿。</li>
+      <li><strong>DSP 处理</strong>：相干接收机中的数字信号处理（DSP）芯片，大量使用快速傅里叶变换（FFT）来进行均衡、色散补偿和载波恢复。</li>
+    </ul>
+
+    <!-- SVG: Time domain vs frequency domain -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="傅里叶变换：时域方波信号到频域频谱成分">
+        <text x="410" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">傅里叶变换：时域 ↔ 频域</text>
+
+        <!-- Time domain -->
+        <rect x="30" y="40" width="340" height="165" rx="8" fill="#F0FAFF" stroke="#049FD9" stroke-width="1"/>
+        <text x="200" y="62" font-size="11" fill="#049FD9" text-anchor="middle" font-weight="700">时域 (Time Domain)</text>
+        <!-- Axes -->
+        <line x1="70" y1="80" x2="70" y2="190" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="70" y1="145" x2="340" y2="145" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="345" y="148" font-size="9" fill="#9B9CA0">t</text>
+        <!-- Square wave -->
+        <path d="M80,145 L80,95 L130,95 L130,145 L180,145 L180,95 L230,95 L230,145 L280,145 L280,95 L330,95 L330,145" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+        <text x="200" y="185" font-size="10" fill="#58585B" text-anchor="middle">看起来是"方波"</text>
+
+        <!-- Arrow -->
+        <text x="410" y="110" font-size="24" fill="#0D274D" text-anchor="middle">⟹</text>
+        <text x="410" y="135" font-size="10" fill="#58585B" text-anchor="middle">傅里叶变换</text>
+        <text x="410" y="150" font-size="10" fill="#58585B" text-anchor="middle">FT</text>
+
+        <!-- Frequency domain -->
+        <rect x="450" y="40" width="340" height="165" rx="8" fill="#E8F7EE" stroke="#67B346" stroke-width="1"/>
+        <text x="620" y="62" font-size="11" fill="#67B346" text-anchor="middle" font-weight="700">频域 (Frequency Domain)</text>
+        <line x1="490" y1="80" x2="490" y2="190" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="490" y1="180" x2="760" y2="180" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="765" y="183" font-size="9" fill="#9B9CA0">f</text>
+        <!-- Sinc-like spectrum bars -->
+        <rect x="510" y="95" width="20" height="85" rx="2" fill="#67B346" opacity="0.7"/>
+        <text x="520" y="90" font-size="8" fill="#005073" text-anchor="middle">f₀</text>
+        <rect x="555" y="130" width="20" height="50" rx="2" fill="#67B346" opacity="0.5"/>
+        <text x="565" y="125" font-size="8" fill="#005073" text-anchor="middle">3f₀</text>
+        <rect x="600" y="148" width="20" height="32" rx="2" fill="#67B346" opacity="0.35"/>
+        <text x="610" y="143" font-size="8" fill="#005073" text-anchor="middle">5f₀</text>
+        <rect x="645" y="158" width="20" height="22" rx="2" fill="#67B346" opacity="0.25"/>
+        <text x="655" y="153" font-size="8" fill="#005073" text-anchor="middle">7f₀</text>
+        <rect x="690" y="164" width="20" height="16" rx="2" fill="#67B346" opacity="0.18"/>
+        <text x="700" y="159" font-size="8" fill="#005073" text-anchor="middle">9f₀</text>
+        <text x="620" y="210" font-size="10" fill="#58585B" text-anchor="middle">实际是无穷多奇次谐波的叠加</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-5 &nbsp;一个"看似简单"的方波，在频域中展开为无穷多个频率成分——这就是傅里叶变换揭示的真相</p>
+
+    <h4>② 奈奎斯特定理——带宽决定符号率上限</h4>
+    <p>
+      <span class="def-term">奈奎斯特定理（Nyquist Theorem / Nyquist-Shannon Sampling Theorem）</span>告诉我们一个无噪声信道的符号率上限：
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">R<sub>symbol</sub> ≤ 2B &emsp;（无噪声理想信道）</div>
+      <p class="formula-note">
+        <em>R<sub>symbol</sub></em> = 符号率（Baud，每秒传输的符号数）&emsp; <em>B</em> = 信道带宽（Hz）<br>
+        在带宽为 B Hz 的信道中，最多每秒传输 2B 个符号（无码间干扰）。<br>
+        如果使用 M 级调制：<strong>最大比特率 = 2B · log₂(M)</strong>
+      </p>
+    </div>
+
+    <div class="analogy">
+      <p class="analogy-title">🛣️ 类比时间</p>
+      <p>
+        带宽就像一条公路的<strong>车道宽度</strong>。车道越宽（带宽越大），你能跑的车（符号）越多。但车道宽度有物理上限——你不能在一条 3 米宽的车道上并排跑两辆卡车。奈奎斯特定理就是在告诉你：给定这么宽的"路"，最多能跑多少"车"。
+      </p>
+    </div>
+
+    <p>
+      在 DWDM 系统中，一个标准 50GHz 频率间隔的信道，实际可用带宽约 37.5–45GHz（考虑保护间隔）。以 ~32 GBaud 的符号率为例：
+    </p>
+    <ul>
+      <li>OOK (1 bit/symbol): 32 Gbps</li>
+      <li>QPSK (2 bits/symbol): 64 Gbps</li>
+      <li>DP-QPSK (4 bits/symbol): 128 Gbps → 实际用于 100G/200G</li>
+      <li>DP-16QAM (8 bits/symbol): 256 Gbps → 实际用于 400G</li>
+    </ul>
+
+    <h4>③ 香农极限——信道容量的天花板</h4>
+    <p>
+      1948年，香农给出了信道容量的<strong>终极上限</strong>：
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">C = B · log₂(1 + SNR)</div>
+      <p class="formula-note">
+        <em>C</em> = 信道容量（bit/s）：该信道<strong>理论上</strong>能传输的最大比特率<br>
+        <em>B</em> = 带宽（Hz）&emsp; <em>SNR</em> = 信噪比（Signal-to-Noise Ratio，线性值）<br>
+        <strong>无论使用多么精巧的编码和调制，比特率都不可能超过 C。</strong>
+      </p>
+    </div>
+
+    <div class="analogy">
+      <p class="analogy-title">📦 类比时间</p>
+      <p>
+        想象你要用卡车运包裹。<strong>带宽 B</strong> = 卡车的尺寸；<strong>SNR</strong> = 路面的平整度。路面越平（噪声越小），你越能把包裹码得高高的（更高阶调制）。但如果路面很颠簸（噪声大），码太高包裹就掉了。香农极限就是在告诉你：给定这辆车（带宽）和这条路（SNR），你<strong>最多</strong>能运多少包裹（信息量）。
+      </p>
+    </div>
+
+    <p>
+      香农公式对光通信的深刻意义：
+    </p>
+    <ul>
+      <li><strong>频谱效率有上限</strong>：在给定 OSNR 下，每赫兹带宽能传输的比特数是有天花板的。</li>
+      <li><strong>调制阶数 vs 距离的权衡</strong>：16QAM 比 QPSK 频谱效率高一倍，但需要约 7dB 更高的 SNR——这直接缩短了可达距离。</li>
+      <li><strong>逼近极限</strong>：现代光通信系统通过软判决 FEC（SD-FEC）+ 概率整形（Probabilistic Shaping），已经能将实际频谱效率推到香农极限的 <strong>85%–90%</strong>。</li>
+    </ul>
+
+    <!-- SVG: Shannon limit curve -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="香农极限：频谱效率与SNR的关系曲线，标注各调制格式的位置">
+        <text x="400" y="24" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">香农极限：频谱效率 vs SNR</text>
+
+        <!-- Axes -->
+        <line x1="80" y1="40" x2="80" y2="310" stroke="#0D274D" stroke-width="1.5"/>
+        <line x1="80" y1="310" x2="740" y2="310" stroke="#0D274D" stroke-width="1.5"/>
+        <text x="30" y="180" font-size="11" fill="#0D274D" text-anchor="middle" transform="rotate(-90,30,180)" font-weight="600">频谱效率 (bit/s/Hz)</text>
+        <text x="400" y="345" font-size="11" fill="#0D274D" text-anchor="middle" font-weight="600">SNR (dB)</text>
+
+        <!-- Y ticks -->
+        <text x="72" y="310" font-size="9" fill="#58585B" text-anchor="end">0</text>
+        <text x="72" y="272" font-size="9" fill="#58585B" text-anchor="end">2</text>
+        <text x="72" y="234" font-size="9" fill="#58585B" text-anchor="end">4</text>
+        <text x="72" y="196" font-size="9" fill="#58585B" text-anchor="end">6</text>
+        <text x="72" y="158" font-size="9" fill="#58585B" text-anchor="end">8</text>
+        <text x="72" y="120" font-size="9" fill="#58585B" text-anchor="end">10</text>
+        <text x="72" y="82" font-size="9" fill="#58585B" text-anchor="end">12</text>
+        <!-- Grid lines -->
+        <line x1="80" y1="272" x2="740" y2="272" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="80" y1="234" x2="740" y2="234" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="80" y1="196" x2="740" y2="196" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="80" y1="158" x2="740" y2="158" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="80" y1="120" x2="740" y2="120" stroke="#D4D8DE" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+        <!-- X ticks (SNR dB): 0,5,10,15,20,25,30 -->
+        <text x="80" y="328" font-size="9" fill="#58585B" text-anchor="middle">0</text>
+        <text x="190" y="328" font-size="9" fill="#58585B" text-anchor="middle">5</text>
+        <text x="300" y="328" font-size="9" fill="#58585B" text-anchor="middle">10</text>
+        <text x="410" y="328" font-size="9" fill="#58585B" text-anchor="middle">15</text>
+        <text x="520" y="328" font-size="9" fill="#58585B" text-anchor="middle">20</text>
+        <text x="630" y="328" font-size="9" fill="#58585B" text-anchor="middle">25</text>
+        <text x="740" y="328" font-size="9" fill="#58585B" text-anchor="middle">30</text>
+
+        <!-- Shannon limit curve: C/B = log2(1+SNR) -->
+        <!-- approximate points: SNR_dB -> SE -->
+        <!-- 0dB->1, 3->2, 6->2.8, 10->3.5, 13->4.5, 16->5.4, 20->6.7, 25->8.4, 30->10 -->
+        <path d="M80,291 Q120,275 150,270 Q200,255 250,245 Q300,228 350,210 Q410,188 470,168 Q530,148 600,122 Q660,102 740,72" fill="none" stroke="#049FD9" stroke-width="3"/>
+        <text x="745" y="65" font-size="10" fill="#049FD9" font-weight="700">香农极限</text>
+
+        <!-- Shaded region below = achievable -->
+        <path d="M80,310 L80,291 Q120,275 150,270 Q200,255 250,245 Q300,228 350,210 Q410,188 470,168 Q530,148 600,122 Q660,102 740,72 L740,310 Z" fill="#049FD9" opacity="0.06"/>
+
+        <!-- Modulation format markers -->
+        <!-- OOK: ~1 bit/s/Hz, needs ~10dB SNR for decent BER -->
+        <circle cx="300" cy="291" r="7" fill="#F58025" opacity="0.3" stroke="#F58025" stroke-width="2"/>
+        <text x="310" y="302" font-size="9" fill="#F58025" font-weight="600">OOK</text>
+
+        <!-- DP-QPSK: ~4 bit/s/Hz, needs ~12-13dB -->
+        <circle cx="370" cy="234" r="7" fill="#67B346" opacity="0.3" stroke="#67B346" stroke-width="2"/>
+        <text x="382" y="230" font-size="9" fill="#67B346" font-weight="600">DP-QPSK</text>
+
+        <!-- DP-16QAM: ~8 bit/s/Hz, needs ~20dB -->
+        <circle cx="520" cy="158" r="7" fill="#9232AC" opacity="0.3" stroke="#9232AC" stroke-width="2"/>
+        <text x="535" y="153" font-size="9" fill="#9232AC" font-weight="600">DP-16QAM</text>
+
+        <!-- DP-64QAM: ~12 bit/s/Hz, needs ~26dB -->
+        <circle cx="660" cy="86" r="7" fill="#E2231A" opacity="0.3" stroke="#E2231A" stroke-width="2"/>
+        <text x="675" y="82" font-size="9" fill="#E2231A" font-weight="600">DP-64QAM</text>
+
+        <!-- Annotation -->
+        <text x="400" y="370" font-size="10" fill="#58585B" text-anchor="middle">曲线以上 = 物理不可能 · 曲线以下 = 可实现区域 · 距曲线越近 = 系统越高效</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-6 &nbsp;香农极限曲线：调制阶数越高，频谱效率越高，但需要更高的 SNR</p>
+
+    <!-- ============================================================
+         3.5 解调
+         ============================================================ -->
+    <h3>3.5 &nbsp;解调——从光信号中"读出"信息</h3>
+
+    <p>
+      调制是"写"，解调是"读"。接收端需要把光信号还原为电信号中的 0 和 1。根据检测方式，分为两大阵营：
+    </p>
+
+    <h4>直接检测（Direct Detection, DD）</h4>
+    <p>
+      <span class="def-term">直接检测</span>使用<strong>光电二极管（Photodiode）</strong>将光转换为电流。光电二极管输出的电流正比于接收到的<strong>光功率（即振幅的平方）</strong>：
+    </p>
+
+    <div class="formula-box">
+      <div class="formula">I<sub>photo</sub> ∝ |E(t)|² = A²</div>
+      <p class="formula-note">
+        光电二极管只能感知光的<strong>强度（Intensity）</strong>——也就是振幅的平方。<br>
+        <strong>相位信息 φ 在这个过程中完全丢失了。</strong>
+      </p>
+    </div>
+
+    <p>
+      这意味着：
+    </p>
+    <ul>
+      <li><strong>OOK</strong>：没问题——我们只需要判断"有光"还是"无光"。✅</li>
+      <li><strong>PAM4</strong>：可以——我们只需要区分4种光强度等级。✅</li>
+      <li><strong>QPSK / 16QAM</strong>：不行！相位信息无法被检测到——所有不同相位的信号在光电二极管看来都是一样亮的。❌</li>
+    </ul>
+
+    <!-- SVG: Direct Detection vs Coherent Detection -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="直接检测与相干检测的区别：直接检测只看强度，相干检测能获取振幅和相位">
+        <text x="450" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">直接检测 vs 相干检测</text>
+
+        <!-- Direct Detection -->
+        <rect x="25" y="40" width="410" height="245" rx="10" fill="#FFF8F0" stroke="#F58025" stroke-width="1.5"/>
+        <text x="230" y="65" font-size="12" fill="#F58025" text-anchor="middle" font-weight="700">直接检测 (Direct Detection)</text>
+
+        <!-- Signal flow -->
+        <rect x="50" y="90" width="80" height="40" rx="6" fill="#049FD9" opacity="0.15" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="90" y="115" font-size="10" fill="#005073" text-anchor="middle" font-weight="600">光信号</text>
+        <!-- Arrow -->
+        <line x1="135" y1="110" x2="175" y2="110" stroke="#0D274D" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <!-- Photodiode -->
+        <rect x="180" y="85" width="100" height="50" rx="6" fill="#F58025" opacity="0.12" stroke="#F58025" stroke-width="1.5"/>
+        <text x="230" y="107" font-size="10" fill="#F58025" text-anchor="middle" font-weight="600">光电二极管</text>
+        <text x="230" y="122" font-size="9" fill="#58585B" text-anchor="middle">I ∝ |E|² = A²</text>
+        <!-- Arrow -->
+        <line x1="285" y1="110" x2="320" y2="110" stroke="#0D274D" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <!-- Output -->
+        <rect x="325" y="90" width="90" height="40" rx="6" fill="#67B346" opacity="0.12" stroke="#67B346" stroke-width="1.5"/>
+        <text x="370" y="115" font-size="10" fill="#67B346" text-anchor="middle" font-weight="600">电信号</text>
+
+        <!-- What's detected -->
+        <text x="230" y="165" font-size="11" fill="#005073" text-anchor="middle" font-weight="600">能检测的信息：</text>
+        <text x="230" y="185" font-size="20" fill="#67B346" text-anchor="middle">✅ 振幅（强度）</text>
+        <text x="230" y="210" font-size="20" fill="#E2231A" text-anchor="middle">❌ 相位</text>
+        <text x="230" y="230" font-size="20" fill="#E2231A" text-anchor="middle">❌ 频率（精细）</text>
+        <text x="230" y="260" font-size="10" fill="#58585B" text-anchor="middle">适用调制：OOK、PAM4</text>
+
+        <!-- Coherent Detection -->
+        <rect x="465" y="40" width="410" height="245" rx="10" fill="#F0FAFF" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="670" y="65" font-size="12" fill="#049FD9" text-anchor="middle" font-weight="700">相干检测 (Coherent Detection)</text>
+
+        <!-- Signal flow -->
+        <rect x="485" y="82" width="80" height="35" rx="6" fill="#049FD9" opacity="0.15" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="525" y="104" font-size="9" fill="#005073" text-anchor="middle" font-weight="600">接收光信号</text>
+        <!-- LO -->
+        <rect x="485" y="130" width="80" height="35" rx="6" fill="#9232AC" opacity="0.12" stroke="#9232AC" stroke-width="1.5"/>
+        <text x="525" y="148" font-size="9" fill="#9232AC" text-anchor="middle" font-weight="600">本振激光 (LO)</text>
+        <text x="525" y="160" font-size="8" fill="#58585B" text-anchor="middle">已知频率 &amp; 相位</text>
+        <!-- Combiner -->
+        <line x1="570" y1="100" x2="620" y2="120" stroke="#0D274D" stroke-width="1.5"/>
+        <line x1="570" y1="147" x2="620" y2="127" stroke="#0D274D" stroke-width="1.5"/>
+        <rect x="620" y="105" width="60" height="40" rx="6" fill="#FBAB18" opacity="0.15" stroke="#FBAB18" stroke-width="1.5"/>
+        <text x="650" y="122" font-size="8" fill="#0D274D" text-anchor="middle" font-weight="600">90°光</text>
+        <text x="650" y="135" font-size="8" fill="#0D274D" text-anchor="middle" font-weight="600">混频器</text>
+        <!-- Arrow -->
+        <line x1="685" y1="125" x2="720" y2="125" stroke="#0D274D" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <!-- Balanced photodetectors + DSP -->
+        <rect x="725" y="100" width="55" height="50" rx="6" fill="#67B346" opacity="0.12" stroke="#67B346" stroke-width="1.5"/>
+        <text x="752" y="120" font-size="8" fill="#67B346" text-anchor="middle" font-weight="600">平衡</text>
+        <text x="752" y="133" font-size="8" fill="#67B346" text-anchor="middle" font-weight="600">探测器</text>
+        <text x="752" y="146" font-size="8" fill="#67B346" text-anchor="middle" font-weight="600">+ DSP</text>
+
+        <!-- What's detected -->
+        <text x="670" y="185" font-size="11" fill="#005073" text-anchor="middle" font-weight="600">能检测的信息：</text>
+        <text x="670" y="205" font-size="20" fill="#67B346" text-anchor="middle">✅ 振幅</text>
+        <text x="670" y="225" font-size="20" fill="#67B346" text-anchor="middle">✅ 相位</text>
+        <text x="670" y="245" font-size="20" fill="#67B346" text-anchor="middle">✅ 频率 &amp; 偏振</text>
+        <text x="670" y="268" font-size="10" fill="#58585B" text-anchor="middle">适用调制：QPSK、16QAM、64QAM 及所有高阶格式</text>
+      </svg>
+    </div>
+    <p class="table-caption">图 3-7 &nbsp;直接检测只能感知光强度；相干检测借助本振激光器恢复完整的振幅 + 相位信息</p>
+
+    <h4>相干检测（Coherent Detection）——光通信的"超级耳朵"</h4>
+    <p>
+      <span class="def-term">相干检测</span>的核心思想是：在接收端引入一束<strong>本地振荡器激光（Local Oscillator, LO）</strong>——它的频率和相位是已知的。将接收到的光信号与 LO 光进行<strong>光学混频（Beating）</strong>，产生的干涉信号中同时包含了振幅和相位信息。
+    </p>
+
+    <div class="analogy">
+      <p class="analogy-title">🎸 类比时间</p>
+      <p>
+        直接检测就像闭着眼睛摸一根振动的吉他弦——你只能感觉到弦振动的<strong>强度</strong>（振幅），但不知道弦在振动周期的哪个"位置"（相位）。<br><br>
+        相干检测就像你用另一根<strong>已知频率</strong>的音叉靠近这根弦——两者产生<strong>"拍频"（Beat Frequency）</strong>。通过分析拍频的强度和节奏变化，你就能精确还原原始弦的振幅<strong>和</strong>相位。本振激光器就是那根"参考音叉"。
+      </p>
+    </div>
+
+    <p>
+      相干检测使得 40G、100G、400G 乃至未来 800G/1.6T 的光传输成为可能。它不仅能解调高阶调制格式，还带来了一系列附加超能力：
+    </p>
+    <ul>
+      <li><strong>电域色散补偿</strong>：DSP 可以在数字域中完全补偿数万 ps/nm 的色度色散——无需 DCU 硬件。</li>
+      <li><strong>电域 PMD 补偿</strong>：相干 DSP 可以实时追踪和补偿 PMD，容限从 OOK 的 10ps 提升到 60ps 以上。</li>
+      <li><strong>窄线宽滤波</strong>：LO 激光器的窄线宽充当了超精密的光学滤波器，极大提升 OSNR 灵敏度。</li>
+    </ul>
+
+    <div class="caution">
+      <p class="caution-title">⚖️ 核心权衡：调制阶数 vs 传输距离</p>
+      <p>
+        这是光通信工程师每天面对的核心抉择：
+      </p>
+      <ul>
+        <li><strong>高阶调制（如 DP-16QAM）</strong>：频谱效率高（8 bit/s/Hz），单波长可达 400Gbps+；但星座点密集，需要高 OSNR（约 20dB+），传输距离短（城域/DCI，约 80-120km）。</li>
+        <li><strong>低阶调制（如 DP-QPSK）</strong>：频谱效率低（4 bit/s/Hz），单波长 100-200Gbps；但星座点间距大，OSNR 容限好（约 12-13dB），可传输数千公里（长途/海缆）。</li>
+      </ul>
+      <p>
+        <strong>没有"最好"的调制——只有"最合适"的调制。</strong>现代光转发器（如 Cisco Acacia 400G ZR/ZR+）支持<strong>可编程调制</strong>，根据传输距离自动选择最优格式，在容量与距离之间找到最佳平衡点。
+      </p>
+    </div>
+
+    <!-- Chapter 3 summary callout -->
+    <div class="callout">
+      <strong>本章小结 — 五个核心认知：</strong>
+      <ol>
+        <li><strong>调制 = 改变光载波的属性（A, f, φ）来编码信息</strong>。调制阶数越高，每个符号携带的比特越多。</li>
+        <li><strong>OOK</strong> 是最简单的调制（1 bit/symbol），适合 10G 以下系统；<strong>PAM4</strong>（2 bits/symbol）是数据中心短距的主力。</li>
+        <li><strong>QPSK 和 QAM</strong> 通过调制相位（+振幅）实现更高频谱效率，但需要<strong>相干检测</strong>——这是 100G+ 光通信的技术基石。</li>
+        <li><strong>三大数学定理</strong>：傅里叶变换揭示频域本质；奈奎斯特定理给出带宽-符号率上限；香农极限是信道容量的终极天花板。</li>
+        <li><strong>容量 vs 距离的永恒博弈</strong>：调制阶数↑ → 频谱效率↑ → 但 SNR 要求↑ → 可达距离↓。选择最合适的调制格式，是光网络设计的核心决策。</li>
+      </ol>
+    </div>
+
+  </div>
+</section>
+<!-- ====================================================================
+     CLOSING SECTION — 呼应开篇
+     ==================================================================== -->
+<section class="chapter" id="closing">
+  <div class="container">
+    <h2>写在最后 &nbsp;——&nbsp; 从一束光到无限可能</h2>
+    <p>
+      我们用三章的篇幅，从电磁波谱中找到了那束人眼不可见的近红外光（第一章），把它锁进了一根比头发还细的玻璃丝里（第二章），又用精妙的数学把海量信息编码到了光的振幅、相位和偏振中（第三章）。
+    </p>
+    <p>
+      这三块拼图——<strong>光的本质、光纤的物理、调制的数学</strong>——构成了光通信大厦最底层的地基。站在这个地基上，我们接下来将继续探索：
+    </p>
+    <div class="grid grid-3" style="margin-top:var(--space-6); margin-bottom:var(--space-8);">
+      <div class="card" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25); color:#fff;">
+        <h4 style="color:#00BCEB;">Optical 102</h4>
+        <p style="color:rgba(255,255,255,0.85);">激光器与光收发系统的工作原理、光放大器（EDFA）、FEC 前向纠错，以及 AI 时代对光网络的全新需求。</p>
+      </div>
+      <div class="card" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25); color:#fff;">
+        <h4 style="color:#00BCEB;">Optical 201</h4>
+        <p style="color:rgba(255,255,255,0.85);">DWDM 密集波分复用系统全解析、ROADM 光交叉、OTN G.709 数字封装，以及相干光通信的完整技术栈。</p>
+      </div>
+      <div class="card" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25); color:#fff;">
+        <h4 style="color:#00BCEB;">Optical 202</h4>
+        <p style="color:rgba(255,255,255,0.85);">Routed Optical Networking、硅光子集成技术、IP over DWDM 融合架构——光网络的未来形态。</p>
+      </div>
+    </div>
+    <p>
+      一束光能传多远？答案取决于你对它理解多深。<br>
+      <strong>光不会停下，学习也是。</strong>
+    </p>
+    <div style="margin-top:var(--space-8);">
+      <a href="Optical102.html" class="btn">继续阅读 Optical 102 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================================
+     GLOSSARY — 完整术语表
+     ==================================================================== -->
+<section class="chapter" id="glossary">
+  <div class="container">
+    <h2>术语表 Glossary</h2>
+    <p class="chapter-lead">
+      本表收录 Optical 101 全文涉及的核心术语，按首字母排序。每个术语给出英文原名、中文译名与简要释义。
+    </p>
+
+    <dl class="glossary-grid">
+
+      <dt>APC (Angled Physical Contact) · 斜面物理接触</dt>
+      <dd>光纤连接器端面研磨方式，端面呈 8° 角，最大限度减少回波反射，接头为绿色。常用于 DWDM 线路光纤连接。</dd>
+
+      <dt>Attenuation · 衰减</dt>
+      <dd>光信号在光纤中传播时功率逐渐降低的现象，单位 dB/km。主要来源包括吸收损耗、瑞利散射和弯曲损耗。</dd>
+
+      <dt>Baseband Signal · 基带信号</dt>
+      <dd>未经调制的原始数字信号（0 和 1 序列），频率较低，不适合直接在光纤信道中传输。</dd>
+
+      <dt>BER (Bit Error Rate) · 误码率</dt>
+      <dd>接收端出错的比特数占总传输比特数的比例。光通信系统通常要求 BER 低于接收机阈值（如 10⁻¹⁵），FEC 可改善 BER 性能。</dd>
+
+      <dt>Carrier · 载波</dt>
+      <dd>用于"搭载"信息的高频信号。在光通信中，载波是激光器发出的单频光波（如 193.1 THz / 1552.52nm）。</dd>
+
+      <dt>CD (Chromatic Dispersion) · 色度色散</dt>
+      <dd>材料色散与波导色散的总和。不同波长成分在光纤中传播速度不同，导致脉冲展宽。标准单模光纤在 1550nm 处约 17 ps/(nm·km)。</dd>
+
+      <dt>Cladding · 包层</dt>
+      <dd>包裹在光纤纤芯外围的玻璃层（直径 125µm），折射率低于纤芯，通过全内反射将光约束在纤芯中。</dd>
+
+      <dt>Coating · 涂覆层</dt>
+      <dd>光纤最外层的聚合物保护层（直径 245µm），保护脆弱的玻璃结构免受物理损伤和湿气侵蚀。</dd>
+
+      <dt>Coherent Detection · 相干检测</dt>
+      <dd>接收端引入本振激光器（LO）与信号光进行光学混频，能同时恢复光信号的振幅和相位信息。是 40G 及以上高速光通信的基础技术。</dd>
+
+      <dt>Constellation Diagram · 星座图</dt>
+      <dd>以 I（同相）和 Q（正交）为坐标轴的二维平面图，用于可视化调制格式中每个符号状态的振幅和相位。</dd>
+
+      <dt>Core · 纤芯</dt>
+      <dd>光纤最中心的玻璃区域，光信号在此传播。单模光纤纤芯直径 8–10µm，多模光纤 50 或 62.5µm。</dd>
+
+      <dt>dB (Decibel) · 分贝</dt>
+      <dd>两个功率值之比的对数表示，用于衡量增益或损耗。dB = 10 · log₁₀(P₂/P₁)。</dd>
+
+      <dt>dBm (Decibel-milliwatt) · 分贝毫瓦</dt>
+      <dd>以 1 毫瓦为参考的绝对光功率单位。0 dBm = 1 mW。用于表示发射功率（Tx）和接收功率（Rx）。</dd>
+
+      <dt>DCU (Dispersion Compensating Unit) · 色散补偿单元</dt>
+      <dd>使用负色散特种光纤来抵消传输链路中累积的正色度色散的硬件模块。相干系统可用 DSP 电域补偿替代。</dd>
+
+      <dt>Demodulation · 解调</dt>
+      <dd>从已调制的载波信号中恢复原始信息的过程。直接检测解调强度信息，相干检测解调振幅 + 相位信息。</dd>
+
+      <dt>Direct Detection (DD) · 直接检测</dt>
+      <dd>使用光电二极管将光功率转换为电流的检测方式。只能检测光强度（振幅²），无法获取相位信息。适用于 OOK、PAM4。</dd>
+
+      <dt>DP (Dual Polarization) · 双偏振</dt>
+      <dd>在光纤的两个正交偏振方向（X 和 Y）上各自独立传输一路调制信号，使频谱效率翻倍。如 DP-QPSK = 4 bit/symbol。</dd>
+
+      <dt>DSP (Digital Signal Processing) · 数字信号处理</dt>
+      <dd>在相干接收机中对数字化后的信号进行色散补偿、PMD 补偿、载波恢复、均衡等处理的专用芯片/算法。</dd>
+
+      <dt>EDFA (Erbium-Doped Fiber Amplifier) · 掺铒光纤放大器</dt>
+      <dd>利用掺铒光纤在 980nm 泵浦激光激励下对 1550nm 附近信号光进行全光放大的器件，是 DWDM 系统中最常用的光放大器。</dd>
+
+      <dt>Electromagnetic Wave · 电磁波</dt>
+      <dd>由相互垂直的振荡电场和磁场组成的波，以光速在真空中传播。光是电磁波谱中波长约 380nm–780nm（可见光）及近红外区域的部分。</dd>
+
+      <dt>FEC (Forward Error Correction) · 前向纠错</dt>
+      <dd>在发送端添加冗余校验位，使接收端无需重传即可纠正一定数量的比特错误。分为硬判决（HD-FEC）和软判决（SD-FEC）。</dd>
+
+      <dt>Fourier Transform · 傅里叶变换</dt>
+      <dd>将时域信号分解为不同频率正弦波叠加（频域表示）的数学工具。在光通信中用于频谱分析、色散补偿和 DSP 处理。</dd>
+
+      <dt>FWM (Four-Wave Mixing) · 四波混频</dt>
+      <dd>光纤非线性效应之一：多个波长的光在光纤中相互作用，产生新的寄生波长，干扰 DWDM 通信。</dd>
+
+      <dt>Graded-Index Fiber · 渐变折射率光纤</dt>
+      <dd>纤芯折射率从中心向外逐渐降低（通常呈抛物线分布）的多模光纤，可大幅减小模式色散。OM3/OM4/OM5 均属此类。</dd>
+
+      <dt>ISI (Inter-Symbol Interference) · 码间干扰</dt>
+      <dd>相邻脉冲因色散展宽而重叠，使接收端无法正确区分 0 和 1 的现象。是限制传输距离和速率的核心因素。</dd>
+
+      <dt>ITU-T Grid · ITU-T 波长栅格</dt>
+      <dd>国际电信联盟制定的 DWDM 信道标准频率/波长间隔方案。常见为 100GHz（0.8nm）和 50GHz（0.4nm）间隔，中心频率 193.1THz（1552.52nm）。</dd>
+
+      <dt>LC (Lucent Connector) · LC 连接器</dt>
+      <dd>小型化光纤连接器，广泛用于高密度光纤面板和收发器模块。</dd>
+
+      <dt>LO (Local Oscillator) · 本振激光器</dt>
+      <dd>相干接收机中的参考激光源，与接收信号混频以恢复相位信息。其频率需与发射端载波频率接近。</dd>
+
+      <dt>MMF (Multi-Mode Fiber) · 多模光纤</dt>
+      <dd>纤芯较粗（50/62.5µm）的光纤，支持多种传导模式，受模式色散限制，适合短距离（&lt;2km）传输。常见护套颜色为橙色或浅蓝色。</dd>
+
+      <dt>Modal Dispersion · 模式色散</dt>
+      <dd>多模光纤中不同传导模式走不同物理路径，导致到达时间不同，脉冲展宽。是多模光纤距离和带宽的主要瓶颈。</dd>
+
+      <dt>Mode · 模式</dt>
+      <dd>光波在光纤横截面上形成的稳定电磁场分布图案（驻波）。单模光纤仅支持基模 LP₀₁，多模光纤支持数百至数千个模式。</dd>
+
+      <dt>Modulation · 调制</dt>
+      <dd>按照信息数据有规律地改变载波信号的振幅（A）、频率（f）或相位（φ）的过程，使载波"携带"信息。</dd>
+
+      <dt>NA (Numerical Aperture) · 数值孔径</dt>
+      <dd>描述光纤能接受的最大入射光锥角度的参数。NA = √(n₁² − n₂²)。NA 越大，耦合光越容易，但支持的模式也越多。</dd>
+
+      <dt>NRZ (Non-Return-to-Zero) · 不归零码</dt>
+      <dd>OOK 编码格式之一：在整个比特周期内，"1"持续保持高电平，"0"持续保持低电平。是 10G OOK 系统的标准格式。</dd>
+
+      <dt>Nyquist Theorem · 奈奎斯特定理</dt>
+      <dd>在带宽为 B Hz 的无噪声信道中，最大无 ISI 符号率为 2B Baud。结合 M 级调制，最大比特率 = 2B · log₂(M)。</dd>
+
+      <dt>OOK (On-Off Keying) · 开关键控</dt>
+      <dd>最简单的光调制方式：有光 = 1，无光 = 0。每符号 1 比特，频谱效率约 1 bit/s/Hz。适用于 10G 及以下系统。</dd>
+
+      <dt>OSNR (Optical Signal-to-Noise Ratio) · 光信噪比</dt>
+      <dd>光信号功率与光噪声功率的比值（dB）。OSNR 越高，接收端越容易正确判决比特。高阶调制需要更高的 OSNR。</dd>
+
+      <dt>PAM4 (Pulse Amplitude Modulation 4-level) · 四电平脉冲振幅调制</dt>
+      <dd>使用 4 个振幅等级编码，每符号 2 比特。广泛用于数据中心 400GE/800GE 短距互联，采用直接检测。</dd>
+
+      <dt>Photodiode · 光电二极管</dt>
+      <dd>将光信号转换为电信号的半导体器件。输出电流正比于入射光功率（即振幅的平方）。</dd>
+
+      <dt>Photon · 光子</dt>
+      <dd>光的粒子性表现，是电磁辐射的最小能量量子。单个光子的能量 E = hf。</dd>
+
+      <dt>PMD (Polarization Mode Dispersion) · 偏振模色散</dt>
+      <dd>因光纤截面不完美圆形及内应力导致两个正交偏振模式传播速度不同，造成脉冲展宽。单位 ps/√km，是随机时变量。</dd>
+
+      <dt>Preform · 预制棒</dt>
+      <dd>制造光纤的原始玻璃棒（直径数厘米、长约 1 米），其截面折射率分布与最终光纤一致，经高温拉丝成为 125µm 光纤。</dd>
+
+      <dt>QAM (Quadrature Amplitude Modulation) · 正交振幅调制</dt>
+      <dd>同时调制振幅和相位的调制格式。16QAM = 16 种状态 = 4 bit/symbol；64QAM = 64 种状态 = 6 bit/symbol。</dd>
+
+      <dt>QPSK (Quadrature Phase Shift Keying) · 正交相移键控</dt>
+      <dd>利用四种相位状态（0°/90°/180°/270°）编码的调制格式，每符号 2 比特。需要相干检测。DP-QPSK 是 100G 长途传输的标准格式。</dd>
+
+      <dt>Rayleigh Scattering · 瑞利散射</dt>
+      <dd>光纤中微观密度波动导致的光散射，与波长的四次方成反比（∝ 1/λ⁴），是光纤在可见光和短红外波段衰减的主要来源。</dd>
+
+      <dt>Refractive Index (n) · 折射率</dt>
+      <dd>光在某种材料中传播速度与真空光速之比：n = c/v。折射率越大，光速越慢。纤芯 n₁ > 包层 n₂ 是全内反射的前提。</dd>
+
+      <dt>RZ (Return-to-Zero) · 归零码</dt>
+      <dd>OOK 编码格式之一：在"1"的比特周期中脉冲只占一半时间后归零，对色散更鲁棒但占用更多带宽。</dd>
+
+      <dt>SC (Subscriber Connector) · SC 连接器</dt>
+      <dd>推拉式光纤连接器，常用于电信和数据通信环境。</dd>
+
+      <dt>Shannon Limit · 香农极限</dt>
+      <dd>信道容量的理论上限：C = B · log₂(1 + SNR)。无论多精巧的编码，比特率不可能超过此值。现代光系统已逼近极限的 85–90%。</dd>
+
+      <dt>SMF (Single-Mode Fiber) · 单模光纤</dt>
+      <dd>纤芯极细（8–10µm）的光纤，V 参数 < 2.405，仅支持一个基本传导模式。无模式色散，适合长距离（数十至数千公里）传输。护套通常为黄色。</dd>
+
+      <dt>Snell's Law · 斯涅尔定律</dt>
+      <dd>描述光在两种介质界面折射行为的定律：n₁·sinθ₁ = n₂·sinθ₂。是推导全内反射和数值孔径的基础。</dd>
+
+      <dt>SNR (Signal-to-Noise Ratio) · 信噪比</dt>
+      <dd>信号功率与噪声功率的比值。SNR 越高，接收端判决越可靠。高阶调制需要更高 SNR。</dd>
+
+      <dt>Spectral Efficiency · 频谱效率</dt>
+      <dd>单位带宽内传输的比特率，单位 bit/s/Hz。OOK ≈ 1，DP-QPSK ≈ 4，DP-16QAM ≈ 8。越高意味着在相同带宽下传输更多数据。</dd>
+
+      <dt>SPM (Self-Phase Modulation) · 自相位调制</dt>
+      <dd>光纤非线性效应：高功率光自身改变光纤折射率，导致脉冲频谱展宽。是限制入纤功率的原因之一。</dd>
+
+      <dt>Step-Index Fiber · 阶跃折射率光纤</dt>
+      <dd>纤芯折射率均匀，与包层之间折射率突变的光纤。模式色散严重，目前极少用于高速通信。</dd>
+
+      <dt>Symbol · 符号</dt>
+      <dd>调制中一个最小传输单元，持续一个符号周期。每个符号可携带 log₂(M) 个比特（M 为调制状态数）。</dd>
+
+      <dt>Symbol Rate (Baud Rate) · 符号率 / 波特率</dt>
+      <dd>每秒传输的符号数，单位 Baud (Bd) 或 GBaud。比特率 = 波特率 × 每符号比特数。</dd>
+
+      <dt>TIR (Total Internal Reflection) · 全内反射</dt>
+      <dd>当光从高折射率介质射向低折射率介质，且入射角大于临界角时，光 100% 被反射回来的现象。是光纤传导光的基本原理。</dd>
+
+      <dt>UPC (Ultra Physical Contact) · 超平面物理接触</dt>
+      <dd>光纤连接器端面研磨方式，端面垂直研磨并微弯曲，回波反射低于 APC 但结构更简单。接头为蓝色。</dd>
+
+      <dt>V Parameter · V 参数（归一化频率）</dt>
+      <dd>决定光纤支持模式数的无量纲参数：V = (π·d/λ)·NA。V < 2.405 时光纤为单模，V >> 2.405 时为多模。</dd>
+
+      <dt>Wave-Particle Duality · 波粒二象性</dt>
+      <dd>光同时具有波动性（波长、频率、相位、干涉）和粒子性（光子、能量量子化）的量子力学特性。光通信发送端利用波动性，接收端利用粒子性。</dd>
+
+      <dt>Wavelength (λ) · 波长</dt>
+      <dd>光波完成一个完整振荡周期所传播的空间距离，单位纳米（nm, 10⁻⁹m）。光通信常用 850nm、1310nm、1550nm。与频率的关系：λ = c/f。</dd>
+
+      <dt>XPM (Cross-Phase Modulation) · 交叉相位调制</dt>
+      <dd>DWDM 系统中的光纤非线性效应：一个波长的高功率光改变了相邻波长光所经历的折射率，导致相位失真。</dd>
+
+    </dl>
+  </div>
+</section>
+
+<!-- ====================================================================
+     FOOTER
+     ==================================================================== -->
+<footer style="background:var(--bg-soft); padding:var(--space-8) 0; text-align:center; color:var(--text-muted); font-size:0.9rem;">
+  <div class="container">
+    <p>
+      <strong style="color:var(--cisco-navy);">Optical 101 — 光与信息的第一性原理</strong><br>
+      Cisco Optical Fundamentals Series &nbsp;|&nbsp; 基于 <em>Optical Fundamentals 101</em> 课件整理<br>
+      本文仅供学习参考 &nbsp;·&nbsp; 内容版权归 Cisco Systems, Inc. 所有
+    </p>
+    <nav style="margin-top:var(--space-4);">
+      <a href="#hero" style="margin:0 var(--space-4);">回到顶部 ↑</a>
+      <a href="Optical102.html" style="margin:0 var(--space-4);">Optical 102 →</a>
+      <a href="Optical201.html" style="margin:0 var(--space-4);">Optical 201 →</a>
+      <a href="Optical202.html" style="margin:0 var(--space-4);">Optical 202 →</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
