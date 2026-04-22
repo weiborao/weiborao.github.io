@@ -290,5 +290,369 @@
     </div>
 </section>
 
+<section class="chapter" id="ch2">
+    <div class="container">
+        <h2>第二章：被留在“海关”之外的高级装备 (What's Missing and Why)</h2>
+        
+        <p>理解了上一章的“合规墙”之后，我们现在要打开 Cisco Secure Access (CSA) 的装备箱，仔细清点一下。在将这套系统搬入 AWS 北京数据中心的过程中，为了优先保证合规与基础连通性，有一批原属于全球版的“高级装备”被暂时留在了海关之外。</p>
+        
+        <p>在这章中，我们将深入这五大核心战区。不要担心遇到生涩的术语，我会用最直白的语言为你拆解它们的 <strong>What（是什么）</strong>、<strong>Why（为什么暂缺）</strong>、以及在没有它们的情况下我们的 <strong>How（替代生存指南）</strong>。</p>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>1. 零信任与私有访问 (ZTA & Resource Connector)</h3>
+                <p><strong>What（是什么）：</strong> 零信任访问 (ZTNA) 是现代安全的圣杯。它分为基于客户端和无客户端（通过浏览器）两种模式。在全球版中，它配合“资源连接器 (Resource Connector)”使用，实现对企业内部私有应用的精细化访问控制。</p>
+                <p><strong>生活化类比：</strong> 零信任 (ZTA) 就像是给员工发了一张“带有生物识别的智能门禁卡”。员工进入大楼后，四周全是漆黑的走廊，只有他职责范围内那一间办公室的门会亮起并允许他刷卡进入（精确到应用级别的微分段）。其他房间对他而言是物理隐形的。</p>
+                <p><strong>Why（为何受限）：</strong> 零信任的底层依赖于复杂的微隔离组件和智能流量调度引擎，目前这些深度集成组件尚未在中国本地化环境中完成全面部署与合规审查。</p>
+                <p><strong>How（替代方案）：</strong> 中国版目前采用了 <strong>VPNaaS (VPN即服务)</strong> 作为核心替代方案。这就好比我们没法做到“只能开一扇门”，于是给了员工一把进入安全大楼的“大门钥匙”（VPN），让他先安全地连入企业内网，然后依靠企业内部现有的防火墙、ACL（访问控制列表）来控制他能去哪个房间。</p>
+            </div>
+
+            <div class="card">
+                <h3>2. 网络与连通性 (DNS 解析 & 预留 IP)</h3>
+                <p><strong>What（是什么）：</strong> DNS 安全解析不仅能将域名转换为IP，还能实时阻断恶意域名。预留 IP 则是为你的租户分配专属的公网出口 IP 地址。</p>
+                <p><strong>生活化类比：</strong> DNS 是互联网的“高德导航”。全球版的 CSA 不仅能为你导航，还能在你输入一个诈骗地址时，立刻把导航切断，告诉你“前方是黑客老巢”。预留 IP (Reserved IP) 则像是给你的公司配了一张“专属京A车牌”，很多第三方 SaaS 服务只允许挂这个特定车牌的请求进入。</p>
+                <p><strong>Why（为何受限）：</strong> DNS 解析的威力在于其背后庞大且时刻更新的全球威胁情报库 (Talos)。将海量威胁情报与 DNS 解析完全本地化存在极高的技术壁垒。而预留 IP 则受限于目前本地机房 IP 池的分配策略。</p>
+                <p><strong>How（替代方案）：</strong> 放弃 DNS 层的拦截，将防线后移。使用中国版自带的 <strong>SWG（安全 Web 网关）</strong>，在 HTTP/HTTPS 流量层面进行 URL 过滤和恶意软件拦截。对于固定 IP 需求，可考虑通过现有的本地专线或本地数据中心出口进行流量路由。</p>
+            </div>
+        </div>
+
+        <div class="svg-scroll-wrapper">
+            <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="ztaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#049FD9" />
+                        <stop offset="100%" stop-color="#005073" />
+                    </linearGradient>
+                    <linearGradient id="vpnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#67B346" />
+                        <stop offset="100%" stop-color="#0D274D" />
+                    </linearGradient>
+                </defs>
+                
+                <rect width="800" height="300" fill="#F7F8FA" rx="12"/>
+                
+                <text x="400" y="40" fill="#0D274D" font-family="sans-serif" font-weight="bold" font-size="18" text-anchor="middle">架构对比：ZTA (全球版) vs VPNaaS (中国版替代)</text>
+                
+                <g transform="translate(50, 70)">
+                    <rect width="300" height="200" fill="url(#ztaGrad)" rx="8" opacity="0.1"/>
+                    <text x="150" y="30" fill="#005073" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">ZTA: 精确到门的“智能房卡”</text>
+                    
+                    <circle cx="60" cy="110" r="20" fill="#049FD9"/>
+                    <path d="M 40 160 Q 60 110 80 160 Z" fill="#049FD9"/>
+                    
+                    <rect x="180" y="60" width="80" height="40" rx="4" fill="#049FD9"/>
+                    <text x="220" y="85" fill="white" font-family="sans-serif" font-size="12" text-anchor="middle">财务系统 (允许)</text>
+                    
+                    <rect x="180" y="110" width="80" height="40" rx="4" fill="#D4D8DE" stroke="#58585B" stroke-dasharray="4,2"/>
+                    <text x="220" y="135" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">HR系统 (隐形)</text>
+                    
+                    <rect x="180" y="160" width="80" height="40" rx="4" fill="#D4D8DE" stroke="#58585B" stroke-dasharray="4,2"/>
+                    <text x="220" y="185" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">研发代码 (隐形)</text>
+                    
+                    <path d="M 90 110 L 170 80" stroke="#049FD9" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
+                </g>
+
+                <g transform="translate(450, 70)">
+                    <rect width="300" height="200" fill="url(#vpnGrad)" rx="8" opacity="0.1"/>
+                    <text x="150" y="30" fill="#0D274D" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">VPNaaS: 进入大楼的“通用钥匙”</text>
+                    
+                    <circle cx="60" cy="110" r="20" fill="#67B346"/>
+                    <path d="M 40 160 Q 60 110 80 160 Z" fill="#67B346"/>
+                    
+                    <rect x="150" y="50" width="130" height="150" rx="4" fill="none" stroke="#67B346" stroke-width="2" stroke-dasharray="4,4"/>
+                    <text x="215" y="40" fill="#67B346" font-family="sans-serif" font-size="12" text-anchor="middle">企业大内网</text>
+
+                    <rect x="175" y="60" width="80" height="30" rx="4" fill="#67B346"/>
+                    <text x="215" y="80" fill="white" font-family="sans-serif" font-size="11" text-anchor="middle">财务系统</text>
+                    
+                    <rect x="175" y="110" width="80" height="30" rx="4" fill="#67B346"/>
+                    <text x="215" y="130" fill="white" font-family="sans-serif" font-size="11" text-anchor="middle">HR系统</text>
+                    
+                    <rect x="175" y="160" width="80" height="30" rx="4" fill="#67B346"/>
+                    <text x="215" y="180" fill="white" font-family="sans-serif" font-size="11" text-anchor="middle">研发代码</text>
+                    
+                    <path d="M 90 110 L 140 110" stroke="#67B346" stroke-width="3" fill="none" marker-end="url(#arrowGreen)"/>
+                </g>
+
+                <defs>
+                    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#049FD9" />
+                    </marker>
+                    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#67B346" />
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>3. 高级安全与隔离 (Sandbox & RBI)</h3>
+                <p><strong>What：</strong> 高级恶意软件分析（沙盒）能动态运行并分析未知文件；远程浏览器隔离 (RBI) 则是将有风险的网页加载在云端，仅向用户流式传输安全的像素画面。</p>
+                <p><strong>生活化类比：</strong> 沙盒就像是拆弹专家的“防爆罐”，遇到可疑包裹（文件）先在里面引爆看看。RBI 就像是“隔着防弹玻璃用机械臂上网”，就算网页里藏着病毒，也只能炸在云端的隔离舱里，绝对碰不到你的电脑。</p>
+                <p><strong>Why：</strong> 这两项技术属于极重度的算力消耗型服务，需要极其庞大的云计算集群和复杂的容器化隔离技术。在优先保障核心网关性能的中国版第一阶段，未被引入。</p>
+                <p><strong>How：</strong> 强化 SWG 的静态文件扫描与防病毒引擎，结合终端安全软件（如 Cisco Secure Endpoint）形成端云联动的防线。</p>
+            </div>
+
+            <div class="card">
+                <h3>4. 数据丢失防护 (DLP) 的“安检”模式</h3>
+                <p><strong>What：</strong> 全球版支持内联 (Inline) DLP 扫描动态流量，以及 SaaS API DLP 扫描静态存储在云盘中的数据。中国版仅支持内联 (In-line only) DLP。</p>
+                <p><strong>生活化类比：</strong> 内联 DLP 就像是大厦门口的“X光安检机”，员工拿着文件往外走（通过网络发送数据）时，必须过机扫描，发现机密（如信用卡号）立刻拦截。中国版完美支持这个！</p>
+                <p>但 SaaS API DLP 就像是雇了一个“巡夜保安”，大半夜拿着手电筒去公司的文件柜（如 Box, Microsoft 365）里翻找，看看有没有人违规存放了机密。很遗憾，中国版目前没有这位巡夜保安。</p>
+                <p><strong>How：</strong> 在网关处（Inline）扎紧篱笆，确保所有企业数据外发必须经过 CSA China 的 SWG/CASB 策略检查。</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: var(--space-6);">
+            <h3>5. 数字体验监控 (DEM / Experience Insights)</h3>
+            <p><strong>What & Why：</strong> 依托于大名鼎鼎的 ThousandEyes 引擎，全球版能够实时监控端到端的网络路径，精准定位卡顿是发生在用户 Wi-Fi、运营商链路还是应用服务器。中国版暂未集成该模块，主要原因是本地化需要重新部署大规模的网络探针与监控中枢。</p>
+            <p><strong>生活化类比：</strong> 网络卡顿是 IT 运维的噩梦。DEM 就像是一架“路况直升机”，能给你全局视野。失去它，我们排查网络慢的问题时，只能重新拿起传统的抓包工具（Wireshark）和日志分析，这无疑增加了运维的隐形成本。</p>
+        </div>
+
+        <div class="callout" id="idp-warning">
+            <p><span class="highlight-text">⚠️ 致命暗礁：身份认证 (IDP) 与 Azure China EntraID 的冲突</span></p>
+            <p>这是一个极易踩坑的架构盲点！在实施 CSA 时，我们需要一个身份提供商 (IdP) 来对接。许多企业在全球使用微软的 Azure EntraID。</p>
+            <p><strong>问题在于：</strong>由世纪互联在中国大陆运营的 <strong>Azure China EntraID，目前不支持 SCIM (跨域身份管理) 协议！</strong></p>
+            <p>SCIM 协议就好比是人事部与安保部之间的“实时自动同步电缆”。员工离职，人事系统一点，CSA 这边立马吊销网络访问权限。由于 Azure China EntraID 缺乏这条线，CSA 无法实现用户组的自动化同步配置。因此，在规划中国版落地时，<strong>请务必寻找支持 SCIM 的本地化身份源（如某些本地部署的 AD 结合现代联邦认证方案，或其他支持该协议的国产 IAM 产品）</strong>，切勿盲目复用 Azure China EntraID。</p>
+        </div>
+
+        <h3>穿越迷雾：未来的路线图 (Roadmap)</h3>
+        <p>诚然，目前的中国版在高级功能上做出了妥协。但 Cisco 正在积极推进功能的本地化。根据神州云与 Cisco 的联合规划，以下缺失功能已被正式列入 Roadmap：</p>
+        
+        <div class="svg-scroll-wrapper">
+            <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="roadmapGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#0D274D" />
+                        <stop offset="60%" stop-color="#049FD9" />
+                        <stop offset="100%" stop-color="#FBAB18" />
+                    </linearGradient>
+                </defs>
+                <rect width="100%" height="100%" fill="none"/>
+                
+                <line x1="100" y1="140" x2="800" y2="140" stroke="url(#roadmapGrad)" stroke-width="8" stroke-linecap="round"/>
+                
+                <g transform="translate(150, 140)">
+                    <circle cx="0" cy="0" r="14" fill="#67B346" stroke="#FFFFFF" stroke-width="4"/>
+                    <text x="0" y="-30" fill="#0D274D" font-weight="bold" font-family="sans-serif" font-size="16" text-anchor="middle">目前 (Today)</text>
+                    <rect x="-70" y="25" width="140" height="70" rx="6" fill="#F7F8FA" stroke="#D4D8DE"/>
+                    <text x="0" y="45" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">VPNaaS (VPN替代ZTNA)</text>
+                    <text x="0" y="65" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">SWG / CASB / IPS</text>
+                    <text x="0" y="85" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">Inline DLP</text>
+                </g>
+
+                <g transform="translate(750, 140)">
+                    <circle cx="0" cy="0" r="14" fill="#FBAB18" stroke="#FFFFFF" stroke-width="4"/>
+                    <text x="0" y="-30" fill="#0D274D" font-weight="bold" font-family="sans-serif" font-size="16" text-anchor="middle">FY27 及以后</text>
+                    <text x="0" y="30" fill="#9B9CA0" font-family="sans-serif" font-size="12" text-anchor="middle">(无明确时间表)</text>
+                </g>
+
+                <g transform="translate(450, 140)">
+                    <circle cx="0" cy="0" r="10" fill="#049FD9" stroke="#FFFFFF" stroke-width="3"/>
+                    <rect x="-80" y="-70" width="160" height="40" rx="20" fill="#049FD9"/>
+                    <text x="0" y="-45" fill="#FFFFFF" font-weight="bold" font-family="sans-serif" font-size="14" text-anchor="middle">优先级 #1: ZTNA</text>
+                    <path d="M 0 -30 L 0 -15" stroke="#049FD9" stroke-width="2" stroke-dasharray="2,2"/>
+                </g>
+
+                <g transform="translate(600, 140)">
+                    <circle cx="0" cy="0" r="8" fill="#FFFFFF" stroke="#005073" stroke-width="3"/>
+                    <rect x="-60" y="25" width="120" height="60" rx="6" fill="#F7F8FA" stroke="#D4D8DE"/>
+                    <text x="0" y="45" fill="#005073" font-weight="bold" font-family="sans-serif" font-size="12" text-anchor="middle">预留 IP</text>
+                    <text x="0" y="60" fill="#005073" font-weight="bold" font-family="sans-serif" font-size="12" text-anchor="middle">SaaS API DLP</text>
+                    <text x="0" y="75" fill="#005073" font-weight="bold" font-family="sans-serif" font-size="12" text-anchor="middle">RBI / DEM</text>
+                    <path d="M 0 10 L 0 25" stroke="#005073" stroke-width="2" stroke-dasharray="2,2"/>
+                </g>
+            </svg>
+        </div>
+
+        <p>需要强调的是，<strong>ZTNA（零信任访问）是所有 Roadmap 功能中优先级最高的</strong>，毕竟这是 SSE 的灵魂所在。但务实的架构师必须认清现实：根据官方资料，这些功能目前没有任何明确的 Timeline，<strong>至少在 FY27（思科2027财年）之后</strong>才有可能陆续发布。因此，在未来相当长的一段时间内，我们必须利用好现有的武器库，来打赢这场合规与安全并重的持久战。</p>
+
+    </div>
+</section>
+<section class="chapter" id="ch3">
+    <div class="container">
+        <h2>第三章：绝地反击：利用现有组件打造合规钢铁防线</h2>
+        
+        <p>面对第二章中那张长长的“受限清单”，作为架构师的我们绝不能束手无策。记住我们的第一性原理：<strong>安全是为了保障业务在合规的前提下平稳运行。</strong> 既然“零信任的高级防盗门”暂时没到货，那我们就用现有的“精锐安保团队”把大楼守得固若金汤。</p>
+
+        <p>Cisco Secure Access China 为我们保留了极其强大的基础核心武器。让我们看看如何排兵布阵。</p>
+
+        <h3>核心战法：重塑统一安全网关 (SSE)</h3>
+        
+        <p>在没有 ZTNA 和沙盒的情况下，我们的核心战略是：<strong>所有流量必须“上云交警台”接受检查。</strong> 这意味着，无论是员工在星巴克连着公共 Wi-Fi 访问公网，还是在家中访问公司内网，流量都必须先打通一条加密隧道，送到神州云 AWS 北京数据中心的 CSA 节点。</p>
+
+        <div class="grid grid-3">
+            <div class="card">
+                <h4 style="color: var(--cisco-blue);">🛡️ 内网访问基石：VPNaaS</h4>
+                <p><strong>价值与场景：</strong> 当员工需要访问部署在企业自建数据中心或私有云的代码库时，由于缺少 Resource Connector，我们使用 VPNaaS (VPN 即服务)。</p>
+                <p><strong>通俗释义：</strong> 这是一条直达公司内网的“专属武装押运通道”。员工的电脑与 CSA 云端节点建立隧道，CSA 再通过 IPSec 专线与企业内网对接。配合云端防火墙 (FWaaS)，我们依然可以限制“财务部的人只能走到财务大楼那一层”。</p>
+            </div>
+
+            <div class="card">
+                <h4 style="color: var(--cisco-blue);">🌐 公网守护神：SWG + IPS</h4>
+                <p><strong>价值与场景：</strong> 员工访问各类外部网站、查资料时，如何防止他们误点钓鱼链接或下载木马？</p>
+                <p><strong>通俗释义：</strong> 安全 Web 网关 (SWG) 和入侵防御系统 (IPS) 就是“海关安检与防爆犬”。没有 DNS 拦截没关系，当用户的网页请求到达 SWG 时，它会直接拆开 HTTP/HTTPS 的包裹，进行内容过滤和恶意签名匹配。一旦防爆犬 (IPS) 闻到了已知病毒的味道，立刻当场销毁请求。</p>
+            </div>
+
+            <div class="card">
+                <h4 style="color: var(--cisco-blue);">☁️ 资产捍卫者：CASB + Inline DLP</h4>
+                <p><strong>价值与场景：</strong> 员工使用第三方 SaaS 应用（如非授权的个人网盘）时，如何防止公司机密数据外发泄露？</p>
+                <p><strong>通俗释义：</strong> CASB (云访问安全代理) 是“云端账房先生”，专门记录和控制员工访问了哪些 SaaS 软件；而 Inline DLP (内联数据丢失防护) 则是“出境X光机”。即使我们没有 SaaS API DLP 去巡查网盘，但只要员工试图通过网络把带有机密标签的文件传出去，X光机就会亮起红灯并自动拦截。</p>
+            </div>
+        </div>
+
+        
+
+        <div class="svg-scroll-wrapper">
+            <svg viewBox="0 0 900 450" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#049FD9" />
+                        <stop offset="100%" stop-color="#005073" />
+                    </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#049FD9" flood-opacity="0.2"/>
+                    </filter>
+                </defs>
+
+                <rect width="900" height="450" fill="#F7F8FA" rx="12"/>
+
+                <g transform="translate(50, 150)">
+                    <rect width="100" height="150" fill="none" stroke="#58585B" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+                    <text x="50" y="30" fill="#58585B" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">混合办公用户</text>
+                    
+                    <circle cx="50" cy="70" r="15" fill="#1A1A1A"/>
+                    <text x="50" y="110" fill="#1A1A1A" font-family="sans-serif" font-size="12" text-anchor="middle">Cisco Secure</text>
+                    <text x="50" y="130" fill="#1A1A1A" font-family="sans-serif" font-size="12" text-anchor="middle">Client (AnyConnect)</text>
+                </g>
+
+                <path d="M 150 225 L 300 225" stroke="#049FD9" stroke-width="6" fill="none" marker-end="url(#cloudArrow)"/>
+                <text x="225" y="215" fill="#049FD9" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">所有流量强制上云</text>
+
+                <g transform="translate(300, 75)" filter="url(#glow)">
+                    <rect width="250" height="300" fill="url(#cloudGrad)" rx="16"/>
+                    <text x="125" y="40" fill="#FFFFFF" font-family="sans-serif" font-weight="bold" font-size="18" text-anchor="middle">CSA China (AWS北京)</text>
+                    
+                    <rect x="25" y="60" width="200" height="40" rx="4" fill="rgba(255,255,255,0.2)"/>
+                    <text x="125" y="85" fill="#FFFFFF" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">FWaaS (云防火墙)</text>
+
+                    <rect x="25" y="110" width="200" height="40" rx="4" fill="rgba(255,255,255,0.2)"/>
+                    <text x="125" y="135" fill="#FFFFFF" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">SWG + IPS (网页与防御)</text>
+
+                    <rect x="25" y="160" width="200" height="40" rx="4" fill="rgba(255,255,255,0.2)"/>
+                    <text x="125" y="185" fill="#FFFFFF" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">CASB (云应用控制)</text>
+
+                    <rect x="25" y="210" width="200" height="40" rx="4" fill="#E2231A" opacity="0.8"/>
+                    <text x="125" y="235" fill="#FFFFFF" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">Inline DLP (出境安检)</text>
+                </g>
+
+                <g transform="translate(650, 80)">
+                    <rect width="180" height="80" fill="#FFFFFF" stroke="#049FD9" stroke-width="2" rx="8"/>
+                    <text x="90" y="35" fill="#0D274D" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">公网与 SaaS 应用</text>
+                    <text x="90" y="60" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">(Office 365, Salesforce等)</text>
+                </g>
+                <path d="M 550 120 L 650 120" stroke="#049FD9" stroke-width="4" stroke-dasharray="6,4" fill="none" marker-end="url(#cloudArrow)"/>
+
+                <g transform="translate(650, 260)">
+                    <rect width="180" height="100" fill="#FFFFFF" stroke="#67B346" stroke-width="2" rx="8"/>
+                    <text x="90" y="35" fill="#0D274D" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle">企业内部数据中心</text>
+                    <text x="90" y="60" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">通过 VPNaaS (IPSec)</text>
+                    <text x="90" y="80" fill="#58585B" font-family="sans-serif" font-size="12" text-anchor="middle">接入内网资源</text>
+                </g>
+                <path d="M 550 310 L 650 310" stroke="#67B346" stroke-width="4" stroke-dasharray="6,4" fill="none" marker-end="url(#greenArrow)"/>
+
+                <defs>
+                    <marker id="cloudArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#049FD9" />
+                    </marker>
+                    <marker id="greenArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#67B346" />
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+
+        <h3>身份认证排雷指南：绕过 SCIM 陷阱</h3>
+        
+        <p>我们曾提到，中国区的 Azure EntraID 不支持 SCIM 协议，会导致 CSA 无法同步组织架构。为了解决这个问题，你的实施方案必须做出调整：</p>
+        <ol>
+            <li><strong>方案A（推荐）：</strong> 如果总部使用的是全球版 Azure EntraID（Global），请直接使用全球版对接 CSA China。员工的身份信息本身不属于高敏感业务数据（只要符合跨国数据出境申报），全球版完美支持 SCIM，可实现顺滑的零信任身份基座。</li>
+            <li><strong>方案B（本地化）：</strong> 如果必须完全使用国内身份源，请更换为支持 SCIM 协议的国产 IAM 供应商（如阿里云 IDaaS、腾讯云 CIAM 等），或者通过本地 Active Directory 搭建支持现代 SAML/SCIM 的联合认证网关。</li>
+        </ol>
+
+    </div>
+</section>
+
+<section class="chapter" id="closing">
+    <div class="container">
+        <h2>第四章：总结 —— 在约束中寻找最优解</h2>
+        
+        <p>至此，我们完整地走过了一遍 Cisco Secure Access 全球版与中国版的差异之旅。回到我们最开始的比喻：虽然这辆名为 CSA China 的“定制跑车”暂时卸下了一些前沿的自动驾驶模块，但它的核心引擎（统一的安全策略管理）、底盘（神州云与 AWS 的稳定网络）、以及刹车系统（SWG、DLP、IPS）依然是业界顶级的。</p>
+
+        <p><strong>合规，是企业在中国运营的生命线。</strong> 牺牲部分花哨的高级功能，换取 100% 的数据本地化驻留与监管合规，这是每一个成熟的跨国企业必须要做的理性妥协。随着未来几年 Roadmap 的逐步落地（特别是 ZTNA 的本土化引入），这套架构将会变得更加丰满和强悍。</p>
+
+        <p>在云原生与混合办公的浪潮下，没有绝对完美的工具，只有最契合业务场景的架构设计。愿这篇指南能成为您在合规迷雾中航行的一盏明灯。</p>
+
+        <hr style="margin: var(--space-8) 0; border: none; border-top: 1px solid var(--border-color);">
+
+        <h3>📚 附录：核心术语表 (Glossary)</h3>
+        <p>为了确保我们始终在同一个频道对话，这里附上文中出现的核心术语大白话解释：</p>
+        
+        <div class="table-scroll-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">术语缩写</th>
+                        <th style="width: 30%;">英文全称</th>
+                        <th>大白话解释 (生活类比)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SSE</strong></td>
+                        <td>Security Service Edge</td>
+                        <td><strong>云端安保中心。</strong> 把公司原本买在机房里的各种防火墙、网关全部搬到云端，打包成一个订阅服务。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ZTNA / ZTA</strong></td>
+                        <td>Zero Trust Network Access</td>
+                        <td><strong>智能门禁卡。</strong> 摒弃了“进门就是自己人”的想法，精确控制员工只能访问自己权限内的特定应用（门），其他应用对其隐形。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VPNaaS</strong></td>
+                        <td>VPN as a Service</td>
+                        <td><strong>云端大门钥匙。</strong> 传统的内网接入方式，员工连上云端后，获得进入企业内网的基础权限。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SWG</strong></td>
+                        <td>Secure Web Gateway</td>
+                        <td><strong>上网海关安检。</strong> 检查员工访问外部网站的流量，拦截赌博/钓鱼网站和恶意软件下载。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CASB</strong></td>
+                        <td>Cloud Access Security Broker</td>
+                        <td><strong>云应用账房。</strong> 专门盯着员工怎么使用云软件（SaaS），防止他们把公司机密传到个人的云盘里。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DLP (Inline)</strong></td>
+                        <td>Data Loss Prevention</td>
+                        <td><strong>出境 X 光机。</strong> 实时扫描正在发送的网络数据，发现信用卡号、源代码等敏感特征立刻拦截阻断。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SCIM</strong></td>
+                        <td>System for Cross-domain Identity Management</td>
+                        <td><strong>人事安保专线。</strong> 一种自动化协议，让人事系统里的员工离职/调岗信息，能瞬间同步给安保系统（CSA），自动调整权限。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: var(--space-12);">
+            <button class="btn" onclick="window.print()">🖨️ 打印或保存为 PDF 技术白皮书</button>
+        </div>
+
+    </div>
+</section>
+
 </body>
 </html>
