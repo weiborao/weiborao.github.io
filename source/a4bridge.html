@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纸桥承重挑战 - 基于第一性原理的工程设计方案</title>
+<style>
+  /* ========== 全局变量 - Cisco官方配色 ========== */
+  :root {
+    --cisco-blue: #1BA0D7;
+    --cisco-dark-blue: #005073;
+    --cisco-indigo: #00264D;
+    --cisco-accent: #6ABF4B;
+    --cisco-gray-100: #F7F9FB;
+    --cisco-gray-200: #E9EEF2;
+    --cisco-gray-400: #9BA7B2;
+    --cisco-gray-700: #39424E;
+    --cisco-text: #1A2733;
+    --cisco-warning: #FBAB2C;
+    --cisco-danger: #E2231A;
+    --shadow-sm: 0 2px 8px rgba(0,38,77,0.06);
+    --shadow-md: 0 6px 20px rgba(0,38,77,0.10);
+    --shadow-lg: 0 14px 40px rgba(0,38,77,0.15);
+    --radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ========== 基础重置 ========== */
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--cisco-text);
+    background: var(--cisco-gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========== 排版 ========== */
+  h1,h2,h3,h4 { color: var(--cisco-indigo); line-height: 1.3; font-weight: 700; }
+  h1 { font-size: 2.75rem; margin-bottom: 1rem; letter-spacing: -0.02em; }
+  h2 { font-size: 2rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem;
+       border-bottom: 3px solid var(--cisco-blue); display: inline-block; }
+  h3 { font-size: 1.4rem; margin: 1.5rem 0 1rem; color: var(--cisco-dark-blue); }
+  h4 { font-size: 1.15rem; margin: 1rem 0 0.5rem; color: var(--cisco-gray-700); }
+  p { margin-bottom: 1rem; }
+  strong { color: var(--cisco-dark-blue); font-weight: 600; }
+  code { background: var(--cisco-gray-200); padding: 2px 8px; border-radius: 4px;
+         font-size: 0.95em; color: var(--cisco-dark-blue); }
+
+  /* ========== 章节 ========== */
+  .chapter { padding: 5rem 1.5rem; border-bottom: 1px solid var(--cisco-gray-200); }
+  .chapter:nth-child(even) { background: #fff; }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* ========== Hero ========== */
+  .hero {
+    background: linear-gradient(135deg, var(--cisco-indigo) 0%, var(--cisco-dark-blue) 50%, var(--cisco-blue) 100%);
+    color: #fff;
+    padding: 6rem 1.5rem 5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, rgba(27,160,215,0.2) 0%, transparent 50%);
+  }
+  .hero h1 { color: #fff; position: relative; z-index: 1; }
+  .hero .subtitle { font-size: 1.25rem; opacity: 0.92; position: relative; z-index: 1;
+                    max-width: 700px; margin: 0 auto 2rem; }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;
+    margin-top: 2.5rem; position: relative; z-index: 1;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 1.25rem 2rem; border-radius: var(--radius);
+    min-width: 160px;
+  }
+  .hero-stat .num { font-size: 2rem; font-weight: 700; display: block; }
+  .hero-stat .label { font-size: 0.9rem; opacity: 0.85; }
+
+  /* ========== 导航 ========== */
+  .toc {
+    background: #fff; padding: 1.25rem 1.5rem;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .toc ul { list-style: none; display: flex; flex-wrap: wrap;
+            gap: 0.5rem; justify-content: center; max-width: 1100px; margin: 0 auto; }
+  .toc a {
+    display: inline-block; padding: 0.5rem 1rem;
+    color: var(--cisco-gray-700); text-decoration: none;
+    border-radius: 999px; font-size: 0.95rem; font-weight: 500;
+    transition: var(--transition);
+  }
+  .toc a:hover { background: var(--cisco-blue); color: #fff; transform: translateY(-2px); }
+
+  /* ========== 卡片 ========== */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+               gap: 1.5rem; margin: 2rem 0; }
+  .card {
+    background: #fff; border: 1px solid var(--cisco-gray-200);
+    border-radius: var(--radius); padding: 1.75rem;
+    box-shadow: var(--shadow-sm); transition: var(--transition);
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--cisco-blue), var(--cisco-accent));
+    transform: scaleX(0); transform-origin: left; transition: var(--transition);
+  }
+  .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .card:hover::before { transform: scaleX(1); }
+  .card .icon {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--cisco-blue), var(--cisco-dark-blue));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 1rem; font-weight: 700;
+  }
+
+  /* ========== SVG / 表格包装器 ========== */
+  .svg-scroll-wrapper, .table-scroll-wrapper {
+    width: 100%; overflow-x: auto; margin: 1.75rem 0;
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); padding: 1.5rem;
+    border: 1px solid var(--cisco-gray-200);
+    display: flex; justify-content: center;
+  }
+  .svg-scroll-wrapper svg { max-width: 100%; height: auto; min-width: 600px; }
+
+  /* ========== 表格 ========== */
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.98rem; }
+  thead { background: var(--cisco-indigo); color: #fff; }
+  th, td { padding: 0.9rem 1rem; text-align: left; border-bottom: 1px solid var(--cisco-gray-200); }
+  tbody tr { transition: var(--transition); }
+  tbody tr:hover { background: var(--cisco-gray-100); }
+  tbody tr:nth-child(even) { background: #fafcfd; }
+  tbody tr:nth-child(even):hover { background: var(--cisco-gray-100); }
+
+  /* ========== 步骤列表 ========== */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps > li {
+    counter-increment: step; position: relative;
+    padding: 1.5rem 1.5rem 1.5rem 5rem;
+    background: #fff; border-radius: var(--radius);
+    margin-bottom: 1.25rem; border: 1px solid var(--cisco-gray-200);
+    box-shadow: var(--shadow-sm); transition: var(--transition);
+  }
+  .steps > li::before {
+    content: counter(step); position: absolute; left: 1.25rem; top: 1.5rem;
+    width: 2.75rem; height: 2.75rem; border-radius: 50%;
+    background: linear-gradient(135deg, var(--cisco-blue), var(--cisco-dark-blue));
+    color: #fff; font-weight: 700; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .steps > li:hover { transform: translateX(6px); box-shadow: var(--shadow-md); }
+  .steps h4 { margin-top: 0; }
+
+  /* ========== 提示框 ========== */
+  .callout {
+    border-left: 4px solid var(--cisco-blue);
+    background: linear-gradient(90deg, rgba(27,160,215,0.08), transparent);
+    padding: 1.25rem 1.5rem; border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.5rem 0;
+  }
+  .callout.warn { border-color: var(--cisco-warning);
+    background: linear-gradient(90deg, rgba(251,171,44,0.1), transparent); }
+  .callout.key { border-color: var(--cisco-accent);
+    background: linear-gradient(90deg, rgba(106,191,75,0.1), transparent); }
+  .callout h4 { margin-top: 0; }
+
+  /* ========== CTA ========== */
+  .cta-wrap { text-align: center; margin: 2.5rem 0 0; }
+  .cta {
+    display: inline-block; padding: 1rem 2.25rem;
+    background: linear-gradient(135deg, var(--cisco-blue), var(--cisco-dark-blue));
+    color: #fff; text-decoration: none; font-weight: 600; font-size: 1.05rem;
+    border-radius: 999px; box-shadow: var(--shadow-md);
+    transition: var(--transition); border: none; cursor: pointer;
+  }
+  .cta:hover { transform: translateY(-3px) scale(1.03);
+               box-shadow: 0 10px 25px rgba(27,160,215,0.4); }
+
+  /* ========== 公式 ========== */
+  .formula {
+    background: var(--cisco-gray-100); border: 1px dashed var(--cisco-gray-400);
+    padding: 1rem 1.25rem; border-radius: 8px; font-family: "Courier New", monospace;
+    font-size: 1.05rem; text-align: center; margin: 1rem 0;
+    color: var(--cisco-dark-blue);
+  }
+
+  /* ========== 3D Canvas ========== */
+  #canvas3d-wrap {
+    background: linear-gradient(135deg, #eef4f8, #fff);
+    border-radius: var(--radius); padding: 1rem;
+    box-shadow: var(--shadow-sm); margin: 1.5rem 0;
+    border: 1px solid var(--cisco-gray-200);
+  }
+  #canvas3d { display: block; width: 100%; height: auto; max-width: 100%; }
+  .canvas-controls { text-align: center; margin-top: 0.75rem; }
+  .canvas-controls button {
+    background: #fff; border: 1px solid var(--cisco-blue);
+    color: var(--cisco-blue); padding: 0.4rem 1rem; margin: 0 0.25rem;
+    border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+    transition: var(--transition);
+  }
+  .canvas-controls button:hover { background: var(--cisco-blue); color: #fff; }
+
+  /* ========== 响应式 ========== */
+  @media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.6rem; }
+    .hero { padding: 4rem 1rem 3rem; }
+    .chapter { padding: 3rem 1rem; }
+    .steps > li { padding-left: 4rem; }
+  }
+
+  /* ========== 打印 ========== */
+  @media print {
+    body { background: #fff; font-size: 11pt; }
+    .toc, .cta-wrap, .canvas-controls { display: none !important; }
+    .chapter { padding: 1rem 0; border: none; page-break-inside: avoid; }
+    h2 { page-break-before: always; }
+    .chapter:first-of-type h2, .hero + .toc + .chapter h2 { page-break-before: auto; }
+    .card, .steps > li { box-shadow: none; border: 1px solid #ccc;
+                          page-break-inside: avoid; }
+    @page { margin: 2cm; @bottom-center { content: "第 " counter(page) " 页 / 共 " counter(pages) " 页"; } }
+  }
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<!-- ============ Hero ============ -->
+<header class="hero">
+  <h1>🌉 纸桥承重挑战</h1>
+  <p class="subtitle">基于第一性原理的高强度、高稳定性 A4 纸桥完整设计方案<br>
+     仅用 A4 纸 + 胶棒，承载极限重量</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num">35</span><span class="label">张 A4 纸</span></div>
+    <div class="hero-stat"><span class="num">≥15</span><span class="label">本书（预估）</span></div>
+    <div class="hero-stat"><span class="num">8cm</span><span class="label">桥墩高度</span></div>
+    <div class="hero-stat"><span class="num">30cm</span><span class="label">跨度</span></div>
+  </div>
+</header>
+
+<!-- ============ 目录 ============ -->
+<nav class="toc">
+  <ul>
+    <li><a href="#ch1">① 物理原理</a></li>
+    <li><a href="#ch2">② 设计理念</a></li>
+    <li><a href="#ch3">③ 材料清单</a></li>
+    <li><a href="#ch4">④ 制作步骤</a></li>
+    <li><a href="#ch5">⑤ 工程图</a></li>
+    <li><a href="#ch6">⑥ 预期成绩</a></li>
+  </ul>
+</nav>
+
+<!-- ============ 第1章：原理科普 ============ -->
+<section class="chapter" id="ch1">
+  <div class="container">
+    <h2>① 第一性原理：支撑力究竟从哪里来？</h2>
+    <p>在动手前，我们先回到最基本的问题：<strong>一张仅 0.1mm 厚的 A4 纸，为什么能撑起几公斤重的书？</strong>
+       答案不在纸本身，而在<strong>"几何形状"</strong>。</p>
+
+    <div class="callout key">
+      <h4>🔑 核心洞察</h4>
+      <p>A4 纸的抗拉强度其实很高（沿纤维方向可达 30~50 N/cm²），但抗弯、抗压、抗失稳能力极差。
+         所以纸桥设计的本质，是通过<strong>折叠、卷曲、层叠</strong>这些几何操作，把"易弯曲的平面"转化为"抗弯的立体"。</p>
+    </div>
+
+    <h3>1.1 四个关键物理原理</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">I</div>
+        <h4>截面惯性矩（抗弯核心）</h4>
+        <p>梁的抗弯刚度与 <code>I = ∫y²dA</code> 成正比。材料离中性轴越远，抗弯能力呈<strong>平方级</strong>放大。</p>
+        <div class="formula">I(圆管) ≫ I(平板)</div>
+        <p>这就是为什么空心钢管比同材料的实心棒更"性价比高"。</p>
+      </div>
+      <div class="card">
+        <div class="icon">σ</div>
+        <h4>欧拉失稳（桥墩命门）</h4>
+        <p>细长柱在受压时，不是被"压碎"，而是先"弯折"坍塌。临界载荷：</p>
+        <div class="formula">P_cr = π²EI / (KL)²</div>
+        <p>提升 I、缩短 L、增加横向支撑是核心对策。</p>
+      </div>
+      <div class="card">
+        <div class="icon">△</div>
+        <h4>三角形稳定性</h4>
+        <p>三角形是唯一形状固定的多边形。桁架结构把弯矩分解为杆件的<strong>拉/压力</strong>，
+           而纸张的<strong>抗拉能力远大于抗弯能力</strong>。</p>
+      </div>
+      <div class="card">
+        <div class="icon">∑</div>
+        <h4>力流传递路径</h4>
+        <p>重力 → 桥面 → 桥墩 → 桌面。任何一环断裂即整体失效。设计时必须让力流<strong>短、直、对称</strong>。</p>
+      </div>
+    </div>
+
+    <h3>1.2 A4 纸的"强度倍增"数学</h3>
+    <p>以一张 A4 纸为例（宽 21cm，厚 0.1mm），不同形状下的截面惯性矩对比：</p>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th>形状</th><th>截面惯性矩 I (mm⁴)</th><th>相对倍数</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>平铺</td><td>~0.018</td><td>1×</td><td>几乎没有抗弯能力</td></tr>
+          <tr><td>对折两次</td><td>~1.1</td><td>60×</td><td>仍易屈曲</td></tr>
+          <tr><td>卷成 Φ2cm 纸管</td><td>~628</td><td>~35,000×</td><td><strong>抗弯能力爆炸式提升</strong></td></tr>
+          <tr><td>瓦楞三层结构</td><td>~420</td><td>~23,000×</td><td>桥面最佳形态</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>结论：</strong>纸桥设计的支撑力，本质上来自<strong>几何形状带来的截面惯性矩放大</strong>，
+      辅以<strong>桁架/拱结构的力流优化</strong>。记住这一点，所有设计选择都将清晰。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第2章：设计理念 ============ -->
+<section class="chapter" id="ch2">
+  <div class="container">
+    <h2>② 设计理念与结构原理</h2>
+    <p>基于第一性原理，我们的方案选择：<strong>"空心纸管四柱桥墩 + 瓦楞夹层桥面 + 底部三角桁架"</strong> 三位一体结构。</p>
+
+    <h3>2.1 为什么选这种结构？</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">①</div>
+        <h4>桥墩：紧密纸管 × 4</h4>
+        <p>每根桥墩由 <strong>3 张 A4 纸紧密卷成 Φ2.5cm 的实心感纸管</strong>，4 根立柱构成矩形底座。
+           纸管截面 I 大，抗压失稳能力强；4 根对称分布提供抗侧翻能力。</p>
+      </div>
+      <div class="card">
+        <div class="icon">②</div>
+        <h4>桥面：瓦楞三明治</h4>
+        <p>上下两层平铺纸 + 中间"W"形折叠芯。这是<strong>纸箱的核心原理</strong>：
+           三层结构把材料推向远离中性轴的位置，抗弯刚度提升数百倍。</p>
+      </div>
+      <div class="card">
+        <div class="icon">③</div>
+        <h4>底部：拱形桁架</h4>
+        <p>在桥面下方增设<strong>倒三角桁架</strong>（两根斜拉纸管 + 一根底弦），
+           把桥面中部的弯矩转化为纸管的<strong>拉力和压力</strong>——纸张最擅长的受力方式。</p>
+      </div>
+    </div>
+
+    <h3>2.2 核心受力分析</h3>
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="受力分析图">
+        <!-- 背景 -->
+        <rect width="700" height="320" fill="#fafcfd"/>
+        <!-- 桌面 -->
+        <line x1="50" y1="280" x2="650" y2="280" stroke="#39424E" stroke-width="3"/>
+        <!-- 桥墩 -->
+        <rect x="120" y="180" width="30" height="100" fill="#1BA0D7" stroke="#005073" stroke-width="2"/>
+        <rect x="550" y="180" width="30" height="100" fill="#1BA0D7" stroke="#005073" stroke-width="2"/>
+        <!-- 桥面（瓦楞） -->
+        <rect x="90" y="155" width="520" height="25" fill="#E9EEF2" stroke="#00264D" stroke-width="2"/>
+        <path d="M95,167 L125,160 L155,167 L185,160 L215,167 L245,160 L275,167 L305,160 L335,167 L365,160 L395,167 L425,160 L455,167 L485,160 L515,167 L545,160 L575,167 L605,160"
+              fill="none" stroke="#005073" stroke-width="1.2"/>
+        <!-- 书本荷载 -->
+        <rect x="280" y="115" width="140" height="35" fill="#FBAB2C" stroke="#b36f00" stroke-width="2"/>
+        <text x="350" y="138" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">书本荷载 W</text>
+        <!-- 荷载箭头 -->
+        <g stroke="#E2231A" stroke-width="2.5" fill="#E2231A">
+          <line x1="300" y1="95" x2="300" y2="115"/><polygon points="296,108 304,108 300,117"/>
+          <line x1="350" y1="95" x2="350" y2="115"/><polygon points="346,108 354,108 350,117"/>
+          <line x1="400" y1="95" x2="400" y2="115"/><polygon points="396,108 404,108 400,117"/>
+        </g>
+        <!-- 桁架（底部） -->
+        <line x1="120" y1="180" x2="350" y2="230" stroke="#6ABF4B" stroke-width="3"/>
+        <line x1="580" y1="180" x2="350" y2="230" stroke="#6ABF4B" stroke-width="3"/>
+        <line x1="120" y1="180" x2="580" y2="180" stroke="#6ABF4B" stroke-width="2" stroke-dasharray="5,3"/>
+        <circle cx="350" cy="230" r="5" fill="#6ABF4B"/>
+        <!-- 力流标注 -->
+        <text x="220" y="215" fill="#6ABF4B" font-size="13" font-weight="700">压力</text>
+        <text x="460" y="215" fill="#6ABF4B" font-size="13" font-weight="700">压力</text>
+        <text x="345" y="175" fill="#005073" font-size="12" font-weight="600">拉力（底弦）</text>
+        <!-- 支反力 -->
+        <g stroke="#00264D" stroke-width="2" fill="#00264D">
+          <line x1="135" y1="305" x2="135" y2="285"/><polygon points="131,292 139,292 135,283"/>
+          <line x1="565" y1="305" x2="565" y2="285"/><polygon points="561,292 569,292 565,283"/>
+        </g>
+        <text x="135" y="320" text-anchor="middle" font-size="12" fill="#00264D">支反力 R₁</text>
+        <text x="565" y="320" text-anchor="middle" font-size="12" fill="#00264D">支反力 R₂</text>
+        <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#00264D">纸桥受力传递路径</text>
+      </svg>
+    </div>
+
+    <div class="callout key">
+      <h4>💡 关键力学对策</h4>
+      <p><strong>抗弯：</strong>瓦楞桥面 + 底部桁架，把弯矩转化为拉压力。<br>
+         <strong>抗剪：</strong>桥墩顶部 3cm 嵌入桥面两侧，增加接触面。<br>
+         <strong>抗失稳：</strong>4 根桥墩呈矩形排布，底部用横杆连接形成"日"字框架。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第3章：材料清单 ============ -->
+<section class="chapter" id="ch3">
+  <div class="container">
+    <h2>③ 精确材料清单</h2>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th>部件</th><th>A4 纸张数</th><th>用途说明</th><th>重量 (g)</th></tr></thead>
+        <tbody>
+          <tr><td>桥墩纸管（4 根 × 3 张）</td><td>12</td><td>Φ2.5cm 紧密实心卷管，高 8cm</td><td>60</td></tr>
+          <tr><td>桥墩横撑（底部 + 中部）</td><td>4</td><td>卷成细管，连接 4 根立柱，形成"日"字框架</td><td>20</td></tr>
+          <tr><td>桥面上层</td><td>3</td><td>3 张 A4 长边拼接，形成 30cm×21cm 桥面</td><td>15</td></tr>
+          <tr><td>桥面下层</td><td>3</td><td>同上</td><td>15</td></tr>
+          <tr><td>瓦楞芯（W 形折叠）</td><td>6</td><td>折叠 5 道波峰，夹在上下层之间</td><td>30</td></tr>
+          <tr><td>底部桁架斜杆（2 根 × 2 张）</td><td>4</td><td>Φ1.5cm 纸管，支撑桥面中部</td><td>20</td></tr>
+          <tr><td>底部桁架底弦</td><td>2</td><td>细长纸管，连接两桥墩顶部</td><td>10</td></tr>
+          <tr><td>桥墩顶部承托板</td><td>2</td><td>多层加固，分散荷载</td><td>10</td></tr>
+          <tr><td><strong>合计</strong></td><td><strong>36 张</strong></td><td>余 4 张作为机动储备</td><td><strong>≈ 180g</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>胶棒：</strong>大号固体胶 1~2 支（建议晨光 21g 或得力同规格）。</p>
+    <div class="callout warn">
+      <strong>⚠️ 重要提醒：</strong>卷纸管时涂胶要薄而均匀，压紧后<strong>静置 5 分钟</strong>让胶完全粘合。
+      制作必须提前 24 小时完成，确保所有胶水彻底干燥硬化。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第4章：制作步骤 ============ -->
+<section class="chapter" id="ch4">
+  <div class="container">
+    <h2>④ 详细制作步骤</h2>
+    <ol class="steps">
+      <li>
+        <h4>制作桥墩纸管（共 4 根，耗时约 40 分钟）</h4>
+        <p>取 3 张 A4 纸，沿<strong>长边 29.7cm</strong>方向卷起，以直径 2.5cm 的笔杆为芯。
+           每卷一层涂一次胶（重点涂最后 5cm），卷紧压实。卷完抽出笔芯，得到<strong>长 29.7cm、Φ约 2.5cm 的实心纸管</strong>。
+           裁切两端，使最终长度 = <strong>8cm</strong>（用剪刀切齐）。</p>
+        <p>重复 4 次，得到 4 根桥墩立柱。</p>
+      </li>
+      <li>
+        <h4>制作桥墩横撑与桁架杆件（耗时约 25 分钟）</h4>
+        <p>用相同卷管方法：<br>
+           ▸ 4 根 Φ1.5cm 细纸管（长 12cm），用作桥墩横撑。<br>
+           ▸ 2 根 Φ1.5cm 斜杆（长约 16cm），用作底部桁架斜撑。<br>
+           ▸ 1 根 Φ1cm 细管（长 30cm），用作桁架底弦。</p>
+      </li>
+      <li>
+        <h4>组装桥墩"日"字框架（耗时约 15 分钟）</h4>
+        <p>将 4 根桥墩立柱呈矩形排布：<strong>短边 12cm，长边 30cm</strong>（对应桥面宽 12cm、跨度 30cm）。
+           用 4 根横撑分别连接相邻立柱的<strong>底部（0cm 处）和中部（4cm 处）</strong>，
+           接缝处大量涂胶，用手按压 1 分钟。</p>
+        <div class="callout">支撑框架完成后，请在平整桌面上静置 1 小时，确保胶水完全固化。</div>
+      </li>
+      <li>
+        <h4>制作瓦楞桥面芯（耗时约 20 分钟）</h4>
+        <p>取 6 张 A4 纸，沿<strong>短边 21cm</strong>每 3cm 折叠一次（先正折，再反折），
+           形成 W 形瓦楞。每张纸折出 5 个波峰，高度约 1.5cm。</p>
+        <p>将 6 张瓦楞纸<strong>首尾长边对齐拼接</strong>（接缝处重叠 1cm 并涂胶），
+           形成一块 30cm × 21cm 的波浪芯板。</p>
+      </li>
+      <li>
+        <h4>制作桥面上下面板并夹合（耗时约 15 分钟）</h4>
+        <p>上层：3 张 A4 纸长边拼接（每条重叠 1cm 粘贴），裁成 <strong>30cm × 12cm</strong> 面板。下层同样制作。</p>
+        <p>在下层面板上均匀涂胶 → 铺上瓦楞芯 → 涂胶 → 盖上上层面板 →
+           用书本重物压 30 分钟，形成<strong>坚固的瓦楞三明治桥面</strong>。</p>
+      </li>
+      <li>
+        <h4>安装底部桁架（耗时约 10 分钟）</h4>
+        <p>将 2 根斜杆的两端分别粘贴在<strong>桥面底部中央</strong>与<strong>桥墩顶部</strong>，
+           形成倒三角。再用底弦（Φ1cm 细管）连接两桥墩顶部，作为张拉约束。</p>
+        <p>所有接缝处涂胶、按压固化。</p>
+      </li>
+      <li>
+        <h4>桥面与桥墩的最终粘合（耗时约 10 分钟）</h4>
+        <p>在桥墩顶部放置承托板（2 张 A4 纸多层折叠而成，约 5cm × 12cm），大量涂胶。
+           将瓦楞桥面<strong>居中对齐</strong>放置于 4 根桥墩顶部，桥面两端各悬伸约 1cm。</p>
+        <p>放一本较轻的书在桥面中央按压 2 小时，确保黏合牢固。</p>
+      </li>
+      <li>
+        <h4>最终检查与加固（耗时约 10 分钟）</h4>
+        <p>▸ 检查所有接缝，发现空隙用胶补充。<br>
+           ▸ 确认桥面水平（用水平仪或直尺测量）。<br>
+           ▸ 在桥墩与桌面接触点附近<strong>额外贴一圈加固</strong>（用剩余 A4 纸条）。<br>
+           ▸ 静置 12~24 小时完全固化。</p>
+      </li>
+    </ol>
+    <div class="callout key">
+      <strong>✅ 总耗时约 2.5 小时（制作）+ 24 小时（固化）。</strong>
+      建议活动前 1~2 天制作完成，避免胶水未干影响强度。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第5章：工程图 ============ -->
+<section class="chapter" id="ch5">
+  <div class="container">
+    <h2>⑤ 完整工程图</h2>
+
+    <h3>5.1 正视图（显示桥墩与桥面）</h3>
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="正视图">
+        <rect width="700" height="350" fill="#fafcfd"/>
+        <!-- 桌面 -->
+        <line x1="50" y1="310" x2="650" y2="310" stroke="#39424E" stroke-width="3"/>
+        <text x="350" y="335" text-anchor="middle" font-size="13" fill="#39424E">桌面</text>
+        <!-- 桥墩（前排2根） -->
+        <rect x="140" y="190" width="30" height="120" fill="#1BA0D7" stroke="#005073" stroke-width="2"/>
+        <rect x="530" y="190" width="30" height="120" fill="#1BA0D7" stroke="#005073" stroke-width="2"/>
+        <!-- 横撑（底部+中部） -->
+        <rect x="170" y="300" width="360" height="8" fill="#9BA7B2" stroke="#005073" stroke-width="1"/>
+        <rect x="170" y="245" width="360" height="8" fill="#9BA7B2" stroke="#005073" stroke-width="1"/>
+        <!-- 桥面 -->
+        <rect x="110" y="155" width="480" height="35" fill="#E9EEF2" stroke="#00264D" stroke-width="2"/>
+        <path d="M115,175 L145,165 L175,175 L205,165 L235,175 L265,165 L295,175 L325,165 L355,175 L385,165 L415,175 L445,165 L475,175 L505,165 L535,175 L565,165 L585,172"
+              fill="none" stroke="#005073" stroke-width="1.2"/>
+        <!-- 标注 -->
+        <g font-size="12" fill="#00264D">
+          <!-- 跨度 -->
+          <line x1="155" y1="140" x2="545" y2="140" stroke="#E2231A" stroke-width="1"/>
+          <line x1="155" y1="135" x2="155" y2="145" stroke="#E2231A"/>
+          <line x1="545" y1="135" x2="545" y2="145" stroke="#E2231A"/>
+          <text x="350" y="135" text-anchor="middle" fill="#E2231A" font-weight="700">跨度 30 cm</text>
+          <!-- 桥墩高度 -->
+          <line x1="95" y1="190" x2="95" y2="310" stroke="#E2231A" stroke-width="1"/>
+          <line x1="90" y1="190" x2="100" y2="190" stroke="#E2231A"/>
+          <line x1="90" y1="310" x2="100" y2="310" stroke="#E2231A"/>
+          <text x="85" y="255" text-anchor="end" fill="#E2231A" font-weight="700">8 cm</text>
+          <!-- 桥面厚度 -->
+          <text x="620" y="178" fill="#005073">瓦楞桥面 3.5cm</text>
+          <!-- 部件标签 -->
+          <text x="155" y="205" font-weight="700">桥墩</text>
+          <text x="545" y="205" font-weight="700">桥墩</text>
+          <text x="350" y="240" text-anchor="middle">中部横撑</text>
+          <text x="350" y="298" text-anchor="middle">底部横撑</text>
+        </g>
+        <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#00264D">正视图</text>
+      </svg>
+    </div>
+
+    <h3>5.2 侧视图（显示桁架内部结构）</h3>
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="侧视图">
+        <rect width="700" height="350" fill="#fafcfd"/>
+        <line x1="50" y1="310" x2="650" y2="310" stroke="#39424E" stroke-width="3"/>
+        <!-- 双桥墩（前后重叠） -->
+        <rect x="140" y="190" width="30" height="120" fill="#1BA0D7" stroke="#005073" stroke-width="2"/>
+        <rect x="530" y="190" width="30" height="120" fill="#1BA0D7" stroke="#005073" stroke-width="2"/>
+        <!-- 桥面 -->
+        <rect x="110" y="155" width="480" height="20" fill="#E9EEF2" stroke="#00264D" stroke-width="2"/>
+        <!-- 瓦楞芯可视化 -->
+        <rect x="110" y="160" width="480" height="12" fill="#fff"/>
+        <path d="M110,166 L140,161 L170,166 L200,161 L230,166 L260,161 L290,166 L320,161 L350,166 L380,161 L410,166 L440,161 L470,166 L500,161 L530,166 L560,161 L590,166"
+              fill="none" stroke="#6ABF4B" stroke-width="1.5"/>
+        <!-- 底部桁架 -->
+        <line x1="155" y1="190" x2="350" y2="260" stroke="#FBAB2C" stroke-width="4"/>
+        <line x1="545" y1="190" x2="350" y2="260" stroke="#FBAB2C" stroke-width="4"/>
+        <line x1="155" y1="190" x2="545" y2="190" stroke="#FBAB2C" stroke-width="2" stroke-dasharray="4,3"/>
+        <circle cx="350" cy="260" r="6" fill="#FBAB2C" stroke="#b36f00" stroke-width="2"/>
+        <!-- 荷载标识 -->
+        <rect x="280" y="120" width="140" height="30" fill="#E2231A" opacity="0.85"/>
+        <text x="350" y="141" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">书本荷载</text>
+        <g stroke="#E2231A" stroke-width="2" fill="#E2231A">
+          <line x1="320" y1="105" x2="320" y2="120"/><polygon points="316,114 324,114 320,122"/>
+          <line x1="380" y1="105" x2="380" y2="120"/><polygon points="376,114 384,114 380,122"/>
+        </g>
+        <!-- 标签 -->
+        <g font-size="12" fill="#00264D">
+          <text x="350" y="185" text-anchor="middle" fill="#6ABF4B" font-weight="700">瓦楞夹层芯</text>
+          <text x="230" y="240" fill="#b36f00" font-weight="700">桁架斜杆（压）</text>
+          <text x="470" y="240" fill="#b36f00" font-weight="700">桁架斜杆（压）</text>
+          <text x="350" y="205" text-anchor="middle" fill="#b36f00">底弦（拉）</text>
+          <text x="350" y="280" text-anchor="middle" fill="#b36f00" font-weight="700">应力集中点（最危险）</text>
+        </g>
+        <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#00264D">侧视图（含内部桁架）</text>
+      </svg>
+    </div>
+
+    <h3>5.3 3D 透视效果（可交互）</h3>
+    <div id="canvas3d-wrap">
+      <canvas id="canvas3d" width="700" height="380"></canvas>
+      <div class="canvas-controls">
+        <button onclick="bridge3D.rotate(-0.15)">⟲ 左转</button>
+        <button onclick="bridge3D.rotate(0.15)">⟳ 右转</button>
+        <button onclick="bridge3D.reset()">🔄 重置</button>
+        <button onclick="bridge3D.toggleLabels()">🏷️ 显示/隐藏标注</button>
+      </div>
+    </div>
+
+    <script>
+    /* ========== 纯 Canvas 绘制 3D 透视纸桥 ========== */
+    const bridge3D = (function() {
+      const canvas = document.getElementById('canvas3d');
+      const ctx = canvas.getContext('2d');
+      let angle = 0.5;   // 旋转角（绕 Y 轴）
+      let showLabels = true;
+      const W = canvas.width, H = canvas.height;
+      const cx = W/2, cy = H/2 + 40;
+
+      // 简单 3D->2D 投影（等轴测变体）
+      function project(x, y, z) {
+        const cosA = Math.cos(angle), sinA = Math.sin(angle);
+        const xr = x*cosA - z*sinA;
+        const zr = x*sinA + z*cosA;
+        const scale = 3.5;
+        return {
+          x: cx + xr * scale,
+          y: cy - y * scale + zr * 0.5,  // y 向上，z 影响 y 位置制造透视
+          depth: zr
+        };
+      }
+
+      // 绘制实心长方体
+      function drawBox(x, y, z, w, h, d, color, stroke) {
+        // 8 个顶点
+        const pts = [
+          project(x,   y,   z),   project(x+w, y,   z),
+          project(x+w, y+h, z),   project(x,   y+h, z),
+          project(x,   y,   z+d), project(x+w, y,   z+d),
+          project(x+w, y+h, z+d), project(x,   y+h, z+d),
+        ];
+        // 面（按平均 depth 排序）
+        const faces = [
+          {idx:[0,1,2,3], color:color},                 // 前
+          {idx:[4,5,6,7], color:shade(color,-15)},      // 后
+          {idx:[0,3,7,4], color:shade(color,-8)},       // 左
+          {idx:[1,2,6,5], color:shade(color,8)},        // 右
+          {idx:[0,1,5,4], color:shade(color,20)},       // 顶
+          {idx:[3,2,6,7], color:shade(color,-25)},      // 底
+        ];
+        faces.forEach(f => {
+          f.avgDepth = f.idx.reduce((s,i)=>s+pts[i].depth,0)/4;
+        });
+        faces.sort((a,b)=>a.avgDepth - b.avgDepth);
+        faces.forEach(f => {
+          ctx.beginPath();
+          f.idx.forEach((i,k) => {
+            if (k===0) ctx.moveTo(pts[i].x, pts[i].y);
+            else ctx.lineTo(pts[i].x, pts[i].y);
+          });
+          ctx.closePath();
+          ctx.fillStyle = f.color;
+          ctx.fill();
+          ctx.strokeStyle = stroke || '#00264D';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+      }
+
+      function shade(hex, amt) {
+        const c = hex.replace('#','');
+        const r = Math.max(0, Math.min(255, parseInt(c.substr(0,2),16) + amt));
+        const g = Math.max(0, Math.min(255, parseInt(c.substr(2,2),16) + amt));
+        const b = Math.max(0, Math.min(255, parseInt(c.substr(4,2),16) + amt));
+        return `rgb(${r},${g},${b})`;
+      }
+
+      function drawLine3D(p1, p2, color, width) {
+        const a = project(...p1), b = project(...p2);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = color; ctx.lineWidth = width||2;
+        ctx.stroke();
+      }
+
+      function drawLabel(x, y, z, text, color) {
+        if (!showLabels) return;
+        const p = project(x, y, z);
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = color || '#00264D';
+        ctx.textAlign = 'center';
+        // 文字背景
+        const w = ctx.measureText(text).width + 8;
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.fillRect(p.x - w/2, p.y - 12, w, 16);
+        ctx.strokeStyle = color || '#00264D';
+        ctx.strokeRect(p.x - w/2, p.y - 12, w, 16);
+        ctx.fillStyle = color || '#00264D';
+        ctx.fillText(text, p.x, p.y);
+      }
+
+      function render() {
+        // 背景
+        ctx.clearRect(0,0,W,H);
+        const grad = ctx.createLinearGradient(0,0,0,H);
+        grad.addColorStop(0,'#f0f6fa'); grad.addColorStop(1,'#ffffff');
+        ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+        // 桌面（一个大平面）
+        const t1 = project(-50,0,-25), t2 = project(50,0,-25),
+              t3 = project(50,0,25),   t4 = project(-50,0,25);
+        ctx.beginPath();
+        ctx.moveTo(t1.x,t1.y); ctx.lineTo(t2.x,t2.y);
+        ctx.lineTo(t3.x,t3.y); ctx.lineTo(t4.x,t4.y); ctx.closePath();
+        ctx.fillStyle = '#e9eef2'; ctx.fill();
+        ctx.strokeStyle='#9ba7b2'; ctx.lineWidth=1; ctx.stroke();
+
+        // ============ 4 根桥墩 ============
+        // 底座矩形：长 30，宽 12，桥墩 Φ2.5，高 8
+        const pillarColor = '#1BA0D7';
+        const positions = [
+          [-15, 0, -6],  // 左前
+          [15,  0, -6],  // 右前
+          [-15, 0, 6],   // 左后
+          [15,  0, 6],   // 右后
+        ];
+        positions.forEach(p => {
+          drawBox(p[0]-1.25, 0, p[2]-1.25, 2.5, 8, 2.5, pillarColor);
+        });
+
+        // ============ 底部横撑 ============
+        drawLine3D([-15, 0.5, -6],[15, 0.5, -6], '#9BA7B2', 3);
+        drawLine3D([-15, 0.5, 6],[15, 0.5, 6], '#9BA7B2', 3);
+        drawLine3D([-15, 0.5, -6],[-15, 0.5, 6], '#9BA7B2', 3);
+        drawLine3D([15, 0.5, -6],[15, 0.5, 6], '#9BA7B2', 3);
+        // 中部横撑
+        drawLine3D([-15, 4, -6],[15, 4, -6], '#9BA7B2', 3);
+        drawLine3D([-15, 4, 6],[15, 4, 6], '#9BA7B2', 3);
+
+        // ============ 桥面（瓦楞三明治） ============
+        // 桥面：30cm × 12cm × 3.5cm，位于桥墩顶部 y=8
+        drawBox(-15, 8, -6, 30, 3.5, 12, '#E9EEF2');
+
+        // ============ 底部桁架 ============
+        drawLine3D([-15, 8, 0], [0, 3, 0], '#FBAB2C', 3);
+        drawLine3D([15, 8, 0], [0, 3, 0], '#FBAB2C', 3);
+        drawLine3D([-15, 8, 0], [15, 8, 0], '#FBAB2C', 2);
+
+        // ============ 书本荷载示意 ============
+        drawBox(-8, 11.5, -4, 16, 2, 8, '#FBAB2C');
+        const loadP = project(0, 15, 0);
+        if (showLabels) {
+          ctx.fillStyle = '#E2231A';
+          ctx.font = 'bold 13px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('↓ 书本荷载', loadP.x, loadP.y - 5);
+        }
+
+        // ============ 标注 ============
+        drawLabel(-20, 4, -6, '桥墩 Φ2.5×8cm', '#005073');
+        drawLabel(0, 10.5, -10, '瓦楞桥面 30×12cm', '#00264D');
+        drawLabel(0, 2, 10, '底部横撑框架', '#39424E');
+        drawLabel(0, 3, -2, '桁架节点', '#b36f00');
+
+        // 标题
+        ctx.fillStyle = '#00264D';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('3D 透视效果图（可旋转）', W/2, 25);
+      }
+
+      function rotate(delta) { angle += delta; render(); }
+      function reset() { angle = 0.5; render(); }
+      function toggleLabels() { showLabels = !showLabels; render(); }
+
+      // 鼠标拖拽旋转
+      let dragging = false, lastX = 0;
+      canvas.addEventListener('mousedown', e => { dragging = true; lastX = e.clientX; });
+      canvas.addEventListener('mousemove', e => {
+        if (dragging) { angle += (e.clientX - lastX) * 0.01; lastX = e.clientX; render(); }
+      });
+      canvas.addEventListener('mouseup', () => dragging = false);
+      canvas.addEventListener('mouseleave', () => dragging = false);
+      // 触摸支持
+      canvas.addEventListener('touchstart', e => { dragging = true; lastX = e.touches[0].clientX; });
+      canvas.addEventListener('touchmove', e => {
+        if (dragging) { angle += (e.touches[0].clientX - lastX) * 0.01; lastX = e.touches[0].clientX; render(); }
+      });
+      canvas.addEventListener('touchend', () => dragging = false);
+
+      render();
+      return { rotate, reset, toggleLabels };
+    })();
+    </script>
+
+    <div class="callout">
+      <strong>💡 使用提示：</strong>点击按钮或拖拽 3D 图可旋转视角，帮助你从不同角度理解结构细节。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第6章：预期成绩 ============ -->
+<section class="chapter" id="ch6">
+  <div class="container">
+    <h2>⑥ 预期成绩与优化建议</h2>
+
+    <h3>6.1 承重估算</h3>
+    <p>基于纸管抗压极限与瓦楞桥面抗弯强度的理论计算：</p>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th>部件</th><th>理论承载力</th><th>安全系数</th><th>实际可用承载</th></tr></thead>
+        <tbody>
+          <tr><td>单根桥墩（Φ2.5cm 实心卷管）</td><td>约 8~12 kg</td><td>0.6</td><td>5~7 kg</td></tr>
+          <tr><td>4 根桥墩合计</td><td>约 32~48 kg</td><td>0.6</td><td>20~28 kg</td></tr>
+          <tr><td>瓦楞桥面（跨度 30cm）</td><td>约 10~15 kg（中央集中）</td><td>0.7</td><td>7~10 kg</td></tr>
+          <tr><td>底部桁架加持后</td><td>—</td><td>—</td><td><strong>12~18 kg</strong></td></tr>
+          <tr><td colspan="3"><strong>系统瓶颈</strong>：桥面抗弯（非桥墩）</td><td><strong>≈ 12~18 kg</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout key">
+      <h4>🎯 预期成绩</h4>
+      <p>假设每本书约 800g（常见教科书重量），本方案预计可承载 <strong>15~22 本</strong>。
+         若教室使用的书较轻（如 500g 薄册），承载数量可达 <strong>24~35 本</strong>。</p>
+      <p><strong>结构自重仅 180g，"承重比"（承重/自重）可达 80~120 倍</strong>，属于高水平表现。</p>
+    </div>
+
+    <h3>6.2 制胜关键点（Top 5）</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">1</div>
+        <h4>纸管必须卷得"紧"</h4>
+        <p>卷管时用力越均匀紧实，越接近"实心"，抗压强度差异可达 2~3 倍。</p>
+      </div>
+      <div class="card">
+        <div class="icon">2</div>
+        <h4>胶水必须"干透"</h4>
+        <p>湿胶强度不足干胶的 30%，提前 24 小时完工是硬性要求。</p>
+      </div>
+      <div class="card">
+        <div class="icon">3</div>
+        <h4>书本必须"居中"</h4>
+        <p>荷载偏心会产生附加弯矩，测试时注意书本对齐桥面中心线。</p>
+      </div>
+      <div class="card">
+        <div class="icon">4</div>
+        <h4>桥墩必须"垂直"</h4>
+        <p>桥墩倾斜 5° 会使承载力下降 30% 以上。装配时用直角尺校准。</p>
+      </div>
+      <div class="card">
+        <div class="icon">5</div>
+        <h4>接缝必须"饱满"</h4>
+        <p>桥面与桥墩的接合面是最薄弱环节，涂胶要覆盖整个接触面。</p>
+      </div>
+    </div>
+
+    <h3>6.3 进阶优化建议（追求极限者）</h3>
+    <div class="callout warn">
+      <h4>⚡ 如果还有余力，可尝试：</h4>
+      <ul style="margin-left:1.5rem; line-height:1.9;">
+        <li><strong>双层瓦楞：</strong>在桥面中再加一层瓦楞芯（需多用 4 张纸），抗弯刚度再提升 50%。</li>
+        <li><strong>桥墩中部内撑：</strong>在每根桥墩管内塞入一小段纸卷，防止局部屈曲。</li>
+        <li><strong>拱形桥面：</strong>将桥面微微拱起 1cm（加工时把芯板压成弧形），把部分弯矩转化为压力流。</li>
+        <li><strong>书本接触垫片：</strong>桥面中央放一片 5cm×12cm 的多层硬纸板，均匀分散集中荷载。</li>
+      </ul>
+    </div>
+
+    <h3>6.4 常见失败模式预警</h3>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead><tr><th>失败模式</th><th>表现</th><th>根因</th><th>对策</th></tr></thead>
+        <tbody>
+          <tr><td>桥面中央下凹</td><td>桥面弯曲变形</td><td>抗弯刚度不足</td><td>加厚瓦楞芯 / 加底部桁架</td></tr>
+          <tr><td>桥墩失稳（歪倒）</td><td>桥墩突然弯折</td><td>欧拉失稳 / 横向约束不足</td><td>加中部横撑 / 减小细长比</td></tr>
+          <tr><td>接合处脱胶</td><td>桥面从桥墩滑落</td><td>胶未干 / 涂胶面积不足</td><td>提前制作 / 加宽承托板</td></tr>
+          <tr><td>桥墩底部溃屈</td><td>底部压扁</td><td>纸管卷得不紧</td><td>卷管时持续加力，层层涂胶</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cta-wrap">
+      <a href="#ch1" class="cta">🚀 返回顶部，开始动手制作</a>
+    </div>
+
+    <div class="callout key" style="margin-top:2rem;">
+      <h4>🌟 最后的话：第一性原理的胜利</h4>
+      <p>这个方案不是最华丽的，但一定是<strong>逻辑最清晰、风险最可控</strong>的。
+         我们没有靠经验主义堆砌结构，而是从"支撑力来自几何放大"这一根本出发，
+         让每一张 A4 纸都用在刀刃上——<strong>桥墩抗压、桥面抗弯、桁架转化力流</strong>。</p>
+      <p>记住：<em>工程不是把东西做得最强，而是用最少的材料解决最关键的问题。</em>
+         祝你在挑战中取得佳绩！🏆</p>
+    </div>
+  </div>
+</section>
+
+<footer style="background:#00264D; color:#fff; padding:2rem 1.5rem; text-align:center;">
+  <p style="margin:0; opacity:0.85;">© 2026 纸桥承重挑战设计方案 · 基于第一性原理 · 仅供学习参考</p>
+</footer>
+
+</body>
+</html>
