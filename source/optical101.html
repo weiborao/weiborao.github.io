@@ -3194,12 +3194,57 @@ fill="none" stroke="#049fd9" stroke-width="2.8" stroke-linecap="round"/>
       <p>你听到一段和弦（时域信号），钢琴调音师能告诉你它由 Do + Mi + Sol 三个音组成（频域分量）。时域是"你听到了什么"，频域是"有哪些音符"。傅里叶变换就是那个"调音师的耳朵"——它把复杂波形拆解成一个个单色正弦波。</p>
     </div>
 
-    <p>对光通信而言，频域视角非常关键：</p>
+    <p>
+      在光通信中，傅里叶变换的意义至关重要：
+    </p>
     <ul>
-      <li>一个矩形脉冲（时域锐利）在频域是一个宽阔的 sinc 函数——意味着它<strong>占用很宽的带宽</strong>；</li>
-      <li>一个带限的脉冲（频域窄）在时域必然会"展宽"——意味着符号之间容易重叠（ISI）；</li>
-      <li>调制的本质就是把基带信号的频谱"搬移"到光载波频率附近。</li>
+      <li><strong>分析信号带宽</strong>：一个数字脉冲在时域看是方方正正的，但在频域展开后占据了很宽的频率范围。调制格式决定了信号的频谱形状和带宽。</li>
+      <li><strong>理解色散</strong>：色散本质上是不同频率成分以不同速度传播——这在频域中更容易理解和补偿。</li>
+      <li><strong>DSP 处理</strong>：相干接收机中的数字信号处理（DSP）芯片，大量使用快速傅里叶变换（FFT）来进行均衡、色散补偿和载波恢复。</li>
     </ul>
+
+    <!-- SVG: Time domain vs frequency domain -->
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="傅里叶变换：时域方波信号到频域频谱成分">
+        <text x="410" y="22" font-size="13" fill="#0D274D" text-anchor="middle" font-weight="700">傅里叶变换：时域 ↔ 频域</text>
+
+        <!-- Time domain -->
+        <rect x="30" y="40" width="340" height="165" rx="8" fill="#F0FAFF" stroke="#049FD9" stroke-width="1"/>
+        <text x="200" y="62" font-size="11" fill="#049FD9" text-anchor="middle" font-weight="700">时域 (Time Domain)</text>
+        <!-- Axes -->
+        <line x1="70" y1="80" x2="70" y2="190" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="70" y1="145" x2="340" y2="145" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="345" y="148" font-size="9" fill="#9B9CA0">t</text>
+        <!-- Square wave -->
+        <path d="M80,145 L80,95 L130,95 L130,145 L180,145 L180,95 L230,95 L230,145 L280,145 L280,95 L330,95 L330,145" fill="none" stroke="#049FD9" stroke-width="2.5"/>
+        <text x="200" y="185" font-size="10" fill="#58585B" text-anchor="middle">看起来是"方波"</text>
+
+        <!-- Arrow -->
+        <text x="410" y="110" font-size="24" fill="#0D274D" text-anchor="middle">⟹</text>
+        <text x="410" y="135" font-size="10" fill="#58585B" text-anchor="middle">傅里叶变换</text>
+        <text x="410" y="150" font-size="10" fill="#58585B" text-anchor="middle">FT</text>
+
+        <!-- Frequency domain -->
+        <rect x="450" y="40" width="340" height="165" rx="8" fill="#E8F7EE" stroke="#67B346" stroke-width="1"/>
+        <text x="620" y="62" font-size="11" fill="#67B346" text-anchor="middle" font-weight="700">频域 (Frequency Domain)</text>
+        <line x1="490" y1="80" x2="490" y2="190" stroke="#9B9CA0" stroke-width="1"/>
+        <line x1="490" y1="180" x2="760" y2="180" stroke="#9B9CA0" stroke-width="1"/>
+        <text x="765" y="183" font-size="9" fill="#9B9CA0">f</text>
+        <!-- Sinc-like spectrum bars -->
+        <rect x="510" y="95" width="20" height="85" rx="2" fill="#67B346" opacity="0.7"/>
+        <text x="520" y="90" font-size="8" fill="#005073" text-anchor="middle">f₀</text>
+        <rect x="555" y="130" width="20" height="50" rx="2" fill="#67B346" opacity="0.5"/>
+        <text x="565" y="125" font-size="8" fill="#005073" text-anchor="middle">3f₀</text>
+        <rect x="600" y="148" width="20" height="32" rx="2" fill="#67B346" opacity="0.35"/>
+        <text x="610" y="143" font-size="8" fill="#005073" text-anchor="middle">5f₀</text>
+        <rect x="645" y="158" width="20" height="22" rx="2" fill="#67B346" opacity="0.25"/>
+        <text x="655" y="153" font-size="8" fill="#005073" text-anchor="middle">7f₀</text>
+        <rect x="690" y="164" width="20" height="16" rx="2" fill="#67B346" opacity="0.18"/>
+        <text x="700" y="159" font-size="8" fill="#005073" text-anchor="middle">9f₀</text>
+        <text x="620" y="210" font-size="10" fill="#58585B" text-anchor="middle">实际是无穷多奇次谐波的叠加</text>
+      </svg>
+    </div>
+    <p>一个"看似简单"的方波，在频域中展开为无穷多个频率成分——这就是傅里叶变换揭示的真相</p>
 
     <h3>3.4.2 奈奎斯特定理——带宽的绝对下限</h3>
 
