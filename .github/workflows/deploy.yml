@@ -1,18 +1,19 @@
----
 name: Hexo Best Practice 2026
 
 on:
   push:
     branches:
-      - main # 确保你的源码分支名是 main
+      - main 
 
-# 2026 核心：必须配置以下权限才能直接发布到 GitHub Pages 服务
+# 【新增】解决 Node 20 弃用警告：强制 Action 插件使用 Node 24 运行环境
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 限制同一时间只有一个部署任务在运行，避免冲突
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -27,11 +28,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # 使用长期支持版 Node
+          node-version: '24' 
           cache: 'npm'
 
       - name: Install Dependencies
-        # 使用 npm ci 代替 npm install 以解决模块丢失报错
         run: npm ci
 
       - name: Generate Hexo Site
@@ -40,7 +40,6 @@ jobs:
           npx hexo generate
 
       - name: Upload Artifact
-        # 将生成的 public 目录上传为 GitHub Pages 产物
         uses: actions/upload-pages-artifact@v3
         with:
           path: './public'
@@ -54,5 +53,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        # 2026 核心：直接将产物发布到 Pages 引擎
         uses: actions/deploy-pages@v4
