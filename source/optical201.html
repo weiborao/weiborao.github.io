@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optical 201 · DWDM 与相干光通信 — 光纤里的彩虹高速公路与 DSP 魔法</title>
+<meta name="description" content="从第一性原理理解 DWDM 波分复用与相干光通信——光通信近 20 年最重要的两大技术革命。通俗类比 + 严密数学 + 工程实战，一站式讲透白光/彩光、ROADM、WSS、相干 DSP、PCS 概率整形。">
+<link rel="stylesheet" href="cisco-style.css">
+<style>
+  /* ============================================================================
+     Optical 201 Custom Enhancements — 与 101/102 保持完全一致的补充样式
+     ============================================================================ */
+
+  /* Hero Section 增强 */
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-8);
+    flex-wrap: wrap;
+    margin-top: var(--space-6);
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+  .hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .hero-subtitle {
+    font-size: 1.25rem;
+    max-width: 820px;
+    margin: var(--space-4) auto 0;
+    line-height: 1.7;
+    opacity: 0.95;
+    font-weight: 300;
+  }
+
+  /* TL;DR 盒子 */
+  .tldr-box {
+    background: linear-gradient(135deg, var(--bg-soft) 0%, var(--bg-light) 100%);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-8);
+    margin: var(--space-8) 0;
+    border-left: 6px solid var(--cisco-blue);
+  }
+  .tldr-box h3 {
+    color: var(--cisco-navy);
+    margin-bottom: var(--space-6);
+    padding-bottom: 0;
+    border: none;
+  }
+  .tldr-grid {
+    display: grid;
+    gap: var(--space-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) {
+    .tldr-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .tldr-item {
+    background: var(--bg-white);
+    padding: var(--space-6);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .tldr-number {
+    position: absolute;
+    top: -12px;
+    left: var(--space-4);
+    background: var(--cisco-blue);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .tldr-item h4 {
+    color: var(--cisco-blue-dark);
+    margin-top: var(--space-4);
+    padding-bottom: 0;
+  }
+  .tldr-item p {
+    font-size: 0.95rem;
+    margin-bottom: 0;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  /* 模块标记 */
+  .module-marker {
+    display: inline-block;
+    background: var(--cisco-accent);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-4);
+  }
+  .module-hero {
+    background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue) 50%, var(--cisco-accent) 100%);
+    color: white;
+    padding: var(--space-12) 0;
+    margin-bottom: var(--space-8);
+  }
+  .module-hero h2 {
+    color: white;
+    border-bottom-color: rgba(255,255,255,0.4);
+    margin-bottom: var(--space-4);
+  }
+  .module-hero p {
+    font-size: 1.1rem;
+    max-width: 780px;
+    opacity: 0.95;
+    line-height: 1.75;
+  }
+
+  /* 思考盒子 */
+  .think-box {
+    background: linear-gradient(135deg, #FFF8E7 0%, #FFFBF0 100%);
+    border-left: 5px solid var(--color-warning);
+    padding: var(--space-6) var(--space-8);
+    margin: var(--space-8) 0;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  }
+  .think-box strong {
+    color: #B8860B;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* 类比盒子 */
+  .analogy-box {
+    background: linear-gradient(135deg, #F0F7FF 0%, #F8FBFF 100%);
+    border-left: 5px solid var(--cisco-blue);
+    padding: var(--space-6) var(--space-8);
+    margin: var(--space-6) 0;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  }
+  .analogy-box strong {
+    color: var(--cisco-blue-dark);
+  }
+
+  /* 公式盒子 */
+  .formula-box {
+    background: var(--cisco-navy);
+    color: white;
+    padding: var(--space-6) var(--space-8);
+    margin: var(--space-6) 0;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+  }
+  .formula-box .formula-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cisco-accent);
+    margin-bottom: var(--space-4);
+  }
+  .formula-box .formula {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    margin: var(--space-4) 0;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+  .formula-box .formula-explain {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-top: var(--space-4);
+    line-height: 1.65;
+  }
+
+  /* 核心要点盒子 */
+  .keypoints-box {
+    background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue-dark) 100%);
+    color: white;
+    padding: var(--space-8);
+    border-radius: var(--border-radius-md);
+    margin: var(--space-8) 0;
+  }
+  .keypoints-box h3 {
+    color: white;
+    padding-bottom: var(--space-4);
+    border-bottom: 3px solid var(--cisco-accent);
+    margin-bottom: var(--space-6);
+  }
+  .keypoints-box ol {
+    margin-left: 1.5rem;
+    padding-left: 0.5rem;
+  }
+  .keypoints-box li {
+    margin-bottom: var(--space-4);
+    line-height: 1.75;
+    padding-left: 0.5rem;
+  }
+  .keypoints-box li::marker {
+    color: var(--cisco-accent);
+    font-weight: 700;
+  }
+  .keypoints-box strong {
+    color: var(--cisco-accent);
+  }
+
+  /* 优势/劣势对比 */
+  .pro-con-grid {
+    display: grid;
+    gap: var(--space-6);
+    margin: var(--space-8) 0;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) {
+    .pro-con-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .pro-box, .con-box {
+    padding: var(--space-6);
+    border-radius: var(--border-radius-md);
+  }
+  .pro-box {
+    background: linear-gradient(135deg, #F0FBF0 0%, #F8FDF8 100%);
+    border-left: 5px solid var(--color-success);
+  }
+  .con-box {
+    background: linear-gradient(135deg, #FFF3F3 0%, #FFFAFA 100%);
+    border-left: 5px solid var(--cisco-red);
+  }
+  .pro-box h4, .con-box h4 {
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+  .pro-box h4 { color: var(--color-success); }
+  .con-box h4 { color: var(--cisco-red); }
+
+  /* 组件卡片 */
+  .component-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-6);
+    transition: all var(--transition-fast);
+    margin-bottom: var(--space-4);
+  }
+  .component-card:hover {
+    border-color: var(--cisco-accent);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+  }
+  .component-card .comp-tag {
+    display: inline-block;
+    background: var(--cisco-accent);
+    color: white;
+    padding: 0.2rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+  }
+  .component-card h4 {
+    color: var(--cisco-navy);
+    margin: var(--space-2) 0 var(--space-2);
+    padding-bottom: 0;
+  }
+  .component-card .comp-sub {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--space-4);
+    font-style: italic;
+  }
+
+  /* 小节导航/下一步 */
+  .next-step {
+    background: linear-gradient(90deg, var(--bg-soft) 0%, var(--bg-light) 100%);
+    padding: var(--space-6) var(--space-8);
+    margin: var(--space-8) 0;
+    border-radius: var(--border-radius-md);
+    border-top: 4px solid var(--cisco-accent);
+  }
+  .next-step h4 {
+    color: var(--cisco-blue);
+    margin-bottom: var(--space-2);
+    padding-bottom: 0;
+  }
+  .next-step p {
+    margin-bottom: 0;
+    color: var(--text-secondary);
+  }
+
+  /* SVG 内的文字样式 */
+  .svg-scroll-wrapper svg text {
+    font-family: var(--font-sans);
+  }
+  .svg-scroll-wrapper {
+    background: white;
+    padding: var(--space-6);
+    text-align: center;
+  }
+  .svg-caption {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: var(--space-4);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* 重要洞察 */
+  .insight-box {
+    background: linear-gradient(135deg, #F5F0FF 0%, #FAF7FF 100%);
+    border-left: 5px solid var(--cisco-purple);
+    padding: var(--space-6) var(--space-8);
+    margin: var(--space-6) 0;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  }
+  .insight-box strong {
+    color: var(--cisco-purple);
+  }
+
+  /* DSP流程图 */
+  .dsp-flow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    counter-reset: dsp-step;
+  }
+  .dsp-step {
+    counter-increment: dsp-step;
+    background: var(--bg-white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-4) var(--space-6);
+    position: relative;
+    padding-left: 4rem;
+    transition: all var(--transition-fast);
+  }
+  .dsp-step:hover {
+    border-color: var(--cisco-accent);
+    transform: translateX(6px);
+  }
+  .dsp-step::before {
+    content: counter(dsp-step);
+    position: absolute;
+    left: var(--space-4);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--cisco-blue);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .dsp-step h5 {
+    color: var(--cisco-navy);
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+  }
+  .dsp-step p {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.55;
+  }
+
+  /* Generation (代际) 表格优化 */
+  .generation-table th:first-child,
+  .generation-table td:first-child {
+    font-weight: 600;
+    background: var(--bg-soft);
+  }
+
+  /* Foot quote */
+  .foot-quote {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    max-width: 760px;
+    margin: var(--space-12) auto;
+    padding: var(--space-8);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    line-height: 1.7;
+  }
+
+  /* 术语卡片，用于 Glossary */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+  @media (min-width: 900px) {
+    .glossary-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .glossary-item {
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border-color);
+  }
+  .glossary-item strong {
+    color: var(--cisco-blue-dark);
+    font-size: 1rem;
+  }
+  .glossary-item .term-en {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-left: 0.5rem;
+  }
+  .glossary-item p {
+    margin-top: 0.4rem;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* 章标号 */
+  .chapter-no {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--cisco-accent);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-2);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HERO — 文章主标题
+============================================================ -->
+<section class="hero">
+  <div class="container">
+    <div class="module-marker">OPTICAL 201 · 网络架构篇</div>
+    <h1>彩虹高速公路与 DSP 魔法</h1>
+    <p class="hero-subtitle">
+      DWDM 让一根光纤瞬间变身几十车道的"彩虹高速公路"；<br>
+      相干光通信用 DSP 算法在电域"消除"了色散、偏振、非线性——<br>
+      这是光通信近 20 年最重要的两次技术革命。<br>
+      从第一性原理理解它们为何出现、如何工作、将去向何方。
+    </p>
+    <div class="hero-meta">
+      <span>⏱ 阅读约 60 分钟</span>
+      <span>📘 2 个模块 · 15+ 器件 · 20+ 公式</span>
+      <span>🗓 2026 年 4 月</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TL;DR — 三句话读懂这篇文章
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+    <div class="tldr-box">
+      <h3>TL;DR · 三句话读懂这篇文章</h3>
+      <div class="tldr-grid">
+        <div class="tldr-item">
+          <div class="tldr-number">01</div>
+          <h4>DWDM 把一根光纤变成"彩虹高速公路"</h4>
+          <p>利用不同波长的光互不干扰的物理特性，一根光纤同时承载 40/80/96 个独立波长信号，总容量从几十 Gbps 跃升到几十 Tbps——这是 1990 年代互联网爆发的基础设施前提。</p>
+        </div>
+        <div class="tldr-item">
+          <div class="tldr-number">02</div>
+          <h4>ROADM 让波长"软件定义"</h4>
+          <p>传统光网络需要工程师现场改接光纤才能改变波长路由。ROADM 通过 WSS（波长选择开关）把波长级别的路由变成"软件可重构"——这是现代光网络灵活性的根本来源。</p>
+        </div>
+        <div class="tldr-item">
+          <div class="tldr-number">03</div>
+          <h4>相干光 + DSP 把光域问题搬到电域解决</h4>
+          <p>色散、偏振、非线性曾经是光通信不可逾越的物理壁垒。相干光通信引入本振激光 + 高速 ADC + 强大 DSP，在电域一次性"算"掉所有损伤——速率从 10G 跃升到 1.6T，距离从 80 km 延伸到 5000 km。</p>
+        </div>
+      </div>
+      <p style="margin-top: var(--space-6); font-size: 1rem; color: var(--text-secondary); text-align: center;">
+        想理解每一个"为什么"，请继续往下读——我们会从棱镜看见彩虹的物理原理开始，一路走到 2026 年最前沿的 1.6T 相干光模块。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MODULE 06 HERO
+============================================================ -->
+<section class="module-hero">
+  <div class="container">
+    <span class="chapter-no">Module 06 of 09</span>
+    <h2>DWDM — 在一根光纤中创造"彩虹高速公路"</h2>
+    <p>
+      Optical 101 和 102 告诉我们：一根光纤可以承载一束精心调制的光波，跨越数千公里。
+      但当全球数据量每年翻倍增长，单束光的容量很快就不够用了——你会选择再铺一根光纤（昂贵又缓慢），
+      还是用巧妙的物理原理"变出"几十束光来共享同一根光纤？
+      这是 1980 年代末光通信工程师面对的根本问题。他们给出的答案改变了世界——
+      DWDM（密集波分复用）。
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     §6.1 WDM 的第一性原理
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <div class="think-box">
+      <p><strong>💭 模块引导问题</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        假设你拥有一根已经铺设好的光纤，投入成本巨大（跨洋海缆动辄数十亿美元）。
+        你能让这根光纤"变宽"吗？物理上，光纤的直径、材料、全内反射机制都已固定，
+        但是——同一根光纤上能不能同时跑多束"不互相干扰"的光？
+        如果能，这些光靠什么"区分"彼此？
+      </p>
+    </div>
+
+    <h3>§6.1 WDM 的第一性原理 — 彩虹的启示</h3>
+
+    <p>
+      让我们从一个你小学就见过的自然现象说起：<strong>棱镜把白光分解成彩虹</strong>。
+      这个看似平凡的物理现象，揭示了一个深刻的事实——
+      白光并不是一种单一的光，而是不同波长（颜色）的光叠加在一起。
+      它们同时存在于同一束光中，却各自保持独立。当它们被棱镜"分离"之后，
+      就重新显现出彼此独立的身份：红橙黄绿青蓝紫。
+    </p>
+
+    <p>
+      把这个思路反过来用：如果不同波长的光本来就可以"同时存在却互不干扰"，
+      那么我们完全可以在发射端<strong>同时打出几十束不同波长的光、让它们挤进同一根光纤</strong>，
+      到接收端再用一个"棱镜式"的分光器把它们分开——这不就是 N 倍的容量吗？
+      这就是 WDM（Wavelength Division Multiplexing，波分复用）的核心思想。
+    </p>
+
+    <div class="analogy-box">
+      <p><strong>💡 类比 · 电台的频道共享</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        这个概念并不陌生——你每天都在用。想想你家的 FM 收音机：
+        北京的 FM 97.4、FM 101.8、FM 103.9、FM 106.1 等十几个电台，都使用同一段"电磁波空间"（无线电频谱）同时广播，
+        但你的收音机可以精确挑选出任意一个频道——因为它们使用的<strong>载波频率不同</strong>。
+        WDM 本质上就是"光的 FM 广播"：不同波长 = 不同频率 = 不同"电台"。
+        棱镜 = 调谐器；光纤 = 无线电频谱；不同波长的光 = 不同频道。这个类比几乎是一比一精确的。
+      </p>
+    </div>
+
+    <p>
+      严格来说，WDM 属于<strong>频分复用（Frequency Division Multiplexing, FDM）在光域的实现</strong>。
+      频分复用在通信工程中并不新鲜——从 19 世纪的电报多路复用，到 20 世纪的模拟电话、无线广播、
+      电视信号，FDM 早已被反复验证。WDM 只是把这个古老的思想搬到了光频段（近红外 200 THz 附近），
+      把载波频率从 100 MHz 级别拉高到 200 THz——可用带宽直接放大了 100 万倍。
+    </p>
+
+    <div class="formula-box">
+      <div class="formula-label">核心公式 ① · WDM 的可用频谱</div>
+      <div class="formula">C 波段总带宽 ≈ 35 nm ≈ 4800 GHz</div>
+      <div class="formula-explain">
+        若每信道占用 50 GHz（DWDM 50GHz 间距），C 波段可容纳 <strong>96 个波长</strong>。<br>
+        每波长传 400 Gbps → 总容量 = 96 × 400 = <strong>38.4 Tbps（单纤单向）</strong>。<br>
+        开启 L 波段后，容量再翻倍至 <strong>~76.8 Tbps</strong>。
+      </div>
+    </div>
+
+    <p>
+      这里有一个让人瞠目结舌的事实：一根头发丝般粗细的单模光纤，利用 DWDM 技术，
+      <strong>能在 1 秒内传输 10000 部蓝光电影</strong>的数据量。
+      这不是工程奇迹，这是物理定律赠予我们的礼物——我们只是聪明地利用了它。
+    </p>
+
+    <h4>WDM 的三个物理前提</h4>
+
+    <p>让我们从第一性原理拆解：为什么 WDM 能工作？这背后有三个必须同时满足的物理前提。</p>
+
+    <div class="grid grid-3" style="margin-top: var(--space-6);">
+      <div class="card">
+        <div class="comp-tag" style="background: var(--cisco-blue); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">前提 1</div>
+        <h4>光纤带宽远超单信道</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+          C 波段有 4.8 THz 带宽，而单个 400G 相干信号只占用 50-100 GHz——意味着光纤里
+          <strong>99% 的频谱是空的</strong>。有巨大"富余空间"可以挤入更多波长。
+        </p>
+      </div>
+      <div class="card">
+        <div class="comp-tag" style="background: var(--cisco-blue); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">前提 2</div>
+        <h4>不同波长线性独立</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+          在光纤的线性工作区内，不同波长的光遵循叠加原理——各走各的路，互不影响。
+          （非线性效应才是"敌人"——我们将在 §6.5 讨论如何驯服它。）
+        </p>
+      </div>
+      <div class="card">
+        <div class="comp-tag" style="background: var(--cisco-blue); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">前提 3</div>
+        <h4>分光器件可区分波长</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+          必须能在接收端用<strong>光学滤波器</strong>精确挑出每个波长——这就是 AWG、TFF、FBG 等 Mux/DeMux 器件的使命。
+          没有这些，WDM 就只是理论。
+        </p>
+      </div>
+    </div>
+
+    <div class="svg-scroll-wrapper" style="margin-top: var(--space-8);">
+      <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <defs>
+          <linearGradient id="fiber-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#0D274D;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:#58585B;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#0D274D;stop-opacity:1"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">WDM 原理：多波长共享同一根光纤</text>
+
+        <!-- 发射端：8 个激光源，不同颜色 -->
+        <g transform="translate(30, 80)">
+          <text x="0" y="-20" font-size="13" font-weight="600" fill="#0D274D">发射端 (TX)</text>
+          <circle cx="15" cy="10" r="8" fill="#E2231A"/><text x="35" y="14" font-size="11" fill="#58585B">λ1 (1530)</text>
+          <circle cx="15" cy="40" r="8" fill="#F58025"/><text x="35" y="44" font-size="11" fill="#58585B">λ2 (1535)</text>
+          <circle cx="15" cy="70" r="8" fill="#FBAB18"/><text x="35" y="74" font-size="11" fill="#58585B">λ3 (1540)</text>
+          <circle cx="15" cy="100" r="8" fill="#67B346"/><text x="35" y="104" font-size="11" fill="#58585B">λ4 (1545)</text>
+          <circle cx="15" cy="130" r="8" fill="#00BCEB"/><text x="35" y="134" font-size="11" fill="#58585B">λ5 (1550)</text>
+          <circle cx="15" cy="160" r="8" fill="#049FD9"/><text x="35" y="164" font-size="11" fill="#58585B">λ6 (1555)</text>
+          <circle cx="15" cy="190" r="8" fill="#005073"/><text x="35" y="194" font-size="11" fill="#58585B">λ7 (1560)</text>
+          <circle cx="15" cy="220" r="8" fill="#9232AC"/><text x="35" y="224" font-size="11" fill="#58585B">λ8 (1565)</text>
+        </g>
+
+        <!-- 波长线汇聚到 MUX -->
+        <g stroke-width="2" fill="none">
+          <line x1="150" y1="90" x2="280" y2="160" stroke="#E2231A"/>
+          <line x1="150" y1="120" x2="280" y2="162" stroke="#F58025"/>
+          <line x1="150" y1="150" x2="280" y2="164" stroke="#FBAB18"/>
+          <line x1="150" y1="180" x2="280" y2="166" stroke="#67B346"/>
+          <line x1="150" y1="210" x2="280" y2="168" stroke="#00BCEB"/>
+          <line x1="150" y1="240" x2="280" y2="170" stroke="#049FD9"/>
+          <line x1="150" y1="270" x2="280" y2="172" stroke="#005073"/>
+          <line x1="150" y1="300" x2="280" y2="174" stroke="#9232AC"/>
+        </g>
+
+        <!-- MUX 棱镜 -->
+        <g transform="translate(280, 130)">
+          <polygon points="0,40 60,0 60,80" fill="#D4D8DE" stroke="#0D274D" stroke-width="2"/>
+          <text x="30" y="50" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">MUX</text>
+          <text x="30" y="100" text-anchor="middle" font-size="11" fill="#58585B">合波器</text>
+        </g>
+
+        <!-- 光纤 -->
+        <rect x="340" y="155" width="220" height="30" fill="url(#fiber-grad)" rx="4"/>
+        <text x="450" y="145" text-anchor="middle" font-size="12" font-weight="600" fill="#0D274D">单根光纤同时承载 8 个波长</text>
+        <!-- 彩色光线通过光纤 -->
+        <g stroke-width="2" opacity="0.7">
+          <line x1="340" y1="165" x2="560" y2="165" stroke="#E2231A"/>
+          <line x1="340" y1="169" x2="560" y2="169" stroke="#F58025"/>
+          <line x1="340" y1="173" x2="560" y2="173" stroke="#FBAB18"/>
+          <line x1="340" y1="177" x2="560" y2="177" stroke="#00BCEB"/>
+        </g>
+
+        <!-- DEMUX 棱镜 -->
+        <g transform="translate(560, 130)">
+          <polygon points="0,0 60,40 0,80" fill="#D4D8DE" stroke="#0D274D" stroke-width="2"/>
+          <text x="25" y="50" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">DEMUX</text>
+          <text x="30" y="100" text-anchor="middle" font-size="11" fill="#58585B">分波器</text>
+        </g>
+
+        <!-- 分光出来 -->
+        <g stroke-width="2" fill="none">
+          <line x1="620" y1="160" x2="740" y2="90" stroke="#E2231A"/>
+          <line x1="620" y1="162" x2="740" y2="120" stroke="#F58025"/>
+          <line x1="620" y1="164" x2="740" y2="150" stroke="#FBAB18"/>
+          <line x1="620" y1="166" x2="740" y2="180" stroke="#67B346"/>
+          <line x1="620" y1="168" x2="740" y2="210" stroke="#00BCEB"/>
+          <line x1="620" y1="170" x2="740" y2="240" stroke="#049FD9"/>
+          <line x1="620" y1="172" x2="740" y2="270" stroke="#005073"/>
+          <line x1="620" y1="174" x2="740" y2="300" stroke="#9232AC"/>
+        </g>
+
+        <!-- 接收端 -->
+        <g transform="translate(750, 80)">
+          <text x="0" y="-20" font-size="13" font-weight="600" fill="#0D274D">接收端 (RX)</text>
+          <circle cx="15" cy="10" r="8" fill="#E2231A"/><text x="35" y="14" font-size="11" fill="#58585B">RX 1</text>
+          <circle cx="15" cy="40" r="8" fill="#F58025"/><text x="35" y="44" font-size="11" fill="#58585B">RX 2</text>
+          <circle cx="15" cy="70" r="8" fill="#FBAB18"/><text x="35" y="74" font-size="11" fill="#58585B">RX 3</text>
+          <circle cx="15" cy="100" r="8" fill="#67B346"/><text x="35" y="104" font-size="11" fill="#58585B">RX 4</text>
+          <circle cx="15" cy="130" r="8" fill="#00BCEB"/><text x="35" y="134" font-size="11" fill="#58585B">RX 5</text>
+          <circle cx="15" cy="160" r="8" fill="#049FD9"/><text x="35" y="164" font-size="11" fill="#58585B">RX 6</text>
+          <circle cx="15" cy="190" r="8" fill="#005073"/><text x="35" y="194" font-size="11" fill="#58585B">RX 7</text>
+          <circle cx="15" cy="220" r="8" fill="#9232AC"/><text x="35" y="224" font-size="11" fill="#58585B">RX 8</text>
+        </g>
+
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-1：WDM 原理示意。8 个独立的激光源发出不同波长的光，通过合波器（MUX）"挤"进同一根光纤；接收端用分波器（DEMUX）"分开"它们，各自送入对应的接收机。这就像 8 个乐器合奏成一首乐曲，录音到一条音轨里，最后在听众处又被分离成 8 条独立的旋律。</p>
+
+    <div class="next-step">
+      <h4>▼ 下一节预告</h4>
+      <p>原理简洁美妙，但工程上有个关键选择：波长要多密集？太密集可能互相干扰、太稀疏又浪费频谱。这就引出了 CWDM vs DWDM 的经典权衡。</p>
+    </div>
+
+<!-- ============================================================
+     §6.2 CWDM vs DWDM
+============================================================ -->
+
+    <h3>§6.2 CWDM vs DWDM — 粗波与密波的经典权衡</h3>
+
+    <p>
+      WDM 技术自 1990 年代初开始商用后，很快分化成了两大阵营——
+      <strong>CWDM（Coarse WDM，粗波分复用）</strong>
+      和 <strong>DWDM（Dense WDM，密波分复用）</strong>。
+      它们的差别不仅仅是"一个间距大、一个间距小"——这背后是<strong>两种完全不同的工程哲学</strong>：
+      CWDM 追求简单廉价，DWDM 追求极致密度。
+    </p>
+
+    <div class="think-box">
+      <p><strong>💭 关键问题</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        如果 C 波段有 4800 GHz 的带宽，每个波长间距越小，能塞进去的波长就越多——
+        那么"越密"一定越好吗？为什么还需要 CWDM 这种看似"浪费频谱"的方案？
+        答案藏在激光器的制造成本与波长稳定性中。
+      </p>
+    </div>
+
+    <h4>§6.2.1 CWDM — 简单、廉价、够用的"经济舱"</h4>
+
+    <p>
+      CWDM 的波长间距是 <strong>20 nm</strong>（约 2500 GHz），
+      标准定义了从 1270 nm 到 1610 nm 共 <strong>18 个信道</strong>。
+      这个"巨大的"间距意味着：
+    </p>
+
+    <ul style="margin: var(--space-4) 0; padding-left: 2rem; line-height: 2;">
+      <li><strong>激光器不需要非常精确</strong>：温度漂移 ±6 nm 都没关系，不需要昂贵的温控（TEC）</li>
+      <li><strong>滤波器制造简单</strong>：薄膜滤波器（TFF）就能轻松区分 20 nm 间距</li>
+      <li><strong>模块成本极低</strong>：CWDM SFP 价格只有 DWDM 模块的 1/5 到 1/10</li>
+      <li><strong>无需光放大</strong>：CWDM 信号散布在 1270-1610 nm 宽谱，EDFA 只覆盖 C 波段，无法统一放大</li>
+    </ul>
+
+    <p>
+      CWDM 的典型应用是<strong>城域接入、企业园区网、有线电视 HFC 网络</strong>——
+      场景共性是：距离不远（<80 km）、容量需求有限（几十到几百 Gbps）、预算敏感。
+      它像城市里的中型巴士——不需要豪华，够用就好。
+    </p>
+
+    <h4>§6.2.2 DWDM — 精密、强大、极致的"高铁"</h4>
+
+    <p>
+      DWDM 走的是完全不同的路线——<strong>把波长间距压缩到极致</strong>，
+      以换取每根光纤的最大容量。ITU-T G.694.1 标准定义了 DWDM 的频率网格（Frequency Grid），
+      以 <strong>193.1 THz</strong>（对应 1552.52 nm，C 波段正中心）为锚点向两侧扩展：
+    </p>
+
+    <div class="table-scroll-wrapper" style="margin-top: var(--space-6);">
+      <table>
+        <thead>
+          <tr>
+            <th>频率间距</th>
+            <th>波长间距</th>
+            <th>C 波段信道数</th>
+            <th>激光器温控要求</th>
+            <th>典型应用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>200 GHz</strong></td>
+            <td>1.6 nm</td>
+            <td>~20 个</td>
+            <td>±20 pm</td>
+            <td>1990年代早期，已淘汰</td>
+          </tr>
+          <tr>
+            <td><strong>100 GHz</strong></td>
+            <td>0.8 nm</td>
+            <td>~40 个</td>
+            <td>±10 pm</td>
+            <td>传统 10G/40G 系统</td>
+          </tr>
+          <tr>
+            <td><strong>50 GHz</strong> ⭐</td>
+            <td>0.4 nm</td>
+            <td>~80/96 个</td>
+            <td>±5 pm</td>
+            <td>100G/200G/400G 主流</td>
+          </tr>
+          <tr>
+            <td><strong>25 GHz</strong></td>
+            <td>0.2 nm</td>
+            <td>~160 个</td>
+            <td>±2.5 pm</td>
+            <td>特殊高密度场景</td>
+          </tr>
+          <tr style="background: #F5F0FF;">
+            <td><strong>Flex Grid</strong> 🚀</td>
+            <td>6.25 GHz 粒度</td>
+            <td>按需分配</td>
+            <td>±5 pm</td>
+            <td>400G+/800G/1.6T 相干系统</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight-box">
+      <p><strong>🚀 关键趋势 · Flexible Grid（灵活栅格）</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        传统 DWDM 把频谱切成<strong>固定大小的格子</strong>（50 GHz 或 100 GHz）——就像按方块切蛋糕，不管你饿不饿，都是一样大小。
+        但现代相干系统的信号<strong>宽度并不固定</strong>：100G 信号可能只占 37.5 GHz，400G 可能占 75 GHz，800G 可能占 150 GHz。
+        ITU-T G.694.1 在 2012 年推出的修订版引入了<strong>灵活栅格（Flex Grid）</strong>概念——
+        把最小切片粒度压到 6.25 GHz，允许信号<strong>按需占用</strong>（例如一个信号占 62.5 GHz，由 10 个 6.25 GHz 切片组成）。
+        这就像从"固定餐盘"升级为"自助餐"——想吃多少盛多少，不再浪费。
+        Flex Grid 是 2020 年代 800G/1.6T 相干系统的标配基础设施。
+      </p>
+    </div>
+
+    <h4>§6.2.3 波段扩展 — C, L, S 波段的"开疆拓土"</h4>
+
+    <p>
+      即便用到 Flex Grid + 极高阶调制，单一 C 波段的容量也会触顶。
+      当全球 AI 数据中心、5G 前传、云互联推动流量以每年 30-40% 的速度增长时，
+      工程师开始向 C 波段两侧的"新大陆"扩张：
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 背景 -->
+        <rect x="0" y="0" width="900" height="320" fill="#F7F8FA"/>
+
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">光纤可用波段全景（SiO₂ 单模光纤）</text>
+
+        <!-- 坐标轴 -->
+        <line x1="80" y1="250" x2="850" y2="250" stroke="#58585B" stroke-width="2"/>
+        <line x1="80" y1="80" x2="80" y2="250" stroke="#58585B" stroke-width="2"/>
+
+        <!-- Y轴标签 -->
+        <text x="70" y="85" text-anchor="end" font-size="11" fill="#58585B">衰减</text>
+        <text x="70" y="100" text-anchor="end" font-size="11" fill="#58585B">(dB/km)</text>
+
+        <!-- 衰减曲线 -->
+        <path d="M 100,130 Q 150,110 200,95 Q 250,110 280,160 Q 310,110 350,95 Q 420,85 500,87 Q 600,90 700,95 Q 780,110 830,170" stroke="#049FD9" stroke-width="3" fill="none"/>
+
+        <!-- S 波段 (1460-1530nm) -->
+        <rect x="300" y="180" width="100" height="60" fill="#9232AC" opacity="0.3"/>
+        <text x="350" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="#6B2380">S 波段</text>
+        <text x="350" y="228" text-anchor="middle" font-size="10" fill="#58585B">1460-1530 nm</text>
+
+        <!-- C 波段 (1530-1565nm) ⭐ 主力 -->
+        <rect x="400" y="150" width="80" height="90" fill="#049FD9" opacity="0.4"/>
+        <text x="440" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="#005073">C 波段 ⭐</text>
+        <text x="440" y="198" text-anchor="middle" font-size="10" fill="#58585B">1530-1565 nm</text>
+        <text x="440" y="214" text-anchor="middle" font-size="10" fill="#0D274D">4.8 THz</text>
+        <text x="440" y="228" text-anchor="middle" font-size="9" fill="#58585B">EDFA 窗口</text>
+
+        <!-- L 波段 (1565-1625nm) -->
+        <rect x="480" y="160" width="140" height="80" fill="#67B346" opacity="0.35"/>
+        <text x="550" y="190" text-anchor="middle" font-size="13" font-weight="700" fill="#2D7517">L 波段</text>
+        <text x="550" y="208" text-anchor="middle" font-size="10" fill="#58585B">1565-1625 nm</text>
+        <text x="550" y="224" text-anchor="middle" font-size="10" fill="#0D274D">4.8 THz</text>
+
+        <!-- U 波段 (1625-1675nm) 未来 -->
+        <rect x="620" y="195" width="110" height="45" fill="#F58025" opacity="0.3"/>
+        <text x="675" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#C45010">U 波段（前沿）</text>
+
+        <!-- X轴标签 -->
+        <text x="100" y="270" text-anchor="middle" font-size="11" fill="#58585B">1260</text>
+        <text x="200" y="270" text-anchor="middle" font-size="11" fill="#58585B">1310</text>
+        <text x="280" y="270" text-anchor="middle" font-size="11" fill="#58585B">1383</text>
+        <text x="350" y="270" text-anchor="middle" font-size="11" fill="#58585B">1460</text>
+        <text x="440" y="270" text-anchor="middle" font-size="11" fill="#58585B">1550</text>
+        <text x="550" y="270" text-anchor="middle" font-size="11" fill="#58585B">1595</text>
+        <text x="675" y="270" text-anchor="middle" font-size="11" fill="#58585B">1650</text>
+        <text x="830" y="270" text-anchor="middle" font-size="11" fill="#58585B">1700</text>
+
+        <text x="465" y="300" text-anchor="middle" font-size="12" font-weight="600" fill="#0D274D">波长 (nm)</text>
+
+        <!-- O波段（另外标注） -->
+        <rect x="160" y="210" width="100" height="30" fill="#58585B" opacity="0.25"/>
+        <text x="210" y="230" text-anchor="middle" font-size="11" font-weight="600" fill="#0D274D">O 波段 (1310nm)</text>
+
+        <!-- 水峰标注 -->
+        <text x="280" y="150" text-anchor="middle" font-size="10" fill="#E2231A">← 传统 OH⁻ 水峰</text>
+        <text x="280" y="163" text-anchor="middle" font-size="9" fill="#58585B">(低水峰光纤已消除)</text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-2：SiO₂ 单模光纤全波段衰减谱。C 波段是主力战场（EDFA 增益窗口）；L 波段是第一扩展（容量翻倍）；S 波段和 U 波段是正在开拓的"新大陆"。每个波段约 5 THz 带宽，全部启用可达 20+ THz——这是光通信未来十年的容量增长路径。</p>
+
+    <div class="grid grid-3" style="margin-top: var(--space-6);">
+      <div class="card">
+        <div class="comp-tag" style="background: var(--cisco-blue); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">C 波段</div>
+        <h4>主力战场</h4>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          1530-1565 nm，35 nm 宽。<strong>衰减最低（0.2 dB/km）</strong>、<strong>EDFA 天然增益窗口</strong>——这两个特性共同让 C 波段成为过去 30 年几乎所有长途光通信的绝对主角。
+        </p>
+      </div>
+      <div class="card">
+        <div class="comp-tag" style="background: var(--color-success); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">L 波段</div>
+        <h4>第一扩展</h4>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          1565-1625 nm，60 nm 宽。衰减略高（0.22 dB/km），但通过专用 L 波段 EDFA 可以实现放大。
+          <strong>C+L 双波段系统</strong>已成为 2020 年代高端 DWDM 系统的标配——容量翻倍而不需要铺新光纤。
+        </p>
+      </div>
+      <div class="card">
+        <div class="comp-tag" style="background: var(--cisco-purple); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">S 波段</div>
+        <h4>未来前沿</h4>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          1460-1530 nm，70 nm 宽。挑战在于：EDFA 在这里不工作，需要新的放大技术（如 <strong>TDFA 掺铥光纤放大器</strong>或 <strong>分布式拉曼</strong>）。学术界和 Nokia Bell Labs 已实验演示 C+L+S 三波段传输，容量突破 200 Tbps。
+        </p>
+      </div>
+    </div>
+
+    <div class="next-step">
+      <h4>▼ 下一节：DWDM 系统中最核心的工程概念</h4>
+      <p>现在我们知道可以把几十个波长塞进一根光纤了。但这些波长是怎么"产生"的？能不能直接拿路由器的普通光模块插到 DWDM 系统里？答案是<strong>不行</strong>——这就引出了白光与彩光的关键区分。</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §6.3 白光与彩光
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§6.3 白光（Grey）与彩光（Colored）— DWDM 最关键的概念</h3>
+
+    <p>
+      这一节的概念非常重要——如果你只记住本模块的一件事，那就应该是<strong>白光和彩光的区别</strong>。
+      这个区分不仅决定了光模块的成本、结构、适用场景，更直接引出了 <strong>Transponder</strong> 这个关键器件，
+      以及 2020 年代光网络架构最重要的变革——<strong>Routed Optical Networking</strong>（我们将在 Optical 202 中详讲）。
+    </p>
+
+    <div class="think-box">
+      <p><strong>💭 引导问题</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        你随手拿起一个路由器上的 QSFP28 光模块——它的标签写着 "100G LR4, 1310 nm"。
+        这个模块能直接插到 DWDM 系统里，和其他 80 个波长共享一根光纤吗？
+        如果不能，为什么不能？需要做什么"转换"？
+      </p>
+    </div>
+
+    <h4>§6.3.1 白光（Grey Optics）— 宽容但不精确</h4>
+
+    <p>
+      <strong>白光模块</strong>（又称<strong>灰光模块</strong>，Grey Optics）是我们在数据中心、企业网、路由器上最常见的光模块。
+      它的特征非常鲜明——工作在<strong>"宽泛的标准波长"</strong>，而不是精确的 ITU-T 网格波长上。
+      典型例子：
+    </p>
+
+    <ul style="margin: var(--space-4) 0; padding-left: 2rem; line-height: 2;">
+      <li><strong>850 nm 多模</strong>（SR 系列）：数据中心内部短距互联</li>
+      <li><strong>1310 nm 单模</strong>（LR、LR4 系列）：机楼间、DCI 短距</li>
+      <li><strong>1550 nm 单模</strong>（ER、ZR 系列）：城域/企业长距</li>
+    </ul>
+
+    <p>
+      这些波长都是<strong>"大致在某个标称值附近"</strong>——实际激光器发出的波长可能漂移 ±1-3 nm，完全没关系。
+      因为白光模块传输时，整根光纤上<strong>只有它一个波长</strong>——没有其他波长与它竞争频谱，漂移一点也不会和邻居打架。
+    </p>
+
+    <div class="analogy-box">
+      <p><strong>💡 类比 · 家用手电筒</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        白光模块就像家用手电筒——你买来照明，只要能亮就行。
+        它发出的光是"大致白色"，色温可能略偏黄或偏蓝，但你根本不在意，因为它不需要和别的光源"共享空间"。
+        简单、可靠、便宜——这是白光模块的全部哲学。
+      </p>
+    </div>
+
+    <p style="margin-top: var(--space-4);">
+      <strong>为什么叫"白光/灰光"？</strong> 这里的"白"和"灰"是个俗称（业内也叫 "Grey"），
+      并不是说激光器真的发白光。它暗示的是——这种光模块<strong>"没有特定颜色身份"</strong>，
+      不在 ITU 网格上精确占位，因此也无法与 DWDM 网格对齐。
+      就像一个人只说"我住在北京某地"，没有精确到门牌号——邻居都不知道他具体在哪。
+    </p>
+
+    <h4>§6.3.2 彩光（Colored Optics）— 精确到皮米级</h4>
+
+    <p>
+      <strong>彩光模块</strong>（Colored Optics）则完全相反——它<strong>必须工作在 ITU-T G.694.1 定义的精确 DWDM 波长上</strong>，
+      例如 1550.12 nm（对应 ITU 第 34 信道）。这种精确性要求激光器的波长稳定性达到惊人的水平：
+    </p>
+
+    <div class="formula-box">
+      <div class="formula-label">核心公式 ② · 彩光波长精度</div>
+      <div class="formula">波长稳定度 ≤ ±2.5 GHz ≈ ±20 pm（皮米！）</div>
+      <div class="formula-explain">
+        对于 50 GHz 间距 DWDM 系统，每个信道只有 50 GHz 宽。激光器漂移超过 ±2.5 GHz 就会"撞到"邻居信道。<br>
+        这相当于<strong>波长精度达到 20 pm（0.00002 nm）</strong>——几千分之一的头发丝直径级别精度！
+      </div>
+    </div>
+
+    <p>为了达到这种精度，彩光模块必须配备：</p>
+
+    <ul style="margin: var(--space-4) 0; padding-left: 2rem; line-height: 2;">
+      <li><strong>DFB 激光器</strong>（Distributed Feedback Laser）或 <strong>可调谐激光器</strong>——内刻布拉格光栅，天然单纵模、窄线宽（详见 Optical 102 §4.2）</li>
+      <li><strong>TEC 温控</strong>（热电制冷器）——把激光器温度控制在 ±0.01°C 内，避免波长随温度漂移</li>
+      <li><strong>波长锁定器</strong>（Wavelength Locker）——实时监测输出波长并反馈调节，锁死在目标 ITU 网格上</li>
+      <li><strong>可调谐选项</strong>（Tunable）——现代高端彩光模块支持 C 波段全范围（96 信道）软件切换波长</li>
+    </ul>
+
+    <div class="analogy-box">
+      <p><strong>💡 类比 · 交响乐团的调音师</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        白光模块像家里的儿童玩具钢琴——走调几度没人在意。
+        彩光模块则像<strong>交响乐团里的首席小提琴</strong>——必须严格把 A 音调到 440 Hz，精确到 1 Hz 内。
+        因为它要和其他几十种乐器（其他 DWDM 波长）一起演奏和谐的乐章，任何一点走调都会被所有人听到。
+        这种"精确共存"的需求，就是彩光模块必须存在的根本原因。
+      </p>
+    </div>
+
+    <h4>§6.3.3 白光 vs 彩光对比总表</h4>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>特性</th>
+            <th>白光 (Grey Optics)</th>
+            <th>彩光 (Colored Optics)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>波长</td>
+            <td>标称 850/1310/1550 nm（粗略）</td>
+            <td>精确 ITU 网格波长（1550.12 nm 等）</td>
+          </tr>
+          <tr>
+            <td>波长精度要求</td>
+            <td>±1-3 nm（宽松）</td>
+            <td>±20 pm（极严格，50× 差距）</td>
+          </tr>
+          <tr>
+            <td>激光器类型</td>
+            <td>FP、VCSEL、普通 DFB</td>
+            <td>窄线宽 DFB 或可调谐激光器</td>
+          </tr>
+          <tr>
+            <td>温控需求</td>
+            <td>通常无需 TEC</td>
+            <td>必须 TEC + 波长锁定器</td>
+          </tr>
+          <tr>
+            <td>模块成本</td>
+            <td>$50 - $500（QSFP28 LR 约 $200）</td>
+            <td>$2,000 - $20,000+（取决于速率）</td>
+          </tr>
+          <tr>
+            <td>功耗</td>
+            <td>1-5 W 典型</td>
+            <td>10-25 W（相干彩光模块）</td>
+          </tr>
+          <tr>
+            <td>可调谐</td>
+            <td>固定波长</td>
+            <td>通常支持 C 波段全可调（96 信道）</td>
+          </tr>
+          <tr>
+            <td>使用场景</td>
+            <td>客户侧接口（路由器-路由器直连、数据中心内）</td>
+            <td>DWDM 线路侧接口（城域、长途骨干、海缆）</td>
+          </tr>
+          <tr>
+            <td>能否共享光纤？</td>
+            <td>❌ 每根光纤只能跑一个白光波长</td>
+            <td>✓ 可同时塞入 40/80/96 个彩光到同一根光纤</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>§6.3.4 为什么需要 Transponder？</h4>
+
+    <p>
+      现在我们可以回答开头的问题了：
+      路由器上的 100G LR4 白光模块，能不能直接插到 DWDM 系统里？
+      <strong>不能</strong>——因为它的波长不精确、不在 ITU 网格上、无法和其他 DWDM 波长共享光纤。
+      这就需要一个"翻译器"，把白光翻译成彩光——这就是 <strong>Transponder（转发器/波长变换器）</strong>。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">Transponder 工作原理：白光 ↔ 彩光的双向翻译器</text>
+
+        <!-- 路由器 -->
+        <g transform="translate(30, 80)">
+          <rect x="0" y="0" width="120" height="100" fill="#005073" rx="8"/>
+          <text x="60" y="35" text-anchor="middle" font-size="14" font-weight="700" fill="white">Router / Switch</text>
+          <text x="60" y="58" text-anchor="middle" font-size="11" fill="#00BCEB">客户侧设备</text>
+          <text x="60" y="78" text-anchor="middle" font-size="10" fill="white" opacity="0.8">输出白光</text>
+          <text x="60" y="92" text-anchor="middle" font-size="10" fill="white" opacity="0.8">(1310/1550 nm)</text>
+        </g>
+
+        <!-- 白光信号 -->
+        <line x1="150" y1="130" x2="270" y2="130" stroke="#9B9CA0" stroke-width="3"/>
+        <polygon points="270,125 280,130 270,135" fill="#9B9CA0"/>
+        <text x="210" y="120" text-anchor="middle" font-size="11" fill="#58585B">白光 (Grey)</text>
+        <text x="210" y="148" text-anchor="middle" font-size="10" fill="#9B9CA0">1310 nm，不精确</text>
+
+        <!-- Transponder -->
+        <g transform="translate(280, 70)">
+          <rect x="0" y="0" width="280" height="120" fill="#049FD9" rx="8" opacity="0.9"/>
+          <text x="140" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="white">TRANSPONDER</text>
+          <text x="140" y="50" text-anchor="middle" font-size="11" fill="white" opacity="0.9">（波长变换器）</text>
+
+          <!-- 内部流程 -->
+          <g transform="translate(15, 65)">
+            <rect x="0" y="0" width="55" height="40" fill="white" rx="4"/>
+            <text x="28" y="17" text-anchor="middle" font-size="10" fill="#0D274D">O → E</text>
+            <text x="28" y="32" text-anchor="middle" font-size="9" fill="#58585B">光电转换</text>
+          </g>
+          <g transform="translate(80, 65)">
+            <rect x="0" y="0" width="60" height="40" fill="white" rx="4"/>
+            <text x="30" y="17" text-anchor="middle" font-size="10" fill="#0D274D">FEC/OTN</text>
+            <text x="30" y="32" text-anchor="middle" font-size="9" fill="#58585B">信号处理</text>
+          </g>
+          <g transform="translate(150, 65)">
+            <rect x="0" y="0" width="55" height="40" fill="white" rx="4"/>
+            <text x="28" y="17" text-anchor="middle" font-size="10" fill="#0D274D">DFB</text>
+            <text x="28" y="32" text-anchor="middle" font-size="9" fill="#58585B">精确激光</text>
+          </g>
+          <g transform="translate(215, 65)">
+            <rect x="0" y="0" width="55" height="40" fill="white" rx="4"/>
+            <text x="28" y="17" text-anchor="middle" font-size="10" fill="#0D274D">E → O</text>
+            <text x="28" y="32" text-anchor="middle" font-size="9" fill="#58585B">电光转换</text>
+          </g>
+        </g>
+
+        <!-- 彩光信号 -->
+        <line x1="560" y1="130" x2="680" y2="130" stroke="#E2231A" stroke-width="3"/>
+        <polygon points="680,125 690,130 680,135" fill="#E2231A"/>
+        <text x="620" y="120" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">彩光 (Colored)</text>
+        <text x="620" y="148" text-anchor="middle" font-size="10" fill="#E2231A">1550.12 nm ±20 pm</text>
+
+        <!-- DWDM 系统 -->
+        <g transform="translate(690, 80)">
+          <rect x="0" y="0" width="180" height="100" fill="#0D274D" rx="8"/>
+          <text x="90" y="35" text-anchor="middle" font-size="13" font-weight="700" fill="white">DWDM System</text>
+          <text x="90" y="55" text-anchor="middle" font-size="10" fill="#00BCEB">MUX + EDFA + ROADM</text>
+          <text x="90" y="78" text-anchor="middle" font-size="10" fill="white" opacity="0.8">与其他 79 个</text>
+          <text x="90" y="92" text-anchor="middle" font-size="10" fill="white" opacity="0.8">彩光共享光纤</text>
+        </g>
+
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-3：Transponder 作为"白光 ↔ 彩光翻译器"的工作原理。内部完成 O→E→O 转换（光电转换 + 数字信号处理 + 精确波长重生）。这是传统 DWDM 网络中每个上下波长必须经过的关键器件。</p>
+
+    <p>Transponder 的核心功能可以概括为"<strong>三个转换</strong>"：</p>
+
+    <div class="dsp-flow">
+      <div class="dsp-step">
+        <h5>光电转换 (O → E)</h5>
+        <p>客户侧的白光信号进入 Transponder，由光电探测器转成电信号——此时信息完整保留在电域中。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>数字信号处理（FEC 编码、OTN 封装等）</h5>
+        <p>电信号经过 OTN（Optical Transport Network）帧封装，加入前向纠错（FEC）冗余、性能监控信息等。这一步让长距传输成为可能。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>电光转换 (E → O，精确波长)</h5>
+        <p>处理后的电信号驱动精确的 DFB 激光器，发射出<strong>符合 ITU-T 网格的彩光</strong>——可以与其他 79 个彩光共享一根光纤。</p>
+      </div>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+      反向流程完全对称：从 DWDM 光纤下来的彩光，经过 Transponder 反向翻译成白光，再送给路由器。
+      就这样，路由器上便宜的白光模块和 DWDM 昂贵的彩光世界被<strong>桥接</strong>了起来。
+    </p>
+
+    <div class="insight-box">
+      <p><strong>🎯 Muxponder — Transponder 的"多路合一"变种</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        还有一种很常见的变种叫 <strong>Muxponder（复用转发器）</strong>——它把<strong>多个低速客户信号合并成一个高速线路信号</strong>。
+        典型例子：4 路 100G 白光输入 → 1 路 400G 彩光输出。
+        这让高速相干彩光模块的昂贵成本可以被多个客户流量分摊，大幅降低每 bit 的成本。
+        Muxponder 是数据中心互联（DCI）和城域汇聚层最常见的部署形态。
+      </p>
+    </div>
+
+    <h4>§6.3.5 O-E-O 转换的代价与争议</h4>
+
+    <p>
+      Transponder 解决了白光到彩光的问题，但它同时也引入了一个严重的代价——<strong>每个波长都要经过完整的 O-E-O 转换</strong>。
+      一个 80 波长的 DWDM 系统需要 80 个 Transponder，功耗、成本、体积、管理复杂度全部乘以 80。
+    </p>
+
+    <div class="pro-con-grid">
+      <div class="pro-box">
+        <h4>✓ Transponder 带来的价值</h4>
+        <ul style="margin-left: 1rem; line-height: 1.8;">
+          <li><strong>波长精准可控</strong>：每个彩光都在 ITU 网格上</li>
+          <li><strong>信号再生（3R）</strong>：电域重新整形、定时、再生信号</li>
+          <li><strong>FEC 保护</strong>：加强长距传输的抗干扰能力</li>
+          <li><strong>性能监控</strong>：OTN 层级的端到端指标监测</li>
+          <li><strong>客户侧解耦</strong>：路由器用便宜的白光模块</li>
+        </ul>
+      </div>
+      <div class="con-box">
+        <h4>✗ Transponder 带来的代价</h4>
+        <ul style="margin-left: 1rem; line-height: 1.8;">
+          <li><strong>功耗翻倍</strong>：每个波长都要 O-E-O 一遍，大型节点几十千瓦</li>
+          <li><strong>成本高昂</strong>：一个 400G Transponder 动辄数万美元</li>
+          <li><strong>增加延迟</strong>：O-E-O 引入几微秒的额外处理延迟</li>
+          <li><strong>占用机柜空间</strong>：一整个机柜可能只够放几个 Transponder</li>
+          <li><strong>管理复杂</strong>：路由器和 DWDM 系统两套管理平面</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+      于是业界出现了一个革命性的想法：<strong>既然 Transponder 的核心功能就是"生成精确的彩光"，
+      那为什么不让路由器本身直接输出彩光，跳过 Transponder？</strong>
+      这个想法就是 <strong>IP over DWDM</strong> 和 <strong>Routed Optical Networking</strong> 的起点——
+      我们将在 Optical 202 中详细展开这场影响整个光通信产业的架构革命。
+      在进入这个新世界之前，我们还需要先理解 DWDM 系统的其他核心组件。
+    </p>
+
+    <div class="next-step">
+      <h4>▼ 下一节：DWDM 系统的其他核心组件</h4>
+      <p>Transponder 解决了"波长生成"的问题，但信号还需要"合并"、"放大"、"中途上下车"——这就需要 MUX/DEMUX、EDFA、OADM、ROADM 这一整套组件。让我们逐一拆解它们。</p>
+    </div>
+
+<!-- ============================================================
+     §6.4 DWDM 系统核心组件
+============================================================ -->
+
+    <h3>§6.4 DWDM 系统的核心组件 — 从 MUX 到 ROADM 的器件全景</h3>
+
+    <p>
+      理解了"白光 vs 彩光"的本质后，我们已经掌握了 DWDM 系统最基础的工程概念。
+      但一个完整的 DWDM 系统远不止 Transponder——它是一个由<strong>十几种精密光学器件协同工作</strong>的复杂系统。
+      这一节，我们将像拆解一台精密钟表一样，逐个认识它们：每个器件是什么、为什么需要、如何工作。
+    </p>
+
+    <h4>§6.4.1 MUX / DEMUX — 波长的"合成器"与"分光器"</h4>
+
+    <p>
+      <strong>MUX（Multiplexer，复用器/合波器）</strong>的使命很简单：
+      把 Transponder 产生的 40/80/96 个彩光信号"<strong>合并</strong>"到同一根光纤中。
+      它的反向操作 <strong>DEMUX（Demultiplexer，解复用器/分波器）</strong>则在接收端把这些波长重新分开。
+      这是 WDM 能工作的物理前提——没有精准的合波/分波，一切都是空谈。
+    </p>
+
+    <p>实现合波/分波有三种主流技术，各有特色：</p>
+
+    <div class="grid grid-3" style="margin-top: var(--space-6);">
+      <div class="component-card">
+        <span class="comp-tag">主流技术 ⭐</span>
+        <h4>AWG 阵列波导光栅</h4>
+        <div class="comp-sub">Arrayed Waveguide Grating</div>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          基于平面光波导集成工艺，利用不同长度的波导形成相位差、产生干涉分光效应。<strong>单芯片集成 40-96 个波长</strong>，体积小、一致性好、成本可控。
+          现代 DWDM 系统 90% 以上的 MUX/DEMUX 都采用 AWG。
+        </p>
+      </div>
+      <div class="component-card">
+        <span class="comp-tag">小信道数</span>
+        <h4>TFF 薄膜滤波器</h4>
+        <div class="comp-sub">Thin Film Filter</div>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          多层介质膜干涉滤波，每片只能挑出一个波长。需要"级联"多片来实现多波长分离。
+          在<strong>小信道数（≤16）场景</strong>成本低，是 CWDM 和部分 OADM 的主流选择。
+        </p>
+      </div>
+      <div class="component-card">
+        <span class="comp-tag">高端特殊</span>
+        <h4>FBG 光纤布拉格光栅</h4>
+        <div class="comp-sub">Fiber Bragg Grating</div>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          在光纤纤芯内刻蚀周期性折射率变化，只反射特定波长。
+          典型应用于<strong>色散补偿（CFBG）</strong>和<strong>波长选择性反射</strong>，较少单独做大规模 MUX。
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+      无论哪种技术，MUX/DEMUX 的核心性能指标都是相似的：
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>参数</th>
+            <th>含义</th>
+            <th>典型值（50GHz AWG）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>信道间隔</td>
+            <td>相邻波长之间的频率间距</td>
+            <td>50 GHz（0.4 nm）</td>
+          </tr>
+          <tr>
+            <td>插入损耗（IL）</td>
+            <td>信号通过器件后的功率衰减</td>
+            <td>4-6 dB</td>
+          </tr>
+          <tr>
+            <td>通道隔离度（Isolation）</td>
+            <td>一个通道对邻近通道的抑制能力</td>
+            <td>&gt; 25 dB（相邻）/ &gt; 40 dB（非相邻）</td>
+          </tr>
+          <tr>
+            <td>通带平坦度</td>
+            <td>通带内响应的波动幅度</td>
+            <td>&lt; 0.5 dB</td>
+          </tr>
+          <tr>
+            <td>PDL（偏振相关损耗）</td>
+            <td>不同偏振态的损耗差异</td>
+            <td>&lt; 0.3 dB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>§6.4.2 EDFA 在 DWDM 中的三种角色</h4>
+
+    <p>
+      回顾 Optical 102 §4.6：EDFA 能同时放大 C 波段所有波长——这是 DWDM 能跨越上千公里的物理基石。
+      在一个典型的 DWDM 系统中，EDFA 根据部署位置扮演三种不同的角色：
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">EDFA 的三个典型部署位置</text>
+
+        <!-- 发射端 TX -->
+        <g transform="translate(30, 110)">
+          <rect x="0" y="0" width="80" height="60" fill="#005073" rx="6"/>
+          <text x="40" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="white">TX + MUX</text>
+          <text x="40" y="48" text-anchor="middle" font-size="10" fill="#00BCEB">发射端</text>
+        </g>
+
+        <!-- Booster -->
+        <g transform="translate(130, 100)">
+          <circle cx="30" cy="40" r="30" fill="#E2231A"/>
+          <text x="30" y="35" text-anchor="middle" font-size="13" font-weight="700" fill="white">BST</text>
+          <text x="30" y="50" text-anchor="middle" font-size="9" fill="white">Booster</text>
+        </g>
+        <text x="160" y="205" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">发射端后</text>
+        <text x="160" y="220" text-anchor="middle" font-size="9" fill="#58585B">高输出功率，驱动入纤</text>
+
+        <!-- Span 1 光纤 -->
+        <line x1="190" y1="140" x2="310" y2="140" stroke="#0D274D" stroke-width="4"/>
+        <text x="250" y="130" text-anchor="middle" font-size="10" fill="#58585B">80-100 km</text>
+
+        <!-- Inline EDFA -->
+        <g transform="translate(310, 100)">
+          <circle cx="30" cy="40" r="30" fill="#F58025"/>
+          <text x="30" y="35" text-anchor="middle" font-size="12" font-weight="700" fill="white">ILA</text>
+          <text x="30" y="50" text-anchor="middle" font-size="9" fill="white">In-line</text>
+        </g>
+        <text x="340" y="205" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">中继站</text>
+        <text x="340" y="220" text-anchor="middle" font-size="9" fill="#58585B">平衡增益与噪声</text>
+
+        <!-- Span 2 光纤 -->
+        <line x1="370" y1="140" x2="490" y2="140" stroke="#0D274D" stroke-width="4"/>
+        <text x="430" y="130" text-anchor="middle" font-size="10" fill="#58585B">80-100 km</text>
+
+        <!-- Inline EDFA 2 -->
+        <g transform="translate(490, 100)">
+          <circle cx="30" cy="40" r="30" fill="#F58025"/>
+          <text x="30" y="35" text-anchor="middle" font-size="12" font-weight="700" fill="white">ILA</text>
+          <text x="30" y="50" text-anchor="middle" font-size="9" fill="white">In-line</text>
+        </g>
+
+        <!-- Span 3 光纤 -->
+        <line x1="550" y1="140" x2="670" y2="140" stroke="#0D274D" stroke-width="4"/>
+        <text x="610" y="130" text-anchor="middle" font-size="10" fill="#58585B">80-100 km</text>
+
+        <!-- Pre-amp -->
+        <g transform="translate(670, 100)">
+          <circle cx="30" cy="40" r="30" fill="#67B346"/>
+          <text x="30" y="35" text-anchor="middle" font-size="13" font-weight="700" fill="white">PRE</text>
+          <text x="30" y="50" text-anchor="middle" font-size="9" fill="white">Preamp</text>
+        </g>
+        <text x="700" y="205" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">接收端前</text>
+        <text x="700" y="220" text-anchor="middle" font-size="9" fill="#58585B">低噪声，关注灵敏度</text>
+
+        <!-- 接收端 RX -->
+        <g transform="translate(730, 110)">
+          <rect x="0" y="0" width="100" height="60" fill="#005073" rx="6"/>
+          <text x="50" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="white">DEMUX + RX</text>
+          <text x="50" y="48" text-anchor="middle" font-size="10" fill="#00BCEB">接收端</text>
+        </g>
+
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-4：EDFA 在 DWDM 链路中的三种部署位置。Booster 关注"推得远"；In-line 关注"传得长"；Pre-amp 关注"听得清"。三者各司其职，共同构成长距 DWDM 的放大链。</p>
+
+    <h4>§6.4.3 增益平坦化 — EDFA 必须搞定的"不公平"</h4>
+
+    <p>
+      然而，EDFA 有一个先天缺陷——<strong>它对不同波长的增益不一样</strong>。
+      原始的 EDFA 增益谱在 C 波段内像一座"小山峰"：1530 nm 附近增益高（峰值），
+      1545 nm 增益低（谷底），两者可能相差 5-8 dB。这在单波长系统里无所谓，
+      但在 DWDM 系统里是<strong>灾难级问题</strong>——
+      如果不处理，不同波长的信号经过多级 EDFA 后，有的已经放大过头，有的还弱得几乎听不见。
+    </p>
+
+    <div class="analogy-box">
+      <p><strong>💡 类比 · 不均匀的合唱团</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        想象一个 96 人合唱团，但指挥有个怪癖——他<strong>偏爱某几个声部</strong>，
+        让那几个人唱得特别响，其他人被压得听不见。
+        经过 10 个中继点（10 个 EDFA）放大之后，最响的声部会震耳欲聋，最弱的声部会彻底淹没。
+        这就是"增益不平坦"的危害——不同波长的 OSNR 差距越拉越大，最弱的那个先崩溃，整个系统随之失效。
+      </p>
+    </div>
+
+    <p>解决方案叫做 <strong>GFF（Gain Flattening Filter，增益平坦化滤波器）</strong>——
+    它是一个经过精密设计的反向滤波器，<strong>对增益高的波长多衰减一点，对增益低的波长少衰减</strong>，
+    最终让所有波长的输出增益趋于一致。现代 EDFA 都内置了 GFF，
+    让 C 波段 96 个信道的增益波动被压到 <strong>&lt; 1 dB</strong>——
+    这已经是极致的工艺水准。</p>
+
+    <h4>§6.4.4 OADM — 固定的"波长上下站"</h4>
+
+    <p>
+      DWDM 链路中，并不是所有波长都要从头走到尾。
+      想象一条跨越北京-上海-广州的长途列车：
+      有些乘客全程乘坐（<strong>Express 波长</strong>，直通），
+      有些乘客在上海下车、新乘客在上海上车（<strong>Add/Drop 波长</strong>）。
+      这就需要一个"<strong>波长中转站</strong>"——<strong>OADM（Optical Add-Drop Multiplexer，光分插复用器）</strong>。
+    </p>
+
+    <p>
+      <strong>FOADM（Fixed OADM）</strong>是最早期的版本——
+      用物理器件（TFF 或 FBG）固定地挑出某几个波长下车、注入某几个波长上车，
+      其他波长物理直通。它的优点是简单、便宜、无源（不需要电源）；
+      但致命缺点是——<strong>一旦部署，想改哪个波长上下车，工程师必须到现场物理换器件</strong>。
+      这在城域网规模还小时还能忍受，但到了跨国、跨洲骨干网规模，完全不可行。
+    </p>
+
+    <div class="next-step">
+      <h4>▼ 于是，DWDM 皇冠上的明珠登场了</h4>
+      <p>能不能让 Add/Drop 变成"软件可配置"？远程敲一条命令，就能让任何波长在任何节点上下车？这就是 ROADM 要解决的问题。</p>
+    </div>
+
+    <h4>§6.4.5 ROADM — DWDM 皇冠上的明珠</h4>
+
+    <p>
+      <strong>ROADM（Reconfigurable OADM，可重构光分插复用器）</strong>是过去 20 年光网络架构最重要的单个器件。
+      它让<strong>波长级别的路由变成了"软件定义"</strong>——
+      工程师坐在办公室敲几条命令，就能让任何波长在任何节点上下或继续通过。
+      这种灵活性从根本上改变了光网络的运营模式：
+      <strong>从"手工布线时代"跃入"自动化网络时代"</strong>。
+    </p>
+
+    <p>
+      ROADM 的技术核心是一个神奇的器件——<strong>WSS（Wavelength Selective Switch，波长选择开关）</strong>。
+      让我们深入看看它是怎么工作的：
+    </p>
+
+    <h4>§6.4.6 WSS — ROADM 的心脏</h4>
+
+    <p>
+      WSS 是一个带有<strong>多个输入/输出端口</strong>的光学器件，其魔力在于：
+      能够<strong>独立地把每个波长送到任意指定的输出端口</strong>，而完全不影响其他波长。
+      可以把它想象成一个 80 车道的智能立交桥——
+      每辆车（波长）都可以被精确分配到任意出口，互不干扰。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">WSS 工作原理：LCoS 如何"驾驭"每个波长</text>
+
+        <!-- 输入端口 -->
+        <g transform="translate(30, 150)">
+          <rect x="0" y="0" width="110" height="60" fill="#005073" rx="6"/>
+          <text x="55" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">输入端口</text>
+          <text x="55" y="45" text-anchor="middle" font-size="10" fill="#00BCEB">80 λ 混合输入</text>
+        </g>
+
+        <!-- 多波长输入 -->
+        <g stroke-width="2">
+          <line x1="140" y1="175" x2="220" y2="175" stroke="#E2231A"/>
+          <line x1="140" y1="180" x2="220" y2="180" stroke="#F58025"/>
+          <line x1="140" y1="185" x2="220" y2="185" stroke="#FBAB18"/>
+          <line x1="140" y1="190" x2="220" y2="190" stroke="#67B346"/>
+          <line x1="140" y1="195" x2="220" y2="195" stroke="#00BCEB"/>
+          <line x1="140" y1="200" x2="220" y2="200" stroke="#9232AC"/>
+        </g>
+
+        <!-- 光栅分光 -->
+        <g transform="translate(220, 155)">
+          <polygon points="0,0 40,-10 40,70 0,60" fill="#D4D8DE" stroke="#0D274D" stroke-width="2"/>
+          <text x="20" y="35" text-anchor="middle" font-size="10" font-weight="700" fill="#0D274D" transform="rotate(-90 20 35)">衍射光栅</text>
+        </g>
+
+        <!-- 分开的波长 -->
+        <g stroke-width="2.5">
+          <line x1="260" y1="165" x2="360" y2="110" stroke="#E2231A"/>
+          <line x1="260" y1="170" x2="360" y2="135" stroke="#F58025"/>
+          <line x1="260" y1="180" x2="360" y2="160" stroke="#FBAB18"/>
+          <line x1="260" y1="190" x2="360" y2="185" stroke="#67B346"/>
+          <line x1="260" y1="200" x2="360" y2="210" stroke="#00BCEB"/>
+          <line x1="260" y1="210" x2="360" y2="235" stroke="#9232AC"/>
+        </g>
+
+        <!-- LCoS 面板 (硅基液晶) -->
+        <g transform="translate(360, 80)">
+          <rect x="0" y="0" width="140" height="180" fill="#0D274D" rx="4"/>
+          <text x="70" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">LCoS 面板</text>
+          <text x="70" y="40" text-anchor="middle" font-size="9" fill="#00BCEB">硅基液晶</text>
+
+          <!-- 像素阵列 -->
+          <g fill="#049FD9" opacity="0.6">
+            <rect x="10" y="50" width="120" height="8"/>
+            <rect x="10" y="62" width="120" height="8"/>
+            <rect x="10" y="74" width="120" height="8"/>
+            <rect x="10" y="86" width="120" height="8"/>
+            <rect x="10" y="98" width="120" height="8"/>
+            <rect x="10" y="110" width="120" height="8"/>
+            <rect x="10" y="122" width="120" height="8"/>
+            <rect x="10" y="134" width="120" height="8"/>
+            <rect x="10" y="146" width="120" height="8"/>
+            <rect x="10" y="158" width="120" height="8"/>
+          </g>
+          <text x="70" y="175" text-anchor="middle" font-size="9" fill="#00BCEB">每行控制一个波长的出口</text>
+        </g>
+
+        <!-- 独立反射角度 - 每个波长送到不同端口 -->
+        <g stroke-width="2.5">
+          <line x1="500" y1="110" x2="620" y2="85" stroke="#E2231A"/>
+          <line x1="500" y1="135" x2="620" y2="130" stroke="#F58025"/>
+          <line x1="500" y1="160" x2="620" y2="85" stroke="#FBAB18"/>
+          <line x1="500" y1="185" x2="620" y2="175" stroke="#67B346"/>
+          <line x1="500" y1="210" x2="620" y2="220" stroke="#00BCEB"/>
+          <line x1="500" y1="235" x2="620" y2="265" stroke="#9232AC"/>
+        </g>
+
+        <!-- 多个输出端口 -->
+        <g transform="translate(620, 60)">
+          <rect x="0" y="0" width="100" height="50" fill="#67B346" rx="6"/>
+          <text x="50" y="22" text-anchor="middle" font-size="11" font-weight="700" fill="white">Output #1</text>
+          <text x="50" y="38" text-anchor="middle" font-size="9" fill="white">→ 方向 A</text>
+        </g>
+
+        <g transform="translate(620, 115)">
+          <rect x="0" y="0" width="100" height="50" fill="#F58025" rx="6"/>
+          <text x="50" y="22" text-anchor="middle" font-size="11" font-weight="700" fill="white">Output #2</text>
+          <text x="50" y="38" text-anchor="middle" font-size="9" fill="white">→ 方向 B</text>
+        </g>
+
+        <g transform="translate(620, 170)">
+          <rect x="0" y="0" width="100" height="50" fill="#049FD9" rx="6"/>
+          <text x="50" y="22" text-anchor="middle" font-size="11" font-weight="700" fill="white">Output #3</text>
+          <text x="50" y="38" text-anchor="middle" font-size="9" fill="white">→ Drop 下车</text>
+        </g>
+
+        <g transform="translate(620, 240)">
+          <rect x="0" y="0" width="100" height="50" fill="#9232AC" rx="6"/>
+          <text x="50" y="22" text-anchor="middle" font-size="11" font-weight="700" fill="white">Output #N</text>
+          <text x="50" y="38" text-anchor="middle" font-size="9" fill="white">→ 方向 C</text>
+        </g>
+
+        <!-- 说明文字 -->
+        <text x="450" y="320" text-anchor="middle" font-size="11" fill="#58585B" font-style="italic">
+          LCoS 上每一行像素通过电控相位，独立决定对应波长应反射到哪个输出端口
+        </text>
+        <text x="450" y="340" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">
+          一个 WSS = N 个独立的波长路由决策，全部软件可编程
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-5：WSS 基于 LCoS（Liquid Crystal on Silicon，硅基液晶）技术的工作原理。输入的多波长信号先被衍射光栅在空间上分开，然后打到 LCoS 面板上——每一行像素对应一个波长，通过电控液晶分子的相位分布，独立决定该波长的反射角度，从而把它"指挥"到任意一个输出端口。这就是软件定义光网络的物理基石。</p>
+
+    <h4>WSS 的两大实现技术</h4>
+
+    <div class="grid grid-2" style="margin-top: var(--space-6);">
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-blue);">主流 ⭐</span>
+        <h4>LCoS（硅基液晶）</h4>
+        <div class="comp-sub">Liquid Crystal on Silicon</div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          利用硅芯片上的液晶像素阵列，通过施加电压改变液晶分子取向，进而改变入射光的反射相位。
+          <strong>每个像素独立可控</strong>，可以做到<strong>任意波长 → 任意端口</strong>的自由路由。
+          是现代高端 ROADM 的主流选择，支持 1×20+ 的高端口数。
+        </p>
+      </div>
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-orange);">早期</span>
+        <h4>MEMS（微机电镜阵列）</h4>
+        <div class="comp-sub">Micro-Electro-Mechanical Systems</div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          用硅基微型可倾斜镜片阵列（每个只有几十微米大小），通过静电力精确控制镜面角度，把入射波长反射到目标方向。
+          早期 ROADM 的主流技术，现在在中低端口数系统中仍有应用。
+        </p>
+      </div>
+    </div>
+
+    <h4>§6.4.7 ROADM 的"度"（Degree）— 几个方向？</h4>
+
+    <p>
+      ROADM 节点的<strong>"度"（Degree）</strong>是指它能连接多少个光纤方向。这个概念就像十字路口的"几叉路口"：
+    </p>
+
+    <ul style="margin: var(--space-4) 0; padding-left: 2rem; line-height: 2;">
+      <li><strong>2-Degree</strong>：线型或环型网络节点（东-西两个方向）</li>
+      <li><strong>4-Degree</strong>：十字路口节点（东-西-南-北）</li>
+      <li><strong>8-Degree</strong>：大型枢纽节点（8 个方向）</li>
+      <li><strong>20-Degree</strong>：超大型骨干中心节点（可达 20+ 方向）</li>
+    </ul>
+
+    <p>
+      每增加一个 Degree，ROADM 节点内部就多一套 WSS 模块。
+      20-Degree 的大型 ROADM 节点可能包含 40 个以上的 WSS，
+      整个系统价值数百万美元——是现代光网络中最复杂、最昂贵的单体器件之一。
+    </p>
+
+    <h4>§6.4.8 CDC ROADM — 终极灵活性的三大特性</h4>
+
+    <p>
+      早期的 ROADM 虽然可重构，但仍有一些"小遗憾"：
+      例如某些 Add/Drop 端口只能接入特定波长（有颜色限制），
+      或者某个波长只能去某个特定方向（方向限制），
+      或者不同方向不能用同一个波长（有冲突）。
+      这些限制在小规模网络里无所谓，但到了云时代的大规模自动化网络，就成了瓶颈。
+    </p>
+
+    <p>
+      于是诞生了<strong>CDC ROADM</strong>——
+      一种具备"<strong>无色 + 无向 + 无冲突</strong>"终极灵活性的 ROADM 架构。
+      这三个特性分别解决了三个不同的限制：
+    </p>
+
+    <div class="grid grid-3" style="margin-top: var(--space-6);">
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-blue);">C = Colorless</span>
+        <h4>无色</h4>
+        <div class="comp-sub">任意端口 ↔ 任意波长</div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          任意一个 Add/Drop 端口可以接入<strong>任意波长</strong>——不再有"这个端口只能接 λ₁₇"这样的物理限制。
+          让波长分配变成纯软件问题。
+        </p>
+      </div>
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-blue);">D = Directionless</span>
+        <h4>无向</h4>
+        <div class="comp-sub">任意波长 ↔ 任意方向</div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          任意 Add/Drop 端口的信号可以去<strong>任意 Degree</strong>——支持动态重路由。
+          当某个方向的光纤发生故障，可以瞬间把受影响的波长全部切换到其他方向，无需物理换线。
+        </p>
+      </div>
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-blue);">C = Contentionless</span>
+        <h4>无冲突</h4>
+        <div class="comp-sub">同一波长可去多个方向</div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          不同方向可<strong>同时使用相同波长</strong>而不冲突——
+          例如 λ₃₄ 可以在东方向和西方向各自独立地承载一条流量，互不干扰。大幅提升波长复用效率。
+        </p>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <p><strong>🎯 CDC ROADM 的价值：从"人工调度"到"智能大脑"</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        CDC ROADM + Flex Grid 构成了<strong>可完全软件定义的光网络（SDON, Software Defined Optical Network）</strong>的物理基础。
+        控制器可以基于实时流量状态，动态计算最优波长路径、自动调度带宽、快速恢复故障——
+        这就是"智能光网络"的硬件底层。没有 CDC ROADM，软件定义光网络就只是一个 PPT 概念。
+        现代 Cisco NCS 2000/1010 系列光平台都原生支持 CDC + Flex Grid 能力。
+      </p>
+    </div>
+
+    <h4>§6.4.9 OXC — 更大规模的光交叉矩阵</h4>
+
+    <p>
+      当网络节点需要处理<strong>超过 20 个方向 × 96 个波长 = 近 2000 路信号</strong>的大规模光域路由时，
+      即便是高端 ROADM 也会显得捉襟见肘。这时候需要更重量级的解决方案——
+      <strong>OXC（Optical Cross-Connect，光交叉连接）</strong>。
+    </p>
+
+    <p>
+      OXC 可以看作是"ROADM 的加强版"——一个<strong>巨大的光交换矩阵</strong>，
+      能够在任意输入端口×波长和任意输出端口×波长之间建立光域连接。
+      超大型骨干网枢纽和数据中心互联核心节点会部署 OXC，单节点容量可达 Pbps 级别。
+      当前主流 OXC 实现技术包括大规模 MEMS 阵列、大端口数 LCoS、以及正在崛起的<strong>硅光子集成交换</strong>——
+      后者我们将在 Optical 202 中详细讨论。
+    </p>
+
+    <div class="next-step">
+      <h4>▼ 组件齐全了，是时候看全景了</h4>
+      <p>MUX / Transponder / EDFA / ROADM / OXC——现在你已经认识了所有 DWDM 核心组件。下一节，我们把它们组装成完整的系统，看一个信号如何从发射端跨越数千公里到达接收端。</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §6.5 DWDM 系统典型架构
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§6.5 DWDM 系统的典型架构 — 从点对点到环网</h3>
+
+    <p>
+      理解了所有核心组件后，我们来看看它们如何组装成完整的系统。
+      现代 DWDM 系统有两种最典型的架构——<strong>点对点 DWDM 系统</strong>和 <strong>ROADM 环网/网状网</strong>。
+      它们适用于不同的场景，复杂度和灵活性也天差地别。
+    </p>
+
+    <h4>§6.5.1 点对点 DWDM 系统 — 两城之间的"高速直达"</h4>
+
+    <p>
+      这是最基础、最传统的 DWDM 架构——两个端点通过若干段光纤+中继 EDFA 连接起来，中间<strong>不上下任何波长</strong>。
+      适用于两个大型数据中心之间的直连（DCI, Data Center Interconnect）、
+      跨城主干传输等场景。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">点对点 DWDM 系统架构（典型 500 km 链路）</text>
+
+        <!-- 端点 A -->
+        <g transform="translate(20, 70)">
+          <!-- Transponder 阵列 -->
+          <rect x="0" y="0" width="80" height="160" fill="#005073" rx="6"/>
+          <text x="40" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="white">TXP 阵列</text>
+          <circle cx="20" cy="40" r="5" fill="#E2231A"/>
+          <circle cx="40" cy="40" r="5" fill="#F58025"/>
+          <circle cx="60" cy="40" r="5" fill="#FBAB18"/>
+          <circle cx="20" cy="60" r="5" fill="#67B346"/>
+          <circle cx="40" cy="60" r="5" fill="#00BCEB"/>
+          <circle cx="60" cy="60" r="5" fill="#9232AC"/>
+          <text x="40" y="85" text-anchor="middle" font-size="9" fill="white" opacity="0.9">N 个波长 Ch.1-N</text>
+          <text x="40" y="100" text-anchor="middle" font-size="9" fill="white" opacity="0.9">（每个一个服务）</text>
+
+          <!-- MUX -->
+          <rect x="0" y="115" width="80" height="25" fill="#D4D8DE"/>
+          <text x="40" y="133" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">MUX</text>
+
+          <!-- Booster -->
+          <circle cx="40" cy="155" r="8" fill="#E2231A"/>
+          <text x="40" y="175" text-anchor="middle" font-size="9" fill="#0D274D" font-weight="600">BST</text>
+        </g>
+
+        <!-- 光纤 + ILA 中继 -->
+        <g>
+          <line x1="100" y1="150" x2="200" y2="150" stroke="#0D274D" stroke-width="4"/>
+          <text x="150" y="140" text-anchor="middle" font-size="10" fill="#58585B">80 km</text>
+
+          <circle cx="220" cy="150" r="14" fill="#F58025"/>
+          <text x="220" y="154" text-anchor="middle" font-size="10" font-weight="700" fill="white">ILA</text>
+          <text x="220" y="180" text-anchor="middle" font-size="9" fill="#58585B">中继 1</text>
+
+          <line x1="235" y1="150" x2="335" y2="150" stroke="#0D274D" stroke-width="4"/>
+          <text x="285" y="140" text-anchor="middle" font-size="10" fill="#58585B">80 km</text>
+
+          <circle cx="355" cy="150" r="14" fill="#F58025"/>
+          <text x="355" y="154" text-anchor="middle" font-size="10" font-weight="700" fill="white">ILA</text>
+          <text x="355" y="180" text-anchor="middle" font-size="9" fill="#58585B">中继 2</text>
+
+          <line x1="370" y1="150" x2="470" y2="150" stroke="#0D274D" stroke-width="4"/>
+          <text x="420" y="140" text-anchor="middle" font-size="10" fill="#58585B">80 km</text>
+
+          <circle cx="490" cy="150" r="14" fill="#F58025"/>
+          <text x="490" y="154" text-anchor="middle" font-size="10" font-weight="700" fill="white">ILA</text>
+          <text x="490" y="180" text-anchor="middle" font-size="9" fill="#58585B">中继 3</text>
+
+          <line x1="505" y1="150" x2="605" y2="150" stroke="#0D274D" stroke-width="4"/>
+          <text x="555" y="140" text-anchor="middle" font-size="10" fill="#58585B">80 km</text>
+
+          <circle cx="625" cy="150" r="14" fill="#F58025"/>
+          <text x="625" y="154" text-anchor="middle" font-size="10" font-weight="700" fill="white">ILA</text>
+          <text x="625" y="180" text-anchor="middle" font-size="9" fill="#58585B">中继 4</text>
+
+          <line x1="640" y1="150" x2="740" y2="150" stroke="#0D274D" stroke-width="4"/>
+          <text x="690" y="140" text-anchor="middle" font-size="10" fill="#58585B">80 km</text>
+        </g>
+
+        <!-- 端点 B -->
+        <g transform="translate(760, 70)">
+          <!-- Pre-amp -->
+          <circle cx="40" cy="80" r="8" fill="#67B346"/>
+          <text x="40" y="105" text-anchor="middle" font-size="9" fill="#0D274D" font-weight="600">PRE</text>
+
+          <!-- DEMUX -->
+          <rect x="0" y="115" width="80" height="25" fill="#D4D8DE"/>
+          <text x="40" y="133" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">DEMUX</text>
+
+          <!-- Transponder 阵列 -->
+          <rect x="0" y="0" width="80" height="75" fill="#005073" rx="6"/>
+          <text x="40" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="white">TXP 阵列</text>
+          <circle cx="20" cy="40" r="5" fill="#E2231A"/>
+          <circle cx="40" cy="40" r="5" fill="#F58025"/>
+          <circle cx="60" cy="40" r="5" fill="#FBAB18"/>
+          <circle cx="20" cy="58" r="5" fill="#67B346"/>
+          <circle cx="40" cy="58" r="5" fill="#00BCEB"/>
+          <circle cx="60" cy="58" r="5" fill="#9232AC"/>
+        </g>
+
+        <!-- 说明 -->
+        <text x="60" y="245" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">端点 A</text>
+        <text x="800" y="245" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="600">端点 B</text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-6：典型点对点 DWDM 系统架构。发送端：Transponder 阵列 → MUX → Booster → 光纤。中途每 80 km 一个 ILA（In-Line EDFA）中继放大。接收端：Pre-amp → DEMUX → Transponder 阵列。一个 5 段 80 km 的系统可以跨越 400 km，总容量可达几十 Tbps。</p>
+
+    <h4>§6.5.2 ROADM 环网 / 网状网 — 城域/骨干的"灵活神经"</h4>
+
+    <p>
+      真实的城域网和骨干网远比"两个点"复杂——
+      一个大都市可能有十几个 POP 节点、一个国家骨干网可能有上百个枢纽。
+      这些节点需要<strong>灵活地两两通信</strong>——波长可以从任意节点出发，在任意节点下车或经过。
+      这就是 <strong>ROADM 环网</strong>和 <strong>ROADM 网状网（Mesh）</strong>的用武之地。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">ROADM 环网架构（6 节点城域环）</text>
+
+        <!-- 6 个 ROADM 节点，环形布置 -->
+        <g>
+          <!-- Node 1 (顶) -->
+          <g transform="translate(420, 80)">
+            <rect x="0" y="0" width="100" height="60" fill="#005073" rx="8"/>
+            <text x="50" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">ROADM A</text>
+            <text x="50" y="45" text-anchor="middle" font-size="10" fill="#00BCEB">Degree-2</text>
+          </g>
+
+          <!-- Node 2 (右上) -->
+          <g transform="translate(620, 140)">
+            <rect x="0" y="0" width="100" height="60" fill="#005073" rx="8"/>
+            <text x="50" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">ROADM B</text>
+            <text x="50" y="45" text-anchor="middle" font-size="10" fill="#00BCEB">Degree-2</text>
+          </g>
+
+          <!-- Node 3 (右下) -->
+          <g transform="translate(620, 260)">
+            <rect x="0" y="0" width="100" height="60" fill="#005073" rx="8"/>
+            <text x="50" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">ROADM C</text>
+            <text x="50" y="45" text-anchor="middle" font-size="10" fill="#00BCEB">Degree-2</text>
+          </g>
+
+          <!-- Node 4 (底) -->
+          <g transform="translate(420, 300)">
+            <rect x="0" y="0" width="100" height="60" fill="#049FD9" rx="8"/>
+            <text x="50" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">ROADM D</text>
+            <text x="50" y="45" text-anchor="middle" font-size="10" fill="white" opacity="0.9">CDC Hub</text>
+          </g>
+
+          <!-- Node 5 (左下) -->
+          <g transform="translate(220, 260)">
+            <rect x="0" y="0" width="100" height="60" fill="#005073" rx="8"/>
+            <text x="50" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">ROADM E</text>
+            <text x="50" y="45" text-anchor="middle" font-size="10" fill="#00BCEB">Degree-2</text>
+          </g>
+
+          <!-- Node 6 (左上) -->
+          <g transform="translate(220, 140)">
+            <rect x="0" y="0" width="100" height="60" fill="#005073" rx="8"/>
+            <text x="50" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">ROADM F</text>
+            <text x="50" y="45" text-anchor="middle" font-size="10" fill="#00BCEB">Degree-2</text>
+          </g>
+
+          <!-- 环网连线 -->
+          <line x1="520" y1="110" x2="620" y2="170" stroke="#67B346" stroke-width="3"/>
+          <line x1="720" y1="170" x2="720" y2="260" stroke="#67B346" stroke-width="3"/>
+          <line x1="620" y1="290" x2="520" y2="330" stroke="#67B346" stroke-width="3"/>
+          <line x1="420" y1="330" x2="320" y2="290" stroke="#67B346" stroke-width="3"/>
+          <line x1="220" y1="260" x2="220" y2="170" stroke="#67B346" stroke-width="3"/>
+          <line x1="320" y1="170" x2="420" y2="110" stroke="#67B346" stroke-width="3"/>
+        </g>
+
+        <!-- 示例波长路径 -->
+        <path d="M 470 140 Q 350 200 350 260" stroke="#E2231A" stroke-width="2.5" fill="none" stroke-dasharray="8,4"/>
+        <text x="355" y="200" text-anchor="middle" font-size="10" fill="#E2231A" font-weight="600">λ₁₇: A→F→E</text>
+
+        <path d="M 600 200 Q 550 250 520 310" stroke="#9232AC" stroke-width="2.5" fill="none" stroke-dasharray="8,4"/>
+        <text x="600" y="240" text-anchor="middle" font-size="10" fill="#9232AC" font-weight="600">λ₃₄: B→D</text>
+
+        <!-- 说明 -->
+        <text x="450" y="370" text-anchor="middle" font-size="11" fill="#58585B" font-style="italic">
+          任意波长可以软件定义地在任意节点上下/直通，故障时可瞬间重路由
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 6-7：典型 ROADM 环网架构。6 个 ROADM 节点构成城域环，每段都承载 96 个 DWDM 波长。节点 D 是 CDC Hub，提供高密度 Add/Drop 能力。两条示例波长（λ₁₇ 和 λ₃₄）沿不同路径传输，互不干扰。故障时可瞬间自动重路由——这就是"自愈光网络"的基础。</p>
+
+    <h4>ROADM 环网的几种保护模式</h4>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>保护模式</th>
+            <th>原理</th>
+            <th>切换时间</th>
+            <th>带宽开销</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1+1 光层保护</strong></td>
+            <td>同一信号同时沿工作和保护路径发送，接收端择优</td>
+            <td>&lt; 50 ms</td>
+            <td>100%（保护占用等量带宽）</td>
+          </tr>
+          <tr>
+            <td><strong>OMSP 环网保护</strong></td>
+            <td>故障时环网翻转（Wrap）或卷回（Loop-back）</td>
+            <td>&lt; 100 ms</td>
+            <td>环路的一半用于保护</td>
+          </tr>
+          <tr>
+            <td><strong>网状网重路由</strong></td>
+            <td>控制器实时计算新路径，动态切换</td>
+            <td>秒级</td>
+            <td>按需占用，最灵活</td>
+          </tr>
+          <tr>
+            <td><strong>IP 层 FRR</strong></td>
+            <td>依赖上层 IP 路由（TI-LFA 等）</td>
+            <td>&lt; 50 ms</td>
+            <td>无专用保护带宽</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+      现代大型运营商网络通常采用<strong>多层保护协同</strong>：
+      光层做 1+1 快速切换保护骨干核心；
+      IP 层做 FRR/TI-LFA 做业务级精细切换。
+      这种<strong>Multi-Layer Protection</strong>既保证了核心链路的毫秒级可用性，
+      又避免了过度保护浪费带宽——这是工程艺术的体现。
+    </p>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §6.6 性能指标 + §6.7 回顾
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§6.6 DWDM 系统的关键性能指标</h3>
+
+    <p>衡量一个 DWDM 系统的"健康状况"和"能力边界"，工程师会关注以下 6 个核心指标：</p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th>含义</th>
+            <th>典型值（2026 高端系统）</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>每波长速率</strong></td>
+            <td>单个 DWDM 信道承载的比特率</td>
+            <td>100G / 400G / 800G / 1.2T / 1.6T</td>
+            <td>决定单信道容量</td>
+          </tr>
+          <tr>
+            <td><strong>波长数</strong></td>
+            <td>单纤承载的 DWDM 信道总数</td>
+            <td>96 (C) / 192 (C+L) / 256+ (C+L+S)</td>
+            <td>决定总容量</td>
+          </tr>
+          <tr>
+            <td><strong>系统总容量</strong></td>
+            <td>= 波长数 × 每波长速率</td>
+            <td>38.4 Tbps ~ 307 Tbps 单纤单向</td>
+            <td>最终业务能力</td>
+          </tr>
+          <tr>
+            <td><strong>OSNR 裕量</strong></td>
+            <td>实际 OSNR 与最低要求 OSNR 的差值</td>
+            <td>2-3 dB（健康系统）</td>
+            <td>决定系统可靠性</td>
+          </tr>
+          <tr>
+            <td><strong>色散容限（CD Tolerance）</strong></td>
+            <td>接收机能补偿的累积 CD</td>
+            <td>&gt; 50,000 ps/nm（相干 DSP）</td>
+            <td>决定无中继距离</td>
+          </tr>
+          <tr>
+            <td><strong>PMD 容限</strong></td>
+            <td>接收机能动态跟踪的 PMD</td>
+            <td>&gt; 20-50 ps（相干 DSP）</td>
+            <td>时变保护能力</td>
+          </tr>
+          <tr>
+            <td><strong>非线性阈值</strong></td>
+            <td>入纤功率上限（超过后非线性爆发）</td>
+            <td>+2 ~ +4 dBm / 信道</td>
+            <td>功率-距离-容量三角平衡</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+      这些指标之间存在精妙的<strong>相互制约关系</strong>：提高波长速率需要更高 OSNR，
+      更高 OSNR 要求更低 NF 的 EDFA，更低 NF 的 EDFA 增加成本...
+      光网络设计本质上就是在这些维度之间寻找<strong>工程甜蜜点</strong>——
+      既满足业务需求，又控制总体拥有成本（TCO）。
+    </p>
+
+    <h3>§6.7 模块六回顾 — 核心要点</h3>
+
+    <div class="keypoints-box">
+      <h3>🎯 模块六：10 个核心要点</h3>
+      <ol>
+        <li><strong>WDM 的第一性原理：</strong>不同波长的光在同一根光纤中互不干扰——这是物理定律赠予我们的礼物，是频分复用在光域的体现。</li>
+        <li><strong>CWDM 简单廉价，DWDM 精密强大。</strong>CWDM 间距 20 nm，18 信道；DWDM 50/25 GHz 间距，96+ 信道。场景不同，选择不同。</li>
+        <li><strong>Flexible Grid（灵活栅格）是 2020 年代主流。</strong>6.25 GHz 粒度按需分配，摆脱了固定信道间距的束缚——为 400G/800G/1.6T 相干系统铺好了基础。</li>
+        <li><strong>白光 vs 彩光是 DWDM 最关键概念。</strong>白光模块便宜、波长不精确；彩光模块精度达 20 pm，可精确占位 ITU 网格，才能共享 DWDM 光纤。</li>
+        <li><strong>Transponder 是白光-彩光的"翻译器"。</strong>通过 O-E-O 转换生成精确彩光，同时提供 FEC 保护、信号再生、性能监控。Muxponder 则多路合一。</li>
+        <li><strong>MUX/DEMUX 基于 AWG 芯片实现。</strong>现代 DWDM 系统 90% 以上的合波/分波都采用阵列波导光栅——单芯片集成 40-96 信道。</li>
+        <li><strong>EDFA 在 DWDM 中扮演三种角色：</strong>Booster（高输出）、In-line（均衡放大）、Pre-amp（低噪声）。配合 GFF 增益平坦化，保证所有波长一致放大。</li>
+        <li><strong>ROADM 是现代光网络的皇冠明珠。</strong>基于 WSS（LCoS 或 MEMS）实现"软件定义"的波长路由，把光网络从手工布线时代推进到自动化时代。</li>
+        <li><strong>CDC ROADM 提供终极灵活性：</strong>Colorless（任意端口任意波长）+ Directionless（任意波长任意方向）+ Contentionless（同波长多方向无冲突），是软件定义光网络的硬件基石。</li>
+        <li><strong>现代光网络 = ROADM 环网/网状网 + 多层保护。</strong>光层 1+1、环网翻转、网状重路由、IP 层 FRR 协同配合，实现毫秒级自愈。</li>
+      </ol>
+    </div>
+
+    <div class="think-box" style="margin-top: var(--space-8);">
+      <p><strong>💭 通往模块七的三个思考题</strong></p>
+      <ol style="margin-top: var(--space-4); margin-bottom: 0; line-height: 1.9;">
+        <li>
+          <strong>Transponder 对每个波长都要做 O-E-O 转换——这给系统带来功耗、成本、延迟的三重代价。有没有办法把 Transponder 的功能集成到路由器里，让路由器直接吐出彩光？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：这就是 Routed Optical Networking 的核心思想，我们将在 Optical 202 中详细展开。</span>
+        </li>
+        <li>
+          <strong>ROADM 在光域直接路由波长——这种"光交叉"与路由器在电域路由数据包的"电交叉"有什么本质区别？各自的优劣势是什么？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：这是模块七开篇要回答的核心问题。</span>
+        </li>
+        <li>
+          <strong>DWDM 系统里每个 Transponder 都要处理色散、偏振、相位恢复——这些都曾是物理光学难题。是什么技术让它们从"硬件难题"变成了"数字算法问题"？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：答案就是即将登场的——<strong>相干光通信 + DSP</strong>，光通信近 20 年最重要的技术革命。</span>
+        </li>
+      </ol>
+    </div>
+
+  </div>
+</section>
