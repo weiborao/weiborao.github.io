@@ -2061,3 +2061,955 @@
 
   </div>
 </section>
+<!-- ============================================================
+     MODULE 07 HERO
+============================================================ -->
+<section class="module-hero">
+  <div class="container">
+    <span class="chapter-no">Module 07 of 09</span>
+    <h2>光交叉 vs 电交叉 + 相干光通信——划时代的技术革命</h2>
+    <p>
+      模块六结尾留下了三个问题——Transponder 为什么笨重？光交叉与电交叉谁更强？色散与偏振这些"光学物理难题"为何一夜之间变成了可算的数字问题？
+      答案指向同一个核心：<strong>相干光通信</strong>——光通信近 20 年最重要的技术革命。
+      它不仅改变了光模块的架构，更重塑了整个全球互联网骨干网的经济性。
+      这个模块我们将深度拆解：光/电交叉的本质对比、相干检测的数学原理、DSP 的八大处理步骤、
+      PCS 概率整形如何逼近香农极限——以及这一切将如何重塑未来网络。
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     §7.1 电交叉
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <div class="think-box">
+      <p><strong>💭 模块引导问题</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        一个路由器和一个 ROADM 都能"转发信号"——路由器在电域处理每个数据包的 IP 头，ROADM 在光域直接重路由整个波长。
+        它们都叫"交叉（Cross-Connect）"，但本质截然不同。什么时候用路由器？什么时候用 ROADM？
+        能不能两者都不用，让信号"端到端直达"？这些问题的答案，决定了现代光网络的整体架构哲学。
+      </p>
+    </div>
+
+    <h3>§7.1 电交叉（Electrical Cross-Connect）— 智能但昂贵的"翻译官"</h3>
+
+    <h4>§7.1.1 电交叉的本质</h4>
+
+    <p>
+      <strong>电交叉</strong>是指信号在节点处必须经过"<strong>光 → 电 → 数字处理 → 电 → 光</strong>"的完整转换（O-E-O）。
+      转发决策（如路由查找、标签交换、流量工程）全部在<strong>电域数字芯片</strong>中完成。
+      代表设备：<strong>路由器、OTN 交换机、SDH/SONET 传输设备</strong>。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">电交叉：每个信号都要"翻译成电、处理、再翻译回光"</text>
+
+        <!-- 输入光 -->
+        <g transform="translate(30, 110)">
+          <rect x="0" y="0" width="80" height="60" fill="#049FD9" rx="6"/>
+          <text x="40" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">输入光</text>
+          <text x="40" y="45" text-anchor="middle" font-size="10" fill="white">IP 数据包</text>
+        </g>
+
+        <!-- 箭头 -->
+        <line x1="110" y1="140" x2="180" y2="140" stroke="#58585B" stroke-width="2"/>
+        <polygon points="180,135 190,140 180,145" fill="#58585B"/>
+
+        <!-- O→E -->
+        <g transform="translate(190, 90)">
+          <rect x="0" y="0" width="110" height="100" fill="#F58025" rx="6"/>
+          <text x="55" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="white">O → E</text>
+          <text x="55" y="50" text-anchor="middle" font-size="10" fill="white">光电转换</text>
+          <text x="55" y="70" text-anchor="middle" font-size="9" fill="white" opacity="0.85">Photodiode</text>
+          <text x="55" y="85" text-anchor="middle" font-size="9" fill="white" opacity="0.85">+ TIA + ADC</text>
+        </g>
+
+        <!-- 箭头 -->
+        <line x1="300" y1="140" x2="340" y2="140" stroke="#58585B" stroke-width="2"/>
+        <polygon points="340,135 350,140 340,145" fill="#58585B"/>
+
+        <!-- 数字处理 -->
+        <g transform="translate(350, 80)">
+          <rect x="0" y="0" width="200" height="120" fill="#005073" rx="6"/>
+          <text x="100" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">数字域处理</text>
+          <text x="100" y="50" text-anchor="middle" font-size="10" fill="#00BCEB">路由查找（IP header）</text>
+          <text x="100" y="68" text-anchor="middle" font-size="10" fill="#00BCEB">QoS 队列调度</text>
+          <text x="100" y="86" text-anchor="middle" font-size="10" fill="#00BCEB">流量工程 / ACL</text>
+          <text x="100" y="104" text-anchor="middle" font-size="10" fill="#00BCEB">全速线速包转发</text>
+        </g>
+
+        <!-- 箭头 -->
+        <line x1="550" y1="140" x2="590" y2="140" stroke="#58585B" stroke-width="2"/>
+        <polygon points="590,135 600,140 590,145" fill="#58585B"/>
+
+        <!-- E→O -->
+        <g transform="translate(600, 90)">
+          <rect x="0" y="0" width="110" height="100" fill="#F58025" rx="6"/>
+          <text x="55" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="white">E → O</text>
+          <text x="55" y="50" text-anchor="middle" font-size="10" fill="white">电光转换</text>
+          <text x="55" y="70" text-anchor="middle" font-size="9" fill="white" opacity="0.85">Driver + MZM</text>
+          <text x="55" y="85" text-anchor="middle" font-size="9" fill="white" opacity="0.85">+ Laser</text>
+        </g>
+
+        <!-- 箭头 -->
+        <line x1="710" y1="140" x2="760" y2="140" stroke="#58585B" stroke-width="2"/>
+        <polygon points="760,135 770,140 760,145" fill="#58585B"/>
+
+        <!-- 输出光 -->
+        <g transform="translate(770, 110)">
+          <rect x="0" y="0" width="80" height="60" fill="#049FD9" rx="6"/>
+          <text x="40" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">输出光</text>
+          <text x="40" y="45" text-anchor="middle" font-size="10" fill="white">重新生成</text>
+        </g>
+
+        <!-- 能耗说明 -->
+        <g transform="translate(190, 230)">
+          <text x="0" y="0" font-size="11" fill="#E2231A" font-weight="600">⚡ 每比特要经过完整的光电光往返</text>
+          <text x="0" y="20" font-size="11" fill="#E2231A" font-weight="600">💰 高端 400G 路由器每端口功耗 20-30 W，成本数千美元</text>
+        </g>
+      </svg>
+    </div>
+    <p class="svg-caption">图 7-1：电交叉的完整流程。每个比特都要经过 O→E→数字处理→E→O 的全过程。优势是可以做细粒度（包级）处理；代价是高功耗、高成本、高延迟。</p>
+
+    <div class="pro-con-grid">
+      <div class="pro-box">
+        <h4>✓ 电交叉的优势</h4>
+        <ul style="margin-left: 1rem; line-height: 1.85;">
+          <li><strong>颗粒度最细：</strong>可以到数据包（Packet）甚至字节级别处理</li>
+          <li><strong>智能处理丰富：</strong>IP 路由、标签交换、QoS、ACL、深度包检测全都能做</li>
+          <li><strong>统计复用：</strong>多业务在同一端口上共享带宽，大幅提升利用率</li>
+          <li><strong>完美再生（3R）：</strong>Re-amplify + Re-shape + Re-time，信号质量完全恢复</li>
+          <li><strong>灵活协议支持：</strong>同一端口可承载以太网、IP、MPLS、SR 等多种协议</li>
+        </ul>
+      </div>
+      <div class="con-box">
+        <h4>✗ 电交叉的代价</h4>
+        <ul style="margin-left: 1rem; line-height: 1.85;">
+          <li><strong>功耗巨大：</strong>每个 O-E-O 都耗电；大型路由器整机功耗可达 10 kW+</li>
+          <li><strong>速率受限于电子：</strong>400G 时代已接近硅 CMOS 速度极限</li>
+          <li><strong>成本高昂：</strong>复杂的 DSP ASIC + 高速 DAC/ADC + 光电器件</li>
+          <li><strong>延迟较大：</strong>包处理引入微秒级延迟，对低延迟应用（如 HFT、AI RDMA）是禁忌</li>
+          <li><strong>无谓转换浪费：</strong>若信号只是"路过"该节点，电交叉就是纯粹的能源浪费</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §7.2 光交叉 + §7.3 权衡
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§7.2 光交叉（Optical Cross-Connect）— 透明但粗犷的"快递员"</h3>
+
+    <h4>§7.2.1 光交叉的本质</h4>
+
+    <p>
+      <strong>光交叉</strong>则完全不同——信号在节点处<strong>不转电、不做数字处理</strong>，直接在<strong>光域</strong>被重路由。
+      代表设备：<strong>ROADM、OXC</strong>。工作颗粒度在<strong>波长</strong>级别。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">光交叉：波长直接在光域被重路由，不转电</text>
+
+        <!-- 输入光 -->
+        <g transform="translate(30, 110)">
+          <rect x="0" y="0" width="100" height="60" fill="#049FD9" rx="6"/>
+          <text x="50" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">输入波长</text>
+          <text x="50" y="45" text-anchor="middle" font-size="10" fill="white">λ₁₇ 信号</text>
+        </g>
+
+        <!-- 粗线条表达"直通" -->
+        <g>
+          <line x1="130" y1="140" x2="390" y2="140" stroke="#E2231A" stroke-width="4"/>
+          <text x="260" y="125" text-anchor="middle" font-size="12" fill="#E2231A" font-weight="600">光信号保持光域</text>
+          <text x="260" y="158" text-anchor="middle" font-size="10" fill="#58585B">无 O-E-O 转换</text>
+        </g>
+
+        <!-- ROADM -->
+        <g transform="translate(390, 90)">
+          <rect x="0" y="0" width="160" height="120" fill="#005073" rx="8"/>
+          <text x="80" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="white">ROADM</text>
+          <text x="80" y="52" text-anchor="middle" font-size="10" fill="#00BCEB">WSS 光域切换</text>
+          <text x="80" y="72" text-anchor="middle" font-size="10" fill="white">仅改变空间路径</text>
+          <text x="80" y="92" text-anchor="middle" font-size="10" fill="white">信号保持光子态</text>
+          <text x="80" y="108" text-anchor="middle" font-size="9" fill="#67B346">✓ 软件可配置</text>
+        </g>
+
+        <!-- 输出 -->
+        <g>
+          <line x1="550" y1="140" x2="770" y2="140" stroke="#E2231A" stroke-width="4"/>
+        </g>
+
+        <g transform="translate(770, 110)">
+          <rect x="0" y="0" width="100" height="60" fill="#049FD9" rx="6"/>
+          <text x="50" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">输出波长</text>
+          <text x="50" y="45" text-anchor="middle" font-size="10" fill="white">去新方向</text>
+        </g>
+
+        <!-- 能耗对比 -->
+        <g transform="translate(280, 240)">
+          <text x="0" y="0" font-size="11" fill="#67B346" font-weight="600">⚡ 相比电交叉，功耗降低 10-50 倍</text>
+          <text x="0" y="18" font-size="11" fill="#67B346" font-weight="600">🚀 速率/格式/协议完全透明，不依赖电子处理速度</text>
+        </g>
+      </svg>
+    </div>
+    <p class="svg-caption">图 7-2：光交叉的工作流程。波长信号全程保持在光域内，ROADM 只是通过 WSS 改变其空间路径。这种"纯光"转发带来了革命性的功耗、速率和透明性优势。</p>
+
+    <div class="pro-con-grid">
+      <div class="pro-box">
+        <h4>✓ 光交叉的优势</h4>
+        <ul style="margin-left: 1rem; line-height: 1.85;">
+          <li><strong>带宽完全透明：</strong>不关心信号是 100G 还是 1.6T，都一视同仁</li>
+          <li><strong>速率/协议透明：</strong>以太网、OTN、任何调制格式都能承载</li>
+          <li><strong>超低功耗：</strong>无 O-E-O，ROADM 全节点仅几十 W</li>
+          <li><strong>超低延迟：</strong>光速直通，几十纳秒级</li>
+          <li><strong>可扩展性强：</strong>单设备 Tbps-Pbps 级容量，远超路由器</li>
+        </ul>
+      </div>
+      <div class="con-box">
+        <h4>✗ 光交叉的局限</h4>
+        <ul style="margin-left: 1rem; line-height: 1.85;">
+          <li><strong>颗粒度粗：</strong>最小单位是波长，不能做包级路由</li>
+          <li><strong>无智能处理：</strong>无法做 IP 路由决策、QoS、流量工程</li>
+          <li><strong>统计复用能力弱：</strong>一个波长就是一个用户独占</li>
+          <li><strong>仅 1R 放大：</strong>信号在光域每过一跳都会累积噪声</li>
+          <li><strong>保护倒换相对慢：</strong>光域切换通常 50-100 ms，而 IP 层可 &lt; 50 ms</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>§7.3 光/电交叉的协同 — 不是"你死我活"，而是"分工合作"</h3>
+
+    <p>
+      现实的网络既不是纯电交叉，也不是纯光交叉，而是<strong>两者的精妙协同</strong>。
+      设计原则很直观——让合适的流量走合适的层：
+    </p>
+
+    <div class="grid grid-2" style="margin-top: var(--space-6);">
+      <div class="card">
+        <h4 style="color: var(--cisco-blue);">🚄 "过路"流量 (Express Traffic)</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary);">
+          从 A 到 C、只是"路过"B 的流量——完全没必要在 B 节点做 O-E-O 转换。
+          <strong>让光交叉直接把这条波长从 A 方向转发到 C 方向</strong>，节省 B 节点的电域处理成本。
+          对于跨城、跨国骨干，几十 ~ 几百 Gbps 的 Express 流量占主导，节省的功耗可达几十 kW。
+        </p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--cisco-red);">📋 需处理流量 (Terminated Traffic)</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary);">
+          本节点是 IP 层目的地、需要做路由查找、策略匹配、负载均衡的流量——必须进入电域。
+          <strong>让波长在这里 Drop 下车，交给路由器处理</strong>。这种流量占比虽小，但必不可少。
+        </p>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <p><strong>💡 核心设计哲学 · "IP over DWDM"的分工原则</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        "<strong>让各层做各层擅长的事</strong>"——这是 IP over DWDM 架构的核心思想：
+        <br><br>
+        &nbsp;&nbsp;▸ <strong>IP 层（路由器）</strong>：做智能路由决策、QoS、流量工程、故障恢复（FRR/TI-LFA）<br>
+        &nbsp;&nbsp;▸ <strong>DWDM 层（ROADM）</strong>：做大管道的"灰度"传输——快速、透明、低成本<br>
+        <br>
+        这种分层协同让网络整体<strong>功耗下降 30-50%、成本下降 40%、延迟减半</strong>——
+        是现代骨干网架构的基本模式。但这个模式还能进一步极简化——Routed Optical Networking 正在把它推向下一阶段，
+        这是 Optical 202 的核心主题。
+      </p>
+    </div>
+
+    <div class="next-step">
+      <h4>▼ 接下来的主角：相干光通信</h4>
+      <p>理解了电交叉 vs 光交叉的架构哲学后，让我们把焦点聚回光信号本身——是什么技术让单波长速率从 10G 跃升到 1.6T？是什么算法让色散、偏振、相位恢复从"硬件难题"变成"数字算法"？答案只有一个——<strong>相干光通信</strong>。</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §7.4 相干光通信
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§7.4 相干光通信 — 划时代的技术革命</h3>
+
+    <p>
+      如果要在光通信领域选一项"过去 20 年最重要的技术突破"，答案几乎毫无悬念——<strong>相干光通信（Coherent Optical Communications）</strong>。
+      它不仅把单波长速率从 10G 推到了 1.6T（<strong>160 倍的增长！</strong>），
+      更让传输距离从 80 km 延伸到 5000+ km，让全球互联网骨干网的经济性发生了根本性变化。
+      这个模块，让我们深入探究相干光的工作原理——从数学第一性原理到工程实现细节。
+    </p>
+
+    <h4>§7.4.1 为什么需要相干光？— 直接检测的死胡同</h4>
+
+    <p>
+      回顾 Optical 101 §3.5：传统的<strong>直接检测（Direct Detection, DD）</strong>使用一个光电二极管，
+      输出电流正比于光强的平方 |E(t)|²。这意味着它<strong>只能"看到"振幅信息</strong>——
+      光波的<strong>相位</strong>（φ）和<strong>偏振</strong>（polarization）完全被丢弃了。
+    </p>
+
+    <p>
+      这个局限在低速时代无所谓——OOK（开关键控）只需要振幅信息就够了。
+      但当我们想要提升频谱效率，实现 QPSK（每符号 2 比特）、16QAM（4 比特）、
+      64QAM（6 比特）、甚至 256QAM（8 比特）这样的高阶调制时，<strong>相位信息就变成了生命线</strong>——
+      你必须能精确测出"光波是 0° 还是 90° 还是 45°"。
+    </p>
+
+    <div class="analogy-box">
+      <p><strong>💡 类比 · 从黑白电视到高清彩色</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        直接检测就像<strong>黑白电视</strong>——只能感知亮度的变化（振幅），无法识别颜色（相位）。
+        相干检测就像<strong>4K 高清彩色电视</strong>——不仅能看到亮度，还能分辨出所有细微的色彩差别。
+        信息维度从 1 维（振幅）跃升到 4 维（振幅 + 相位 + X 偏振 + Y 偏振），
+        单符号承载的信息量呈几何级数增长——这就是相干光的"升维打击"。
+      </p>
+    </div>
+
+    <h4>§7.4.2 相干检测的核心思想 — "本振激光"的魔法</h4>
+
+    <p>
+      相干检测的核心创新，是在接收端引入一束<strong>本地振荡激光（LO, Local Oscillator）</strong>——
+      一束频率几乎与信号光相同、相位稳定的参考光。让这束本振光与信号光<strong>"混频干涉"</strong>，
+      就能把原本光域中难以直接测量的<strong>相位信息"搬运"到电域</strong>，
+      然后由光电探测器轻松测量。
+    </p>
+
+    <h4>§7.4.3 相干检测的数学推导</h4>
+
+    <p>让我们从第一性原理推导相干检测如何工作。这背后的数学非常优美——</p>
+
+    <div class="formula-box">
+      <div class="formula-label">信号光与本振光</div>
+      <div class="formula">
+        E<sub>s</sub>(t) = A<sub>s</sub> · exp(j(ω<sub>s</sub>·t + φ<sub>s</sub>))<br>
+        E<sub>LO</sub>(t) = A<sub>LO</sub> · exp(j(ω<sub>LO</sub>·t + φ<sub>LO</sub>))
+      </div>
+      <div class="formula-explain">
+        信号光和本振光都是经典的复指数形式的电磁波。A 是振幅，ω 是角频率，φ 是相位。<br>
+        关键信息（调制数据）藏在 A<sub>s</sub> 和 φ<sub>s</sub> 里——我们要把它们提取出来。
+      </div>
+    </div>
+
+    <p>把两束光耦合在一起送入光电探测器，探测器输出电流正比于光强 |E|²：</p>
+
+    <div class="formula-box">
+      <div class="formula-label">混频后的光电流</div>
+      <div class="formula">
+        I ∝ |E<sub>s</sub> + E<sub>LO</sub>|²<br>
+        = |E<sub>s</sub>|² + |E<sub>LO</sub>|² + 2·Re(E<sub>s</sub> · E<sub>LO</sub>*)<br>
+        = A<sub>s</sub>² + A<sub>LO</sub>² + <strong>2·A<sub>s</sub>·A<sub>LO</sub>·cos((ω<sub>s</sub>−ω<sub>LO</sub>)·t + (φ<sub>s</sub>−φ<sub>LO</sub>))</strong>
+      </div>
+      <div class="formula-explain">
+        前两项是"直流"——只跟功率有关，不携带信息。<br>
+        <strong>第三项</strong>（交叉项）才是魔法所在——它<strong>同时包含了信号的振幅 A<sub>s</sub> 和相位 φ<sub>s</sub></strong>！<br>
+        这就是相干检测能恢复相位信息的数学本质。
+      </div>
+    </div>
+
+    <h4>§7.4.4 零差 vs 外差</h4>
+
+    <p>根据本振频率的选择，相干检测分两种模式：</p>
+
+    <div class="grid grid-2" style="margin-top: var(--space-6);">
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-blue);">现代主流 ⭐</span>
+        <h4>零差检测（Homodyne）</h4>
+        <div class="comp-sub">ω<sub>s</sub> = ω<sub>LO</sub></div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          本振频率与信号频率<strong>完全相同</strong>。交叉项直接在基带（低频）出现，<br>
+          I ∝ 2·A<sub>s</sub>·A<sub>LO</sub>·cos(φ<sub>s</sub>−φ<sub>LO</sub>)——<strong>直接解出相位</strong>。<br>
+          电子处理带宽需求低，是所有商用 100G+ 相干系统的选择。
+        </p>
+      </div>
+      <div class="component-card">
+        <span class="comp-tag" style="background: var(--cisco-orange);">历史早期</span>
+        <h4>外差检测（Heterodyne）</h4>
+        <div class="comp-sub">ω<sub>s</sub> ≠ ω<sub>LO</sub></div>
+        <p style="font-size: 0.93rem; color: var(--text-secondary); line-height: 1.65;">
+          本振频率与信号频率<strong>略有偏差</strong>，交叉项落在中频（IF）。
+          需要更高带宽的电子处理。现代几乎不用，但在某些实验系统仍有应用。
+        </p>
+      </div>
+    </div>
+
+    <h4>§7.4.5 90° 光混频器 (Optical Hybrid) — I/Q 的光学分解</h4>
+
+    <p>
+      上面的数学推导只得到了一个"cos(相位差)"项——但一个 cos 值是<strong>二义的</strong>（cos(φ) = cos(−φ)）。
+      为了完整恢复相位信息（即区分 +φ 和 −φ），我们还需要一个"sin(相位差)"项。
+      这就需要 <strong>90° 光混频器（90° Optical Hybrid）</strong>——
+      一个将信号光与本振光分解成 <strong>I 路（同相，In-phase）</strong>和 <strong>Q 路（正交，Quadrature）</strong>的精密光学器件。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">90° 光混频器：把光域的复数信号拆分成 I/Q 两路</text>
+
+        <!-- 信号光输入 -->
+        <g transform="translate(30, 80)">
+          <rect x="0" y="0" width="110" height="40" fill="#E2231A" rx="4"/>
+          <text x="55" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">信号光 E_s</text>
+        </g>
+        <line x1="140" y1="100" x2="220" y2="100" stroke="#E2231A" stroke-width="2.5"/>
+
+        <!-- 本振光输入 -->
+        <g transform="translate(30, 200)">
+          <rect x="0" y="0" width="110" height="40" fill="#049FD9" rx="4"/>
+          <text x="55" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">本振光 E_LO</text>
+        </g>
+        <line x1="140" y1="220" x2="220" y2="220" stroke="#049FD9" stroke-width="2.5"/>
+
+        <!-- 90° Hybrid -->
+        <g transform="translate(220, 70)">
+          <rect x="0" y="0" width="180" height="180" fill="#9232AC" rx="8" opacity="0.9"/>
+          <text x="90" y="35" text-anchor="middle" font-size="14" font-weight="700" fill="white">90° Optical</text>
+          <text x="90" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="white">Hybrid</text>
+          <text x="90" y="85" text-anchor="middle" font-size="10" fill="white" opacity="0.9">4 个 50/50 耦合器</text>
+          <text x="90" y="105" text-anchor="middle" font-size="10" fill="white" opacity="0.9">+ 90° 相位偏置</text>
+          <text x="90" y="140" text-anchor="middle" font-size="10" fill="#FBAB18">输出 4 路光：</text>
+          <text x="90" y="158" text-anchor="middle" font-size="9" fill="white">E_s+E_LO, E_s−E_LO</text>
+          <text x="90" y="172" text-anchor="middle" font-size="9" fill="white">E_s+jE_LO, E_s−jE_LO</text>
+        </g>
+
+        <!-- 4 路输出 -->
+        <g stroke-width="2">
+          <line x1="400" y1="90" x2="500" y2="80" stroke="#F58025"/>
+          <line x1="400" y1="130" x2="500" y2="130" stroke="#F58025"/>
+          <line x1="400" y1="180" x2="500" y2="180" stroke="#67B346"/>
+          <line x1="400" y1="220" x2="500" y2="230" stroke="#67B346"/>
+        </g>
+
+        <!-- 平衡探测器 BPD I -->
+        <g transform="translate(500, 65)">
+          <rect x="0" y="0" width="130" height="80" fill="#F58025" rx="6"/>
+          <text x="65" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">BPD-I</text>
+          <text x="65" y="45" text-anchor="middle" font-size="9" fill="white" opacity="0.9">平衡探测器</text>
+          <text x="65" y="62" text-anchor="middle" font-size="9" fill="white" opacity="0.9">（同相分量）</text>
+        </g>
+
+        <!-- 平衡探测器 BPD Q -->
+        <g transform="translate(500, 170)">
+          <rect x="0" y="0" width="130" height="80" fill="#67B346" rx="6"/>
+          <text x="65" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">BPD-Q</text>
+          <text x="65" y="45" text-anchor="middle" font-size="9" fill="white" opacity="0.9">平衡探测器</text>
+          <text x="65" y="62" text-anchor="middle" font-size="9" fill="white" opacity="0.9">（正交分量）</text>
+        </g>
+
+        <!-- 输出 I -->
+        <line x1="630" y1="105" x2="700" y2="105" stroke="#F58025" stroke-width="2.5"/>
+        <polygon points="700,100 710,105 700,110" fill="#F58025"/>
+
+        <g transform="translate(710, 85)">
+          <rect x="0" y="0" width="120" height="40" fill="#F58025" rx="4"/>
+          <text x="60" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">I(t) = A_s·cos(φ)</text>
+        </g>
+
+        <!-- 输出 Q -->
+        <line x1="630" y1="210" x2="700" y2="210" stroke="#67B346" stroke-width="2.5"/>
+        <polygon points="700,205 710,210 700,215" fill="#67B346"/>
+
+        <g transform="translate(710, 190)">
+          <rect x="0" y="0" width="120" height="40" fill="#67B346" rx="4"/>
+          <text x="60" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">Q(t) = A_s·sin(φ)</text>
+        </g>
+
+        <!-- 说明 -->
+        <text x="450" y="290" text-anchor="middle" font-size="12" fill="#0D274D" font-weight="600">
+          合起来 I + jQ = A_s · exp(jφ) — 完整的复数信号被还原！
+        </text>
+        <text x="450" y="315" text-anchor="middle" font-size="11" fill="#58585B" font-style="italic">
+          这就是把光域复数调制信号 1:1 映射到电域 I/Q 两路的"光学魔法"
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 7-3：90° 光混频器的工作原理。通过 4 个 50/50 耦合器 + 90° 相位偏置，把信号光与本振光的干涉分解成 4 路光，再经过两个平衡探测器（BPD）输出 I 和 Q 两路基带电信号。合起来 I + jQ = A_s · exp(jφ)，完整恢复复数调制信号。</p>
+
+    <h4>§7.4.6 偏振分集接收 — 解开 X/Y 偏振的纠结</h4>
+
+    <p>
+      现代相干系统普遍使用<strong>偏振复用（Dual Polarization, DP）</strong>——
+      同时在 X 偏振和 Y 偏振上各传一路独立数据，频谱效率翻倍。
+      但光纤的双折射效应让 X/Y 偏振在传输过程中<strong>互相"搅和"</strong>——
+      到达接收端时已经不是最初那两个干净的偏振了，而是两者的某种线性组合。
+      接收端必须能把它们"分离"出来。
+    </p>
+
+    <p>方案是在接收前端加一个<strong>偏振分束器（PBS, Polarization Beam Splitter）</strong>——把接收光分为 X、Y 两路，各自独立地做 90° 混频 + 平衡探测：</p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">偏振分集相干接收机：4 路 ADC 输入 DSP</text>
+
+        <!-- 输入信号光 -->
+        <g transform="translate(20, 170)">
+          <rect x="0" y="0" width="100" height="40" fill="#E2231A" rx="4"/>
+          <text x="50" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="white">接收信号光</text>
+        </g>
+
+        <!-- 信号 PBS -->
+        <g transform="translate(140, 150)">
+          <polygon points="0,0 50,40 0,80" fill="#9232AC"/>
+          <text x="20" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="white">PBS</text>
+        </g>
+
+        <!-- X 偏振路径 -->
+        <line x1="160" y1="170" x2="230" y2="100" stroke="#E2231A" stroke-width="2"/>
+        <text x="200" y="130" font-size="10" fill="#E2231A" font-weight="600">X 偏振</text>
+
+        <!-- Y 偏振路径 -->
+        <line x1="160" y1="210" x2="230" y2="280" stroke="#F58025" stroke-width="2"/>
+        <text x="200" y="260" font-size="10" fill="#F58025" font-weight="600">Y 偏振</text>
+
+        <!-- X Hybrid -->
+        <g transform="translate(230, 70)">
+          <rect x="0" y="0" width="120" height="60" fill="#9232AC" rx="6" opacity="0.9"/>
+          <text x="60" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="white">90° Hybrid</text>
+          <text x="60" y="45" text-anchor="middle" font-size="10" fill="white">(X)</text>
+        </g>
+
+        <!-- Y Hybrid -->
+        <g transform="translate(230, 250)">
+          <rect x="0" y="0" width="120" height="60" fill="#9232AC" rx="6" opacity="0.9"/>
+          <text x="60" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="white">90° Hybrid</text>
+          <text x="60" y="45" text-anchor="middle" font-size="10" fill="white">(Y)</text>
+        </g>
+
+        <!-- 本振 PBS -->
+        <g transform="translate(430, 150)">
+          <polygon points="50,0 0,40 50,80" fill="#049FD9"/>
+          <text x="30" y="45" text-anchor="middle" font-size="10" font-weight="700" fill="white">PBS</text>
+        </g>
+
+        <!-- 本振输入 -->
+        <g transform="translate(500, 170)">
+          <rect x="0" y="0" width="100" height="40" fill="#049FD9" rx="4"/>
+          <text x="50" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="white">本振 LO</text>
+        </g>
+
+        <!-- 4 个平衡探测器 + ADC -->
+        <g>
+          <!-- X-I -->
+          <line x1="350" y1="85" x2="400" y2="85" stroke="#F58025" stroke-width="2"/>
+          <rect x="400" y="70" width="80" height="30" fill="#F58025" rx="4"/>
+          <text x="440" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="white">BPD + ADC</text>
+          <line x1="480" y1="85" x2="550" y2="85" stroke="#F58025" stroke-width="2"/>
+          <text x="515" y="78" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="700">X-I</text>
+
+          <!-- X-Q -->
+          <line x1="350" y1="120" x2="400" y2="120" stroke="#F58025" stroke-width="2"/>
+          <rect x="400" y="105" width="80" height="30" fill="#F58025" rx="4"/>
+          <text x="440" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="white">BPD + ADC</text>
+          <line x1="480" y1="120" x2="550" y2="120" stroke="#F58025" stroke-width="2"/>
+          <text x="515" y="113" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="700">X-Q</text>
+
+          <!-- Y-I -->
+          <line x1="350" y1="265" x2="400" y2="265" stroke="#67B346" stroke-width="2"/>
+          <rect x="400" y="250" width="80" height="30" fill="#67B346" rx="4"/>
+          <text x="440" y="270" text-anchor="middle" font-size="11" font-weight="700" fill="white">BPD + ADC</text>
+          <line x1="480" y1="265" x2="550" y2="265" stroke="#67B346" stroke-width="2"/>
+          <text x="515" y="258" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="700">Y-I</text>
+
+          <!-- Y-Q -->
+          <line x1="350" y1="300" x2="400" y2="300" stroke="#67B346" stroke-width="2"/>
+          <rect x="400" y="285" width="80" height="30" fill="#67B346" rx="4"/>
+          <text x="440" y="305" text-anchor="middle" font-size="11" font-weight="700" fill="white">BPD + ADC</text>
+          <line x1="480" y1="300" x2="550" y2="300" stroke="#67B346" stroke-width="2"/>
+          <text x="515" y="293" text-anchor="middle" font-size="11" fill="#0D274D" font-weight="700">Y-Q</text>
+        </g>
+
+        <!-- DSP ASIC -->
+        <g transform="translate(600, 130)">
+          <rect x="0" y="0" width="260" height="130" fill="#005073" rx="8"/>
+          <text x="130" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="white">DSP ASIC</text>
+          <text x="130" y="55" text-anchor="middle" font-size="10" fill="#00BCEB">7nm/5nm CMOS</text>
+          <text x="130" y="75" text-anchor="middle" font-size="10" fill="white" opacity="0.9">完成 8 大处理步骤</text>
+          <text x="130" y="95" text-anchor="middle" font-size="10" fill="white" opacity="0.9">色散 / PMD / 相位 / FEC</text>
+          <text x="130" y="115" text-anchor="middle" font-size="10" fill="#67B346">吐出恢复的比特流</text>
+        </g>
+
+      </svg>
+    </div>
+    <p class="svg-caption">图 7-4：完整的偏振分集相干接收机。信号光与本振光分别通过 PBS 分为 X、Y 两个偏振路径，各自进入独立的 90° Hybrid，最终输出 4 路电信号（X-I、X-Q、Y-I、Y-Q）给 DSP ASIC 处理。这 4 路信号完整承载了光域复数信号在两个偏振维度上的全部信息。</p>
+
+    <h4>§7.4.7 DSP — 真正的魔法在这里</h4>
+
+    <p>
+      好戏才刚刚开始。4 路 ADC 输出的信号<strong>并不能直接使用</strong>——
+      它们被色散扭曲、被偏振混合、被激光器频偏污染、被相位噪声打乱。
+      这时候，<strong>DSP（Digital Signal Processing）</strong>登场了——这是相干光通信真正的"大脑"。
+      现代相干光 DSP ASIC 每秒执行万亿次运算，处理着每一个比特的命运。
+    </p>
+
+    <div class="dsp-flow">
+      <div class="dsp-step">
+        <h5>ADC 采样 + 正交化</h5>
+        <p>用 128+ GSa/s 的超高速 ADC 把模拟信号数字化。然后正交化处理 I/Q 间可能存在的幅度不匹配和相位偏差（Gram-Schmidt Orthogonalization）。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>色散补偿（CD Compensation）</h5>
+        <p>在频域施加反向色散 H(ω) = exp(jβ₂·ω²·L/2) 的共轭——精确"抵消"数千公里光纤累积的数万 ps/nm 色散。<strong>这一步让传统 DCF 色散补偿光纤彻底过时！</strong>长距系统光路大幅简化。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>时钟恢复（Clock Recovery）</h5>
+        <p>从接收信号中提取精确的符号时钟。Gardner 算法、Mueller-Müller 算法等经典时钟恢复技术被广泛使用。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>偏振均衡与解复用（2×2 MIMO）</h5>
+        <p>用自适应滤波器矩阵（Butterfly Equalizer）实时解耦 X/Y 偏振。核心算法：CMA（Constant Modulus Algorithm）盲均衡、RDE、LMS 等。这一步能跟踪 <strong>毫秒级偏振变化</strong>，完美解决 PMD 问题。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>频偏估计与补偿（Frequency Offset Estimation）</h5>
+        <p>发射激光器和本振激光器的频率总会有微小偏差（kHz-MHz 量级）。DSP 用 FFT 或 Viterbi 等算法估计这个偏差并消除之。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>载波相位恢复（Carrier Phase Recovery）</h5>
+        <p>激光器相位噪声会让接收星座图"旋转抖动"。Viterbi-Viterbi 算法和盲相位搜索（BPS）算法实时跟踪相位漂移，把星座图"锁死"在正确位置。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>非线性补偿（Nonlinearity Compensation）</h5>
+        <p>光纤非线性（SPM/XPM）难以完全消除，但可以通过<strong>数字反向传播（DBP, Digital Back Propagation）</strong>部分补偿。这是当前算法研究的热点前沿。</p>
+      </div>
+      <div class="dsp-step">
+        <h5>符号判决 + FEC 解码</h5>
+        <p>终于！恢复出来的干净星座点被判决为比特。然后 SD-FEC（软判决纠错）用 LDPC 或 Turbo 码纠正剩余错误，吐出正确的原始比特流。整个流程在<strong>纳秒级</strong>完成。</p>
+      </div>
+    </div>
+
+    <div class="insight-box" style="margin-top: var(--space-8);">
+      <p><strong>🎯 相干 DSP 的革命性意义</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        想想这个画面：2010 年以前，光传输工程师要手工计算每段光纤的色散累积，配合插入合适长度的 DCF 色散补偿光纤；
+        要担心偏振变化引起的信号衰落；要控制激光器的频率漂移。每一项都是硬件难题。
+        <strong>相干光 + DSP 把所有这些"光学物理难题"转化成了"数字信号处理问题"</strong>——
+        既然是数字算法，那就可以用摩尔定律推动性能指数增长，可以用 AI 优化算法效果。
+        这就是为什么光通信近 15 年能以惊人速度从 10G 跃升到 1.6T——
+        本质上是把光域问题"搬家"到了电域，享受了硅 CMOS 工艺的红利。
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §7.4.8 相干光演进 + PCS + 可插拔
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§7.4.8 相干光通信的演进 — 从 100G 到 1.6T 的 15 年飞跃</h3>
+
+    <p>
+      相干光通信自 2010 年左右商用以来，每隔 3-5 年推出一代新产品，速率不断翻倍，频谱效率不断逼近香农极限。
+      让我们用一张表看清整个演进脉络：
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table class="generation-table">
+        <thead>
+          <tr>
+            <th>代际</th>
+            <th>年份</th>
+            <th>单波长速率</th>
+            <th>调制格式</th>
+            <th>波特率</th>
+            <th>频谱效率</th>
+            <th>典型 DSP 工艺</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>第一代</strong></td>
+            <td>~2010</td>
+            <td>100G</td>
+            <td>DP-QPSK</td>
+            <td>28 GBaud</td>
+            <td>2 bits/s/Hz</td>
+            <td>40 nm</td>
+          </tr>
+          <tr>
+            <td><strong>第二代</strong></td>
+            <td>~2015</td>
+            <td>200G</td>
+            <td>DP-16QAM</td>
+            <td>32 GBaud</td>
+            <td>4 bits/s/Hz</td>
+            <td>28 nm</td>
+          </tr>
+          <tr>
+            <td><strong>第三代</strong></td>
+            <td>~2018</td>
+            <td>400G</td>
+            <td>DP-16QAM / 64QAM</td>
+            <td>64 GBaud</td>
+            <td>4-6 bits/s/Hz</td>
+            <td>16 nm</td>
+          </tr>
+          <tr>
+            <td><strong>第四代</strong></td>
+            <td>~2022</td>
+            <td>800G</td>
+            <td>DP-16QAM / 64QAM + PCS</td>
+            <td>96-140 GBaud</td>
+            <td>4-6 bits/s/Hz</td>
+            <td>7 nm</td>
+          </tr>
+          <tr style="background: #F5F0FF;">
+            <td><strong>第五代</strong> 🚀</td>
+            <td>2024-2026</td>
+            <td>1.2T / 1.6T</td>
+            <td>DP-16/64/256QAM + PCS</td>
+            <td>140-200 GBaud</td>
+            <td>6-8 bits/s/Hz</td>
+            <td>5 nm → 3 nm</td>
+          </tr>
+          <tr style="background: #FFF8E7;">
+            <td><strong>第六代</strong>（研发）</td>
+            <td>2027+</td>
+            <td>2.4T / 3.2T</td>
+            <td>Flexible PCS + AI DSP</td>
+            <td>~300+ GBaud</td>
+            <td>接近香农极限</td>
+            <td>3 nm / 2 nm</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+      每一代背后都是 DSP ASIC 工艺节点的跳跃 + 新算法的引入。
+      15 年间速率增长 16 倍，而同期数据中心硅的 Dennard 缩放已停滞——
+      光通信成为少数几个"速率增长还在指数线上"的领域。
+    </p>
+
+    <h4>§7.4.9 PCS — 概率星座整形：用"概率魔法"逼近香农极限</h4>
+
+    <p>
+      说到第四代及以后的相干光系统，不得不隆重介绍一个革命性的技术——
+      <strong>PCS（Probabilistic Constellation Shaping，概率星座整形）</strong>。
+      这是逼近香农极限的关键武器，也是当前所有高端相干模块的标配。
+    </p>
+
+    <div class="think-box">
+      <p><strong>💭 关键观察</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        传统的 QAM 调制里，所有星座点都是<strong>等概率发送</strong>的（16 个点各占 1/16 概率）。
+        这意味着——<strong>发送端平均功率被浪费在了"外围的大振幅点"上</strong>，而这些点恰恰最易受噪声干扰。
+        如果我们让内环（小振幅）星座点发送得更频繁，外环（大振幅）点更稀有——平均功率会下降，接收 BER 反而改善。
+        这个"反直觉"的想法，就是 PCS 的核心思想。
+      </p>
+    </div>
+
+    <h4>PCS 的本质 — 让星座概率贴近高斯</h4>
+
+    <p>
+      香农早就证明：<strong>在 AWGN 信道中达到容量极限的信号，其幅度分布应该是高斯分布</strong>，而不是均匀分布。
+      传统 QAM 用的是方形均匀星座，距离高斯最优有 1.53 dB 的 "shaping gain"（整形增益）差距。
+      PCS 通过<strong>主动调整每个星座点的发送概率</strong>——让中心点（低能量）高概率出现、外围点（高能量）低概率出现——
+      使整体分布逼近高斯，把这 1.53 dB 增益"夺回来"。
+    </p>
+
+    <div class="formula-box">
+      <div class="formula-label">核心公式 ③ · PCS 带来的系统增益</div>
+      <div class="formula">
+        Shaping Gain ≈ 1-1.5 dB OSNR ≈ 20-30% 距离延长
+      </div>
+      <div class="formula-explain">
+        在相同硬件、相同速率的条件下，仅仅通过"重新分配发送概率"就能把传输距离延长 20-30%——<br>
+        这对跨洋海缆、骨干网来说是千万美元级的价值提升。
+      </div>
+    </div>
+
+    <div class="analogy-box">
+      <p><strong>💡 类比 · 运动员的体能分配</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        马拉松选手知道一个道理——平均用力最节能，偶尔全力冲刺反而耗尽体能。
+        传统 QAM 就像"每公里都全力跑"的业余选手——平均速度快但很快累垮；
+        PCS 则像"大部分时间匀速，偶尔才冲刺"的职业选手——同样能量下跑得更远。
+        在通信中，"能量"就是光功率，"跑得远"就是传输距离。
+      </p>
+    </div>
+
+    <h4>PCS 的另一大优势：无级软件速率切换</h4>
+
+    <p>
+      PCS 还带来一个革命性的工程特性——<strong>同一套硬件，软件切换不同容量/距离模式</strong>。
+      传统上，400G 和 800G 是两套独立的硬件；有了 PCS，同一个模块可以做到："今天配置成 600G 长距离，明天配置成 800G 短距离"——
+      全部通过软件改变调制/整形参数。这种<strong>灵活性（Flexibility）</strong>是现代 DCI、
+      城域网能"按需分配带宽"的硬件基础。
+    </p>
+
+    <h4>§7.4.10 相干光的系统级影响</h4>
+
+    <div class="grid grid-2" style="margin-top: var(--space-6);">
+      <div class="card">
+        <h4 style="color: var(--cisco-blue);">🔧 光路架构全面简化</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">
+          DCF 色散补偿光纤不再需要——DSP 数字补偿。<br>
+          ROADM 光路设计更灵活，不需预留 DCF 空间。<br>
+          PMD 动态变化自动处理。<br>
+          复杂的色散图纸不再需要。
+        </p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--cisco-blue);">💰 成本革命 + 规模效应</h4>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">
+          2010 年：专用 transponder chassis，数百瓦功耗，单机柜数万美元。<br>
+          2026 年：400G ZR+ 模块，15-22 W 功耗，几千美元。<br>
+          相干光从"昂贵的长途专用技术"演变成"通用基础技术"——
+          数据中心和城域都能用得起。
+        </p>
+      </div>
+    </div>
+
+    <h4>§7.5 相干光 + 可插拔模块 — 从机柜到"指甲盖"的革命</h4>
+
+    <p>
+      2010 年的第一代相干光系统是"机柜级"的——一个完整的 100G 相干 transponder 占用一个 2U 机箱，
+      功耗 200+ W，单端口成本超过 10 万美元。而今天（2026），同样的功能被集成到了一个 <strong>QSFP-DD</strong>
+      可插拔模块里——大小如同 USB 记忆棒，功耗 15-22 W，成本几千美元。这是令人震撼的 <strong>1000 倍尺寸收缩 + 100 倍成本下降</strong>。
+    </p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 900px;">
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">相干光模块演进：从机柜到指甲盖</text>
+
+        <!-- 2010: 机柜级 -->
+        <g transform="translate(50, 70)">
+          <rect x="0" y="0" width="180" height="180" fill="#005073" rx="8"/>
+          <text x="90" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="white">2010</text>
+          <text x="90" y="55" text-anchor="middle" font-size="11" fill="#00BCEB">Transponder Chassis</text>
+          <text x="90" y="80" text-anchor="middle" font-size="10" fill="white">100G 相干</text>
+          <text x="90" y="110" text-anchor="middle" font-size="10" fill="white" opacity="0.9">尺寸: 2U (880×440×89 mm)</text>
+          <text x="90" y="130" text-anchor="middle" font-size="10" fill="white" opacity="0.9">功耗: ~200 W</text>
+          <text x="90" y="150" text-anchor="middle" font-size="10" fill="white" opacity="0.9">成本: &gt; $100,000</text>
+          <text x="90" y="170" text-anchor="middle" font-size="10" fill="#FBAB18">专用机箱</text>
+        </g>
+
+        <!-- 2018: CFP2-DCO -->
+        <g transform="translate(260, 100)">
+          <rect x="0" y="0" width="130" height="120" fill="#049FD9" rx="8"/>
+          <text x="65" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="white">2018</text>
+          <text x="65" y="45" text-anchor="middle" font-size="11" fill="white">CFP2-DCO</text>
+          <text x="65" y="65" text-anchor="middle" font-size="10" fill="white" opacity="0.9">400G 相干</text>
+          <text x="65" y="85" text-anchor="middle" font-size="10" fill="white" opacity="0.9">功耗: ~25 W</text>
+          <text x="65" y="105" text-anchor="middle" font-size="10" fill="white" opacity="0.9">成本: ~$5,000</text>
+        </g>
+
+        <!-- 2022: QSFP-DD -->
+        <g transform="translate(420, 130)">
+          <rect x="0" y="0" width="100" height="80" fill="#67B346" rx="6"/>
+          <text x="50" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="white">2022</text>
+          <text x="50" y="45" text-anchor="middle" font-size="10" fill="white">QSFP-DD</text>
+          <text x="50" y="60" text-anchor="middle" font-size="9" fill="white">400G ZR/ZR+</text>
+          <text x="50" y="75" text-anchor="middle" font-size="9" fill="white">~18 W</text>
+        </g>
+
+        <!-- 2024: OSFP 800G -->
+        <g transform="translate(550, 140)">
+          <rect x="0" y="0" width="100" height="65" fill="#F58025" rx="6"/>
+          <text x="50" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="white">2024</text>
+          <text x="50" y="38" text-anchor="middle" font-size="10" fill="white">QSFP-DD800</text>
+          <text x="50" y="52" text-anchor="middle" font-size="9" fill="white">800G ZR+</text>
+        </g>
+
+        <!-- 2026: OSFP 1.6T -->
+        <g transform="translate(680, 155)">
+          <rect x="0" y="0" width="80" height="50" fill="#9232AC" rx="6"/>
+          <text x="40" y="18" text-anchor="middle" font-size="11" font-weight="700" fill="white">2026</text>
+          <text x="40" y="34" text-anchor="middle" font-size="10" fill="white">OSFP-XD</text>
+          <text x="40" y="46" text-anchor="middle" font-size="9" fill="white">1.6T</text>
+        </g>
+
+        <!-- 箭头 -->
+        <line x1="230" y1="160" x2="260" y2="160" stroke="#58585B" stroke-width="2"/>
+        <polygon points="260,155 270,160 260,165" fill="#58585B"/>
+        <line x1="390" y1="160" x2="420" y2="170" stroke="#58585B" stroke-width="2"/>
+        <polygon points="420,165 430,170 420,175" fill="#58585B"/>
+        <line x1="520" y1="170" x2="550" y2="172" stroke="#58585B" stroke-width="2"/>
+        <polygon points="550,167 560,172 550,177" fill="#58585B"/>
+        <line x1="650" y1="172" x2="680" y2="180" stroke="#58585B" stroke-width="2"/>
+        <polygon points="680,175 690,180 680,185" fill="#58585B"/>
+
+        <text x="450" y="285" text-anchor="middle" font-size="11" fill="#58585B" font-style="italic">
+          15 年间：尺寸缩小 &gt;1000 倍，功耗下降 &gt;10 倍，成本下降 &gt;100 倍，速率提升 16 倍
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 7-5：相干光模块的尺寸/功耗/成本演进。从 2010 年的独立机柜，到 2026 年的 OSFP-XD 1.6T 指甲盖模块——每一代都源于 DSP 工艺进步 + 硅光子集成 + 算法优化的共同推动。这种高速进化直接催生了下一个历史性变革——<strong>Routed Optical Networking</strong>。</p>
+
+    <div class="insight-box">
+      <p><strong>🚀 2026 业界前沿：400G/800G ZR+ 与路由器直连</strong></p>
+      <p style="margin-top: var(--space-4); margin-bottom: 0;">
+        当相干光模块被做到 QSFP-DD 大小（与普通光模块一致）并符合 OIF 400ZR / OpenZR+ 标准后，
+        它就可以<strong>直接插到路由器的普通端口上</strong>——路由器自己就能产生彩光，直接送入 DWDM 光纤。
+        这意味着什么？<strong>Transponder 这个角色被"消灭"了</strong>——
+        路由器直接承担了波长生成职责，整套 DWDM 网络被大幅简化。
+        这就是 Cisco 大力推动的 <strong>Routed Optical Networking（RON）</strong>架构的硬件基础。
+        它是光网络接下来 5 年最重要的架构革命——我们将在 Optical 202 中深入展开。
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     §7.6 模块七回顾
+============================================================ -->
+<section class="chapter">
+  <div class="container">
+
+    <h3>§7.6 模块七回顾 — 核心要点</h3>
+
+    <div class="keypoints-box">
+      <h3>🎯 模块七：10 个核心要点</h3>
+      <ol>
+        <li><strong>电交叉 vs 光交叉是两种互补的转发模式。</strong>电交叉（路由器）颗粒度细、智能强，但功耗成本高；光交叉（ROADM）带宽透明、功耗低，但颗粒度粗。现代网络协同使用两者。</li>
+        <li><strong>"IP over DWDM"是骨干网设计的黄金法则：</strong>让 Express 流量走光交叉，让 Terminated 流量走电交叉。这样能把功耗降 30-50%、成本降 40%。</li>
+        <li><strong>相干光通信是过去 20 年光通信最重要的技术革命。</strong>它把光通信从 10G 推到 1.6T，让频谱效率逼近香农极限。</li>
+        <li><strong>相干检测的核心是本振激光 + 光混频。</strong>|E_s + E_LO|² 中的交叉项 2·A_s·A_LO·cos(...) 同时承载振幅和相位信息——这就是恢复相位的数学本质。</li>
+        <li><strong>90° Hybrid + 偏振分集 = 4 路 ADC 输入。</strong>把光域复数信号在 X、Y 两个偏振上完整分解成 I、Q 两路基带电信号，为 DSP 提供完整信息。</li>
+        <li><strong>DSP 是相干光真正的"魔法所在"。</strong>8 大步骤：ADC 正交化 → 色散补偿 → 时钟恢复 → 偏振均衡 → 频偏补偿 → 相位恢复 → 非线性补偿 → FEC 判决。每秒万亿次运算。</li>
+        <li><strong>DCF 色散补偿光纤被彻底淘汰。</strong>DSP 数字色散补偿可以消除数万 ps/nm 累积色散，让传统光路架构大幅简化。</li>
+        <li><strong>PCS 概率星座整形是逼近香农极限的关键武器。</strong>通过让星座点发送概率贴近高斯分布，获得 1-1.5 dB 整形增益——相当于 20-30% 距离延长。</li>
+        <li><strong>相干光模块从机柜进化到指甲盖。</strong>15 年间，尺寸缩小 &gt;1000 倍，功耗下降 &gt;10 倍，成本下降 &gt;100 倍，速率提升 16 倍——这是 DSP 工艺 + 硅光子 + 算法三管齐下的胜利。</li>
+        <li><strong>400G/800G ZR/ZR+ 可插拔模块重塑光网络架构。</strong>路由器直接输出彩光，Transponder 不再必需。这是 Routed Optical Networking 的硬件基础，是下一个 5 年光网络架构革命的起点。</li>
+      </ol>
+    </div>
+
+    <div class="think-box" style="margin-top: var(--space-8);">
+      <p><strong>💭 通往 Optical 202 的四个深度思考题</strong></p>
+      <ol style="margin-top: var(--space-4); margin-bottom: 0; line-height: 1.9;">
+        <li>
+          <strong>DSP 补偿了几乎所有光域损伤——色散、PMD、频偏、相位噪声甚至部分非线性。那么光通信系统是否可以大幅简化，直接用"廉价光路 + 强大 DSP"的架构？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：这正是 Open Line System 架构的核心思想——光路做到最简，智能都在电域。</span>
+        </li>
+        <li>
+          <strong>如果 400G ZR+ 模块可以直接插到路由器上输出彩光，还需要独立的 Transponder 吗？整个 DWDM 网络是否会发生架构级变革？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：这就是 <strong>Routed Optical Networking</strong>——Optical 202 的主角，Cisco 正在推动的下一代网络架构。</span>
+        </li>
+        <li>
+          <strong>相干光通信逼近香农极限的道路上，还有多少创新空间？当频谱效率已达 8 bit/s/Hz 时，下一个增长维度在哪里？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：空分复用（SDM）、多芯光纤、空心光纤、AI 原生光网络——将在 Optical 202/203 中展开。</span>
+        </li>
+        <li>
+          <strong>相干光 DSP 每比特功耗可观（~5 pJ/bit）。当 AI 数据中心需要每秒 Petabit 流量时，DSP 是否会成为新的功耗瓶颈？有哪些新技术正在涌现？</strong>
+          <br><span style="color: var(--text-muted); font-size: 0.92rem;">→ 预告：CPO（共封装光学）、LPO（线性驱动）、硅光子集成——这些正是未来 5 年光通信最激动人心的前沿方向。</span>
+        </li>
+      </ol>
+    </div>
+
+  </div>
+</section>
