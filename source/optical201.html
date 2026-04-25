@@ -5,9 +5,36 @@ layout: false
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Optical 201 · DWDM 与相干光通信 — 光纤里的彩虹高速公路与 DSP 魔法</title>
-<meta name="description" content="从第一性原理理解 DWDM 波分复用与相干光通信——光通信近 20 年最重要的两大技术革命。通俗类比 + 严密数学 + 工程实战，一站式讲透白光/彩光、ROADM、WSS、相干 DSP、PCS 概率整形。">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>DWDM与相干光通信：光纤里的彩虹高速公路与DSP魔法 | Optical 201</title>
+
+    <meta name="description" content="全面解析密集波分复用（DWDM）与相干光通信技术。探讨ROADM的灵活路由机制、Flex Grid波段扩展，以及DSP算法如何在电域消除色散与非线性。">
+
+    <meta name="keywords" content="DWDM, 相干光通信, ROADM, DSP算法, 波分复用, Flex Grid, 概率星座整形, PCS, C波段扩容, Optical 201">
+
+    <meta name="revised" content="Saturday, April 25th, 2026, 12:00 pm" />
+    <meta property="og:title" content="DWDM与相干光通信：光纤里的彩虹高速公路与DSP魔法 | Optical 201">
+    <meta property="og:description" content="剖析光通信近20年最重要的技术革命，从波分复用原理到相干光DSP电域均衡的终极奥秘。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://weiborao.link/optical201.html">
+    <meta property="og:updated_time" content="2026-04-25T12:00:00+08:00" />
+
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "DWDM与相干光通信：光纤里的彩虹高速公路与DSP魔法 | Optical 201",
+    "description": "深入研究密集波分复用（DWDM）、ROADM架构与相干光数字信号处理（DSP）技术在现代通信骨干网中的应用原理。",
+    "datePublished": "2026-04-23T10:00:00+08:00",
+    "dateModified": "2026-04-25T12:00:00+08:00",
+    "proficiencyLevel": "Advanced",
+    "author": { 
+        "@type": "Person", 
+        "name": "Weibo Rao" 
+    },
+    "keywords": "DWDM, Coherent Optics, ROADM, DSP, Flex Grid, PCS"
+    }
+    </script>
 <link rel="stylesheet" href="cisco-style.css">
 <style>
   /* ============================================================================
@@ -601,6 +628,97 @@ layout: false
     text-transform: uppercase;
     margin-bottom: var(--space-2);
   }
+/* ============================================
+   系列文章导航 - Series Navigation Footer
+   ============================================ */
+.series-nav {
+  margin-top: 4rem;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #F5F7FA 0%, #E8F4FA 100%);
+  border-top: 3px solid #049FD9;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.series-nav-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0D274D;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.02em;
+}
+
+.series-nav-subtitle {
+  font-size: 0.85rem;
+  color: #6B7785;
+  margin-bottom: 1.5rem;
+}
+
+.series-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.series-nav-item {
+  display: block;
+  padding: 1rem 1.2rem;
+  background: #FFFFFF;
+  border: 1px solid #D4D8DE;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #0D274D;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.series-nav-item:hover {
+  border-color: #049FD9;
+  box-shadow: 0 4px 12px rgba(4, 159, 217, 0.15);
+  transform: translateY(-2px);
+}
+
+.series-nav-item.current {
+  background: #049FD9;
+  border-color: #049FD9;
+  color: #FFFFFF;
+  cursor: default;
+}
+
+.series-nav-item.current:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.series-nav-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #049FD9;
+  margin-bottom: 0.3rem;
+}
+
+.series-nav-item.current .series-nav-tag {
+  color: #A8E1F5;
+}
+
+.series-nav-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.series-footer-note {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #D4D8DE;
+  font-size: 0.8rem;
+  color: #6B7785;
+  text-align: center;
+}
+
+
 </style>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 
@@ -3968,40 +4086,33 @@ layout: false
 ============================================================ -->
 <section style="background: var(--bg-soft); padding: var(--space-8) 0; text-align: center;">
   <div class="container">
-    <h3 style="color: var(--cisco-navy); padding-bottom: 0; border: none; margin-bottom: var(--space-6);">Optical 系列学习路线图</h3>
-    <div class="grid grid-3" style="margin-top: var(--space-6);">
-      <div class="card" style="text-align: left;">
-        <div class="comp-tag" style="background: var(--cisco-blue); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">Optical 101</div>
-        <h4>光与信息的本质</h4>
-        <p style="font-size: 0.9rem; color: var(--text-secondary);">
-          光的电磁本质、光纤全内反射、调制与解调的数学原理。打好物理与数学基础。
-        </p>
-        <a href="./Optical101.html" class="btn" style="margin-top: var(--space-4); font-size: 0.9rem; padding: var(--space-2) var(--space-6);">← 基础篇</a>
-      </div>
-
-      <div class="card" style="text-align: left; border-color: var(--cisco-accent); border-width: 2px;">
-        <div class="comp-tag" style="background: var(--cisco-accent); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">Optical 201 · 当前</div>
-        <h4>DWDM 与相干光</h4>
-        <p style="font-size: 0.9rem; color: var(--text-secondary);">
-          波分复用、ROADM、相干检测、DSP、PCS 整形——光通信近 20 年最重要的两大革命。
-        </p>
-        <p style="margin-top: var(--space-4); font-size: 0.9rem; color: var(--cisco-accent); font-weight: 600;">★ 当前阅读</p>
-      </div>
-
-      <div class="card" style="text-align: left;">
-        <div class="comp-tag" style="background: var(--cisco-purple); display: inline-block; color: white; padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-2);">Optical 202</div>
-        <h4>RON 与 AI 时代光网络</h4>
-        <p style="font-size: 0.9rem; color: var(--text-secondary);">
-          Routed Optical Networking、硅光子、CPO、AI 数据中心光互联——光通信的未来蓝图。
-        </p>
-        <a href="./Optical202.html" class="btn" style="margin-top: var(--space-4); font-size: 0.9rem; padding: var(--space-2) var(--space-6);">前沿篇 →</a>
-      </div>
-    </div>
-
-    <p style="margin-top: var(--space-8); color: var(--text-muted); font-size: 0.9rem;">
-      © 2026 · 光通信技术博客 · 基于 Cisco 设计系统 · 欢迎学习与分享<br>
-      <strong>Optical 201 · DWDM 与相干光通信</strong> — 从彩虹高速公路到 DSP 魔法
-    </p>
+<nav class="series-nav">
+  <div class="series-nav-title">📚 光通信系列文章 · Optical Communication Series</div>
+  <div class="series-nav-subtitle">从第一性原理到 AI 时代的光网络架构</div>
+  <div class="series-nav-grid">
+    <a href="optical101.html" class="series-nav-item">
+      <div class="series-nav-tag">Part 1</div>
+      <div class="series-nav-name">光的物理与信息论</div>
+    </a>
+    <a href="optical102.html" class="series-nav-item">
+      <div class="series-nav-tag">Part 2</div>
+      <div class="series-nav-name">激光器与调制器</div>
+    </a>
+    <a class="series-nav-item current">
+      <div class="series-nav-tag">Part 3 · 当前</div>
+      <div class="series-nav-name">DWDM 与相干通信</div>
+    </a>
+    <a href="optical202.html" class="series-nav-item">
+      <div class="series-nav-tag">Part 4</div>
+      <div class="series-nav-name">RON 与 AI 时代光网络</div>
+    </a>
+    <a href="optics.html" class="series-nav-item">
+      <div class="series-nav-tag">百科全书</div>
+      <div class="series-nav-name">光模块完全解剖</div>
+    </a>
+  </div>
+  <div class="series-footer-note">© 2026 · Based on Cisco Technical Documentation</div>
+</nav>
   </div>
 </section>
 
