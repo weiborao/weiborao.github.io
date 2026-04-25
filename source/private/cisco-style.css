@@ -219,13 +219,9 @@ margin-bottom: 0.3em;
 }
 
 /* ===== §8  PRINT STYLES ===== */
-@media print{
+@media print {
 
-  /* ---------- base ---------- */
-  body{font-size:10pt;color:#000;background:#fff!important;}
-  .chapter{padding:10pt 0;background:transparent!important;}
-  section.chapter{page-break-before:always}
-
+  /* ---------- @page 规则独立块（不能嵌套常规选择器）---------- */
   @page {
     margin: 2cm;
     @bottom-center {
@@ -234,41 +230,79 @@ margin-bottom: 0.3em;
       color: #58585B;
       font-family: "CiscoSans", sans-serif;
     }
+  }
+
+  /* ---------- base ---------- */
+  body {
+    font-size: 10pt;
+    color: #000;
+    background: #fff !important;
+  }
+
+  .chapter {
+    padding: 10pt 0;
+    background: transparent !important;
+  }
+
   /* ---------- page breaks ---------- */
-  h2{page-break-before:always;break-before:page;}
-  .chapter:first-of-type h2{page-break-before:avoid;break-before:avoid;}
+  section.chapter,
+  h2 {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .chapter:first-of-type,
+  .chapter:first-of-type h2 {
+    page-break-before: avoid;
+    break-before: avoid;
+  }
 
   /* tables / cards still avoid internal splits */
-  table,pre,.card{page-break-inside:avoid;break-inside:avoid;}
+  table,
+  pre,
+  .card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 
-  /* FIX-A ① : .svg-scroll-wrapper —
+  /* FIX-A : .svg-scroll-wrapper —
      Remove break-inside:avoid so large SVGs can span pages
      instead of pushing to a new page and leaving a blank one.
      Also force overflow visible so nothing is clipped. */
-  .svg-scroll-wrapper{
-    break-inside:auto!important;
-    page-break-inside:auto!important;
-    overflow:visible!important;
-    border:none!important;          /* hide the visible border on the "blank" page */
-    max-height:none!important;
+  .svg-scroll-wrapper {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    overflow: visible !important;
+    border: none !important;          /* hide the visible border on the "blank" page */
+    max-height: none !important;
   }
 
   /* Let large SVGs shrink to fit the page width */
-  .svg-scroll-wrapper svg{
-    width:100%!important;
-    height:auto!important;
-    max-width:100%!important;
+  .svg-scroll-wrapper svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
   }
 
   /* FIX-B : #closing section — dark-bg text invisible when printed
      Override inline color:#fff and gradient background so text is readable */
   #closing,
-  #closing *{
-    background:transparent!important;
-    color:#000!important;
+  #closing * {
+    background: transparent !important;
+    color: #000 !important;
   }
-  #closing h2{
-    border-bottom-color:#049fd9!important;   /* keep a Cisco-blue accent line */
+
+  #closing h2 {
+    border-bottom-color: #049fd9 !important;   /* keep a Cisco-blue accent line */
   }
-}
+
+  /* ---------- 打印背景色还原（新增·可选但推荐）---------- */
+  /* 确保关键元素的背景色在打印时被保留，而非被浏览器默认优化掉 */
+  thead,
+  .hero,
+  .callout,
+  .card {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
