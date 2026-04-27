@@ -775,7 +775,7 @@ layout: false
     <p><strong>Routed Optical Networking（路由光网络，简称 RON）</strong> 是 Cisco 在 2020 年代初主推的架构革命。它的核心理念用一句话概括：</p>
 
     <blockquote style="font-size:1.15rem; color:var(--cisco-navy); font-weight:500;">
-      "消除独立的 OTN 与 Transponder 层，将 DWDM 相干光传输能力直接集成到路由器中。路由器端口直接输出 DWDM 彩光，接入光层（ROADM 或直连光纤）。"
+      Routed Optical Networking（路由光网络）是一种将 DWDM 相干光传输能力直接集成到 IP 路由器端口的网络架构。通过在路由器上直接使用可插拔相干光模块（如 400G ZR/ZR+）产生符合 DWDM 网格的彩光信号，RON 消除了独立的 OTN 层和独立的 Transponder 设备，将传统的"IP + OTN + DWDM"三层架构压缩为"IP + 光层"两层架构。
     </blockquote>
 
     <p>这不是小修小补，而是对过去 20 年网络架构根本范式的颠覆。从传统三层到 RON 两层的变革如下图所示：</p>
@@ -862,7 +862,27 @@ layout: false
       </svg>
     </div>
 
-    <h3>8.2.2 Why — 为什么 RON 会成功？</h3>
+    <h3>8.2.2 Why — 为什么能这么做，以及为什么RON能成功</h3>
+
+    <p>RON 的核心创新听起来简单，但它为什么能在 2020 年代才真正落地？因为它需要三个关键技术同时成熟，缺一不可：</p>
+
+    <h4>技术基础 1：可插拔相干光模块的成熟</h4>
+
+    <p>回顾 Optical 201 的模块 7，我们看到相干光模块从 2010 年的机柜级系统（功耗 400W+、成本百万美元），演进到 2020 年的 QSFP-DD 可插拔模块（功耗 15-20W、成本数千美元）——15 年间尺寸缩小 1000 倍、功耗下降 20 倍、成本下降 200 倍。没有这种"指甲盖大小的相干光"，RON 根本不可能实现——总不可能在每个路由器端口背后挂一台 Transponder 机柜吧？</p>
+
+    <h4>技术基础 2：OIF 400ZR 与 OpenZR+ 标准的统一</h4>
+
+    <p>如果每家厂商的可插拔相干光模块都用自己的私有协议，那 RON 永远只能是"单厂商独角戏"。幸运的是，OIF（光互联网络论坛）在 2020 年推出了 400ZR 标准，定义了统一的相干光互操作规范；Cisco/Acacia 等主导的 OpenZR+ MSA 进一步扩展了距离和速率选项。<strong>有了标准化的互操作性，多厂商生态才能真正形成</strong>，运营商才敢下定决心大规模部署。</p>
+
+    <h4>技术基础 3：硅光子（Silicon Photonics）的规模化商用</h4>
+
+    <p>这是最容易被忽视但最关键的基础。要把一整套相干光系统（激光器 + 调制器 + 探测器 + 波导 + 耦合器）塞进一个 QSFP-DD 大小的壳子里，传统的 InP（磷化铟）离散光器件拼装方式完全做不到。只有硅光子——利用 CMOS 半导体工艺在硅芯片上集成光学元件——才能做到如此高的集成度和如此低的成本。我们将在 §8.4 详细讲解硅光子。</p>
+
+    <div class="key-insight">
+      <strong>一个关键洞察：</strong>RON 不是"一项技术"，而是"一组技术同时成熟后的必然结果"。可插拔相干光模块 + 标准化互操作 + 硅光子集成——这三者任何一个不成熟，RON 都无法大规模商用。这也是为什么 2024-2026 年成了 RON 的爆发期——不是偶然，是三项关键技术在同一时期达到了商用成熟度。
+    </div>
+
+    <p>为什么RON能成功？</p>
 
     <div class="concept-grid">
       <div class="concept-box success">
@@ -891,17 +911,108 @@ layout: false
       </div>
     </div>
 
-    <h3>8.2.3 How — RON 是如何实现的？</h3>
+    <h3>8.2.3 How —— RON 的三种部署模式</h3>
 
-    <p>RON 的实现依赖三个关键技术使能：</p>
+    <p>RON 不是"非黑即白"的技术，而是一个可以分层实施的架构。根据 Cisco 官方文档，RON 有三种典型的部署模式，可以根据网络现状灵活选择：</p>
 
-    <div class="callout">
-      <h4 style="color:var(--cisco-navy); margin-bottom:1rem;">RON 的三大技术基石</h4>
-      <ol style="padding-left:1.5em;">
-        <li><strong>可插拔相干光模块</strong>（400G ZR/ZR+、800G ZR/ZR+）：让路由器直接输出 DWDM 彩光，这是物理可行性的基础。</li>
-        <li><strong>硅光子集成</strong>：使相干光模块达到 QSFP-DD 尺寸和 15-20W 功耗，这是经济可行性的基础。</li>
-        <li><strong>统一管理自动化</strong>（Cisco Crosswork）：让 IP 层和光层在同一个管理平面协同工作，这是运维可行性的基础。</li>
-      </ol>
+    <h4>模式 1：第三方光线路系统上部署 ZR/ZR+（最渐进）</h4>
+
+    <p>在已有的第三方（非 Cisco）DWDM 光线路系统上，把 Cisco 路由器的 QSFP-DD 端口插入 ZR/ZR+ 模块，形成"Alien Wavelength（异类波长）"。光线路系统并不知道这是 Cisco 的 ZR 模块产生的彩光，只是正常传输它。</p>
+
+    <ul>
+      <li><strong>优势：</strong>不需要替换现有光线路系统，投资保护最大化</li>
+      <li><strong>适用场景：</strong>已有第三方 DWDM 网络、希望快速验证 RON 价值</li>
+      <li><strong>占比：</strong>根据 ACG Research 2023 年报告，<strong>超过 75% 的 RON 部署是在第三方光线路系统上</strong>——这说明 RON 的"异类波长"模式是产业接受度最高的</li>
+    </ul>
+
+    <h4>模式 2：直接在暗光纤或无源 DWDM 上部署（最简单）</h4>
+
+    <p>对于短距链路（&lt; 120km），可以直接把两个路由器之间用暗光纤连接，ZR 模块之间直接通信，不需要任何光放大器或 ROADM。这是最简单、最省钱的部署模式。</p>
+
+    <ul>
+      <li><strong>优势：</strong>零光线路系统投资，部署最快</li>
+      <li><strong>适用场景：</strong>短距 DCI（数据中心互联）、城域内互联</li>
+    </ul>
+
+    <h4>模式 3：Cisco 全栈光线路系统（最完整）</h4>
+
+    <p>使用 Cisco NCS 1010 等新一代开放光线路系统（OLS）配合路由器的 ZR/ZR+ 模块，形成端到端的 Cisco 方案。这种模式下，光层和 IP 层可以实现深度的自动化协同（通过 Cisco Crosswork Hierarchical Controller）。</p>
+
+    <ul>
+      <li><strong>优势：</strong>端到端自动化能力最强、性能最优</li>
+      <li><strong>适用场景：</strong>新建网络、希望充分利用 RON 潜力的用户</li>
+    </ul>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; max-width:100%; display:block; margin:0 auto;">
+        <text x="450" y="25" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">RON 三种部署模式对比</text>
+        
+        <!-- 模式 1 -->
+        <g transform="translate(10, 50)">
+          <rect width="280" height="220" fill="#E6F4FB" stroke="#049FD9" stroke-width="2" rx="8"/>
+          <text x="140" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">① 第三方 OLS</text>
+          <rect x="20" y="50" width="70" height="40" fill="#049FD9" rx="4"/>
+          <text x="55" y="75" text-anchor="middle" fill="white" font-size="10">路由器</text>
+          <text x="55" y="85" text-anchor="middle" fill="white" font-size="8">+ZR+</text>
+          <rect x="105" y="50" width="70" height="40" fill="#9B9CA0" rx="4"/>
+          <text x="140" y="73" text-anchor="middle" fill="white" font-size="10">第三方</text>
+          <text x="140" y="85" text-anchor="middle" fill="white" font-size="9">OLS</text>
+          <rect x="190" y="50" width="70" height="40" fill="#049FD9" rx="4"/>
+          <text x="225" y="75" text-anchor="middle" fill="white" font-size="10">路由器</text>
+          <text x="225" y="85" text-anchor="middle" fill="white" font-size="8">+ZR+</text>
+          <line x1="90" y1="70" x2="105" y2="70" stroke="#049FD9" stroke-width="2"/>
+          <line x1="175" y1="70" x2="190" y2="70" stroke="#049FD9" stroke-width="2"/>
+          
+          <text x="140" y="120" text-anchor="middle" font-size="10" fill="#3E7A22" font-weight="600">✓ 75% 部署场景</text>
+          <text x="20" y="145" font-size="10" fill="#0D274D">• 复用现有光网络</text>
+          <text x="20" y="165" font-size="10" fill="#0D274D">• Alien Wavelength 方式</text>
+          <text x="20" y="185" font-size="10" fill="#0D274D">• TCO 降低 46%</text>
+          <text x="20" y="205" font-size="10" fill="#0D274D">• 渐进式升级</text>
+        </g>
+
+        <!-- 模式 2 -->
+        <g transform="translate(310, 50)">
+          <rect width="280" height="220" fill="#E8F7ED" stroke="#67B346" stroke-width="2" rx="8"/>
+          <text x="140" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">② 暗光纤直连</text>
+          <rect x="30" y="50" width="80" height="40" fill="#049FD9" rx="4"/>
+          <text x="70" y="75" text-anchor="middle" fill="white" font-size="10">路由器</text>
+          <text x="70" y="85" text-anchor="middle" fill="white" font-size="8">+ZR</text>
+          <rect x="170" y="50" width="80" height="40" fill="#049FD9" rx="4"/>
+          <text x="210" y="75" text-anchor="middle" fill="white" font-size="10">路由器</text>
+          <text x="210" y="85" text-anchor="middle" fill="white" font-size="8">+ZR</text>
+          <line x1="110" y1="70" x2="170" y2="70" stroke="#049FD9" stroke-width="3"/>
+          <text x="140" y="65" text-anchor="middle" font-size="8" fill="#0D274D">暗光纤</text>
+          
+          <text x="140" y="120" text-anchor="middle" font-size="10" fill="#3E7A22" font-weight="600">✓ 最简架构</text>
+          <text x="20" y="145" font-size="10" fill="#0D274D">• 无任何中间设备</text>
+          <text x="20" y="165" font-size="10" fill="#0D274D">• 距离 ≤ 120km</text>
+          <text x="20" y="185" font-size="10" fill="#0D274D">• 成本最低</text>
+          <text x="20" y="205" font-size="10" fill="#0D274D">• 短距 DCI 首选</text>
+        </g>
+
+        <!-- 模式 3 -->
+        <g transform="translate(610, 50)">
+          <rect width="280" height="220" fill="#FFF9E6" stroke="#FBAB18" stroke-width="2" rx="8"/>
+          <text x="140" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">③ Cisco 全栈 OLS</text>
+          <rect x="20" y="50" width="60" height="40" fill="#049FD9" rx="4"/>
+          <text x="50" y="75" text-anchor="middle" fill="white" font-size="10">路由器</text>
+          <text x="50" y="85" text-anchor="middle" fill="white" font-size="8">+ZR+</text>
+          <rect x="95" y="50" width="90" height="40" fill="#00BCEB" rx="4"/>
+          <text x="140" y="73" text-anchor="middle" fill="white" font-size="10">Cisco</text>
+          <text x="140" y="85" text-anchor="middle" fill="white" font-size="9">NCS 1010</text>
+          <rect x="200" y="50" width="60" height="40" fill="#049FD9" rx="4"/>
+          <text x="230" y="75" text-anchor="middle" fill="white" font-size="10">路由器</text>
+          <text x="230" y="85" text-anchor="middle" fill="white" font-size="8">+ZR+</text>
+          <line x1="80" y1="70" x2="95" y2="70" stroke="#049FD9" stroke-width="2"/>
+          <line x1="185" y1="70" x2="200" y2="70" stroke="#049FD9" stroke-width="2"/>
+          
+          <text x="140" y="120" text-anchor="middle" font-size="10" fill="#3E7A22" font-weight="600">✓ 端到端自动化</text>
+          <text x="20" y="145" font-size="10" fill="#0D274D">• 统一管理平面</text>
+          <text x="20" y="165" font-size="10" fill="#0D274D">• Crosswork HCO 集成</text>
+          <text x="20" y="185" font-size="10" fill="#0D274D">• 性能最优</text>
+          <text x="20" y="205" font-size="10" fill="#0D274D">• 适合新建网络</text>
+        </g>
+      </svg>
     </div>
 
     <div class="analogy-box">
@@ -1216,7 +1327,7 @@ layout: false
     <p><strong>硅光子</strong>是利用标准 CMOS 半导体工艺，在硅芯片上集成光学元件（调制器、探测器、光波导、耦合器等）的技术。核心思想是：</p>
 
     <blockquote style="font-size:1.1rem; color:var(--cisco-navy);">
-      "把光学组件像电子芯片一样批量制造——让光学从'手工作坊'进化为'半导体工厂'。"
+      <p>硅光子是利用标准 CMOS（互补金属氧化物半导体）半导体工艺，在硅（Si）芯片上集成光学元件（调制器、探测器、光波导、耦合器、滤波器等）的技术。其核心思想是：<strong>把光学世界"搬家"到半导体芯片上</strong>，利用成熟的硅加工工艺（与 CPU/GPU 相同的工厂、工艺、封装方式）来规模化生产光学器件。</p>
     </blockquote>
 
     <div class="analogy-box">
