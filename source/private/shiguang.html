@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>时光小卖部 · 把旧时光，换成新希望</title>
+  <meta name="description" content="时光小卖部 —— 一场为守护老手艺人发起的公益义卖，每一件复古手作背后，都有一段值得被听见的故事。" />
+
+  <style>
+    /* ============ 设计变量（统一主题控制） ============ */
+    :root {
+      /* 使用 oklch 实现更鲜艳、无障碍的配色 */
+      --color-bg:        oklch(98% 0.02 85);     /* 奶油白 */
+      --color-surface:   oklch(96% 0.04 85);     /* 浅奶黄 */
+      --color-primary:   oklch(72% 0.18 45);     /* 暖珊瑚橘 */
+      --color-accent:    oklch(88% 0.17 95);     /* 柠檬黄 */
+      --color-ink:       oklch(22% 0.02 60);     /* 墨黑 */
+      --color-muted:     oklch(50% 0.02 60);     /* 灰文字 */
+      --color-line:      oklch(90% 0.02 85);     /* 描边 */
+
+      --radius-sm: 12px;
+      --radius-lg: 24px;
+      --shadow-soft: 0 6px 24px oklch(70% 0.1 45 / 0.12);
+
+      --font-display: "Noto Serif SC", "Songti SC", Georgia, serif;
+      --font-body: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+
+      --space: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    /* 深色模式适配 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg:      oklch(20% 0.02 60);
+        --color-surface: oklch(25% 0.03 60);
+        --color-ink:     oklch(96% 0.02 85);
+        --color-muted:   oklch(70% 0.02 60);
+        --color-line:    oklch(35% 0.02 60);
+        --shadow-soft: 0 6px 24px oklch(0% 0 0 / 0.4);
+      }
+    }
+
+    /* ============ 基础重置 ============ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+
+    /* 键盘焦点态（无障碍） */
+    :focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    /* ============ 容器 ============ */
+    .container {
+      width: min(1200px, 92%);
+      margin-inline: auto;
+    }
+
+    /* ============ 顶部导航 ============ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      background: oklch(from var(--color-bg) l c h / 0.8);
+      border-bottom: 1px solid var(--color-line);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: 1rem;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .logo span { color: var(--color-primary); }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      margin: 0; padding: 0;
+    }
+    .nav-links a {
+      font-size: 0.95rem;
+      position: relative;
+      padding-block: 0.25rem;
+    }
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: 0;
+      height: 2px; width: 0;
+      background: var(--color-primary);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after,
+    .nav-links a:focus-visible::after { width: 100%; }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }  /* 移动端可后续接入抽屉菜单 */
+    }
+
+    /* ============ Hero 巨幅标题区 ============ */
+    .hero {
+      padding-block: clamp(3rem, 10vw, 7rem);
+      display: grid;
+      gap: 2rem;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: fit-content;
+      padding: 0.4rem 0.9rem;
+      background: var(--color-accent);
+      color: var(--color-ink);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .hero-eyebrow::before {
+      content: "✦";
+      color: var(--color-primary);
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 9vw, 7rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 0;
+      font-weight: 700;
+    }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-primary);
+      position: relative;
+      display: inline-block;
+    }
+    .hero-title em::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0.1em;
+      height: 0.25em;
+      background: var(--color-accent);
+      z-index: -1;
+      border-radius: 4px;
+    }
+    .hero-desc {
+      max-width: 50ch;
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      color: var(--color-muted);
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 1.6rem;
+      background: var(--color-ink);
+      color: var(--color-bg);
+      border-radius: 999px;
+      font-weight: 600;
+      width: fit-content;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .hero-cta:hover { transform: translateY(-2px); background: var(--color-primary); }
+    .hero-cta::after {
+      content: "→";
+      transition: transform 0.2s ease;
+    }
+    .hero-cta:hover::after { transform: translate(4px, 0); }
+
+    /* ============ 数据条（公益力） ============ */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      margin-block: 2rem 4rem;
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: var(--color-primary);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--color-muted);
+      margin-top: 0.4rem;
+    }
+
+    /* ============ 商品区 ============ */
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      margin: 0;
+    }
+    .section-link { color: var(--color-primary); font-weight: 600; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: clamp(1rem, 2.5vw, 2rem);
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: transform 0.3s ease;
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card-img {
+      aspect-ratio: 4 / 5;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      place-items: center;
+      font-size: 4rem;
+    }
+    .card-tag {
+      position: absolute;
+      top: 0.75rem; left: 0.75rem;
+      background: var(--color-accent);
+      color: var(--color-ink);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .card-name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .card-story {
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      margin: 0;
+    }
+    .card-price {
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    /* ============ 故事区块 ============ */
+    .story {
+      margin-block: 5rem;
+      padding: clamp(2rem, 5vw, 4rem);
+      background: var(--color-primary);
+      color: oklch(98% 0.02 85);
+      border-radius: var(--radius-lg);
+      display: grid;
+      gap: 1.5rem;
+    }
+    .story h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin: 0;
+      max-width: 18ch;
+    }
+    .story p { max-width: 60ch; opacity: 0.9; }
+    .story a {
+      width: fit-content;
+      padding: 0.75rem 1.4rem;
+      background: var(--color-bg);
+      color: var(--color-ink);
+      border-radius: 999px;
+      font-weight: 600;
+      transition: transform 0.2s ease;
+    }
+    .story a:hover { transform: translateY(-2px); }
+
+    /* ============ 页脚 ============ */
+    footer {
+      padding-block: 2.5rem;
+      border-top: 1px solid var(--color-line);
+      color: var(--color-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* ============ 滚动淡入动画（轻量微交互） ============ */
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+      }
+      .reveal.is-visible {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== 导航 ========== -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#" class="logo">时光<span>小卖部</span></a>
+      <nav aria-label="主导航">
+        <ul class="nav-links">
+          <li><a href="#shop">义卖商品</a></li>
+          <li><a href="#story">公益故事</a></li>
+          <li><a href="#join">参与方式</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========== Hero ========== -->
+    <section class="hero container">
+      <span class="hero-eyebrow">2026 春季公益义卖</span>
+      <h1 class="hero-title">
+        把<em>旧时光</em>，<br />换成新希望。
+      </h1>
+      <p class="hero-desc">
+        时光小卖部，是一场为守护老手艺人发起的公益义卖。每一件复古手作背后，都有一段值得被听见的故事。你买下的，不只是物件，是匠人下一年的炉火。
+      </p>
+      <a href="#shop" class="hero-cta">逛逛小卖部</a>
+
+      <!-- 数据条 -->
+      <div class="stats reveal" aria-label="公益数据">
+        <div>
+          <div class="stat-num">128</div>
+          <div class="stat-label">位老手艺人受助</div>
+        </div>
+        <div>
+          <div class="stat-num">¥86,420</div>
+          <div class="stat-label">已筹善款</div>
+        </div>
+        <div>
+          <div class="stat-num">37</div>
+          <div class="stat-label">项濒危技艺被记录</div>
+        </div>
+        <div>
+          <div class="stat-num">100%</div>
+          <div class="stat-label">收益直达匠人</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 商品网格 ========== -->
+    <section id="shop" class="container">
+      <div class="section-head">
+        <h2 class="section-title">本期精选好物</h2>
+        <a href="#" class="section-link">查看全部 →</a>
+      </div>
+
+      <div class="grid">
+        <article class="card reveal">
+          <div class="card-img" aria-hidden="true">🧶
+            <span class="card-tag">手工编织</span>
+          </div>
+          <h3 class="card-name">外婆的毛线坐垫</h3>
+          <p class="card-story">来自李奶奶 · 编织 47 年</p>
+          <span class="card-price">¥ 88</span>
+        </article>
+
+        <article class="card reveal">
+          <div class="card-img" aria-hidden="true">🏮
+            <span class="card-tag">非遗</span>
+          </div>
+          <h3 class="card-name">手扎竹编小灯笼</h3>
+          <p class="card-story">来自王爷爷 · 篾匠世家</p>
+          <span class="card-price">¥ 128</span>
+        </article>
+
+        <article class="card reveal">
+          <div class="card-img" aria-hidden="true">📔
+            <span class="card-tag">复古</span>
+          </div>
+          <h3 class="card-name">线装手作笔记本</h3>
+          <p class="card-story">来自周师傅 · 古法装帧</p>
+          <span class="card-price">¥ 56</span>
+        </article>
+
+        <article class="card reveal">
+          <div class="card-img" aria-hidden="true">🍶
+            <span class="card-tag">陶艺</span>
+          </div>
+          <h3 class="card-name">柴烧粗陶茶杯</h3>
+          <p class="card-story">来自陈师傅 · 龙窑柴烧</p>
+          <span class="card-price">¥ 168</span>
+        </article>
+
+        <article class="card reveal">
+          <div class="card-img" aria-hidden="true">🪡
+            <span class="card-tag">刺绣</span>
+          </div>
+          <h3 class="card-name">苗绣口金零钱包</h3>
+          <p class="card-story">来自杨阿婆 · 苗寨手绣</p>
+          <span class="card-price">¥ 98</span>
+        </article>
+
+        <article class="card reveal">
+          <div class="card-img" aria-hidden="true">🧸
+            <span class="card-tag">布艺</span>
+          </div>
+          <h3 class="card-name">老布拼接玩偶</h3>
+          <p class="card-story">来自赵阿姨 · 旧物新生</p>
+          <span class="card-price">¥ 76</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== 故事区块 ========== -->
+    <section id="story" class="story container reveal">
+      <h2>每一双布满老茧的手，都在和时间赛跑。</h2>
+      <p>
+        我们走过 12 个省份，记录下 37 项即将失传的手艺。这些老人，不是不愿教，而是没有人愿意学。我们做不了太多，但至少可以让他们的作品，被看见，被珍惜，被买走，让他们知道：你做的东西，有人喜欢。
+      </p>
+      <a href="#join">读他们的故事</a>
+    </section>
+
+    <!-- ========== 参与方式 ========== -->
+    <section id="join" class="container" style="margin-block: 4rem;">
+      <div class="section-head">
+        <h2 class="section-title">如何参与</h2>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="card-img" aria-hidden="true">🛍️</div>
+          <h3 class="card-name">购买义卖商品</h3>
+          <p class="card-story">收益 100% 流向匠人</p>
+        </article>
+        <article class="card">
+          <div class="card-img" aria-hidden="true">📣</div>
+          <h3 class="card-name">分享给朋友</h3>
+          <p class="card-story">让更多人听见这些故事</p>
+        </article>
+        <article class="card">
+          <div class="card-img" aria-hidden="true">✍️</div>
+          <h3 class="card-name">成为志愿者</h3>
+          <p class="card-story">和我们一起记录手艺</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== 页脚 ========== -->
+  <footer>
+    <div class="container">
+      © 2026 时光小卖部 · 一个公益独立项目 · 把旧时光，换成新希望
+    </div>
+  </footer>
+
+  <!-- ========== 轻量动画脚本（Intersection Observer） ========== -->
+  <script>
+    // 滚动淡入：低性能消耗的微交互
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  </script>
+</body>
+</html>
