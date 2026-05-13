@@ -6973,6 +6973,559 @@ spec:
   <span class="author">— B.10 · 分层防御第一性原理</span>
 </div>
 
+<!-- ===== B.11 企业 AI Agent 五层参考架构 ===== -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.11 企业 AI Agent 五层参考架构（Reference Architecture）</h3>
+</div>
+
+<p>
+  企业落地 AI Agent 时，需要的不是一份"组件清单"，而是一份<strong>责任清晰、层级正确、可观测贯穿</strong>的端到端蓝图。
+  下面这张架构图是 Cisco 在数百家头部客户实施中沉淀的<strong>五层参考架构</strong> ——
+  <strong>L0 用户接入 / L1 Agent 网关 / L2 K8s 运行时（内嵌 eBPF）/ L3 ACI 物理层</strong>，
+  以及横向贯穿四层的 <strong>L⊥ Observability Fabric</strong>。
+</p>
+
+<!-- ===== 五层架构 SVG ===== -->
+<div class="svg-scroll-wrapper">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1380" style="width:100%; height:auto; min-width:780px; background-color:#F8FAFC; font-family:'CiscoSans', system-ui, sans-serif;" role="img" aria-label="Cisco 企业级 AI Agent 五层参考架构">
+
+    <defs>
+      <!-- ===== 渐变定义 ===== -->
+      <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#F8FAFC"/>
+        <stop offset="100%" stop-color="#EEF2F7"/>
+      </linearGradient>
+      <linearGradient id="l0Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#F5E9F9"/><stop offset="100%" stop-color="#E9D4F1"/>
+      </linearGradient>
+      <linearGradient id="l1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FEF5F4"/><stop offset="100%" stop-color="#FCE0DD"/>
+      </linearGradient>
+      <linearGradient id="l2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#E8F4FA"/><stop offset="100%" stop-color="#CDE8F5"/>
+      </linearGradient>
+      <linearGradient id="l3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFF7E6"/><stop offset="100%" stop-color="#FFE4B8"/>
+      </linearGradient>
+      <linearGradient id="obsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0D274D"/><stop offset="100%" stop-color="#005073"/>
+      </linearGradient>
+      <linearGradient id="ebpfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#005073"/><stop offset="100%" stop-color="#049fd9"/>
+      </linearGradient>
+      <linearGradient id="agentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10A37F"/><stop offset="100%" stop-color="#0E8C6C"/>
+      </linearGradient>
+      <linearGradient id="clawGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#E2231A"/><stop offset="100%" stop-color="#B91C1C"/>
+      </linearGradient>
+
+      <!-- ===== 阴影定义 ===== -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%">
+        <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0D274D" flood-opacity="0.08"/>
+      </filter>
+      <filter id="layerShadow" x="-3%" y="-3%" width="106%" height="110%">
+        <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0D274D" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- ===== 箭头 Marker 定义（修复版）=====
+           设计原则：
+           1. 统一使用标准右向三角 M0,0 L10,5 L0,10
+           2. orient="auto" 让 SVG 根据线段方向自动旋转
+           3. refX=10 使箭头尖端正好对齐线段端点
+           4. markerUnits="strokeWidth" 让箭头随线宽缩放
+      -->
+      <marker id="arrDown" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L10,5 L0,10 z" fill="#049fd9"/>
+      </marker>
+      <marker id="arrObs" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L10,5 L0,10 z" fill="#9232AC"/>
+      </marker>
+      <marker id="arrRedDown" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L10,5 L0,10 z" fill="#E2231A"/>
+      </marker>
+      <marker id="arrFed" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L10,5 L0,10 z" fill="#F58025"/>
+      </marker>
+      <marker id="arrFedStart" viewBox="0 0 10 10" refX="0" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto-start-reverse" markerUnits="strokeWidth">
+        <path d="M0,0 L10,5 L0,10 z" fill="#F58025"/>
+      </marker>
+    </defs>
+
+    <!-- ===== 背景 ===== -->
+    <rect x="0" y="0" width="1200" height="1380" fill="url(#bgGrad)" rx="12"/>
+
+    <!-- ===== 标题 ===== -->
+    <text x="50" y="42" fill="#0D274D" font-size="22" font-weight="800" letter-spacing="0.3">CISCO ENTERPRISE AI AGENT · 五层参考架构</text>
+    <text x="50" y="68" fill="#58585B" font-size="13">L0 用户接入 → L1 Agent 网关 → L2 K8s 运行时（内嵌 eBPF）→ L3 ACI Fabric · 横向 L⊥ Observability 贯穿全栈</text>
+    <line x1="50" y1="80" x2="1150" y2="80" stroke="#049fd9" stroke-width="2" opacity="0.4"/>
+
+    <!-- ============================================================
+         L0 · 用户接入层
+    ============================================================ -->
+    <g filter="url(#layerShadow)">
+      <rect x="50" y="100" width="1100" height="120" rx="12" fill="url(#l0Grad)" stroke="#9232AC" stroke-width="1.5"/>
+    </g>
+    <rect x="50" y="100" width="180" height="32" rx="12" fill="#9232AC"/>
+    <text x="65" y="121" fill="#fff" font-size="13" font-weight="700">L0 · 用户接入层</text>
+    <text x="240" y="121" fill="#9232AC" font-size="11" font-weight="600">EMPLOYEE EDGE  ·  归属：终端工程团队</text>
+
+    <g filter="url(#cardShadow)">
+      <rect x="80" y="148" width="200" height="60" rx="8" fill="#fff" stroke="#9232AC" stroke-width="1"/>
+      <text x="180" y="172" fill="#5B21B6" font-size="13" font-weight="700" text-anchor="middle">VSCode / JetBrains</text>
+      <text x="180" y="192" fill="#6D28D9" font-size="10" text-anchor="middle">IDE Plugin · 代码生成</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="300" y="148" width="200" height="60" rx="8" fill="#fff" stroke="#9232AC" stroke-width="1"/>
+      <text x="400" y="172" fill="#5B21B6" font-size="13" font-weight="700" text-anchor="middle">Browser</text>
+      <text x="400" y="192" fill="#6D28D9" font-size="10" text-anchor="middle">Web Chat · 业务查询</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="520" y="148" width="200" height="60" rx="8" fill="#fff" stroke="#9232AC" stroke-width="1"/>
+      <text x="620" y="172" fill="#5B21B6" font-size="13" font-weight="700" text-anchor="middle">Webex / Teams</text>
+      <text x="620" y="192" fill="#6D28D9" font-size="10" text-anchor="middle">协作 Bot · 工作流</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="740" y="148" width="200" height="60" rx="8" fill="#fff" stroke="#9232AC" stroke-width="1"/>
+      <text x="840" y="172" fill="#5B21B6" font-size="13" font-weight="700" text-anchor="middle">CLI / SDK</text>
+      <text x="840" y="192" fill="#6D28D9" font-size="10" text-anchor="middle">DevOps · CI/CD 集成</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="960" y="148" width="160" height="60" rx="8" fill="#fff" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="1040" y="172" fill="#5B21B6" font-size="13" font-weight="700" text-anchor="middle">SSO / SAML</text>
+      <text x="1040" y="192" fill="#6D28D9" font-size="10" text-anchor="middle">统一身份令牌</text>
+    </g>
+
+    <!-- L0 → L1 箭头（修复版）-->
+    <line x1="600" y1="220" x2="600" y2="253"
+          stroke="#049fd9" stroke-width="3" marker-end="url(#arrDown)"/>
+
+    <!-- ============================================================
+         L1 · 企业 Agent 网关
+    ============================================================ -->
+    <g filter="url(#layerShadow)">
+      <rect x="50" y="255" width="1100" height="160" rx="12" fill="url(#l1Grad)" stroke="#E2231A" stroke-width="1.5"/>
+    </g>
+    <rect x="50" y="255" width="220" height="32" rx="12" fill="#E2231A"/>
+    <text x="65" y="276" fill="#fff" font-size="13" font-weight="700">L1 · 企业 Agent 网关</text>
+    <text x="280" y="276" fill="#B91C1C" font-size="11" font-weight="600">DEFENSECLAW + ENTERPRISE AGENT GATEWAY  ·  归属：AI 平台团队</text>
+
+    <g filter="url(#cardShadow)">
+      <rect x="75" y="305" width="200" height="95" rx="8" fill="#fff" stroke="#E2231A" stroke-width="1"/>
+      <circle cx="100" cy="332" r="16" fill="#E2231A"/>
+      <text x="100" y="338" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">ID</text>
+      <text x="125" y="332" fill="#7F1D1D" font-size="13" font-weight="700">Identity</text>
+      <text x="90" y="362" fill="#9B2C2C" font-size="10">SSO / SAML / OIDC</text>
+      <text x="90" y="378" fill="#9B2C2C" font-size="10">Service Account 联邦</text>
+      <text x="90" y="394" fill="#9B2C2C" font-size="10">Per-User 配额</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="290" y="305" width="200" height="95" rx="8" fill="#fff" stroke="#E2231A" stroke-width="1"/>
+      <circle cx="315" cy="332" r="16" fill="#E2231A"/>
+      <text x="315" y="338" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">PO</text>
+      <text x="340" y="332" fill="#7F1D1D" font-size="13" font-weight="700">Policy (OPA)</text>
+      <text x="305" y="362" fill="#9B2C2C" font-size="10">Rego 策略引擎</text>
+      <text x="305" y="378" fill="#9B2C2C" font-size="10">Allow / Block / Alert</text>
+      <text x="305" y="394" fill="#9B2C2C" font-size="10">热更新 + 灰度</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="505" y="305" width="220" height="95" rx="8" fill="#fff" stroke="#E2231A" stroke-width="2"/>
+      <circle cx="530" cy="332" r="16" fill="#E2231A"/>
+      <text x="530" y="338" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">FW</text>
+      <text x="555" y="332" fill="#7F1D1D" font-size="13" font-weight="700">Prompt Firewall</text>
+      <text x="520" y="362" fill="#9B2C2C" font-size="10">Guardrail Proxy (Port 4000)</text>
+      <text x="520" y="378" fill="#9B2C2C" font-size="10">4-Stage: Regex→AID→Judge→OPA</text>
+      <text x="520" y="394" fill="#B91C1C" font-size="10" font-weight="600">P50 &lt; 50ms · P99 &lt; 250ms</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="740" y="305" width="190" height="95" rx="8" fill="#fff" stroke="#E2231A" stroke-width="1"/>
+      <circle cx="765" cy="332" r="16" fill="#E2231A"/>
+      <text x="765" y="338" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">MC</text>
+      <text x="790" y="332" fill="#7F1D1D" font-size="13" font-weight="700">MCP Broker</text>
+      <text x="755" y="362" fill="#9B2C2C" font-size="10">Skill / MCP / A2A 路由</text>
+      <text x="755" y="378" fill="#9B2C2C" font-size="10">Tool Catalog</text>
+      <text x="755" y="394" fill="#9B2C2C" font-size="10">Block / Allow Lists</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="945" y="305" width="180" height="95" rx="8" fill="#fff" stroke="#E2231A" stroke-width="1"/>
+      <circle cx="970" cy="332" r="16" fill="#E2231A"/>
+      <text x="970" y="338" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">AU</text>
+      <text x="995" y="332" fill="#7F1D1D" font-size="13" font-weight="700">Audit / AIBOM</text>
+      <text x="960" y="362" fill="#9B2C2C" font-size="10">SQLite WAL 留痕</text>
+      <text x="960" y="378" fill="#9B2C2C" font-size="10">SPDX / CycloneDX</text>
+      <text x="960" y="394" fill="#9B2C2C" font-size="10">合规一键导出</text>
+    </g>
+
+    <!-- L1 → L2 箭头（修复版）-->
+    <line x1="600" y1="415" x2="600" y2="448"
+          stroke="#049fd9" stroke-width="3" marker-end="url(#arrDown)"/>
+
+    <!-- ============================================================
+         L2 · K8s 运行时层（内嵌 eBPF）
+    ============================================================ -->
+    <g filter="url(#layerShadow)">
+      <rect x="50" y="450" width="1100" height="380" rx="12" fill="url(#l2Grad)" stroke="#005073" stroke-width="1.5"/>
+    </g>
+    <rect x="50" y="450" width="280" height="32" rx="12" fill="#005073"/>
+    <text x="65" y="471" fill="#fff" font-size="13" font-weight="700">L2 · Kubernetes 运行时层</text>
+    <text x="340" y="471" fill="#005073" font-size="11" font-weight="600">SUSE LINUX + KUBERNETES + 内嵌 eBPF  ·  归属：平台 + 安全团队</text>
+
+    <text x="75" y="505" fill="#005073" font-size="12" font-weight="700">▸ 业务工作负载 (Pods)</text>
+
+    <!-- AI Agent Pod（含 Sidecar） -->
+    <g filter="url(#cardShadow)">
+      <rect x="75" y="515" width="320" height="115" rx="8" fill="#fff" stroke="#10A37F" stroke-width="1.5"/>
+      <text x="90" y="535" fill="#0E8C6C" font-size="11" font-weight="700">Pod: AI Agent</text>
+      <rect x="90" y="545" width="135" height="75" rx="6" fill="url(#agentGrad)"/>
+      <text x="157" y="565" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">Agent Container</text>
+      <text x="157" y="582" fill="#fff" font-size="9" text-anchor="middle" opacity="0.9">LangChain</text>
+      <text x="157" y="595" fill="#fff" font-size="9" text-anchor="middle" opacity="0.9">AutoGen</text>
+      <text x="157" y="608" fill="#fff" font-size="9" text-anchor="middle" opacity="0.9">CrewAI</text>
+      <rect x="235" y="545" width="145" height="75" rx="6" fill="url(#clawGrad)"/>
+      <text x="307" y="565" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">DefenseClaw</text>
+      <text x="307" y="582" fill="#fff" font-size="9" text-anchor="middle" opacity="0.9">Sidecar (Go)</text>
+      <text x="307" y="595" fill="#fff" font-size="9" text-anchor="middle" opacity="0.9">5 Subsystems</text>
+      <text x="307" y="608" fill="#fff" font-size="9" text-anchor="middle" opacity="0.9">localhost:4000</text>
+    </g>
+
+    <!-- Tool Sandbox -->
+    <g filter="url(#cardShadow)">
+      <rect x="410" y="515" width="180" height="115" rx="8" fill="#fff" stroke="#005073" stroke-width="1"/>
+      <text x="425" y="535" fill="#005073" font-size="11" font-weight="700">Pod: Tool Sandbox</text>
+      <text x="500" y="560" fill="#1A1A1A" font-size="11" font-weight="700" text-anchor="middle">OpenShell</text>
+      <text x="500" y="578" fill="#58585B" font-size="9" text-anchor="middle">Landlock + seccomp</text>
+      <text x="500" y="593" fill="#58585B" font-size="9" text-anchor="middle">netns + veth</text>
+      <text x="500" y="608" fill="#58585B" font-size="9" text-anchor="middle">privilege drop</text>
+      <text x="500" y="623" fill="#0077B6" font-size="9" text-anchor="middle" font-weight="600">BPF LSM 联动</text>
+    </g>
+
+    <!-- Workflow Engine -->
+    <g filter="url(#cardShadow)">
+      <rect x="605" y="515" width="170" height="115" rx="8" fill="#fff" stroke="#005073" stroke-width="1"/>
+      <text x="620" y="535" fill="#005073" font-size="11" font-weight="700">Pod: Workflow</text>
+      <text x="690" y="560" fill="#1A1A1A" font-size="11" font-weight="700" text-anchor="middle">Workflow Engine</text>
+      <text x="690" y="578" fill="#58585B" font-size="9" text-anchor="middle">Temporal / Argo</text>
+      <text x="690" y="593" fill="#58585B" font-size="9" text-anchor="middle">DAG 编排</text>
+      <text x="690" y="608" fill="#58585B" font-size="9" text-anchor="middle">HITL 审批节点</text>
+    </g>
+
+    <!-- RAG / Vector DB -->
+    <g filter="url(#cardShadow)">
+      <rect x="790" y="515" width="160" height="115" rx="8" fill="#fff" stroke="#005073" stroke-width="1"/>
+      <text x="805" y="535" fill="#005073" font-size="11" font-weight="700">Pod: RAG</text>
+      <text x="870" y="560" fill="#1A1A1A" font-size="11" font-weight="700" text-anchor="middle">Vector DB</text>
+      <text x="870" y="578" fill="#58585B" font-size="9" text-anchor="middle">Milvus / Qdrant</text>
+      <text x="870" y="593" fill="#58585B" font-size="9" text-anchor="middle">Embedding Service</text>
+      <text x="870" y="608" fill="#58585B" font-size="9" text-anchor="middle">PII 脱敏</text>
+    </g>
+
+    <!-- Model Gateway -->
+    <g filter="url(#cardShadow)">
+      <rect x="965" y="515" width="160" height="115" rx="8" fill="#fff" stroke="#005073" stroke-width="1"/>
+      <text x="980" y="535" fill="#005073" font-size="11" font-weight="700">Pod: Model GW</text>
+      <text x="1045" y="560" fill="#1A1A1A" font-size="11" font-weight="700" text-anchor="middle">Egress Gateway</text>
+      <text x="1045" y="578" fill="#58585B" font-size="9" text-anchor="middle">FQDN 白名单</text>
+      <text x="1045" y="593" fill="#58585B" font-size="9" text-anchor="middle">透明 mTLS</text>
+      <text x="1045" y="608" fill="#58585B" font-size="9" text-anchor="middle">→ OpenAI/Claude</text>
+    </g>
+
+    <!-- L2 内部分隔线 -->
+    <line x1="75" y1="650" x2="1125" y2="650" stroke="#005073" stroke-width="1" stroke-dasharray="6,4" opacity="0.5"/>
+
+    <text x="75" y="675" fill="#005073" font-size="12" font-weight="700">▸ 内嵌 eBPF 数据平面 (Per-Node DaemonSet)  ·  Linux Kernel 加速器</text>
+
+    <!-- Cilium -->
+    <g filter="url(#cardShadow)">
+      <rect x="75" y="690" width="245" height="80" rx="8" fill="url(#ebpfGrad)"/>
+      <text x="90" y="715" fill="#fff" font-size="14" font-weight="700">🌐 Cilium</text>
+      <text x="90" y="734" fill="#cdeefb" font-size="10">CNI · L7 Policy · BPF Map</text>
+      <text x="90" y="750" fill="#cdeefb" font-size="10">Identity-based · FQDN · Rate Limit</text>
+      <text x="90" y="764" fill="#fff" font-size="10" font-weight="600">↔ ACI EPG 联邦</text>
+    </g>
+
+    <!-- Tetragon -->
+    <g filter="url(#cardShadow)">
+      <rect x="335" y="690" width="245" height="80" rx="8" fill="url(#ebpfGrad)"/>
+      <text x="350" y="715" fill="#fff" font-size="14" font-weight="700">🛡️ Tetragon</text>
+      <text x="350" y="734" fill="#cdeefb" font-size="10">LSM Hook · Kprobe · Tracepoint</text>
+      <text x="350" y="750" fill="#cdeefb" font-size="10">同步 SIGKILL · &lt;500μs 阻断</text>
+      <text x="350" y="764" fill="#fff" font-size="10" font-weight="600">Process Lineage 追踪</text>
+    </g>
+
+    <!-- Hubble -->
+    <g filter="url(#cardShadow)">
+      <rect x="595" y="690" width="245" height="80" rx="8" fill="url(#ebpfGrad)"/>
+      <text x="610" y="715" fill="#fff" font-size="14" font-weight="700">🔭 Hubble Relay</text>
+      <text x="610" y="734" fill="#cdeefb" font-size="10">L3-L7 流量观测</text>
+      <text x="610" y="750" fill="#cdeefb" font-size="10">Service Map · Token Metrics</text>
+      <text x="610" y="764" fill="#fff" font-size="10" font-weight="600">→ OTel Collector</text>
+    </g>
+
+    <!-- Linux Kernel -->
+    <g filter="url(#cardShadow)">
+      <rect x="855" y="690" width="270" height="80" rx="8" fill="#0D274D"/>
+      <text x="870" y="715" fill="#fff" font-size="13" font-weight="700">SUSE Linux Kernel</text>
+      <text x="870" y="734" fill="#9B9CA0" font-size="10">BPF Verifier · LSM · XDP / TC</text>
+      <text x="870" y="750" fill="#9B9CA0" font-size="10">Landlock · seccomp · cgroup v2</text>
+      <text x="870" y="764" fill="#cdeefb" font-size="10" font-weight="600">物理学的尽头</text>
+    </g>
+
+    <!-- L2 内部联动箭头：Sidecar → Cilium（修复版，补齐红色箭头） -->
+    <path d="M 307,635 Q 307,665 197,683"
+          fill="none" stroke="#E2231A" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arrRedDown)"/>
+    <text x="180" y="668" fill="#E2231A" font-size="9" font-weight="600">语义判决 → eBPF 执行</text>
+
+    <!-- L2 → L3 箭头（修复版）-->
+    <line x1="600" y1="830" x2="600" y2="863"
+          stroke="#049fd9" stroke-width="3" marker-end="url(#arrDown)"/>
+
+    <!-- ============================================================
+         L3 · Cisco ACI Fabric
+    ============================================================ -->
+    <g filter="url(#layerShadow)">
+      <rect x="50" y="868" width="1100" height="200" rx="12" fill="url(#l3Grad)" stroke="#F58025" stroke-width="1.5"/>
+    </g>
+    <rect x="50" y="868" width="240" height="32" rx="12" fill="#F58025"/>
+    <text x="65" y="889" fill="#fff" font-size="13" font-weight="700">L3 · Cisco ACI Fabric</text>
+    <text x="300" y="889" fill="#D97706" font-size="11" font-weight="600">物理数据中心网络  ·  归属：网络团队</text>
+
+    <!-- APIC Cluster -->
+    <g filter="url(#cardShadow)">
+      <rect x="80" y="918" width="200" height="130" rx="8" fill="#fff" stroke="#F58025" stroke-width="2"/>
+      <text x="180" y="944" fill="#D97706" font-size="13" font-weight="700" text-anchor="middle">APIC Cluster × 3</text>
+      <line x1="100" y1="955" x2="260" y2="955" stroke="#F58025" stroke-width="1" opacity="0.4"/>
+      <text x="95" y="975" fill="#1A1A1A" font-size="10" font-weight="600">· 集中控制平面</text>
+      <text x="95" y="993" fill="#1A1A1A" font-size="10" font-weight="600">· EPG ↔ Identity 联邦</text>
+      <text x="95" y="1011" fill="#1A1A1A" font-size="10" font-weight="600">· Contract 自动转译</text>
+      <text x="95" y="1029" fill="#D97706" font-size="10" font-weight="700">· Intent-Based Networking</text>
+      <text x="95" y="1045" fill="#58585B" font-size="9">REST API ↔ Cilium Operator</text>
+    </g>
+
+    <!-- APIC ↔ Spine 双向身份联邦箭头（修复版） -->
+    <line x1="282" y1="975" x2="358" y2="975"
+          stroke="#F58025" stroke-width="2" stroke-dasharray="5,3"
+          marker-start="url(#arrFedStart)" marker-end="url(#arrFed)"/>
+    <text x="320" y="966" fill="#D97706" font-size="10" font-weight="700" text-anchor="middle">身份联邦</text>
+    <text x="320" y="993" fill="#D97706" font-size="9" text-anchor="middle">Cilium ID ⇌ EPG</text>
+
+    <!-- Spine -->
+    <g filter="url(#cardShadow)">
+      <rect x="360" y="945" width="180" height="50" rx="6" fill="#fff" stroke="#005073" stroke-width="1.5"/>
+      <text x="450" y="965" fill="#005073" font-size="12" font-weight="700" text-anchor="middle">Spine Switches</text>
+      <text x="450" y="982" fill="#58585B" font-size="10" text-anchor="middle">Nexus 9K · 100Gbps</text>
+    </g>
+
+    <!-- Leaf-101/102 -->
+    <g filter="url(#cardShadow)">
+      <rect x="360" y="1010" width="180" height="50" rx="6" fill="#fff" stroke="#005073" stroke-width="1.5"/>
+      <text x="450" y="1030" fill="#005073" font-size="12" font-weight="700" text-anchor="middle">Leaf-101 / 102</text>
+      <text x="450" y="1047" fill="#58585B" font-size="10" text-anchor="middle">K8s Workers 接入</text>
+    </g>
+    <line x1="450" y1="995" x2="450" y2="1010" stroke="#005073" stroke-width="1.2"/>
+
+    <!-- K8s Worker -->
+    <g filter="url(#cardShadow)">
+      <rect x="570" y="945" width="200" height="115" rx="6" fill="#cdeefb" stroke="#049fd9" stroke-width="1.5"/>
+      <text x="670" y="965" fill="#005073" font-size="12" font-weight="700" text-anchor="middle">K8s Worker Node</text>
+      <text x="670" y="982" fill="#58585B" font-size="10" text-anchor="middle">SUSE + Cilium + Pods</text>
+      <text x="670" y="1002" fill="#58585B" font-size="10" text-anchor="middle">Eth1/1 → Leaf-101</text>
+      <text x="670" y="1020" fill="#1A1A1A" font-size="10" font-weight="600" text-anchor="middle">Pod Quarantine 触发时</text>
+      <text x="670" y="1038" fill="#E2231A" font-size="10" font-weight="700" text-anchor="middle">↓ APIC 收紧 Contract</text>
+      <text x="670" y="1054" fill="#E2231A" font-size="9" text-anchor="middle">物理端口隔离 · 单 Pod 级</text>
+    </g>
+
+    <!-- Leaf-201/202 -->
+    <g filter="url(#cardShadow)">
+      <rect x="800" y="1010" width="180" height="50" rx="6" fill="#fff" stroke="#005073" stroke-width="1.5"/>
+      <text x="890" y="1030" fill="#005073" font-size="12" font-weight="700" text-anchor="middle">Leaf-201 / 202</text>
+      <text x="890" y="1047" fill="#58585B" font-size="10" text-anchor="middle">Bare Metal 接入</text>
+    </g>
+
+    <!-- Bare Metal DB -->
+    <g filter="url(#cardShadow)">
+      <rect x="800" y="945" width="180" height="50" rx="6" fill="#FFF7E6" stroke="#F58025" stroke-width="1.5"/>
+      <text x="890" y="965" fill="#D97706" font-size="12" font-weight="700" text-anchor="middle">Bare Metal DB</text>
+      <text x="890" y="982" fill="#58585B" font-size="10" text-anchor="middle">Oracle / PostgreSQL</text>
+    </g>
+    <line x1="890" y1="995" x2="890" y2="1010" stroke="#005073" stroke-width="1.2"/>
+
+    <!-- ACI Multi-Site -->
+    <g filter="url(#cardShadow)">
+      <rect x="1010" y="945" width="115" height="115" rx="8" fill="#fff" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="1067" y="965" fill="#9232AC" font-size="11" font-weight="700" text-anchor="middle">ACI</text>
+      <text x="1067" y="980" fill="#9232AC" font-size="11" font-weight="700" text-anchor="middle">Multi-Site</text>
+      <text x="1067" y="1004" fill="#58585B" font-size="9" text-anchor="middle">DC1 ⇌ DC2</text>
+      <text x="1067" y="1020" fill="#58585B" font-size="9" text-anchor="middle">Cilium</text>
+      <text x="1067" y="1034" fill="#58585B" font-size="9" text-anchor="middle">ClusterMesh</text>
+      <text x="1067" y="1052" fill="#9232AC" font-size="9" text-anchor="middle" font-weight="700">策略跟随</text>
+    </g>
+
+    <!-- L3 → L⊥ 箭头（修复版，紫色虚线表示遥测下沉） -->
+    <line x1="600" y1="1068" x2="600" y2="1100"
+          stroke="#9232AC" stroke-width="2.5" stroke-dasharray="5,3"
+          marker-end="url(#arrObs)"/>
+
+    <!-- ============================================================
+         L⊥ · Observability Fabric（横向贯穿）
+    ============================================================ -->
+    <g filter="url(#layerShadow)">
+      <rect x="50" y="1105" width="1100" height="155" rx="12" fill="url(#obsGrad)"/>
+    </g>
+    <rect x="50" y="1105" width="280" height="32" rx="12" fill="#9232AC"/>
+    <text x="65" y="1126" fill="#fff" font-size="13" font-weight="700">L⊥ · Observability Fabric</text>
+    <text x="340" y="1126" fill="#cdeefb" font-size="11" font-weight="600">横向贯穿 L0-L3 全栈  ·  归属：SOC 团队  ·  Free-From-Day-1</text>
+
+    <g filter="url(#cardShadow)">
+      <rect x="75" y="1155" width="200" height="90" rx="8" fill="#fff" stroke="#049fd9" stroke-width="1"/>
+      <text x="175" y="1180" fill="#005073" font-size="12" font-weight="700" text-anchor="middle">Splunk HEC</text>
+      <text x="175" y="1198" fill="#58585B" font-size="10" text-anchor="middle">Free-From-Day-1</text>
+      <text x="175" y="1214" fill="#58585B" font-size="10" text-anchor="middle">SIEM 视图</text>
+      <text x="175" y="1232" fill="#049fd9" font-size="10" font-weight="600" text-anchor="middle">零额外许可费</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="285" y="1155" width="200" height="90" rx="8" fill="#fff" stroke="#10A37F" stroke-width="1"/>
+      <text x="385" y="1180" fill="#0E8C6C" font-size="12" font-weight="700" text-anchor="middle">OTel Collector</text>
+      <text x="385" y="1198" fill="#58585B" font-size="10" text-anchor="middle">Logs / Traces / Metrics</text>
+      <text x="385" y="1214" fill="#58585B" font-size="10" text-anchor="middle">CNCF 标准</text>
+      <text x="385" y="1232" fill="#10A37F" font-size="10" font-weight="600" text-anchor="middle">Hubble 同源</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="495" y="1155" width="200" height="90" rx="8" fill="#fff" stroke="#F58025" stroke-width="1"/>
+      <text x="595" y="1180" fill="#D97706" font-size="12" font-weight="700" text-anchor="middle">SecureX SOAR</text>
+      <text x="595" y="1198" fill="#58585B" font-size="10" text-anchor="middle">Playbook 自动响应</text>
+      <text x="595" y="1214" fill="#58585B" font-size="10" text-anchor="middle">Webhook 联动</text>
+      <text x="595" y="1232" fill="#F58025" font-size="10" font-weight="600" text-anchor="middle">秒级闭环</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="705" y="1155" width="200" height="90" rx="8" fill="#fff" stroke="#67B346" stroke-width="1"/>
+      <text x="805" y="1180" fill="#5A9C36" font-size="12" font-weight="700" text-anchor="middle">AppDynamics</text>
+      <text x="805" y="1198" fill="#58585B" font-size="10" text-anchor="middle">Agent 性能监控</text>
+      <text x="805" y="1214" fill="#58585B" font-size="10" text-anchor="middle">ThousandEyes 拨测</text>
+      <text x="805" y="1232" fill="#67B346" font-size="10" font-weight="600" text-anchor="middle">用户体验视角</text>
+    </g>
+    <g filter="url(#cardShadow)">
+      <rect x="915" y="1155" width="210" height="90" rx="8" fill="#fff" stroke="#E2231A" stroke-width="1"/>
+      <text x="1020" y="1180" fill="#B91C1C" font-size="12" font-weight="700" text-anchor="middle">Talos Threat Intel</text>
+      <text x="1020" y="1198" fill="#58585B" font-size="10" text-anchor="middle">AI 威胁情报</text>
+      <text x="1020" y="1214" fill="#58585B" font-size="10" text-anchor="middle">实时 IOC 推送</text>
+      <text x="1020" y="1232" fill="#E2231A" font-size="10" font-weight="600" text-anchor="middle">情报闭环</text>
+    </g>
+
+    <!-- 横向贯穿示意线（左右两侧，提示 L⊥ 跨越全栈） -->
+    <path d="M 30,180 Q 25,180 25,1180 Q 25,1200 50,1200"
+          fill="none" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.4"/>
+    <path d="M 1170,180 Q 1175,180 1175,1180 Q 1175,1200 1150,1200"
+          fill="none" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.4"/>
+    <text x="20" y="690" fill="#9232AC" font-size="9" font-weight="700"
+          text-anchor="middle" transform="rotate(-90, 20, 690)">L⊥ 贯穿全栈</text>
+    <text x="1180" y="690" fill="#9232AC" font-size="9" font-weight="700"
+          text-anchor="middle" transform="rotate(90, 1180, 690)">L⊥ 贯穿全栈</text>
+
+    <!-- ============================================================
+         底部价值条
+    ============================================================ -->
+    <rect x="50" y="1290" width="1100" height="60" rx="8" fill="#fff" stroke="#049fd9" stroke-width="1.5"/>
+    <text x="70" y="1316" fill="#005073" font-size="13" font-weight="700">CISCO REFERENCE ARCHITECTURE VALUE：</text>
+    <text x="70" y="1338" fill="#1A1A1A" font-size="11">
+      ✓ 五层职责清晰　　✓ eBPF 嵌入 K8s 内核加速　　✓ ACI 物理层闭环　　✓ Observability 横向贯穿　　✓ 30ms 端到端防御
+    </text>
+  </svg>
+</div>
+
+<!-- 架构关键说明 · 复用 callout -->
+<div class="callout">
+  <strong>架构核心三原则：</strong>
+  ① <strong>eBPF 是 K8s 的内核加速器，不是独立一层</strong> —— Cilium / Tetragon / Hubble 以 DaemonSet 形态嵌入 L2；
+  ② <strong>ACI Fabric 是不可省略的 L3</strong> —— 没有物理层联邦，"Prompt 到 Leaf 端口"的 30ms 防御链路无法闭合；
+  ③ <strong>Observability 横向贯穿全栈</strong> —— Splunk Free-From-Day-1，从 Day 0 即建立基线，避免后续盲飞。
+</div>
+
+<!-- 责任与产出对照 · 复用 advantage-matrix -->
+<p style="margin-top: 1.5rem;">五层各自的<strong>归属团队、核心组件、关键产出</strong>明细如下：</p>
+
+<div class="advantage-matrix">
+  <div class="adv-row">
+    <div class="adv-label">L0 · 用户接入</div>
+    <div class="adv-others"><strong>组件：</strong>VSCode / JetBrains / Browser / Webex / Teams + IDE Plugin + SSO</div>
+    <div class="adv-cisco"><strong>产出：</strong>统一身份令牌、零信任接入、用户行为基线　<strong>归属：</strong>终端工程团队</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">L1 · Agent 网关</div>
+    <div class="adv-others"><strong>组件：</strong>Identity / Policy（OPA）/ Prompt Firewall / MCP Broker / Audit（AIBOM）</div>
+    <div class="adv-cisco"><strong>产出：</strong>语义层判决、Prompt 注入拦截、Tool 调用审批　<strong>归属：</strong>AI 平台团队</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">L2 · K8s 运行时</div>
+    <div class="adv-others"><strong>组件：</strong>Agent Pods / Tool Sandbox / Workflow / RAG / Model GW + 内嵌 Cilium / Tetragon / Hubble</div>
+    <div class="adv-cisco"><strong>产出：</strong>运行时隔离、内核级 SIGKILL、L7 流量策略　<strong>归属：</strong>平台 + 安全团队</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">L3 · ACI Fabric</div>
+    <div class="adv-others"><strong>组件：</strong>APIC × 3 + Spine / Leaf + EPG/ESG + ACI Multi-Site</div>
+    <div class="adv-cisco"><strong>产出：</strong>物理端口隔离、Identity Federation、跨 DC 一致性　<strong>归属：</strong>网络团队</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">L⊥ · Observability</div>
+    <div class="adv-others"><strong>组件：</strong>Splunk HEC + OTel Collector + SecureX SOAR + AppDynamics + Talos</div>
+    <div class="adv-cisco"><strong>产出：</strong>端到端 Trace、自动响应、威胁情报联动　<strong>归属：</strong>SOC 团队</div>
+  </div>
+</div>
+
+<!-- 推荐部署节奏 · 复用 benefit-grid -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.11.1 推荐部署节奏（Day 0 → Day 90）</h3>
+</div>
+
+<div class="benefit-grid">
+  <div class="benefit-card b1">
+    <span class="b-num">1</span>
+    <span class="b-tag">Day 0-7</span>
+    <h4>L⊥ 可观测先行</h4>
+    <p>Splunk HEC + OTel Collector 先部署，<strong>建立基线</strong>，避免后续工作"盲飞"。</p>
+  </div>
+  <div class="benefit-card b2">
+    <span class="b-num">2</span>
+    <span class="b-tag">Day 7-30</span>
+    <h4>L2 eBPF 数据面</h4>
+    <p>Cilium / Tetragon / Hubble 以 Audit-only 模式上线，<strong>不阻断业务</strong>，仅采集数据。</p>
+  </div>
+  <div class="benefit-card b3">
+    <span class="b-num">3</span>
+    <span class="b-tag">Day 30-60</span>
+    <h4>L1 Agent 网关</h4>
+    <p>DefenseClaw Sidecar + Guardrail Proxy 接入 AI Agent，<strong>启用四级流水线</strong>。</p>
+  </div>
+  <div class="benefit-card b4">
+    <span class="b-num">4</span>
+    <span class="b-tag">Day 60-90</span>
+    <h4>L3 ACI 联邦</h4>
+    <p>APIC ↔ Cilium Identity 自动映射启用，<strong>物理层联动开闸</strong>。</p>
+  </div>
+  <div class="benefit-card b5">
+    <span class="b-num">5</span>
+    <span class="b-tag">Day 90+</span>
+    <h4>策略转 Enforce</h4>
+    <p>所有层从 Audit-only 切换至 Enforce，<strong>30ms 全链路防御</strong>正式生效。</p>
+  </div>
+</div>
+
+<!-- 反模式警告 -->
+<div class="alert-box">
+  <strong>⚠ 落地提醒：</strong>
+  <strong>Observability 必须 Day-0 先行</strong>。若先部署 L1-L3 再考虑日志接入 SIEM，
+  事后接入平均耗时 2-6 周、每年额外 SIEM 许可费数十万美元。
+  Cisco 推荐架构的核心红利之一，就是 <strong>Splunk Free-From-Day-1 + Hubble OTel 同源</strong> ——
+  零额外许可费、Day-0 即可向董事会出报告。
+</div>
+
     <!-- 金句收束（复用 .golden-quote） -->
     <div class="golden-quote">
       <p>从恶意 Prompt 到 Leaf 端口隔离，<br>30 毫秒，五子系统，四层联动，五大独占。<br>这不是技术的胜利，<br>是<strong>Cisco 全栈架构哲学</strong>的胜利。</p>
