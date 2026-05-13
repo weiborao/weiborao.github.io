@@ -6643,6 +6643,336 @@ spec:
       </div>
     </div>
 
+    <!-- ===== B.10 Sidecar vs eBPF · 分层防御第一性原理 ===== -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.10 Sidecar 是否可被 Cilium 取代？分层防御的第一性原理</h3>
+</div>
+
+<p>
+  这是一个在企业架构评审会上几乎必然会被问到的<strong>尖锐问题</strong>：
+  既然 Cisco 已收购 Isovalent、Cilium 提供了内核级 L7 策略能力，
+  <strong>"为何 DefenseClaw 还要以 Sidecar 形式部署？能否完全交给 Cilium 来做？"</strong>
+  本节用第一性原理给出严谨答案 —— 不是"能或不能"的二元判断，而是
+  <strong>"哪些可以下推、哪些必须保留、为什么"</strong>的工程化分层。
+</p>
+
+<!-- 苏格拉底提问 -->
+<div class="socratic-question">
+  <span class="label">Architect's Dilemma</span>
+  <p>当一个架构层（Cilium L7）<strong>能看见 HTTP 路径</strong>，但<strong>看不懂 Prompt 语义</strong>时 —— 我们应该让它做超出本职的工作，还是让它专注做最擅长的事？</p>
+</div>
+
+<!-- 两种哲学对决 · 复用 def-analogy -->
+<div class="def-analogy">
+  <div class="def-card">
+    <span class="tag">SIDECAR MODE</span>
+    <h4>当前模式：DefenseClaw v1</h4>
+    <p>
+      <code>App → localhost:4000 (Sidecar) → Egress</code><br>
+      <strong>优势：</strong>流量收口确定性 100%、与应用同生命周期、零网络跳数、Go Heap 状态无限。<br>
+      <strong>代价：</strong>每 Pod +50-150MB、注入复杂度、Pod 重启代价。
+    </p>
+  </div>
+  <div class="analogy-card">
+    <span class="tag">SIDECARLESS MODE</span>
+    <h4>理论替代：Cilium 原生</h4>
+    <p>
+      <code>App → Cilium eBPF (内核态) → Egress</code><br>
+      <strong>优势：</strong>每节点共享 Envoy、零 Sidecar 注入、纳秒级 packet filter。<br>
+      <strong>代价：</strong>策略表达受限、Wasm 沙箱约束、无法承载有状态语义。
+    </p>
+  </div>
+</div>
+
+<!-- 能力矩阵 · 复用 advantage-matrix -->
+<p style="margin-top: 1.5rem;">让我们用一张严谨的<strong>能力替代矩阵</strong>，逐项评估 12 项核心能力：</p>
+
+<div class="advantage-matrix">
+  <div class="adv-row">
+    <div class="adv-label">流量 Inline 收口</div>
+    <div class="adv-others"><strong>替代评估：✅ 完全可以</strong>　Cilium L7 Policy + Envoy 透明代理可实现 iptables redirect。</div>
+    <div class="adv-cisco"><strong>建议：下推 Cilium</strong>　这是 Cilium 的天然能力，Sidecar 在此环节确实是冗余。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Stage 1 · Regex/DLP</div>
+    <div class="adv-others"><strong>替代评估：✅ 可以</strong>　Envoy Lua/Wasm Filter 可执行 113 条 Regex。</div>
+    <div class="adv-cisco"><strong>建议：下推 Cilium</strong>　Wasm 性能甚至略优于 Go Regex，节约 ~20MB Sidecar 内存。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">FQDN / HTTP Path</div>
+    <div class="adv-others"><strong>替代评估：✅ 完全可以</strong>　Cilium 原生支持 method/path/header 粒度。</div>
+    <div class="adv-cisco"><strong>建议：下推 Cilium</strong>　节约 ~10MB，且策略与 Identity 联动更紧密。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Rate Limiting / mTLS</div>
+    <div class="adv-others"><strong>替代评估：✅ 完全可以</strong>　Cilium 透明加密 + per-Identity 限流。</div>
+    <div class="adv-cisco"><strong>建议：下推 Cilium</strong>　节约 ~20MB，且与 ACI EPG 配额对齐。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Stage 2 · AI Defense</div>
+    <div class="adv-others"><strong>替代评估：⚠️ 部分可以</strong>　Wasm 可外部调用，但冷启动 + 状态管理困难。</div>
+    <div class="adv-cisco"><strong>建议：保留 Sidecar</strong>　Go SDK 对 Cisco AI Defense API 的集成成熟度远超 Wasm。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Stage 3 · LLM Judge</div>
+    <div class="adv-others"><strong>替代评估：❌ 几乎不可行</strong>　LLM 推理 200ms+，Wasm 沙箱无法承载流式响应。</div>
+    <div class="adv-cisco"><strong>建议：必须保留</strong>　这是 DefenseClaw 的核心差异化，不可妥协。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Stage 4 · OPA Rego</div>
+    <div class="adv-others"><strong>替代评估：⚠️ 部分可以</strong>　Envoy ext_authz 可调用 OPA，但热更新远不如原生 Go。</div>
+    <div class="adv-cisco"><strong>建议：保留 Sidecar</strong>　OPA 模块加载 + 多策略包管理需要应用层灵活性。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Context Tracker</div>
+    <div class="adv-others"><strong>替代评估：❌ 不可行</strong>　200 会话 × 10 turns ≈ 100MB 状态。</div>
+    <div class="adv-cisco"><strong>建议：必须保留</strong>　eBPF / Envoy 是无状态层，多轮渐进式注入检测无处可放。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">Skill/MCP Watcher</div>
+    <div class="adv-others"><strong>替代评估：❌ 完全不可行</strong>　这是文件系统事件，根本不在网络层。</div>
+    <div class="adv-cisco"><strong>建议：必须保留</strong>　fsnotify 是应用层职责，与流量层正交。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">before_tool_call Hook</div>
+    <div class="adv-others"><strong>替代评估：❌ 不可行</strong>　这是应用语义钩子，需要 SDK 级别介入。</div>
+    <div class="adv-cisco"><strong>建议：必须保留</strong>　eBPF 看不到 Python/Go 函数级语义。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">AIBOM 资产清单</div>
+    <div class="adv-others"><strong>替代评估：❌ 完全不可行</strong>　应用层元数据采集，与流量层无关。</div>
+    <div class="adv-cisco"><strong>建议：必须保留</strong>　SPDX/CycloneDX 生成需要语言生态级深度。</div>
+  </div>
+  <div class="adv-row">
+    <div class="adv-label">HITL 审批 + Notification</div>
+    <div class="adv-others"><strong>替代评估：❌ 完全不可行</strong>　需要 UI、审批工作流、状态机。</div>
+    <div class="adv-cisco"><strong>建议：必须保留</strong>　修改请求体并保持会话上下文是应用层独占职责。</div>
+  </div>
+</div>
+
+<!-- 第一性原理：抽象层级 · 复用 pyramid -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.10.1 第一性原理：抽象层级失配（Layer Mismatch）</h3>
+</div>
+
+<p>为什么 Cilium 无法吃下 DefenseClaw 的全部职责？答案在于<strong>抽象层级</strong>的物理边界：</p>
+
+<div class="pyramid">
+  <div class="pyramid-layer l1">
+    <div class="lvl">L7+</div>
+    <div class="info">
+      <h5>AI 语义层 · DefenseClaw 本职</h5>
+      <p class="desc">Prompt 内容 / Tool 调用 / Context 多轮 / AIBOM 资产</p>
+      <p class="ask">Cilium 看不见、看不懂、不该看</p>
+    </div>
+  </div>
+  <div class="pyramid-layer l2">
+    <div class="lvl">L7</div>
+    <div class="info">
+      <h5>应用协议层 · Cilium 强项</h5>
+      <p class="desc">HTTP method/path/header · gRPC service/method · Kafka topic</p>
+      <p class="ask">Cilium 可下推 Stage 1 + 部分 Stage 2</p>
+    </div>
+  </div>
+  <div class="pyramid-layer l3">
+    <div class="lvl">L4</div>
+    <div class="info">
+      <h5>传输层 · Cilium 原生</h5>
+      <p class="desc">TCP/UDP port · Identity-based · Connection Tracking</p>
+      <p class="ask">完全由 Cilium 承担</p>
+    </div>
+  </div>
+  <div class="pyramid-layer l4">
+    <div class="lvl">L3</div>
+    <div class="info">
+      <h5>网络层 · Cilium 原生</h5>
+      <p class="desc">IP CIDR · Routing · ACI EPG 联邦</p>
+      <p class="ask">完全由 Cilium 承担</p>
+    </div>
+  </div>
+  <div class="pyramid-foot">
+    <strong>核心命题：</strong>Cilium 的天花板止于 L7，而 AI 治理的真正战场在 L7+。这不是 Cilium 的缺陷，而是它的设计原则 —— 网络数据平面应保持纯净、高速、无状态。
+  </div>
+</div>
+
+<!-- 三大第一性原理 · 复用 dna-grid 模式 -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.10.2 三大第一性原理：为什么不能完全替换</h3>
+</div>
+
+<div class="dna-grid">
+  <div class="dna-card dna-h">
+    <span class="dna-tag">PRINCIPLE 1</span>
+    <h4>抽象层级失配</h4>
+    <p class="dna-role">Layer Mismatch</p>
+    <ul>
+      <li>Cilium 看见 <code>POST /v1/chat/completions</code></li>
+      <li>但请求体里 <code>"忽略以上指令..."</code> 的 Prompt 注入 —— Cilium 看不见</li>
+      <li>语义理解需要 LLM 模型推理，不是字节匹配</li>
+    </ul>
+    <div class="dna-purpose">每一层只做最擅长的事</div>
+  </div>
+  <div class="dna-card dna-d">
+    <span class="dna-tag">PRINCIPLE 2</span>
+    <h4>CPU 周期经济学</h4>
+    <p class="dna-role">Cycle Economics</p>
+    <ul>
+      <li>eBPF 快路径：纳秒级 packet filter / connection tracking</li>
+      <li>eBPF 慢路径：调用 LLM API（200ms+）—— <strong>架构错位</strong></li>
+      <li>BPF Verifier 严格限制循环次数与栈深度，无法承载 LLM Judge</li>
+    </ul>
+    <div class="dna-purpose">让法拉利去拉货 = 架构级错误</div>
+  </div>
+</div>
+
+<div class="dna-grid" style="grid-template-columns: 1fr;">
+  <div class="dna-card dna-h">
+    <span class="dna-tag">PRINCIPLE 3</span>
+    <h4>状态管理范式冲突</h4>
+    <p class="dna-role">Stateful vs Stateless Paradigm</p>
+    <ul>
+      <li><strong>Cilium eBPF：</strong>无状态（per-packet）· BPF Map 受限 · 节点级生命周期 · 节点级故障域</li>
+      <li><strong>DefenseClaw Sidecar：</strong>有状态（per-session）· Go Heap 无限 · Pod 级生命周期 · Pod 级故障域</li>
+      <li>Context Tracker 需要 <code>200 sessions × 10 turns × ~50KB ≈ 100MB</code> 状态</li>
+      <li>这种规模的有状态会话<strong>不该住在内核里</strong></li>
+    </ul>
+    <div class="dna-purpose">无状态层承担有状态职责 = 系统级灾难</div>
+  </div>
+</div>
+
+<!-- 正确分层架构 · 复用 pyramid 强化版 -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.10.3 正确答案：分层协同，而非替代</h3>
+</div>
+
+<p>这正是 Cisco 收购 Isovalent 的<strong>真正战略意图</strong> —— 不是用 Cilium 取代 Sidecar，而是构建<strong>正确的分层防御</strong>：</p>
+
+<div class="pyramid">
+  <div class="pyramid-layer l1">
+    <div class="lvl">L7+</div>
+    <div class="info">
+      <h5>语义层 · DefenseClaw Sidecar（必须保留）</h5>
+      <p class="desc">LLM Judge · Context Tracker · Skill Watcher · before_tool_call · AIBOM · HITL</p>
+      <p class="ask">瘦身后 ~40MB，专注做 AI 语义治理</p>
+    </div>
+  </div>
+  <div class="pyramid-layer l2">
+    <div class="lvl">L7</div>
+    <div class="info">
+      <h5>协议层 · Cilium L7 Policy（接管 Stage 1 + 部分 Stage 2）</h5>
+      <p class="desc">基础 Regex/DLP（Wasm）· FQDN 白名单 · HTTP method/path · Rate Limiting · mTLS</p>
+      <p class="ask">下推后节约 ~50-110MB Sidecar 资源</p>
+    </div>
+  </div>
+  <div class="pyramid-layer l3">
+    <div class="lvl">L4/L3</div>
+    <div class="info">
+      <h5>网络层 · Cilium 原生（Identity / NetworkPolicy）</h5>
+      <p class="desc">Identity-based Egress · Pod 隔离 · ACI EPG 联邦 · ClusterMesh</p>
+      <p class="ask">完全由 Cilium 承担，零 Sidecar 介入</p>
+    </div>
+  </div>
+  <div class="pyramid-foot">
+    <strong>分层红利：</strong>Sidecar 从 ~150MB 瘦身至 ~40MB（-73%），同时保留全部核心差异化能力
+  </div>
+</div>
+
+<!-- Sidecar 瘦身策略 · 复用 benefit-grid -->
+<p style="margin-top: 1.5rem;">具体的<strong>下推清单</strong>如下 —— 这是可立即落地的优化路径：</p>
+
+<div class="benefit-grid">
+  <div class="benefit-card b1">
+    <span class="b-num">1</span>
+    <span class="b-tag">DOWNLOAD</span>
+    <h4>Stage 1 Regex</h4>
+    <p>下推到 Cilium Wasm Filter，节约 <strong>~20MB</strong></p>
+  </div>
+  <div class="benefit-card b2">
+    <span class="b-num">2</span>
+    <span class="b-tag">DOWNLOAD</span>
+    <h4>FQDN/Path</h4>
+    <p>下推到 Cilium L7 Policy，节约 <strong>~10MB</strong></p>
+  </div>
+  <div class="benefit-card b3">
+    <span class="b-num">3</span>
+    <span class="b-tag">DOWNLOAD</span>
+    <h4>Rate Limiting</h4>
+    <p>下推到 Cilium per-Identity 限流，节约 <strong>~5MB</strong></p>
+  </div>
+  <div class="benefit-card b4">
+    <span class="b-num">4</span>
+    <span class="b-tag">DOWNLOAD</span>
+    <h4>mTLS</h4>
+    <p>下推到 Cilium 透明加密，节约 <strong>~15MB</strong></p>
+  </div>
+  <div class="benefit-card b5">
+    <span class="b-num">5</span>
+    <span class="b-tag">KEEP</span>
+    <h4>核心语义层</h4>
+    <p>LLM Judge / Context / OPA / AIBOM <strong>必须保留</strong></p>
+  </div>
+</div>
+
+<!-- 行业先例 · 复用 callout -->
+<div class="callout">
+  <strong>行业共识：</strong>
+  这场 Sidecar vs Sidecarless 的争论在通用 Service Mesh 领域早已尘埃落定。
+  <strong>第一代（2017-2020）</strong> Istio 完全 Sidecar → 资源开销过大；
+  <strong>第二代（2021-2023）</strong> Cilium 完全 Sidecarless → 表达力受限；
+  <strong>第三代（2024+）</strong> Istio Ambient + Cilium Layered <strong>分层混合</strong> ——
+  Google、Solo.io、Isovalent 三方在 KubeCon 2024 已达成共识：
+  <strong>纯 Sidecarless 是错误，纯 Sidecar 是浪费，分层混合才是终局。</strong>
+</div>
+
+<!-- 风险警示 -->
+<div class="alert-box">
+  <strong>⚠ 反模式警告：</strong>
+  在企业落地中，曾有团队尝试将 LLM Judge 通过 Wasm 模块塞进 Cilium L7 Filter ——
+  结果是：① Wasm 沙箱无法承载 200ms+ 的 LLM 推理，触发 Envoy 上游超时；
+  ② 流式响应（SSE）在 Wasm 中状态管理极其复杂；
+  ③ Wasm 模块热更新需要重启 Envoy，影响整个节点流量。
+  <strong>请勿将"语义层"职责强行下推到"协议层"。</strong>
+</div>
+
+<!-- 直接回答 -->
+<div class="subsection-title">
+  <span class="dot"></span>
+  <h3>B.10.4 直接回答：能否用 Cilium 完全替代 Sidecar？</h3>
+</div>
+
+<div class="def-analogy">
+  <div class="def-card">
+    <span class="tag">SHORT ANSWER</span>
+    <h4>可以替代 ~30%，不能替代 100%</h4>
+    <p>
+      Cilium 可承担 <strong>流量收口 + Stage 1 + FQDN/Path + Rate Limit + mTLS</strong>，
+      约占 DefenseClaw 总职责的 30%。
+      但 LLM Judge、Context Tracker、Skill Watcher、AIBOM、HITL 等
+      <strong>核心差异化能力必须保留在 Sidecar</strong>。
+    </p>
+  </div>
+  <div class="analogy-card">
+    <span class="tag">CONSEQUENCE</span>
+    <h4>强行 100% 替代 = 四重灾难</h4>
+    <p>
+      ① <strong>能力倒退</strong>：失去 LLM Judge 等核心差异化；
+      ② <strong>抽象层错配</strong>：让 eBPF 做语义工作，违反单一职责；
+      ③ <strong>运维灾难</strong>：Wasm 热更新远比容器升级困难；
+      ④ <strong>战略倒退</strong>：Cisco AI Defense 判别式 AI 无法在 eBPF 中调用。
+    </p>
+  </div>
+</div>
+
+<!-- 金句收束 -->
+<div class="golden-quote">
+  <p>Cilium 不是 Sidecar 的<strong>替代品</strong>，<br>而是 Sidecar 的<strong>放大器</strong>。<br>每一层做它最擅长的事 ——<br>这才是 Cisco 全栈架构的真正威力。</p>
+  <span class="author">— B.10 · 分层防御第一性原理</span>
+</div>
+
     <!-- 金句收束（复用 .golden-quote） -->
     <div class="golden-quote">
       <p>从恶意 Prompt 到 Leaf 端口隔离，<br>30 毫秒，五子系统，四层联动，五大独占。<br>这不是技术的胜利，<br>是<strong>Cisco 全栈架构哲学</strong>的胜利。</p>
