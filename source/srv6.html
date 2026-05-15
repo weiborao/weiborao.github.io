@@ -1,0 +1,3980 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRv6 深度解构 · 从第一性原理到芯片微架构 | Cisco 技术白皮书</title>
+<link rel="stylesheet" href="cisco-style.css">
+<style>
+/* ============ 本页专属增强样式 ============ */
+
+/* 顶部导航 */
+.top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+.top-nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4) var(--space-6);
+}
+.nav-brand {
+    font-weight: 700;
+    color: var(--cisco-navy);
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+}
+.nav-brand span {
+    color: var(--cisco-blue);
+}
+.nav-links {
+    display: flex;
+    gap: var(--space-6);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.nav-links a {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: none;
+    padding: 0.4em 0;
+    position: relative;
+}
+.nav-links a:hover {
+    color: var(--cisco-blue);
+}
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--cisco-blue);
+    transition: width var(--transition-fast);
+}
+.nav-links a:hover::after {
+    width: 100%;
+}
+.nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--cisco-navy);
+    cursor: pointer;
+}
+
+/* Hero 区强化 */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: var(--space-12) 0 calc(var(--space-12) * 1.5);
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(2, 200, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(10, 96, 255, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+}
+.hero .container {
+    position: relative;
+    z-index: 1;
+}
+.hero-eyebrow {
+    display: inline-block;
+    padding: 0.4em 1em;
+    background: rgba(2, 200, 255, 0.2);
+    border: 1px solid rgba(2, 200, 255, 0.4);
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-6);
+    color: #02c8ff;
+}
+.hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: var(--space-6);
+    line-height: 1.15;
+}
+.hero h1 .highlight {
+    background: linear-gradient(90deg, #02c8ff 0%, #ff007f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.hero-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 760px;
+    margin: 0 auto var(--space-8);
+    line-height: 1.6;
+}
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-6);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+.hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+/* 模块标识 */
+.module-tag {
+    display: inline-block;
+    padding: 0.4em 1em;
+    background: linear-gradient(90deg, var(--cisco-blue) 0%, var(--cisco-accent) 100%);
+    color: white;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-4);
+}
+
+/* 苏格拉底式提问框 */
+.socratic-box {
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+    border-left: 6px solid var(--color-warning);
+    padding: var(--space-6);
+    margin: var(--space-8) 0;
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    position: relative;
+}
+.socratic-box::before {
+    content: '🤔';
+    position: absolute;
+    top: -16px;
+    left: 16px;
+    background: var(--color-warning);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+.socratic-box .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #92740a;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    margin-top: var(--space-2);
+}
+.socratic-box h4 {
+    color: #5c4a05;
+    margin-bottom: var(--space-2);
+    font-size: 1.2rem;
+    border: none;
+    padding: 0;
+}
+.socratic-box p {
+    color: #4a3a04;
+    margin-bottom: 0;
+}
+
+/* 第一性原理推导框 */
+.first-principle-box {
+    background: linear-gradient(135deg, #e8f4fd 0%, #d5ebfb 100%);
+    border-left: 6px solid var(--cisco-blue);
+    padding: var(--space-6);
+    margin: var(--space-8) 0;
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    position: relative;
+}
+.first-principle-box::before {
+    content: '🔬';
+    position: absolute;
+    top: -16px;
+    left: 16px;
+    background: var(--cisco-blue);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-sm);
+    color: white;
+}
+.first-principle-box .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cisco-blue-dark);
+    font-weight: 700;
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+/* 类比框 */
+.analogy-box {
+    background: linear-gradient(135deg, #f0f9eb 0%, #e1f3d8 100%);
+    border-left: 6px solid var(--color-success);
+    padding: var(--space-6);
+    margin: var(--space-6) 0;
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    position: relative;
+}
+.analogy-box::before {
+    content: '💡';
+    position: absolute;
+    top: -16px;
+    left: 16px;
+    background: var(--color-success);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+.analogy-box .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3d7a1d;
+    font-weight: 700;
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+/* 定义框 */
+.definition-box {
+    background: var(--bg-soft);
+    border: 2px dashed var(--cisco-blue);
+    padding: var(--space-6);
+    margin: var(--space-6) 0;
+    border-radius: var(--border-radius-md);
+}
+.definition-box .term {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cisco-navy);
+    margin-bottom: var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+.definition-box .term::before {
+    content: '📐';
+}
+
+/* 警告/注意框 */
+.warning-box {
+    background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
+    border-left: 6px solid var(--cisco-red);
+    padding: var(--space-6);
+    margin: var(--space-6) 0;
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    position: relative;
+}
+.warning-box::before {
+    content: '⚠️';
+    position: absolute;
+    top: -16px;
+    left: 16px;
+    background: var(--cisco-red);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 章节金句 */
+.chapter-quote {
+    margin: var(--space-12) auto 0;
+    max-width: 800px;
+    text-align: center;
+    padding: var(--space-8);
+    background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue) 100%);
+    color: white;
+    border-radius: var(--border-radius-md);
+    position: relative;
+}
+.chapter-quote::before {
+    content: '"';
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--cisco-accent);
+    position: absolute;
+    top: 0;
+    left: var(--space-4);
+    opacity: 0.5;
+    font-family: Georgia, serif;
+}
+.chapter-quote p {
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin: 0;
+    color: white;
+}
+.chapter-quote .author {
+    margin-top: var(--space-4);
+    font-size: 0.9rem;
+    color: var(--cisco-accent);
+    font-weight: 500;
+}
+
+/* 时间线/进化线 */
+.timeline {
+    position: relative;
+    padding: var(--space-8) 0;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--cisco-blue) 0%, var(--cisco-accent) 100%);
+    border-radius: 2px;
+}
+.timeline-item {
+    position: relative;
+    padding-left: 80px;
+    margin-bottom: var(--space-8);
+}
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+.timeline-dot {
+    position: absolute;
+    left: 18px;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    background: white;
+    border: 4px solid var(--cisco-blue);
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+}
+.timeline-year {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--cisco-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3em;
+}
+.timeline-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--cisco-navy);
+    margin-bottom: 0.5em;
+}
+
+/* 对比表格强化 */
+.comparison-table th {
+    background: var(--cisco-navy);
+    font-size: 0.95rem;
+}
+.comparison-table .col-bad {
+    background: rgba(226, 35, 26, 0.04);
+}
+.comparison-table .col-good {
+    background: rgba(103, 179, 70, 0.06);
+}
+
+/* 大数字展示 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-6);
+    margin: var(--space-8) 0;
+}
+.stat-card {
+    background: white;
+    padding: var(--space-6);
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--cisco-accent);
+}
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--cisco-blue) 0%, var(--cisco-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: var(--space-2);
+}
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* 引导小提示 */
+.tip-bar {
+    background: linear-gradient(90deg, var(--cisco-blue) 0%, var(--cisco-accent) 100%);
+    color: white;
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: var(--space-6) 0;
+}
+.tip-bar-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.tip-bar p {
+    margin: 0;
+    color: white;
+}
+
+/* 章节进度指示 */
+.progress-pills {
+    display: flex;
+    gap: var(--space-2);
+    margin: var(--space-6) 0;
+    flex-wrap: wrap;
+}
+.progress-pill {
+    padding: 0.4em 1em;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--bg-soft);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+.progress-pill.active {
+    background: var(--cisco-blue);
+    color: white;
+    border-color: var(--cisco-blue);
+}
+.progress-pill.done {
+    background: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+    .nav-toggle {
+        display: block;
+    }
+    .nav-links.open {
+        display: flex;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: var(--space-4);
+        box-shadow: var(--shadow-md);
+        border-top: 1px solid var(--border-color);
+    }
+    .timeline-item {
+        padding-left: 60px;
+    }
+    .timeline::before {
+        left: 20px;
+    }
+    .timeline-dot {
+        left: 8px;
+    }
+}
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<!-- ===================== 顶部导航 ===================== -->
+<nav class="top-nav">
+    <div class="container">
+        <div class="nav-brand">SRv6 <span>·</span> 深度解构</div>
+        <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#hero">首页</a></li>
+            <li><a href="#ch1">模块1·起源</a></li>
+            <li><a href="#ch2">模块2·数据面</a></li>
+            <li><a href="#ch3">模块3·控制面</a></li>
+            <li><a href="#ch4">模块4·指令集</a></li>
+            <li><a href="#ch5">模块5·进化</a></li>
+            <li><a href="#ch6">模块6·应用</a></li>
+            <li><a href="#glossary">术语表</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="hero">
+    <div class="container">
+        <div class="hero-eyebrow">CISCO TECHNICAL DEEP-DIVE · 2026</div>
+        <h1>从源路由的<span class="highlight">复仇</span>，<br>到 IP 网络的<span class="highlight">指令集革命</span></h1>
+        <p class="hero-subtitle">
+            一份用<strong>苏格拉底提问法</strong>+ <strong>第一性原理</strong>解剖 SRv6 的硬核手册。
+            从状态机灾难、ASIC 微架构到 uSID 压缩魔术，我们拒绝浅尝辄止——直达底层。
+        </p>
+        <div class="hero-meta">
+            <span>📚 6 大模块</span>
+            <span>🔬 第一性原理推导</span>
+            <span>💬 苏格拉底式追问</span>
+            <span>⚙️ 直达 ASIC 层</span>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== 模块 1 ===================== -->
+<section class="chapter" id="ch1">
+    <div class="container">
+
+        <span class="module-tag">MODULE 1 · ORIGINS</span>
+        <h2>第一性原理与 SRv6 的起源</h2>
+
+        <div class="progress-pills">
+            <span class="progress-pill active">①·起源 (当前)</span>
+            <span class="progress-pill">②·数据面</span>
+            <span class="progress-pill">③·控制面</span>
+            <span class="progress-pill">④·指令集</span>
+            <span class="progress-pill">⑤·进化</span>
+            <span class="progress-pill">⑥·应用</span>
+        </div>
+
+        <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 800px;">
+            在你了解 SRv6 的任何细节之前，我们必须先回答一个最根本的问题：
+            <strong>为什么人类需要在 IPv6 已经"够用"的情况下，再造一个 SRv6？</strong>
+            这不是一次平庸的协议升级，而是一次<strong>对网络架构哲学的彻底反叛</strong>。
+        </p>
+
+        <!-- ============ 苏格拉底问题 1 ============ -->
+        <h3 id="ch1-q1">§ 1.1 第一问：网络的本质，到底是什么？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #1</div>
+            <h4>"你认为，IP 网络一定要是逐跳路由（Hop-by-Hop Routing）的吗？"</h4>
+            <p>
+                请暂停 30 秒，认真思考这个问题。如果你的答案是"是"——那是因为你被 30 年的 Internet 训练出了一种思维定势。
+                如果你的答案是"不一定"——那么恭喜，你已经站在了源路由（Source Routing）哲学的门槛上。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE</div>
+            <p style="margin-bottom: var(--space-4);">
+                让我们抛开一切既有协议，回到最朴素的问题：<strong>"把数据从 A 送到 Z，本质上需要什么？"</strong>
+            </p>
+            <p style="margin-bottom: var(--space-4);">
+                答案只有一个——<strong>路径决策（Path Decision）</strong>。
+                决策可以发生在两个地方：
+            </p>
+            <ol>
+                <li><strong>分布式决策（Hop-by-Hop）</strong>：每一台中间路由器，独立查表、独立决定下一跳。这是 Internet 的默认范式。</li>
+                <li><strong>集中式决策（Source Routing）</strong>：起点（源节点）一次性决定整条路径，把"指令清单"写进数据包，沿途节点只是"忠实执行"。</li>
+            </ol>
+            <p style="margin-bottom: 0;">
+                这两种范式没有谁绝对优劣——但在<strong>不同的时代</strong>、面对<strong>不同的需求</strong>，最优解是不同的。
+                SRv6 的诞生，正是因为时代变了。
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 出租车 vs Google Maps 导航</div>
+            <p style="margin-bottom: var(--space-2);">
+                <strong>逐跳路由</strong>，就像你在 1990 年代打出租车——你只告诉司机"我要去机场"，至于走哪条路，每个路口该左转还是右转，全凭司机的经验和当时的路况判断。每个司机的决策都是<strong>局部最优</strong>，但你没法保证全局是最快的。
+            </p>
+            <p style="margin-bottom: 0;">
+                <strong>源路由</strong>，则像今天你打开 Google Maps：<strong>导航 APP 在出发前就为你算好了最佳路径</strong>，"前 200 米左转，第二个路口右转，再走 1 公里上高架……"，司机（以及所有路过的红绿灯）只需要按部就班执行。决策者只有一个，路径是<strong>全局最优</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 2 ============ -->
+        <h3 id="ch1-q2">§ 1.2 第二问：既然源路由这么好，为什么 30 年来没人用？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #2</div>
+            <h4>"如果源路由这么优雅，为什么 IPv4 时代它几乎被遗忘了？"</h4>
+            <p>
+                提示：去翻一下 RFC 791（1981 年的 IPv4 标准），它<strong>本来就支持 Loose Source Route 和 Strict Source Route 选项</strong>。
+                那为什么今天没人用？这背后藏着一个深刻的工程教训。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 历史的失败</div>
+            <p style="margin-bottom: var(--space-4);">
+                IPv4 的源路由失败有<strong>三个致命原因</strong>，每一个都是用第一性原理就能推出来的：
+            </p>
+            <ol>
+                <li>
+                    <strong>安全噩梦</strong>：任何主机都可以伪造源路由，绕过防火墙、欺骗反向路径检查（uRPF）。
+                    于是几乎所有运营商在边界默认 <code>drop ip option source-route</code>。一项被全网封禁的功能，等于死亡。
+                </li>
+                <li>
+                    <strong>性能黑洞</strong>：IPv4 头部本身只有 20 字节，源路由选项最多塞 9 个 IP 地址（每个 4 字节）。
+                    更要命的是——<strong>选项处理走的是软件慢路径（Slow Path）</strong>，硬件根本不加速。
+                </li>
+                <li>
+                    <strong>没有控制面配套</strong>：IGP（OSPF/IS-IS）只算最短路径，没有任何机制让源端"知道"该写什么路径下去。
+                    源路由变成了一个"<strong>有数据面、没控制面</strong>"的孤儿。
+                </li>
+            </ol>
+            <p style="margin-bottom: 0;">
+                所以——<strong>IPv4 源路由不是输在哲学，是输在工程实现</strong>。这个教训直接塑造了 SRv6 的所有设计决策。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 3 ============ -->
+        <h3 id="ch1-q3">§ 1.3 第三问：那 MPLS / RSVP-TE 不是已经"解决"了吗？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #3</div>
+            <h4>"我们有 MPLS，有 RSVP-TE，有 LDP，运营商网络跑得好好的，为什么还要 SRv6？"</h4>
+            <p>
+                这是反对者最常用的论据。要回答这个问题，你必须先回答另一个更深刻的问题：
+                <strong>"MPLS 流量工程的痛苦根源，到底是什么？"</strong>
+            </p>
+        </div>
+
+        <p>
+            让我用一个词概括 MPLS TE 的原罪：<strong>状态机灾难（State Machine Hell）</strong>。
+            我们逐层拆解这个灾难是怎么发生的。
+        </p>
+
+        <h4>§ 1.3.1 MPLS RSVP-TE 的本质：用"状态"换"路径控制"</h4>
+
+        <p>
+            想象你是一个运营商网络架构师，你想从 PE1 到 PE2 建一条<strong>低时延 + 绕开核心节点 P3</strong>的隧道。MPLS RSVP-TE 是怎么实现的？
+        </p>
+
+        <ol>
+            <li><strong>头节点（PE1）</strong>用 CSPF 算法算出路径：PE1 → P1 → P2 → P4 → PE2</li>
+            <li><strong>RSVP Path 消息</strong>沿着这条路径逐跳发送，每个节点必须<strong>分配一个本地标签</strong>，并<strong>记住这条 LSP 的状态</strong>（带宽预留、亲和性、保护信息）</li>
+            <li><strong>Resv 消息</strong>反向回送，绑定标签</li>
+            <li>每隔 30 秒，<strong>所有中间节点</strong>必须发送 Refresh 消息维护这个状态——否则状态超时被清除</li>
+        </ol>
+
+        <div class="warning-box">
+            <p style="margin-bottom: var(--space-2);"><strong>问题来了</strong>：假设你有 1000 个 PE 节点，做 PE-to-PE 全互联（典型 L3VPN 场景）：</p>
+            <ul>
+                <li>需要建立的隧道数 = 1000 × 999 ≈ <strong>100 万条 LSP</strong></li>
+                <li>每条 LSP 在<strong>每个中间节点</strong>都有状态</li>
+                <li>每个 P 节点可能要维护<strong>数十万条 LSP 状态</strong>，每 30 秒刷新一次</li>
+                <li>任何一次链路抖动，<strong>所有受影响 LSP 都要重新信令</strong>，控制面雪崩</li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                这就是网络工程师的"<strong>RSVP 之夜</strong>"——一次小小的链路 Flap，整个网络的控制面 CPU 飙到 100%，运维彻夜不眠。
+            </p>
+        </div>
+
+        <h4>§ 1.3.2 第一性原理：状态应该放在哪里？</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 状态守恒定律</div>
+            <p style="margin-bottom: var(--space-4);">
+                网络工程有一条铁律：<strong>"状态是有成本的"</strong>。状态越多，控制面越脆弱、扩展性越差、收敛越慢。
+            </p>
+            <p style="margin-bottom: var(--space-4);">
+                那么，对于"用户想走特定路径"这件事，<strong>状态最少应该放在哪里？</strong>有三个选项：
+            </p>
+            <ol>
+                <li>放在<strong>每一台中间节点</strong>（RSVP-TE 的做法）→ 状态 = O(N²) 量级</li>
+                <li>放在<strong>头节点 + 尾节点</strong>（部分隧道方案）→ 状态 = O(N) 量级</li>
+                <li>放在<strong>数据包自己里面</strong>（源路由）→ 状态 = O(1)，跟节点数无关！</li>
+            </ol>
+            <p style="margin-bottom: 0;">
+                第三个选项就是 <strong>Segment Routing（SR）的核心哲学</strong>：
+                <strong style="color: var(--cisco-blue-dark); font-size: 1.1rem;">"把状态从网络中赶出去，塞进数据包的头里。"</strong>
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 旅行社 vs 自助攻略</div>
+            <p style="margin-bottom: 0;">
+                MPLS RSVP-TE 像是<strong>跟团旅游</strong>——旅行社在每个景点都要预订位置、维护订单、保留状态，任何一个环节出问题整团都得改行程。<br>
+                Segment Routing 像是<strong>自由行</strong>——你手里拿着一份自己写好的"路线攻略"（SID List），到每个景点（节点）只需要按攻略上的下一项执行就行。景点不需要记住"你来过"，路线全部状态都在你的攻略本里。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 4 ============ -->
+        <h3 id="ch1-q4">§ 1.4 第四问：那 SR-MPLS 不就够了吗？为什么还要 SRv6？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #4</div>
+            <h4>"SR 可以基于 MPLS 数据面（SR-MPLS）实现，性能好、生态成熟。为什么思科还要力推 SRv6？"</h4>
+            <p>
+                这是 SRv6 故事中最关键、也最容易被误解的一步。许多工程师会说："SRv6 就是把标签换成了 IPv6 地址而已嘛，何必多此一举？"
+                但如果你这么想，你就完全错过了 SRv6 的革命性所在。
+            </p>
+        </div>
+
+        <h4>§ 1.4.1 SR-MPLS 的"原罪"：协议栈的累赘</h4>
+
+        <p>
+            要理解 SRv6 为什么必须存在，我们要看一眼一个典型 SR-MPLS 网络的<strong>真实协议栈</strong>：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <defs>
+                <linearGradient id="badGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#fef0f0"/>
+                    <stop offset="100%" style="stop-color:#fde2e2"/>
+                </linearGradient>
+                <linearGradient id="goodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#e8f4fd"/>
+                    <stop offset="100%" style="stop-color:#d5ebfb"/>
+                </linearGradient>
+            </defs>
+
+            <!-- Title -->
+            <text x="440" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">SR-MPLS vs SRv6 · 协议栈复杂度对比</text>
+
+            <!-- Left: SR-MPLS -->
+            <rect x="40" y="60" width="380" height="290" fill="url(#badGrad)" stroke="#E2231A" stroke-width="2" rx="12"/>
+            <text x="230" y="88" text-anchor="middle" font-size="15" font-weight="700" fill="#7a1a14">SR-MPLS 网络</text>
+
+            <rect x="60" y="105" width="340" height="40" fill="white" stroke="#E2231A" rx="6"/>
+            <text x="230" y="130" text-anchor="middle" font-size="13" fill="#1A1A1A">① IPv4/IPv6 — 用户层</text>
+
+            <rect x="60" y="155" width="340" height="40" fill="white" stroke="#E2231A" rx="6"/>
+            <text x="230" y="180" text-anchor="middle" font-size="13" fill="#1A1A1A">② MPLS 数据面 — 标签封装</text>
+
+            <rect x="60" y="205" width="340" height="40" fill="white" stroke="#E2231A" rx="6"/>
+            <text x="230" y="230" text-anchor="middle" font-size="13" fill="#1A1A1A">③ LDP / RSVP-TE / SR — 标签分发</text>
+
+            <rect x="60" y="255" width="340" height="40" fill="white" stroke="#E2231A" rx="6"/>
+            <text x="230" y="280" text-anchor="middle" font-size="13" fill="#1A1A1A">④ IGP（OSPF/IS-IS）— 底层路由</text>
+
+            <text x="230" y="325" text-anchor="middle" font-size="13" font-weight="600" fill="#7a1a14">4 层协议栈 · 状态多 · 故障点多</text>
+
+            <!-- Right: SRv6 -->
+            <rect x="460" y="60" width="380" height="290" fill="url(#goodGrad)" stroke="#049FD9" stroke-width="2" rx="12"/>
+            <text x="650" y="88" text-anchor="middle" font-size="15" font-weight="700" fill="#005073">SRv6 网络</text>
+
+            <rect x="480" y="105" width="340" height="40" fill="white" stroke="#049FD9" rx="6"/>
+            <text x="650" y="130" text-anchor="middle" font-size="13" fill="#1A1A1A">① IPv6（用户层 + 转发层 = 同一层）</text>
+
+            <rect x="480" y="155" width="340" height="40" fill="white" stroke="#049FD9" rx="6"/>
+            <text x="650" y="180" text-anchor="middle" font-size="13" fill="#1A1A1A">② IGP（IS-IS with SR ext.）— 自动分发 SID</text>
+
+            <rect x="480" y="220" width="340" height="80" fill="#f0f9eb" stroke="#67B346" stroke-width="2" stroke-dasharray="6,4" rx="6"/>
+            <text x="650" y="248" text-anchor="middle" font-size="14" font-weight="700" fill="#3d7a1d">✓ 移除：MPLS 标签栈</text>
+            <text x="650" y="270" text-anchor="middle" font-size="14" font-weight="700" fill="#3d7a1d">✓ 移除：LDP</text>
+            <text x="650" y="292" text-anchor="middle" font-size="14" font-weight="700" fill="#3d7a1d">✓ 移除：RSVP-TE</text>
+
+            <text x="650" y="330" text-anchor="middle" font-size="13" font-weight="600" fill="#005073">2 层协议栈 · 极简 · IP 即一切</text>
+        </svg>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 奥卡姆剃刀</div>
+            <p style="margin-bottom: 0;">
+                "<strong>如无必要，勿增实体</strong>"——奥卡姆剃刀原理。
+                如果 IPv6 地址（128 比特）本身就足以编码一个"指令"（Locator + Function + Args），
+                那么 MPLS 标签层就是<strong>历史负担</strong>，应该被剃掉。
+                SRv6 的本质，是<strong>把 IPv6 地址重新定义为"指令操作码"</strong>——这就是它被称为"网络编程（Network Programming）"的原因。
+            </p>
+        </div>
+
+        <h4>§ 1.4.2 SR-MPLS 的真正软肋：跨域与端到端</h4>
+
+        <p>
+            SR-MPLS 在<strong>同一个 MPLS 域内</strong>表现优秀，但一旦跨越多个域（运营商边界、数据中心 underlay 与 fabric 边界、5G 移动网与传输网），就会暴露三大软肋：
+        </p>
+
+        <div class="table-scroll-wrapper">
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th style="width:22%;">维度</th>
+                    <th class="col-bad" style="width:39%;">SR-MPLS（标签数据面）</th>
+                    <th class="col-good" style="width:39%;">SRv6（IPv6 数据面）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>跨域能力</strong></td>
+                    <td class="col-bad">MPLS 标签是<strong>本地有效</strong>，跨域需要 BGP-LU、Inter-AS Option B/C 等"胶水"协议。复杂、易错。</td>
+                    <td class="col-good">IPv6 地址<strong>全球可路由</strong>，跨域天然可达。一个 SID 就是一个 IPv6 地址，不需要任何"翻译"。</td>
+                </tr>
+                <tr>
+                    <td><strong>主机参与</strong></td>
+                    <td class="col-bad">主机不懂 MPLS，无法直接生成或处理 SID。隧道只能在 PE 上终结。</td>
+                    <td class="col-good">主机原生支持 IPv6，可以<strong>直接生成 SRH</strong>。Linux Kernel 4.10+ 已原生支持。</td>
+                </tr>
+                <tr>
+                    <td><strong>云原生融合</strong></td>
+                    <td class="col-bad">公有云不跑 MPLS。SR-MPLS 永远走不出运营商核心网。</td>
+                    <td class="col-good">AWS、Azure 都基于 IPv6。SRv6 可以<strong>从主机一直贯穿到云</strong>，实现 End-to-End 网络编程。</td>
+                </tr>
+                <tr>
+                    <td><strong>安全模型</strong></td>
+                    <td class="col-bad">MPLS 没有 IP 层的安全机制（IPsec、ACL 等）。</td>
+                    <td class="col-good">IPv6 自带 IPsec、ACL、uRPF——SRv6 直接继承全部安全工具链。</td>
+                </tr>
+                <tr>
+                    <td><strong>运维工具</strong></td>
+                    <td class="col-bad">需要专用 MPLS OAM（LSP Ping/Traceroute）。</td>
+                    <td class="col-good">Ping、Traceroute、tcpdump 全部原生可用。运维心智负担降到最低。</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- ============ 苏格拉底问题 5 ============ -->
+        <h3 id="ch1-q5">§ 1.5 第五问：那 SRv6 真正的"杀手锏"哲学，是什么？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #5 · 终极一问</div>
+            <h4>"如果让你用一句话概括 SRv6 的设计哲学，你会怎么说？"</h4>
+            <p>
+                想清楚这一点，你就抓住了 SRv6 的"道"。其余所有的细节——SRH 头、End/End.X 指令、uSID 压缩——都只是"术"。
+            </p>
+        </div>
+
+        <div class="definition-box">
+            <div class="term">SRv6 设计哲学（一句话定义）</div>
+            <p style="font-size: 1.15rem; margin-bottom: 0; color: var(--cisco-navy); font-weight: 500;">
+                <strong>SRv6 = 把网络变成一台"分布式可编程计算机"，IPv6 地址是它的"指令操作码"，源节点是它的"程序员"，沿途路由器是它的"CPU"。</strong>
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">终极类比 · 网络编程 vs 传统网络</div>
+            <p style="margin-bottom: var(--space-2);">
+                传统网络像是<strong>一群独立思考的快递员</strong>——你交给他们一个包裹，他们各自决定怎么送。
+                你能干预的，最多就是说"请走 EMS"或"请走顺丰"。
+            </p>
+            <p style="margin-bottom: 0;">
+                SRv6 像是<strong>给网络写一段汇编代码</strong>——你（源节点）在数据包里写下：
+                "<code>到东京（End）→ 走第三条线缆（End.X）→ 进入 VPN-A（End.DT4）→ 出到客户网</code>"。
+                整个网络变成了你的"<strong>可编程 CPU</strong>"，每个 IPv6 地址都是一条机器指令。这种范式转换，不是协议升级，是<strong>架构革命</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 时间线 ============ -->
+        <h3 id="ch1-timeline">§ 1.6 SRv6 的演化时间线：一场十年的革命</h3>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">2013</div>
+                <div class="timeline-title">理论奠基 · IETF SPRING 工作组成立</div>
+                <p>由思科 Clarence Filsfils 主导提出 Segment Routing 概念，目标：消除 MPLS RSVP-TE 的状态地狱。最初基于 MPLS 数据面（SR-MPLS）。</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">2017</div>
+                <div class="timeline-title">SRv6 数据面定义 · RFC 8200 修订</div>
+                <p>Routing Header Type 4（SRH）被正式定义，IPv6 路由扩展头获得 SRv6 专属类型。从此，IPv6 地址不再只是"标识"，而成为"指令"。</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">2020</div>
+                <div class="timeline-title">RFC 8754 + RFC 8986 · 标准成熟</div>
+                <p>SRH（RFC 8754）与网络编程（RFC 8986）正式成为 IETF 标准。End、End.X、End.DT4/6、End.DX2 等全套指令集尘埃落定。</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">2021-2023</div>
+                <div class="timeline-title">uSID 革命 · 思科 Micro-SID 压缩架构</div>
+                <p>SRH 头过长导致芯片处理瓶颈和 MTU 问题。Cisco 提出 uSID（128bit 容器中嵌入 8 个 16bit 微指令），单个 IPv6 地址可承载完整 SID 列表，彻底解决 SRH 膨胀。</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">2024-2026</div>
+                <div class="timeline-title">规模部署 · 5G/Cloud/AI 网络全面采用</div>
+                <p>中国移动、Softbank、Telefonica 等头部运营商规模商用。AWS、Azure 在 backbone 试水 SRv6。AI 数据中心使用 SRv6 实现 GPU-to-GPU 流量工程。SRv6 从"未来"成为"现在"。</p>
+            </div>
+        </div>
+
+        <!-- ============ 数字震撼 ============ -->
+        <h3 id="ch1-stats">§ 1.7 数据说话：SRv6 vs MPLS 的对比震撼</h3>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">10×</div>
+                <div class="stat-label">控制面状态减少（vs RSVP-TE）</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">↓50ms</div>
+                <div class="stat-label">TI-LFA 故障倒换时间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2 → 4</div>
+                <div class="stat-label">协议栈层数：从 4 层精简至 2 层</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">128 bit</div>
+                <div class="stat-label">单个 SID 编码空间（vs MPLS 20 bit）</div>
+            </div>
+        </div>
+
+        <!-- ============ 模块 1 总结 ============ -->
+        <h3 id="ch1-summary">§ 1.8 模块 1 小结：你已经掌握了"道"</h3>
+
+        <div class="tip-bar">
+            <div class="tip-bar-icon">🎯</div>
+            <p>
+                如果你能用自己的话回答以下五个问题，说明你已经掌握了 SRv6 的"第一性原理"，可以进入下一模块——<strong>数据平面解剖</strong>。
+            </p>
+        </div>
+
+        <ol style="font-size: 1.05rem; line-height: 2;">
+            <li>为什么逐跳路由不是网络的唯一范式？源路由的根本优势在哪？</li>
+            <li>IPv4 时代的源路由为什么失败了？三个工程教训分别是什么？</li>
+            <li>MPLS RSVP-TE 的"状态机灾难"是怎么发生的？SR 是如何用"状态守恒定律"解决它的？</li>
+            <li>SR-MPLS 已经很好了，SRv6 凭什么必须存在？跨域、主机参与、云融合三个维度怎么打？</li>
+            <li>用一句话概括 SRv6 的设计哲学：网络编程范式的本质是什么？</li>
+        </ol>
+
+        <!-- ============ 章节金句 ============ -->
+        <div class="chapter-quote">
+            <p>
+                状态是有成本的。SRv6 的伟大，不在于它发明了什么新东西，<br>
+                而在于它<strong>把状态从网络中赶出去，塞进了数据包的 IP 头里</strong>。<br>
+                从此，IP 地址不再只是"标识"，而成为可编程的"指令"。
+            </p>
+            <div class="author">—— SRv6 第一性原理</div>
+        </div>
+
+        <!-- ============ 苏格拉底追问预告 ============ -->
+        <div class="socratic-box" style="margin-top: var(--space-12);">
+            <div class="label">下一模块预告 · MODULE 2 · DATA PLANE</div>
+            <h4>"现在你知道了'为什么'，下一个问题是——'怎么实现'？"</h4>
+            <p style="margin-bottom: var(--space-4);">
+                我们会带你深入 SRH（Segment Routing Header）的每一个比特位：
+            </p>
+            <ul>
+                <li><strong>IPv6 扩展头机制</strong>：为什么 Routing Header Type 4 是 SRH？</li>
+                <li><strong>SRH 字段精确解构</strong>：Segments Left、Last Entry、TLV、Flags 每一个位的含义</li>
+                <li><strong>Locator : Function : Arguments 三元结构</strong>：128 比特如何编码一个完整指令？</li>
+                <li><strong>抓包实战</strong>：用 Wireshark 看清一个 SRv6 报文的真实样貌</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+<!-- ===================== 模块 2 · 数据平面深度解构 ===================== -->
+<section class="chapter" id="ch2">
+    <div class="container">
+
+        <span class="module-tag">MODULE 2 · DATA PLANE</span>
+        <h2>数据平面解剖：从 IPv6 扩展头到 SRH 的每一个比特</h2>
+
+        <div class="progress-pills">
+            <span class="progress-pill done">①·起源 ✓</span>
+            <span class="progress-pill active">②·数据面 (当前)</span>
+            <span class="progress-pill">③·控制面</span>
+            <span class="progress-pill">④·指令集</span>
+            <span class="progress-pill">⑤·进化</span>
+            <span class="progress-pill">⑥·应用</span>
+        </div>
+
+        <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 800px;">
+            上一模块我们建立了"为什么"的认知——网络编程范式。本模块我们要回答"怎么实现"——
+            <strong>当一个 SRv6 报文出现在网线上时，它到底是什么样子？路由器/ASIC 又是如何精确处理它的每一个比特的？</strong>
+            这一章是后续所有内容的"物理基础"，请不要跳过任何一个字段。
+        </p>
+
+        <!-- ============ 苏格拉底问题 6 ============ -->
+        <h3 id="ch2-q1">§ 2.1 第六问：IPv6 凭什么"天生"就能扛起源路由的大旗？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #6</div>
+            <h4>"为什么是 IPv6 而不是 IPv4 成为 SRv6 的载体？仅仅因为地址够多吗？"</h4>
+            <p>
+                如果你的回答是"因为 IPv6 地址够多，能编码 SID"——那只是表面原因。
+                真正的根本，藏在 IPv6 头部一个被大多数人忽略的设计里：<strong>扩展头机制（Extension Headers）</strong>。
+            </p>
+        </div>
+
+        <h4>§ 2.1.1 IPv6 头部的革命性设计：固定 + 可扩展</h4>
+
+        <p>
+            让我们对比一下 IPv4 和 IPv6 的头部哲学。这个对比不只是历史考古，它直接决定了 SRv6 为什么<strong>必须</strong>诞生在 IPv6 上：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <defs>
+                <linearGradient id="ipv4Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#fef0f0"/>
+                    <stop offset="100%" style="stop-color:#fde2e2"/>
+                </linearGradient>
+                <linearGradient id="ipv6Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#e8f4fd"/>
+                    <stop offset="100%" style="stop-color:#d5ebfb"/>
+                </linearGradient>
+            </defs>
+
+            <text x="440" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">IPv4 vs IPv6 · 头部哲学对比</text>
+
+            <!-- IPv4 -->
+            <rect x="40" y="50" width="380" height="380" fill="url(#ipv4Grad)" stroke="#E2231A" stroke-width="2" rx="12"/>
+            <text x="230" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#7a1a14">IPv4 · 头部哲学：所有功能塞进一个头</text>
+
+            <rect x="60" y="95" width="340" height="30" fill="white" stroke="#E2231A" rx="4"/>
+            <text x="70" y="115" font-size="11" fill="#1A1A1A">Ver|IHL|ToS|Total Length</text>
+            <rect x="60" y="125" width="340" height="30" fill="white" stroke="#E2231A" rx="4"/>
+            <text x="70" y="145" font-size="11" fill="#1A1A1A">Identification | Flags | Fragment Offset</text>
+            <rect x="60" y="155" width="340" height="30" fill="white" stroke="#E2231A" rx="4"/>
+            <text x="70" y="175" font-size="11" fill="#1A1A1A">TTL | Protocol | Header Checksum</text>
+            <rect x="60" y="185" width="340" height="30" fill="white" stroke="#E2231A" rx="4"/>
+            <text x="70" y="205" font-size="11" fill="#1A1A1A">Source IP (32 bit)</text>
+            <rect x="60" y="215" width="340" height="30" fill="white" stroke="#E2231A" rx="4"/>
+            <text x="70" y="235" font-size="11" fill="#1A1A1A">Destination IP (32 bit)</text>
+            <rect x="60" y="245" width="340" height="50" fill="#fff5f5" stroke="#E2231A" stroke-dasharray="4,2" rx="4"/>
+            <text x="230" y="268" text-anchor="middle" font-size="12" font-weight="600" fill="#7a1a14">⚠️ Options（变长，0~40 字节）</text>
+            <text x="230" y="284" text-anchor="middle" font-size="11" fill="#7a1a14">— 几乎无人使用，硬件慢路径处理</text>
+
+            <text x="230" y="325" text-anchor="middle" font-size="12" font-weight="600" fill="#7a1a14">问题：</text>
+            <text x="230" y="345" text-anchor="middle" font-size="11" fill="#7a1a14">• 头部变长 → 硬件必须做 IHL 解析</text>
+            <text x="230" y="362" text-anchor="middle" font-size="11" fill="#7a1a14">• Checksum 涉及全头部，每跳重算</text>
+            <text x="230" y="379" text-anchor="middle" font-size="11" fill="#7a1a14">• Options 在路由器走 CPU 软件路径</text>
+            <text x="230" y="396" text-anchor="middle" font-size="11" fill="#7a1a14">• 防火墙广泛 drop options 包</text>
+            <text x="230" y="416" text-anchor="middle" font-size="11" font-weight="700" fill="#7a1a14">→ 源路由扩展性 = 0</text>
+
+            <!-- IPv6 -->
+            <rect x="460" y="50" width="380" height="380" fill="url(#ipv6Grad)" stroke="#049FD9" stroke-width="2" rx="12"/>
+            <text x="650" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#005073">IPv6 · 头部哲学：固定头 + 链式扩展头</text>
+
+            <!-- 固定头 -->
+            <rect x="480" y="95" width="340" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="490" y="115" font-size="11" fill="#1A1A1A">Ver|TC|Flow Label</text>
+            <rect x="480" y="125" width="340" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="490" y="145" font-size="11" fill="#1A1A1A">Payload Len | Next Header | Hop Limit</text>
+            <rect x="480" y="155" width="340" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="490" y="175" font-size="11" fill="#1A1A1A">Source IPv6 (128 bit)</text>
+            <rect x="480" y="185" width="340" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="490" y="205" font-size="11" fill="#1A1A1A">Destination IPv6 (128 bit)</text>
+
+            <text x="650" y="232" text-anchor="middle" font-size="12" font-weight="700" fill="#005073">↓ Next Header 链式指针 ↓</text>
+
+            <!-- 扩展头 -->
+            <rect x="480" y="240" width="340" height="35" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="4"/>
+            <text x="650" y="262" text-anchor="middle" font-size="12" font-weight="700" fill="#3d7a1d">★ Routing Header Type 4 = SRH</text>
+
+            <rect x="480" y="280" width="160" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="560" y="300" text-anchor="middle" font-size="11" fill="#1A1A1A">Hop-by-Hop</text>
+
+            <rect x="660" y="280" width="160" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="740" y="300" text-anchor="middle" font-size="11" fill="#1A1A1A">Destination Opts</text>
+
+            <rect x="480" y="315" width="340" height="30" fill="white" stroke="#049FD9" rx="4"/>
+            <text x="650" y="335" text-anchor="middle" font-size="11" fill="#1A1A1A">Fragment / AH / ESP / ...</text>
+
+            <text x="650" y="370" text-anchor="middle" font-size="12" font-weight="600" fill="#005073">优势：</text>
+            <text x="650" y="388" text-anchor="middle" font-size="11" fill="#005073">• 固定头永远 40 字节 → 硬件流水线极简</text>
+            <text x="650" y="404" text-anchor="middle" font-size="11" fill="#005073">• 扩展头按需加挂，不影响基础转发</text>
+            <text x="650" y="420" text-anchor="middle" font-size="11" font-weight="700" fill="#005073">→ 源路由有了"合法宿主"</text>
+        </svg>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 为什么扩展头是革命性的</div>
+            <p style="margin-bottom: var(--space-4);">
+                IPv4 的 Options 是<strong>"内嵌的负担"</strong>——它强制每一台路由器在转发任何 IPv4 包时都要检查"我是不是有 Options"。
+                即使 99.99% 的包没有 Options，硬件的 IHL（IP Header Length）字段也必须被解析。这种"<strong>悲观假设</strong>"的代价是巨大的。
+            </p>
+            <p style="margin-bottom: 0;">
+                IPv6 的扩展头是<strong>"乐观分离"</strong>——主头永远 40 字节，硬件按固定偏移取字段；只有当 <code>Next Header</code> 字段指向扩展头时，
+                硬件才进入"深度处理"模式。这种设计让<strong>"绝大多数普通包跑得飞快，少数特殊包享受丰富功能"</strong>成为可能。
+                SRv6 正是优雅地利用了这一机制，把整条路径指令封装进 Routing Header Type 4。
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 集装箱 vs 散装货物</div>
+            <p style="margin-bottom: 0;">
+                IPv4 像是<strong>"散装货船"</strong>——每件货物形状各异，装卸时必须逐一称量。<br>
+                IPv6 像是<strong>"标准集装箱"</strong>——主体永远是 40 英尺标准箱（固定头），如果你需要冷藏、危险品、超长货等特殊需求，
+                就外挂一个"<strong>特种附加箱</strong>"（扩展头）。普通船只看主箱即可装卸（硬件快路径），特种箱由专门设备处理（SRv6 引擎），效率最大化。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 7 ============ -->
+        <h3 id="ch2-q2">§ 2.2 第七问：SRH 的每一个字段，到底在干什么？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #7</div>
+            <h4>"打开 RFC 8754，你能告诉我 SRH 里 Segments Left 和 Last Entry 的关系吗？为什么需要两个看似冗余的字段？"</h4>
+            <p>
+                这是一个绝佳的问题，能区分"读过文档"和"理解设计"的工程师。我们一起解剖。
+            </p>
+        </div>
+
+        <h4>§ 2.2.1 SRH 完整字段图（RFC 8754 精确定义）</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 880 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <defs>
+                <linearGradient id="srhHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#005073"/>
+                    <stop offset="100%" style="stop-color:#049FD9"/>
+                </linearGradient>
+            </defs>
+
+            <text x="440" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">SRH (Segment Routing Header) · RFC 8754 字段图</text>
+
+            <!-- bit ruler -->
+            <text x="60" y="60" font-size="11" fill="#58585B">bit:</text>
+            <line x1="80" y1="55" x2="820" y2="55" stroke="#9B9CA0" stroke-width="1"/>
+            <text x="80" y="70" font-size="10" fill="#58585B">0</text>
+            <text x="265" y="70" font-size="10" fill="#58585B">8</text>
+            <text x="450" y="70" font-size="10" fill="#58585B">16</text>
+            <text x="635" y="70" font-size="10" fill="#58585B">24</text>
+            <text x="810" y="70" font-size="10" fill="#58585B">31</text>
+
+            <!-- Row 1: Next Header | Hdr Ext Len | Routing Type | Segments Left -->
+            <rect x="80" y="80" width="185" height="50" fill="url(#srhHeader)" stroke="white" stroke-width="2"/>
+            <text x="172" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="white">Next Header</text>
+            <text x="172" y="121" text-anchor="middle" font-size="10" fill="white">8 bit · 后继协议</text>
+
+            <rect x="265" y="80" width="185" height="50" fill="url(#srhHeader)" stroke="white" stroke-width="2"/>
+            <text x="357" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="white">Hdr Ext Len</text>
+            <text x="357" y="121" text-anchor="middle" font-size="10" fill="white">8 bit · SRH 长度</text>
+
+            <rect x="450" y="80" width="185" height="50" fill="url(#srhHeader)" stroke="white" stroke-width="2"/>
+            <text x="542" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="white">Routing Type = 4</text>
+            <text x="542" y="121" text-anchor="middle" font-size="10" fill="white">8 bit · 固定 = 4 (SRH)</text>
+
+            <rect x="635" y="80" width="185" height="50" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="727" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="white">Segments Left</text>
+            <text x="727" y="121" text-anchor="middle" font-size="10" fill="white">8 bit · 剩余 SID 索引 ⭐</text>
+
+            <!-- Row 2: Last Entry | Flags | Tag -->
+            <rect x="80" y="135" width="185" height="50" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="172" y="160" text-anchor="middle" font-size="12" font-weight="700" fill="white">Last Entry</text>
+            <text x="172" y="176" text-anchor="middle" font-size="10" fill="white">8 bit · 末尾 SID 索引 ⭐</text>
+
+            <rect x="265" y="135" width="185" height="50" fill="url(#srhHeader)" stroke="white" stroke-width="2"/>
+            <text x="357" y="160" text-anchor="middle" font-size="12" font-weight="700" fill="white">Flags</text>
+            <text x="357" y="176" text-anchor="middle" font-size="10" fill="white">8 bit · 保留标志位</text>
+
+            <rect x="450" y="135" width="370" height="50" fill="url(#srhHeader)" stroke="white" stroke-width="2"/>
+            <text x="635" y="160" text-anchor="middle" font-size="12" font-weight="700" fill="white">Tag</text>
+            <text x="635" y="176" text-anchor="middle" font-size="10" fill="white">16 bit · 数据包分组标记</text>
+
+            <!-- SID Stack -->
+            <rect x="80" y="200" width="740" height="50" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="450" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="white">Segment List [0]  —  128 bit IPv6 SID</text>
+            <text x="450" y="241" text-anchor="middle" font-size="10" fill="white">这是路径中的 ★最后一站★（注意：栈底！）</text>
+
+            <rect x="80" y="255" width="740" height="50" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="450" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">Segment List [1]  —  128 bit IPv6 SID</text>
+
+            <rect x="80" y="310" width="740" height="50" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="450" y="335" text-anchor="middle" font-size="13" font-weight="700" fill="white">Segment List [2]  —  128 bit IPv6 SID</text>
+
+            <rect x="80" y="365" width="740" height="40" fill="#bbb" stroke="white" stroke-width="2"/>
+            <text x="450" y="389" text-anchor="middle" font-size="12" fill="white" font-style="italic">...  Segment List [n]  ...</text>
+
+            <rect x="80" y="410" width="740" height="50" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="450" y="435" text-anchor="middle" font-size="13" font-weight="700" fill="white">Segment List [Last Entry]  —  128 bit IPv6 SID</text>
+            <text x="450" y="451" text-anchor="middle" font-size="10" fill="white">这是路径中的 ★第一站★（栈顶！数据包出发就走它）</text>
+
+            <!-- Optional TLVs -->
+            <rect x="80" y="475" width="740" height="40" fill="#67B346" stroke="white" stroke-width="2" stroke-dasharray="5,3"/>
+            <text x="450" y="500" text-anchor="middle" font-size="12" font-weight="700" fill="white">Optional TLVs (HMAC, Padding, NSH, ...) · 可选</text>
+        </svg>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · Segments Left & Last Entry 的关系</div>
+            <p style="margin-bottom: var(--space-4);">
+                这两个字段的设计，是 SRv6 数据面最精妙的细节，也是最容易被误读的地方。它们的关系如下：
+            </p>
+            <ul>
+                <li><strong>Last Entry</strong>：固定值，永远指向 Segment List 数组的<strong>最大下标</strong>（数组长度 - 1）。它告诉硬件"这条路径总共有多少站"。</li>
+                <li><strong>Segments Left (SL)</strong>：动态值，初始等于 Last Entry，<strong>每经过一个段端点就减 1</strong>。它告诉硬件"还剩几站要走"。</li>
+                <li><strong>当前活跃 SID</strong> = <code>Segment List[SL]</code>，并且这个值同时被复制到 IPv6 主头的 Destination Address 字段。</li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                <strong>为什么要这样设计？</strong>
+                因为 IPv6 的全局路由查找永远是基于 Destination Address。SRv6 巧妙地把"<strong>当前应该去的下一个段端点</strong>"放到 DA 字段，
+                这样<strong>整个 IPv6 网络都不需要修改</strong>——普通路由器只看 DA 转发，根本不需要知道 SRH 的存在。
+                只有 DA 命中本地 SID 的"段端点路由器"，才会去解析 SRH，做 SL 减 1、更新 DA、然后继续转发。
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 接力赛跑</div>
+            <p style="margin-bottom: 0;">
+                想象一场<strong>接力赛</strong>：教练（源节点）在出发前给运动员（数据包）一份完整的"<strong>交接棒名单</strong>"（Segment List），名单从最后一棒往前写。<br>
+                <code>Last Entry</code> = 名单总人数 - 1 = "<strong>这场比赛总共要交几次棒</strong>"，是固定的；<br>
+                <code>Segments Left</code> = "<strong>还剩几次棒没交</strong>"，每完成一次交接就减 1；<br>
+                运动员手里的"<strong>下一棒选手胸牌</strong>"（IPv6 DA）= 名单中第 SL 项，每次交棒后更新。<br>
+                沿途的观众（普通路由器）只需要看胸牌指向哪——不需要懂整个名单。这就是 SRv6 优雅之处。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 8 ============ -->
+        <h3 id="ch2-q3">§ 2.3 第八问：一个 128 比特的 IPv6 地址，凭什么能装下"完整的指令"？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #8</div>
+            <h4>"如果 SID 只是个 IPv6 地址，那它和'目的地址'有什么本质区别？"</h4>
+            <p>
+                这是 SRv6 哲学层最关键的一跃——<strong>SID 不是地址，而是一条"机器指令"</strong>。
+                我们来看看一个 128 比特如何被切分成"指令操作码 + 操作数"。
+            </p>
+        </div>
+
+        <h4>§ 2.3.1 SID 的三段式结构：Locator : Function : Arguments</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="440" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">SRv6 SID · 128 bit 三段式语义结构</text>
+
+            <!-- Bit ruler -->
+            <text x="60" y="60" font-size="11" fill="#58585B">bit:</text>
+            <line x1="80" y1="55" x2="820" y2="55" stroke="#9B9CA0"/>
+            <text x="80" y="70" font-size="10" fill="#58585B">0</text>
+            <text x="385" y="70" font-size="10" fill="#58585B">48 (默认)</text>
+            <text x="595" y="70" font-size="10" fill="#58585B">80</text>
+            <text x="810" y="70" font-size="10" fill="#58585B">127</text>
+
+            <!-- Locator -->
+            <rect x="80" y="80" width="320" height="80" fill="#005073" stroke="white" stroke-width="2"/>
+            <text x="240" y="115" text-anchor="middle" font-size="16" font-weight="700" fill="white">Locator (定位段)</text>
+            <text x="240" y="135" text-anchor="middle" font-size="11" fill="white">通常 32~48 bit</text>
+            <text x="240" y="151" text-anchor="middle" font-size="11" fill="white">类似"邮政编码 + 街道地址"</text>
+
+            <!-- Function -->
+            <rect x="400" y="80" width="220" height="80" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="510" y="115" text-anchor="middle" font-size="16" font-weight="700" fill="white">Function (功能段)</text>
+            <text x="510" y="135" text-anchor="middle" font-size="11" fill="white">16~32 bit</text>
+            <text x="510" y="151" text-anchor="middle" font-size="11" fill="white">"操作指令"，如 End.DT4</text>
+
+            <!-- Arguments -->
+            <rect x="620" y="80" width="200" height="80" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="720" y="115" text-anchor="middle" font-size="16" font-weight="700" fill="white">Arguments (参数段)</text>
+            <text x="720" y="135" text-anchor="middle" font-size="11" fill="white">可选，剩余 bit</text>
+            <text x="720" y="151" text-anchor="middle" font-size="11" fill="white">"操作数"，如 Flow ID</text>
+
+            <!-- Example -->
+            <rect x="80" y="195" width="740" height="100" fill="#f5f7fa" stroke="#005073" stroke-width="2" stroke-dasharray="5,3" rx="6"/>
+            <text x="450" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">实例：fcbb:bb00:0001:e002::</text>
+            <text x="120" y="245" font-size="11" font-family="monospace" fill="#005073">Locator = fcbb:bb00:0001::/48</text>
+            <text x="120" y="262" font-size="11" font-family="monospace" fill="#9232AC">Function = e002 (= End.DT4 指令)</text>
+            <text x="120" y="279" font-size="11" font-family="monospace" fill="#FF9000">Arguments = 0000:0000:0000:0000 (本例无参数)</text>
+            <text x="450" y="245" font-size="11" fill="#0D274D">→ "去找节点 0001"</text>
+            <text x="450" y="262" font-size="11" fill="#0D274D">→ "执行 IPv4 VPN 解封装查表"</text>
+            <text x="450" y="279" font-size="11" fill="#0D274D">→ "无额外参数"</text>
+        </svg>
+        </div>
+
+        <div class="definition-box">
+            <div class="term">SID 三段式语义</div>
+            <ul style="margin-bottom: 0;">
+                <li><strong>Locator（定位段）</strong>：定义"<strong>这条指令在哪台路由器上执行</strong>"。它是可路由的 IPv6 前缀，通过 IGP（IS-IS）扩散到全网。本质上类似 MPLS 中的 Node SID。</li>
+                <li><strong>Function（功能段）</strong>：定义"<strong>这条指令做什么</strong>"。它是路由器本地分配的"操作码"，常见值如 End=0xe000、End.X=0xe001、End.DT4=0xe002。这就是 RFC 8986 定义的"网络指令集"。</li>
+                <li><strong>Arguments（参数段）</strong>：定义"<strong>这条指令的额外操作数</strong>"。比如 End.DT2M 多播 SID 的 Bridge-Domain 编号、Flow ID 等。</li>
+            </ul>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 汇编指令</div>
+            <p style="margin-bottom: 0;">
+                如果你写过汇编，一定见过这样的指令：<code>MOV [0x1000], EAX</code>。<br>
+                — <strong>0x1000（操作地址）</strong> = 类似 Locator——"对哪个内存位置操作"<br>
+                — <strong>MOV（操作码）</strong> = 类似 Function——"做什么操作"<br>
+                — <strong>EAX（操作数）</strong> = 类似 Arguments——"用什么数据"<br>
+                所以 SRv6 的 128 bit SID，本质是一条<strong>"分布式机器指令"</strong>。整个网络是 CPU，IPv6 地址就是机器码。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 9 ============ -->
+        <h3 id="ch2-q4">§ 2.4 第九问：报文经过每一跳时，到底发生了什么？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #9</div>
+            <h4>"现在请你用第一性原理推演：一个 SRv6 包从源 A 经过 4 跳到达目的 D，每一跳的 IPv6 头和 SRH 字段会发生什么变化？"</h4>
+            <p>
+                如果你能把这个过程逐字段地讲清楚，你就真正"看见"了 SRv6 数据面。
+            </p>
+        </div>
+
+        <h4>§ 2.4.1 报文逐跳演进（State-by-State Diagram）</h4>
+
+        <p>
+            假设拓扑：<strong>R1 (源) → R2 → R3 → R4 → R5 (目的)</strong>，源节点 R1 想强制路径走 R2、R3、R4 终结于 R5。
+            源节点构造的 SRH 路径列表（注意栈底→栈顶）：
+        </p>
+
+        <pre><code>Segment List[0] = R5::SID  ← 终点（栈底）
+Segment List[1] = R4::SID
+Segment List[2] = R3::SID
+Segment List[3] = R2::SID  ← 第一站（栈顶）
+Last Entry = 3
+Segments Left = 3 (初始)</code></pre>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 920 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="460" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">SRv6 报文逐跳演进 · DA 与 SL 的精确变化</text>
+
+            <!-- 节点 -->
+            <g>
+                <circle cx="80" cy="80" r="28" fill="#005073"/>
+                <text x="80" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="white">R1</text>
+
+                <circle cx="240" cy="80" r="28" fill="#049FD9"/>
+                <text x="240" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="white">R2</text>
+
+                <circle cx="400" cy="80" r="28" fill="#049FD9"/>
+                <text x="400" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="white">R3</text>
+
+                <circle cx="560" cy="80" r="28" fill="#049FD9"/>
+                <text x="560" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="white">R4</text>
+
+                <circle cx="720" cy="80" r="28" fill="#67B346"/>
+                <text x="720" y="86" text-anchor="middle" font-size="13" font-weight="700" fill="white">R5</text>
+
+                <!-- 连线 -->
+                <line x1="108" y1="80" x2="212" y2="80" stroke="#005073" stroke-width="2"/>
+                <line x1="268" y1="80" x2="372" y2="80" stroke="#005073" stroke-width="2"/>
+                <line x1="428" y1="80" x2="532" y2="80" stroke="#005073" stroke-width="2"/>
+                <line x1="588" y1="80" x2="692" y2="80" stroke="#005073" stroke-width="2"/>
+            </g>
+
+            <!-- Stage 1: R1 出包后 -->
+            <rect x="40" y="135" width="240" height="105" fill="#e8f4fd" stroke="#005073" stroke-width="1.5" rx="6"/>
+            <text x="160" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#005073">Stage 1 · R1 → R2</text>
+            <text x="50" y="175" font-size="10" font-family="monospace" fill="#1A1A1A">DA = R2::SID  ⭐</text>
+            <text x="50" y="190" font-size="10" font-family="monospace" fill="#1A1A1A">SL = 3</text>
+            <text x="50" y="205" font-size="10" font-family="monospace" fill="#1A1A1A">SegList[3] = R2::SID</text>
+            <text x="50" y="220" font-size="10" font-family="monospace" fill="#9B9CA0">SegList[2] = R3::SID</text>
+            <text x="50" y="234" font-size="10" font-family="monospace" fill="#9B9CA0">SegList[1] = R4::SID, [0]=R5</text>
+
+            <!-- Stage 2 -->
+            <rect x="290" y="135" width="240" height="105" fill="#e8f4fd" stroke="#005073" stroke-width="1.5" rx="6"/>
+            <text x="410" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#005073">Stage 2 · R2 → R3</text>
+            <text x="300" y="175" font-size="10" font-family="monospace" fill="#1A1A1A">DA = R3::SID  ⭐</text>
+            <text x="300" y="190" font-size="10" font-family="monospace" fill="#1A1A1A">SL = 2  (减 1)</text>
+            <text x="300" y="205" font-size="10" font-family="monospace" fill="#9B9CA0">SegList[3] = R2::SID</text>
+            <text x="300" y="220" font-size="10" font-family="monospace" fill="#1A1A1A">SegList[2] = R3::SID</text>
+            <text x="300" y="234" font-size="10" font-family="monospace" fill="#9B9CA0">SegList[1] = R4::SID, [0]=R5</text>
+
+            <!-- Stage 3 -->
+            <rect x="540" y="135" width="240" height="105" fill="#e8f4fd" stroke="#005073" stroke-width="1.5" rx="6"/>
+            <text x="660" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#005073">Stage 3 · R3 → R4</text>
+            <text x="550" y="175" font-size="10" font-family="monospace" fill="#1A1A1A">DA = R4::SID  ⭐</text>
+            <text x="550" y="190" font-size="10" font-family="monospace" fill="#1A1A1A">SL = 1</text>
+            <text x="550" y="205" font-size="10" font-family="monospace" fill="#9B9CA0">SegList[3] = R2::SID</text>
+            <text x="550" y="220" font-size="10" font-family="monospace" fill="#9B9CA0">SegList[2] = R3::SID</text>
+            <text x="550" y="234" font-size="10" font-family="monospace" fill="#1A1A1A">SegList[1] = R4::SID</text>
+
+            <!-- Stage 4 -->
+            <rect x="160" y="265" width="240" height="105" fill="#e8f4fd" stroke="#005073" stroke-width="1.5" rx="6"/>
+            <text x="280" y="285" text-anchor="middle" font-size="12" font-weight="700" fill="#005073">Stage 4 · R4 → R5</text>
+            <text x="170" y="305" font-size="10" font-family="monospace" fill="#1A1A1A">DA = R5::SID  ⭐</text>
+            <text x="170" y="320" font-size="10" font-family="monospace" fill="#1A1A1A">SL = 0  (最后一站)</text>
+            <text x="170" y="335" font-size="10" font-family="monospace" fill="#9B9CA0">...</text>
+            <text x="170" y="350" font-size="10" font-family="monospace" fill="#1A1A1A">SegList[0] = R5::SID</text>
+            <text x="170" y="364" font-size="10" font-family="monospace" fill="#67B346">PSP: 弹出 SRH! ✓</text>
+
+            <!-- Stage 5 -->
+            <rect x="420" y="265" width="240" height="105" fill="#f0f9eb" stroke="#67B346" stroke-width="1.5" rx="6"/>
+            <text x="540" y="285" text-anchor="middle" font-size="12" font-weight="700" fill="#3d7a1d">Stage 5 · R5 终结处理</text>
+            <text x="430" y="305" font-size="10" font-family="monospace" fill="#1A1A1A">命中本地 SID = R5::SID</text>
+            <text x="430" y="320" font-size="10" font-family="monospace" fill="#1A1A1A">执行 Function (如 End.DT4)</text>
+            <text x="430" y="335" font-size="10" font-family="monospace" fill="#1A1A1A">查 VRF 表，解封装</text>
+            <text x="430" y="350" font-size="10" font-family="monospace" fill="#1A1A1A">原始 IPv4/IPv6 包送出</text>
+            <text x="430" y="364" font-size="10" font-family="monospace" fill="#67B346">→ 路径完成! ✓</text>
+
+            <!-- 关键洞察 -->
+            <rect x="40" y="395" width="840" height="125" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="8"/>
+            <text x="60" y="418" font-size="13" font-weight="700" fill="#92740a">⚡ 关键洞察 · 路径状态在哪里？</text>
+            <text x="60" y="440" font-size="11" fill="#4a3a04">• <tspan font-weight="700">中间路由器 R3</tspan> 完全不需要"记住"这条路径——它只看到 DA = 自己的 SID，做完操作把 DA 改成下一站，丢出去就完事</text>
+            <text x="60" y="458" font-size="11" fill="#4a3a04">• <tspan font-weight="700">所有路径状态</tspan> 都在数据包的 SRH 里，路由器是"无状态执行单元"</text>
+            <text x="60" y="476" font-size="11" fill="#4a3a04">• 即使百万条隧道穿过 R3，<tspan font-weight="700">R3 的内存占用</tspan> 不会因此增加 1 比特</text>
+            <text x="60" y="494" font-size="11" font-weight="700" fill="#7a1a14">→ 这就是模块 1 说的"状态守恒定律"在数据面的精确实现 ✦</text>
+        </svg>
+        </div>
+
+        <!-- ============ 苏格拉底问题 10 ============ -->
+        <h3 id="ch2-q5">§ 2.5 第十问：ASIC 芯片到底是怎么"读懂"SRH 的？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #10 · 直达硬件层</div>
+            <h4>"你能告诉我，一颗 NPU（网络处理器）芯片在 100 纳秒内，是如何把 SRH 解析、查 SID 表、改 DA、转发的吗？"</h4>
+            <p>
+                这是大多数工程师从未深入的领域，但对于真正掌握 SRv6 至关重要——
+                因为 SRH 的<strong>处理深度</strong>直接决定了 SRv6 的工程可行性。
+            </p>
+        </div>
+
+        <h4>§ 2.5.1 NPU 处理 SRH 的微观流水线</h4>
+
+        <p>
+            现代高性能路由器（如 Cisco Silicon One、ASR 9000 系列的 NPU）使用<strong>流水线式包处理</strong>。
+            一个 SRv6 报文进入芯片后，会经历以下精密阶段：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 920 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="460" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">NPU 处理 SRv6 包的流水线（Pipeline）</text>
+
+            <!-- Pipeline stages -->
+            <g>
+                <rect x="40" y="60" width="160" height="80" fill="#005073" rx="8"/>
+                <text x="120" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="white">① Parser</text>
+                <text x="120" y="106" text-anchor="middle" font-size="10" fill="white">解析 IPv6 主头</text>
+                <text x="120" y="120" text-anchor="middle" font-size="10" fill="white">识别 NextHdr=43</text>
+                <text x="120" y="134" text-anchor="middle" font-size="10" fill="white">读 SRH 字段</text>
+
+                <polygon points="200,100 220,90 220,110" fill="#005073"/>
+
+                <rect x="225" y="60" width="160" height="80" fill="#049FD9" rx="8"/>
+                <text x="305" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="white">② DA Lookup</text>
+                <text x="305" y="106" text-anchor="middle" font-size="10" fill="white">查 IPv6 FIB（LPM）</text>
+                <text x="305" y="120" text-anchor="middle" font-size="10" fill="white">命中本地 SID?</text>
+                <text x="305" y="134" text-anchor="middle" font-size="10" fill="white">→ 进入 SID 表</text>
+
+                <polygon points="385,100 405,90 405,110" fill="#049FD9"/>
+
+                <rect x="410" y="60" width="160" height="80" fill="#9232AC" rx="8"/>
+                <text x="490" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="white">③ SID Decode</text>
+                <text x="490" y="106" text-anchor="middle" font-size="10" fill="white">提取 Function</text>
+                <text x="490" y="120" text-anchor="middle" font-size="10" fill="white">查指令表</text>
+                <text x="490" y="134" text-anchor="middle" font-size="10" fill="white">→ 执行 End/End.X..</text>
+
+                <polygon points="570,100 590,90 590,110" fill="#9232AC"/>
+
+                <rect x="595" y="60" width="160" height="80" fill="#FF9000" rx="8"/>
+                <text x="675" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="white">④ SRH Update</text>
+                <text x="675" y="106" text-anchor="middle" font-size="10" fill="white">SL = SL - 1</text>
+                <text x="675" y="120" text-anchor="middle" font-size="10" fill="white">DA = SegList[SL]</text>
+                <text x="675" y="134" text-anchor="middle" font-size="10" fill="white">PSP/USD 处理</text>
+
+                <polygon points="755,100 775,90 775,110" fill="#FF9000"/>
+
+                <rect x="780" y="60" width="120" height="80" fill="#67B346" rx="8"/>
+                <text x="840" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="white">⑤ Forward</text>
+                <text x="840" y="106" text-anchor="middle" font-size="10" fill="white">查新 DA 的</text>
+                <text x="840" y="120" text-anchor="middle" font-size="10" fill="white">FIB 出接口</text>
+                <text x="840" y="134" text-anchor="middle" font-size="10" fill="white">送 Egress</text>
+            </g>
+
+            <!-- 关键限制：解析深度 -->
+            <rect x="40" y="170" width="860" height="180" fill="#fef0f0" stroke="#E2231A" stroke-width="2" rx="8"/>
+            <text x="60" y="195" font-size="14" font-weight="700" fill="#7a1a14">⚠️ ASIC 的"解析深度墙"（Parser Depth Wall）—— SRv6 落地的硬件天花板</text>
+            <text x="60" y="220" font-size="11" fill="#4a3a04">网络芯片的 Parser 单元是固定流水线，<tspan font-weight="700">每个 cycle 只能解析有限的 byte</tspan>。常见的硬件限制：</text>
+            <text x="60" y="245" font-size="11" font-family="monospace" fill="#7a1a14">• Cisco Silicon One Q200    : 可解析至包头 ~256 bytes（约 12-14 个 SID）</text>
+            <text x="60" y="262" font-size="11" font-family="monospace" fill="#7a1a14">• Broadcom Jericho 2          : 可解析至 ~192 bytes</text>
+            <text x="60" y="279" font-size="11" font-family="monospace" fill="#7a1a14">• 老旧芯片                  : 仅 ~80-128 bytes（甚至无法处理 4 个以上 SID）</text>
+            <text x="60" y="306" font-size="11" fill="#4a3a04">如果 SRH 太长（比如 10 个 SID = 160 bytes），芯片会 <tspan font-weight="700" fill="#7a1a14">触发 "Recirculation"</tspan> ——把包丢回 Parser 再来一次。</text>
+            <text x="60" y="324" font-size="11" font-weight="700" fill="#7a1a14">→ 性能可能腰斩 50%！这是 SRv6 早期落地的最大痛点，也是 uSID 必须诞生的根本原因（模块 5 详讲）。</text>
+
+            <!-- 时延 -->
+            <rect x="40" y="370" width="860" height="100" fill="#e8f4fd" stroke="#005073" stroke-width="1.5" rx="8"/>
+            <text x="60" y="395" font-size="13" font-weight="700" fill="#005073">⏱️ 实测处理时延（参考 Cisco ASR 9000）</text>
+            <text x="60" y="418" font-size="11" font-family="monospace" fill="#1A1A1A">普通 IPv6 转发           : ~80 ns/pkt （流水线满速）</text>
+            <text x="60" y="435" font-size="11" font-family="monospace" fill="#1A1A1A">SRv6 转发（≤ 6 SID）     : ~100-120 ns/pkt （+ 25% 开销）</text>
+            <text x="60" y="452" font-size="11" font-family="monospace" fill="#1A1A1A">SRv6 + Recirculation     : ~200+ ns/pkt （性能减半）⚠️</text>
+        </svg>
+        </div>
+
+        <div class="warning-box">
+            <p style="margin-bottom: var(--space-2);"><strong>这就是为什么 SRv6 早期被很多人质疑"性能不行"——他们用的是不带专用 SRv6 引擎的老芯片。</strong></p>
+            <p style="margin-bottom: 0;">现代 NPU（如 Cisco Silicon One、Broadcom Jericho 2C+、Marvell Teralynx 等）已经在硬件层<strong>专门设计了 SRv6 加速单元</strong>——SRH 解析、SL 减一、DA 替换全部在<strong>单 cycle 完成</strong>，性能与原生 IPv6 几乎无差异。但对于运营商存量设备而言，<strong>SRH 长度仍然是落地的核心约束</strong>，这直接催生了 uSID 微指令架构。</p>
+        </div>
+
+        <!-- ============ 抓包实战 ============ -->
+        <h3 id="ch2-pcap">§ 2.6 抓包实战：用 Wireshark 看一个真实的 SRv6 报文</h3>
+
+        <p>
+            理论说了再多，不如看一眼真实抓包。下面是一段在 Cisco IOS-XR 设备上抓到的 SRv6 报文 hex dump，逐字段拆解：
+        </p>
+
+        <pre><code>0000  60 00 00 00 00 5c <strong>2b</strong> 40    fc bb bb 00 00 01 00 00      ← IPv6 主头：NextHdr = 0x2b (43 = Routing)
+0010  00 00 00 00 00 00 00 01    <strong>fc bb bb 00 00 02 e0 00</strong>     ← Source / Destination = R2 的 SID
+0020  00 00 00 00 00 00 00 00    <strong>2b 06 04 02</strong> 00 00 00 00     ← SRH 起点：NH=43, HdrExtLen=6, RT=4, SL=2
+                                                                              ← (Last Entry 隐含在 HdrExtLen 中)
+0030  fc bb bb 00 00 04 e0 00    00 00 00 00 00 00 00 00         ← SegList[0] = R4::SID (终点)
+0040  fc bb bb 00 00 03 e0 00    00 00 00 00 00 00 00 00         ← SegList[1] = R3::SID
+0050  fc bb bb 00 00 02 e0 00    00 00 00 00 00 00 00 00         ← SegList[2] = R2::SID (当前活跃)
+0060  04 00 00 00 ...                                            ← 内层 IPv4 payload</code></pre>
+
+        <div class="first-principle-box">
+            <div class="label">字段精确对照</div>
+            <ul style="margin-bottom: 0;">
+                <li><strong>0x2b = 43</strong>：IPv6 NextHeader 字段，43 表示后面是 Routing Header</li>
+                <li><strong>HdrExtLen = 6</strong>：SRH 长度 = (6 + 1) × 8 = 56 字节（不算前 8 字节）</li>
+                <li><strong>RT = 4</strong>：Routing Type = 4，明确这是 SRH（不是其它路由头）</li>
+                <li><strong>SL = 2</strong>：还剩 2 个 SID 没消费（当前在第 2 跳）</li>
+                <li><strong>DA = R2::SID</strong>：刚好等于 SegList[2]，符合规范</li>
+            </ul>
+        </div>
+
+        <!-- ============ TLV 与扩展性 ============ -->
+        <h3 id="ch2-tlv">§ 2.7 SRH 的 TLV 扩展：HMAC、Padding 与未来</h3>
+
+        <p>
+            SRH 末尾的 Optional TLV（Type-Length-Value）字段为 SRv6 提供了<strong>极强的可扩展性</strong>。当前 RFC 8754 定义了三类常见 TLV：
+        </p>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:18%;">TLV 类型</th>
+                    <th style="width:14%;">Type 值</th>
+                    <th>用途与本质</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Padding TLV</strong></td>
+                    <td><code>0x04</code></td>
+                    <td>对齐到 8 字节边界，硬件解析效率优化。无功能含义。</td>
+                </tr>
+                <tr>
+                    <td><strong>HMAC TLV</strong></td>
+                    <td><code>0x05</code></td>
+                    <td>基于密钥的消息认证码，<strong>防止 SRH 被中间节点伪造或篡改</strong>。这是 SRv6 安全模型的基石。</td>
+                </tr>
+                <tr>
+                    <td><strong>NSH TLV</strong></td>
+                    <td>Draft</td>
+                    <td>承载 SFC（Service Function Chain）元数据，用于服务链编排。</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <div class="callout">
+            <strong>重要的设计哲学</strong>：SRH 的 TLV 机制确保了协议的<strong>前向兼容</strong>——未来如果我们要加新功能（比如 In-Situ OAM、Path Tracing），不需要修改 SRH 主体结构，只需要新增一种 TLV Type。这就是 IPv6 设计的远见。
+        </div>
+
+        <!-- ============ 模块 2 小结 ============ -->
+        <h3 id="ch2-summary">§ 2.8 模块 2 小结：你已经看清了"机器码"</h3>
+
+        <div class="tip-bar">
+            <div class="tip-bar-icon">🔬</div>
+            <p>
+                如果你能用自己的话回答以下问题，你就真正掌握了 SRv6 数据面的<strong>每一个比特</strong>。
+            </p>
+        </div>
+
+        <ol style="font-size: 1.05rem; line-height: 2;">
+            <li>为什么 IPv6 的扩展头机制比 IPv4 的 Options 更适合承载源路由？两者的"乐观/悲观假设"区别在哪？</li>
+            <li>SRH 中 Segments Left 和 Last Entry 为什么要分两个字段？如果只用一个会出什么问题？</li>
+            <li>SID 的三段式结构（Locator : Function : Arguments）如何映射到"汇编指令"的概念？</li>
+            <li>当一个 SRv6 包从 R1 经过 R2 到 R3，IPv6 主头的 DA 字段如何变化？为什么这个设计让普通路由器"无感"？</li>
+            <li>什么是 ASIC 的"解析深度墙"？为什么 SRH 太长会触发 Recirculation？这与第 5 模块的 uSID 有什么关系？</li>
+        </ol>
+
+        <!-- ============ 章节金句 ============ -->
+        <div class="chapter-quote">
+            <p>
+                SRv6 的优雅，在于它从不强迫世界改变——<br>
+                它让<strong>普通 IPv6 路由器只需要看 DA 转发</strong>，让<strong>段端点路由器才执行指令</strong>。<br>
+                这就是分层抽象的极致艺术：每一层只看自己该看的事。
+            </p>
+            <div class="author">—— SRv6 数据面美学</div>
+        </div>
+
+        <!-- ============ 苏格拉底追问预告 ============ -->
+        <div class="socratic-box" style="margin-top: var(--space-12);">
+            <div class="label">下一模块预告 · MODULE 3 · CONTROL PLANE</div>
+            <h4>"现在你知道了'数据包长什么样'。但下一个问题是：源节点凭什么知道该写哪些 SID？"</h4>
+            <p style="margin-bottom: var(--space-4);">
+                数据面再优雅，也需要控制面的"<strong>大脑</strong>"。模块 3 我们将深入：
+            </p>
+            <ul>
+                <li><strong>IGP 扩展（IS-IS / OSPFv3）</strong>：Locator、Function 是怎么扩散到全网的？</li>
+                <li><strong>BGP-LS</strong>：拓扑信息如何上报给 SDN 控制器？</li>
+                <li><strong>BGP SRv6 Service SID</strong>：VPN 服务怎么把 SID 通告给对端 PE？</li>
+                <li><strong>PCEP 与控制器算路</strong>：跨域 TE 的算法实现细节</li>
+                <li><strong>分布式 vs 集中式</strong>：SR-PCE 的真实角色</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+<!-- ===================== 模块 3 · 控制平面魔法 ===================== -->
+<section class="chapter" id="ch3">
+    <div class="container">
+
+        <span class="module-tag">MODULE 3 · CONTROL PLANE</span>
+        <h2>控制平面魔法：从 IGP 扩散到 SDN 算路的全链路</h2>
+
+        <div class="progress-pills">
+            <span class="progress-pill done">①·起源 ✓</span>
+            <span class="progress-pill done">②·数据面 ✓</span>
+            <span class="progress-pill active">③·控制面 (当前)</span>
+            <span class="progress-pill">④·指令集</span>
+            <span class="progress-pill">⑤·进化</span>
+            <span class="progress-pill">⑥·应用</span>
+        </div>
+
+        <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 800px;">
+            数据平面是<strong>"被动的执行单元"</strong>，控制平面是<strong>"主动的决策大脑"</strong>。
+            如果说 SRH 是机器码，那么控制面就是<strong>编译器 + 链接器 + 操作系统</strong>。
+            一个 SRv6 网络的真正威力，不在于一个孤立的 SRH 包能跑多快，
+            而在于<strong>整个网络的拓扑、SID、策略、约束</strong>能否被快速、准确、自动地分发到每一个角落。
+        </p>
+
+        <!-- ============ 苏格拉底问题 11 ============ -->
+        <h3 id="ch3-q1">§ 3.1 第十一问：为什么不能用 BGP 来分发 SID？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #11</div>
+            <h4>"BGP 是 Internet 上分发路由信息的事实标准，为什么 SRv6 用 IS-IS / OSPFv3 来分发 Locator？"</h4>
+            <p>
+                这个问题看起来简单，但答案揭示了 IGP 与 EGP 在<strong>设计哲学层面</strong>的根本差异——
+                它直接决定了 SRv6 控制面为什么必须是"<strong>IGP 主导 + BGP 辅助</strong>"的双层架构。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · IGP vs BGP 的本质差异</div>
+            <p style="margin-bottom: var(--space-4);">
+                让我们抛开协议细节，回到最朴素的问题：<strong>"什么场景适合什么协议？"</strong>
+            </p>
+            <div class="table-scroll-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th style="width:20%;">维度</th>
+                            <th class="col-good" style="width:40%;">IGP（IS-IS / OSPFv3）</th>
+                            <th class="col-bad" style="width:40%;">BGP（边界网关协议）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>设计初衷</strong></td>
+                            <td class="col-good">同一管理域内的<strong>拓扑同步</strong>。所有节点必须看到一致的网络全貌。</td>
+                            <td class="col-bad">不同管理域之间的<strong>策略交换</strong>。每个 AS 只暴露自己愿意暴露的部分。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>收敛速度</strong></td>
+                            <td class="col-good">毫秒级（基于 LSP/LSA 洪泛 + Dijkstra）</td>
+                            <td class="col-bad">秒级（基于 Best Path 选举 + 增量更新）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>状态模型</strong></td>
+                            <td class="col-good"><strong>Link-State</strong>：每个节点知道全网的链路图（LSDB）</td>
+                            <td class="col-bad"><strong>Path-Vector</strong>：节点只知道"经过哪些 AS 可达某前缀"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>适合分发什么</strong></td>
+                            <td class="col-good">拓扑、链路属性、Locator 前缀、SR 算法、邻接 SID</td>
+                            <td class="col-bad">服务前缀（VPN 路由）、跨域可达性、策略</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-bottom: 0;">
+                所以 SRv6 的设计选择是<strong>必然的</strong>：
+                <strong>底层 Locator/拓扑由 IGP 分发（域内同步）</strong>，
+                <strong>顶层 Service SID 由 BGP 分发（跨域可达）</strong>。
+                这是"用对工具做对的事"的典范。
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 公司组织架构</div>
+            <p style="margin-bottom: 0;">
+                IGP 像是<strong>公司内部的钉钉/企微</strong>——所有员工都要看到完整的部门架构、座位地图、办公电话。信息<strong>必须同步、必须一致</strong>。<br>
+                BGP 像是<strong>公司之间的商务对接邮件</strong>——你只把"<strong>对方需要知道的</strong>"信息发出去，绝不暴露内部细节。
+                两者绝不能混用——你不会把公司架构图群发给所有合作伙伴，也不会让员工通过"商务邮件"才能看到自己的座位号。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 12 ============ -->
+        <h3 id="ch3-q2">§ 3.2 第十二问：IS-IS 凭什么扛起 SRv6 的大旗？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #12</div>
+            <h4>"OSPFv3 也支持 IPv6，为什么运营商和大型数据中心几乎一边倒地选择 IS-IS 作为 SRv6 的载体？"</h4>
+            <p>
+                这是个有意思的"<strong>历史选择题</strong>"。如果你只看协议规范，OSPFv3 完全可以承载 SRv6。但实际世界中——尤其是 Tier-1 运营商和超大规模数据中心——<strong>几乎全部押注 IS-IS</strong>。为什么？
+            </p>
+        </div>
+
+        <h4>§ 3.2.1 IS-IS 的"基因优势"</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 协议扩展性</div>
+            <p style="margin-bottom: var(--space-4);">
+                IS-IS 在三个维度上"<strong>天生"</strong>就比 OSPF 更适合 SRv6：
+            </p>
+            <ol>
+                <li>
+                    <strong>不依赖 IP 寻址</strong>：IS-IS 跑在<strong>数据链路层（OSI Layer 2）</strong>之上，使用 NSAP 地址，
+                    完全独立于 IPv4/IPv6。这意味着——它可以在 IPv6 网络起来<strong>之前</strong>就建立邻接、传递拓扑。
+                    这对运营商"<strong>边迁移边运行</strong>"的现实诉求至关重要。
+                </li>
+                <li>
+                    <strong>TLV 机制极致灵活</strong>：IS-IS 协议天生用 TLV 编码所有信息，新增任何属性只需要定义新的 TLV Type 即可，
+                    <strong>不需要修改报文主体结构</strong>。SRv6 的所有扩展（Locator TLV、SID TLV、Algo TLV）都是这样无缝加进去的。
+                </li>
+                <li>
+                    <strong>大规模性能优秀</strong>：IS-IS 的 LSP（Link State PDU）<strong>不分片</strong>，
+                    可以承载数十 KB 的拓扑信息，特别适合超大规模网络。OSPF 的 LSA 受 IPv6 MTU 限制，扩展性较差。
+                </li>
+            </ol>
+            <p style="margin-bottom: 0;">
+                简而言之：<strong>IS-IS 是"可扩展协议工程"的胜利</strong>。它不是因为"先到"，而是因为"基因更好"。
+            </p>
+        </div>
+
+        <h4>§ 3.2.2 IS-IS 的 SRv6 关键 TLV 详解</h4>
+
+        <p>
+            当一台路由器配置了 SRv6 Locator 后，IS-IS 会通过以下 TLV 把"<strong>我有哪些 SID、能力如何</strong>"通告给全网：
+        </p>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:20%;">TLV 名称</th>
+                    <th style="width:14%;">Type</th>
+                    <th>含义与作用</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Router Capability TLV</strong></td>
+                    <td><code>242</code></td>
+                    <td>通告本节点的<strong>SRv6 能力</strong>：是否支持 SRv6、最大 SRH 长度（MSD）、支持的 Function 类型。下游节点据此判断"能不能给它推 SID 列表"。</td>
+                </tr>
+                <tr>
+                    <td><strong>SRv6 Locator TLV</strong></td>
+                    <td><code>27</code></td>
+                    <td>通告本节点的 <strong>Locator 前缀</strong>（如 <code>fcbb:bb00:0001::/48</code>）。其他节点据此可以"路由到这个 Locator"——这是 SRv6 数据面的根基。</td>
+                </tr>
+                <tr>
+                    <td><strong>SRv6 End SID Sub-TLV</strong></td>
+                    <td>Sub-TLV</td>
+                    <td>挂在 Locator TLV 下，通告具体的 <strong>End SID（即 Function 段）</strong>，包括 PSP/USP/USD Flavor。</td>
+                </tr>
+                <tr>
+                    <td><strong>SRv6 End.X SID Sub-TLV</strong></td>
+                    <td>Sub-TLV</td>
+                    <td>挂在 Extended IS Reachability TLV (#22) 下，通告<strong>邻接 SID</strong>。这是 TE 的关键——可以指定"必须走某条具体的物理链路"。</td>
+                </tr>
+                <tr>
+                    <td><strong>SR Algorithm TLV</strong></td>
+                    <td>Sub-TLV</td>
+                    <td>通告本节点支持的<strong>路径计算算法</strong>。0 = 默认 SPF；128~255 = Flex-Algo（用户自定义算法，如低时延 SPF、避开特定区域等）。</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <div class="callout">
+            <strong>Cisco IOS-XR 配置实例</strong>：在思科设备上启用 SRv6 + IS-IS 通告 Locator，配置极其简洁：
+            <pre style="margin-top: var(--space-4); margin-bottom: 0;"><code>segment-routing srv6
+ locators
+  locator MAIN
+   prefix fcbb:bb00:0001::/48
+  !
+ !
+!
+router isis CORE
+ address-family ipv6 unicast
+  segment-routing srv6
+   locator MAIN</code></pre>
+        </div>
+
+        <h4>§ 3.2.3 拓扑扩散的全过程图解</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 920 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="460" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">IS-IS 扩散 SRv6 Locator 与 SID 的全过程</text>
+
+            <!-- Topology -->
+            <g>
+                <circle cx="150" cy="120" r="32" fill="#005073"/>
+                <text x="150" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="white">R1</text>
+                <text x="150" y="170" text-anchor="middle" font-size="10" fill="#005073" font-family="monospace">fcbb:bb00:0001::/48</text>
+
+                <circle cx="380" cy="80" r="32" fill="#049FD9"/>
+                <text x="380" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="white">R2</text>
+                <text x="380" y="55" text-anchor="middle" font-size="10" fill="#005073" font-family="monospace">fcbb:bb00:0002::/48</text>
+
+                <circle cx="380" cy="220" r="32" fill="#049FD9"/>
+                <text x="380" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="white">R3</text>
+                <text x="380" y="265" text-anchor="middle" font-size="10" fill="#005073" font-family="monospace">fcbb:bb00:0003::/48</text>
+
+                <circle cx="610" cy="120" r="32" fill="#005073"/>
+                <text x="610" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="white">R4</text>
+                <text x="610" y="170" text-anchor="middle" font-size="10" fill="#005073" font-family="monospace">fcbb:bb00:0004::/48</text>
+
+                <line x1="182" y1="120" x2="348" y2="80" stroke="#005073" stroke-width="2"/>
+                <line x1="182" y1="120" x2="348" y2="220" stroke="#005073" stroke-width="2"/>
+                <line x1="412" y1="80" x2="578" y2="120" stroke="#005073" stroke-width="2"/>
+                <line x1="412" y1="220" x2="578" y2="120" stroke="#005073" stroke-width="2"/>
+            </g>
+
+            <!-- LSP flooding indicator -->
+            <text x="460" y="305" text-anchor="middle" font-size="13" font-weight="700" fill="#005073">↓ 每个节点构造自己的 LSP 并洪泛 ↓</text>
+
+            <!-- LSP example -->
+            <rect x="60" y="320" width="800" height="140" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="8"/>
+            <text x="80" y="345" font-size="13" font-weight="700" fill="#92740a">📬 R2 构造的 LSP (Link State PDU) 关键内容</text>
+            <text x="80" y="370" font-size="11" font-family="monospace" fill="#1A1A1A">┌─ Router-ID: R2.00.00</text>
+            <text x="80" y="386" font-size="11" font-family="monospace" fill="#1A1A1A">├─ <tspan fill="#9232AC" font-weight="700">Router Cap TLV (#242)</tspan>: SRv6-capable, MSD=10, Algo=[0,128]</text>
+            <text x="80" y="402" font-size="11" font-family="monospace" fill="#1A1A1A">├─ <tspan fill="#9232AC" font-weight="700">SRv6 Locator TLV (#27)</tspan>: fcbb:bb00:0002::/48, metric=10</text>
+            <text x="80" y="418" font-size="11" font-family="monospace" fill="#1A1A1A">│  └─ <tspan fill="#FF9000">End SID Sub-TLV</tspan>: fcbb:bb00:0002:e000:: (PSP+USD)</text>
+            <text x="80" y="434" font-size="11" font-family="monospace" fill="#1A1A1A">├─ <tspan fill="#9232AC" font-weight="700">Extended IS Reach (#22)</tspan>: R1, metric=10, link-id=12</text>
+            <text x="80" y="450" font-size="11" font-family="monospace" fill="#1A1A1A">│  └─ <tspan fill="#FF9000">End.X SID Sub-TLV</tspan>: fcbb:bb00:0002:e001:: (邻接 R1)</text>
+        </svg>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">关键认知</div>
+            <p style="margin-bottom: 0;">
+                收敛后，<strong>R1 的 LSDB 中</strong> 会同时拥有：
+                ① 全网拓扑图（Dijkstra 算最短路）；
+                ② 全网每台路由器的 Locator 前缀；
+                ③ 每条链路的 End.X SID。
+                这就是为什么 R1 可以"<strong>独立、本地、无须询问任何人</strong>"地构造出一条 SRH——所有的"原料"都已经通过 IGP 同步到了它的本地数据库。
+                这也是为什么 SR-MPLS 能淘汰 LDP——<strong>IGP 已经做了 LDP 的活</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 13 ============ -->
+        <h3 id="ch3-q3">§ 3.3 第十三问：服务怎么"用"上 SID？BGP 又是怎么参与的？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #13</div>
+            <h4>"IGP 把 Locator 散布到全网了。但 R1 凭什么知道：'去访问 VPN-A 的客户网段，应该用 R4 的哪个 SID'？"</h4>
+            <p>
+                这是底层"<strong>地图</strong>"和上层"<strong>服务</strong>"之间的关键桥梁。答案是：<strong>BGP SRv6 Service SID</strong>。
+            </p>
+        </div>
+
+        <h4>§ 3.3.1 BGP 在 SRv6 中的"双重身份"</h4>
+
+        <p>
+            BGP 在 SRv6 网络中扮演两个完全不同的角色，理解这一点至关重要：
+        </p>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <h4 style="color: var(--cisco-blue); border:none; padding:0;">① 服务路由分发</h4>
+                <p><strong>本质</strong>：传统 BGP 的 EVPN/VPNv4/VPNv6/L3VPN 等 Address-Family，
+                现在在 NLRI 或 Attribute 中携带<strong>SRv6 Service SID</strong>。</p>
+                <p><strong>典型用法</strong>：PE2 通告"VPN-A 的 192.168.1.0/24"路由时，附带"<strong>用我的 End.DT4 SID = fcbb:bb00:0002:e002::</strong>"。
+                PE1 收到后，就知道"<strong>给 192.168.1.0/24 的包要封装 SRH，外层 DA = 这个 SID</strong>"。</p>
+                <p style="margin-bottom:0;"><strong>RFC 9252</strong>：BGP Services over SRv6 Core，定义了 Service SID 的 BGP 传输机制。</p>
+            </div>
+            <div class="card">
+                <h4 style="color: var(--cisco-blue); border:none; padding:0;">② 拓扑信息上报（BGP-LS）</h4>
+                <p><strong>本质</strong>：BGP-LS 是<strong>"反向"</strong>用法——把 IGP 的 Link State Database <strong>导出</strong>到外部控制器（如 SDN PCE）。</p>
+                <p><strong>典型用法</strong>：每台 ABR 路由器把本域的 IGP 拓扑（节点、链路、Locator、SID、TE 属性）通过 BGP-LS 推送给 Cisco Crosswork / SR-PCE。
+                控制器据此构建<strong>跨域全网拓扑数据库</strong>，进行算路。</p>
+                <p style="margin-bottom:0;"><strong>RFC 7752 + 9552</strong>：BGP-LS 与 SRv6 扩展。</p>
+            </div>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 房地产中介市场</div>
+            <p style="margin-bottom: 0;">
+                想象一个城市的房产生态：<br>
+                — <strong>IGP</strong> = 城市政府的"<strong>街道地图与门牌号系统</strong>"，所有人都看得到（每条街、每栋楼）。<br>
+                — <strong>BGP（服务路由）</strong> = "<strong>房屋买卖与租赁广告</strong>"——"我家在 XX 路 88 号，卖房，联系门牌 XX"。<br>
+                — <strong>BGP-LS</strong> = "<strong>城市规划局的统计上报</strong>"——把城市完整地图导出给国务院做宏观决策。<br>
+                三者协同：地图（IGP）告诉你"<strong>路怎么走</strong>"，广告（BGP 服务）告诉你"<strong>哪有房</strong>"，规划上报（BGP-LS）让上层做"<strong>全城统筹</strong>"。
+            </p>
+        </div>
+
+        <h4>§ 3.3.2 一次完整的 L3VPN over SRv6 控制面交互</h4>
+
+        <p>
+            让我们用最经典的 L3VPN 场景，展示 IGP 与 BGP 如何协同：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">L3VPN over SRv6 · 控制面完整交互序列</text>
+
+            <!-- Nodes -->
+            <g>
+                <rect x="40" y="60" width="100" height="50" fill="#67B346" rx="6"/>
+                <text x="90" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="white">CE-1</text>
+
+                <rect x="180" y="60" width="100" height="50" fill="#005073" rx="6"/>
+                <text x="230" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="white">PE-1 (R1)</text>
+
+                <rect x="320" y="60" width="100" height="50" fill="#049FD9" rx="6"/>
+                <text x="370" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="white">P-1 (R2)</text>
+
+                <rect x="460" y="60" width="100" height="50" fill="#049FD9" rx="6"/>
+                <text x="510" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="white">P-2 (R3)</text>
+
+                <rect x="600" y="60" width="100" height="50" fill="#005073" rx="6"/>
+                <text x="650" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="white">PE-2 (R4)</text>
+
+                <rect x="740" y="60" width="100" height="50" fill="#67B346" rx="6"/>
+                <text x="790" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="white">CE-2</text>
+
+                <line x1="140" y1="85" x2="180" y2="85" stroke="#005073" stroke-width="2"/>
+                <line x1="280" y1="85" x2="320" y2="85" stroke="#005073" stroke-width="2"/>
+                <line x1="420" y1="85" x2="460" y2="85" stroke="#005073" stroke-width="2"/>
+                <line x1="560" y1="85" x2="600" y2="85" stroke="#005073" stroke-width="2"/>
+                <line x1="700" y1="85" x2="740" y2="85" stroke="#005073" stroke-width="2"/>
+            </g>
+
+            <!-- Step 1: IGP -->
+            <rect x="40" y="135" width="800" height="65" fill="#e8f4fd" stroke="#005073" stroke-width="1.5" rx="6"/>
+            <text x="55" y="155" font-size="12" font-weight="700" fill="#005073">Step 1 · IS-IS 在域内洪泛 Locator (Underlay)</text>
+            <text x="55" y="175" font-size="11" fill="#1A1A1A">PE-1 通过 IS-IS 学到：PE-2 的 Locator = fcbb:bb00:0004::/48 ，可达，Cost = 30</text>
+            <text x="55" y="190" font-size="11" fill="#1A1A1A">→ Underlay 路由就绪：PE-1 知道"如何把包送到 PE-2 的任何 SID 上"</text>
+
+            <!-- Step 2: BGP CE -->
+            <rect x="40" y="215" width="800" height="65" fill="#fff8e1" stroke="#FBAB18" stroke-width="1.5" rx="6"/>
+            <text x="55" y="235" font-size="12" font-weight="700" fill="#92740a">Step 2 · CE-2 通过 eBGP 把 192.168.2.0/24 通告给 PE-2</text>
+            <text x="55" y="255" font-size="11" fill="#1A1A1A">PE-2 收到 IPv4 路由，加入到 VRF "CUST-A"</text>
+            <text x="55" y="270" font-size="11" fill="#1A1A1A">→ PE-2 本地为 VRF "CUST-A" 分配 End.DT4 SID = fcbb:bb00:0004:e002::</text>
+
+            <!-- Step 3: BGP VPNv4 -->
+            <rect x="40" y="295" width="800" height="80" fill="#f0f9eb" stroke="#67B346" stroke-width="1.5" rx="6"/>
+            <text x="55" y="315" font-size="12" font-weight="700" fill="#3d7a1d">Step 3 · PE-2 通过 iBGP (VPNv4) 把 VPN 路由通告给 PE-1（关键！）</text>
+            <text x="55" y="335" font-size="11" font-family="monospace" fill="#1A1A1A">BGP UPDATE:</text>
+            <text x="55" y="350" font-size="11" font-family="monospace" fill="#1A1A1A">  NLRI = RD:1:100 + 192.168.2.0/24</text>
+            <text x="55" y="365" font-size="11" font-family="monospace" fill="#9232AC">  Attribute: Prefix-SID Attr → SRv6 L3 Service TLV → SID=fcbb:bb00:0004:e002:: ⭐</text>
+
+            <!-- Step 4: PE-1 building SRH -->
+            <rect x="40" y="390" width="800" height="80" fill="#fef0f0" stroke="#E2231A" stroke-width="1.5" rx="6"/>
+            <text x="55" y="410" font-size="12" font-weight="700" fill="#7a1a14">Step 4 · PE-1 为 VRF "CUST-A" 安装路由：192.168.2.0/24 → SRv6 封装</text>
+            <text x="55" y="430" font-size="11" fill="#1A1A1A">PE-1 FIB 安装：</text>
+            <text x="55" y="447" font-size="11" font-family="monospace" fill="#1A1A1A">  192.168.2.0/24 → encap (Outer IPv6 DA = fcbb:bb00:0004:e002::, no SRH if 1 SID)</text>
+            <text x="55" y="463" font-size="11" font-weight="700" fill="#7a1a14">→ 控制面闭环！数据面就绪 ✓</text>
+
+            <!-- 总结 -->
+            <rect x="40" y="485" width="800" height="50" fill="#005073" rx="6"/>
+            <text x="440" y="510" text-anchor="middle" font-size="13" font-weight="700" fill="white">⚡ IGP 提供"<tspan fill="#02C8FF">怎么走</tspan>"，BGP 提供"<tspan fill="#02C8FF">去哪里 + 干什么</tspan>" — 各司其职、完美协同</text>
+        </svg>
+        </div>
+
+        <div class="warning-box">
+            <p style="margin-bottom: var(--space-2);"><strong>容易混淆的细节</strong>：</p>
+            <ul style="margin-bottom: 0;">
+                <li><strong>RFC 9252 定义的 Service SID 编码方式有两种</strong>：Transposition Scheme（与 BGP Label 字段联动）和 Non-Transposition Scheme（完整放在 Prefix-SID 属性中）。Cisco 默认用前者，节省 BGP 报文长度。</li>
+                <li><strong>SID 的 Function 部分是 PE-2 本地分配的</strong>，不需要预先约定。这就是 SRv6 的"<strong>分布式语义</strong>"——每台路由器自治决定本地 Function 编码。</li>
+                <li><strong>当 SID 列表只有 1 个时</strong>，可以直接放到 IPv6 主头 DA，<strong>省略整个 SRH</strong>——这就是 RFC 8986 提到的 "Reduced SRH" 优化。</li>
+            </ul>
+        </div>
+
+        <!-- ============ 苏格拉底问题 14 ============ -->
+        <h3 id="ch3-q4">§ 3.4 第十四问：跨域怎么办？分布式 IGP 不是封闭在域内吗？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #14</div>
+            <h4>"如果客户端在北京 IGP 域，服务端在广州 IGP 域，中间隔了三个 AS——SRv6 路径怎么算？"</h4>
+            <p>
+                IGP 的"<strong>同一管理域内</strong>"特性此时反而成了限制——它<strong>看不到</strong>其他域的拓扑。这正是<strong>集中式控制器（PCE）+ BGP-LS</strong> 登场的舞台。
+            </p>
+        </div>
+
+        <h4>§ 3.4.1 SR-PCE 的真实角色</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 何时需要集中式大脑</div>
+            <p style="margin-bottom: var(--space-4);">
+                分布式 IGP 在<strong>三个场景</strong>下力不从心，必须靠集中式控制器解决：
+            </p>
+            <ol>
+                <li><strong>跨域可见性</strong>：单个路由器只能看到本 IGP 域，无法做"<strong>北京 → 上海 → 广州</strong>"的全局路径选择。</li>
+                <li><strong>带宽感知 TE</strong>：IGP 不会传播实时带宽利用率，CSPF 只能基于"<strong>预留带宽</strong>"算路，而非"<strong>实时空闲带宽</strong>"。</li>
+                <li><strong>多约束优化</strong>：当约束变得复杂（"低时延 + 避开 AS65001 + 带宽 ≥ 10 Gbps + 不超过 4 跳"），分布式算法处理不了，必须集中式 LP 求解。</li>
+            </ol>
+            <p style="margin-bottom: 0;">
+                Cisco SR-PCE（基于 IOS-XR 软件实例）就是为解决这三个问题而生。
+            </p>
+        </div>
+
+        <h4>§ 3.4.2 SR-PCE 完整工作流程</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 530" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">Cisco SR-PCE · 跨域 SRv6 TE 算路工作流</text>
+
+            <!-- SR-PCE -->
+            <rect x="350" y="55" width="240" height="80" fill="#9232AC" stroke="white" stroke-width="2" rx="10"/>
+            <text x="470" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="white">SR-PCE / Crosswork</text>
+            <text x="470" y="100" text-anchor="middle" font-size="11" fill="white">📊 跨域拓扑数据库</text>
+            <text x="470" y="116" text-anchor="middle" font-size="11" fill="white">🧮 集中式 CSPF 引擎</text>
+            <text x="470" y="130" text-anchor="middle" font-size="11" fill="white">🔌 PCEP / NETCONF</text>
+
+            <!-- 三个 IGP 域 -->
+            <g>
+                <rect x="40" y="200" width="240" height="120" fill="#e8f4fd" stroke="#005073" stroke-width="2" rx="10"/>
+                <text x="160" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#005073">IGP Domain 1 (北京)</text>
+                <circle cx="100" cy="265" r="20" fill="#005073"/>
+                <text x="100" y="270" text-anchor="middle" font-size="11" fill="white">PE-A</text>
+                <circle cx="220" cy="265" r="20" fill="#049FD9"/>
+                <text x="220" y="270" text-anchor="middle" font-size="11" fill="white">ABR-1</text>
+                <line x1="120" y1="265" x2="200" y2="265" stroke="#005073" stroke-width="1.5"/>
+                <text x="160" y="300" text-anchor="middle" font-size="10" fill="#005073">IS-IS Level-2</text>
+
+                <rect x="350" y="200" width="240" height="120" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="10"/>
+                <text x="470" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#92740a">IGP Domain 2 (中转)</text>
+                <circle cx="395" cy="265" r="20" fill="#FBAB18"/>
+                <text x="395" y="270" text-anchor="middle" font-size="10" fill="white">ABR-1</text>
+                <circle cx="470" cy="265" r="20" fill="#FBAB18"/>
+                <text x="470" y="270" text-anchor="middle" font-size="10" fill="white">P-X</text>
+                <circle cx="545" cy="265" r="20" fill="#FBAB18"/>
+                <text x="545" y="270" text-anchor="middle" font-size="10" fill="white">ABR-2</text>
+                <line x1="415" y1="265" x2="450" y2="265" stroke="#FBAB18" stroke-width="1.5"/>
+                <line x1="490" y1="265" x2="525" y2="265" stroke="#FBAB18" stroke-width="1.5"/>
+                <text x="470" y="300" text-anchor="middle" font-size="10" fill="#92740a">IS-IS Level-2</text>
+
+                <rect x="660" y="200" width="240" height="120" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="10"/>
+                <text x="780" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#3d7a1d">IGP Domain 3 (广州)</text>
+                <circle cx="720" cy="265" r="20" fill="#67B346"/>
+                <text x="720" y="270" text-anchor="middle" font-size="10" fill="white">ABR-2</text>
+                <circle cx="840" cy="265" r="20" fill="#67B346"/>
+                <text x="840" y="270" text-anchor="middle" font-size="10" fill="white">PE-Z</text>
+                <line x1="740" y1="265" x2="820" y2="265" stroke="#67B346" stroke-width="1.5"/>
+                <text x="780" y="300" text-anchor="middle" font-size="10" fill="#3d7a1d">IS-IS Level-2</text>
+            </g>
+
+            <!-- BGP-LS arrows -->
+            <line x1="160" y1="200" x2="380" y2="135" stroke="#9232AC" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="240" y="170" font-size="10" font-weight="700" fill="#9232AC">BGP-LS</text>
+
+            <line x1="470" y1="200" x2="470" y2="135" stroke="#9232AC" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="490" y="170" font-size="10" font-weight="700" fill="#9232AC">BGP-LS</text>
+
+            <line x1="780" y1="200" x2="560" y2="135" stroke="#9232AC" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="700" y="170" font-size="10" font-weight="700" fill="#9232AC">BGP-LS</text>
+
+            <!-- PCEP -->
+            <line x1="100" y1="285" x2="350" y2="135" stroke="#E2231A" stroke-width="2" stroke-dasharray="3,3"/>
+            <text x="200" y="220" font-size="10" font-weight="700" fill="#E2231A">PCEP Request</text>
+
+            <!-- 流程说明 -->
+            <rect x="40" y="345" width="860" height="170" fill="#f5f7fa" stroke="#005073" stroke-width="1.5" rx="8"/>
+            <text x="60" y="370" font-size="13" font-weight="700" fill="#005073">📋 完整跨域 TE 工作流</text>
+            <text x="60" y="392" font-size="11" fill="#1A1A1A">① <tspan font-weight="700">拓扑收集</tspan>：每个域的 ABR 通过 BGP-LS 把本域 IGP LSDB 上报给 SR-PCE，PCE 形成跨域全局拓扑</text>
+            <text x="60" y="412" font-size="11" fill="#1A1A1A">② <tspan font-weight="700">头节点请求</tspan>：PE-A 收到业务流量，需要建立到 PE-Z 的 SR-TE 策略，发送 <tspan font-family="monospace" fill="#E2231A">PCEP PCRequest</tspan> 给 SR-PCE</text>
+            <text x="60" y="432" font-size="11" fill="#1A1A1A">③ <tspan font-weight="700">集中式算路</tspan>：SR-PCE 基于全局拓扑 + 约束（带宽、时延、亲和性）计算最优 SID 列表</text>
+            <text x="60" y="452" font-size="11" fill="#1A1A1A">④ <tspan font-weight="700">下发结果</tspan>：通过 <tspan font-family="monospace" fill="#E2231A">PCEP PCReply</tspan> 把 SID List = [ABR-1::SID, P-X::SID, ABR-2::SID, PE-Z::End.DT4] 返回给 PE-A</text>
+            <text x="60" y="472" font-size="11" fill="#1A1A1A">⑤ <tspan font-weight="700">数据面执行</tspan>：PE-A 在 SRH 中按列表封装，包跨越 3 个 IGP 域到达 PE-Z</text>
+            <text x="60" y="496" font-size="11" font-weight="700" fill="#3d7a1d">✓ 关键点：每个 IGP 域不需要知道其他域的细节，所有"跨域智能"集中在 SR-PCE</text>
+        </svg>
+        </div>
+
+        <h4>§ 3.4.3 SR-PCE 的算路引擎：CSPF + 多约束优化</h4>
+
+        <p>
+            集中式算路不是简单的 Dijkstra。SR-PCE 内部维护着一个<strong>约束最短路径优先（CSPF, Constrained SPF）</strong>引擎，能处理：
+        </p>
+
+        <div class="grid grid-3">
+            <div class="card">
+                <h4 style="border:none;padding:0;">⏱️ 时延约束</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">基于 IS-IS 通告的链路时延（RFC 8570），找出"<strong>端到端时延 ≤ 5ms</strong>"的路径。</p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">📊 带宽约束</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">结合 SNMP/Telemetry 实时利用率，避开"<strong>已被使用 ≥ 80%</strong>"的链路。</p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">🎨 亲和性</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">"<strong>必须经过</strong>"或"<strong>必须避开</strong>"特定 Color 的链路（如绕开海底光缆）。</p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">🔀 不相交路径</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">为主备双隧道找出<strong>节点/链路/SRLG 完全不相交</strong>的两条路径。</p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">🌐 Flex-Algo</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">用户自定义算法（如"<strong>最低成本 + 避开 AS65001</strong>"），SID 列表自动嵌入算法编号。</p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">⚡ 自动 BFD</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">SR-PCE 监控路径状态，故障时<strong>毫秒级</strong>下发新 SID 列表。</p>
+            </div>
+        </div>
+
+        <!-- ============ 苏格拉底问题 15 ============ -->
+        <h3 id="ch3-q5">§ 3.5 第十五问：分布式与集中式，到底谁是主谁是辅？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #15</div>
+            <h4>"既然 SR-PCE 这么强，是不是所有的算路都应该交给它？分布式 IGP 是不是该被淘汰？"</h4>
+            <p>
+                这是一个非常容易陷入"<strong>非此即彼</strong>"思维的问题。真正的工程智慧，是知道在<strong>什么时候用什么</strong>。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 分层职责</div>
+            <p style="margin-bottom: var(--space-4);">
+                SRv6 的控制面是<strong>"分层职责模型"</strong>，每一层解决一类问题：
+            </p>
+            <div class="table-scroll-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:18%;">层级</th>
+                            <th style="width:24%;">协议</th>
+                            <th style="width:28%;">解决什么问题</th>
+                            <th>响应速度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>L0 · 拓扑层</strong></td>
+                            <td>IS-IS / OSPFv3</td>
+                            <td>域内拓扑同步、Locator 扩散、最短路径计算</td>
+                            <td><strong>毫秒级</strong>（故障切换 50ms）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>L1 · 服务层</strong></td>
+                            <td>BGP（VPNv4/v6, EVPN, …）</td>
+                            <td>VPN 服务前缀分发、Service SID 携带</td>
+                            <td><strong>秒级</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>L2 · TE 算路层</strong></td>
+                            <td>SR-PCE / PCEP</td>
+                            <td>跨域算路、多约束优化、集中式策略</td>
+                            <td><strong>秒级 ~ 分钟级</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>L3 · 编排层</strong></td>
+                            <td>NETCONF / gRPC / Crosswork</td>
+                            <td>意图驱动配置、自动化部署、闭环验证</td>
+                            <td><strong>分钟级</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-bottom: 0;">
+                <strong>这是一个"金字塔"——底层快、上层慢；底层确定性、上层灵活性</strong>。
+                分布式 IGP 永远不会被淘汰——它是 SRv6 的"<strong>反射神经</strong>"，故障毫秒切换靠它，永远不能依赖远程控制器。
+                SR-PCE 是"<strong>大脑</strong>"——做需要全局视野的决策。两者协同才完美。
+            </p>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 人体神经系统</div>
+            <p style="margin-bottom: 0;">
+                IGP 像是<strong>脊髓反射</strong>——你被针扎到，反射弧在脊髓就完成了缩手动作，不需要等大脑决策（毫秒级）。<br>
+                SR-PCE 像是<strong>大脑皮层</strong>——决定"<strong>今天要不要出门、走哪条路</strong>"等需要全局信息和复杂判断的决策（秒级）。<br>
+                如果你的所有决策都靠大脑，被针扎到的瞬间你已经被烫伤了。但如果只靠脊髓反射，你永远不会进步、不会规划。
+                SRv6 的控制面正是这种<strong>"反射 + 大脑"</strong>的双层架构智慧。
+            </p>
+        </div>
+
+        <!-- ============ 模块 3 小结 ============ -->
+        <h3 id="ch3-summary">§ 3.6 模块 3 小结：你已经掌握了"操作系统"</h3>
+
+        <div class="tip-bar">
+            <div class="tip-bar-icon">🧠</div>
+            <p>
+                如果你能用自己的话回答以下问题，你就真正理解了 SRv6 控制面的<strong>分层智慧</strong>。
+            </p>
+        </div>
+
+        <ol style="font-size: 1.05rem; line-height: 2;">
+            <li>为什么 IGP 用来分发 Locator，而 BGP 用来分发 Service SID？两者的设计哲学差异在哪？</li>
+            <li>IS-IS 相比 OSPFv3，在 SRv6 场景下有哪三个"基因优势"？</li>
+            <li>BGP 在 SRv6 中有哪两个完全不同的角色？BGP-LS 是哪一种？</li>
+            <li>L3VPN over SRv6 的端到端控制面交互序列是什么？Service SID 在哪一步被分配、在哪一步被通告？</li>
+            <li>SR-PCE 解决了哪三类分布式 IGP 解决不了的问题？为什么"分布式 + 集中式"必须共存？</li>
+        </ol>
+
+        <!-- ============ 章节金句 ============ -->
+        <div class="chapter-quote">
+            <p>
+                控制面的伟大，不在于谁更聪明，而在于<strong>分层职责的智慧</strong>——<br>
+                让 IGP 做反射神经，让 BGP 做服务广告，让 PCE 做大脑皮层。<br>
+                每一层只解决自己擅长的事，整个系统才能既<strong>稳如磐石</strong>，又<strong>灵活如水</strong>。
+            </p>
+            <div class="author">—— SRv6 控制面分层哲学</div>
+        </div>
+
+        <!-- ============ 模块 4 预告 ============ -->
+        <div class="socratic-box" style="margin-top: var(--space-12);">
+            <div class="label">下一模块预告 · MODULE 4 · INSTRUCTION SET</div>
+            <h4>"现在你会写'地图'了。但 SRv6 的'指令集'到底有哪些？怎么组合？"</h4>
+            <p style="margin-bottom: var(--space-4);">
+                模块 4 我们将进入 SRv6 的"<strong>汇编语言手册</strong>"——RFC 8986 网络编程指令集：
+            </p>
+            <ul>
+                <li><strong>End / End.X</strong>：基础指令家族（含 PSP/USP/USD 等 Flavor 的精确语义）</li>
+                <li><strong>End.DT4 / End.DT6 / End.DT2U/M</strong>：L3VPN/EVPN 解封装指令</li>
+                <li><strong>End.DX4 / End.DX6 / End.DX2</strong>:  Cross-Connect 直连指令</li>
+                <li><strong>H.Encaps / H.Insert</strong>：源节点的封装与插入操作</li>
+                <li><strong>End.B6.Encaps / End.BM</strong>：Binding SID 的"宏指令"机制</li>
+                <li><strong>组合的艺术</strong>：用多个 SID 组装一段"网络程序"</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+<!-- ===================== 模块 5 · 现实妥协与 uSID 进化 ===================== -->
+<section class="chapter" id="ch5">
+    <div class="container">
+
+        <span class="module-tag">MODULE 5 · COMPROMISE & EVOLUTION</span>
+        <h2>现实妥协与 uSID 进化：从 SRH 膨胀危机到 Micro-SID 革命</h2>
+
+        <div class="progress-pills">
+            <span class="progress-pill done">①·起源 ✓</span>
+            <span class="progress-pill done">②·数据面 ✓</span>
+            <span class="progress-pill done">③·控制面 ✓</span>
+            <span class="progress-pill done">④·指令集 ✓</span>
+            <span class="progress-pill active">⑤·进化 (当前)</span>
+            <span class="progress-pill">⑥·应用</span>
+        </div>
+
+        <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 800px;">
+            前四章描绘的 SRv6 是一个<strong>近乎完美的理论模型</strong>——但任何工程系统，理论的优雅都要在物理世界里"交税"。
+            这一章我们直面 SRv6 最痛的两道伤疤：<strong>SRH 头膨胀</strong>与<strong>ASIC 解析深度墙</strong>。
+            然后我们将看到 Cisco 是如何用<strong>一段精妙的位操作魔术</strong>——uSID（Micro-SID）——把这两个看似无解的问题彻底化解的。
+        </p>
+
+        <!-- ============ 苏格拉底问题 23 ============ -->
+        <h3 id="ch5-q1">§ 5.1 第二十三问：SRH 真的会"膨胀"到不可接受吗？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #23</div>
+            <h4>"模块 4 我们看到一段跨域 SID 列表里塞了 4 个 SID。但真实运营商网络呢？让我们做个真实场景的算术。"</h4>
+            <p>
+                数学不会骗人。让我们用一个<strong>典型 5G 跨域承载</strong>的实际场景，算清楚 SRH 到底有多"胖"。
+            </p>
+        </div>
+
+        <h4>§ 5.1.1 真实场景的字节计算</h4>
+
+        <p>
+            考虑一个 5G 跨域 SR-TE 路径，需要经过 6 个段端点：
+            <strong>RAN-PE → Aggregation-1 → ABR-1 → P-Core → ABR-2 → Aggregation-2 → DC-PE</strong>。
+            源节点需要在 SRH 里塞下 7 个 SID。让我们逐字节计算：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">SRH 膨胀的真实账单 · 一个 7-SID 跨域路径</text>
+
+            <!-- 字节累加图 -->
+            <rect x="40" y="60" width="860" height="50" fill="#005073" rx="6"/>
+            <text x="470" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="white">原始用户数据包：1500 byte 标准 MTU</text>
+            <text x="470" y="103" text-anchor="middle" font-size="11" fill="#02C8FF">假设 IPv4 + TCP + Payload 应用流量</text>
+
+            <!-- Outer IPv6 Header -->
+            <rect x="40" y="125" width="160" height="80" fill="#FF9000" rx="4"/>
+            <text x="120" y="153" text-anchor="middle" font-size="13" font-weight="700" fill="white">Outer IPv6</text>
+            <text x="120" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="white">+40 bytes</text>
+            <text x="120" y="190" text-anchor="middle" font-size="9" fill="white">(固定)</text>
+
+            <!-- SRH header -->
+            <rect x="205" y="125" width="120" height="80" fill="#9232AC" rx="4"/>
+            <text x="265" y="153" text-anchor="middle" font-size="13" font-weight="700" fill="white">SRH 头</text>
+            <text x="265" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="white">+8 bytes</text>
+            <text x="265" y="190" text-anchor="middle" font-size="9" fill="white">(固定)</text>
+
+            <!-- SID List -->
+            <rect x="330" y="125" width="570" height="80" fill="#E2231A" rx="4"/>
+            <text x="615" y="153" text-anchor="middle" font-size="13" font-weight="700" fill="white">SID List × 7</text>
+            <text x="615" y="173" text-anchor="middle" font-size="14" font-weight="700" fill="white">+ 7 × 16 = 112 bytes ⚠️</text>
+            <text x="615" y="190" text-anchor="middle" font-size="9" fill="white">每个 SID 是 128bit / 16 byte</text>
+
+            <!-- 累计 -->
+            <text x="470" y="240" text-anchor="middle" font-size="14" font-weight="700" fill="#7a1a14">总封装开销：40 + 8 + 112 = ★ 160 bytes ★</text>
+
+            <!-- 实际 MTU 占用对比 -->
+            <rect x="40" y="265" width="860" height="180" fill="#fef0f0" stroke="#E2231A" stroke-width="2" rx="8"/>
+            <text x="60" y="290" font-size="13" font-weight="700" fill="#7a1a14">⚠️ MTU 受害最深的两个场景</text>
+            <text x="60" y="315" font-size="11" font-weight="700" fill="#1A1A1A">场景 1：以太网默认 MTU 1500</text>
+            <text x="60" y="333" font-size="11" font-family="monospace" fill="#7a1a14">  原始可承载用户数据 = 1500 - 40(IPv4) = 1460 byte</text>
+            <text x="60" y="350" font-size="11" font-family="monospace" fill="#7a1a14">  SRv6 封装后 = 1500 - 160(SRv6 总头) - 40(IPv4) = 1300 byte → 损失 11% 净荷！</text>
+
+            <text x="60" y="378" font-size="11" font-weight="700" fill="#1A1A1A">场景 2：4G/5G 移动承载（典型 MTU 1400）</text>
+            <text x="60" y="396" font-size="11" font-family="monospace" fill="#7a1a14">  SRv6 头占用 160 byte → 净荷只剩 1200 byte → 损失 14% 带宽</text>
+
+            <text x="60" y="425" font-size="12" font-weight="700" fill="#7a1a14">→ 这意味着运营商每承载 100 Gbps 用户流量，就有 11~14 Gbps 在传"包头" ❌</text>
+        </svg>
+        </div>
+
+        <div class="warning-box">
+            <p style="margin-bottom: var(--space-2);"><strong>这还不是最糟的</strong>。让我们考虑更极端的场景：</p>
+            <ul style="margin-bottom: 0;">
+                <li><strong>跨 3 个 AS 的全球互联（10+ SID）</strong>：SRH 长度可达 8 + 160 = <strong>168 bytes</strong></li>
+                <li><strong>SFC 服务功能链（5 个服务节点 × 经过 5 个传输节点 = 10 SID）</strong>：同样达到 <strong>160+ bytes</strong></li>
+                <li><strong>需要 IPsec 加密时</strong>：再加 ESP 头和填充 ≈ +50 bytes，总头部接近 <strong>210 bytes</strong>，净荷损失超 15%</li>
+            </ul>
+        </div>
+
+        <!-- ============ 苏格拉底问题 24 ============ -->
+        <h3 id="ch5-q2">§ 5.2 第二十四问：能不能通过分片解决？为什么不行？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #24</div>
+            <h4>"既然包头太长，那让设备分片不就行了？IPv6 不是支持分片扩展头吗？"</h4>
+            <p>
+                这是个看似合理但<strong>致命错误</strong>的提议。理解为什么"分片不是解药"，能让你看清 IPv6 设计哲学的另一面。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · IPv6 分片的"原罪"</div>
+            <p style="margin-bottom: var(--space-4);">
+                IPv6 与 IPv4 在分片处理上有一个<strong>巨大差异</strong>：
+            </p>
+            <ul>
+                <li><strong>IPv4</strong>：<strong>路由器可以分片</strong>（中间节点也能切包）</li>
+                <li><strong>IPv6</strong>：<strong>仅源节点能分片</strong>（RFC 8200 强制要求）。中间节点遇到 MTU 不足时，<strong>必须丢包并发送 ICMPv6 Packet Too Big</strong></li>
+            </ul>
+            <p style="margin-bottom: var(--space-4);">
+                为什么 IPv6 这样设计？因为分片在路由器上是<strong>性能噩梦</strong>——需要做 IP 重组、维护状态、处理乱序。
+                IPv6 把"<strong>路径 MTU 发现（PMTUD）</strong>"作为强制机制，让源节点动态学习最小 MTU 并主动适配。
+            </p>
+            <p style="margin-bottom: 0;">
+                <strong>但这套机制在 SRv6 场景下成了大坑</strong>：
+            </p>
+            <ul style="margin-bottom: 0;">
+                <li>PMTUD 依赖 ICMPv6 反馈，<strong>很多防火墙默认 drop ICMPv6</strong>，PMTUD 静默失败</li>
+                <li>如果源节点是"<strong>不感知 SRv6 的 CE</strong>"（普通主机），它根本不知道有 SRv6 封装开销，<strong>无法主动调整</strong></li>
+                <li>大包到达 PE 被强制丢弃，<strong>用户感受是"网络莫名其妙断流"</strong>——这是真实运营商的运维噩梦</li>
+            </ul>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 行李超重</div>
+            <p style="margin-bottom: 0;">
+                IPv4 像是<strong>有人工分拣员的机场</strong>——你的行李超重了，机场会帮你分成两个包托运。<br>
+                IPv6 像是<strong>全自动 RFID 通道</strong>——超重了直接扔回来，让你自己重新打包。<br>
+                SRv6 在 IPv6 之上又加了 160 byte 行李——如果用户不知道这个事实，就会被"<strong>扔回来</strong>"。<br>
+                <strong>所以分片不是解药，"让 SID 列表本身变短"才是唯一出路</strong>——这就是 uSID 诞生的根本动机。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 25 ============ -->
+        <h3 id="ch5-q3">§ 5.3 第二十五问：芯片解析深度墙到底是什么物理限制？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #25 · 直达硬件层</div>
+            <h4>"模块 2 我提到了'解析深度墙'，但没深入它的物理本质。一颗 NPU 为什么读不动 200 byte 的包头？这是软件限制还是硬件限制？"</h4>
+            <p>
+                答案：<strong>是物理限制，是芯片设计的根本约束</strong>。理解这一点，需要我们短暂深入芯片微架构。
+            </p>
+        </div>
+
+        <h4>§ 5.3.1 NPU Parser 的物理结构</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 流水线深度 = 时延 = 芯片成本</div>
+            <p style="margin-bottom: var(--space-4);">
+                现代网络芯片（NPU/ASIC）使用<strong>流水线（Pipeline）</strong>处理报文，每个 cycle 推进一步。
+                Parser 单元的设计核心是<strong>"在固定时间内取多少 byte"</strong>。
+            </p>
+            <ul>
+                <li>每个 Parser 节点（Stage）通常并行解析 <strong>32~64 bytes</strong></li>
+                <li>Stage 数量受芯片面积、功耗、时钟频率限制——通常 <strong>4~8 级</strong></li>
+                <li>这意味着 Parser <strong>最大解析深度 = Stage 数 × Stage 宽度 ≈ 128~512 bytes</strong></li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                超过这个深度怎么办？芯片就必须做 <strong>Recirculation</strong>——把包<strong>重新回送到 Parser 入口</strong>，再来一次。
+                这就是 SRv6 早期最痛的"暗坑"——<strong>每多一次 Recirculation，转发性能腰斩 50%</strong>。
+            </p>
+        </div>
+
+        <h4>§ 5.3.2 Recirculation 的真实代价</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">ASIC Pipeline Recirculation · SRv6 性能"暗坑"</text>
+
+            <!-- 正常流水线 -->
+            <text x="470" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#3d7a1d">情况 A：SRH ≤ 6 SID（Parser 一次过）</text>
+
+            <g>
+                <rect x="40" y="75" width="120" height="50" fill="#67B346" rx="6"/>
+                <text x="100" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">Parser</text>
+                <text x="100" y="115" text-anchor="middle" font-size="9" fill="white">解析包头</text>
+
+                <polygon points="160,100 180,90 180,110" fill="#67B346"/>
+
+                <rect x="185" y="75" width="120" height="50" fill="#67B346" rx="6"/>
+                <text x="245" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">Lookup</text>
+                <text x="245" y="115" text-anchor="middle" font-size="9" fill="white">查 FIB / SID 表</text>
+
+                <polygon points="305,100 325,90 325,110" fill="#67B346"/>
+
+                <rect x="330" y="75" width="120" height="50" fill="#67B346" rx="6"/>
+                <text x="390" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">Modify</text>
+                <text x="390" y="115" text-anchor="middle" font-size="9" fill="white">改 DA / SL</text>
+
+                <polygon points="450,100 470,90 470,110" fill="#67B346"/>
+
+                <rect x="475" y="75" width="120" height="50" fill="#67B346" rx="6"/>
+                <text x="535" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">Egress</text>
+                <text x="535" y="115" text-anchor="middle" font-size="9" fill="white">送出</text>
+
+                <text x="640" y="105" font-size="13" font-weight="700" fill="#3d7a1d">→ 100 ns ✓</text>
+            </g>
+
+            <!-- Recirculation 流水线 -->
+            <text x="470" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="#7a1a14">情况 B：SRH 含 8+ SID（触发 Recirculation）</text>
+
+            <g>
+                <rect x="40" y="200" width="120" height="50" fill="#FBAB18" rx="6"/>
+                <text x="100" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="white">Parser (1st)</text>
+                <text x="100" y="240" text-anchor="middle" font-size="9" fill="white">读 IPv6+SRH 头</text>
+
+                <polygon points="160,225 180,215 180,235" fill="#FBAB18"/>
+
+                <rect x="185" y="200" width="200" height="50" fill="#E2231A" rx="6"/>
+                <text x="285" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="white">Recirculation Stage</text>
+                <text x="285" y="240" text-anchor="middle" font-size="9" fill="#fdd">SID 太多，回送 Parser</text>
+
+                <!-- Loop arrow back -->
+                <path d="M 285 250 Q 285 290 100 290 Q 100 280 100 260" stroke="#E2231A" stroke-width="3" fill="none" marker-end="url(#arrowR)"/>
+                <defs>
+                    <marker id="arrowR" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                        <polygon points="0 0, 10 5, 0 10" fill="#E2231A"/>
+                    </marker>
+                </defs>
+                <text x="200" y="285" font-size="11" font-weight="700" fill="#E2231A">↪ Loop Back</text>
+
+                <polygon points="385,225 405,215 405,235" fill="#E2231A"/>
+
+                <rect x="410" y="200" width="120" height="50" fill="#FBAB18" rx="6"/>
+                <text x="470" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="white">Parser (2nd)</text>
+                <text x="470" y="240" text-anchor="middle" font-size="9" fill="white">再读剩余 SID</text>
+
+                <polygon points="530,225 550,215 550,235" fill="#FBAB18"/>
+
+                <rect x="555" y="200" width="120" height="50" fill="#FBAB18" rx="6"/>
+                <text x="615" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="white">Lookup+Modify</text>
+
+                <polygon points="675,225 695,215 695,235" fill="#FBAB18"/>
+
+                <rect x="700" y="200" width="100" height="50" fill="#FBAB18" rx="6"/>
+                <text x="750" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="white">Egress</text>
+
+                <text x="820" y="230" font-size="13" font-weight="700" fill="#7a1a14">→ 200+ ns ❌</text>
+            </g>
+
+            <!-- 影响 -->
+            <rect x="40" y="320" width="860" height="80" fill="#fef0f0" stroke="#E2231A" stroke-width="2" rx="8"/>
+            <text x="60" y="345" font-size="13" font-weight="700" fill="#7a1a14">💥 Recirculation 的真实代价（生产环境实测）</text>
+            <text x="60" y="368" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">单包时延翻倍</tspan>：100ns → 200ns，对低时延业务（金融、5G uRLLC）灾难性</text>
+            <text x="60" y="386" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">芯片吞吐量减半</tspan>：原本能跑满 100 Gbps 的端口，启用 SRv6 8+ SID 后实测仅 50 Gbps</text>
+        </svg>
+        </div>
+
+        <div class="warning-box">
+            <p style="margin-bottom: 0;">
+                <strong>这就是为什么 SRv6 早期落地遭遇"性能不行"的污名</strong>——
+                不是协议本身有问题，而是<strong>SID 列表太长，触发了硬件 Recirculation</strong>。
+                业界共识是：<strong>SRH 中 SID 数量 ≤ 6 才能保证线速转发</strong>。
+                但跨域 TE 经常需要 8~10 SID——<strong>这就是矛盾的根源</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 26 ============ -->
+        <h3 id="ch5-q4">§ 5.4 第二十六问：能不能"压缩"SID 列表？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #26 · 灵感时刻</div>
+            <h4>"如果一个 SID 是 128 bit，其中 Locator 已经占了 48 bit，剩下 80 bit 真的都需要吗？能不能多个'微指令'共享一个 IPv6 地址？"</h4>
+            <p>
+                这正是 Cisco 工程师在 2020 年灵光一闪的问题。答案就是改变 SRv6 战局的——<strong>uSID（Micro-SID）架构</strong>。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 信息密度的革命</div>
+            <p style="margin-bottom: var(--space-4);">
+                Clarence Filsfils 的关键洞察——<strong>"我们其实不需要每个段都用整个 128 bit"</strong>：
+            </p>
+            <ul>
+                <li>大多数 SID 真正承载的信息其实只有 <strong>16~32 bit</strong>（节点 ID + 简单 Function）</li>
+                <li>剩下的 96+ bit 都是"<strong>Locator 块前缀</strong>"——但这些前缀<strong>在同一个网络里是高度重复的</strong></li>
+                <li><strong>关键洞察</strong>：如果一组 SID 共享相同的 Locator Block（比如全网都用 <code>fcbb:bb00::/32</code>），那么这部分前缀<strong>只需要写一次</strong>！</li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                于是诞生了 uSID 的核心思想：
+                <strong style="color: var(--cisco-blue-dark); font-size: 1.08rem;">"把多个 16-bit 微指令打包进一个 IPv6 地址容器，让一个 IPv6 地址承载一段路径"</strong>。
+                这是<strong>信息论意义上的完美压缩</strong>——剔除冗余、保留语义。
+            </p>
+        </div>
+
+        <h4>§ 5.4.1 uSID 容器的精确结构</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">uSID Container · 一个 IPv6 地址装 6 条微指令</text>
+
+            <!-- bit ruler -->
+            <text x="60" y="60" font-size="11" fill="#58585B">bit:</text>
+            <line x1="80" y1="55" x2="900" y2="55" stroke="#9B9CA0"/>
+            <text x="80" y="70" font-size="10" fill="#58585B">0</text>
+            <text x="280" y="70" font-size="10" fill="#58585B">32</text>
+            <text x="412" y="70" font-size="10" fill="#58585B">48</text>
+            <text x="544" y="70" font-size="10" fill="#58585B">64</text>
+            <text x="676" y="70" font-size="10" fill="#58585B">80</text>
+            <text x="808" y="70" font-size="10" fill="#58585B">96</text>
+            <text x="890" y="70" font-size="10" fill="#58585B">128</text>
+
+            <!-- Block -->
+            <rect x="80" y="80" width="200" height="70" fill="#005073" stroke="white" stroke-width="2"/>
+            <text x="180" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="white">uSID Block (32 bit)</text>
+            <text x="180" y="123" text-anchor="middle" font-size="10" fill="white">全网共享前缀</text>
+            <text x="180" y="139" text-anchor="middle" font-size="10" font-family="monospace" fill="#02C8FF">fcbb:bb00::/32</text>
+
+            <!-- 6 micro-SIDs -->
+            <rect x="280" y="80" width="132" height="70" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="346" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="white">uSID #1</text>
+            <text x="346" y="125" text-anchor="middle" font-size="10" fill="white">16 bit</text>
+            <text x="346" y="141" text-anchor="middle" font-size="10" font-family="monospace" fill="white">0x0001</text>
+
+            <rect x="412" y="80" width="132" height="70" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="478" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="white">uSID #2</text>
+            <text x="478" y="141" text-anchor="middle" font-size="10" font-family="monospace" fill="white">0x0002</text>
+
+            <rect x="544" y="80" width="132" height="70" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="610" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="white">uSID #3</text>
+            <text x="610" y="141" text-anchor="middle" font-size="10" font-family="monospace" fill="white">0x0003</text>
+
+            <rect x="676" y="80" width="132" height="70" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="742" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="white">uSID #4</text>
+            <text x="742" y="141" text-anchor="middle" font-size="10" font-family="monospace" fill="white">0x0004</text>
+
+            <rect x="808" y="80" width="92" height="70" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="854" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="white">End-of-</text>
+            <text x="854" y="124" text-anchor="middle" font-size="11" font-weight="700" fill="white">Container</text>
+            <text x="854" y="141" text-anchor="middle" font-size="10" font-family="monospace" fill="white">0x0000</text>
+
+            <!-- 完整地址示例 -->
+            <rect x="40" y="180" width="860" height="60" fill="#f5f7fa" stroke="#005073" stroke-width="1.5" rx="6"/>
+            <text x="60" y="205" font-size="13" font-weight="700" fill="#005073">📦 实际 IPv6 地址</text>
+            <text x="60" y="227" font-size="13" font-family="monospace" font-weight="700" fill="#9232AC">fcbb:bb00 : 0001:0002:0003:0004 :: </text>
+            <text x="500" y="227" font-size="11" fill="#005073">→ 一个地址 = 一段 4 跳路径！</text>
+
+            <!-- 对比说明 -->
+            <rect x="40" y="260" width="860" height="80" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="6"/>
+            <text x="60" y="285" font-size="13" font-weight="700" fill="#3d7a1d">⚡ 这意味着什么？</text>
+            <text x="60" y="308" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">传统 SRv6</tspan>：6 跳路径需要 6 × 16 byte = <tspan font-weight="700" fill="#7a1a14">96 byte 的 SID 列表</tspan></text>
+            <text x="60" y="328" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">uSID 模式</tspan>：6 跳路径只需 1 × 16 byte = <tspan font-weight="700" fill="#3d7a1d">16 byte（甚至连 SRH 都不要！）→ 节省 83%</tspan></text>
+        </svg>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 邮政编码的智慧</div>
+            <p style="margin-bottom: 0;">
+                想象你要把一个包裹送到"<strong>北京 → 上海 → 杭州 → 萧山区</strong>"4 个站点。<br>
+                — <strong>传统 SRv6</strong>：每个站点写一张完整地址（"中国北京"、"中国上海"...），4 张完整地址<br>
+                — <strong>uSID</strong>：因为都在中国，把"中国"前缀只写一次，然后是简短的城市代码序列：<strong>CN-BJ-SH-HZ-XS</strong>——一行表达整条路径<br>
+                这就是信息论中的"<strong>共同前缀压缩</strong>"——uSID 把网络的 Locator Block 当成"国家代码"，把节点 ID 当成"城市代码"，自然地实现了极致压缩。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 27 ============ -->
+        <h3 id="ch5-q5">§ 5.5 第二十七问：路由器到底怎么"消费"一个 uSID？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #27 · 关键技术</div>
+            <h4>"既然一个 IPv6 地址装了多个 uSID，路由器怎么知道当前轮到哪个？怎么把'当前 uSID'更新为'下一个 uSID'？"</h4>
+            <p>
+                答案是 uSID 设计中最精妙的——<strong>位移操作（Bit Shift）</strong>。这是一段优雅的位运算魔术。
+            </p>
+        </div>
+
+        <h4>§ 5.5.1 uSID Shift-and-Forward 操作</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · Shift 而非 Pop</div>
+            <p style="margin-bottom: var(--space-4);">
+                传统 SRv6：用 <strong>Segments Left（指针）</strong>来定位"当前活跃 SID"，每跳 SL 减 1。<br>
+                uSID：用<strong>左移操作</strong>把消费完的 uSID 直接"<strong>挤出去</strong>"。
+            </p>
+            <p style="margin-bottom: var(--space-4);">具体步骤（以 4 个 uSID 为例）：</p>
+            <ol>
+                <li>路由器发现 DA 中第一个 uSID（紧跟 Block 之后的 16 bit）匹配本地 SID 表</li>
+                <li><strong>触发 uSID 处理：把整个 16-bit uSID "弹出"——逻辑上左移 16 bit</strong></li>
+                <li>右侧自动"补 0"——对应那个 <code>0x0000</code> End-of-Container 标记</li>
+                <li>新的 DA 自动指向"<strong>下一个 uSID</strong>"，继续转发</li>
+            </ol>
+        </div>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">uSID Shift-and-Forward · 位移魔术全流程</text>
+
+            <!-- Stage 1 -->
+            <text x="470" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#005073">Stage 1：包到达 Node-1，DA = fcbb:bb00:0001:0002:0003:0004::</text>
+
+            <rect x="40" y="75" width="200" height="40" fill="#005073" stroke="white" stroke-width="2"/>
+            <text x="140" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">fcbb:bb00 (Block)</text>
+
+            <rect x="240" y="75" width="80" height="40" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="280" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">★ 0001 ★</text>
+
+            <rect x="320" y="75" width="80" height="40" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="360" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">0002</text>
+
+            <rect x="400" y="75" width="80" height="40" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="440" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">0003</text>
+
+            <rect x="480" y="75" width="80" height="40" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="520" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="white">0004</text>
+
+            <rect x="560" y="75" width="200" height="40" fill="#bbb" stroke="white" stroke-width="2"/>
+            <text x="660" y="100" text-anchor="middle" font-size="11" fill="white">::0000 (空)</text>
+
+            <text x="780" y="100" font-size="11" font-weight="700" fill="#005073">← 当前 uSID = 0001（本节点）</text>
+
+            <!-- Arrow -->
+            <text x="470" y="148" text-anchor="middle" font-size="20" fill="#FF9000">↓ 处理 0001 完成，左移 16 bit</text>
+
+            <!-- Stage 2 -->
+            <text x="470" y="180" text-anchor="middle" font-size="12" font-weight="700" fill="#FF9000">Stage 2：左移后，DA = fcbb:bb00:0002:0003:0004:0000::</text>
+
+            <rect x="40" y="195" width="200" height="40" fill="#005073" stroke="white" stroke-width="2"/>
+            <text x="140" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="white">fcbb:bb00 (Block)</text>
+
+            <rect x="240" y="195" width="80" height="40" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="280" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="white">★ 0002 ★</text>
+
+            <rect x="320" y="195" width="80" height="40" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="360" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="white">0003</text>
+
+            <rect x="400" y="195" width="80" height="40" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="440" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="white">0004</text>
+
+            <rect x="480" y="195" width="280" height="40" fill="#bbb" stroke="white" stroke-width="2"/>
+            <text x="620" y="220" text-anchor="middle" font-size="11" fill="white">:0000:0000 (空)</text>
+
+            <text x="780" y="220" font-size="11" font-weight="700" fill="#FF9000">→ 转发去 Node-2</text>
+
+            <!-- Stage 3 -->
+            <text x="470" y="265" text-anchor="middle" font-size="12" font-weight="700" fill="#9232AC">Stage 3：Node-2 处理 0002，再左移</text>
+
+            <rect x="40" y="280" width="200" height="40" fill="#005073" stroke="white" stroke-width="2"/>
+            <text x="140" y="305" text-anchor="middle" font-size="11" font-weight="700" fill="white">fcbb:bb00 (Block)</text>
+
+            <rect x="240" y="280" width="80" height="40" fill="#FF9000" stroke="white" stroke-width="2"/>
+            <text x="280" y="305" text-anchor="middle" font-size="11" font-weight="700" fill="white">★ 0003 ★</text>
+
+            <rect x="320" y="280" width="80" height="40" fill="#9232AC" stroke="white" stroke-width="2"/>
+            <text x="360" y="305" text-anchor="middle" font-size="11" font-weight="700" fill="white">0004</text>
+
+            <rect x="400" y="280" width="360" height="40" fill="#bbb" stroke="white" stroke-width="2"/>
+            <text x="580" y="305" text-anchor="middle" font-size="11" fill="white">:0000:0000:0000 (空)</text>
+
+            <!-- 关键洞察 -->
+            <rect x="40" y="345" width="860" height="105" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="8"/>
+            <text x="60" y="370" font-size="13" font-weight="700" fill="#92740a">⚡ 为什么"左移"是天才设计？</text>
+            <text x="60" y="392" font-size="11" fill="#4a3a04">① <tspan font-weight="700">硬件极致友好</tspan>：左移 16 bit 是 ASIC 单 cycle 操作，比"SL 减 1 + DA 替换"更快</text>
+            <text x="60" y="410" font-size="11" fill="#4a3a04">② <tspan font-weight="700">无需 SRH</tspan>：所有 uSID 都在 IPv6 主头 DA 内！如果路径短，根本不需要 Routing Header！</text>
+            <text x="60" y="428" font-size="11" fill="#4a3a04">③ <tspan font-weight="700">完美兼容</tspan>：到不识别 uSID 的旧路由器时，它会按 LPM 匹配 Block 前缀正常路由——零破坏部署</text>
+        </svg>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 字符串处理</div>
+            <p style="margin-bottom: 0;">
+                uSID 的 Shift 操作，就像编程里的<strong>字符串左移</strong>：<br>
+                <code>"BJ-SH-HZ-XS"</code> → 处理完 BJ → <code>"SH-HZ-XS-"</code> → 处理完 SH → <code>"HZ-XS--"</code><br>
+                每一步都是简单的内存左移操作，<strong>不需要维护任何"指针变量"</strong>。
+                这就是为什么 uSID 在硬件上如此高效——它把"<strong>状态变量</strong>"（SL 指针）<strong>融化进了数据本身的位置</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 28 ============ -->
+        <h3 id="ch5-q6">§ 5.6 第二十八问：uSID 怎么和传统 SRv6 共存？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #28</div>
+            <h4>"如果运营商已经部署了 RFC 8986 的传统 SRv6，能不能渐进引入 uSID？两者会冲突吗？"</h4>
+            <p>
+                这是 uSID 设计中真正的<strong>"工程艺术"</strong>——它不是替代 RFC 8986，而是<strong>优雅地兼容</strong>。
+            </p>
+        </div>
+
+        <h4>§ 5.6.1 GIB 与 LIB 的双层 SID 空间</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 命名空间分隔</div>
+            <p style="margin-bottom: var(--space-4);">
+                Cisco 在 SRv6 SID 空间里巧妙划分了两类区域：
+            </p>
+            <ul>
+                <li><strong>GIB（Global ID Block）</strong>：传统 SRv6 SID 区域，使用完整 128-bit Locator + Function 编码（兼容 RFC 8986 / 8754）</li>
+                <li><strong>LIB（Local ID Block）</strong>：uSID 区域，每个 16-bit 微指令在本节点有局部含义</li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                <strong>关键设计</strong>：路由器查 SID 表时，根据 IPv6 DA 自动判断"<strong>这是 GIB SID 还是 uSID Container</strong>"，分别走不同处理路径。
+                两套机制<strong>在同一台路由器上无缝共存</strong>——运营商可以"<strong>新业务用 uSID，旧业务保留传统 SID</strong>"，逐步迁移。
+            </p>
+        </div>
+
+        <h4>§ 5.6.2 真实部署：典型 uSID 编码方案</h4>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:18%;">字段</th>
+                    <th style="width:18%;">长度</th>
+                    <th style="width:30%;">取值</th>
+                    <th>含义</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>uSID Block</strong></td>
+                    <td>32 bit</td>
+                    <td><code>fcbb:bb00::/32</code></td>
+                    <td>全网共享前缀（运营商 ULA 或 GUA 段）</td>
+                </tr>
+                <tr>
+                    <td><strong>uSID #1~5</strong></td>
+                    <td>每段 16 bit</td>
+                    <td><code>0x0001~0xDFFF</code></td>
+                    <td><strong>节点 uSID</strong>：标识网络中具体节点（最多 65535 个，远超大多数运营商规模）</td>
+                </tr>
+                <tr>
+                    <td><strong>Behavior uSID</strong></td>
+                    <td>16 bit</td>
+                    <td><code>0xE001~0xEFFF</code></td>
+                    <td><strong>功能 uSID</strong>：如 0xE001=End.X-Link1, 0xE002=End.DT4-VRF-A</td>
+                </tr>
+                <tr>
+                    <td><strong>End-of-Container</strong></td>
+                    <td>16 bit</td>
+                    <td><code>0x0000</code></td>
+                    <td>终结标记，路由器看到 0x0000 知道容器消费完毕</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <h4>§ 5.6.3 uSID 与 SRH 的双层组合</h4>
+
+        <p>
+            uSID 不是<strong>完全消灭</strong> SRH——而是把<strong>"信息密度"</strong>提升数倍。当路径超过 5~6 跳时，依然可以用<strong>多个 uSID Container 串联</strong>组成 SID List：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">超长路径：用多个 uSID Container 拼接</text>
+
+            <text x="470" y="60" text-anchor="middle" font-size="12" fill="#005073">场景：12 跳跨域路径（每个 uSID Container 装 6 跳）</text>
+
+            <!-- Container 1 -->
+            <rect x="40" y="80" width="420" height="80" fill="#005073" rx="8"/>
+            <text x="250" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="white">SegList[1] · uSID Container 1</text>
+            <text x="250" y="125" text-anchor="middle" font-size="11" font-family="monospace" fill="#02C8FF">fcbb:bb00:0001:0002:0003:0004:0005:0006</text>
+            <text x="250" y="145" text-anchor="middle" font-size="10" fill="#02C8FF">承载前 6 跳：N1 → N2 → N3 → N4 → N5 → N6</text>
+
+            <!-- Container 2 -->
+            <rect x="480" y="80" width="420" height="80" fill="#9232AC" rx="8"/>
+            <text x="690" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="white">SegList[0] · uSID Container 2</text>
+            <text x="690" y="125" text-anchor="middle" font-size="11" font-family="monospace" fill="white">fcbb:bb00:0007:0008:0009:000a:000b:E002</text>
+            <text x="690" y="145" text-anchor="middle" font-size="10" fill="white">后 5 跳 + 终点 End.DT4 (0xE002)</text>
+
+            <!-- 关键说明 -->
+            <rect x="40" y="180" width="860" height="125" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="8"/>
+            <text x="60" y="205" font-size="13" font-weight="700" fill="#3d7a1d">⚡ 对比传统 SRv6 编码</text>
+            <text x="60" y="228" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">传统 SRv6</tspan>：12 跳 = 12 个 SID = 12 × 16 = <tspan font-weight="700" fill="#7a1a14">192 byte SID 列表</tspan></text>
+            <text x="60" y="248" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">uSID</tspan>：12 跳 = 2 个容器 = 2 × 16 = <tspan font-weight="700" fill="#3d7a1d">32 byte SID 列表 → 节省 83%！</tspan></text>
+            <text x="60" y="270" font-size="11" fill="#1A1A1A">• <tspan font-weight="700">关键效果</tspan>：12 跳路径<tspan font-weight="700" fill="#3d7a1d">不再触发 ASIC Recirculation</tspan>，性能恢复线速</text>
+            <text x="60" y="290" font-size="11" font-weight="700" fill="#3d7a1d">→ 这就是 uSID 在 5G/AI 跨域大网中的杀手级价值</text>
+        </svg>
+        </div>
+
+        <!-- ============ uSID 性能基准 ============ -->
+        <h3 id="ch5-perf">§ 5.7 实测性能：uSID 在 Cisco Silicon One 上的真实数据</h3>
+
+        <p>
+            理论再美也要有数据支撑。以下是 Cisco 在 Silicon One Q200 NPU 上的实测对比：
+        </p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">100ns</div>
+                <div class="stat-label">uSID 单跳处理时延（与原生 IPv6 持平）</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0次</div>
+                <div class="stat-label">12 跳路径 Recirculation 次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">↓83%</div>
+                <div class="stat-label">SID 列表字节数减少（12 跳路径）</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">线速</div>
+                <div class="stat-label">100Gbps 端口满载，零丢包</div>
+            </div>
+        </div>
+
+        <div class="table-scroll-wrapper">
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th style="width:24%;">维度</th>
+                    <th class="col-bad" style="width:38%;">传统 SRv6（RFC 8986）</th>
+                    <th class="col-good" style="width:38%;">uSID（Cisco Micro-SID）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SID 编码长度</strong></td>
+                    <td class="col-bad">每个 SID 128 bit</td>
+                    <td class="col-good">每个 uSID 仅 16 bit</td>
+                </tr>
+                <tr>
+                    <td><strong>5 跳路径开销</strong></td>
+                    <td class="col-bad">SRH + 5×16 = 88 byte</td>
+                    <td class="col-good">仅 IPv6 DA = 0 byte 额外</td>
+                </tr>
+                <tr>
+                    <td><strong>12 跳路径开销</strong></td>
+                    <td class="col-bad">SRH + 12×16 = 200 byte</td>
+                    <td class="col-good">SRH + 2×16 = 40 byte</td>
+                </tr>
+                <tr>
+                    <td><strong>硬件操作</strong></td>
+                    <td class="col-bad">SL-1 + DA 替换（多 cycle）</td>
+                    <td class="col-good">单 cycle 左移</td>
+                </tr>
+                <tr>
+                    <td><strong>Recirculation 风险</strong></td>
+                    <td class="col-bad">SID > 6 时高频触发</td>
+                    <td class="col-good">几乎不触发（容器内 6 跳 = 1 个 IPv6 地址）</td>
+                </tr>
+                <tr>
+                    <td><strong>MTU 友好度</strong></td>
+                    <td class="col-bad">长路径吃掉 10%+ 净荷</td>
+                    <td class="col-good">几乎零开销</td>
+                </tr>
+                <tr>
+                    <td><strong>与传统 IPv6 兼容</strong></td>
+                    <td class="col-bad">需要 SRH 解析支持</td>
+                    <td class="col-good">完全 IPv6 LPM 路由兼容</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- ============ 苏格拉底问题 29 ============ -->
+        <h3 id="ch5-q7">§ 5.8 第二十九问：uSID 是不是"完美"了？还有什么短板？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #29 · 反思</div>
+            <h4>"任何技术都有代价。uSID 解决了 SRH 膨胀，但它一定也牺牲了什么。猜猜是什么？"</h4>
+            <p>
+                这是工程师必须有的批判性思维——任何"<strong>过于完美</strong>"的方案都隐藏代价。
+            </p>
+        </div>
+
+        <div class="warning-box">
+            <p style="margin-bottom: var(--space-2);"><strong>uSID 的工程代价</strong>：</p>
+            <ol style="margin-bottom: 0;">
+                <li><strong>编码空间约束</strong>：16 bit 节点 ID 上限 65535，对于超大规模公有云（如 AWS Global）可能不够用，需要分层 uSID Block</li>
+                <li><strong>标准化滞后</strong>：uSID 是 Cisco 主导的"<strong>事实标准</strong>"（IETF draft-filsfils-spring-net-pgm-extension-srv6-usid），尚未成为 RFC——其他厂商早期可能不兼容</li>
+                <li><strong>认知曲线陡峭</strong>：从"一个 SID 一条指令"到"一个 IPv6 地址多条指令"，运维心智模型需要重建</li>
+                <li><strong>调试复杂度</strong>：抓包看到的 IPv6 DA 不是简单的"目的地址"，而是"指令容器"——传统工具需要升级理解能力</li>
+                <li><strong>uSID Block 全网规划</strong>：必须从 Day-1 就确定全网共享的 32-bit Block，<strong>事后修改成本极高</strong></li>
+            </ol>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 工程权衡的真相</div>
+            <p style="margin-bottom: 0;">
+                uSID 的故事完美诠释了<strong>工程的本质——在多个约束之间找到帕累托最优</strong>：
+                <strong>用"标准化复杂度"换"硬件性能与 MTU 友好"</strong>。
+                对于 5G/云/AI 这种"<strong>性能压倒一切</strong>"的场景，这是绝对划算的交易。
+                这也告诉我们一个真理——<strong>没有银弹，只有权衡。优秀工程师的能力，是知道在什么场景下做什么权衡</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 模块 5 小结 ============ -->
+        <h3 id="ch5-summary">§ 5.9 模块 5 小结：你已经看清了"工程现实"</h3>
+
+        <div class="tip-bar">
+            <div class="tip-bar-icon">⚙️</div>
+            <p>
+                如果你能用自己的话回答以下问题，你就理解了 SRv6 的<strong>工程演进逻辑</strong>。
+            </p>
+        </div>
+
+        <ol style="font-size: 1.05rem; line-height: 2;">
+            <li>SRH 膨胀在 7-SID 跨域路径上具体多少字节？为什么 IPv6 分片不能解决这个问题？</li>
+            <li>NPU 解析深度墙的物理本质是什么？什么是 Recirculation？它对性能的影响有多大？</li>
+            <li>uSID 的核心思想是什么？为什么"共享 Locator Block"的洞察如此关键？</li>
+            <li>uSID 的"左移操作"相比传统 SL 减 1 有哪些硬件优势？</li>
+            <li>GIB 和 LIB 是怎么实现 uSID 与传统 SRv6 共存的？</li>
+            <li>uSID 牺牲了什么？为什么这些代价对运营商是可接受的？</li>
+        </ol>
+
+        <!-- ============ 章节金句 ============ -->
+        <div class="chapter-quote">
+            <p>
+                理论上，理论与实践没有差别；<br>
+                实践上，它们的差别巨大。<br>
+                uSID 的伟大，在于它<strong>不是推翻 SRv6，而是用一段位运算魔术让 SRv6 真正落地</strong>。
+            </p>
+            <div class="author">—— SRv6 工程演进哲学</div>
+        </div>
+
+        <!-- ============ 模块 6 预告 ============ -->
+        <div class="socratic-box" style="margin-top: var(--space-12);">
+            <div class="label">下一模块预告 · MODULE 6 · APPLICATIONS</div>
+            <h4>"理论、协议、工程都讲完了。SRv6 在真实业务中是怎么改变世界的？"</h4>
+            <p style="margin-bottom: var(--space-4);">
+                最终一章，我们要看 SRv6 在三个最具代表性的场景中的杀手级应用：
+            </p>
+            <ul>
+                <li><strong>5G 核心网切片</strong>：每个切片一个 SRv6 Flex-Algo + 独立 SLA</li>
+                <li><strong>跨域 TE</strong>：从中国到美国的端到端低时延承载，怎么靠 SRv6 + uSID + SR-PCE 实现？</li>
+                <li><strong>SFC 服务功能链</strong>：把防火墙、DPI、NAT 用 SID 串成一条"服务链"</li>
+                <li><strong>AI 数据中心</strong>：GPU-to-GPU 流量 RDMA over SRv6 实战</li>
+                <li><strong>SD-WAN 升维</strong>：SRv6 怎么取代 IPsec 隧道</li>
+                <li><strong>结尾</strong>：完整术语表（Glossary）</li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                <strong>请回复"继续"，我会先用苏格拉底问题检验你对模块 5 的理解，然后进入终章模块 6。</strong>
+            </p>
+        </div>
+
+    </div>
+</section>
+<!-- ===================== 模块 6 · 应用场景推演（终章） ===================== -->
+<section class="chapter" id="ch6">
+    <div class="container">
+
+        <span class="module-tag">MODULE 6 · APPLICATIONS · 终章</span>
+        <h2>应用场景推演：SRv6 在真实战场上的范式革命</h2>
+
+        <div class="progress-pills">
+            <span class="progress-pill done">①·起源 ✓</span>
+            <span class="progress-pill done">②·数据面 ✓</span>
+            <span class="progress-pill done">③·控制面 ✓</span>
+            <span class="progress-pill done">④·指令集 ✓</span>
+            <span class="progress-pill done">⑤·进化 ✓</span>
+            <span class="progress-pill active">⑥·应用 (当前)</span>
+        </div>
+
+        <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 800px;">
+            协议的优雅是写给程序员看的；<strong>业务的革命才是写给世界看的</strong>。
+            前五章我们解构了 SRv6 的"<strong>骨骼与神经</strong>"，本章我们看它如何"<strong>改变行业</strong>"——
+            5G 切片、跨域 TE、服务链、AI 数据中心、SD-WAN。每一个场景都是 SRv6 真正发挥威力的舞台。
+        </p>
+
+        <!-- ============ 苏格拉底问题 30 ============ -->
+        <h3 id="ch6-q1">§ 6.1 第三十问：为什么 5G 切片"必须"用 SRv6？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #30</div>
+            <h4>"5G 三大业务（eMBB、URLLC、mMTC）有截然不同的 SLA。传统网络也能给不同业务做 QoS，为什么必须用 SRv6 切片？"</h4>
+            <p>
+                这个问题揭示了 5G 的本质需求——<strong>不只是"区分对待"，而是"硬隔离"</strong>。
+            </p>
+        </div>
+
+        <h4>§ 6.1.1 5G 三大业务的"SLA 撕裂"</h4>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:14%;">业务类型</th>
+                    <th style="width:24%;">典型应用</th>
+                    <th style="width:18%;">时延要求</th>
+                    <th style="width:18%;">带宽要求</th>
+                    <th>可靠性</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>eMBB</strong><br>增强移动宽带</td>
+                    <td>4K/8K 直播、VR、云游戏</td>
+                    <td>~20ms</td>
+                    <td><strong>极高（10 Gbps+）</strong></td>
+                    <td>99.99%</td>
+                </tr>
+                <tr>
+                    <td><strong>URLLC</strong><br>超可靠低时延</td>
+                    <td>工业控制、自动驾驶、远程手术</td>
+                    <td><strong>≤ 1ms</strong></td>
+                    <td>低</td>
+                    <td><strong>99.9999%</strong>（六个 9）</td>
+                </tr>
+                <tr>
+                    <td><strong>mMTC</strong><br>海量物联</td>
+                    <td>智慧城市、表计、传感网</td>
+                    <td>~100ms（不敏感）</td>
+                    <td>极低</td>
+                    <td>99%</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <div class="warning-box">
+            <p style="margin-bottom: 0;">
+                <strong>问题</strong>：传统 QoS（DiffServ）只能"<strong>软优先级</strong>"——拥塞时高优先级先走。
+                但 URLLC 不是"<strong>更优先</strong>"，而是"<strong>必须 1ms 内到达</strong>"——
+                它需要<strong>独立的物理路径、独立的带宽、独立的转发资源</strong>。
+                这是 SLA 的"<strong>硬隔离</strong>"，不是"软优先"。
+            </p>
+        </div>
+
+        <h4>§ 6.1.2 SRv6 + Flex-Algo + uSID 的切片实现</h4>
+
+        <p>
+            SRv6 的 Flex-Algo 让"<strong>每个切片用独立的算法走独立的路径</strong>"成为可能：
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">5G 切片 · SRv6 + Flex-Algo 实现"硬隔离"</text>
+
+            <!-- 5G 基站 -->
+            <rect x="40" y="60" width="120" height="60" fill="#005073" rx="6"/>
+            <text x="100" y="85" text-anchor="middle" font-size="12" font-weight="700" fill="white">5G gNB</text>
+            <text x="100" y="103" text-anchor="middle" font-size="9" fill="#02C8FF">(基站 / RAN-PE)</text>
+
+            <!-- 三条切片路径 -->
+            <text x="280" y="50" font-size="11" fill="#92740a" font-weight="700">eMBB 切片 (Algo 0 · 默认)</text>
+            <line x1="160" y1="80" x2="780" y2="80" stroke="#FBAB18" stroke-width="6" stroke-dasharray="0"/>
+            <text x="470" y="73" text-anchor="middle" font-size="9" fill="#92740a">大带宽路径，经核心 P 节点</text>
+
+            <text x="280" y="155" font-size="11" fill="#7a1a14" font-weight="700">URLLC 切片 (Algo 128 · 低时延)</text>
+            <line x1="160" y1="180" x2="780" y2="180" stroke="#E2231A" stroke-width="6" stroke-dasharray="0"/>
+            <text x="470" y="173" text-anchor="middle" font-size="9" fill="#7a1a14">超短路径 + 严格 BW 预留</text>
+
+            <text x="280" y="255" font-size="11" fill="#3d7a1d" font-weight="700">mMTC 切片 (Algo 129 · 低成本)</text>
+            <line x1="160" y1="280" x2="780" y2="280" stroke="#67B346" stroke-width="6" stroke-dasharray="6,4"/>
+            <text x="470" y="273" text-anchor="middle" font-size="9" fill="#3d7a1d">最便宜路径，可绕远</text>
+
+            <!-- 5GC -->
+            <rect x="780" y="60" width="120" height="220" fill="#9232AC" rx="6"/>
+            <text x="840" y="170" text-anchor="middle" font-size="12" font-weight="700" fill="white">5GC</text>
+            <text x="840" y="190" text-anchor="middle" font-size="9" fill="white">(UPF/AMF)</text>
+
+            <!-- SID 编码示例 -->
+            <rect x="40" y="310" width="860" height="135" fill="#f5f7fa" stroke="#005073" stroke-width="1.5" rx="8"/>
+            <text x="60" y="335" font-size="13" font-weight="700" fill="#005073">📦 SRv6 切片 SID 编码（基于 uSID）</text>
+            <text x="60" y="358" font-size="11" font-family="monospace" fill="#92740a">eMBB:    fcbb:bb00:0001:0002:0003:E002::  (Algo 0)  → 走默认 Flex-Algo</text>
+            <text x="60" y="378" font-size="11" font-family="monospace" fill="#7a1a14">URLLC:   fcbb:bb01:0001:0002:0003:E002::  (Algo 128) → 严格低时延路径 ⚡</text>
+            <text x="60" y="398" font-size="11" font-family="monospace" fill="#3d7a1d">mMTC:    fcbb:bb02:0001:0002:0003:E002::  (Algo 129) → 最低成本路径</text>
+            <text x="60" y="425" font-size="11" font-weight="700" fill="#005073">→ 三条切片<tspan fill="#7a1a14">在物理上完全隔离</tspan>，但共享同一套基础设施</text>
+        </svg>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 切片的本质</div>
+            <p style="margin-bottom: 0;">
+                5G 切片 = "<strong>多个虚拟网络共享物理基础设施 + SLA 强隔离</strong>"。
+                SRv6 实现切片的精妙之处：
+                <strong>同一台路由器、同一根光纤</strong>，仅靠"<strong>不同的 Flex-Algo SID</strong>"就让数据自动走独立的路径、享受独立的带宽资源。
+                而且<strong>切片定义可以秒级动态调整</strong>——这是传统 MPLS 切片需要预先规划隧道完全做不到的。
+                这就是为什么中国移动、中国电信、Softbank、Telefonica 等头部运营商<strong>5G 承载网全面采用 SRv6</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 31 ============ -->
+        <h3 id="ch6-q2">§ 6.2 第三十一问：跨国跨域 TE，到底是怎么实现的？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #31</div>
+            <h4>"假设你是一家全球游戏公司，你的玩家在北京，服务器在新加坡，中间跨 3 个 AS。SRv6 怎么保证'端到端 50ms'的 SLA？"</h4>
+            <p>
+                这是 SRv6 + uSID + SR-PCE 三剑合璧的舞台。我们走一遍完整的工程实现。
+            </p>
+        </div>
+
+        <h4>§ 6.2.1 跨域 TE 的实战架构</h4>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">跨国跨域 SRv6 TE · 端到端 50ms SLA 实战</text>
+
+            <!-- Crosswork SR-PCE -->
+            <rect x="350" y="55" width="240" height="65" fill="#9232AC" rx="10"/>
+            <text x="470" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="white">Cisco Crosswork + SR-PCE</text>
+            <text x="470" y="100" text-anchor="middle" font-size="10" fill="white">全局拓扑 + 实时算路 + 跨 AS BSID 编排</text>
+
+            <!-- AS-A China -->
+            <rect x="40" y="170" width="240" height="170" fill="#fef0f0" stroke="#E2231A" stroke-width="2" rx="10"/>
+            <text x="160" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#7a1a14">AS-A · China Telecom</text>
+            <text x="160" y="213" text-anchor="middle" font-size="10" fill="#7a1a14">uSID Block: fcbb:bb00::/32</text>
+
+            <circle cx="80" cy="265" r="22" fill="#E2231A"/>
+            <text x="80" y="270" text-anchor="middle" font-size="11" fill="white">PE-A</text>
+            <text x="80" y="305" text-anchor="middle" font-size="9" fill="#7a1a14">玩家入网</text>
+
+            <circle cx="160" cy="265" r="22" fill="#E2231A"/>
+            <text x="160" y="270" text-anchor="middle" font-size="11" fill="white">P-1</text>
+
+            <circle cx="240" cy="265" r="22" fill="#E2231A"/>
+            <text x="240" y="270" text-anchor="middle" font-size="11" fill="white">ABR-A</text>
+            <text x="240" y="305" text-anchor="middle" font-size="9" fill="#7a1a14">边界</text>
+
+            <line x1="100" y1="265" x2="140" y2="265" stroke="#E2231A" stroke-width="1.5"/>
+            <line x1="180" y1="265" x2="220" y2="265" stroke="#E2231A" stroke-width="1.5"/>
+
+            <!-- AS-B Transit -->
+            <rect x="350" y="170" width="240" height="170" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="10"/>
+            <text x="470" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#92740a">AS-B · NTT Transit</text>
+            <text x="470" y="213" text-anchor="middle" font-size="10" fill="#92740a">uSID Block: fcbb:bb20::/32</text>
+
+            <circle cx="380" cy="265" r="22" fill="#FBAB18"/>
+            <text x="380" y="270" text-anchor="middle" font-size="11" fill="white">ABR-B1</text>
+
+            <circle cx="470" cy="265" r="22" fill="#FBAB18"/>
+            <text x="470" y="270" text-anchor="middle" font-size="11" fill="white">P-T</text>
+
+            <circle cx="560" cy="265" r="22" fill="#FBAB18"/>
+            <text x="560" y="270" text-anchor="middle" font-size="11" fill="white">ABR-B2</text>
+
+            <line x1="402" y1="265" x2="448" y2="265" stroke="#FBAB18" stroke-width="1.5"/>
+            <line x1="492" y1="265" x2="538" y2="265" stroke="#FBAB18" stroke-width="1.5"/>
+
+            <!-- AS-C SG -->
+            <rect x="660" y="170" width="240" height="170" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="10"/>
+            <text x="780" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#3d7a1d">AS-C · Singtel</text>
+            <text x="780" y="213" text-anchor="middle" font-size="10" fill="#3d7a1d">uSID Block: fcbb:bb40::/32</text>
+
+            <circle cx="700" cy="265" r="22" fill="#67B346"/>
+            <text x="700" y="270" text-anchor="middle" font-size="11" fill="white">ABR-C</text>
+
+            <circle cx="780" cy="265" r="22" fill="#67B346"/>
+            <text x="780" y="270" text-anchor="middle" font-size="11" fill="white">P-2</text>
+
+            <circle cx="860" cy="265" r="22" fill="#67B346"/>
+            <text x="860" y="270" text-anchor="middle" font-size="11" fill="white">PE-Z</text>
+            <text x="860" y="305" text-anchor="middle" font-size="9" fill="#3d7a1d">游戏服务器</text>
+
+            <line x1="722" y1="265" x2="758" y2="265" stroke="#67B346" stroke-width="1.5"/>
+            <line x1="802" y1="265" x2="840" y2="265" stroke="#67B346" stroke-width="1.5"/>
+
+            <!-- 跨域连接 -->
+            <line x1="262" y1="265" x2="358" y2="265" stroke="#005073" stroke-width="3" stroke-dasharray="6,3"/>
+            <text x="310" y="255" text-anchor="middle" font-size="10" font-weight="700" fill="#005073">eBGP</text>
+
+            <line x1="582" y1="265" x2="678" y2="265" stroke="#005073" stroke-width="3" stroke-dasharray="6,3"/>
+            <text x="630" y="255" text-anchor="middle" font-size="10" font-weight="700" fill="#005073">eBGP</text>
+
+            <!-- BGP-LS / PCEP -->
+            <line x1="160" y1="230" x2="380" y2="125" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="200" y="190" font-size="9" font-weight="700" fill="#9232AC">BGP-LS</text>
+            <line x1="470" y1="230" x2="470" y2="125" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="780" y1="230" x2="560" y2="125" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+            <!-- SID List -->
+            <rect x="40" y="370" width="860" height="160" fill="#005073" rx="10"/>
+            <text x="60" y="395" font-size="13" font-weight="700" fill="white">📦 PE-A 头节点构造的 SRv6 SID List（含跨域 BSID）</text>
+            <text x="60" y="423" font-size="11" font-family="monospace" fill="#02C8FF">SegList[0] = fcbb:bb40:0050:0070:E002::      → AS-C 内 uSID 容器（终点 PE-Z）</text>
+            <text x="60" y="443" font-size="11" font-family="monospace" fill="#02C8FF">SegList[1] = fcbb:bb20:BSID-X::             → AS-B 的 BSID（封装其内部路径）</text>
+            <text x="60" y="463" font-size="11" font-family="monospace" fill="#02C8FF">SegList[2] = fcbb:bb00:0030:0040:E001::      → AS-A 内 uSID 容器（出 ABR-A）</text>
+            <text x="60" y="490" font-size="11" font-weight="700" fill="white">⚡ 关键技巧：每个 AS 用自己的 uSID Block，跨 AS 用 BSID 封装对方的内部路径</text>
+            <text x="60" y="510" font-size="11" font-weight="700" fill="#FF9000">→ 上游不需要知道下游 AS 内部细节，BSID 替代了"另一个 AS 的整段路径"</text>
+        </svg>
+        </div>
+
+        <div class="callout">
+            <strong>这正是回答模块 5 留下的问题</strong>：当跨多个 uSID Block 时（不同运营商不同 Block），<strong>BSID 是天然的"翻译层"</strong>。
+            上游 PE 把对方的 uSID Container 封装成一个 BSID，下游 ABR 解析后展开成本地的 uSID 列表继续转发——
+            <strong>就像编程语言中跨模块调用必须经过"接口（API）"一样优雅</strong>。
+        </div>
+
+        <!-- ============ 苏格拉底问题 32 ============ -->
+        <h3 id="ch6-q3">§ 6.3 第三十二问：服务功能链（SFC）—— 怎么把网络服务"串起来"？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #32</div>
+            <h4>"企业流量需要按顺序经过：防火墙 → DPI → 负载均衡 → 业务服务器。传统方式是用 VLAN 串接 / Policy-Based Routing。SRv6 怎么做？"</h4>
+            <p>
+                传统方式叫"<strong>Service Chaining via Topology</strong>"——靠物理拓扑硬连接。SRv6 让它进化为"<strong>Service Chaining via Programming</strong>"——按 SID 列表自由编排。
+            </p>
+        </div>
+
+        <h4>§ 6.3.1 SRv6 SFC 的核心思想</h4>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 服务即指令</div>
+            <p style="margin-bottom: var(--space-4);">
+                把每个网络服务（防火墙、DPI、LB...）当成<strong>"网络函数（Network Function, NF）"</strong>，
+                每个 NF 在控制器注册一个 SRv6 SID。流量按<strong>SID List 顺序</strong>逐个穿过 NF——
+                这就是 SFC（Service Function Chaining）。
+            </p>
+            <p style="margin-bottom: 0;">
+                关键创新：<strong>NF 不需要懂路由！</strong> 它只需在收到包后处理完业务（比如防火墙过滤），然后把包送回到默认网关——
+                网关就是 SRv6-aware 路由器，会根据 SRH 自动找到下一个 NF 的 SID 转发。
+            </p>
+        </div>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#0D274D">SRv6 SFC · 用 SID List 编排服务功能链</text>
+
+            <!-- 业务流量入口 -->
+            <rect x="40" y="80" width="100" height="60" fill="#005073" rx="6"/>
+            <text x="90" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="white">企业流量</text>
+            <text x="90" y="123" text-anchor="middle" font-size="9" fill="#02C8FF">(Internet 访问)</text>
+
+            <text x="170" y="115" font-size="20" fill="#005073">→</text>
+
+            <!-- 防火墙 -->
+            <rect x="200" y="80" width="120" height="60" fill="#FBAB18" rx="6"/>
+            <text x="260" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="white">🛡️ Firewall</text>
+            <text x="260" y="123" text-anchor="middle" font-size="9" fill="white">SID: ::F001:E001</text>
+
+            <text x="340" y="115" font-size="20" fill="#005073">→</text>
+
+            <!-- DPI -->
+            <rect x="370" y="80" width="120" height="60" fill="#9232AC" rx="6"/>
+            <text x="430" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="white">🔍 DPI</text>
+            <text x="430" y="123" text-anchor="middle" font-size="9" fill="white">SID: ::F002:E001</text>
+
+            <text x="510" y="115" font-size="20" fill="#005073">→</text>
+
+            <!-- LB -->
+            <rect x="540" y="80" width="120" height="60" fill="#67B346" rx="6"/>
+            <text x="600" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="white">⚖️ Load-Bal</text>
+            <text x="600" y="123" text-anchor="middle" font-size="9" fill="white">SID: ::F003:E001</text>
+
+            <text x="680" y="115" font-size="20" fill="#005073">→</text>
+
+            <!-- 业务服务器 -->
+            <rect x="710" y="80" width="190" height="60" fill="#E2231A" rx="6"/>
+            <text x="805" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="white">📊 业务服务器</text>
+            <text x="805" y="123" text-anchor="middle" font-size="9" fill="white">SID: ::F004:E002 (End.DT4)</text>
+
+            <!-- SID List 在包里 -->
+            <rect x="40" y="180" width="860" height="100" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="8"/>
+            <text x="60" y="205" font-size="13" font-weight="700" fill="#92740a">📦 入口路由器构造的 SID List</text>
+            <text x="60" y="230" font-size="11" font-family="monospace" fill="#92740a">SegList[3] = fcbb:bb00:F001:E001::    (Firewall NF)</text>
+            <text x="60" y="248" font-size="11" font-family="monospace" fill="#9232AC">SegList[2] = fcbb:bb00:F002:E001::    (DPI NF)</text>
+            <text x="60" y="266" font-size="11" font-family="monospace" fill="#3d7a1d">SegList[1] = fcbb:bb00:F003:E001::    (LoadBalancer NF)</text>
+
+            <!-- 关键说明 -->
+            <rect x="40" y="305" width="860" height="135" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="8"/>
+            <text x="60" y="330" font-size="13" font-weight="700" fill="#3d7a1d">⚡ 为什么 SRv6 SFC 远胜传统方案？</text>
+            <text x="60" y="355" font-size="11" fill="#1A1A1A">① <tspan font-weight="700">动态编排</tspan>：增减服务节点 = 改 SID 列表，<tspan font-weight="700" fill="#3d7a1d">秒级生效</tspan>，无需改 VLAN/路由</text>
+            <text x="60" y="375" font-size="11" fill="#1A1A1A">② <tspan font-weight="700">服务无感知</tspan>：NF 只看本地 SID，收发包就行，<tspan font-weight="700" fill="#3d7a1d">无需理解整条链</tspan></text>
+            <text x="60" y="395" font-size="11" fill="#1A1A1A">③ <tspan font-weight="700">多链并存</tspan>：不同租户/业务可定义不同链（用不同 SID List），<tspan font-weight="700" fill="#3d7a1d">物理设施完全共享</tspan></text>
+            <text x="60" y="415" font-size="11" fill="#1A1A1A">④ <tspan font-weight="700">故障跳过</tspan>：某 NF 故障时，控制器实时下发新 SID List 跳过该节点</text>
+        </svg>
+        </div>
+
+        <div class="analogy-box">
+            <div class="label">类比 · 工厂流水线</div>
+            <p style="margin-bottom: 0;">
+                传统 SFC 像是<strong>"焊死的流水线"</strong>——产品必须按预设物理路径走过每个工位，调整顺序要重新布置传送带。<br>
+                SRv6 SFC 像是<strong>"无人车自动调度"</strong>——每个工位有 RFID 标识（SID），无人车（数据包）按"<strong>工位列表</strong>"自主导航。
+                增加一个工位 = 改个列表。<strong>软件定义服务编排，正是 SRv6 SFC 的核心革命</strong>。
+            </p>
+        </div>
+
+        <!-- ============ 苏格拉底问题 33 ============ -->
+        <h3 id="ch6-q4">§ 6.4 第三十三问：AI 数据中心 GPU-to-GPU 流量为什么需要 SRv6？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #33 · 2026 热点</div>
+            <h4>"训练大模型时，几千张 GPU 之间的 RDMA 通信对网络要求极高。SRv6 在 AI 数据中心能解决什么独特问题？"</h4>
+            <p>
+                这是 2024-2026 年 SRv6 最热门的新战场。理解这个场景，能让你看清 SRv6 在<strong>"性能+可编程"</strong>双维度的天然优势。
+            </p>
+        </div>
+
+        <h4>§ 6.4.1 大模型训练的网络挑战</h4>
+
+        <div class="warning-box">
+            <p style="margin-bottom: var(--space-2);"><strong>典型 LLM 训练场景</strong>（如 GPT-4 级模型）：</p>
+            <ul style="margin-bottom: 0;">
+                <li><strong>规模</strong>：万卡级 GPU 集群（10000+ NVIDIA H100/H200）</li>
+                <li><strong>通信模式</strong>：AllReduce、All-to-All——<strong>每个 GPU 都和其他所有 GPU 通信</strong></li>
+                <li><strong>带宽需求</strong>：单 GPU 网卡 400 Gbps，集群总带宽达 PB/s 级</li>
+                <li><strong>时延敏感</strong>：单次 AllReduce 时延 <strong>百微秒</strong>级——一次抖动让整个 epoch 浪费</li>
+                <li><strong>故障敏感</strong>：任何一条链路丢包都会让 NCCL 重传，整个集群效率暴跌</li>
+            </ul>
+        </div>
+
+        <h4>§ 6.4.2 SRv6 在 AI DC 的三大杀招</h4>
+
+        <div class="grid grid-3">
+            <div class="card">
+                <h4 style="border:none;padding:0;">① 路径多样性</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">
+                    AllReduce 流量经常出现"<strong>大象流</strong>"——多条 ECMP 路径中只走一条，导致拥塞。
+                    SRv6 + Flex-Algo 让控制器精确分配每条流走不同路径，<strong>实现真正的等价多路径</strong>。
+                </p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">② 拥塞自避让</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">
+                    控制器实时监控每条链路 BW 利用率。检测到拥塞时，
+                    <strong>毫秒级下发新 SID List</strong>，让流量绕开热点链路。比传统 ECMP 哈希更智能。
+                </p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">③ 故障快速切换</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">
+                    SRv6 TI-LFA（Topology Independent Loop-Free Alternate）实现 <strong>≤ 50ms</strong> 故障切换。
+                    NCCL 通信几乎无感知——不会触发 TCP 重连或集合通信重启。
+                </p>
+            </div>
+        </div>
+
+        <div class="callout">
+            <strong>实战案例</strong>：Meta、Microsoft Azure 的 AI 训练网络已开始采用 SRv6 over Ethernet（基于 RoCEv2），
+            实现 GPU 集群间的<strong>智能路径调度</strong>。Cisco Silicon One G200 NPU（51.2 Tbps 单芯片）原生支持 uSID，
+            为 AI Fabric 提供线速转发能力。
+        </div>
+
+        <!-- ============ 苏格拉底问题 34 ============ -->
+        <h3 id="ch6-q5">§ 6.5 第三十四问：SD-WAN 为什么也开始拥抱 SRv6？</h3>
+
+        <div class="socratic-box">
+            <div class="label">SOCRATIC QUESTION #34</div>
+            <h4>"SD-WAN 用 IPsec 隧道+应用感知路由不是已经很成熟了吗？SRv6 加进来有什么新价值？"</h4>
+            <p>
+                这是企业网架构师在 2025-2026 年面对的关键问题。答案藏在"<strong>隧道叠加</strong>"的深层成本里。
+            </p>
+        </div>
+
+        <div class="first-principle-box">
+            <div class="label">FIRST PRINCIPLE · 隧道蛛网的代价</div>
+            <p style="margin-bottom: var(--space-4);">
+                传统 SD-WAN 在 N 个分支机构之间建立 N×(N-1) 的全互联 IPsec 隧道：
+            </p>
+            <ul>
+                <li>100 个分支 = <strong>9900 条 IPsec 隧道</strong></li>
+                <li>每条隧道维护：IKE 协商、SA 状态、密钥更新——<strong>控制面噩梦</strong></li>
+                <li>路径选择是"<strong>隧道粒度</strong>"，无法做精细的应用级 TE</li>
+                <li>跨运营商时还要叠加 MPLS L3VPN，<strong>双层封装</strong>开销巨大</li>
+            </ul>
+            <p style="margin-bottom: 0;">
+                SRv6 让 SD-WAN 演进为"<strong>无隧道隧道</strong>"：分支用 SRv6 SID 直接编程路径，
+                路径状态在数据包里，<strong>不需要预建隧道</strong>。这就是 Cisco Catalyst SD-WAN（前 Viptela）正在融合 SRv6 的方向。
+            </p>
+        </div>
+
+        <div class="table-scroll-wrapper">
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>维度</th>
+                    <th class="col-bad">传统 SD-WAN（IPsec 隧道）</th>
+                    <th class="col-good">SRv6 SD-WAN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>隧道数量</strong></td>
+                    <td class="col-bad">N² 全互联，控制面爆炸</td>
+                    <td class="col-good">无需预建，路径在包里</td>
+                </tr>
+                <tr>
+                    <td><strong>路径选择</strong></td>
+                    <td class="col-bad">隧道粒度（粗）</td>
+                    <td class="col-good">SID 粒度（极细，可应用级）</td>
+                </tr>
+                <tr>
+                    <td><strong>跨运营商</strong></td>
+                    <td class="col-bad">叠加 MPLS，双层封装</td>
+                    <td class="col-good">原生 IPv6 全球可达</td>
+                </tr>
+                <tr>
+                    <td><strong>新分支接入</strong></td>
+                    <td class="col-bad">配置 N 条新隧道</td>
+                    <td class="col-good">分配 Locator 即可加入</td>
+                </tr>
+                <tr>
+                    <td><strong>故障切换</strong></td>
+                    <td class="col-bad">秒级（隧道重建）</td>
+                    <td class="col-good">毫秒级（TI-LFA）</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- ============ 总结：SRv6 的范式革命 ============ -->
+        <h3 id="ch6-summary">§ 6.6 全文回环：SRv6 真正改变了什么？</h3>
+
+        <p>
+            走过六大模块，我们终于可以回到最初的问题——<strong>SRv6 到底改变了什么？</strong>
+        </p>
+
+        <div class="svg-scroll-wrapper">
+        <svg viewBox="0 0 940 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <text x="470" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">SRv6 范式革命的三个层次</text>
+
+            <!-- Layer 1: 协议层 -->
+            <rect x="40" y="60" width="280" height="280" fill="#e8f4fd" stroke="#005073" stroke-width="2" rx="12"/>
+            <text x="180" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#005073">① 协议层革命</text>
+            <text x="180" y="115" text-anchor="middle" font-size="11" fill="#005073">从"标签转发"到"网络编程"</text>
+            <text x="55" y="150" font-size="11" fill="#1A1A1A">• 状态在包头，不在节点</text>
+            <text x="55" y="172" font-size="11" fill="#1A1A1A">• IPv6 地址 = 机器指令</text>
+            <text x="55" y="194" font-size="11" fill="#1A1A1A">• 协议栈精简（4→2 层）</text>
+            <text x="55" y="216" font-size="11" fill="#1A1A1A">• 全球可达，主机可参与</text>
+            <text x="55" y="238" font-size="11" fill="#1A1A1A">• uSID 极致信息密度</text>
+            <text x="180" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#005073">代表技术：</text>
+            <text x="180" y="310" text-anchor="middle" font-size="10" fill="#005073">SRH / End.* / uSID</text>
+            <text x="180" y="328" text-anchor="middle" font-size="10" fill="#005073">RFC 8754 / 8986 / 9252</text>
+
+            <!-- Layer 2: 架构层 -->
+            <rect x="330" y="60" width="280" height="280" fill="#fff8e1" stroke="#FBAB18" stroke-width="2" rx="12"/>
+            <text x="470" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#92740a">② 架构层革命</text>
+            <text x="470" y="115" text-anchor="middle" font-size="11" fill="#92740a">从"分布式管理"到"分层智能"</text>
+            <text x="345" y="150" font-size="11" fill="#1A1A1A">• IGP 反射神经（毫秒）</text>
+            <text x="345" y="172" font-size="11" fill="#1A1A1A">• BGP 服务广告（秒）</text>
+            <text x="345" y="194" font-size="11" fill="#1A1A1A">• PCE 大脑皮层（分钟）</text>
+            <text x="345" y="216" font-size="11" fill="#1A1A1A">• 控制器+模型驱动</text>
+            <text x="345" y="238" font-size="11" fill="#1A1A1A">• 意图自动转译路径</text>
+            <text x="470" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#92740a">代表技术：</text>
+            <text x="470" y="310" text-anchor="middle" font-size="10" fill="#92740a">Crosswork / SR-PCE / BGP-LS</text>
+            <text x="470" y="328" text-anchor="middle" font-size="10" fill="#92740a">PCEP / Flex-Algo</text>
+
+            <!-- Layer 3: 业务层 -->
+            <rect x="620" y="60" width="280" height="280" fill="#f0f9eb" stroke="#67B346" stroke-width="2" rx="12"/>
+            <text x="760" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#3d7a1d">③ 业务层革命</text>
+            <text x="760" y="115" text-anchor="middle" font-size="11" fill="#3d7a1d">从"专网叠加"到"统一可编程"</text>
+            <text x="635" y="150" font-size="11" fill="#1A1A1A">• 5G 切片硬隔离</text>
+            <text x="635" y="172" font-size="11" fill="#1A1A1A">• 跨域 TE 端到端 SLA</text>
+            <text x="635" y="194" font-size="11" fill="#1A1A1A">• SFC 服务链动态编排</text>
+            <text x="635" y="216" font-size="11" fill="#1A1A1A">• AI Fabric 智能调度</text>
+            <text x="635" y="238" font-size="11" fill="#1A1A1A">• SD-WAN 无隧道化</text>
+            <text x="760" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#3d7a1d">商业价值：</text>
+            <text x="760" y="310" text-anchor="middle" font-size="10" fill="#3d7a1d">运维 OPEX↓ / 业务 TTM↓</text>
+            <text x="760" y="328" text-anchor="middle" font-size="10" fill="#3d7a1d">资源利用率↑ / SLA 保障</text>
+        </svg>
+        </div>
+
+        <div class="chapter-quote">
+            <p>
+                SRv6 不只是更优秀的 MPLS。<br>
+                它是<strong>把网络从"管道"升维为"分布式可编程计算机"</strong>的范式跃迁。<br>
+                每一个 IPv6 地址都是一条指令，每一段 SID 列表都是一段程序——<br>
+                <strong>从此，网络不再是被使用的基础设施，而是可以被编程的计算引擎</strong>。
+            </p>
+            <div class="author">—— SRv6 终极哲学</div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ===================== 完整术语表 GLOSSARY ===================== -->
+<section class="chapter" id="glossary">
+    <div class="container">
+
+        <span class="module-tag">GLOSSARY · 术语表</span>
+        <h2>完整术语表：SRv6 核心概念速查</h2>
+
+        <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 800px; margin-bottom: var(--space-8);">
+            一份精心编纂的术语速查手册，按"<strong>协议数据面 / 控制面 / 工程优化 / 业务场景</strong>"四类组织。
+            遇到不熟悉的概念时，可随时回查。
+        </p>
+
+        <h3>📦 数据平面术语</h3>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:18%;">术语</th>
+                    <th style="width:18%;">英文全称</th>
+                    <th>定义</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SRv6</strong></td>
+                    <td>Segment Routing over IPv6</td>
+                    <td>基于 IPv6 数据面的 Segment Routing 实现，将路径指令编码为 IPv6 地址</td>
+                </tr>
+                <tr>
+                    <td><strong>SRH</strong></td>
+                    <td>Segment Routing Header</td>
+                    <td>IPv6 Routing Header Type 4，承载 SID 列表与转发状态（RFC 8754）</td>
+                </tr>
+                <tr>
+                    <td><strong>SID</strong></td>
+                    <td>Segment Identifier</td>
+                    <td>128-bit IPv6 地址，由 Locator + Function + Arguments 组成</td>
+                </tr>
+                <tr>
+                    <td><strong>Locator</strong></td>
+                    <td>Locator</td>
+                    <td>SID 中的可路由前缀（通常 32-64 bit），定义"指令在哪台节点执行"</td>
+                </tr>
+                <tr>
+                    <td><strong>Function</strong></td>
+                    <td>Function Code</td>
+                    <td>SID 中的指令操作码（16-32 bit），定义"做什么操作"</td>
+                </tr>
+                <tr>
+                    <td><strong>Arguments</strong></td>
+                    <td>Arguments</td>
+                    <td>SID 中的指令参数（剩余 bit），如 Flow ID、Bridge Domain 等</td>
+                </tr>
+                <tr>
+                    <td><strong>SL</strong></td>
+                    <td>Segments Left</td>
+                    <td>SRH 字段，剩余未消费的 SID 数量。每经过一个段端点减 1</td>
+                </tr>
+                <tr>
+                    <td><strong>Last Entry</strong></td>
+                    <td>Last Entry</td>
+                    <td>SRH 字段，SID 列表的最大下标（数组长度 - 1）</td>
+                </tr>
+                <tr>
+                    <td><strong>End</strong></td>
+                    <td>Endpoint Function</td>
+                    <td>基础节点指令，按 IGP 最短路径到达节点。类似 SR-MPLS 的 Node SID</td>
+                </tr>
+                <tr>
+                    <td><strong>End.X</strong></td>
+                    <td>Endpoint w/ Cross-Connect</td>
+                    <td>邻接指令，强制经特定接口出。类似 SR-MPLS 的 Adjacency SID</td>
+                </tr>
+                <tr>
+                    <td><strong>End.DT4/6</strong></td>
+                    <td>End w/ Decap & Table Lookup</td>
+                    <td>VPN 解封装指令，剥外层 SRv6 后查 IPv4/IPv6 VRF 表</td>
+                </tr>
+                <tr>
+                    <td><strong>End.DX2</strong></td>
+                    <td>End w/ Decap & L2 X-Connect</td>
+                    <td>L2VPN 直连指令，剥外层后 L2 帧送特定接口</td>
+                </tr>
+                <tr>
+                    <td><strong>End.DT2U/M</strong></td>
+                    <td>L2 Unicast/Multicast Table</td>
+                    <td>EVPN 桥接指令，单播查 MAC 表 / 多播 BUM 洪泛</td>
+                </tr>
+                <tr>
+                    <td><strong>H.Encaps</strong></td>
+                    <td>Headend Encapsulation</td>
+                    <td>源节点封装指令，把原始包整体封进 IPv6+SRH 隧道</td>
+                </tr>
+                <tr>
+                    <td><strong>H.Insert</strong></td>
+                    <td>Headend Insert</td>
+                    <td>已废弃：直接在原 IPv6 包插入 SRH（违反 RFC 8200）</td>
+                </tr>
+                <tr>
+                    <td><strong>BSID</strong></td>
+                    <td>Binding SID</td>
+                    <td>"宏指令"SID，绑定一段 SR Policy。被命中时自动展开为子 SID 列表</td>
+                </tr>
+                <tr>
+                    <td><strong>PSP</strong></td>
+                    <td>Penultimate Segment Pop</td>
+                    <td>Flavor 修饰符：在倒数第二跳（SL=1）弹出 SRH</td>
+                </tr>
+                <tr>
+                    <td><strong>USP</strong></td>
+                    <td>Ultimate Segment Pop</td>
+                    <td>Flavor 修饰符：在最后一跳（SL=0）弹出 SRH</td>
+                </tr>
+                <tr>
+                    <td><strong>USD</strong></td>
+                    <td>Ultimate Segment Decapsulation</td>
+                    <td>Flavor 修饰符：最后一跳整体剥掉外层 IPv6+SRH，送内层包</td>
+                </tr>
+                <tr>
+                    <td><strong>uSID</strong></td>
+                    <td>Micro Segment Identifier</td>
+                    <td>Cisco 提出的 16-bit 微指令，多个 uSID 打包进单个 IPv6 地址</td>
+                </tr>
+                <tr>
+                    <td><strong>uSID Block</strong></td>
+                    <td>uSID Common Block</td>
+                    <td>32-bit 全网共享前缀，多个 uSID 容器共用</td>
+                </tr>
+                <tr>
+                    <td><strong>uSID Container</strong></td>
+                    <td>uSID Container</td>
+                    <td>一个 IPv6 地址容器，承载 4-6 个 16-bit uSID + End-of-Container 标记</td>
+                </tr>
+                <tr>
+                    <td><strong>GIB / LIB</strong></td>
+                    <td>Global / Local ID Block</td>
+                    <td>GIB = 传统 SRv6 SID 区域；LIB = uSID 区域。两者可同节点共存</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <h3>🧠 控制平面术语</h3>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:18%;">术语</th>
+                    <th style="width:18%;">英文全称</th>
+                    <th>定义</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>IGP</strong></td>
+                    <td>Interior Gateway Protocol</td>
+                    <td>域内路由协议（IS-IS / OSPFv3），负责拓扑同步与 Locator 扩散</td>
+                </tr>
+                <tr>
+                    <td><strong>IS-IS</strong></td>
+                    <td>Intermediate System to IS</td>
+                    <td>基于 OSI L2 的链路状态协议，SRv6 主流承载协议（RFC 9352）</td>
+                </tr>
+                <tr>
+                    <td><strong>LSP</strong></td>
+                    <td>Link State PDU</td>
+                    <td>IS-IS 的链路状态报文。承载 SRv6 Locator TLV、SID Sub-TLV 等</td>
+                </tr>
+                <tr>
+                    <td><strong>BGP</strong></td>
+                    <td>Border Gateway Protocol</td>
+                    <td>跨域路由协议，在 SRv6 中分发 Service SID（RFC 9252）</td>
+                </tr>
+                <tr>
+                    <td><strong>BGP-LS</strong></td>
+                    <td>BGP Link-State</td>
+                    <td>"反向"BGP，把 IGP 拓扑导出给外部 SDN 控制器（RFC 9552）</td>
+                </tr>
+                <tr>
+                    <td><strong>PCE</strong></td>
+                    <td>Path Computation Element</td>
+                    <td>集中式路径计算实体，运行 CSPF 算法解决跨域 TE 问题</td>
+                </tr>
+                <tr>
+                    <td><strong>SR-PCE</strong></td>
+                    <td>Cisco Segment Routing PCE</td>
+                    <td>Cisco 基于 IOS-XR 的 PCE 实现，支持 SR-MPLS 与 SRv6</td>
+                </tr>
+                <tr>
+                    <td><strong>PCEP</strong></td>
+                    <td>PCE Communication Protocol</td>
+                    <td>头节点与 PCE 之间的通信协议，传递路径请求与响应</td>
+                </tr>
+                <tr>
+                    <td><strong>CSPF</strong></td>
+                    <td>Constrained SPF</td>
+                    <td>带约束的最短路径优先算法，支持带宽、时延、亲和性等多约束</td>
+                </tr>
+                <tr>
+                    <td><strong>SR Policy</strong></td>
+                    <td>SR Policy</td>
+                    <td>由 (头节点, Color, 终点) 唯一标识的流量工程策略，含多条候选路径</td>
+                </tr>
+                <tr>
+                    <td><strong>Color</strong></td>
+                    <td>Color (32-bit)</td>
+                    <td>BGP Extended Community，标识"意图"（如低时延 = Color 100）</td>
+                </tr>
+                <tr>
+                    <td><strong>ODN</strong></td>
+                    <td>On-Demand Next-Hop</td>
+                    <td>头节点根据收到的彩色 BGP 路由自动实例化 SR Policy</td>
+                </tr>
+                <tr>
+                    <td><strong>Automated Steering</strong></td>
+                    <td>Automated Steering (AS)</td>
+                    <td>BGP 服务路由自动按 (Color + Endpoint) 匹配的 SR Policy 转发</td>
+                </tr>
+                <tr>
+                    <td><strong>Flex-Algo</strong></td>
+                    <td>Flexible Algorithm</td>
+                    <td>用户自定义算法（128-255），每个算法独立 SPF + 独立 SID（RFC 9350）</td>
+                </tr>
+                <tr>
+                    <td><strong>Crosswork</strong></td>
+                    <td>Cisco Crosswork Network Controller</td>
+                    <td>思科端到端网络控制器，集成 SR-PCE + 服务编排 + AI 闭环</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <h3>⚙️ 工程优化术语</h3>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:18%;">术语</th>
+                    <th style="width:18%;">英文全称</th>
+                    <th>定义</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>NPU</strong></td>
+                    <td>Network Processing Unit</td>
+                    <td>专用网络处理芯片（如 Cisco Silicon One）</td>
+                </tr>
+                <tr>
+                    <td><strong>Parser</strong></td>
+                    <td>Packet Parser</td>
+                    <td>NPU 流水线第一阶段，解析包头字段</td>
+                </tr>
+                <tr>
+                    <td><strong>Parser Depth</strong></td>
+                    <td>Parser Depth Wall</td>
+                    <td>解析器一次能读取的最大 byte 数，超过则触发 Recirculation</td>
+                </tr>
+                <tr>
+                    <td><strong>Recirculation</strong></td>
+                    <td>Pipeline Recirculation</td>
+                    <td>包头过长时，包被丢回 Parser 重新解析，性能减半</td>
+                </tr>
+                <tr>
+                    <td><strong>MSD</strong></td>
+                    <td>Maximum SID Depth</td>
+                    <td>节点能处理的最大 SID 列表深度（IGP 通告）</td>
+                </tr>
+                <tr>
+                    <td><strong>PMTUD</strong></td>
+                    <td>Path MTU Discovery</td>
+                    <td>路径 MTU 发现机制，IPv6 强制要求源节点处理 MTU 适配</td>
+                </tr>
+                <tr>
+                    <td><strong>TI-LFA</strong></td>
+                    <td>Topology Independent LFA</td>
+                    <td>拓扑无关的快速重路由，≤ 50ms 故障切换</td>
+                </tr>
+                <tr>
+                    <td><strong>LFA</strong></td>
+                    <td>Loop-Free Alternate</td>
+                    <td>无环替代路径，故障时本地切换的备份路径</td>
+                </tr>
+                <tr>
+                    <td><strong>SRLG</strong></td>
+                    <td>Shared Risk Link Group</td>
+                    <td>共享风险链路组，主备路径必须避免落入同一 SRLG</td>
+                </tr>
+                <tr>
+                    <td><strong>HMAC TLV</strong></td>
+                    <td>HMAC Authentication TLV</td>
+                    <td>SRH 中的密钥认证 TLV，防止 SRH 被篡改</td>
+                </tr>
+                <tr>
+                    <td><strong>SR-PM</strong></td>
+                    <td>SR Performance Measurement</td>
+                    <td>基于 STAMP/TWAMP 的性能测量工具集，测时延/丢包/活性</td>
+                </tr>
+                <tr>
+                    <td><strong>STAMP</strong></td>
+                    <td>Simple Two-Way AMP</td>
+                    <td>RFC 8762 简单双向主动测量协议</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <h3>🚀 业务与场景术语</h3>
+
+        <div class="table-scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:18%;">术语</th>
+                    <th style="width:18%;">英文全称</th>
+                    <th>定义</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>L3VPN</strong></td>
+                    <td>Layer-3 VPN</td>
+                    <td>IP 层 VPN 服务，每个 VRF 用一个 End.DT4/6 SID 表示</td>
+                </tr>
+                <tr>
+                    <td><strong>EVPN</strong></td>
+                    <td>Ethernet VPN</td>
+                    <td>基于 BGP 的 L2/L3 VPN 控制平面，配合 SRv6 数据面</td>
+                </tr>
+                <tr>
+                    <td><strong>VPWS</strong></td>
+                    <td>Virtual Private Wire Service</td>
+                    <td>点到点 L2 VPN，用 End.DX2 实现</td>
+                </tr>
+                <tr>
+                    <td><strong>VPLS</strong></td>
+                    <td>Virtual Private LAN Service</td>
+                    <td>多点 L2 VPN，用 End.DT2U/M 实现</td>
+                </tr>
+                <tr>
+                    <td><strong>SFC</strong></td>
+                    <td>Service Function Chaining</td>
+                    <td>服务功能链，按 SID 列表顺序串接多个网络功能</td>
+                </tr>
+                <tr>
+                    <td><strong>NF</strong></td>
+                    <td>Network Function</td>
+                    <td>网络功能（防火墙、DPI、LB），每个 NF 注册一个 SID</td>
+                </tr>
+                <tr>
+                    <td><strong>5G Slicing</strong></td>
+                    <td>5G Network Slicing</td>
+                    <td>5G 网络切片，基于 Flex-Algo 实现 eMBB/URLLC/mMTC 硬隔离</td>
+                </tr>
+                <tr>
+                    <td><strong>eMBB</strong></td>
+                    <td>enhanced Mobile Broadband</td>
+                    <td>5G 增强移动宽带切片，高带宽场景</td>
+                </tr>
+                <tr>
+                    <td><strong>URLLC</strong></td>
+                    <td>Ultra-Reliable Low-Latency</td>
+                    <td>5G 超可靠低时延切片，要求 ≤ 1ms 时延 + 6 个 9 可靠性</td>
+                </tr>
+                <tr>
+                    <td><strong>mMTC</strong></td>
+                    <td>massive Machine-Type Comm.</td>
+                    <td>5G 海量物联切片，连接密度优先</td>
+                </tr>
+                <tr>
+                    <td><strong>RoCEv2</strong></td>
+                    <td>RDMA over Converged Ethernet v2</td>
+                    <td>以太网上的 RDMA，AI 数据中心的关键传输协议</td>
+                </tr>
+                <tr>
+                    <td><strong>NCCL</strong></td>
+                    <td>NVIDIA Collective Comm. Library</td>
+                    <td>NVIDIA GPU 集合通信库，AllReduce / All-to-All 等原语</td>
+                </tr>
+                <tr>
+                    <td><strong>Mo6</strong></td>
+                    <td>MPLS over SRv6</td>
+                    <td>MPLS 业务承载在 SRv6 underlay 上的过渡方案</td>
+                </tr>
+                <tr>
+                    <td><strong>6PE/6vPE</strong></td>
+                    <td>IPv6 Provider Edge</td>
+                    <td>IPv6 业务承载在 MPLS 之上的传统方案，可与 SRv6 网关互联</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- ============ 收束 ============ -->
+        <h3 id="closing-bridge">🎯 学习路径建议</h3>
+
+        <div class="grid grid-3">
+            <div class="card">
+                <h4 style="border:none;padding:0;">🔰 入门</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">
+                    重读模块 1（起源）+ 模块 4 的 End / End.X / End.DT4 三条核心指令。
+                    在实验室 IOS-XR 上配置一个 L3VPN over SRv6 实例。
+                </p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">🚀 进阶</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">
+                    深入模块 2（数据面）+ 模块 3（IS-IS / BGP-LS）。
+                    用 Wireshark 抓包分析 SRH，理解 PSP/USD Flavor 的实际效果。
+                </p>
+            </div>
+            <div class="card">
+                <h4 style="border:none;padding:0;">⚡ 专家</h4>
+                <p style="margin-bottom:0;font-size:0.95rem;">
+                    精读模块 5（uSID）+ 模块 6（应用）。
+                    部署 SR-PCE + Crosswork，在跨域场景中实施 Flex-Algo 切片与 TI-LFA 保护。
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ===================== 全文收束 ===================== -->
+<section class="chapter" id="closing" style="background: linear-gradient(135deg, #07182D 0%, #0A60FF 100%); color: white;">
+    <div class="container" style="text-align: center;">
+
+        <h2 style="color: white; border-color: #02C8FF;">写在最后</h2>
+
+        <p style="font-size: 1.2rem; max-width: 760px; margin: 0 auto var(--space-8); color: rgba(255,255,255,0.9); line-height: 1.7;">
+            从模块 1 我们提出"为什么 IP 网络不一定是逐跳路由"开始，
+            到模块 6 我们看到 SRv6 在 5G、AI、SD-WAN 中的革命应用——<br>
+            <strong style="color: #02C8FF;">我们走过了一段完整的"第一性原理 + 苏格拉底追问"的认知旅程</strong>。
+        </p>
+
+        <p style="font-size: 1.1rem; max-width: 760px; margin: 0 auto var(--space-8); color: rgba(255,255,255,0.85); line-height: 1.7;">
+            真正的技术理解，从来不是"<strong>记住了多少 RFC 编号</strong>"，<br>
+            而是"<strong>能用第一性原理推导出每一个设计决策</strong>"。<br>
+            希望这份白皮书让你不只是"<strong>知道 SRv6</strong>"——而是"<strong>看懂 SRv6</strong>"。
+        </p>
+
+        <div style="margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid rgba(255,255,255,0.2);">
+            <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7);">
+                Cisco Technical Deep-Dive · 2026<br>
+                <em>"The network is not a tube. It's a distributed programmable computer."</em>
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<script>
+// 简单的导航高亮
+const links = document.querySelectorAll('.nav-links a');
+links.forEach(link => {
+    link.addEventListener('click', () => {
+        document.getElementById('navLinks').classList.remove('open');
+    });
+});
+</script>
+
+</body>
+</html>
