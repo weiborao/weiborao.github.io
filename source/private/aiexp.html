@@ -1,0 +1,3365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 协作时代:我的生产力跃迁之路 | Cisco Internal Sharing</title>
+<style>
+/* ============================================================================
+   CISCO PRESENTATION DECK — AI Productivity Sharing
+   Theme: Cisco Brand 2026 (Midnight + Cisco Blue)
+   Mode: Single-Page Presentation with Keyboard Navigation
+   ============================================================================ */
+
+:root {
+  /* Cisco Brand Primary */
+  --cisco-white: #FFFFFF;
+  --cisco-midnight: #07182D;
+  --cisco-blue: #02C8FF;
+  --cisco-medium-blue: #0A60FF;
+
+  /* Cisco Accents (使用克制, ≤5%) */
+  --cisco-magenta: #FF007F;
+  --cisco-orange: #FF9000;
+
+  /* Neutrals */
+  --gray-50: #F7F8FA;
+  --gray-100: #EEF0F3;
+  --gray-200: #D4D8DE;
+  --gray-400: #9B9CA0;
+  --gray-600: #58585B;
+  --gray-900: #1A1A1A;
+
+  /* Functional */
+  --shadow-sm: 0 2px 8px rgba(7, 24, 45, 0.06);
+  --shadow-md: 0 8px 24px rgba(7, 24, 45, 0.10);
+  --shadow-lg: 0 20px 60px rgba(7, 24, 45, 0.18);
+  --shadow-glow: 0 0 40px rgba(2, 200, 255, 0.25);
+
+  /* Gradients */
+  --grad-primary: linear-gradient(90deg, #0A60FF 5%, #02C8FF 37%, #02C8FF 43%, #FF007F 75%, #FF9000 94%);
+  --grad-blue: linear-gradient(135deg, #0A60FF 0%, #02C8FF 100%);
+  --grad-midnight: linear-gradient(135deg, #07182D 0%, #0A2540 50%, #0A60FF 100%);
+
+/* Typography — 纯系统字体栈,中国大陆友好,无需外部加载 */
+--font-sans:
+  -apple-system,                /* Apple Silicon / macOS / iOS · SF Pro */
+  BlinkMacSystemFont,           /* macOS Chrome 系列 */
+  "Segoe UI",                   /* Windows 10/11 默认 · 现代感强 */
+  "PingFang SC",                /* macOS 中文 · 苹方 */
+  "Microsoft YaHei UI",         /* Windows 中文 · 微软雅黑 UI 版本 */
+  "Microsoft YaHei",            /* Windows 中文 · 微软雅黑 */
+  "Source Han Sans CN",         /* Adobe/Google 思源黑体(若已安装) */
+  "Hiragino Sans GB",           /* macOS 中文备用 · 冬青黑体 */
+  Roboto,                       /* Android · 谷歌字体已下放系统 */
+  "Helvetica Neue",
+  Arial,
+  sans-serif,
+  "Apple Color Emoji",          /* Emoji · 让标题里的 🎯📚 变彩色 */
+  "Segoe UI Emoji",
+  "Segoe UI Symbol";
+
+--font-mono:
+  ui-monospace,                 /* 现代浏览器最佳代码字体 */
+  "SF Mono",                    /* macOS 代码字体 */
+  "Cascadia Code",              /* Windows Terminal 内置 · 极美 */
+  "Cascadia Mono",
+  Menlo,                        /* macOS 备用 */
+  Consolas,                     /* Windows 备用 */
+  "Liberation Mono",
+  "Courier New",
+  monospace;
+
+  /* Layout */
+  --container-max: 1320px;
+  --transition: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--gray-900);
+  background-color: var(--cisco-white);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* Presentation mode */
+}
+
+:focus-visible { outline: 3px solid var(--cisco-blue); outline-offset: 3px; }
+
+img, svg { display: block; max-width: 100%; height: auto; }
+
+/* ============================================================================
+   PRESENTATION FRAMEWORK
+   ============================================================================ */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(40px);
+  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  background: var(--cisco-white);
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  z-index: 2;
+}
+
+.slide.prev {
+  transform: translateX(-40px);
+}
+
+.slide-inner {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 5vh, 4rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+/* ============================================================================
+   NAVIGATION CONTROLS
+   ============================================================================ */
+.nav-controls {
+  position: fixed;
+  bottom: 1.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(7, 24, 45, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(2, 200, 255, 0.2);
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cisco-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+  font-size: 1.1rem;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: var(--cisco-blue);
+  color: var(--cisco-midnight);
+  transform: scale(1.08);
+}
+
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.page-indicator {
+  color: var(--cisco-white);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.page-indicator .current {
+  color: var(--cisco-blue);
+  font-size: 1rem;
+}
+
+/* Progress bar */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--grad-primary);
+  z-index: 200;
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(2, 200, 255, 0.5);
+}
+
+/* Hint */
+.kbd-hint {
+  position: fixed;
+  bottom: 1.75rem;
+  right: 1.75rem;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 0.875rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cisco-midnight);
+}
+
+/* ============================================================================
+   TYPOGRAPHY
+   ============================================================================ */
+h1, h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--cisco-midnight);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+h2 { font-size: clamp(1.875rem, 4vw, 3rem); margin-bottom: 1.5rem; }
+h3 { font-size: clamp(1.375rem, 2.5vw, 1.875rem); margin-bottom: 1rem; }
+h4 { font-size: 1.125rem; margin-bottom: 0.75rem; }
+
+p { margin-bottom: 1rem; }
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cisco-medium-blue);
+  margin-bottom: 1rem;
+  padding: 0.375rem 0.875rem;
+  background: rgba(10, 96, 255, 0.08);
+  border-radius: 4px;
+  border-left: 3px solid var(--cisco-blue);
+}
+
+.gradient-text {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+}
+
+/* ============================================================================
+   SLIDE 1 — COVER
+   ============================================================================ */
+.cover {
+  background: var(--grad-midnight);
+  color: var(--cisco-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(2, 200, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 0, 127, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 50% 100%, rgba(10, 96, 255, 0.20) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(2, 200, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(2, 200, 255, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+}
+
+.cover .slide-inner {
+  position: relative;
+  z-index: 2;
+  justify-content: center;
+}
+
+.cover-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.2em;
+  color: var(--cisco-blue);
+}
+
+.cover-brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cisco-blue);
+  box-shadow: 0 0 16px var(--cisco-blue);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+.cover-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--cisco-blue);
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(2, 200, 255, 0.4);
+  border-radius: 999px;
+  margin-bottom: 2rem;
+  background: rgba(2, 200, 255, 0.08);
+}
+
+.cover h1 {
+  color: var(--cisco-white);
+  font-size: clamp(2.75rem, 7vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+
+.cover h1 .accent {
+  background: linear-gradient(90deg, #02C8FF 0%, #0A60FF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cover-subtitle {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 780px;
+  line-height: 1.5;
+  margin-bottom: 3rem;
+}
+
+.cover-divider {
+  width: 80px;
+  height: 4px;
+  background: var(--grad-primary);
+  border-radius: 2px;
+  margin: 2.5rem 0;
+}
+
+.cover-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin-top: 1rem;
+}
+
+.meta-item {
+  border-left: 2px solid rgba(2, 200, 255, 0.4);
+  padding-left: 1rem;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cisco-blue);
+  margin-bottom: 0.5rem;
+}
+
+.meta-value {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  min-height: 1.75rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  padding-bottom: 0.25rem;
+}
+
+.cover-floating-icons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.float-icon {
+  position: absolute;
+  opacity: 0.06;
+  animation: float 8s ease-in-out infinite;
+}
+
+.float-icon:nth-child(1) { top: 12%; right: 8%; animation-delay: 0s; }
+.float-icon:nth-child(2) { top: 65%; right: 15%; animation-delay: 2s; }
+.float-icon:nth-child(3) { bottom: 18%; left: 10%; animation-delay: 4s; }
+.float-icon:nth-child(4) { top: 25%; left: 12%; animation-delay: 1s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-25px) rotate(5deg); }
+}
+
+/* ============================================================================
+   COMMON SLIDE STYLES (Content)
+   ============================================================================ */
+.slide-header {
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.slide-header-left { flex: 1; min-width: 280px; }
+
+.slide-number {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cisco-blue);
+  letter-spacing: 0.1em;
+}
+
+.slide-number .total {
+  color: var(--gray-400);
+}
+
+/* Hide scrollbar but keep functionality */
+.slide::-webkit-scrollbar { width: 8px; }
+.slide::-webkit-scrollbar-track { background: transparent; }
+.slide::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+.slide::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+  .slide-inner { padding: 1.5rem 1.25rem; }
+  .nav-controls { bottom: 1rem; }
+  .kbd-hint { display: none; }
+  .cover-meta { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+/* ============================================================================
+   PRINT
+   ============================================================================ */
+@media print {
+  body { overflow: visible; }
+  .deck { height: auto; }
+  .slide {
+    position: relative;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    page-break-after: always;
+    break-after: page;
+    height: auto;
+    min-height: 100vh;
+  }
+  .nav-controls, .kbd-hint, .progress-bar { display: none !important; }
+}
+
+/* ============================================================================
+   SECTION DIVIDER (章节扉页)
+   ============================================================================ */
+.section-divider {
+  background: linear-gradient(135deg, #F7F8FA 0%, #FFFFFF 60%, #EEF0F3 100%);
+}
+
+.divider-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .divider-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .divider-right { max-width: 360px; margin: 0 auto; }
+}
+
+.part-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--cisco-medium-blue);
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(10, 96, 255, 0.08);
+  border-radius: 999px;
+  border: 1px solid rgba(10, 96, 255, 0.2);
+}
+
+.divider-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+}
+
+.divider-lead {
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  color: var(--gray-600);
+  line-height: 1.65;
+  max-width: 560px;
+  margin-bottom: 2.5rem;
+}
+
+.divider-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cisco-midnight);
+  box-shadow: var(--shadow-sm);
+}
+
+.meta-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cisco-blue);
+}
+
+/* ============================================================================
+   TIMELINE WRAPPER
+   ============================================================================ */
+.svg-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-wrapper { padding: 1.5rem; }
+
+/* ============================================================================
+   CALLOUT INSIGHT (洞察提示框)
+   ============================================================================ */
+.callout-insight {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.5rem 1.75rem;
+  margin-top: 2rem;
+  background: linear-gradient(135deg, rgba(2, 200, 255, 0.08), rgba(10, 96, 255, 0.04));
+  border-left: 4px solid var(--cisco-blue);
+  border-radius: 0 12px 12px 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--gray-900);
+}
+
+.insight-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--grad-blue);
+  color: var(--cisco-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(2, 200, 255, 0.3);
+}
+
+/* ============================================================================
+   TOOL CARDS GRID
+   ============================================================================ */
+.tool-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 900px) {
+  .tool-grid-2 { grid-template-columns: 1fr; }
+}
+
+.tool-card {
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-blue);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cisco-blue);
+}
+
+.tool-card:hover::before { opacity: 1; }
+
+.tool-card-feature {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F7F8FA 100%);
+  border-color: rgba(2, 200, 255, 0.3);
+}
+
+.tool-card-feature::before { opacity: 1; }
+
+.tool-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.tool-logo {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cisco-white);
+}
+
+.tool-logo-gpt { background: linear-gradient(135deg, #10A37F, #1A7F64); }
+.tool-logo-grok { background: linear-gradient(135deg, #1A1A1A, #404040); }
+.tool-logo-gemini { background: linear-gradient(135deg, #4285F4, #9B72CB, #D96570); }
+.tool-logo-nlm { background: linear-gradient(135deg, #4285F4, #34A853); }
+
+.tool-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cisco-medium-blue);
+}
+
+.tool-desc {
+  color: var(--gray-900);
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.7;
+}
+
+.tool-story {
+  background: var(--gray-50);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.tool-story p { margin-bottom: 0.5rem; }
+.tool-story p:last-child { margin-bottom: 0; }
+
+.story-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--cisco-medium-blue);
+  margin-bottom: 0.5rem;
+}
+
+.tool-aside {
+  background: linear-gradient(135deg, rgba(255, 144, 0, 0.06), rgba(255, 0, 127, 0.04));
+  border-left: 3px solid var(--cisco-orange);
+  padding: 0.875rem 1.125rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+}
+
+.tool-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  background: rgba(10, 96, 255, 0.08);
+  color: var(--cisco-medium-blue);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 96, 255, 0.15);
+}
+
+/* ============================================================================
+   FEATURE LIST (特性编号列表)
+   ============================================================================ */
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  margin: 1.25rem 0;
+}
+
+.feature-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.feature-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--grad-blue);
+  color: var(--cisco-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.feature-item p {
+  margin: 0.25rem 0 0;
+  color: var(--gray-600);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.feature-item em {
+  color: var(--cisco-medium-blue);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   METAPHOR BOX (类比框)
+   ============================================================================ */
+.metaphor-box {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.5rem 1.75rem;
+  margin-top: 2rem;
+  background: linear-gradient(135deg, #07182D 0%, #0A2540 100%);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-md);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.metaphor-box strong { color: var(--cisco-blue); }
+.metaphor-box em { color: rgba(255, 255, 255, 0.7); }
+
+.metaphor-icon {
+  flex-shrink: 0;
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(2, 200, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(2, 200, 255, 0.3);
+}
+
+/* ============================================================================
+   HERO TOOL (Slide 6 - Claude Opus 突出展示)
+   ============================================================================ */
+.hero-tool {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-tool::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--grad-primary);
+}
+
+@media (max-width: 900px) {
+  .hero-tool { grid-template-columns: 1fr; gap: 2rem; padding: 1.75rem; }
+}
+
+.hero-tool-logo {
+  margin-bottom: 1.5rem;
+}
+
+.hero-tool-badge {
+  display: inline-block;
+  padding: 0.4rem 0.875rem;
+  background: linear-gradient(135deg, #FF007F, #FF9000);
+  color: var(--cisco-white);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.comparison-card {
+  background: var(--gray-50);
+  border-radius: 16px;
+  padding: 1.75rem;
+  border: 1px solid var(--gray-200);
+}
+
+.comparison-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--cisco-midnight);
+  margin-bottom: 1.25rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 0.875rem;
+  align-items: center;
+  margin-bottom: 0.875rem;
+  font-size: 0.9375rem;
+}
+
+.bar-label {
+  color: var(--gray-900);
+}
+
+.bar-track {
+  height: 28px;
+  background: var(--cisco-white);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.75rem;
+  color: var(--cisco-white);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  transition: width 800ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.comparison-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 1.25rem 0;
+}
+
+.reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.reason-item {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--gray-900);
+}
+
+.check-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--grad-blue);
+  color: var(--cisco-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-top: 1px;
+}
+/* ============================================================================
+   PART 02 — Case Preview List (章节扉页的案例预览)
+   ============================================================================ */
+.case-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.case-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.125rem;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  color: var(--gray-900);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+
+.case-preview-item:hover {
+  transform: translateX(6px);
+  border-color: var(--cisco-blue);
+  box-shadow: var(--shadow-md);
+}
+
+.case-preview-item em {
+  color: var(--gray-600);
+  font-style: normal;
+  font-size: 0.875rem;
+}
+
+.case-num-mini {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--grad-blue);
+  color: var(--cisco-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+/* ============================================================================
+   LEAD PARAGRAPH (开篇大段落)
+   ============================================================================ */
+.lead-paragraph {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: var(--gray-900);
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(2, 200, 255, 0.04), rgba(10, 96, 255, 0.02));
+  border-left: 3px solid var(--cisco-blue);
+  border-radius: 0 10px 10px 0;
+}
+
+.section-h3 {
+  font-size: 1.375rem;
+  color: var(--cisco-midnight);
+  margin: 1.5rem 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ============================================================================
+   PROMPT SKELETON (提示词四段式骨架)
+   ============================================================================ */
+.prompt-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.skeleton-step {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  transition: all var(--transition);
+}
+
+.skeleton-step:hover {
+  border-color: var(--cisco-blue);
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+.step-num-circle {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--grad-blue);
+  color: var(--cisco-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(2, 200, 255, 0.3);
+}
+
+.step-body { flex: 1; min-width: 0; }
+
+.step-title {
+  font-size: 1.125rem;
+  margin-bottom: 0.375rem;
+  color: var(--cisco-midnight);
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.step-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--cisco-medium-blue);
+  background: rgba(10, 96, 255, 0.08);
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 96, 255, 0.18);
+}
+
+.step-desc {
+  color: var(--gray-600);
+  font-size: 0.9375rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.step-desc em { color: var(--cisco-medium-blue); font-style: normal; font-weight: 500; }
+
+.step-example {
+  background: var(--cisco-midnight);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0.875rem 1.125rem;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid var(--cisco-blue);
+}
+
+.step-example code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+.step-why {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--gray-600);
+  padding: 0.625rem 0.875rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+}
+
+.step-why strong { color: var(--cisco-medium-blue); }
+
+.skeleton-arrow {
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--cisco-blue);
+  font-weight: 800;
+  margin: -0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+/* ============================================================================
+   REVIEW GRID (案例 2 - 审稿要点卡片)
+   ============================================================================ */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 1.5rem;
+}
+
+.review-card {
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1rem;
+  transition: all var(--transition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cisco-blue);
+}
+
+.review-card-highlight {
+  background: linear-gradient(135deg, rgba(2, 200, 255, 0.06), rgba(10, 96, 255, 0.03));
+  border-color: rgba(2, 200, 255, 0.4);
+}
+
+.review-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.review-card h4 {
+  font-size: 1rem;
+  color: var(--cisco-midnight);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.review-card p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--gray-600);
+  margin: 0;
+  flex: 1;
+}
+
+.review-card p strong {
+  color: var(--cisco-midnight);
+  font-weight: 600;
+}
+
+.review-tag {
+  display: inline-block;
+  margin-top: 0.875rem;
+  padding: 0.25rem 0.625rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--cisco-medium-blue);
+  letter-spacing: 0.05em;
+  align-self: flex-start;
+}
+/* ============================================================================
+   STORY SCENARIO (案例 3 - 场景化故事)
+   ============================================================================ */
+.story-scenario {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.scenario-step {
+  display: flex;
+  gap: 1.25rem;
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  transition: all var(--transition);
+}
+
+.scenario-step:hover {
+  border-color: var(--cisco-blue);
+  box-shadow: var(--shadow-md);
+}
+
+.scenario-step-num {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--cisco-blue);
+  line-height: 1;
+  width: 44px;
+  text-align: center;
+}
+
+.scenario-step-body { flex: 1; min-width: 0; }
+
+.scenario-step-body h4 {
+  font-size: 1.0625rem;
+  margin-bottom: 0.5rem;
+  color: var(--cisco-midnight);
+}
+
+.scenario-step-body p {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--gray-900);
+  margin-bottom: 0;
+}
+
+.scenario-step-body p strong { color: var(--cisco-medium-blue); }
+
+/* VS Grid (传统 vs NotebookLM) */
+.vs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+  margin-top: 0.875rem;
+}
+
+@media (max-width: 700px) {
+  .vs-grid { grid-template-columns: 1fr; }
+}
+
+.vs-card {
+  padding: 1rem 1.125rem;
+  border-radius: 10px;
+  position: relative;
+}
+
+.vs-card-old {
+  background: rgba(255, 0, 127, 0.04);
+  border: 1px solid rgba(255, 0, 127, 0.2);
+}
+
+.vs-card-new {
+  background: rgba(2, 200, 255, 0.06);
+  border: 1px solid rgba(2, 200, 255, 0.3);
+}
+
+.vs-tag {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.vs-card-old .vs-tag {
+  background: rgba(255, 0, 127, 0.15);
+  color: #C8005F;
+}
+
+.vs-card-new .vs-tag {
+  background: rgba(10, 96, 255, 0.12);
+  color: var(--cisco-medium-blue);
+}
+
+.vs-card p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  color: var(--gray-900);
+}
+
+.vs-meta {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.vs-card-old .vs-meta { color: #C8005F; }
+.vs-card-new .vs-meta { color: var(--cisco-medium-blue); }
+
+/* ============================================================================
+   PODCAST SHOWCASE (NotebookLM 播客功能展示)
+   ============================================================================ */
+.podcast-showcase {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2rem;
+  align-items: center;
+  background: linear-gradient(135deg, #07182D 0%, #0A2540 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 1.25rem 0 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 700px) {
+  .podcast-showcase { grid-template-columns: 1fr; gap: 1.25rem; padding: 1.5rem; }
+}
+
+.podcast-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.podcast-mic {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--grad-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cisco-white);
+  box-shadow: 0 8px 24px rgba(2, 200, 255, 0.4);
+  position: relative;
+}
+
+.podcast-mic::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--cisco-blue);
+  opacity: 0.4;
+  animation: ringPulse 2s ease-out infinite;
+}
+
+@keyframes ringPulse {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+.sound-wave {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+}
+
+.sound-wave span {
+  display: block;
+  width: 4px;
+  background: var(--cisco-blue);
+  border-radius: 2px;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.sound-wave span:nth-child(1) { height: 30%; animation-delay: 0s; }
+.sound-wave span:nth-child(2) { height: 60%; animation-delay: 0.1s; }
+.sound-wave span:nth-child(3) { height: 100%; animation-delay: 0.2s; }
+.sound-wave span:nth-child(4) { height: 70%; animation-delay: 0.3s; }
+.sound-wave span:nth-child(5) { height: 40%; animation-delay: 0.4s; }
+.sound-wave span:nth-child(6) { height: 80%; animation-delay: 0.5s; }
+.sound-wave span:nth-child(7) { height: 50%; animation-delay: 0.6s; }
+.sound-wave span:nth-child(8) { height: 90%; animation-delay: 0.7s; }
+.sound-wave span:nth-child(9) { height: 35%; animation-delay: 0.8s; }
+.sound-wave span:nth-child(10) { height: 65%; animation-delay: 0.9s; }
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+.podcast-content p { margin-bottom: 0.75rem; }
+.podcast-content p strong { color: var(--cisco-blue); }
+
+.podcast-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  background: rgba(2, 200, 255, 0.1);
+  border: 1px solid rgba(2, 200, 255, 0.25);
+  border-radius: 999px;
+  font-size: 0.875rem;
+}
+
+.mode-pill strong { color: var(--cisco-blue); }
+
+.mode-icon {
+  font-size: 1.125rem;
+}
+
+/* ============================================================================
+   CIRCUIT GRID (案例 4 - CIRCUIT 四大功能卡片)
+   ============================================================================ */
+.circuit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin: 1.25rem 0;
+}
+
+@media (max-width: 900px) {
+  .circuit-grid { grid-template-columns: 1fr; }
+}
+
+.circuit-card {
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.circuit-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cisco-blue);
+}
+
+.circuit-card-feature {
+  background: linear-gradient(135deg, #FFFFFF 0%, rgba(2, 200, 255, 0.04) 100%);
+  border-color: rgba(2, 200, 255, 0.4);
+}
+
+.circuit-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cisco-white);
+  margin-bottom: 0.875rem;
+}
+
+.circuit-icon-1 { background: linear-gradient(135deg, #0A60FF, #02C8FF); }
+.circuit-icon-2 { background: linear-gradient(135deg, #02C8FF, #0A60FF); }
+.circuit-icon-3 { background: linear-gradient(135deg, #07182D, #0A60FF); }
+.circuit-icon-4 { background: linear-gradient(135deg, #FF007F, #FF9000); }
+
+.circuit-num {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--gray-200);
+  line-height: 1;
+}
+
+.circuit-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background: linear-gradient(135deg, #FF007F, #FF9000);
+  color: var(--cisco-white);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 999px;
+  margin-bottom: 0.5rem;
+  width: fit-content;
+}
+
+.circuit-card h4 {
+  font-size: 1.125rem;
+  color: var(--cisco-midnight);
+  margin-bottom: 0.625rem;
+  padding-right: 2.5rem;
+}
+
+.circuit-card > p {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.circuit-card > p strong { color: var(--cisco-medium-blue); }
+
+.circuit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.circuit-list li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--gray-900);
+}
+
+.circuit-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--cisco-blue);
+  font-weight: 700;
+}
+
+.circuit-list li strong { color: var(--cisco-medium-blue); }
+
+.circuit-footnote {
+  margin-top: auto;
+  padding: 0.625rem 0.875rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+  font-size: 0.8375rem;
+  color: var(--gray-600);
+  border-left: 3px solid var(--cisco-blue);
+}
+
+/* ============================================================================
+   POSITIONING TABLE (CIRCUIT 定位对比表)
+   ============================================================================ */
+.positioning-table {
+  margin: 1.25rem 0 1.5rem;
+}
+
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  background: var(--cisco-white);
+}
+
+.table-scroll-wrapper table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.table-scroll-wrapper thead {
+  background: linear-gradient(135deg, var(--cisco-midnight), #0A2540);
+  color: var(--cisco-white);
+}
+
+.table-scroll-wrapper th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.table-scroll-wrapper td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--gray-900);
+}
+
+.table-scroll-wrapper tbody tr:nth-child(even) {
+  background-color: var(--gray-50);
+}
+
+.table-scroll-wrapper tbody tr:hover {
+  background-color: rgba(2, 200, 255, 0.04);
+}
+
+.table-scroll-wrapper td strong { color: var(--cisco-midnight); }
+
+.td-yes { color: #1A7F64; font-weight: 600; }
+.td-no { color: #C8005F; font-weight: 600; }
+.td-maybe { color: var(--gray-600); font-weight: 500; }
+
+/* ============================================================================
+   SLIDE FINALE (总结页)
+   ============================================================================ */
+.slide-finale {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FA 100%);
+}
+
+/* Principle Grid (三条心法) */
+.principle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin: 1.25rem 0 2rem;
+}
+
+@media (max-width: 900px) {
+  .principle-grid { grid-template-columns: 1fr; }
+}
+
+.principle-card {
+  background: var(--cisco-white);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 1.5rem;
+  position: relative;
+  transition: all var(--transition);
+}
+
+.principle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cisco-blue);
+}
+
+.principle-card-highlight {
+  background: linear-gradient(135deg, rgba(2, 200, 255, 0.06), rgba(10, 96, 255, 0.03));
+  border-color: rgba(2, 200, 255, 0.4);
+}
+
+.principle-num {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--cisco-blue);
+  background: rgba(2, 200, 255, 0.1);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+.principle-card h4 {
+  font-size: 1.125rem;
+  color: var(--cisco-midnight);
+  margin-bottom: 0.625rem;
+}
+
+.principle-card p {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.principle-card p strong { color: var(--cisco-medium-blue); }
+
+/* Final Quote */
+.final-quote {
+  position: relative;
+  background: linear-gradient(135deg, #07182D 0%, #0A2540 100%);
+  border-radius: 20px;
+  padding: 2.5rem 2.5rem 2rem;
+  margin: 2rem 0;
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.final-quote::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--grad-primary);
+}
+
+.quote-mark {
+  position: absolute;
+  top: 0.5rem;
+  left: 1.5rem;
+  font-family: Georgia, serif;
+  font-size: 6rem;
+  line-height: 1;
+  color: var(--cisco-blue);
+  opacity: 0.3;
+}
+
+.final-quote blockquote {
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+  line-height: 1.6;
+  font-weight: 500;
+  border: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.95);
+  font-style: normal;
+  position: relative;
+  z-index: 1;
+}
+
+.final-quote blockquote strong {
+  color: var(--cisco-blue);
+  font-weight: 700;
+}
+
+.quote-author {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: rgba(2, 200, 255, 0.8);
+  letter-spacing: 0.02em;
+}
+
+/* Finale CTA */
+.finale-cta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  background: linear-gradient(135deg, var(--cisco-medium-blue) 0%, var(--cisco-blue) 100%);
+  border-radius: 20px;
+  padding: 2.25rem 2.5rem;
+  color: var(--cisco-white);
+  margin-top: 1rem;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.finale-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .finale-cta { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.75rem; text-align: center; }
+}
+
+.finale-cta-left { position: relative; z-index: 1; }
+.finale-cta-left h3 { color: var(--cisco-white) !important; }
+
+.finale-cta-right {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .finale-cta-right { align-items: center; }
+}
+
+.cta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 1.125rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--cisco-white);
+  transition: all var(--transition);
+}
+
+.cta-pill:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(4px);
+}
+
+.cta-icon { font-size: 1.125rem; }
+
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width: 0%"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 1: COVER                                                   -->
+  <!-- ============================================================== -->
+  <section class="slide cover active" data-slide="1">
+    <div class="cover-floating-icons">
+      <!-- Floating decoration icons -->
+      <svg class="float-icon" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#02C8FF" stroke-width="1">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 1v6m0 10v6m11-11h-6m-10 0H1m17.07-7.07l-4.24 4.24M7.17 16.83l-4.24 4.24m0-18l4.24 4.24m9.9 9.9l4.24 4.24"/>
+      </svg>
+      <svg class="float-icon" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#02C8FF" stroke-width="1">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M7 8h10M7 12h10M7 16h6"/>
+      </svg>
+      <svg class="float-icon" width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="#FF007F" stroke-width="1">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+      <svg class="float-icon" width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="#02C8FF" stroke-width="1">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+      </svg>
+    </div>
+
+    <div class="slide-inner">
+      <div class="container">
+        <div class="cover-brand">
+          <span class="cover-brand-dot"></span>
+          <span>CISCO · INTERNAL SHARING SESSION</span>
+        </div>
+
+        <span class="cover-tag">▸ AI Productivity · 2026</span>
+
+        <h1>
+          当 AI 成为你的<br>
+          <span class="accent">"第二大脑"</span>
+        </h1>
+
+        <p class="cover-subtitle">
+          从 ChatGPT 的第一次惊艳，到 Claude Opus 的得力相助 —— 一位 Cisco 工程师的 AI 工具进化史，与一份可立即上手的"生产力跃迁"指南。
+        </p>
+
+        <div class="cover-divider"></div>
+
+        <div class="cover-meta">
+          <div class="meta-item">
+            <div class="meta-label">Speaker · 演讲者</div>
+            <div class="meta-value">&nbsp;</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Date · 日期</div>
+            <div class="meta-value">&nbsp;</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Audience · 受众</div>
+            <div class="meta-value">Cisco Internal Team</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 2: 章节扉页 — 我的 AI 工具进化史                            -->
+  <!-- ============================================================== -->
+  <section class="slide section-divider" data-slide="2">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="divider-grid">
+          <div class="divider-left">
+            <div class="part-label">PART 01</div>
+            <h1 class="divider-title">
+              我的 AI 工具<br>
+              <span class="gradient-text">进化史</span>
+            </h1>
+            <p class="divider-lead">
+              工具不是越多越好，而是越"对"越好。<br>
+              这是一段从"问答机器"到"协作伙伴"的旅程 —— 每一次切换，背后都有一个"为什么"。
+            </p>
+            <div class="divider-meta">
+              <div class="meta-pill"><span class="dot"></span>4 年实战</div>
+              <div class="meta-pill"><span class="dot"></span>5 款主力工具</div>
+              <div class="meta-pill"><span class="dot"></span>1 个核心心法</div>
+            </div>
+          </div>
+          <div class="divider-right">
+            <!-- 抽象演化图 -->
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="AI 工具演化抽象图">
+              <defs>
+                <linearGradient id="evoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0A60FF"/>
+                  <stop offset="100%" stop-color="#02C8FF"/>
+                </linearGradient>
+                <radialGradient id="evoCenter" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#02C8FF" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#02C8FF" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <circle cx="200" cy="200" r="180" fill="url(#evoCenter)"/>
+              <!-- Concentric rings -->
+              <circle cx="200" cy="200" r="60" fill="none" stroke="#02C8FF" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.5"/>
+              <circle cx="200" cy="200" r="110" fill="none" stroke="#0A60FF" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.4"/>
+              <circle cx="200" cy="200" r="160" fill="none" stroke="#0A60FF" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.3"/>
+              <!-- Center -->
+              <circle cx="200" cy="200" r="30" fill="url(#evoGrad)"/>
+              <text x="200" y="206" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700" font-family="Inter">YOU</text>
+              <!-- Orbit nodes -->
+              <g><circle cx="200" cy="90" r="14" fill="#0A60FF"/><text x="200" y="94" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="700">GPT</text></g>
+              <g><circle cx="310" cy="200" r="14" fill="#0A60FF"/><text x="310" y="204" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="700">Grok</text></g>
+              <g><circle cx="200" cy="310" r="14" fill="#0A60FF"/><text x="200" y="314" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="700">Gem</text></g>
+              <g><circle cx="90" cy="200" r="14" fill="#0A60FF"/><text x="90" y="204" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="700">NLM</text></g>
+              <g><circle cx="280" cy="120" r="18" fill="#02C8FF"/><text x="280" y="124" text-anchor="middle" fill="#07182D" font-size="9" font-weight="800">Cla</text></g>
+              <!-- Trajectory dots -->
+              <circle cx="245" cy="115" r="2" fill="#FF007F" opacity="0.6"/>
+              <circle cx="265" cy="155" r="2" fill="#FF007F" opacity="0.6"/>
+              <circle cx="270" cy="240" r="2" fill="#FF007F" opacity="0.4"/>
+              <circle cx="155" cy="285" r="2" fill="#FF007F" opacity="0.4"/>
+              <circle cx="115" cy="155" r="2" fill="#FF007F" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 3: 时间线全景                                                -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="3">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Timeline · 一图看懂</span>
+            <h2>从"试一试"到"离不开"</h2>
+            <p style="color: var(--gray-600); font-size: 1.0625rem; max-width: 720px;">
+              过去 4 年,我换过 5 个主力 AI 工具。<strong>不是它们不好,而是我的需求在变,它们也在变</strong>。下面这张时间线,记录了每一次切换背后的"为什么"。
+            </p>
+          </div>
+          <div class="slide-number">02 / <span class="total">11</span></div>
+        </div>
+
+        <div class="svg-scroll-wrapper timeline-wrapper">
+          <svg viewBox="0 0 1200 380" xmlns="http://www.w3.org/2000/svg" style="min-width: 1000px; width: 100%; height: auto;" aria-label="AI 工具使用时间线">
+            <defs>
+              <linearGradient id="tlLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0A60FF"/>
+                <stop offset="50%" stop-color="#02C8FF"/>
+                <stop offset="100%" stop-color="#FF007F"/>
+              </linearGradient>
+              <filter id="tlShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#07182D" flood-opacity="0.15"/>
+              </filter>
+            </defs>
+
+            <!-- Main line -->
+            <line x1="80" y1="190" x2="1120" y2="190" stroke="url(#tlLine)" stroke-width="4" stroke-linecap="round"/>
+
+            <!-- Stage 1: ChatGPT -->
+            <g filter="url(#tlShadow)">
+              <circle cx="160" cy="190" r="32" fill="#FFFFFF" stroke="#0A60FF" stroke-width="3"/>
+              <text x="160" y="196" text-anchor="middle" font-size="13" font-weight="800" fill="#0A60FF" font-family="Inter">GPT</text>
+            </g>
+            <text x="160" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#07182D" font-family="Inter">ChatGPT</text>
+            <text x="160" y="120" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">问答 + 早期 Vibe Coding</text>
+            <text x="160" y="138" text-anchor="middle" font-size="10" fill="#0A60FF" font-weight="600" font-family="JetBrains Mono">起点</text>
+            <text x="160" y="260" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">「写 Shell 脚本</text>
+            <text x="160" y="276" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">部署 AppD 到</text>
+            <text x="160" y="292" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">AWS China」</text>
+
+            <!-- Stage 2: Grok -->
+            <g filter="url(#tlShadow)">
+              <circle cx="360" cy="190" r="32" fill="#FFFFFF" stroke="#0A60FF" stroke-width="3"/>
+              <text x="360" y="196" text-anchor="middle" font-size="13" font-weight="800" fill="#0A60FF" font-family="Inter">Grok</text>
+            </g>
+            <text x="360" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#07182D" font-family="Inter">Grok</text>
+            <text x="360" y="120" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">提示词 + 新闻核实</text>
+            <text x="360" y="138" text-anchor="middle" font-size="10" fill="#0A60FF" font-weight="600" font-family="JetBrains Mono">补位</text>
+            <text x="360" y="260" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">「语言犀利</text>
+            <text x="360" y="276" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">不被政治正确</text>
+            <text x="360" y="292" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">束缚」</text>
+
+            <!-- Stage 3: Gemini -->
+            <g filter="url(#tlShadow)">
+              <circle cx="560" cy="190" r="32" fill="#FFFFFF" stroke="#0A60FF" stroke-width="3"/>
+              <text x="560" y="196" text-anchor="middle" font-size="11" font-weight="800" fill="#0A60FF" font-family="Inter">Gem</text>
+            </g>
+            <text x="560" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#07182D" font-family="Inter">Gemini Pro</text>
+            <text x="560" y="120" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">深度研究 + Canvas</text>
+            <text x="560" y="138" text-anchor="middle" font-size="10" fill="#0A60FF" font-weight="600" font-family="JetBrains Mono">跃迁</text>
+            <text x="560" y="260" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">「自主搜资料</text>
+            <text x="560" y="276" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">点燃了 HTML</text>
+            <text x="560" y="292" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">博客之路」</text>
+
+            <!-- Stage 4: NotebookLM -->
+            <g filter="url(#tlShadow)">
+              <circle cx="760" cy="190" r="32" fill="#FFFFFF" stroke="#02C8FF" stroke-width="3"/>
+              <text x="760" y="196" text-anchor="middle" font-size="11" font-weight="800" fill="#02C8FF" font-family="Inter">NLM</text>
+            </g>
+            <text x="760" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#07182D" font-family="Inter">NotebookLM</text>
+            <text x="760" y="120" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">资料整理 + 播客</text>
+            <text x="760" y="138" text-anchor="middle" font-size="10" fill="#02C8FF" font-weight="600" font-family="JetBrains Mono">并行</text>
+            <text x="760" y="260" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">「只用我的资料</text>
+            <text x="760" y="276" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">回答,绝不</text>
+            <text x="760" y="292" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">瞎编」</text>
+
+            <!-- Stage 5: Claude Opus -->
+            <g filter="url(#tlShadow)">
+              <circle cx="980" cy="190" r="40" fill="#02C8FF" stroke="#0A60FF" stroke-width="3"/>
+              <text x="980" y="197" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF" font-family="Inter">Claude</text>
+            </g>
+            <text x="980" y="92" text-anchor="middle" font-size="15" font-weight="800" fill="#07182D" font-family="Inter">Claude Opus 4.7</text>
+            <text x="980" y="112" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">on CIRCUIT · 当前主力</text>
+            <text x="980" y="132" text-anchor="middle" font-size="10" fill="#FF007F" font-weight="700" font-family="JetBrains Mono">★ NOW</text>
+            <text x="980" y="260" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">「同样的提示词,</text>
+            <text x="980" y="276" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">输出更省心,</text>
+            <text x="980" y="292" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">质量更高」</text>
+
+            <!-- Arrow at end -->
+            <path d="M 1080 180 L 1110 190 L 1080 200 Z" fill="#FF007F"/>
+            <text x="1100" y="220" text-anchor="middle" font-size="10" fill="#FF007F" font-weight="600" font-family="JetBrains Mono">未来</text>
+          </svg>
+        </div>
+
+        <div class="callout-insight">
+          <div class="insight-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          </div>
+          <div>
+            <strong>核心洞察:</strong>这条时间线背后,藏着一个朴素的道理 —— <strong>"工具的迁移,不是因为旧的不好用,而是新的更贴合当下的需求。"</strong> 没有"最好"的 AI 工具,只有"最适合此刻任务"的工具。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 4: ChatGPT + Grok 详解                                     -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="4">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Chapter 1 · 启蒙时代</span>
+            <h2>ChatGPT &amp; Grok:从"问答"到"补位"</h2>
+          </div>
+          <div class="slide-number">03 / <span class="total">11</span></div>
+        </div>
+
+        <div class="tool-grid-2">
+          <!-- ChatGPT Card -->
+          <article class="tool-card">
+            <div class="tool-card-header">
+              <div class="tool-logo tool-logo-gpt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="margin-bottom: 0.25rem;">ChatGPT</h3>
+                <span class="tool-tag">起点 · 问答与代码</span>
+              </div>
+            </div>
+            <p class="tool-desc">
+              我的 AI 启蒙老师。最初只是简单的"问答式查询"——直到那个让我至今难忘的真实战役:
+            </p>
+            <div class="tool-story">
+              <div class="story-label">📌 真实案例</div>
+              <p>
+                我让 ChatGPT 帮我编写了一套复杂的 Shell 脚本,用于在 <strong>AWS China</strong> 上架 <strong>AppDynamics</strong>。
+                这套脚本涉及环境配置、依赖安装、网络打通……人工写至少要两天,AI 协助下半天搞定。
+              </p>
+              <p style="margin-bottom: 0;">
+                <strong>这就是早期的 Vibe Coding</strong> —— 不必"懂全部",只需"会描述"。
+              </p>
+            </div>
+            <div class="tool-tags">
+              <span class="chip">问答查询</span>
+              <span class="chip">Shell 脚本</span>
+              <span class="chip">早期 Vibe Coding</span>
+            </div>
+          </article>
+
+          <!-- Grok Card -->
+          <article class="tool-card">
+            <div class="tool-card-header">
+              <div class="tool-logo tool-logo-grok">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="margin-bottom: 0.25rem;">Grok</h3>
+                <span class="tool-tag">补位 · 犀利且不"装"</span>
+              </div>
+            </div>
+            <p class="tool-desc">
+              当 ChatGPT 越来越"客气"、动不动就免责声明时,Grok 像个"敢说真话的朋友"——
+              <strong>语言风格犀利,不被政治正确束缚</strong>。
+            </p>
+            <div class="tool-story">
+              <div class="story-label">📌 我的两大用途</div>
+              <ul style="margin: 0; padding-left: 1.2rem;">
+                <li><strong>生成提示词</strong>(Prompt 工程的副驾驶,直白且不绕弯)</li>
+                <li><strong>新闻事件核实</strong>(快速判断信息真伪)</li>
+              </ul>
+            </div>
+            <div class="tool-aside">
+              <strong>💭 一个克制的选择:</strong> 据说 Perplexity 在新闻核实上更胜一筹,但我没有切换 ——
+              <strong>"工具过于分散,反而会拖慢节奏"</strong>。少即是多。
+            </div>
+            <div class="tool-tags">
+              <span class="chip">提示词生成</span>
+              <span class="chip">新闻核实</span>
+              <span class="chip">风格犀利</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="metaphor-box">
+          <div class="metaphor-icon">🔍</div>
+          <div>
+            <strong>类比时间:</strong> 如果 ChatGPT 是"什么都懂一点的瑞士军刀",那 Grok 就是"嘴毒但靠谱的酒馆老炮"——
+            前者解决日常,后者帮你看穿迷雾。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 5: Gemini + NotebookLM 详解                                -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="5">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Chapter 2 · 深度时代</span>
+            <h2>Gemini &amp; NotebookLM:从"通用"到"专研"</h2>
+          </div>
+          <div class="slide-number">04 / <span class="total">11</span></div>
+        </div>
+
+        <div class="tool-grid-2">
+          <!-- Gemini Card -->
+          <article class="tool-card tool-card-feature">
+            <div class="tool-card-header">
+              <div class="tool-logo tool-logo-gemini">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                  <path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="margin-bottom: 0.25rem;">Gemini Pro</h3>
+                <span class="tool-tag">跃迁 · 深度研究</span>
+              </div>
+            </div>
+            <p class="tool-desc">
+              <strong>Google Gemini Pro 的能力跨越式提升,让我心甘情愿付费订阅。</strong>它给我带来了两个"魔法时刻":
+            </p>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-num">01</div>
+                <div>
+                  <strong>Deep Research(深度研究)</strong>
+                  <p>它能<em>自主搜索互联网资料</em>,像一个不知疲倦的研究助理——你只需提出问题,它自己规划、检索、总结,最后给你一份带引用的研究报告。</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-num">02</div>
+                <div>
+                  <strong>Canvas(画布功能)</strong>
+                  <p>这个偶然发现的功能,直接<em>点燃了我写 HTML 博客的兴趣</em>——所见即所得地输出格式精美的网页文章,让我从此一发不可收拾。</p>
+                </div>
+              </div>
+            </div>
+            <div class="tool-tags">
+              <span class="chip">Deep Research</span>
+              <span class="chip">Canvas</span>
+              <span class="chip">HTML 博客</span>
+            </div>
+          </article>
+
+          <!-- NotebookLM Card -->
+          <article class="tool-card">
+            <div class="tool-card-header">
+              <div class="tool-logo tool-logo-nlm">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+                  <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="margin-bottom: 0.25rem;">NotebookLM</h3>
+                <span class="tool-tag">并行 · 资料中枢</span>
+              </div>
+            </div>
+            <p class="tool-desc">
+              它和 Gemini 不是替代,而是<strong>分工</strong>。NotebookLM 是我专门用来<strong>"驯服资料"</strong>的工具。
+            </p>
+            <div class="tool-story">
+              <div class="story-label">🎯 它最让我惊艳的三点</div>
+              <ul style="margin: 0; padding-left: 1.2rem;">
+                <li><strong>只看"投喂"的资料</strong>——绝不瞎编、绝不外延</li>
+                <li><strong>问答式检索</strong>——像有了一个"读完这堆文档的助理"</li>
+                <li><strong>一键生成音频播客 &amp; 视频</strong>——把枯燥资料"播"给你听</li>
+              </ul>
+            </div>
+            <div class="tool-aside" style="background: linear-gradient(135deg, rgba(2, 200, 255, 0.08), rgba(10, 96, 255, 0.04));">
+              <strong>🎙️ 玩出花的尝试:</strong> 我让它把一份技术文档生成"两个主播辩论形式"的播客——
+              开车通勤听技术,体验非常奇妙。
+            </div>
+            <div class="tool-tags">
+              <span class="chip">资料检索</span>
+              <span class="chip">绝不瞎编</span>
+              <span class="chip">音频播客</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="callout-insight">
+          <div class="insight-icon">💡</div>
+          <div>
+            <strong>关键认知:</strong> Gemini 适合"<strong>探索未知</strong>"(它替你上网搜),NotebookLM 适合"<strong>消化已知</strong>"(它精读你给的资料)。<br>
+            前者像派出去的<em>侦察兵</em>,后者像家里的<em>资料管家</em> —— 两者并行,才是完整的研究闭环。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 6: Claude Opus 当前主力                                     -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="6">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Chapter 3 · 当前主力</span>
+            <h2>Claude Opus on CIRCUIT:让我"省心"的最终答案</h2>
+          </div>
+          <div class="slide-number">05 / <span class="total">11</span></div>
+        </div>
+
+        <div class="hero-tool">
+          <div class="hero-tool-left">
+            <div class="hero-tool-logo">
+              <svg viewBox="0 0 100 100" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="claudeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#02C8FF"/>
+                    <stop offset="100%" stop-color="#0A60FF"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="46" fill="url(#claudeGrad)"/>
+                <path d="M30 35 L40 70 L50 45 L60 70 L70 35" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="hero-tool-badge">★ 当前主力模型</div>
+            <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--cisco-midnight);">Claude Opus 4.7</h3>
+            <p style="color: var(--cisco-medium-blue); font-weight: 600; margin-bottom: 1.5rem;">via Cisco CIRCUIT 平台</p>
+
+            <p style="font-size: 1.0625rem; line-height: 1.75;">
+              当 CIRCUIT 引入 Claude Opus 之后,我做了一个简单实验:
+              <strong>用同样的提示词,分别喂给 Gemini Pro 和 Claude Opus。</strong>
+            </p>
+            <p style="font-size: 1.0625rem; line-height: 1.75;">
+              结果让我一锤定音 —— Claude Opus 的输出更结构化、更有"灵气"、几乎不用反复修改。
+              <strong style="color: var(--cisco-medium-blue);">"省心"二字,是它打动我的关键。</strong>
+            </p>
+            <p style="font-size: 1.0625rem; line-height: 1.75; margin-bottom: 0;">
+              它现在是我撰写技术博客、深度文章的主力。
+            </p>
+          </div>
+
+          <div class="hero-tool-right">
+            <div class="comparison-card">
+              <div class="comparison-title">同样提示词,质量对比 <span style="font-weight:400; color:var(--gray-600); font-size: 0.875rem;">(主观感受)</span></div>
+
+              <div class="bar-row">
+                <div class="bar-label">Gemini Pro</div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 75%; background: linear-gradient(90deg, #9B9CA0, #58585B);">75%</div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><strong>Claude Opus 4.7</strong></div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 95%; background: var(--grad-blue); color: white;">95%</div>
+                </div>
+              </div>
+
+              <div class="comparison-divider"></div>
+
+              <div class="reason-list">
+                <div class="reason-item">
+                  <span class="check-icon">✓</span>
+                  <span>结构化表达更清晰,符合"金字塔原理"</span>
+                </div>
+                <div class="reason-item">
+                  <span class="check-icon">✓</span>
+                  <span>类比与举例运用娴熟,通俗化能力强</span>
+                </div>
+                <div class="reason-item">
+                  <span class="check-icon">✓</span>
+                  <span>输出长文不"虎头蛇尾",尾部依然在线</span>
+                </div>
+                <div class="reason-item">
+                  <span class="check-icon">✓</span>
+                  <span>HTML/CSS 输出"美感"明显占优</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metaphor-box" style="margin-top: 2.5rem;">
+          <div class="metaphor-icon">🎯</div>
+          <div>
+            <strong>一句话总结这段进化:</strong> 我从 ChatGPT 起步、用 Grok 补位、靠 Gemini 跃迁、借 NotebookLM 深耕,最终在 Claude Opus 这里找到了"<strong>趁手</strong>"的感觉。 <br>
+            <em style="color: var(--gray-600);">—— 而这一切,都是用脚投票的结果。</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<!-- ============================================================== -->
+  <!-- SLIDE 7: 章节扉页 — 具体使用经验                                   -->
+  <!-- ============================================================== -->
+  <section class="slide section-divider" data-slide="7">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="divider-grid">
+          <div class="divider-left">
+            <div class="part-label">PART 02</div>
+            <h1 class="divider-title">
+              四个真实场景<br>
+              <span class="gradient-text">看我如何用 AI</span>
+            </h1>
+            <p class="divider-lead">
+              理论讲完了,该上"硬菜"。<br>
+              接下来的四个案例,都是我每周高频使用的真实工作流 —— 你拿走就能用,不用重新造轮子。
+            </p>
+            <div class="case-preview-list">
+              <div class="case-preview-item">
+                <span class="case-num-mini">01</span>
+                <span>AI 写 HTML 博客 <em>· 提示词驱动</em></span>
+              </div>
+              <div class="case-preview-item">
+                <span class="case-num-mini">02</span>
+                <span>AI 审阅博客文章 <em>· 提升品质</em></span>
+              </div>
+              <div class="case-preview-item">
+                <span class="case-num-mini">03</span>
+                <span>NotebookLM 解读文档 <em>· 不瞎编</em></span>
+              </div>
+              <div class="case-preview-item">
+                <span class="case-num-mini">04</span>
+                <span>CIRCUIT 的"Cisco 专属"妙用 <em>· 安全合规</em></span>
+              </div>
+            </div>
+          </div>
+          <div class="divider-right">
+            <!-- 工作流抽象图 -->
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="工作流抽象图">
+              <defs>
+                <linearGradient id="workGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0A60FF"/>
+                  <stop offset="100%" stop-color="#02C8FF"/>
+                </linearGradient>
+              </defs>
+              <!-- 4 quadrants -->
+              <g transform="translate(120,120)">
+                <rect x="-50" y="-50" width="100" height="100" rx="14" fill="#FFFFFF" stroke="#0A60FF" stroke-width="2"/>
+                <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#07182D" font-family="Inter">Case 01</text>
+                <text x="0" y="6" text-anchor="middle" font-size="9" fill="#58585B" font-family="Inter">写博客</text>
+                <text x="0" y="22" text-anchor="middle" font-size="22">📝</text>
+              </g>
+              <g transform="translate(280,120)">
+                <rect x="-50" y="-50" width="100" height="100" rx="14" fill="#FFFFFF" stroke="#0A60FF" stroke-width="2"/>
+                <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#07182D" font-family="Inter">Case 02</text>
+                <text x="0" y="6" text-anchor="middle" font-size="9" fill="#58585B" font-family="Inter">审稿</text>
+                <text x="0" y="22" text-anchor="middle" font-size="22">🔍</text>
+              </g>
+              <g transform="translate(120,280)">
+                <rect x="-50" y="-50" width="100" height="100" rx="14" fill="#FFFFFF" stroke="#0A60FF" stroke-width="2"/>
+                <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#07182D" font-family="Inter">Case 03</text>
+                <text x="0" y="6" text-anchor="middle" font-size="9" fill="#58585B" font-family="Inter">查文档</text>
+                <text x="0" y="22" text-anchor="middle" font-size="22">📚</text>
+              </g>
+              <g transform="translate(280,280)">
+                <rect x="-50" y="-50" width="100" height="100" rx="14" fill="url(#workGrad)" stroke="#0A60FF" stroke-width="2"/>
+                <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" font-family="Inter">Case 04</text>
+                <text x="0" y="6" text-anchor="middle" font-size="9" fill="#FFFFFF" font-family="Inter">CIRCUIT</text>
+                <text x="0" y="22" text-anchor="middle" font-size="22">🔐</text>
+              </g>
+              <!-- Connecting lines -->
+              <line x1="170" y1="120" x2="230" y2="120" stroke="#02C8FF" stroke-width="2" stroke-dasharray="4,4"/>
+              <line x1="170" y1="280" x2="230" y2="280" stroke="#02C8FF" stroke-width="2" stroke-dasharray="4,4"/>
+              <line x1="120" y1="170" x2="120" y2="230" stroke="#02C8FF" stroke-width="2" stroke-dasharray="4,4"/>
+              <line x1="280" y1="170" x2="280" y2="230" stroke="#02C8FF" stroke-width="2" stroke-dasharray="4,4"/>
+              <!-- Center YOU -->
+              <circle cx="200" cy="200" r="26" fill="#07182D"/>
+              <text x="200" y="206" text-anchor="middle" fill="#02C8FF" font-size="12" font-weight="800" font-family="Inter">YOU</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 8: 案例 1 — AI 写 HTML 博客                                 -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="8">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Case 01 · 提示词驱动</span>
+            <h2>让 AI 帮你写"图文并茂"的 HTML 博客</h2>
+          </div>
+          <div class="slide-number">07 / <span class="total">11</span></div>
+        </div>
+
+        <p class="lead-paragraph">
+          这是我使用频率最高的场景。它是一个典型的 <strong>"提示词驱动"</strong> 工作流 —— 你不动手写,只动嘴(键盘)。
+          <strong>关键不在 AI,而在那条"提示词"</strong>。它就像给大厨的菜谱:菜谱写得好,菜才能好。
+        </p>
+
+        <h3 class="section-h3">🧬 提示词的"四段式骨架"</h3>
+        <p style="color: var(--gray-600); margin-bottom: 1.25rem;">
+          我所有写博客的提示词,都遵循同一套结构 —— <strong>角色 + 任务 + 思考方法 + 输出要求</strong>。这套骨架是我反复打磨出来的"模板",可直接复用。
+        </p>
+
+        <div class="prompt-skeleton">
+          <div class="skeleton-step">
+            <div class="step-num-circle">1</div>
+            <div class="step-body">
+              <h4 class="step-title">定义角色 <span class="step-tag">Role</span></h4>
+              <p class="step-desc">告诉 AI 它是"谁" —— 越具体越好。</p>
+              <div class="step-example">
+                <code>你是 Cisco 资深系统工程师,精通 Cisco Networking 与 Security 解决方案,持有 CISSP 证书,拥有 20 年网页设计经验……</code>
+              </div>
+              <div class="step-why">
+                <strong>为什么有效?</strong> AI 会根据"角色"调整知识范围、语气和深度。设定 CISSP 专家,它就不会用小学生口吻和你聊安全。
+              </div>
+            </div>
+          </div>
+
+          <div class="skeleton-arrow">↓</div>
+
+          <div class="skeleton-step">
+            <div class="step-num-circle">2</div>
+            <div class="step-body">
+              <h4 class="step-title">设置任务与约束条件 <span class="step-tag">Task &amp; Constraints</span></h4>
+              <p class="step-desc">明确目标 + 边界 —— AI 最怕"含糊"。</p>
+              <div class="step-example">
+                <code>请撰写一篇技术白皮书,采用"总-分-总"结构,使用 Cisco 官方配色,所有图表必须 SVG,必须包含打印样式……</code>
+              </div>
+              <div class="step-why">
+                <strong>为什么有效?</strong> 约束越清晰,AI 越能"对齐"你的期望。"总-分-总"结构、配色规范、SVG 等限制,把发散变成聚焦。
+              </div>
+            </div>
+          </div>
+
+          <div class="skeleton-arrow">↓</div>
+
+          <div class="skeleton-step">
+            <div class="step-num-circle">3</div>
+            <div class="step-body">
+              <h4 class="step-title">指定思考方法 <span class="step-tag">Reasoning</span></h4>
+              <p class="step-desc">让 AI <em>"按你的方式思考"</em>,而不是按它的默认方式。</p>
+              <div class="step-example">
+                <code>请用第一性原理 + 苏格拉底提问法构建文章。每个新概念必须给出"精准定义 + 精妙类比"。</code>
+              </div>
+              <div class="step-why">
+                <strong>为什么有效?</strong> 不指定方法时,AI 默认是"列要点"; 指定了,它会层层追问、推导,产出深度文章。这是质变。
+              </div>
+            </div>
+          </div>
+
+          <div class="skeleton-arrow">↓</div>
+
+          <div class="skeleton-step">
+            <div class="step-num-circle">4</div>
+            <div class="step-body">
+              <h4 class="step-title">输出格式与质量标准 <span class="step-tag">Output</span></h4>
+              <p class="step-desc">明确"成品"长什么样 —— 别让 AI "猜"。</p>
+              <div class="step-example">
+                <code>输出形式:单一完整 HTML 网页;Light Mode 风格;字号 ≥16px;Container 自适应;按章节分批输出,等我说"继续"再继续……</code>
+              </div>
+              <div class="step-why">
+                <strong>为什么有效?</strong> 格式定得越死,返工越少。"分批输出 + 等用户确认"还能避开 Token 限制导致的"输出截断"。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout-insight">
+          <div class="insight-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <strong>本案例的精髓:</strong> 写好提示词,本质是"<strong>把模糊需求翻译成精确指令</strong>"。
+            它考验的不是技术,而是 <em>"你到底想要什么"的自我澄清能力</em>。
+            <br><strong style="color: var(--cisco-medium-blue);">📎 完整提示词模板见附件 Prompt1.txt,可直接复用。</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 9: 案例 2 — AI 审阅文章                                     -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="9">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Case 02 · 闭环验证</span>
+            <h2>让 AI 当你的"主编",审稿提质</h2>
+          </div>
+          <div class="slide-number">08 / <span class="total">11</span></div>
+        </div>
+
+        <p class="lead-paragraph">
+          只让 AI <em>"写"</em> 是初阶玩法。让 AI <em>"自己审自己"</em>,才是高阶心法。<br>
+          这是一个 <strong>"双 AI 闭环"</strong> —— 一个写、一个挑刺,质量比单跑一次提升一个量级。
+        </p>
+
+        <h3 class="section-h3">🔄 双 AI 闭环:写作 → 审稿 → 修订</h3>
+
+        <div class="svg-scroll-wrapper">
+          <svg viewBox="0 0 1100 280" xmlns="http://www.w3.org/2000/svg" style="min-width: 900px; width: 100%; height: auto;" aria-label="双 AI 闭环工作流">
+            <defs>
+              <linearGradient id="loopGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0A60FF"/>
+                <stop offset="100%" stop-color="#02C8FF"/>
+              </linearGradient>
+              <linearGradient id="loopGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#FF9000"/>
+                <stop offset="100%" stop-color="#FF007F"/>
+              </linearGradient>
+              <filter id="loopShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#07182D" flood-opacity="0.15"/>
+              </filter>
+              <!-- ✅ 把 marker 也合并到这里 -->
+              <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A60FF"/>
+              </marker>
+              <marker id="arrowOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#FF9000"/>
+              </marker>
+              <marker id="arrowPink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#FF007F"/>
+              </marker>
+            </defs>
+
+            <!-- Step 1: Prompt -->
+            <g filter="url(#loopShadow)">
+              <rect x="40" y="100" width="170" height="90" rx="14" fill="#FFFFFF" stroke="#0A60FF" stroke-width="2"/>
+              <text x="125" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#07182D" font-family="Inter">① Prompt1.txt</text>
+              <text x="125" y="152" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">写作提示词</text>
+              <text x="125" y="172" text-anchor="middle" font-size="10" fill="#0A60FF" font-family="JetBrains Mono">(角色+任务+方法)</text>
+            </g>
+
+            <!-- Arrow 1 -->
+            <line x1="215" y1="145" x2="265" y2="145" stroke="#0A60FF" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+
+            <!-- Step 2: AI Writer -->
+            <g filter="url(#loopShadow)">
+              <rect x="270" y="80" width="180" height="130" rx="14" fill="url(#loopGrad1)"/>
+              <text x="360" y="115" text-anchor="middle" font-size="14" font-weight="800" fill="#FFFFFF" font-family="Inter">② AI 写作者</text>
+              <text x="360" y="138" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">Claude Opus 4.7</text>
+              <text x="360" y="160" text-anchor="middle" font-size="22">✍️</text>
+              <text x="360" y="190" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)" font-family="JetBrains Mono">输出 HTML 初稿</text>
+            </g>
+
+            <!-- Arrow 2 -->
+            <line x1="455" y1="145" x2="505" y2="145" stroke="#0A60FF" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+
+            <!-- Step 3: Draft -->
+            <g filter="url(#loopShadow)">
+              <rect x="510" y="100" width="160" height="90" rx="14" fill="#FFFFFF" stroke="#02C8FF" stroke-width="2" stroke-dasharray="6,3"/>
+              <text x="590" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#07182D" font-family="Inter">③ HTML 初稿</text>
+              <text x="590" y="152" text-anchor="middle" font-size="11" fill="#58585B" font-family="Inter">xxx.html</text>
+              <text x="590" y="172" text-anchor="middle" font-size="20">📄</text>
+            </g>
+
+            <!-- Arrow 3 -->
+            <line x1="675" y1="145" x2="725" y2="145" stroke="#FF9000" stroke-width="2.5" marker-end="url(#arrowOrange)"/>
+
+            <!-- Step 4: AI Reviewer -->
+            <g filter="url(#loopShadow)">
+              <rect x="730" y="80" width="180" height="130" rx="14" fill="url(#loopGrad2)"/>
+              <text x="820" y="115" text-anchor="middle" font-size="14" font-weight="800" fill="#FFFFFF" font-family="Inter">④ AI 审稿者</text>
+              <text x="820" y="138" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">Claude / Gemini</text>
+              <text x="820" y="160" text-anchor="middle" font-size="22">🔍</text>
+              <text x="820" y="190" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.9)" font-family="JetBrains Mono">挑错 + 改进建议</text>
+            </g>
+
+            <!-- Step 5: Refinement Loop (回到 Step 2) -->
+            <path d="M 820 215 Q 820 250 590 250 Q 360 250 360 215" stroke="#FF007F" stroke-width="2.5" fill="none" stroke-dasharray="6,4" marker-end="url(#arrowPink)"/>
+            <text x="590" y="270" text-anchor="middle" font-size="11" font-weight="600" fill="#FF007F" font-family="JetBrains Mono">迭代修订 · Prompt2.txt 驱动</text>
+
+            <!-- Step 6: Final -->
+            <g filter="url(#loopShadow)">
+              <rect x="940" y="100" width="120" height="90" rx="14" fill="#07182D"/>
+              <text x="1000" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#02C8FF" font-family="Inter">⑤ 终稿</text>
+              <text x="1000" y="152" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)" font-family="Inter">Final.html</text>
+              <text x="1000" y="172" text-anchor="middle" font-size="20">✨</text>
+            </g>
+          </svg>
+        </div>
+
+        <h3 class="section-h3" style="margin-top: 2rem;">🎯 审稿提示词的核心要点</h3>
+
+        <div class="review-grid">
+          <div class="review-card">
+            <div class="review-icon">🧭</div>
+            <h4>梳理逻辑动线</h4>
+            <p>"请审视文章的逻辑路线图与节点,评价整体思路是否畅通无阻。"</p>
+            <div class="review-tag">逻辑层</div>
+          </div>
+          <div class="review-card">
+            <div class="review-icon">🚧</div>
+            <h4>找出"跳跃感"</h4>
+            <p>"模拟读者通读,告诉我哪里不连贯、哪里有跳跃感、哪里需要补充过渡。"</p>
+            <div class="review-tag">体验层</div>
+          </div>
+          <div class="review-card">
+            <div class="review-icon">⚖️</div>
+            <h4>核实事实准确性</h4>
+            <p>"<strong>每个章节、每张表格、每张 SVG,都需要依照原始资料逐一核实,避免错误。若发现冲突,以最新版本为准。</strong>"</p>
+            <div class="review-tag">事实层 ★关键</div>
+          </div>
+          <div class="review-card">
+            <div class="review-icon">✨</div>
+            <h4>Make it Clear</h4>
+            <p>"从行文逻辑、覆盖深度、价值传达等多角度评价 —— 这是不是一篇你心目中的高质量博客?"</p>
+            <div class="review-tag">品质层</div>
+          </div>
+          <div class="review-card review-card-highlight">
+            <div class="review-icon">🔧</div>
+            <h4>给出可执行的修改</h4>
+            <p>"如有修改建议,请提供 <strong>HTML 增量代码</strong>,并明确告知如何添加或替换原文中的代码,精确到上下文位置。"</p>
+            <div class="review-tag">闭环层 ★关键</div>
+          </div>
+        </div>
+
+        <div class="metaphor-box">
+          <div class="metaphor-icon">🎭</div>
+          <div>
+            <strong>类比时间:</strong> 这就像写论文找导师 —— <strong>自己写完不算完,要让"另一个聪明的脑袋"挑刺</strong>。
+            妙就妙在:你的导师就是 AI,它不会嫌烦、不会嘴软,且能提供精确到代码行的修改建议。<br>
+            <em style="color: rgba(255,255,255,0.7);">—— 一个写一个审,质量直接拉满。</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ============================================================== -->
+  <!-- SLIDE 10: 案例 3 — NotebookLM 解读文档                            -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="10">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Case 03 · 资料驯服</span>
+            <h2>NotebookLM:让一份文档"开口说话"</h2>
+          </div>
+          <div class="slide-number">09 / <span class="total">11</span></div>
+        </div>
+
+        <p class="lead-paragraph">
+          通用大模型最大的"原罪",是<strong>幻觉</strong> —— 一本正经地胡说八道。<br>
+          而 NotebookLM 用一个朴素而强悍的设计,几乎根除了这个问题:<strong>"我只看你给我的资料,绝不外延、绝不瞎编。"</strong>
+        </p>
+
+        <h3 class="section-h3">📖 一个真实场景:让 RoomOS API 文档"自己回答我"</h3>
+
+        <div class="story-scenario">
+          <div class="scenario-step">
+            <div class="scenario-step-num">①</div>
+            <div class="scenario-step-body">
+              <h4>遇到的问题</h4>
+              <p>我需要写一段宏脚本(Macro),实现 Cisco RoomOS 设备的"会议屏幕分配"——但 RoomOS 的 API 文档动辄几百页,翻起来眼花。</p>
+            </div>
+          </div>
+
+          <div class="scenario-step">
+            <div class="scenario-step-num">②</div>
+            <div class="scenario-step-body">
+              <h4>传统做法 vs NotebookLM 做法</h4>
+              <div class="vs-grid">
+                <div class="vs-card vs-card-old">
+                  <div class="vs-tag">传统做法</div>
+                  <p>Ctrl+F 搜关键词 → 在几百页里翻 → 拼凑示例代码 → 反复试错</p>
+                  <div class="vs-meta">⏱️ 半天起步</div>
+                </div>
+                <div class="vs-card vs-card-new">
+                  <div class="vs-tag">NotebookLM 做法</div>
+                  <p>把 API 文档拖进 NotebookLM → 用自然语言提问:"调用哪些 API 实现会议屏幕分配?"</p>
+                  <div class="vs-meta">⚡ 几分钟拿到答案 + 引用页码</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scenario-step">
+            <div class="scenario-step-num">③</div>
+            <div class="scenario-step-body">
+              <h4>关键差异:它真的"只读你的资料"</h4>
+              <p>每一条回答都会标注 <strong>"引用自原文第 X 页"</strong>。如果文档里没有,它会直接告诉你"<em>资料中未提及</em>"——而不是像 ChatGPT 那样,自信地编一个不存在的 API 函数给你。</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-h3" style="margin-top: 2rem;">🧠 为什么"不瞎编"?—— 第一性原理拆解</h3>
+
+        <div class="svg-scroll-wrapper">
+          <svg viewBox="0 0 1100 280" xmlns="http://www.w3.org/2000/svg" style="min-width: 900px; width: 100%; height: auto;" aria-label="NotebookLM 工作原理">
+            <defs>
+              <linearGradient id="nlmGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0A60FF"/>
+                <stop offset="100%" stop-color="#02C8FF"/>
+              </linearGradient>
+              <filter id="nlmShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#07182D" flood-opacity="0.15"/>
+              </filter>
+              <marker id="arrowPink2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#FF007F"/>
+              </marker>
+            </defs>
+
+            <!-- ChatGPT side (left, with hallucination) -->
+            <g>
+              <text x="200" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#FF007F" font-family="Inter">❌ 传统大模型</text>
+              <g filter="url(#nlmShadow)">
+                <rect x="60" y="60" width="280" height="180" rx="14" fill="#FFFFFF" stroke="#FF007F" stroke-width="2" stroke-dasharray="6,3"/>
+              </g>
+              <!-- LLM cloud -->
+              <ellipse cx="200" cy="110" rx="80" ry="22" fill="rgba(255, 0, 127, 0.08)" stroke="#FF007F" stroke-width="1.5"/>
+              <text x="200" y="115" text-anchor="middle" font-size="11" fill="#FF007F" font-weight="600" font-family="Inter">海量训练知识(含旧/错信息)</text>
+              <!-- Question -->
+              <text x="200" y="155" text-anchor="middle" font-size="11" fill="#07182D" font-family="Inter">问题: 调用哪些 API?</text>
+              <line x1="200" y1="160" x2="200" y2="180" stroke="#FF007F" stroke-width="2" marker-end="url(#arrowPink2)"/>
+              <!-- Hallucination -->
+              <rect x="100" y="185" width="200" height="40" rx="8" fill="rgba(255, 0, 127, 0.1)" stroke="#FF007F" stroke-width="1"/>
+              <text x="200" y="202" text-anchor="middle" font-size="10" fill="#FF007F" font-weight="600" font-family="Inter">⚠️ 自信编造</text>
+              <text x="200" y="218" text-anchor="middle" font-size="9" fill="#58585B" font-family="JetBrains Mono">xAPI.Conference.Setup() (不存在)</text>
+            </g>
+
+            <!-- VS divider -->
+            <text x="500" y="155" text-anchor="middle" font-size="32" font-weight="800" fill="#9B9CA0" font-family="Inter">VS</text>
+
+            <!-- NotebookLM side (right, grounded) -->
+            <g>
+              <text x="800" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#0A60FF" font-family="Inter">✅ NotebookLM</text>
+              <g filter="url(#nlmShadow)">
+                <rect x="660" y="60" width="280" height="180" rx="14" fill="#FFFFFF" stroke="#0A60FF" stroke-width="2"/>
+              </g>
+              <!-- Document -->
+              <rect x="700" y="80" width="50" height="60" rx="4" fill="rgba(10, 96, 255, 0.1)" stroke="#0A60FF" stroke-width="1.5"/>
+              <line x1="708" y1="92" x2="742" y2="92" stroke="#0A60FF" stroke-width="1"/>
+              <line x1="708" y1="100" x2="742" y2="100" stroke="#0A60FF" stroke-width="1"/>
+              <line x1="708" y1="108" x2="735" y2="108" stroke="#0A60FF" stroke-width="1"/>
+              <text x="725" y="155" text-anchor="middle" font-size="9" fill="#0A60FF" font-weight="600" font-family="Inter">你的 PDF</text>
+
+              <!-- Lock icon -->
+              <text x="800" y="100" text-anchor="middle" font-size="22">🔒</text>
+              <text x="800" y="125" text-anchor="middle" font-size="10" fill="#0A60FF" font-weight="600" font-family="Inter">边界锁定</text>
+              <text x="800" y="140" text-anchor="middle" font-size="9" fill="#58585B" font-family="Inter">只读这份资料</text>
+
+              <!-- Question to answer -->
+              <rect x="780" y="170" width="140" height="55" rx="8" fill="rgba(2, 200, 255, 0.1)" stroke="#02C8FF" stroke-width="1"/>
+              <text x="850" y="188" text-anchor="middle" font-size="10" fill="#0A60FF" font-weight="700" font-family="Inter">✓ xAPI.Call.Layout</text>
+              <text x="850" y="205" text-anchor="middle" font-size="9" fill="#58585B" font-family="JetBrains Mono">引用: 第 47 页</text>
+              <text x="850" y="218" text-anchor="middle" font-size="9" fill="#58585B" font-family="JetBrains Mono">引用: 第 89 页</text>
+            </g>
+         </svg>
+        </div>
+
+        <h3 class="section-h3" style="margin-top: 2rem;">🎙️ 玩出花:把文档变成"双主播播客"</h3>
+
+        <div class="podcast-showcase">
+          <div class="podcast-visual">
+            <div class="podcast-mic">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </div>
+            <!-- Sound wave animation -->
+            <div class="sound-wave">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="podcast-content">
+            <h4 style="color: var(--cisco-blue); margin-bottom: 0.75rem;">一键生成,通勤路上听技术</h4>
+            <p style="margin-bottom: 0.875rem;">
+              NotebookLM 可以把上传的资料,自动生成<strong>双主播形式</strong>的中英文音频播客——一个人发问、一个人解答,你听起来就像在听一档真人科技播客。
+            </p>
+            <div class="podcast-modes">
+              <div class="mode-pill">
+                <span class="mode-icon">💬</span>
+                <span><strong>问答形式</strong> · 一问一答,适合学习</span>
+              </div>
+              <div class="mode-pill">
+                <span class="mode-icon">⚔️</span>
+                <span><strong>辩论形式</strong> · 正反交锋,激发思考</span>
+              </div>
+            </div>
+            <p style="margin: 0.875rem 0 0; font-size: 0.9375rem; color: var(--gray-600);">
+              <em>👂 我做过尝试:把一份枯燥的产品白皮书,变成 10 分钟的播客。开车回家路上听一遍,印象深刻 —— 这才是"信息消费"的现代方式。</em>
+            </p>
+          </div>
+        </div>
+
+        <div class="metaphor-box">
+          <div class="metaphor-icon">📚</div>
+          <div>
+            <strong>类比时间:</strong> 通用大模型像"<strong>夸夸其谈的演讲家</strong>",有问必答,但你不知道哪句是真的;
+            NotebookLM 像"<strong>认真的图书管理员</strong>",只回答你给他的那本书里有的内容,且每句话都会指给你看出处。
+            <br><em style="color: rgba(255,255,255,0.7);">—— 想要"靠谱",就让 AI"先看资料、再开口"。</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 11: 案例 4 — CIRCUIT 的 Cisco 专属玩法                       -->
+  <!-- ============================================================== -->
+  <section class="slide" data-slide="11">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Case 04 · Cisco 内部利器</span>
+            <h2>CIRCUIT:为什么它是 Cisco 人的"主战场"</h2>
+          </div>
+          <div class="slide-number">10 / <span class="total">11</span></div>
+        </div>
+
+        <p class="lead-paragraph">
+          所有外部 AI 工具,都有一个共同的"红线":<strong>不能投喂 Cisco Highly Confidential 资料</strong>。<br>
+          这就是为什么,我们必须有 CIRCUIT —— 它是<strong>"穿着安全外套的 AI"</strong>,能让你放心地把客户 Case、内部数据、机密文档喂给它。
+        </p>
+
+        <h3 class="section-h3">🛡️ CIRCUIT 的四大杀手锏</h3>
+
+        <div class="circuit-grid">
+          <!-- Feature 1: Confidential -->
+          <article class="circuit-card">
+            <div class="circuit-icon-wrap circuit-icon-1">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div class="circuit-num">01</div>
+            <h4>处理 Cisco 机密资料</h4>
+            <p>这是它最核心的价值。可放心处理 <strong>Highly Confidential</strong> 数据,因此适合一切真实工作场景:</p>
+            <ul class="circuit-list">
+              <li>撰写客户邮件</li>
+              <li>针对 Case 内容辅助 <strong>根因分析</strong>(RCA)</li>
+              <li>给客户撰写 <strong>故障分析报告</strong></li>
+              <li>整理内部技术文档</li>
+            </ul>
+            <div class="circuit-footnote">📍 替代了 70% 我对外部 AI 的依赖</div>
+          </article>
+
+          <!-- Feature 2: Agent + MCP -->
+          <article class="circuit-card">
+            <div class="circuit-icon-wrap circuit-icon-2">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 10v6m11-11h-6m-10 0H1"/>
+                <circle cx="5" cy="12" r="2"/>
+                <circle cx="19" cy="12" r="2"/>
+                <circle cx="12" cy="5" r="2"/>
+                <circle cx="12" cy="19" r="2"/>
+              </svg>
+            </div>
+            <div class="circuit-num">02</div>
+            <h4>Agent &amp; MCP Connector 扩展</h4>
+            <p>聊天框里可以挂载 <strong>Agent</strong> 和 <strong>MCP Connector</strong>,把 CIRCUIT 从一个"聊天工具"升级为"操作中枢":</p>
+            <ul class="circuit-list">
+              <li>连接 <strong>Cisco Data</strong> → 直接拉取内部精准数据</li>
+              <li>调用业务系统 → 不再需要切换多个工具</li>
+              <li>查询不再"猜",而是"查",答案有据可依</li>
+            </ul>
+            <div class="circuit-footnote">💡 类比:给 AI 装上"手脚",不只动嘴还能动手</div>
+          </article>
+
+          <!-- Feature 3: Prompt Hub -->
+          <article class="circuit-card">
+            <div class="circuit-icon-wrap circuit-icon-3">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="15" y2="17"/>
+              </svg>
+            </div>
+            <div class="circuit-num">03</div>
+            <h4>Prompt Hub + 合规图片生成</h4>
+            <p>两个被很多人忽视、却极有价值的功能:</p>
+            <ul class="circuit-list">
+              <li><strong>Prompt Hub</strong>:精选模板库,我用得最多的是<br><code style="font-size:0.8125rem;">"Prompt to create prompt"</code> —— 让 AI 帮你写提示词</li>
+              <li><strong>合规图片生成</strong>:经过 Cisco Policy 审查,可放心用于内部材料</li>
+            </ul>
+            <div class="circuit-footnote">⚡ Prompt Hub 是"提示词菜谱市集"</div>
+          </article>
+
+          <!-- Feature 4: Agent Studio -->
+          <article class="circuit-card circuit-card-feature">
+            <div class="circuit-icon-wrap circuit-icon-4">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div class="circuit-num">04</div>
+            <div class="circuit-badge">★ 我的实战</div>
+            <h4>Agent Studio:打造你自己的 AI Agent</h4>
+            <p>我用 Agent Studio 做了一个 <strong>"Cisco Style Blog Bot"</strong>——把前面所有"写博客"的提示词与技能,封装成一个可复用的 Agent。</p>
+            <ul class="circuit-list">
+              <li>✅ 一键调用,无需重复粘贴提示词</li>
+              <li>✅ 团队成员可以共享使用</li>
+              <li>⚠️ 当前只能调用 <strong>Gemini Flash</strong> 模型</li>
+              <li>⚠️ 受 Token 限制,质量逊色于 Claude Opus 直跑</li>
+            </ul>
+            <div class="circuit-footnote">🔮 期待未来支持 Claude Opus,体验将质变</div>
+          </article>
+        </div>
+
+        <h3 class="section-h3" style="margin-top: 2.25rem;">📊 CIRCUIT 在我工作流中的定位</h3>
+
+        <div class="positioning-table">
+          <div class="table-scroll-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th style="min-width: 140px;">场景</th>
+                  <th>外部 AI(Claude/Gemini)</th>
+                  <th>CIRCUIT</th>
+                  <th style="min-width: 100px;">为什么</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>写技术博客</strong>(公开内容)</td>
+                  <td class="td-yes">✅ 主力</td>
+                  <td class="td-maybe">○ 可选</td>
+                  <td>外部模型能力当前更强</td>
+                </tr>
+                <tr>
+                  <td><strong>客户 Case 分析</strong></td>
+                  <td class="td-no">❌ 禁止</td>
+                  <td class="td-yes">✅ 唯一选择</td>
+                  <td>含机密数据,合规红线</td>
+                </tr>
+                <tr>
+                  <td><strong>内部邮件草稿</strong></td>
+                  <td class="td-maybe">○ 可脱敏后用</td>
+                  <td class="td-yes">✅ 主力</td>
+                  <td>效率更高,无需脱敏</td>
+                </tr>
+                <tr>
+                  <td><strong>查 Cisco 内部数据</strong></td>
+                  <td class="td-no">❌ 无能为力</td>
+                  <td class="td-yes">✅ 通过 MCP</td>
+                  <td>外部 AI 接触不到</td>
+                </tr>
+                <tr>
+                  <td><strong>研究公开技术</strong></td>
+                  <td class="td-yes">✅ 深度研究</td>
+                  <td class="td-maybe">○ 可用</td>
+                  <td>Gemini Deep Research 更强</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout-insight">
+          <div class="insight-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+          </div>
+          <div>
+            <strong>本案例的本质:</strong> CIRCUIT 不是一个"另一个 ChatGPT",而是一个 <strong>"为 Cisco 人量身定制的 AI 工作台"</strong>——
+            它的价值不在"模型多强",而在"<strong>能让你放心地把真实工作交给它</strong>"。
+            <br><em style="color: var(--gray-600);">—— 安全合规与生产力,在这里第一次合二为一。</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ============================================================== -->
+  <!-- SLIDE 12: 总结 — 工具地图与开放心态                                -->
+  <!-- ============================================================== -->
+  <section class="slide slide-finale" data-slide="12">
+    <div class="slide-inner">
+      <div class="container">
+        <div class="slide-header">
+          <div class="slide-header-left">
+            <span class="eyebrow">▸ Conclusion · 收束</span>
+            <h2>没有"最好"的 AI,只有"最合适"的 AI</h2>
+          </div>
+          <div class="slide-number">11 / <span class="total">11</span></div>
+        </div>
+
+        <p class="lead-paragraph">
+          回到最初的问题:<strong>"该用哪个 AI 工具?"</strong> —— 答案不在工具本身,而在<strong>你手头的任务</strong>。
+          下面这张"工具地图",是我四年实战沉淀下来的决策框架,送给你。
+        </p>
+
+        <h3 class="section-h3">🗺️ 我的"工具地图":按任务选工具</h3>
+
+        <div class="svg-scroll-wrapper">
+          <svg viewBox="0 0 1100 460" xmlns="http://www.w3.org/2000/svg" style="min-width: 900px; width: 100%; height: auto;" aria-label="AI 工具决策地图">
+            <defs>
+              <linearGradient id="mapGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0A60FF"/><stop offset="100%" stop-color="#02C8FF"/></linearGradient>
+              <linearGradient id="mapGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#02C8FF"/><stop offset="100%" stop-color="#0A60FF"/></linearGradient>
+              <filter id="mapShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#07182D" flood-opacity="0.15"/>
+              </filter>
+            </defs>
+
+            <!-- Center decision node -->
+            <g filter="url(#mapShadow)">
+              <circle cx="550" cy="230" r="70" fill="#07182D"/>
+              <text x="550" y="220" text-anchor="middle" fill="#02C8FF" font-size="14" font-weight="800" font-family="Inter">START</text>
+              <text x="550" y="240" text-anchor="middle" fill="#FFFFFF" font-size="11" font-family="Inter">你的任务是?</text>
+              <text x="550" y="258" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-family="JetBrains Mono">→ 看 6 个分支</text>
+            </g>
+
+            <!-- Branch 1: 公开技术研究 (top-left) -->
+            <line x1="495" y1="195" x2="280" y2="80" stroke="#02C8FF" stroke-width="2" stroke-dasharray="5,3"/>
+            <g filter="url(#mapShadow)">
+              <rect x="80" y="40" width="220" height="80" rx="14" fill="url(#mapGrad1)"/>
+              <text x="190" y="65" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700" font-family="Inter">🔬 公开技术研究</text>
+              <text x="190" y="86" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11" font-family="Inter">Gemini Pro · Deep Research</text>
+              <text x="190" y="104" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="JetBrains Mono">自主搜资料,出研究报告</text>
+            </g>
+
+            <!-- Branch 2: 写技术博客 (top) -->
+            <line x1="550" y1="160" x2="550" y2="120" stroke="#02C8FF" stroke-width="2" stroke-dasharray="5,3"/>
+            <g filter="url(#mapShadow)">
+              <rect x="440" y="20" width="220" height="80" rx="14" fill="url(#mapGrad1)"/>
+              <text x="550" y="45" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700" font-family="Inter">✍️ 写技术博客</text>
+              <text x="550" y="66" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11" font-family="Inter">Claude Opus 4.7 (CIRCUIT)</text>
+              <text x="550" y="84" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="JetBrains Mono">结构化、长文不掉链子</text>
+            </g>
+
+            <!-- Branch 3: 解读已有资料 (top-right) -->
+            <line x1="605" y1="195" x2="820" y2="80" stroke="#02C8FF" stroke-width="2" stroke-dasharray="5,3"/>
+            <g filter="url(#mapShadow)">
+              <rect x="800" y="40" width="220" height="80" rx="14" fill="url(#mapGrad1)"/>
+              <text x="910" y="65" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700" font-family="Inter">📚 解读已有资料</text>
+              <text x="910" y="86" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11" font-family="Inter">NotebookLM</text>
+              <text x="910" y="104" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="JetBrains Mono">绝不瞎编 + 一键播客</text>
+            </g>
+
+            <!-- Branch 4: 处理 Cisco 机密 (bottom-right) -->
+            <line x1="605" y1="265" x2="820" y2="380" stroke="#FF007F" stroke-width="2" stroke-dasharray="5,3"/>
+            <g filter="url(#mapShadow)">
+              <rect x="800" y="340" width="220" height="80" rx="14" fill="url(#mapGrad2)" stroke="#FF007F" stroke-width="2"/>
+              <text x="910" y="365" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700" font-family="Inter">🔐 Cisco 机密内容</text>
+              <text x="910" y="386" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11" font-family="Inter">CIRCUIT(必选)</text>
+              <text x="910" y="404" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10" font-family="JetBrains Mono">Case · 邮件 · RCA 报告</text>
+            </g>
+
+            <!-- Branch 5: 快速搜索 (bottom) -->
+            <line x1="550" y1="300" x2="550" y2="340" stroke="#02C8FF" stroke-width="2" stroke-dasharray="5,3"/>
+            <g filter="url(#mapShadow)">
+              <rect x="440" y="360" width="220" height="80" rx="14" fill="url(#mapGrad1)"/>
+              <text x="550" y="385" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700" font-family="Inter">⚡ 快速查询答案</text>
+              <text x="550" y="406" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11" font-family="Inter">Google AI Mode</text>
+              <text x="550" y="424" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="JetBrains Mono">最快、最方便、用得最多</text>
+            </g>
+
+            <!-- Branch 6: 提示词 + 新闻 (bottom-left) -->
+            <line x1="495" y1="265" x2="280" y2="380" stroke="#02C8FF" stroke-width="2" stroke-dasharray="5,3"/>
+            <g filter="url(#mapShadow)">
+              <rect x="80" y="340" width="220" height="80" rx="14" fill="url(#mapGrad1)"/>
+              <text x="190" y="365" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700" font-family="Inter">🗞️ 写提示词 / 核新闻</text>
+              <text x="190" y="386" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11" font-family="Inter">Grok</text>
+              <text x="190" y="404" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="JetBrains Mono">犀利不"装",直击要害</text>
+            </g>
+          </svg>
+        </div>
+
+        <h3 class="section-h3" style="margin-top: 2rem;">🌱 三条心法,送给你</h3>
+
+        <div class="principle-grid">
+          <div class="principle-card">
+            <div class="principle-num">01</div>
+            <h4>选趁手的,不选最贵的</h4>
+            <p>"趁手"比"先进"重要。<strong>能帮你高效完成任务的工具,就是好工具。</strong>不要为了追新而追新,也不要囤积一堆"用不上的会员"。</p>
+          </div>
+          <div class="principle-card">
+            <div class="principle-num">02</div>
+            <h4>守住合规底线</h4>
+            <p>外部 AI 再强,也<strong>不能投喂 Cisco 机密</strong>。在涉及客户数据、内部资料的场景,<strong>CIRCUIT 是唯一选择</strong>。这条红线,不能碰。</p>
+          </div>
+          <div class="principle-card principle-card-highlight">
+            <div class="principle-num">03</div>
+            <h4>保持开放心态,随时调整</h4>
+            <p><strong>AI 工具发展太快了。</strong>三个月前的"最佳实践",今天可能已经过时。比如 Google 搜索的 AI 模式,因为快、方便,我用得越来越多 —— <strong>今天的主力,可能不是明天的主力。</strong></p>
+          </div>
+        </div>
+
+        <!-- Final Quote -->
+        <div class="final-quote">
+          <div class="quote-mark">"</div>
+          <blockquote>
+            工具会一直变,但<strong>"用第一性原理思考、把模糊需求翻译成精确指令"</strong>这件事,永远不会过时。
+          </blockquote>
+          <div class="quote-author">—— 一个被 AI 改变了工作方式的 Cisco 工程师</div>
+        </div>
+
+        <!-- Thank you / Q&A -->
+        <div class="finale-cta">
+          <div class="finale-cta-left">
+            <h3 style="color: var(--cisco-blue); margin-bottom: 0.5rem; font-size: 2rem;">谢谢聆听</h3>
+            <p style="font-size: 1.0625rem; color: rgba(255,255,255,0.85); margin: 0;">愿 AI 让你的工作,从"消耗"变成"创造"。</p>
+          </div>
+          <div class="finale-cta-right">
+            <div class="cta-pill">
+              <span class="cta-icon">💬</span>
+              <span>Q &amp; A · 欢迎讨论</span>
+            </div>
+            <div class="cta-pill">
+              <span class="cta-icon">📎</span>
+              <span>提示词模板 · 见附件</span>
+            </div>
+            <div class="cta-pill">
+              <span class="cta-icon">🤝</span>
+              <span>Let's Build Together</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav-controls" role="navigation" aria-label="Slide navigation">
+  <button class="nav-btn" id="prevBtn" aria-label="Previous slide" title="上一页 (←)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="page-indicator">
+    <span class="current" id="currentPage">01</span>
+    <span> / </span>
+    <span id="totalPages">01</span>
+  </div>
+  <button class="nav-btn" id="nextBtn" aria-label="Next slide" title="下一页 (→)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<div class="kbd-hint">
+  使用 <span class="kbd">←</span> <span class="kbd">→</span> 翻页 · <span class="kbd">F</span> 全屏
+</div>
+
+
+  <script>
+/* ============================================================================
+   PRESENTATION CONTROLLER — Robust Version
+   ============================================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+  var deck = document.getElementById('deck');
+  if (!deck) {
+    console.error('[Deck] #deck not found!');
+    return;
+  }
+
+  function getSlides() {
+    return Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  }
+
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var currentPageEl = document.getElementById('currentPage');
+  var totalPagesEl = document.getElementById('totalPages');
+  var progressBar = document.getElementById('progressBar');
+
+  var currentIndex = 0;
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function updateUI() {
+    var all = getSlides();
+    if (totalPagesEl) totalPagesEl.textContent = pad(all.length);
+    if (currentPageEl) currentPageEl.textContent = pad(currentIndex + 1);
+    if (prevBtn) prevBtn.disabled = currentIndex === 0;
+    if (nextBtn) nextBtn.disabled = currentIndex === all.length - 1;
+    if (progressBar) progressBar.style.width = ((currentIndex + 1) / all.length * 100) + '%';
+  }
+
+  function goTo(idx) {
+    var all = getSlides();
+    if (idx < 0 || idx >= all.length) return;
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.remove('active', 'prev');
+      if (i === idx) {
+        all[i].classList.add('active');
+      } else if (i < idx) {
+        all[i].classList.add('prev');
+      }
+    }
+    currentIndex = idx;
+    if (all[idx]) all[idx].scrollTop = 0;
+    updateUI();
+  }
+
+  function next() { goTo(currentIndex + 1); }
+  function prev() { goTo(currentIndex - 1); }
+
+  if (prevBtn) prevBtn.addEventListener('click', prev);
+  if (nextBtn) nextBtn.addEventListener('click', next);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.target && e.target.matches && e.target.matches('input, textarea')) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault(); prev();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); goTo(getSlides().length - 1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+  });
+
+  // Touch swipe
+  var touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) next(); else prev();
+    }
+  }, { passive: true });
+
+  updateUI();
+  window.__deck = { goTo: goTo, next: next, prev: prev, getSlides: getSlides };
+  console.log('[Deck] Initialized with ' + getSlides().length + ' slides.');
+});
+</script>
+</body>
+</html>
