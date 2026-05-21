@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>窗台上的那台交换机 | 一线SE故事分享</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --midnight: #07182D;
+    --cisco-blue: #02C8FF;
+    --med-blue: #0A60FF;
+    --magenta: #FF007F;
+    --orange: #FF9000;
+    --white: #FFFFFF;
+    --soft-bg: #F4F7FB;
+    --text-muted: #5A6B82;
+    --border-soft: #E3E9F2;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--soft-bg);
+    color: var(--midnight);
+    line-height: 1.5;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(7, 24, 45, 0.12);
+  }
+  
+  /* === Hero Header === */
+  .hero {
+    background: var(--midnight);
+    color: var(--white);
+    padding: 32px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      rgba(10, 96, 255, 1) 5%, 
+      rgba(2, 200, 255, 1) 37%, 
+      rgba(2, 200, 255, 1) 43%, 
+      rgba(255, 0, 127, 1) 75%, 
+      rgba(255, 144, 0, 1) 94%);
+  }
+  
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 32px;
+  }
+  
+  .hero-left .eyebrow {
+    font-size: 13px;
+    color: var(--cisco-blue);
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  
+  .hero-left h1 {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+  }
+  
+  .hero-left .subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 400;
+    max-width: 720px;
+  }
+  
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  
+  .badge {
+    background: linear-gradient(90deg, rgba(10, 96, 255, 1) 0%, rgba(2, 200, 255, 1) 100%);
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  
+  .meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+  }
+  
+  /* === The Hook (诗眼) === */
+  .hook {
+    background: linear-gradient(135deg, #07182D 0%, #0A2548 100%);
+    color: var(--white);
+    padding: 24px 40px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  
+  .hook-icon {
+    flex-shrink: 0;
+  }
+  
+  .hook-text {
+    font-size: 17px;
+    line-height: 1.6;
+    font-style: italic;
+    color: rgba(255,255,255,0.92);
+  }
+  
+  .hook-text .highlight {
+    color: var(--cisco-blue);
+    font-weight: 600;
+    font-style: normal;
+  }
+  
+  .hook-text .quote {
+    color: var(--orange);
+    font-weight: 600;
+    font-style: normal;
+  }
+  
+  /* === STAR Grid === */
+  .star-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+  
+  .star-card {
+    padding: 28px 32px;
+    border-right: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .star-card:nth-child(2n) { border-right: none; }
+  .star-card:nth-child(n+3) { border-bottom: none; }
+  
+  .star-card:hover {
+    background: var(--soft-bg);
+  }
+  
+  .star-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .star-letter {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  
+  .star-card.s .star-letter { background: var(--midnight); }
+  .star-card.t .star-letter { background: var(--med-blue); }
+  .star-card.a .star-letter { background: linear-gradient(135deg, var(--med-blue), var(--cisco-blue)); }
+  .star-card.r .star-letter { background: linear-gradient(135deg, var(--magenta), var(--orange)); }
+  
+  .star-title-block .star-en {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  
+  .star-title-block .star-cn {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--midnight);
+    margin-top: 2px;
+  }
+  
+  .star-body {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #2A3A55;
+  }
+  
+  .star-body p { margin-bottom: 10px; }
+  .star-body p:last-child { margin-bottom: 0; }
+  
+  .star-body strong {
+    color: var(--midnight);
+    font-weight: 700;
+  }
+  
+  .star-body .accent {
+    color: var(--med-blue);
+    font-weight: 600;
+  }
+  
+  .stat-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .stat-pill {
+    background: var(--soft-bg);
+    border: 1px solid var(--border-soft);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--midnight);
+    font-weight: 600;
+  }
+  
+  .stat-pill .num {
+    color: var(--med-blue);
+    font-size: 14px;
+    font-weight: 800;
+    margin-right: 4px;
+  }
+  
+  .action-list {
+    list-style: none;
+    margin-top: 8px;
+  }
+  
+  .action-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  
+  .action-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--cisco-blue);
+  }
+  
+  .action-list li:nth-child(2)::before { background: var(--med-blue); }
+  .action-list li:nth-child(3)::before { background: var(--magenta); }
+  
+  .action-list li strong {
+    display: block;
+    color: var(--midnight);
+    font-size: 13.5px;
+    margin-bottom: 2px;
+  }
+  
+  /* === Closing Wisdom === */
+  .wisdom {
+    background: var(--midnight);
+    color: var(--white);
+    padding: 28px 40px;
+    position: relative;
+  }
+  
+  .wisdom::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      rgba(10, 96, 255, 1) 5%, 
+      rgba(2, 200, 255, 1) 37%, 
+      rgba(255, 0, 127, 1) 75%, 
+      rgba(255, 144, 0, 1) 94%);
+  }
+  
+  .wisdom-title {
+    font-size: 13px;
+    color: var(--cisco-blue);
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .wisdom-title::before, .wisdom-title::after {
+    content: '';
+    height: 1px;
+    background: rgba(2, 200, 255, 0.3);
+    flex: 0 0 24px;
+  }
+  
+  .wisdom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .wisdom-item {
+    padding-left: 16px;
+    border-left: 3px solid var(--cisco-blue);
+  }
+  
+  .wisdom-item:nth-child(2) { border-left-color: var(--magenta); }
+  .wisdom-item:nth-child(3) { border-left-color: var(--orange); }
+  
+  .wisdom-num {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  
+  .wisdom-text {
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 500;
+    color: var(--white);
+  }
+  
+  .wisdom-text em {
+    font-style: normal;
+    color: var(--cisco-blue);
+    font-weight: 700;
+  }
+  
+  /* === Footer === */
+  .footer {
+    background: var(--soft-bg);
+    padding: 14px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .footer-logo {
+    font-weight: 800;
+    color: var(--midnight);
+    letter-spacing: 1px;
+  }
+  
+  /* === Responsive === */
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-right { align-items: flex-start; }
+    .star-grid { grid-template-columns: 1fr; }
+    .star-card { border-right: none !important; border-bottom: 1px solid var(--border-soft) !important; }
+    .star-card:last-child { border-bottom: none !important; }
+    .wisdom-grid { grid-template-columns: 1fr; gap: 16px; }
+    .hook { grid-template-columns: 1fr; }
+    .hero-left h1 { font-size: 28px; }
+  }
+  
+  @media print {
+    body { background: white; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+  }
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============ HERO HEADER ============ -->
+  <header class="hero">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="eyebrow">A FRONTLINE SE STORY · 一线工程师故事分享</div>
+        <h1>窗台上的那台交换机</h1>
+        <div class="subtitle">一周四起事故、一张烧毁端口的照片、一场信任崩塌边缘的救援 —— 我如何用同理心、行动力与事实，把客户从对立面拉回到同一战壕。</div>
+      </div>
+      <div class="hero-right">
+        <div class="badge">STAR · 信任重建</div>
+        <div class="meta">Customer Trust Recovery Case</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ THE HOOK 诗眼 ============ -->
+  <div class="hook">
+    <div class="hook-icon">
+      <!-- SVG: 窗台上的交换机 -->
+      <svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+        <!-- 窗框 -->
+        <rect x="2" y="2" width="116" height="76" fill="none" stroke="#02C8FF" stroke-width="1.5" opacity="0.4" rx="2"/>
+        <line x1="60" y1="2" x2="60" y2="55" stroke="#02C8FF" stroke-width="1" opacity="0.3"/>
+        <line x1="2" y1="55" x2="118" y2="55" stroke="#02C8FF" stroke-width="1" opacity="0.3"/>
+        <!-- 窗台 -->
+        <rect x="0" y="55" width="120" height="4" fill="#02C8FF" opacity="0.5"/>
+        <!-- 交换机 -->
+        <rect x="20" y="59" width="80" height="16" fill="#1a2a44" stroke="#5A6B82" stroke-width="0.8" rx="1"/>
+        <!-- 端口 -->
+        <g fill="#0A60FF" opacity="0.6">
+          <rect x="24" y="63" width="3" height="6"/>
+          <rect x="29" y="63" width="3" height="6"/>
+          <rect x="34" y="63" width="3" height="6"/>
+          <rect x="39" y="63" width="3" height="6"/>
+          <rect x="44" y="63" width="3" height="6"/>
+          <rect x="49" y="63" width="3" height="6"/>
+        </g>
+        <!-- 烧毁部分 -->
+        <g fill="#07182D">
+          <rect x="54" y="62" width="42" height="10"/>
+        </g>
+        <!-- 烟尘 -->
+        <ellipse cx="75" cy="60" rx="22" ry="3" fill="#FF007F" opacity="0.3"/>
+        <ellipse cx="75" cy="58" rx="18" ry="2.5" fill="#FF9000" opacity="0.25"/>
+        <!-- 反光 -->
+        <line x1="22" y1="61" x2="98" y2="61" stroke="#02C8FF" stroke-width="0.5" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="hook-text">
+      "那台烧毁的交换机，被静静地放在客户办公室的<span class="highlight">窗台上</span>，像一具无声的证物，诉说着这一周的混乱与狼狈。<br>
+      照片下面只有一句话：<span class="quote">"你们的设备烧了，赶紧看看吧。"</span> —— 没有抱怨、没有质问，但这种克制，让我心头一惊。"
+    </div>
+  </div>
+
+  <!-- ============ STAR GRID ============ -->
+  <main class="star-grid">
+
+    <!-- Situation -->
+    <section class="star-card s">
+      <div class="star-header">
+        <div class="star-letter">S</div>
+        <div class="star-title-block">
+          <div class="star-en">Situation</div>
+          <div class="star-cn">半年的隐忍，一周的爆发</div>
+        </div>
+      </div>
+      <div class="star-body">
+        <p>知名制造业客户，工厂AGV依赖<strong>ISE认证</strong>。半年内已配合处理<strong>5个Bug</strong>的Workaround，运行渐稳。</p>
+        <p>但跨入2026第一周，<span class="accent">命运开了个玩笑</span> —— 网络事故连环爆发，IT负责人三面承压，半年累积的耐心几近耗尽。</p>
+        <div class="stat-row">
+          <div class="stat-pill"><span class="num">2</span>次 ISE Crash</div>
+          <div class="stat-pill"><span class="num">2</span>次 交换机故障</div>
+          <div class="stat-pill"><span class="num">1</span>张 烧毁照片</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task -->
+    <section class="star-card t">
+      <div class="star-header">
+        <div class="star-letter">T</div>
+        <div class="star-title-block">
+          <div class="star-en">Task</div>
+          <div class="star-cn">中午1点，一个决定</div>
+        </div>
+      </div>
+      <div class="star-body">
+        <p>午饭被那张照片打断。第一念头：<strong>"客户要炸了。"</strong></p>
+        <p>真正的恐惧是 —— 一旦"起火"二字被上升到<span class="accent">安全生产</span>高度，可能引发对Install Base的批次性彻查。</p>
+        <p>与经理通话后，决定：<strong>立刻动身，不让事态升级。</strong>带着两个必达目标奔赴现场：</p>
+        <ul class="action-list" style="margin-top: 10px;">
+          <li><strong>① 锁定ISE补救方案</strong>确认风险可控，争取周六执行</li>
+          <li><strong>② 损毁设备周五寄出</strong>绕开官方物流，直送实验室</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Action -->
+    <section class="star-card a">
+      <div class="star-header">
+        <div class="star-letter">A</div>
+        <div class="star-title-block">
+          <div class="star-en">Action</div>
+          <div class="star-cn">三幕递进的行动</div>
+        </div>
+      </div>
+      <div class="star-body">
+        <ul class="action-list">
+          <li><strong>🚄 高铁三小时</strong>GFEP升级Case，调集TAC/BU/Global FACT资源；微信、Teams同步推进；心里反复推演明日方案。</li>
+          <li><strong>🤝 走进会议室</strong>开口第一句不是辩护，而是共情："我完全理解您的处境，所以第一时间赶到。"信任的门，开了一条缝。</li>
+          <li><strong>🔬 当报告被质疑</strong>客户设计部连珠质疑 "appears to be" 的措辞 —— 我没反驳，转而<span class="accent">借助AI重写报告</span>，用物理定律与逻辑链，把证据串成不可辩驳的推理，邮件正式交付，"冷处理"。</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section class="star-card r">
+      <div class="star-header">
+        <div class="star-letter">R</div>
+        <div class="star-title-block">
+          <div class="star-en">Result</div>
+          <div class="star-cn">信任，一砖一瓦垒回来</div>
+        </div>
+      </div>
+      <div class="star-body">
+        <p>ISE补救周六上线，至今稳定；损毁设备分析报告获客户接受，事件"翻篇"。</p>
+        <p>没有掌声，没有庆功。但与运维团队的关系，<strong>达到前所未有的紧密</strong>，后续共同规划AIOps，从被动救火走向主动监控。</p>
+        <div class="stat-row">
+          <div class="stat-pill">📧 客户致谢邮件</div>
+          <div class="stat-pill">🏆 Cisco Recognition</div>
+          <div class="stat-pill">🤝 长期信任</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ WISDOM 三句金句 ============ -->
+  <section class="wisdom">
+    <div class="wisdom-title">写给每一位一线SE的三句话 · KEY TAKEAWAYS</div>
+    <div class="wisdom-grid">
+      <div class="wisdom-item">
+        <div class="wisdom-num">01</div>
+        <div class="wisdom-text">在冲突中，请尽全力<em>分清"情绪"与"事实"</em> —— 不被客户的情绪遮蔽，透过现象看到本质。</div>
+      </div>
+      <div class="wisdom-item">
+        <div class="wisdom-num">02</div>
+        <div class="wisdom-text">自证清白很难。所以<em>不要自证清白</em>，而是用事实说话 —— 让证据自己开口。</div>
+      </div>
+      <div class="wisdom-item">
+        <div class="wisdom-num">03</div>
+        <div class="wisdom-text"><em>共情先于方案，倾听先于解释</em>。客户要的不是道歉，是看到我们的行动。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="footer-logo">CISCO · SYSTEMS ENGINEER STORY</div>
+    <div>"在一线，我们用每一次决定，为 Cisco 这两个字背书。"</div>
+  </footer>
+
+</div>
+
+</body>
+</html>
