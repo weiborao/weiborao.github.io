@@ -1,0 +1,3964 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从被动救火到主动洞察 | Cisco 网络监控体系第一性原理白皮书</title>
+<link rel="stylesheet" href="cisco-style.css">
+<style>
+/* ============================================================================
+   局部增强样式 — 仅补充 cisco-style.css 未覆盖的场景
+   ============================================================================ */
+
+/* 顶部导航 */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--border-color);
+}
+.top-nav .nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: var(--container-max); margin: 0 auto;
+  padding: var(--space-4) var(--space-6);
+}
+.top-nav .brand {
+  font-weight: 700; color: var(--cisco-navy); font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.top-nav .brand span { color: var(--cisco-blue); }
+.top-nav ul {
+  display: flex; gap: var(--space-6); list-style: none; padding: 0; margin: 0;
+}
+.top-nav ul li { margin: 0; }
+.top-nav a {
+  font-size: 0.95rem; color: var(--text-secondary);
+  border-bottom: none; font-weight: 500;
+}
+.top-nav a:hover { color: var(--cisco-blue); }
+.nav-toggle { display: none; background: none; border: none; font-size: 1.5rem; color: var(--cisco-navy); cursor: pointer; }
+
+@media (max-width: 768px) {
+  .top-nav ul {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; gap: 0;
+    background: var(--bg-white); border-bottom: 1px solid var(--border-color);
+    padding: var(--space-4);
+  }
+  .top-nav ul.open { display: flex; }
+  .top-nav ul li { padding: var(--space-2) 0; }
+  .nav-toggle { display: block; }
+}
+
+/* Hero 增强 */
+.hero {
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 188, 235, 0.25), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(146, 50, 172, 0.2), transparent 45%);
+  pointer-events: none;
+}
+.hero .container { position: relative; z-index: 1; }
+.hero .eyebrow {
+  display: inline-block; padding: 0.4em 1em; margin-bottom: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50px;
+  font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--cisco-accent);
+}
+.hero p.lead {
+  font-size: 1.25rem; max-width: 820px; margin: 0 auto var(--space-8);
+  color: rgba(255, 255, 255, 0.92); line-height: 1.7;
+}
+.hero .meta-row {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-6);
+  font-size: 0.9rem; color: rgba(255, 255, 255, 0.75); margin-top: var(--space-8);
+}
+.hero .meta-row span::before { content: '◆ '; color: var(--cisco-accent); }
+
+/* 章节副标题 / Eyebrow */
+.section-eyebrow {
+  display: inline-block; font-size: 0.85rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--cisco-blue);
+  font-weight: 700; margin-bottom: var(--space-2);
+}
+
+/* 苏格拉底问题块 */
+.socratic {
+  background: linear-gradient(135deg, #ffffff 0%, var(--bg-light) 100%);
+  border: 1px solid var(--border-color); border-left: 6px solid var(--cisco-purple);
+  border-radius: var(--border-radius-md); padding: var(--space-6) var(--space-8);
+  margin: var(--space-8) 0; box-shadow: var(--shadow-sm);
+}
+.socratic .q-label {
+  display: inline-block; font-size: 0.8rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--cisco-purple); font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.socratic h3 {
+  font-size: 1.4rem; color: var(--cisco-navy); margin-bottom: var(--space-4);
+  padding: 0; border: none;
+}
+
+/* 定义 + 类比块 */
+.def-analogy {
+  display: grid; gap: var(--space-4); margin: var(--space-6) 0;
+}
+@media (min-width: 768px) {
+  .def-analogy { grid-template-columns: 1fr 1fr; }
+}
+.def-analogy .box {
+  padding: var(--space-6); border-radius: var(--border-radius-md);
+  background: var(--bg-white); border: 1px solid var(--border-color);
+}
+.def-analogy .box.def {
+  border-top: 4px solid var(--cisco-blue);
+}
+.def-analogy .box.analogy {
+  border-top: 4px solid var(--color-success);
+  background: linear-gradient(180deg, #f3faf0 0%, #ffffff 100%);
+}
+.def-analogy .box .tag {
+  display: inline-block; font-size: 0.75rem; letter-spacing: 0.1em;
+  text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-2);
+}
+.def-analogy .box.def .tag { color: var(--cisco-blue); }
+.def-analogy .box.analogy .tag { color: var(--color-success); }
+
+/* 关键句 */
+.key-quote {
+  text-align: center; font-size: 1.4rem; line-height: 1.6;
+  color: var(--cisco-navy); font-weight: 600; max-width: 880px;
+  margin: var(--space-12) auto; padding: var(--space-6) var(--space-8);
+  border-top: 2px solid var(--cisco-accent);
+  border-bottom: 2px solid var(--cisco-accent);
+}
+.key-quote::before { content: '“'; color: var(--cisco-blue); font-size: 2.2rem; vertical-align: -0.4em; margin-right: 0.1em; }
+.key-quote::after  { content: '”'; color: var(--cisco-blue); font-size: 2.2rem; vertical-align: -0.4em; margin-left: 0.1em; }
+
+/* 对比卡片 */
+.compare-grid {
+  display: grid; gap: var(--space-6); margin: var(--space-8) 0;
+}
+@media (min-width: 768px) {
+  .compare-grid { grid-template-columns: 1fr 1fr; }
+}
+.compare-grid .col {
+  padding: var(--space-6); border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color); background: var(--bg-white);
+}
+.compare-grid .col.bad { border-top: 5px solid var(--cisco-red); }
+.compare-grid .col.good { border-top: 5px solid var(--color-success); }
+.compare-grid .col h4 { margin-bottom: var(--space-4); }
+.compare-grid .col.bad h4::before { content: '⚠ '; color: var(--cisco-red); }
+.compare-grid .col.good h4::before { content: '✓ '; color: var(--color-success); }
+.compare-grid ul { padding-left: 1.4em; }
+
+/* 数字徽章 */
+.stat-grid {
+  display: grid; gap: var(--space-6); margin: var(--space-8) 0;
+}
+@media (min-width: 768px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat-card {
+  text-align: center; padding: var(--space-6);
+  background: var(--bg-white); border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--cisco-accent); }
+.stat-card .num { font-size: 2.6rem; font-weight: 800; color: var(--cisco-blue); line-height: 1; margin-bottom: var(--space-2); }
+.stat-card .label { color: var(--text-secondary); font-size: 0.95rem; }
+
+/* SVG 标题 */
+.svg-caption {
+  text-align: center; color: var(--text-secondary); font-size: 0.9rem;
+  margin-top: var(--space-2); font-style: normal;
+}
+
+/* 章节序号大字 */
+.chapter-num {
+  font-size: 5rem; font-weight: 800; line-height: 1;
+  color: var(--cisco-accent); opacity: 0.18;
+  margin-bottom: -1.5rem;
+}
+
+/* OID 标签 */
+.oid-tag {
+  display: inline-block; font-family: var(--font-mono);
+  background: var(--bg-soft); color: var(--cisco-blue-dark);
+  padding: 0.15em 0.5em; border-radius: var(--border-radius-sm);
+  font-size: 0.85em; border: 1px solid var(--border-color);
+}
+
+/* 优先级徽章 */
+.prio { display: inline-block; padding: 0.2em 0.7em; border-radius: 50px; font-size: 0.8rem; font-weight: 700; color: #fff; }
+.prio-p0 { background: var(--cisco-red); }
+.prio-p1 { background: var(--color-warning); color: #1A1A1A; }
+.prio-p2 { background: var(--cisco-blue); }
+
+/* 滚动锚点偏移补偿 */
+section.chapter { scroll-margin-top: 80px; }
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+
+<!-- ============================================================================
+     顶部导航
+============================================================================ -->
+<nav class="top-nav" aria-label="主导航">
+  <div class="nav-inner">
+    <div class="brand">CISCO · <span>Network Observability</span></div>
+    <button class="nav-toggle" aria-label="展开菜单" onclick="document.getElementById('navMenu').classList.toggle('open')">☰</button>
+    <ul id="navMenu">
+      <li><a href="#ch1">第一章 · 监控哲学</a></li>
+      <li><a href="#ch2">第二章 · Downshift</a></li>
+      <li><a href="#ch3">第三章 · SDA 全栈</a></li>
+      <li><a href="#ch4">第四章 · 网元健康</a></li>
+      <li><a href="#ch5">第五章 · Zabbix 落地</a></li>
+      <li><a href="#glossary">术语表</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============================================================================
+     HERO 封面
+============================================================================ -->
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">Cisco Network Observability · 2026 Edition</span>
+    <h1>当网络“静悄悄地坏掉”<br>你的监控系统在哪里？</h1>
+    <p class="lead">
+      Up/Down 不再是判断网络健康的唯一信号。<br>
+      在 mGig、SDA、LISP、VXLAN 构成的现代园区里，<br>
+      真正可怕的故障，是那些<strong style="color:var(--cisco-accent)">没有红灯亮起、却悄悄拖垮业务</strong>的灰色异常。
+    </p>
+    <a href="#ch1" class="btn">开启第一性原理之旅 →</a>
+    <div class="meta-row">
+      <span>面向：网络运维团队负责人</span>
+      <span>方法：第一性原理 + 苏格拉底提问</span>
+      <span>落地：Zabbix · SNMP · Cisco Catalyst / SDA</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================================
+     第一章 · 监控体系总体设计思路
+============================================================================ -->
+<section class="chapter" id="ch1">
+  <div class="container">
+    <div class="chapter-num">01</div>
+    <span class="section-eyebrow">Chapter One · 监控的第一性原理</span>
+    <h2>为什么监控会有“盲区”？</h2>
+
+    <p style="font-size:1.1rem; color:var(--text-secondary); max-width:880px;">
+      在我们打开任何一份 OID 表格之前，请先停下来想一个问题——<br>
+      <strong style="color:var(--cisco-navy);">如果监控系统从未告警，是不是就意味着网络一切正常？</strong><br>
+      过去十五年的运维经验告诉我：<em>恰恰相反</em>。最危险的故障，往往就藏在“监控保持沉默”的缝隙里。
+    </p>
+
+    <!-- ======================== 苏格拉底问题 1 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 01</span>
+      <h3>从第一性原理看，网络运维监控的本质到底是什么？</h3>
+      <p>
+        我们为什么要监控？是为了“看到设备”吗？显然不是。设备摆在机柜里，肉眼也能看到。
+        我们真正想看到的，是<strong>网络承载业务的能力，正在以怎样的速度偏离正常状态</strong>。
+      </p>
+      <p>
+        换句话说，监控不是“看设备活没活着”，而是“<strong>用最少的观测点，最快地推断出系统真实健康度</strong>”。
+        这是一个典型的<strong>有限观测下的状态估计问题</strong>——和医生看病、飞行员读仪表盘，本质上完全相同。
+      </p>
+
+      <div class="def-analogy">
+        <div class="box def">
+          <span class="tag">精准定义</span>
+          <p style="margin:0;">
+            <strong>网络监控</strong>：通过协议（SNMP / Telemetry / Syslog）在有限观测点采集状态量，
+            结合时间序列与阈值模型，对网络承载业务能力进行<strong>持续状态估计</strong>的工程实践。
+          </p>
+        </div>
+        <div class="box analogy">
+          <span class="tag">精妙类比</span>
+          <p style="margin:0;">
+            就像 ICU 里给病人贴的<strong>电极片</strong>：心率、血氧、血压、呼吸——四个数字就能告诉医生
+            “这个人现在活得好不好”。<br>
+            监控系统就是给网络贴电极片的医生，<strong>贴对位置，比贴多少更重要</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 苏格拉底问题 2 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 02</span>
+      <h3>那么，“盲区”究竟是怎么产生的？</h3>
+      <p>
+        让我们做一次思想实验：一个端口在 2.5Gbps 上跑得好好的，因为线缆老化触发了 Auto-Negotiation 的 Downshift，
+        降到了 1Gbps。<strong>端口仍然 Up，ifOperStatus 依旧是 1（up）</strong>。
+        Zabbix 的默认模板会告警吗？——不会。
+      </p>
+      <p>
+        这就是盲区的来源：<strong>我们用“二值状态（Up/Down）”去描述一个本应是“连续健康度”的物理过程</strong>。
+        就像只用“活着/死了”两种状态去监控一个 ICU 病人，你会错过他血压从 120 慢慢掉到 70 的全过程。
+      </p>
+
+      <h4 style="margin-top:var(--space-6);">盲区的三大根因</h4>
+      <ol>
+        <li><strong>观测维度不足</strong>：只看 L1/L2 的 Up/Down，不看 L0（线缆/光纤物理质量）和 L2 子层（SymbolErrors / FCS）。</li>
+        <li><strong>采样粒度过粗</strong>：5 分钟一次的轮询，无法捕捉秒级的速率震荡或瞬时丢包。</li>
+        <li><strong>缺少“变化率”视角</strong>：只看绝对值，不看 delta。例如 <code>ifHighSpeed</code> 从 2500 跌到 1000，这个“跌落事件”本身就是关键信号。</li>
+      </ol>
+    </div>
+
+    <!-- ======================== SVG 图：盲区图谱 ======================== -->
+    <h3 style="margin-top:var(--space-12);">监控盲区图谱：你看见的，远不是网络的全部</h3>
+    <p>下图把网络故障按“可观测性”做了分层。越往下，故障越隐蔽，但对业务 SLA 的影响越深远。</p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="监控盲区图谱">
+        <defs>
+          <linearGradient id="g-visible" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#67B346"/><stop offset="100%" stop-color="#a8d68a"/>
+          </linearGradient>
+          <linearGradient id="g-partial" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#FBAB18"/><stop offset="100%" stop-color="#fcd17a"/>
+          </linearGradient>
+          <linearGradient id="g-blind" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#E2231A"/><stop offset="100%" stop-color="#f37a74"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 标题 -->
+        <text x="490" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#0D274D">
+          可观测性分层：从冰山一角到水下九分
+        </text>
+
+        <!-- 三层条带 -->
+        <rect x="60" y="70"  width="860" height="100" rx="10" fill="url(#g-visible)" opacity="0.92"/>
+        <rect x="60" y="190" width="860" height="100" rx="10" fill="url(#g-partial)" opacity="0.92"/>
+        <rect x="60" y="310" width="860" height="120" rx="10" fill="url(#g-blind)" opacity="0.92"/>
+
+        <!-- 层标签 -->
+        <text x="80" y="105" font-size="16" font-weight="700" fill="#fff">① 显性层 · 你 100% 看得见</text>
+        <text x="80" y="130" font-size="13" fill="#fff">设备掉电、端口 Down、ICMP 不可达、SNMP 超时</text>
+        <text x="80" y="150" font-size="12" fill="#fff" opacity="0.9">— Zabbix 默认模板基本能告警 —</text>
+
+        <text x="80" y="225" font-size="16" font-weight="700" fill="#1A1A1A">② 半显性层 · 阈值依赖症</text>
+        <text x="80" y="250" font-size="13" fill="#1A1A1A">CPU/Mem 高占用、温度报警、风扇缺位、丢包率上升</text>
+        <text x="80" y="270" font-size="12" fill="#1A1A1A" opacity="0.85">— 取决于阈值设得准不准 · 大量误报或漏报 —</text>
+
+        <text x="80" y="345" font-size="16" font-weight="700" fill="#fff">③ 隐性层 · 真正的监控盲区</text>
+        <text x="80" y="370" font-size="13" fill="#fff">Downshift · Symbol Error · TDR 异常 · DOM 光功率漂移</text>
+        <text x="80" y="390" font-size="13" fill="#fff">IS-IS Stale RIB · LISP Map-Cache 异常 · BFD 抖动</text>
+        <text x="80" y="412" font-size="12" fill="#fff" opacity="0.9">— 端口 Up，业务却在悄悄烂掉 —</text>
+
+        <!-- 右侧业务影响 -->
+        <text x="900" y="105" text-anchor="end" font-size="12" fill="#fff" font-weight="600">业务影响：低</text>
+        <text x="900" y="225" text-anchor="end" font-size="12" fill="#1A1A1A" font-weight="600">业务影响：中</text>
+        <text x="900" y="345" text-anchor="end" font-size="12" fill="#fff" font-weight="600">业务影响：高 / 极高</text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 1-1 · 网络故障的三层可观测性。盲区不是“没监控”，而是“监控的维度选错了”。</p>
+
+    <!-- ======================== 苏格拉底问题 3 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 03</span>
+      <h3>如何科学、系统地消除盲区，把 SLA 从“事后救火”变成“事前洞察”？</h3>
+      <p>
+        既然盲区来自“维度不足 + 粒度过粗 + 缺少变化率”，那解药也必须从这三个第一性维度入手——
+        我把它总结为<strong>“分层观测 · 多维采样 · 变化感知”</strong>三原则。
+      </p>
+
+      <div class="def-analogy">
+        <div class="box def">
+          <span class="tag">分层观测</span>
+          <p style="margin:0;">
+            把监控指标按 OSI 与 SDA 架构分层（L0 物理 → L1/L2 链路 → L3 路由 → Overlay 控制 → 业务），
+            <strong>每一层都至少有一个“生命体征”指标</strong>。
+          </p>
+        </div>
+        <div class="box analogy">
+          <span class="tag">类比</span>
+          <p style="margin:0;">
+            这就像体检：不是只测体温，还要测血压、血脂、心电图、肝功能。
+            <strong>单一指标永远会骗你，多维指标互相校验才有真相</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="def-analogy">
+        <div class="box def">
+          <span class="tag">多维采样</span>
+          <p style="margin:0;">
+            关键指标采用<strong>差异化粒度</strong>：链路状态 30s，错误计数 60s，
+            CPU/Mem 60s，光功率 5min，TDR 按需触发。
+          </p>
+        </div>
+        <div class="box analogy">
+          <span class="tag">类比</span>
+          <p style="margin:0;">
+            ICU 心电图 1 秒采一次，体重一周称一次。<strong>数据的价值密度，决定采样频率</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="def-analogy">
+        <div class="box def">
+          <span class="tag">变化感知</span>
+          <p style="margin:0;">
+            不仅监控绝对值，更监控<strong>变化率（delta / rate）和事件型跳变</strong>。
+            例如 <code>ifHighSpeed</code> 的下降事件、<code>SymbolErrors</code> 的增长率、邻居状态的翻转次数。
+          </p>
+        </div>
+        <div class="box analogy">
+          <span class="tag">类比</span>
+          <p style="margin:0;">
+            体重 70kg 不可怕，<strong>一周掉 5kg 才可怕</strong>。
+            网络也一样：稳态值不重要，趋势和拐点才是预警信号。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 苏格拉底问题 4 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 04</span>
+      <h3>基于 Zabbix 的监控有什么先天不足？我们要补什么？</h3>
+      <p>
+        Zabbix 是一把好刀，但任何一把刀都有它擅长与不擅长的切割角度。<br>
+        诚实地评估它的能力边界，是设计补强方案的前提。
+      </p>
+
+      <div class="compare-grid">
+        <div class="col good">
+          <h4>Zabbix 的强项</h4>
+          <ul>
+            <li>SNMP Polling 与 Trap 接收成熟稳定</li>
+            <li>LLD（低级发现）自动适配大规模端口/传感器</li>
+            <li>触发器 + 依赖关系，支持复杂告警逻辑</li>
+            <li>模板继承机制，便于跨设备复用</li>
+            <li>开源，可深度定制（External Script、JavaScript Preprocessing）</li>
+          </ul>
+        </div>
+        <div class="col bad">
+          <h4>Zabbix 的盲点</h4>
+          <ul>
+            <li><strong>采样粒度受限</strong>：默认分钟级，秒级抖动看不到</li>
+            <li><strong>原生不支持 Streaming Telemetry</strong>（gNMI / Model-Driven）</li>
+            <li><strong>跨设备拓扑关联弱</strong>：单设备视角，难以推理 SDA 控制平面状态</li>
+            <li><strong>智能基线缺失</strong>：依赖人工阈值，难以发现“慢性病”</li>
+            <li><strong>对 LISP / VXLAN Overlay 没有开箱模板</strong>，需自建</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:var(--space-6);">补强策略：四条腿走路</h4>
+      <ol>
+        <li><strong>SNMP 深挖</strong>：在 Zabbix 内自建 Cisco 私有 OID 模板（覆盖 Downshift、TDR、DOM、ISIS、LISP）。</li>
+        <li><strong>SNMP Trap 双通道</strong>：被动捕捉 linkDown / cefcModuleStatusChange / ciscoIsisAdjacencyChange 等事件。</li>
+        <li><strong>外部脚本桥接</strong>：通过 External Check 调用 NETCONF/RESTCONF，补齐 SDA 与 Catalyst Center 视角。</li>
+        <li><strong>Telemetry 旁路</strong>：长期演进路径上引入 gNMI Collector（如 Telegraf + InfluxDB），与 Zabbix 互补。</li>
+      </ol>
+    </div>
+
+    <!-- ======================== 设计哲学 SVG ======================== -->
+    <h3 style="margin-top:var(--space-12);">本白皮书的设计哲学：分层 · 多维 · 变化</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="监控设计哲学">
+        <defs>
+          <linearGradient id="layer-g" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#0D274D"/><stop offset="100%" stop-color="#049FD9"/>
+          </linearGradient>
+        </defs>
+
+        <text x="490" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#0D274D">
+          网络监控分层模型 · L0 → 业务
+        </text>
+
+        <!-- 五层金字塔（倒置：业务在上） -->
+        <g font-family="CiscoSans, sans-serif">
+          <!-- 业务层 -->
+          <rect x="280" y="60"  width="420" height="50" rx="6" fill="#9232AC"/>
+          <text x="490" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">业务层 · Application SLA（用户感知）</text>
+
+          <!-- Overlay -->
+          <rect x="220" y="115" width="540" height="50" rx="6" fill="#005073"/>
+          <text x="490" y="147" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Overlay · LISP / VXLAN / BGP-EVPN 控制平面</text>
+
+          <!-- Underlay -->
+          <rect x="160" y="170" width="660" height="50" rx="6" fill="#049FD9"/>
+          <text x="490" y="202" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Underlay · IS-IS / OSPF / BFD / ECMP</text>
+
+          <!-- L1/L2 -->
+          <rect x="100" y="225" width="780" height="50" rx="6" fill="#00BCEB"/>
+          <text x="490" y="257" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">L1/L2 · Link / MAC / FCS / Symbol / Speed / Downshift</text>
+
+          <!-- L0 -->
+          <rect x="60"  y="280" width="860" height="50" rx="6" fill="#67B346"/>
+          <text x="490" y="312" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">L0 · 物理层（线缆 TDR / 光模块 DOM / PoE / 温度）</text>
+        </g>
+
+        <!-- 右侧采样频率注释 -->
+        <text x="940" y="92"  text-anchor="end" font-size="11" fill="#58585B">采样：业务探测</text>
+        <text x="940" y="147" text-anchor="end" font-size="11" fill="#58585B">采样：60s + Trap</text>
+        <text x="940" y="202" text-anchor="end" font-size="11" fill="#58585B">采样：30s + Trap</text>
+        <text x="940" y="257" text-anchor="end" font-size="11" fill="#58585B">采样：30–60s</text>
+        <text x="940" y="312" text-anchor="end" font-size="11" fill="#58585B">采样：5min / 按需</text>
+
+        <text x="490" y="365" text-anchor="middle" font-size="12" fill="#9B9CA0">
+          每一层都需要至少一个“生命体征”指标 · 多维交叉验证才能消除盲区
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 1-2 · 网络监控分层模型。本白皮书后续章节将逐层落到具体 OID。</p>
+
+    <!-- ======================== 数字徽章 ======================== -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="num">3</div>
+        <div class="label">监控盲区根因<br>（维度 / 粒度 / 变化率）</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">5</div>
+        <div class="label">分层观测维度<br>（L0 → 业务）</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">P0–P2</div>
+        <div class="label">告警分级体系<br>（业务影响驱动）</div>
+      </div>
+    </div>
+
+    <!-- ======================== 章节金句 ======================== -->
+    <p class="key-quote">
+      监控的终点，不是看到红灯亮起，<br>而是在红灯亮起之前，听见网络的咳嗽声。
+    </p>
+
+    <p style="text-align:center; color:var(--text-secondary);">
+      → 下一章，我们将把“分层 · 多维 · 变化”三原则，<br>
+      落到第一个真实战场：<strong style="color:var(--cisco-blue);">端口 Downshift 与线缆质量监控</strong>。
+    </p>
+  </div>
+</section>
+<!-- ============================================================================
+     第二章 · 端口 Downshift 与线缆质量监控
+============================================================================ -->
+<section class="chapter" id="ch2">
+  <div class="container">
+    <div class="chapter-num">02</div>
+    <span class="section-eyebrow">Chapter Two · 物理层的真相</span>
+    <h2>当端口"Up"成为最大的谎言</h2>
+
+    <p style="font-size:1.1rem; color:var(--text-secondary); max-width:880px;">
+      想象一个画面：Catalyst 9300LM 的 mGig 端口连着一台 9120 AP，
+      <code>ifOperStatus = up(1)</code>，绿灯稳定。运维大屏一片祥和。<br>
+      可就在此刻，AP 上的用户正在不断重连，IP 电话在嘶嘶杂音，视频会议卡成 PPT——<br>
+      这就是 <strong style="color:var(--cisco-red);">Downshift（速率自动降级）</strong>悄悄发生的样子。
+    </p>
+
+    <!-- ======================== 故事化场景还原 ======================== -->
+    <h3 style="margin-top:var(--space-8);">2.1 一次真实事件的时序还原</h3>
+    <p>下面的 SVG 还原了客户现场那段 Downshift 抖动的完整过程：</p>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Downshift 时序图">
+        <defs>
+          <linearGradient id="gd-good" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#67B346"/><stop offset="100%" stop-color="#a8d68a"/>
+          </linearGradient>
+          <linearGradient id="gd-bad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#FBAB18"/><stop offset="100%" stop-color="#fcd17a"/>
+          </linearGradient>
+          <linearGradient id="gd-worse" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#E2231A"/><stop offset="100%" stop-color="#f37a74"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 标题 -->
+        <text x="490" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">
+          Downshift 抖动事件 · 真实时间轴还原
+        </text>
+
+        <!-- X 轴 -->
+        <line x1="60" y1="280" x2="920" y2="280" stroke="#58585B" stroke-width="2"/>
+        <text x="60" y="305" font-size="11" fill="#58585B">T0</text>
+        <text x="240" y="305" font-size="11" fill="#58585B">T0+30min</text>
+        <text x="440" y="305" font-size="11" fill="#58585B">T0+90min</text>
+        <text x="640" y="305" font-size="11" fill="#58585B">T0+150min</text>
+        <text x="860" y="305" font-size="11" fill="#58585B">T0+180min</text>
+
+        <!-- Y 轴标签 -->
+        <text x="20" y="100" font-size="11" fill="#58585B">2.5 Gbps</text>
+        <text x="20" y="180" font-size="11" fill="#58585B">1 Gbps</text>
+        <text x="20" y="260" font-size="11" fill="#58585B">100 Mbps</text>
+
+        <!-- 阶段 1：稳定 2.5G -->
+        <rect x="60" y="80" width="180" height="40" fill="url(#gd-good)" rx="3"/>
+        <text x="150" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">稳定 2.5G</text>
+
+        <!-- 阶段 2：开始抖动 -->
+        <path d="M 240 100 L 260 110 L 280 95 L 300 115 L 320 100 L 340 120 L 360 105 L 380 125 L 400 110 L 420 130 L 440 115" 
+              stroke="#FBAB18" stroke-width="3" fill="none"/>
+        <rect x="240" y="80" width="200" height="40" fill="url(#gd-bad)" rx="3" opacity="0.4"/>
+        <text x="340" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#FBAB18">阶段 2 · Up/Down 震荡 + SymbolErrors 缓慢上升</text>
+
+        <!-- 阶段 3：Downshift 至 1G -->
+        <rect x="440" y="160" width="200" height="40" fill="url(#gd-bad)" rx="3"/>
+        <text x="540" y="185" text-anchor="middle" font-size="12" font-weight="700" fill="#1A1A1A">Downshift → 1 Gbps</text>
+        <line x1="440" y1="100" x2="440" y2="160" stroke="#E2231A" stroke-width="2" stroke-dasharray="4,3"/>
+        <text x="440" y="155" text-anchor="end" font-size="10" fill="#E2231A" font-weight="700">⚡ Downshift!</text>
+
+        <!-- 阶段 4：业务受损 -->
+        <rect x="640" y="160" width="280" height="40" fill="url(#gd-worse)" rx="3"/>
+        <text x="780" y="185" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">大量重传 · AP 用户体验下降</text>
+
+        <!-- 关键观测点 -->
+        <circle cx="240" cy="100" r="6" fill="#FBAB18" stroke="#fff" stroke-width="2"/>
+        <text x="240" y="155" text-anchor="middle" font-size="10" fill="#0D274D" font-weight="700">观测点①<tspan x="240" dy="12">FCS 错误开始累积</tspan></text>
+
+        <circle cx="440" cy="160" r="7" fill="#E2231A" stroke="#fff" stroke-width="2"/>
+        <text x="440" y="225" text-anchor="middle" font-size="10" fill="#E2231A" font-weight="700">观测点②<tspan x="440" dy="12">ifHighSpeed: 2500→1000</tspan></text>
+
+        <circle cx="780" cy="180" r="6" fill="#9232AC" stroke="#fff" stroke-width="2"/>
+        <text x="780" y="225" text-anchor="middle" font-size="10" fill="#9232AC" font-weight="700">观测点③<tspan x="780" dy="12">业务感知告警（已晚！）</tspan></text>
+
+        <!-- 现有 Zabbix 视角 -->
+        <rect x="60" y="320" width="860" height="28" rx="4" fill="#EEF0F3" stroke="#D4D8DE"/>
+        <text x="490" y="338" text-anchor="middle" font-size="11" fill="#58585B">
+          Zabbix 默认模板视角：⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪（端口 Up，没有任何告警！）
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 2-1 · Downshift 事件的三个阶段。如果只看 Up/Down，整个故障期都是"绿灯"。</p>
+
+    <!-- ======================== 第一性原理 ======================== -->
+    <h3 style="margin-top:var(--space-12);">2.2 第一性原理：什么才是物理层真正的"生命体征"？</h3>
+
+    <div class="def-analogy">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p style="margin:0;">
+          <strong>Downshift</strong>：当 IEEE 802.3ab/bz 协商的链路因 SNR（信噪比）持续下降，
+          经过多次 FLP（Fast Link Pulse）重协商后，<strong>双方妥协到一个更低、但更稳定的速率</strong>的过程。
+          它是 <em>设计内的容错机制</em>，不是故障——但它揭示了"链路质量正在烂掉"。
+        </p>
+      </div>
+      <div class="box analogy">
+        <span class="tag">精妙类比</span>
+        <p style="margin:0;">
+          就像高速公路上车流过密、路面湿滑时，<strong>限速从 120 自动降到 80</strong>。
+          车还能开（端口 Up），但承运能力大幅缩水。
+          监控只看"路通不通"是远远不够的，必须看"<strong>限速牌的实际数字</strong>"。
+        </p>
+      </div>
+    </div>
+
+    <p>从第一性原理出发，物理层只有 <strong>3 个核心问题</strong>需要回答：</p>
+    <ol>
+      <li><strong>链路在以什么速率运行？</strong>（速率维度）</li>
+      <li><strong>线缆/光纤的物理质量如何？</strong>（介质维度）</li>
+      <li><strong>有多少帧因物理层错误被丢弃？</strong>（错误率维度）</li>
+    </ol>
+
+    <p class="key-quote" style="font-size:1.2rem; margin:var(--space-8) auto;">
+      Downshift 不是一个"事件"，而是物理层在向你大喊：<br>"我撑不住了！"
+    </p>
+
+    <!-- ======================== 苏格拉底问题 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 05</span>
+      <h3>那么，IF-MIB 里的 ifSpeed 不就够用了吗？</h3>
+      <p>
+        看似合理，<strong>实则是个陷阱</strong>。让我们读 RFC 2863 原文：
+      </p>
+      <blockquote>
+        "ifSpeed: An estimate of the interface's current bandwidth in bits per second.
+        <strong>If the bandwidth of the interface is greater than the maximum value reportable by this object
+        then this object should report its maximum value (4,294,967,295) and ifHighSpeed must be used.</strong>"
+      </blockquote>
+      <p>
+        翻译：<code>ifSpeed</code> 是一个 <code>Gauge32</code>，最大值约 4.29 Gbps。
+        对于 mGig（2.5G/5G/10G）、25G、40G、100G 端口，<strong>它的值要么饱和（4294967295），要么压根不准</strong>。
+      </p>
+      <p>
+        正确的做法：<strong>始终使用 <code class="oid-tag">ifHighSpeed</code>（单位 Mbps）</strong>。
+        2.5G 端口正常时返回 2500；Downshift 到 1G 后变成 1000——
+        这正是我们捕捉 Downshift 的<strong>第一性指标</strong>。
+      </p>
+    </div>
+
+    <!-- ======================== 核心 OID 表（基于 IF-MIB） ======================== -->
+    <h3 style="margin-top:var(--space-12);">2.3 核心 OID 体系（一）：速率与链路状态</h3>
+    <p>下表所有 OID 已与上传的 <code>IF-MIB.my</code>、<code>CISCO-IF-EXTENSION-MIB.my</code> 源码逐一核对。</p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>MIB 来源</th><th>含义</th><th>Zabbix 触发器逻辑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ifHighSpeed</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.31.1.1.1.15</span></td>
+            <td>IF-MIB</td>
+            <td><strong>当前接口速率（单位 Mbps）</strong>。Downshift 主指标。</td>
+            <td><code>last() &lt; 2500</code>（针对 2.5G 端口）</td>
+          </tr>
+          <tr>
+            <td>ifSpeed</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.2.2.1.5</span></td>
+            <td>IF-MIB</td>
+            <td>32 位速率（bps）。仅用于低速链路兼容，<strong>不推荐</strong>用于 mGig。</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>ifOperStatus</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.2.2.1.8</span></td>
+            <td>IF-MIB</td>
+            <td>接口操作状态（1=up, 2=down, 7=lowerLayerDown 等）。</td>
+            <td><code>last() &lt;&gt; 1</code></td>
+          </tr>
+          <tr>
+            <td>ifLastChange</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.2.2.1.9</span></td>
+            <td>IF-MIB</td>
+            <td>接口最近一次状态变化时的 sysUpTime。用于检测震荡频率。</td>
+            <td>10 分钟内变化次数 &gt; 3</td>
+          </tr>
+          <tr>
+            <td>ifInErrors</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.2.2.1.14</span></td>
+            <td>IF-MIB</td>
+            <td>入向错误帧总数（含 FCS、对齐、Symbol 等）。</td>
+            <td><code>change()</code> 5min 内增量 &gt; 100</td>
+          </tr>
+          <tr>
+            <td>ifOutErrors</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.2.2.1.20</span></td>
+            <td>IF-MIB</td>
+            <td>出向错误帧总数。</td>
+            <td><code>change()</code> 5min 内增量 &gt; 100</td>
+          </tr>
+          <tr>
+            <td>ifAlias</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.31.1.1.1.18</span></td>
+            <td>IF-MIB</td>
+            <td>接口别名（运维描述）。<strong>LLD 必备</strong>，用于人类可读的告警。</td>
+            <td>仅作为标签</td>
+          </tr>
+          <tr>
+            <td>ifConnectorPresent</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.31.1.1.1.17</span></td>
+            <td>IF-MIB</td>
+            <td>是否为物理连接器（true/false）。<strong>LLD 过滤条件</strong>，排除 Loopback/SVI。</td>
+            <td>过滤 true(1) 才纳入监控</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================== Cisco 私有扩展（CISCO-IF-EXTENSION-MIB） ======================== -->
+    <h3 style="margin-top:var(--space-8);">2.4 核心 OID 体系（二）：Cisco 私有扩展（震荡与状态变化原因）</h3>
+    <p>
+      标准 IF-MIB 只能告诉你"端口 Down 了"，告诉不了你<strong>"为什么 Down"</strong>。
+      Cisco 在 <code>CISCO-IF-EXTENSION-MIB</code> 中给出了答案：
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th><th>关键价值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>cieIfStateChangeReason</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.2.1.3</span></td>
+            <td>接口状态变化的人类可读原因（如 "Lost Carrier"、"administratively down"）。</td>
+            <td><strong>故障定级第一手证据</strong></td>
+          </tr>
+          <tr>
+            <td><strong>cieIfCarrierTransitionCount</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.2.1.4</span></td>
+            <td>载波信号跳变次数（Carrier transitions）。</td>
+            <td><strong>Downshift 震荡的核心证据</strong>。1 小时内 &gt; 5 次即可告警。</td>
+          </tr>
+          <tr>
+            <td>cieIfResetCount</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.2.1.1</span></td>
+            <td>接口被内部 reset 的次数。</td>
+            <td>排查"被运维误操作"或"硬件自愈"</td>
+          </tr>
+          <tr>
+            <td>cieIfOperStatusCause</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.2.1.9</span></td>
+            <td>当前 down 状态的详细原因码（IfOperStatusReason 枚举）。</td>
+            <td>结构化的 down 原因，便于自动分类</td>
+          </tr>
+          <tr>
+            <td>cieIfPacketDiscontinuityTime</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.1.1.12</span></td>
+            <td>接口计数器最近一次发生不连续的 sysUpTime。</td>
+            <td>判断错误计数是否被人为清零</td>
+          </tr>
+          <tr>
+            <td>cieIfInRuntsErrs</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.1.1.4</span></td>
+            <td>因小于物理层最小帧而被丢弃的帧数（Runts）。</td>
+            <td>典型电缆质量问题</td>
+          </tr>
+          <tr>
+            <td>cieIfInGiantsErrs</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.1.1.5</span></td>
+            <td>超过 MTU 的帧数（Giants）。</td>
+            <td>对端 MTU 配置错误或 EMI 干扰</td>
+          </tr>
+          <tr>
+            <td>cieIfInFramingErrs</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.1.1.6</span></td>
+            <td>帧定界错误（misaligned 或 framing 异常）。</td>
+            <td><strong>线缆 SNR 劣化的早期信号</strong></td>
+          </tr>
+          <tr>
+            <td>cieIfInputQueueDrops</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.276.1.1.1.1.10</span></td>
+            <td>因入队列满或硬件错误而丢包数。</td>
+            <td>判断是否触发了拥塞 vs. 物理错误</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================== 核心 OID 体系（三）：TDR 线缆诊断 ======================== -->
+    <h3 style="margin-top:var(--space-8);">2.5 核心 OID 体系（三）：TDR 线缆诊断（CISCO-CABLE-DIAG-MIB）</h3>
+    <p>
+      TDR（Time Domain Reflectometry，时域反射）是物理层诊断的"X 光机"——
+      它向线缆发送脉冲信号，根据反射波分析<strong>故障点距离、线对极性、阻抗匹配</strong>。
+      这是排查"端口 Up 但 SNR 烂掉"的唯一非破坏性手段。
+    </p>
+
+    <div class="def-analogy">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p style="margin:0;">
+          <strong>TDR</strong>：基于电磁波反射理论的线缆诊断技术。从一端发出已知脉冲，
+          测量反射信号的<strong>时间延迟</strong>和<strong>极性</strong>，反推故障点位置（米/厘米级精度）。
+        </p>
+      </div>
+      <div class="box analogy">
+        <span class="tag">类比</span>
+        <p style="margin:0;">
+          就像在<strong>水管里用回声定位漏点</strong>。
+          敲一下听回声——回声越快说明断裂越近，回声方向能告诉你是堵塞还是断裂。
+        </p>
+      </div>
+    </div>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ccdTdrIfAction</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.1.1.1</span></td>
+            <td>TDR 测试控制（write: start/clear; read: running/notRunning）</td>
+          </tr>
+          <tr>
+            <td>ccdTdrIfActionStatus</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.1.1.2</span></td>
+            <td>上一次 TDR 测试的执行状态（succeeded / failed*）</td>
+          </tr>
+          <tr>
+            <td>ccdTdrIfLastTestTime</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.1.1.3</span></td>
+            <td>最近一次 TDR 测试的 sysUpTime 时间戳</td>
+          </tr>
+          <tr>
+            <td>ccdTdrIfResultValid</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.1.1.4</span></td>
+            <td>TDR 结果是否有效（true/false）</td>
+          </tr>
+          <tr>
+            <td><strong>ccdTdrIfResultPairStatus</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.2.1.8</span></td>
+            <td>线对状态：terminated(2) / open(5) / shorted(6) / impedanceMismatch(7) / broken(8)</td>
+          </tr>
+          <tr>
+            <td>ccdTdrIfResultPairLength</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.2.1.3</span></td>
+            <td>该线对长度（结合 Unit 解读：米/厘米/千米）</td>
+          </tr>
+          <tr>
+            <td>ccdTdrIfResultPairDistToFault</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.2.1.5</span></td>
+            <td>到故障点距离 ★关键指标★</td>
+          </tr>
+          <tr>
+            <td>ccdTdrIfResultPairLengthUnit</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.390.1.2.2.1.7</span></td>
+            <td>距离单位（meter / centimeter / kilometer）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>💡 实战建议</strong>：TDR 测试会<strong>短暂中断业务</strong>（约 5-10 秒），
+      因此不能持续轮询。推荐方案：
+      <ul style="margin-top:var(--space-2);">
+        <li>通过 <strong>Zabbix External Script + SNMP SET</strong>，在每周凌晨维护窗口对关键访问端口触发一次 TDR；</li>
+        <li>或在收到 <code>cieIfCarrierTransitionCount</code> 暴涨告警时，<strong>事件驱动</strong>触发 TDR；</li>
+        <li>对于 mGig 端口，特别要监控 <code>impedanceMismatch(7)</code>——这是 Downshift 的常见根因。</li>
+      </ul>
+    </div>
+
+    <!-- ======================== 核心 OID 体系（四）：MAU-MIB 的 Auto-Negotiation ======================== -->
+    <h3 style="margin-top:var(--space-8);">2.6 核心 OID 体系（四）：Auto-Negotiation 协商真相（MAU-MIB）</h3>
+    <p>
+      想直接观测"协商出来的 Downshift"？<code>MAU-MIB</code> 提供了链路两端的协商能力快照。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ifMauStatus</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.2.1.1.4</span></td>
+            <td>MAU 当前状态（operational / standby / shutdown / reset）</td>
+          </tr>
+          <tr>
+            <td><strong>ifMauMediaAvailable</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.2.1.1.5</span></td>
+            <td>媒介可用性状态（available / notAvailable / remoteFault 等）</td>
+          </tr>
+          <tr>
+            <td>ifMauMediaAvailableStateExits</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.2.1.1.6</span></td>
+            <td>退出 available 状态的次数（震荡计数器）</td>
+          </tr>
+          <tr>
+            <td><strong>ifMauAutoNegConfig</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.5.1.1.4</span></td>
+            <td>协商状态（configuring / complete / disabled / parallelDetectFail）</td>
+          </tr>
+          <tr>
+            <td>ifMauAutoNegCapAdvertisedBits</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.5.1.1.10</span></td>
+            <td>本端通告的协商能力位图</td>
+          </tr>
+          <tr>
+            <td>ifMauAutoNegCapReceivedBits</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.5.1.1.11</span></td>
+            <td>对端通告的协商能力位图（<strong>对比这两个能找出失配</strong>）</td>
+          </tr>
+          <tr>
+            <td>ifMauAutoNegRestart</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.26.5.1.1.8</span></td>
+            <td>SET = restart(1) 可强制重新协商（运维兜底动作）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================== Zabbix 实战配置 ======================== -->
+    <h3 style="margin-top:var(--space-12);">2.7 Zabbix 实战配置：Downshift 检测全流程</h3>
+
+    <h4 style="margin-top:var(--space-6);">Step 1 · 用 LLD 自动发现物理端口</h4>
+    <pre><code>{
+  "name": "Cisco mGig Physical Ports Discovery",
+  "type": "SNMP_AGENT",
+  "snmp_oid": "discovery[{#IFINDEX},1.3.6.1.2.1.31.1.1.1.1, {#IFNAME},1.3.6.1.2.1.31.1.1.1.1, {#IFALIAS},1.3.6.1.2.1.31.1.1.1.18, {#IFTYPE},1.3.6.1.2.1.2.2.1.3, {#CONNECTOR},1.3.6.1.2.1.31.1.1.1.17]",
+  "filter": {
+    "evaltype": "AND",
+    "conditions": [
+      { "macro": "{#CONNECTOR}", "value": "1", "operator": "MATCHES_REGEX" },
+      { "macro": "{#IFTYPE}",    "value": "^6$|^117$", "operator": "MATCHES_REGEX" }
+    ]
+  },
+  "lifetime": "30d"
+}</code></pre>
+    <p style="font-size:0.92rem; color:var(--text-secondary);">
+      <strong>说明</strong>：过滤条件保留 <code>ifConnectorPresent=true(1)</code> 且 ifType 为 ethernetCsmacd(6) 或 gigabitEthernet(117) 的接口，
+      自动剔除 Loopback、SVI、Tunnel 等逻辑接口。
+    </p>
+
+    <h4 style="margin-top:var(--space-6);">Step 2 · 关键 Item 模板（按 LLD 原型）</h4>
+    <pre><code># 1. 当前协商速率（Mbps）— Downshift 主指标
+Item Key:        net.if.speed.high[{#IFINDEX}]
+SNMP OID:        1.3.6.1.2.1.31.1.1.1.15.{#IFINDEX}
+Type:            Numeric (unsigned)
+Update interval: 30s
+Preprocessing:   Discard unchanged with heartbeat: 600s
+Tags:            tier:L1, scenario:downshift
+
+# 2. Carrier Transition 次数（震荡核心证据）
+Item Key:        cisco.if.carrier.trans[{#IFINDEX}]
+SNMP OID:        1.3.6.1.4.1.9.9.276.1.1.2.1.4.{#IFINDEX}
+Type:            Numeric (unsigned, Counter32 → delta)
+Update interval: 60s
+Preprocessing:   Change per second
+Tags:            tier:L1, scenario:flapping
+
+# 3. State Change Reason（人类可读原因）
+Item Key:        cisco.if.state.reason[{#IFINDEX}]
+SNMP OID:        1.3.6.1.4.1.9.9.276.1.1.2.1.3.{#IFINDEX}
+Type:            Character
+Update interval: 60s
+
+# 4. ifOperStatus
+Item Key:        net.if.status[{#IFINDEX}]
+SNMP OID:        1.3.6.1.2.1.2.2.1.8.{#IFINDEX}
+Update interval: 30s
+
+# 5. 入向错误帧增长率
+Item Key:        net.if.in.errors[{#IFINDEX}]
+SNMP OID:        1.3.6.1.2.1.2.2.1.14.{#IFINDEX}
+Type:            Counter32
+Update interval: 60s
+Preprocessing:   Change per second</code></pre>
+
+    <h4 style="margin-top:var(--space-6);">Step 3 · 触发器矩阵（含告警分级）</h4>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">优先级</th><th>触发器名称</th><th>表达式</th><th>响应建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>Downshift Occurred</td>
+            <td><code>last(/Tmpl/net.if.speed.high[{#IFINDEX}]) &lt; 2500</code> AND <code>last(...) &gt; 0</code></td>
+            <td>立即工单：现场更换线缆或检查光模块</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Port Flapping (Carrier Transitions)</td>
+            <td><code>change(/Tmpl/cisco.if.carrier.trans[{#IFINDEX}],10m) &gt; 5</code></td>
+            <td>触发 TDR 测试 + DOM 检查</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>FCS/Symbol Errors Surging</td>
+            <td><code>avg(/Tmpl/net.if.in.errors[{#IFINDEX}],5m) &gt; 1</code> err/s</td>
+            <td>评估线缆质量，准备 TDR</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>Speed Below Capability (Negotiated &lt; Configured)</td>
+            <td><code>last(/Tmpl/net.if.speed.high[{#IFINDEX}]) &lt; {$EXPECTED.SPEED:"{#IFNAME}"}</code></td>
+            <td>记录入趋势库，周报回顾</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>Interface Reset Excessively</td>
+            <td>10 分钟内 <code>cieIfResetCount</code> 增长 &gt; 2</td>
+            <td>检查是否人工误操作</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">Step 4 · SNMP Trap 双通道（事件驱动）</h4>
+    <p>除了 Polling，强烈建议在 Cisco IOS 上启用 Trap 主动通告：</p>
+    <pre><code>! 在 Catalyst 9300LM 上配置：
+snmp-server enable traps snmp linkdown linkup
+snmp-server enable traps cef-mac-move
+snmp-server enable traps interface
+snmp-server host 10.x.x.x version 2c &lt;community&gt; udp-port 162  snmp interface
+
+! Zabbix Trap 接收侧（snmptrapd + Trapper Item）：
+Trap OID: 1.3.6.1.6.3.1.1.5.3   (linkDown)
+Trap OID: 1.3.6.1.6.3.1.1.5.4   (linkUp)
+Trap OID: 1.3.6.1.4.1.9.9.276.0.1  (cieLinkDown - 携带额外 ifName/ifType)</code></pre>
+
+    <!-- ======================== 告警优先级矩阵 SVG ======================== -->
+    <h3 style="margin-top:var(--space-12);">2.8 一图总览：物理层告警优先级矩阵</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="物理层告警优先级矩阵">
+        <text x="490" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">
+          物理层 OID 监控优先级矩阵
+        </text>
+
+        <!-- 表头 -->
+        <rect x="40" y="60" width="240" height="40" fill="#0D274D"/>
+        <text x="160" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">监控维度</text>
+
+        <rect x="280" y="60" width="240" height="40" fill="#0D274D"/>
+        <text x="400" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">关键 OID</text>
+
+        <rect x="520" y="60" width="240" height="40" fill="#0D274D"/>
+        <text x="640" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">采样频率</text>
+
+        <rect x="760" y="60" width="180" height="40" fill="#0D274D"/>
+        <text x="850" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">优先级</text>
+
+        <!-- 行 1 -->
+        <rect x="40" y="100" width="240" height="40" fill="#F7F8FA"/>
+        <text x="55" y="125" font-size="12" fill="#1A1A1A">速率与 Downshift</text>
+        <rect x="280" y="100" width="240" height="40" fill="#F7F8FA"/>
+        <text x="295" y="125" font-size="11" font-family="monospace" fill="#005073">ifHighSpeed</text>
+        <rect x="520" y="100" width="240" height="40" fill="#F7F8FA"/>
+        <text x="535" y="125" font-size="12" fill="#1A1A1A">30s</text>
+        <rect x="760" y="100" width="180" height="40" fill="#E2231A"/>
+        <text x="850" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">P0</text>
+
+        <!-- 行 2 -->
+        <rect x="40" y="140" width="240" height="40" fill="#fff"/>
+        <text x="55" y="165" font-size="12" fill="#1A1A1A">链路震荡</text>
+        <rect x="280" y="140" width="240" height="40" fill="#fff"/>
+        <text x="295" y="165" font-size="11" font-family="monospace" fill="#005073">cieIfCarrierTransitionCount</text>
+        <rect x="520" y="140" width="240" height="40" fill="#fff"/>
+        <text x="535" y="165" font-size="12" fill="#1A1A1A">60s</text>
+        <rect x="760" y="140" width="180" height="40" fill="#FBAB18"/>
+        <text x="850" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="#1A1A1A">P1</text>
+
+        <!-- 行 3 -->
+        <rect x="40" y="180" width="240" height="40" fill="#F7F8FA"/>
+        <text x="55" y="205" font-size="12" fill="#1A1A1A">MAC 层错误</text>
+        <rect x="280" y="180" width="240" height="40" fill="#F7F8FA"/>
+        <text x="295" y="205" font-size="11" font-family="monospace" fill="#005073">ifInErrors / cieIfInFramingErrs</text>
+        <rect x="520" y="180" width="240" height="40" fill="#F7F8FA"/>
+        <text x="535" y="205" font-size="12" fill="#1A1A1A">60s</text>
+        <rect x="760" y="180" width="180" height="40" fill="#FBAB18"/>
+        <text x="850" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#1A1A1A">P1</text>
+
+        <!-- 行 4 -->
+        <rect x="40" y="220" width="240" height="40" fill="#fff"/>
+        <text x="55" y="245" font-size="12" fill="#1A1A1A">线缆物理质量</text>
+        <rect x="280" y="220" width="240" height="40" fill="#fff"/>
+        <text x="295" y="245" font-size="11" font-family="monospace" fill="#005073">ccdTdrIfResultPairStatus</text>
+        <rect x="520" y="220" width="240" height="40" fill="#fff"/>
+        <text x="535" y="245" font-size="12" fill="#1A1A1A">按需 / 周维护</text>
+        <rect x="760" y="220" width="180" height="40" fill="#049FD9"/>
+        <text x="850" y="245" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">P2</text>
+
+        <!-- 行 5 -->
+        <rect x="40" y="260" width="240" height="40" fill="#F7F8FA"/>
+        <text x="55" y="285" font-size="12" fill="#1A1A1A">协商失配</text>
+        <rect x="280" y="260" width="240" height="40" fill="#F7F8FA"/>
+        <text x="295" y="285" font-size="11" font-family="monospace" fill="#005073">ifMauAutoNegConfig</text>
+        <rect x="520" y="260" width="240" height="40" fill="#F7F8FA"/>
+        <text x="535" y="285" font-size="12" fill="#1A1A1A">5min</text>
+        <rect x="760" y="260" width="180" height="40" fill="#049FD9"/>
+        <text x="850" y="285" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">P2</text>
+
+        <!-- 行 6 -->
+        <rect x="40" y="300" width="240" height="40" fill="#fff"/>
+        <text x="55" y="325" font-size="12" fill="#1A1A1A">状态变化原因</text>
+        <rect x="280" y="300" width="240" height="40" fill="#fff"/>
+        <text x="295" y="325" font-size="11" font-family="monospace" fill="#005073">cieIfStateChangeReason</text>
+        <rect x="520" y="300" width="240" height="40" fill="#fff"/>
+        <text x="535" y="325" font-size="12" fill="#1A1A1A">事件驱动 (Trap)</text>
+        <rect x="760" y="300" width="180" height="40" fill="#67B346"/>
+        <text x="850" y="325" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">辅助证据</text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 2-2 · 物理层 6 个监控维度的优先级、采样频率与关键 OID 速查表。</p>
+
+    <!-- ======================== 章节金句 ======================== -->
+    <p class="key-quote">
+      监控物理层，不要等"灯灭"，要听"咳嗽"——<br>
+      ifHighSpeed 的每一次跌落，都是网络在告诉你它需要看医生。
+    </p>
+
+    <p style="text-align:center; color:var(--text-secondary);">
+      → 下一章，我们将进入更深的水域：<br>
+      <strong style="color:var(--cisco-blue);">Cisco SDA 全栈监控（Underlay · Overlay · Control Plane）</strong>，
+      看 IS-IS、LISP、VXLAN 这些"看不见的协议"如何被精准捕获。
+    </p>
+  </div>
+</section>
+<!-- ============================================================================
+     第三章 · Cisco SDA 全栈监控（Underlay / Overlay / Control Plane）
+============================================================================ -->
+<section class="chapter" id="ch3">
+  <div class="container">
+    <div class="chapter-num">03</div>
+    <span class="section-eyebrow">Chapter Three · 看不见的网络</span>
+    <h2>当 SDA 的"地基"开始下沉</h2>
+
+    <p style="font-size:1.1rem; color:var(--text-secondary); max-width:880px;">
+      传统网络是<strong>"水平的"</strong>——一根光纤从 A 到 B，看得见摸得着。<br>
+      Cisco SDA 是<strong>"立体的"</strong>——
+      下面跑 IS-IS 织出 Underlay 路由地基，<br>
+      中间用 VXLAN 隧道封装承载，
+      上面用 LISP 的 Map-Server 像 DNS 一样查询终端位置。<br>
+      <strong style="color:var(--cisco-purple);">三层任何一层出问题，业务都会瘫痪——而你可能完全不知道。</strong>
+    </p>
+
+    <!-- ======================== SDA 三层架构 SVG ======================== -->
+    <h3 style="margin-top:var(--space-8);">3.1 先看清地图：SDA 的三层立体结构</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cisco SDA 三层架构">
+        <defs>
+          <linearGradient id="sda-overlay" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#9232AC"/><stop offset="100%" stop-color="#b96bd0"/>
+          </linearGradient>
+          <linearGradient id="sda-cp" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#00BCEB"/><stop offset="100%" stop-color="#67d8f0"/>
+          </linearGradient>
+          <linearGradient id="sda-underlay" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#005073"/><stop offset="100%" stop-color="#0a82a8"/>
+          </linearGradient>
+        </defs>
+
+        <text x="490" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="#0D274D">
+          Cisco SDA 三层架构 · 监控视角
+        </text>
+
+        <!-- ======= Overlay 层 ======= -->
+        <rect x="60" y="60" width="860" height="100" rx="10" fill="url(#sda-overlay)" opacity="0.92"/>
+        <text x="80" y="90" font-size="15" font-weight="700" fill="#fff">① Overlay 层 · 数据封装与租户隔离</text>
+        <text x="80" y="115" font-size="12" fill="#fff">VXLAN 隧道 · VNI（Virtual Network Identifier）· 租户流量承载</text>
+        <text x="80" y="138" font-size="11" fill="#fff" opacity="0.92">关键 MIB：CISCO-NETWORK-VIRTUALIZATION-OVERLAY-MIB · CISCO-VRF-MIB</text>
+        <text x="900" y="90" text-anchor="end" font-size="11" fill="#fff" font-weight="600">L2/L3 over IP</text>
+        <text x="900" y="138" text-anchor="end" font-size="10" fill="#fff" opacity="0.85">采样：60s + Trap</text>
+
+        <!-- ======= Control Plane 层 ======= -->
+        <rect x="60" y="180" width="860" height="100" rx="10" fill="url(#sda-cp)" opacity="0.92"/>
+        <text x="80" y="210" font-size="15" font-weight="700" fill="#0D274D">② Control Plane · LISP 终端定位与映射</text>
+        <text x="80" y="235" font-size="12" fill="#0D274D">LISP Map-Server / Map-Resolver · EID-to-RLOC 映射 · ITR/ETR 角色</text>
+        <text x="80" y="258" font-size="11" fill="#0D274D" opacity="0.85">关键 MIB：LISP-MIB（RFC 7052）· CISCO-LISP-EXT-MIB</text>
+        <text x="900" y="210" text-anchor="end" font-size="11" fill="#0D274D" font-weight="600">DNS-like Lookup</text>
+        <text x="900" y="258" text-anchor="end" font-size="10" fill="#0D274D" opacity="0.75">采样：60s + 事件驱动</text>
+
+        <!-- ======= Underlay 层 ======= -->
+        <rect x="60" y="300" width="860" height="100" rx="10" fill="url(#sda-underlay)" opacity="0.92"/>
+        <text x="80" y="330" font-size="15" font-weight="700" fill="#fff">③ Underlay · IS-IS 路由 + BFD 快速收敛</text>
+        <text x="80" y="355" font-size="12" fill="#fff">IS-IS 邻居 / LSP 数据库 · BFD 毫秒级故障检测 · ECMP 多路径</text>
+        <text x="80" y="378" font-size="11" fill="#fff" opacity="0.92">关键 MIB：CISCO-IETF-ISIS-MIB · CISCO-IETF-BFD-MIB · IP-FORWARD-MIB</text>
+        <text x="900" y="330" text-anchor="end" font-size="11" fill="#fff" font-weight="600">IP Reachability</text>
+        <text x="900" y="378" text-anchor="end" font-size="10" fill="#fff" opacity="0.85">采样：30s + Trap</text>
+
+        <!-- 业务影响标记 -->
+        <text x="490" y="430" text-anchor="middle" font-size="12" fill="#9B9CA0">
+          故障传播：Underlay 故障 → Control Plane 失联 → Overlay 隧道断 → 业务中断
+        </text>
+        <text x="490" y="448" text-anchor="middle" font-size="11" fill="#E2231A" font-weight="700">
+          ⚠ 监控必须自下而上构建，缺一层就有盲区
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 3-1 · SDA 三层架构与监控分工。Underlay 是地基，Control Plane 是大脑，Overlay 是血管。</p>
+
+    <!-- ======================== 苏格拉底问题 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 06</span>
+      <h3>客户那次 Border Node 断电后的 "Stale RIB"，到底是怎么发生的？</h3>
+      <p>
+        让我们用第一性原理重演现场：
+      </p>
+      <ol>
+        <li>Border Node 突然断电——这是一个"瞬时事件"；</li>
+        <li>邻居 Edge Node 还在按正常的 IS-IS Hello 计时（<strong>10 秒一次</strong>），等待 Hold Time 超时（<strong>30 秒</strong>）；</li>
+        <li>这 30 秒里，邻居的 RIB（Routing Information Base）仍认为 Border Node 可达；</li>
+        <li>原本流向 Border Node 的流量持续被转发到一个"已经死掉"的下一跳——<strong>形成黑洞</strong>；</li>
+        <li>30 秒后 IS-IS 邻居超时，但此时 SPF 重算、RIB 更新、FIB 下发还需数秒；</li>
+        <li>更糟的是：如果 Border Node 上还运行着 LISP Map-Server，所有依赖它做 EID-to-RLOC 解析的 ITR 都会陷入<strong>查询超时</strong>。</li>
+      </ol>
+      <p>
+        这就是 <strong>Stale RIB（陈旧路由表）</strong>的本质：<em>控制平面与转发平面的时间差</em>。
+        监控如果不能在这 30 秒内告警，就只能"事后解释"。
+      </p>
+
+      <div class="def-analogy">
+        <div class="box def">
+          <span class="tag">解药</span>
+          <p style="margin:0;">
+            <strong>BFD（Bidirectional Forwarding Detection）</strong> + 
+            <strong>ISIS Adjacency Trap</strong> + 
+            <strong>LISP Map-Server 状态监控</strong>三管齐下，
+            把检测时间从 <em>30 秒</em>压缩到 <em>毫秒级</em>。
+          </p>
+        </div>
+        <div class="box analogy">
+          <span class="tag">类比</span>
+          <p style="margin:0;">
+            就像消防系统：
+            烟雾报警器（BFD）瞬时响应，
+            温度传感器（ISIS Hold Time）30 秒兜底，
+            人工值班（LISP Map 状态）确保大脑还在工作。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================================
+         3.2 Underlay 监控 · IS-IS
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">3.2 Underlay 监控（一）：IS-IS 邻居与 LSP 数据库</h3>
+    <p>
+      Cisco SDA 在 Underlay 默认使用 <strong>IS-IS</strong>（而非 OSPF），原因是 IS-IS 与 IP 解耦，
+      天然支持 IPv6/IPv4 双栈、收敛快、对大规模 fabric 友好。
+      所有 OID 来自您上传的 <code>CISCO-IETF-ISIS-MIB</code>。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th><th>监控价值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ciiISAdjState</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.6.1.1.2</span></td>
+            <td>邻居状态（down(1) / initializing(2) / up(3) / failed(4)）</td>
+            <td>★ 邻居关系的核心指标 ★</td>
+          </tr>
+          <tr>
+            <td>ciiISAdjNeighSysID</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.6.1.1.6</span></td>
+            <td>邻居的 System ID（标识对端 IS）</td>
+            <td>识别"是哪个邻居挂了"</td>
+          </tr>
+          <tr>
+            <td>ciiISAdjLastUpTime</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.6.1.1.11</span></td>
+            <td>邻居最近一次进入 up 状态的时间</td>
+            <td>计算邻居稳定性 / 震荡频率</td>
+          </tr>
+          <tr>
+            <td>ciiISAdjHoldTimer</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.6.1.1.9</span></td>
+            <td>当前 Hold Time（秒）</td>
+            <td>判断 hello 是否被持续接收</td>
+          </tr>
+          <tr>
+            <td>ciiISAdj3WayState</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.6.1.1.3</span></td>
+            <td>3-Way 握手状态（up/init/down/failed）</td>
+            <td>P2P 链路诊断必看</td>
+          </tr>
+          <tr>
+            <td><strong>ciiCircAdjChanges</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.5.2.1.2</span></td>
+            <td>该 circuit 上邻居状态变化次数</td>
+            <td>★ 邻居震荡的累计计数器 ★</td>
+          </tr>
+          <tr>
+            <td>ciiCircRejAdjs</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.5.2.1.5</span></td>
+            <td>被拒绝的邻接关系次数</td>
+            <td>认证失败 / 区域不匹配</td>
+          </tr>
+          <tr>
+            <td>ciiCircAuthFails</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.5.2.1.9</span></td>
+            <td>认证失败次数</td>
+            <td>安全告警 / 配置漂移</td>
+          </tr>
+          <tr>
+            <td>ciiSysStatLSPDbaseOloads</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.5.1.1.5</span></td>
+            <td>LSP 数据库进入 overload 状态的次数</td>
+            <td>★ 资源耗尽的关键预警 ★</td>
+          </tr>
+          <tr>
+            <td>ciiSysStatSPFRuns</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.5.1.1.12</span></td>
+            <td>SPF 重算次数</td>
+            <td>变化过频意味着不稳定</td>
+          </tr>
+          <tr>
+            <td>ciiSysStatCorrLSPs</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.5.1.1.2</span></td>
+            <td>检测到的损坏 LSP 数量</td>
+            <td>内存损坏 / 软件 bug</td>
+          </tr>
+          <tr>
+            <td>ciiLSPLifetimeRemain</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.9.1.1.6</span></td>
+            <td>LSP 剩余生存时间（秒）</td>
+            <td>检测 Stale LSP（陈旧 LSP）</td>
+          </tr>
+          <tr>
+            <td>ciiSysLevelOverloadState</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.1.2.1.1.4</span></td>
+            <td>本地 IS 在该 level 的状态（off/on/waiting/overloaded）</td>
+            <td>★ overloaded 即是黑洞前兆 ★</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">关键 IS-IS Trap（事件驱动核心）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Trap 名称</th><th>OID</th><th>触发条件</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ciiAdjacencyChange</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.0.17</span></td>
+            <td>★ 邻居 up/down 状态变化 ★（最高优先级 Trap）</td>
+          </tr>
+          <tr>
+            <td>ciiDatabaseOverload</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.0.1</span></td>
+            <td>LSP 数据库进入或退出 overload</td>
+          </tr>
+          <tr>
+            <td>ciiAuthenticationFailure</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.0.10</span></td>
+            <td>认证字段不匹配</td>
+          </tr>
+          <tr>
+            <td>ciiAreaMismatch</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.0.12</span></td>
+            <td>区域地址不匹配（典型配置错误）</td>
+          </tr>
+          <tr>
+            <td>ciiLSPErrorDetected</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.118.0.18</span></td>
+            <td>LSP 解析错误</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================================
+         3.3 Underlay 监控 · BFD
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-8);">3.3 Underlay 监控（二）：BFD 毫秒级故障检测</h3>
+    <p>
+      <strong>BFD（Bidirectional Forwarding Detection）</strong>是 SDA Underlay 的"心电监护仪"——
+      它独立于路由协议，以毫秒级周期发送 hello 包，
+      故障检测时间可压缩到 <strong>50ms 以内</strong>，远快于 IS-IS 的默认 30 秒 Hold Time。
+    </p>
+
+    <div class="def-analogy">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p style="margin:0;">
+          <strong>BFD</strong>：RFC 5880 定义的轻量级双向链路检测协议，
+          独立运行于 IS-IS / OSPF / BGP 之上，提供 sub-second 级别的链路故障通告。
+        </p>
+      </div>
+      <div class="box analogy">
+        <span class="tag">类比</span>
+        <p style="margin:0;">
+          就像 ICU 病人胸前的心电图电极——它不关心病人的"路由协议偏好"，
+          只测最基本的"<strong>心还在跳吗？</strong>"。
+        </p>
+      </div>
+    </div>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th><th>关键阈值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ciscoBfdSessState</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.137.1.2.1.1.6</span></td>
+            <td>BFD 会话状态（adminDown/down/init/up/failing）</td>
+            <td>★ 不为 up(4) 即告警 ★</td>
+          </tr>
+          <tr>
+            <td>ciscoBfdSessDiag</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.137.1.2.1.1.8</span></td>
+            <td>诊断码（控制超时/路径 down/邻居信号 down 等）</td>
+            <td>定位失败原因</td>
+          </tr>
+          <tr>
+            <td>ciscoBfdSessPerfSessUpCount</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.137.1.3.1.1.6</span></td>
+            <td>会话进入 up 状态的次数</td>
+            <td>震荡计数</td>
+          </tr>
+          <tr>
+            <td>ciscoBfdSessPerfLastSessDownTime</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.137.1.3.1.1.4</span></td>
+            <td>最近一次失联的 sysUpTime</td>
+            <td>故障时间锚点</td>
+          </tr>
+          <tr>
+            <td>ciscoBfdSessPerfLastCommLostDiag</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.137.1.3.1.1.5</span></td>
+            <td>最近一次失联的诊断码</td>
+            <td>故障复盘依据</td>
+          </tr>
+          <tr>
+            <td>ciscoBfdSessDetectMult</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.10.137.1.2.1.1.18</span></td>
+            <td>检测倍数（hello miss 多少次后判定 down）</td>
+            <td>典型值：3</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">BFD 关键 Trap</h4>
+    <ul>
+      <li><code>ciscoBfdSessUp</code> · <span class="oid-tag">1.3.6.1.4.1.9.10.137.0.1</span> · 会话恢复</li>
+      <li><strong><code>ciscoBfdSessDown</code></strong> · <span class="oid-tag">1.3.6.1.4.1.9.10.137.0.2</span> · ★会话失联（核心告警）★</li>
+    </ul>
+
+    <!-- ============================================================================
+         3.4 Underlay 监控 · IP-FORWARD-MIB · RIB 健康
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-8);">3.4 Underlay 监控（三）：路由表（RIB）健康度</h3>
+    <p>
+      用 <code>IP-FORWARD-MIB</code>（RFC 4292）观测路由表的整体健康度，
+      它是判断 <strong>"Stale RIB"</strong> 的最直接证据。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th><th>用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>inetCidrRouteNumber</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.4.24.6</span></td>
+            <td>当前活跃路由条目数</td>
+            <td>★ 数量骤降 = 路由黑洞预警 ★</td>
+          </tr>
+          <tr>
+            <td>inetCidrRouteDiscards</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.4.24.8</span></td>
+            <td>被丢弃的路由条目数</td>
+            <td>资源耗尽监测</td>
+          </tr>
+          <tr>
+            <td>inetCidrRouteAge</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.4.24.7.1.10</span></td>
+            <td>该路由最后更新距今秒数</td>
+            <td>★ Stale 检测核心 ★</td>
+          </tr>
+          <tr>
+            <td>inetCidrRouteProto</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.4.24.7.1.9</span></td>
+            <td>路由学习协议（isis=9 / ospf=13 / bgp=14 等）</td>
+            <td>分协议统计</td>
+          </tr>
+          <tr>
+            <td>inetCidrRouteType</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.4.24.7.1.8</span></td>
+            <td>路由类型（local/remote/reject/blackhole）</td>
+            <td>识别黑洞路由</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>🎯 Stale RIB 检测黄金公式</strong>：<br>
+      若某条 IS-IS 路由的 <code>inetCidrRouteAge</code> 超过 <code>(IS-IS Hold Time × 3)</code>，
+      但 <code>inetCidrRouteType</code> 仍为 <code>remote(4)</code>，
+      则极有可能是 Stale 路由——<strong>这就是您客户 Border Node 断电时该捕获的信号</strong>。
+    </div>
+
+    <!-- ============================================================================
+         3.5 Control Plane · LISP
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">3.5 Control Plane 监控：LISP 终端定位系统</h3>
+
+    <div class="def-analogy">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p style="margin:0;">
+          <strong>LISP</strong>（Locator/ID Separation Protocol，RFC 6830）将 IP 拆成两个独立的语义：
+          <strong>EID</strong>（Endpoint Identifier，终端身份）和 <strong>RLOC</strong>（Routing Locator，位置标识）。
+          通过 Map-Server / Map-Resolver 维护"身份→位置"的映射。
+        </p>
+      </div>
+      <div class="box analogy">
+        <span class="tag">精妙类比</span>
+        <p style="margin:0;">
+          就像<strong>手机号码可携带服务</strong>——
+          号码（EID）跟着你走，但每次拨打前需要查 HLR（Map-Server）问"这个号现在在哪个基站（RLOC）"。
+          <strong>Map-Server 挂了，整个 SDA fabric 就成了"打不通的电话"。</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:var(--space-6);">
+      OID 全部来自您上传的 <code>LISP-MIB</code>（IETF RFC 7052）和 <code>CISCO-LISP-EXT-MIB</code>。
+    </p>
+
+    <h4 style="margin-top:var(--space-6);">3.5.1 LISP 角色与特性状态</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>lispFeaturesItrEnabled</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.3</span></td>
+            <td>本设备是否启用了 ITR 角色</td>
+          </tr>
+          <tr>
+            <td><strong>lispFeaturesEtrEnabled</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.4</span></td>
+            <td>本设备是否启用了 ETR 角色</td>
+          </tr>
+          <tr>
+            <td>lispFeaturesProxyItrEnabled</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.5</span></td>
+            <td>是否启用 PxTR 代理</td>
+          </tr>
+          <tr>
+            <td><strong>lispFeaturesMapServerEnabled</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.7</span></td>
+            <td>是否启用 Map-Server</td>
+          </tr>
+          <tr>
+            <td><strong>lispFeaturesMapResolverEnabled</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.8</span></td>
+            <td>是否启用 Map-Resolver</td>
+          </tr>
+          <tr>
+            <td>lispFeaturesMapCacheSize</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.9</span></td>
+            <td>当前 EID-to-RLOC 缓存条目数</td>
+          </tr>
+          <tr>
+            <td>lispFeaturesMapCacheLimit</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.1.1.1.10</span></td>
+            <td>缓存上限（达到即停止学习新条目）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">3.5.2 LISP 全局统计（控制平面流量）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>lispGlobalStatsMapRequestsIn</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.3.1.1</span></td>
+            <td>收到的 Map-Request 总数</td>
+          </tr>
+          <tr>
+            <td>lispGlobalStatsMapRequestsOut</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.3.1.2</span></td>
+            <td>发出的 Map-Request 总数</td>
+          </tr>
+          <tr>
+            <td><strong>lispGlobalStatsMapRepliesIn</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.3.1.3</span></td>
+            <td>★ 收到的 Map-Reply 总数（应答率核心）★</td>
+          </tr>
+          <tr>
+            <td>lispGlobalStatsMapRepliesOut</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.3.1.4</span></td>
+            <td>发出的 Map-Reply 总数</td>
+          </tr>
+          <tr>
+            <td><strong>lispGlobalStatsMapRegistersIn</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.3.1.5</span></td>
+            <td>★ 收到的 Map-Register 总数（Map-Server 视角）★</td>
+          </tr>
+          <tr>
+            <td>lispGlobalStatsMapRegistersOut</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.3.1.6</span></td>
+            <td>发出的 Map-Register 总数（ETR 视角）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">3.5.3 ★ EID 注册状态（Map-Server 视角，最关键）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>lispEidRegistrationIsRegistered</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.9.1.5</span></td>
+            <td>★ EID 是否成功注册（true/false）★</td>
+          </tr>
+          <tr>
+            <td>lispEidRegistrationSiteName</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.9.1.3</span></td>
+            <td>注册所属的 LISP site 名称</td>
+          </tr>
+          <tr>
+            <td>lispEidRegistrationLastTimeStamp</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.9.1.7</span></td>
+            <td>最近一次有效 Register 的时间</td>
+          </tr>
+          <tr>
+            <td>lispEidRegistrationAuthenticationErrors</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.9.1.10</span></td>
+            <td>认证失败次数</td>
+          </tr>
+          <tr>
+            <td>lispEidRegistrationRlocsMismatch</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.9.1.11</span></td>
+            <td>RLOC 不在允许列表的次数</td>
+          </tr>
+          <tr>
+            <td><strong>lispEidRegistrationEtrLastTimeStamp</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.10.1.3</span></td>
+            <td>★ 该 ETR 最近一次 Register 时间（注册 keepalive）★</td>
+          </tr>
+          <tr>
+            <td>lispEidRegistrationLocatorRlocState</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.11.1.3</span></td>
+            <td>每个 RLOC 的 up/down 状态</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">3.5.4 Map-Cache 健康（ITR 视角）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>lispMapCacheEidExpiryTime</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.6.1.4</span></td>
+            <td>该 EID 缓存条目剩余 TTL</td>
+          </tr>
+          <tr>
+            <td>lispMapCacheEidState</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.6.1.5</span></td>
+            <td>该 EID 是否有流量活跃（active）</td>
+          </tr>
+          <tr>
+            <td>lispMapCacheLocatorRlocState</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.7.1.7</span></td>
+            <td>对应 RLOC 的可达性（up/down/unreachable）</td>
+          </tr>
+          <tr>
+            <td>lispMapCacheLocatorRlocRtt</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.7.1.14</span></td>
+            <td>RLOC-Probe 往返时延</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">3.5.5 Map-Server / Map-Resolver 可达性</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>lispUseMapServerState</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.12.1.3</span></td>
+            <td>★ Map-Server 可达性（up/down）★</td>
+          </tr>
+          <tr>
+            <td><strong>lispUseMapResolverState</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.13.1.3</span></td>
+            <td>★ Map-Resolver 可达性（up/down）★</td>
+          </tr>
+          <tr>
+            <td>lispUseProxyEtrState</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.220.1.14.1.7</span></td>
+            <td>Proxy-ETR 可达性</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">3.5.6 ★ Cisco LISP 扩展 Trap（事件驱动黄金组合）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Trap 名称</th><th>OID</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>clispExtUseMapServerStateChange</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.825.0.4</span></td>
+            <td>★ Map-Server 可达性变化（关键告警）★</td>
+          </tr>
+          <tr>
+            <td><strong>clispExtUseMapResolverStateChange</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.825.0.1</span></td>
+            <td>★ Map-Resolver 可达性变化 ★</td>
+          </tr>
+          <tr>
+            <td><strong>clispExtMappingDatabaseEidRegFailure</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.825.0.3</span></td>
+            <td>★ ETR 注册失败（最严重场景）★</td>
+          </tr>
+          <tr>
+            <td>clispExtEidRegSiteAllRegistrationsExpired</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.825.0.6</span></td>
+            <td>整个 site 的所有注册都过期了</td>
+          </tr>
+          <tr>
+            <td>clispExtUseProxyEtrStateChange</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.825.0.5</span></td>
+            <td>Proxy-ETR 可达性变化</td>
+          </tr>
+          <tr>
+            <td>clispExtFeaturesMapCacheLimitReached</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.825.0.13</span></td>
+            <td>Map-Cache 达到上限（资源耗尽）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================================
+         3.6 Overlay · VXLAN
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">3.6 Overlay 监控：VXLAN 隧道与 VNI 状态</h3>
+    <p>
+      VXLAN 是 SDA 数据平面的承载协议，每个虚拟网络（租户）映射到一个 <strong>VNI</strong>（24-bit）。
+      OID 来自您上传的 <code>CISCO-NETWORK-VIRTUALIZATION-OVERLAY-MIB</code>。
+    </p>
+
+    <h4 style="margin-top:var(--space-4);">3.6.1 VNI 配置与状态</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cnvoNvoEncapType</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.1.1.2</span></td>
+            <td>封装类型（vxlan(2) / nvgre(3)）</td>
+          </tr>
+          <tr>
+            <td>cnvoNvoSourceInterface</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.1.1.3</span></td>
+            <td>VTEP 源接口 ifIndex</td>
+          </tr>
+          <tr>
+            <td>cnvoNvoConfiguredVni</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.1.1.4</span></td>
+            <td>该 NVE 实例承载的 VNI 列表</td>
+          </tr>
+          <tr>
+            <td>cnvoVNetReplication</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.2.1.6</span></td>
+            <td>BUM 复制模式（mcast/ucastBgp/ucastStatic）</td>
+          </tr>
+          <tr>
+            <td><strong>cnvoVNetHostReachability</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.2.1.7</span></td>
+            <td>★ 主机可达学习方式（dataPlaneL2 / controlPlaneL3）★</td>
+          </tr>
+          <tr>
+            <td>cnvoVNetVniType</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.2.1.8</span></td>
+            <td>VNI 类型（L2/L3）</td>
+          </tr>
+          <tr>
+            <td>cnvoVNetIpVrfOrBridgeDomainName</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.2.1.9</span></td>
+            <td>关联的 VRF 名称（L3 VNI）或 BD 名称（L2 VNI）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">3.6.2 ★ VTEP 邻居（VXLAN Peer）状态 ★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>cnvoPeerUpTime</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.3.1.3</span></td>
+            <td>★ 该 VTEP 邻居 up 时间（值为 0 表示 down）★</td>
+          </tr>
+          <tr>
+            <td>cnvoPeerLearningSourceType</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.3.1.4</span></td>
+            <td>邻居学习来源（dataPlane / controlPlane）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">3.6.3 VXLAN 流量统计（VNI 维度）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cnvoVNetInUnicastPackets</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.4.1.5</span></td>
+            <td>该 VNI 解封装入向单播包数</td>
+          </tr>
+          <tr>
+            <td>cnvoVNetOutUnicastPackets</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.4.1.1</span></td>
+            <td>该 VNI 封装出向单播包数</td>
+          </tr>
+          <tr>
+            <td>cnvoVNetInMulticastPackets</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.4.1.7</span></td>
+            <td>该 VNI 入向组播包数（BUM 流量）</td>
+          </tr>
+          <tr>
+            <td>cnvoVNetOutMulticastPackets</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.820.1.1.4.1.3</span></td>
+            <td>该 VNI 出向组播包数</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================================
+         3.7 SDA 故障传播链路 SVG
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">3.7 一图看懂：SDA 故障传播链路</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SDA 故障传播链">
+        <text x="490" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">
+          故障传播链 · 从硬件断电到业务中断（典型时间窗）
+        </text>
+
+        <!-- 时间轴 -->
+        <line x1="60" y1="180" x2="920" y2="180" stroke="#58585B" stroke-width="2"/>
+
+        <!-- 节点 1: 硬件事件 -->
+        <circle cx="100" cy="180" r="28" fill="#E2231A"/>
+        <text x="100" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">T0</text>
+        <text x="100" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">硬件断电</text>
+        <text x="100" y="232" text-anchor="middle" font-size="10" fill="#58585B">Border Node 失电</text>
+        <text x="100" y="248" text-anchor="middle" font-size="9" fill="#9B9CA0">无 SNMP 信号</text>
+
+        <!-- 节点 2: BFD 检测 -->
+        <circle cx="260" cy="180" r="28" fill="#FBAB18"/>
+        <text x="260" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#1A1A1A">+50ms</text>
+        <text x="260" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">BFD 检测</text>
+        <text x="260" y="232" text-anchor="middle" font-size="10" fill="#58585B">ciscoBfdSessDown</text>
+        <text x="260" y="248" text-anchor="middle" font-size="9" fill="#67B346" font-weight="700">★ 最快告警 ★</text>
+
+        <!-- 节点 3: IS-IS 邻居超时 -->
+        <circle cx="420" cy="180" r="28" fill="#FBAB18"/>
+        <text x="420" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#1A1A1A">+30s</text>
+        <text x="420" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">ISIS 邻居 Down</text>
+        <text x="420" y="232" text-anchor="middle" font-size="10" fill="#58585B">ciiAdjacencyChange</text>
+        <text x="420" y="248" text-anchor="middle" font-size="9" fill="#9B9CA0">SPF 重算开始</text>
+
+        <!-- 节点 4: RIB 变化 -->
+        <circle cx="580" cy="180" r="28" fill="#9232AC"/>
+        <text x="580" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">+35s</text>
+        <text x="580" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">RIB 收敛</text>
+        <text x="580" y="232" text-anchor="middle" font-size="10" fill="#58585B">inetCidrRouteNumber↓</text>
+        <text x="580" y="248" text-anchor="middle" font-size="9" fill="#9B9CA0">FIB 下发</text>
+
+        <!-- 节点 5: LISP 影响 -->
+        <circle cx="740" cy="180" r="28" fill="#9232AC"/>
+        <text x="740" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">+60s</text>
+        <text x="740" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">LISP MS 失联</text>
+        <text x="740" y="232" text-anchor="middle" font-size="10" fill="#58585B">lispUseMapServerState</text>
+        <text x="740" y="248" text-anchor="middle" font-size="9" fill="#9B9CA0">EID 解析失败</text>
+
+        <!-- 节点 6: 业务影响 -->
+        <circle cx="900" cy="180" r="28" fill="#E2231A"/>
+        <text x="900" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">+90s</text>
+        <text x="900" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D">业务可见</text>
+        <text x="900" y="232" text-anchor="middle" font-size="10" fill="#58585B">用户报障</text>
+        <text x="900" y="248" text-anchor="middle" font-size="9" fill="#E2231A" font-weight="700">已经晚了！</text>
+
+        <!-- 箭头 -->
+        <path d="M 128 180 L 232 180" stroke="#58585B" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 288 180 L 392 180" stroke="#58585B" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 448 180 L 552 180" stroke="#58585B" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 608 180 L 712 180" stroke="#58585B" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 768 180 L 872 180" stroke="#58585B" stroke-width="2" marker-end="url(#arr)"/>
+
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#58585B"/>
+          </marker>
+        </defs>
+
+        <!-- 黄金告警窗口 -->
+        <rect x="60" y="290" width="860" height="50" rx="6" fill="#67B346" opacity="0.15" stroke="#67B346" stroke-dasharray="4,3"/>
+        <text x="490" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D">
+          ⚡ 黄金告警窗口：T0 ~ T0+60s
+        </text>
+        <text x="490" y="330" text-anchor="middle" font-size="11" fill="#58585B">
+          BFD + ISIS Trap + LISP Trap 必须在此窗口内完成所有告警 · 否则只能"事后解释"
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 3-2 · SDA 故障从硬件到业务的传播时间线。监控的目标，是把告警发现压缩在 60 秒之内。</p>
+
+    <!-- ============================================================================
+         3.8 Zabbix 实战：SDA 三层模板设计
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">3.8 Zabbix 实战：SDA 三层模板与触发器矩阵</h3>
+
+    <h4 style="margin-top:var(--space-4);">触发器矩阵（按场景分级）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">优先级</th>
+            <th>触发器名</th>
+            <th>所属层</th>
+            <th>表达式（核心逻辑）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>BFD Session Down</td>
+            <td>Underlay</td>
+            <td><code>last(/SDA/bfd.state[{#SESSID}]) &lt;&gt; 4</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>ISIS Adjacency Lost</td>
+            <td>Underlay</td>
+            <td><code>last(/SDA/isis.adj.state[{#NBR}]) &lt;&gt; 3</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>LISP Map-Server Unreachable</td>
+            <td>Control Plane</td>
+            <td><code>last(/SDA/lisp.ms.state[{#MS}]) &lt;&gt; 1</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>EID Site All Registrations Expired</td>
+            <td>Control Plane</td>
+            <td>来自 Trap <code>clispExtEidRegSiteAllRegistrationsExpired</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>ISIS LSP Database Overload</td>
+            <td>Underlay</td>
+            <td><code>last(/SDA/isis.overload[1]) = 4</code> (overloaded)</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>RIB Routes Suddenly Drop</td>
+            <td>Underlay</td>
+            <td><code>change(/SDA/rib.count) &lt; -100</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>VTEP Peer Down</td>
+            <td>Overlay</td>
+            <td><code>last(/SDA/vtep.uptime[{#PEER}]) = 0</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>EID Registration Failure (Map-Server)</td>
+            <td>Control Plane</td>
+            <td><code>last(/SDA/eid.registered[{#EID}]) = 2</code> (false)</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Map-Cache Approaching Limit</td>
+            <td>Control Plane</td>
+            <td><code>last(...mapcache.size) / last(...mapcache.limit) &gt; 0.85</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>ISIS SPF Runs Excessive</td>
+            <td>Underlay</td>
+            <td>5 分钟 SPF 次数 &gt; 10</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>LISP Auth Errors</td>
+            <td>Control Plane</td>
+            <td><code>change(...AuthenticationErrors)</code> 1h &gt; 0</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>BFD Flapping</td>
+            <td>Underlay</td>
+            <td>1h 内 SessUpCount 变化 &gt; 3</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">关键 Item 配置示例（YAML 化）</h4>
+    <pre><code># ========== Underlay · ISIS ==========
+- key: isis.adj.state[{#SYSID}]
+  oid: 1.3.6.1.4.1.9.10.118.1.6.1.1.2.{#CIRCIDX}.{#ADJIDX}
+  interval: 30s
+  preprocessing: discard_unchanged_with_heartbeat:300s
+  triggers:
+    - {prio: P0, expr: "last() &lt;&gt; 3"}
+
+- key: isis.overload[{#LEVEL}]
+  oid: 1.3.6.1.4.1.9.10.118.1.2.1.1.4.{#LEVEL}
+  interval: 60s
+  triggers:
+    - {prio: P1, expr: "last() = 4"}
+
+# ========== Underlay · BFD ==========
+- key: bfd.state[{#SESSID}]
+  oid: 1.3.6.1.4.1.9.10.137.1.2.1.1.6.{#SESSID}
+  interval: 30s
+  triggers:
+    - {prio: P0, expr: "last() &lt;&gt; 4"}
+
+# ========== Control Plane · LISP ==========
+- key: lisp.ms.state[{#MS_LEN}.{#MS_ADDR}]
+  oid: 1.3.6.1.2.1.220.1.12.1.3.{#MS_LEN}.{#MS_ADDR}
+  interval: 60s
+  triggers:
+    - {prio: P0, expr: "last() &lt;&gt; 1"}
+
+- key: lisp.eid.registered[{#EID_LEN}.{#EID}]
+  oid: 1.3.6.1.2.1.220.1.9.1.5.{#EID_LEN}.{#EID}
+  interval: 60s
+  triggers:
+    - {prio: P1, expr: "last() = 2"}
+
+- key: lisp.mapcache.size[0]
+  oid: 1.3.6.1.2.1.220.1.1.1.1.9.0.0
+  interval: 60s
+
+# ========== Overlay · VXLAN ==========
+- key: vtep.peer.uptime[{#PEER_LEN}.{#PEER_ADDR}]
+  oid: 1.3.6.1.4.1.9.9.820.1.1.3.1.3.{#NVE_ID}.{#PEER_LEN}.{#PEER_ADDR}
+  interval: 60s
+  triggers:
+    - {prio: P1, expr: "last() = 0"}</code></pre>
+
+    <h4 style="margin-top:var(--space-6);">SNMP Trap 接收清单（事件驱动核心）</h4>
+    <pre><code>! 在 Catalyst 9300/9500 上启用 SDA 关键 Trap：
+snmp-server enable traps isis
+snmp-server enable traps bfd
+snmp-server enable traps cisco-lisp           ! 启用 LISP 扩展 Trap
+
+! Zabbix 侧 snmptrapd 关注的 OID：
+! Underlay
+1.3.6.1.4.1.9.10.118.0.17  → ciiAdjacencyChange       (ISIS 邻居状态变化)
+1.3.6.1.4.1.9.10.118.0.1   → ciiDatabaseOverload      (LSP DB 过载)
+1.3.6.1.4.1.9.10.137.0.2   → ciscoBfdSessDown         (BFD 失联)
+
+! Control Plane
+1.3.6.1.4.1.9.9.825.0.4    → clispExtUseMapServerStateChange    ★
+1.3.6.1.4.1.9.9.825.0.1    → clispExtUseMapResolverStateChange  ★
+1.3.6.1.4.1.9.9.825.0.3    → clispExtMappingDatabaseEidRegFailure ★
+1.3.6.1.4.1.9.9.825.0.6    → clispExtEidRegSiteAllRegistrationsExpired</code></pre>
+
+    <!-- ============================================================================
+         3.9 监控盲区检查清单
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">3.9 SDA 监控盲区自查清单</h3>
+
+    <div class="compare-grid">
+      <div class="col bad">
+        <h4>常见盲区（必须避免）</h4>
+        <ul>
+          <li>只看接口 Up/Down，不看 IS-IS 邻居</li>
+          <li>未启用 BFD，故障检测 = 30 秒以上</li>
+          <li>不监控 LISP Map-Server 可达性</li>
+          <li>EID 注册失败完全无感知</li>
+          <li>VTEP 邻居 down 不告警，只看物理接口</li>
+          <li>只 Polling 不收 Trap，错过事件细节</li>
+          <li>未关联 Map-Cache 容量与告警</li>
+        </ul>
+      </div>
+      <div class="col good">
+        <h4>合规清单（必须具备）</h4>
+        <ul>
+          <li>BFD Session Down 触发 P0 告警（&lt;1秒）</li>
+          <li>ISIS <code>ciiAdjacencyChange</code> Trap 已启用</li>
+          <li>LISP MS/MR/PETR 三类可达性独立监控</li>
+          <li>EID 注册状态按 site 维度看板化</li>
+          <li>VTEP Peer 列表自动 LLD 发现</li>
+          <li>RIB 总数趋势曲线 + 突变阈值</li>
+          <li>每个层都有"健康度评分"卡片</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ======================== 章节金句 ======================== -->
+    <p class="key-quote">
+      在 SDA 网络里，"端口 Up" 只是序章，<br>
+      ISIS 邻居、LISP 注册、VXLAN 隧道才是真正决定业务生死的三条命脉。
+    </p>
+
+    <p style="text-align:center; color:var(--text-secondary);">
+      → 下一章，我们将回到设备本身：<br>
+      <strong style="color:var(--cisco-blue);">网元基础健康监控（CPU / Memory / Fan / Power / Temperature）</strong>，
+      看 Cisco 私有 MIB 如何精准捕获每一个传感器的呼吸。
+    </p>
+  </div>
+</section>
+<!-- ============================================================================
+     第四章 · 网元基础健康监控（CPU / Memory / FRU / Sensor / Stack）
+============================================================================ -->
+<section class="chapter" id="ch4">
+  <div class="container">
+    <div class="chapter-num">04</div>
+    <span class="section-eyebrow">Chapter Four · 设备的体检报告</span>
+    <h2>当一台交换机"看起来还活着"</h2>
+
+    <p style="font-size:1.1rem; color:var(--text-secondary); max-width:880px;">
+      第二章我们讨论了端口的物理层"咳嗽"，第三章我们读懂了 SDA 协议栈的"血压心跳"。<br>
+      但还有一类盲区——<strong style="color:var(--cisco-purple);">设备本身的脏腑健康</strong>。<br>
+      CPU 持续 95%、内存碎片化、风扇坏掉一台、电源在抖、传感器温度爬升……<br>
+      这些都不会让端口 Down，但会让设备<em>慢慢死去</em>，直到某一天突然崩溃。
+    </p>
+
+    <!-- ======================== 苏格拉底问题 ======================== -->
+    <div class="socratic">
+      <span class="q-label">Question 07</span>
+      <h3>"CPU 占用 80%" 到底有没有问题？</h3>
+      <p>
+        这是一道经典的伪问题。让我们用第一性原理拆解：
+      </p>
+      <ul>
+        <li>如果是<strong>持续 5 分钟 80%</strong>——很可能是 SPF 重算/拓扑震荡，需要立即介入；</li>
+        <li>如果是<strong>瞬时 80%、5 秒后回落</strong>——可能只是 SNMP 自身轮询造成的，无需告警；</li>
+        <li>如果是<strong>核心 0 持续 80%、其他核心 5%</strong>——某个进程在饿死系统，需要 per-process 视角；</li>
+        <li>如果是<strong>中断上下文 80%</strong>——硬件转发卸载失败，正在走 punt 路径，必须紧急排查。</li>
+      </ul>
+      <p>
+        所以监控 CPU 不是"看一个数"，而是<strong>四个维度的交叉验证</strong>：
+        <em>时间窗口 × 核心维度 × 进程维度 × 上下文维度</em>。
+      </p>
+
+      <div class="def-analogy">
+        <div class="box def">
+          <span class="tag">精准定义</span>
+          <p style="margin:0;">
+            <strong>CPU 健康度</strong>：在指定时间窗内，CPU 总占用率、各核心占用率、各进程占用率、
+            中断上下文占用率四个维度的<strong>联合分布</strong>。
+          </p>
+        </div>
+        <div class="box analogy">
+          <span class="tag">类比</span>
+          <p style="margin:0;">
+            就像看一个跑步者累不累——
+            不能只看心率，还要看<strong>呼吸频率（核心）</strong>、
+            <strong>是否一只脚瘸（per-process）</strong>、
+            <strong>是不是抽筋（中断上下文）</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================================
+         4.1 CPU 监控
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.1 CPU 监控：从总体到每个核心</h3>
+    <p>所有 OID 来自您上传的 <code>CISCO-PROCESS-MIB</code>。</p>
+
+    <h4 style="margin-top:var(--space-4);">4.1.1 CPU 总体利用率（cpmCPUTotalTable）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th><th>建议阈值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>cpmCPUTotal5secRev</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.6</span></td>
+            <td>过去 5 秒 CPU 占用率（%）</td>
+            <td>不直接告警（瞬时值波动大）</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCPUTotal1minRev</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.7</span></td>
+            <td>★ 过去 1 分钟 CPU 占用率（%）★</td>
+            <td>P1: 持续 5min &gt; 80%</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCPUTotal5minRev</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.8</span></td>
+            <td>★ 过去 5 分钟 CPU 占用率（%）★</td>
+            <td>P0: &gt; 90%</td>
+          </tr>
+          <tr>
+            <td>cpmCPUTotalMonIntervalValue</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.10</span></td>
+            <td>监控周期内的 CPU 占用率</td>
+            <td>替代 cpmCPUTotal5secRev</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCPUInterruptMonIntervalValue</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.11</span></td>
+            <td>★ 中断上下文 CPU 占用率 ★</td>
+            <td>P1: &gt; 30% 持续 1min</td>
+          </tr>
+          <tr>
+            <td>cpmCPUTotalPhysicalIndex</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.2</span></td>
+            <td>关联的 entPhysicalIndex（用于多 CPU 设备）</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.1.2 CPU 负载均值（Linux-style Load Average）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cpmCPULoadAvg1min</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.24</span></td>
+            <td>1 分钟负载均值（单位：百分之进程数）</td>
+          </tr>
+          <tr>
+            <td>cpmCPULoadAvg5min</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.25</span></td>
+            <td>5 分钟负载均值</td>
+          </tr>
+          <tr>
+            <td>cpmCPULoadAvg15min</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.26</span></td>
+            <td>15 分钟负载均值</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.1.3 ★ Per-Core 利用率（cpmCoreTable，多核 SoC 必看）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cpmCore5sec</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.1.1.3</span></td>
+            <td>该核心 5 秒占用率</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCore1min</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.1.1.4</span></td>
+            <td>★ 该核心 1 分钟占用率（识别"独热核心"）★</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCore5min</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.1.1.5</span></td>
+            <td>★ 该核心 5 分钟占用率 ★</td>
+          </tr>
+          <tr>
+            <td>cpmCoreLoadAvg1min</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.1.1.6</span></td>
+            <td>该核心 1 分钟负载均值</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.1.4 ★ Per-Process 利用率（cpmProcessExtRevTable，深度诊断必备）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cpmProcessName</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.1.1.2.2</span> <em>(在 cpmProcessTable)</em></td>
+            <td>进程名（如 "IP Input"、"BGP Router"、"ISIS Hello"）</td>
+          </tr>
+          <tr>
+            <td><strong>cpmProcExtUtil1MinRev</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.3.1.6</span></td>
+            <td>★ 该进程 1 分钟占用率 ★</td>
+          </tr>
+          <tr>
+            <td><strong>cpmProcExtUtil5MinRev</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.3.1.7</span></td>
+            <td>★ 该进程 5 分钟占用率 ★</td>
+          </tr>
+          <tr>
+            <td>cpmProcExtMemAllocatedRev</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.3.1.1</span></td>
+            <td>进程已申请的内存总和</td>
+          </tr>
+          <tr>
+            <td>cpmProcExtRuntimeRev</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.2.3.1.4</span></td>
+            <td>进程累计运行时间（微秒）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.1.5 CPU 阈值告警与 Trap</h4>
+    <p>
+      CISCO-PROCESS-MIB 提供了内置的 CPU 阈值机制，
+      可以让设备自己判断"超过阈值持续多久"再发 Trap，<strong>避免 NMS 反复轮询</strong>。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cpmCPURisingThresholdValue</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.4.1.2</span></td>
+            <td>CPU 上升阈值（%），如 80</td>
+          </tr>
+          <tr>
+            <td>cpmCPURisingThresholdPeriod</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.4.1.3</span></td>
+            <td>持续时长（秒），如 300（即 5 分钟）</td>
+          </tr>
+          <tr>
+            <td>cpmCPUFallingThresholdValue</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.1.1.4.1.4</span></td>
+            <td>CPU 下降阈值（%），用于告警恢复</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCPURisingThreshold</strong> Trap</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.2.0.1</span></td>
+            <td>★ CPU 持续超阈 Trap（含 top 进程列表）★</td>
+          </tr>
+          <tr>
+            <td><strong>cpmCPUFallingThreshold</strong> Trap</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.109.2.0.2</span></td>
+            <td>★ CPU 恢复 Trap ★</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>💡 实战建议</strong>：
+      在 Cisco IOS-XE 上配置 <code>process cpu threshold type total rising 80 interval 300</code>，
+      让设备主动发 <code>cpmCPURisingThreshold</code> Trap，
+      <strong>Zabbix 仅作为 Trap 接收方 + 短间隔健康度采样</strong>，
+      可以把 CPU 监控的告警延迟压到秒级。
+    </div>
+
+    <!-- ============================================================================
+         4.2 内存监控
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.2 内存监控：不只是"用了多少"</h3>
+
+    <div class="def-analogy">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p style="margin:0;">
+          <strong>内存健康度</strong>：内存池的总量、已用、空闲、最大块、低水位、利用率移动平均
+          六个维度的联合状态。<strong>"内存碎片化"比"内存用满"更可怕</strong>。
+        </p>
+      </div>
+      <div class="box analogy">
+        <span class="tag">类比</span>
+        <p style="margin:0;">
+          就像图书馆的书架——
+          总容量没满（free 充足），但找不到连续 5 本书的位置（largestFree 太小），
+          新书（大对象）就放不进去，系统就开始报错。
+        </p>
+      </div>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">4.2.1 内存池状态（CISCO-MEMORY-POOL-MIB）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ciscoMemoryPoolName</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.1.1.2</span></td>
+            <td>内存池名（"Processor"、"I/O"、"Driver text"）</td>
+          </tr>
+          <tr>
+            <td>ciscoMemoryPoolValid</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.1.1.4</span></td>
+            <td>该池数据是否有效（false 即内部错误）</td>
+          </tr>
+          <tr>
+            <td><strong>ciscoMemoryPoolUsed</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.1.1.5</span></td>
+            <td>★ 已使用字节数 ★</td>
+          </tr>
+          <tr>
+            <td><strong>ciscoMemoryPoolFree</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.1.1.6</span></td>
+            <td>★ 空闲字节数 ★</td>
+          </tr>
+          <tr>
+            <td><strong>ciscoMemoryPoolLargestFree</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.1.1.7</span></td>
+            <td>★ 最大连续空闲块（碎片化核心指标）★</td>
+          </tr>
+          <tr>
+            <td>ciscoMemoryPoolLowMemoryNotifThreshold</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.1.1.8</span></td>
+            <td>低内存阈值（%），用于触发 Trap</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.2.2 内存利用率（移动平均）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ciscoMemoryPoolUtilization1Min</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.2.1.1</span></td>
+            <td>1 分钟内存利用率（%）</td>
+          </tr>
+          <tr>
+            <td><strong>ciscoMemoryPoolUtilization5Min</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.2.1.2</span></td>
+            <td>★ 5 分钟内存利用率（推荐主指标）★</td>
+          </tr>
+          <tr>
+            <td>ciscoMemoryPoolUtilization10Min</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.48.1.2.1.3</span></td>
+            <td>10 分钟内存利用率</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.2.3 内存 Trap</h4>
+    <ul>
+      <li><strong>ciscoMemoryPoolLowMemoryNotif</strong> · <span class="oid-tag">1.3.6.1.4.1.9.9.48.2.0.1</span>
+        · ★ 低内存告警（携带 PoolName + Used 字节数）★</li>
+      <li><strong>ciscoMemoryPoolLowMemoryRecoveryNotif</strong> · <span class="oid-tag">1.3.6.1.4.1.9.9.48.2.0.2</span>
+        · ★ 低内存恢复 ★</li>
+    </ul>
+
+    <!-- ============================================================================
+         4.3 FRU · 风扇 / 电源 / 模块
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.3 FRU 监控：风扇 / 电源 / 模块的"现场体检"</h3>
+    <p>
+      <strong>FRU</strong>（Field Replaceable Unit）是可在现场更换的硬件单元——
+      风扇托盘、电源模块、线卡、SFP 光模块等。
+      OID 来自您上传的 <code>CISCO-ENTITY-FRU-CONTROL-MIB</code>。
+    </p>
+
+    <h4 style="margin-top:var(--space-4);">4.3.1 ★ 风扇状态（cefcFanTrayStatusTable）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>cefcFanTrayOperStatus</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.4.1.1.1</span></td>
+            <td>★ 风扇状态（unknown/up/down/warning）★</td>
+          </tr>
+          <tr>
+            <td>cefcFanTrayDirection</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.4.1.1.2</span></td>
+            <td>风扇风向（frontToBack / backToFront）</td>
+          </tr>
+          <tr>
+            <td>cefcFanSpeed</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.4.2.1.1</span></td>
+            <td>风扇转速（RPM）</td>
+          </tr>
+          <tr>
+            <td>cefcFanSpeedPercent</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.4.2.1.2</span></td>
+            <td>风扇转速百分比（相对最大值）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.3.2 ★ 电源状态（cefcFRUPowerStatusTable）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cefcFRUPowerAdminStatus</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.1.2.1.1</span></td>
+            <td>电源管理员状态（on/off/inlineAuto/inlineOn/powerCycle）</td>
+          </tr>
+          <tr>
+            <td><strong>cefcFRUPowerOperStatus</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.1.2.1.2</span></td>
+            <td>★ 电源运行状态（12 种枚举，详见下文）★</td>
+          </tr>
+          <tr>
+            <td>cefcFRUCurrent</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.1.2.1.3</span></td>
+            <td>电流（正值=供给，负值=消耗）</td>
+          </tr>
+          <tr>
+            <td>cefcFRURealTimeCurrent</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.1.2.1.5</span></td>
+            <td>实时电流值</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      <code>cefcFRUPowerOperStatus</code> 的 12 种状态值含义：
+    </p>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>值</th><th>名称</th><th>含义</th><th>建议响应</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>offEnvOther</td><td>其他环境原因关闭</td><td>P1: 检查日志</td></tr>
+          <tr><td>2</td><td><strong>on</strong></td><td>正常工作</td><td>—</td></tr>
+          <tr><td>3</td><td>offAdmin</td><td>管理员关闭</td><td>P3: 确认是否计划内</td></tr>
+          <tr><td>4</td><td>offDenied</td><td>系统功率不足而拒绝供电</td><td>P0: 紧急扩容电源</td></tr>
+          <tr><td>5</td><td>offEnvPower</td><td>FRU 电源故障</td><td>P0: 立即更换</td></tr>
+          <tr><td>6</td><td>offEnvTemp</td><td>温度过高而关闭</td><td>P0: 检查制冷</td></tr>
+          <tr><td>7</td><td>offEnvFan</td><td>风扇故障关联关闭</td><td>P0: 修风扇+电源</td></tr>
+          <tr><td>8</td><td><strong>failed</strong></td><td>★ 失败状态 ★</td><td>P0: 立即更换</td></tr>
+          <tr><td>9</td><td>onButFanFail</td><td>电源在工作但风扇坏</td><td>P1: 计划更换</td></tr>
+          <tr><td>10</td><td>offCooling</td><td>制冷不足而关闭</td><td>P0: 检查空调/风扇</td></tr>
+          <tr><td>11</td><td>offConnectorRating</td><td>电源接口额定值超限</td><td>P1: 检查供电规划</td></tr>
+          <tr><td>12</td><td>onButInlinePowerFail</td><td>电源在工作但 PoE 失效</td><td>P1: PoE 子系统故障</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.3.3 模块状态（cefcModuleTable）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>cefcModuleAdminStatus</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.2.1.1.1</span></td>
+            <td>管理员状态（enabled/disabled/reset/outOfServiceAdmin）</td>
+          </tr>
+          <tr>
+            <td><strong>cefcModuleOperStatus</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.2.1.1.2</span></td>
+            <td>★ 模块运行状态（27 种枚举）★</td>
+          </tr>
+          <tr>
+            <td><strong>cefcModuleResetReason</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.2.1.1.3</span></td>
+            <td>★ 最近一次复位原因（23 种枚举）★</td>
+          </tr>
+          <tr>
+            <td>cefcModuleResetReasonDescription</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.2.1.1.6</span></td>
+            <td>复位原因的人类可读描述</td>
+          </tr>
+          <tr>
+            <td>cefcModuleUpTime</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.1.2.1.1.8</span></td>
+            <td>模块运行时长（秒）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.3.4 ★ FRU Trap（事件驱动黄金）★</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Trap 名称</th><th>OID</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>cefcModuleStatusChange</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.2.0.1</span></td>
+            <td>★ 模块状态变化（含新状态枚举）★</td>
+          </tr>
+          <tr>
+            <td><strong>cefcPowerStatusChange</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.2.0.2</span></td>
+            <td>★ 电源状态变化 ★</td>
+          </tr>
+          <tr>
+            <td>cefcFRUInserted</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.2.0.3</span></td>
+            <td>FRU 插入</td>
+          </tr>
+          <tr>
+            <td>cefcFRURemoved</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.2.0.4</span></td>
+            <td>★ FRU 拔出（资产合规告警）★</td>
+          </tr>
+          <tr>
+            <td>cefcUnrecognizedFRU</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.2.0.5</span></td>
+            <td>无法识别的 FRU（假货/兼容性问题）</td>
+          </tr>
+          <tr>
+            <td><strong>cefcFanTrayStatusChange</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.117.2.0.6</span></td>
+            <td>★ 风扇状态变化 ★</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================================
+         4.4 传感器 · 温度 / 电压 / 电流 / 光功率（DOM）
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.4 传感器监控：温度、电压、光功率（DOM）的实时呼吸</h3>
+    <p>
+      <code>CISCO-ENTITY-SENSOR-MIB</code> 提供了一个统一的传感器抽象——
+      无论是温度、电压、电流、转速、还是光模块的 Tx/Rx Power、模块温度、Bias 电流，
+      都可以通过同一个表格查询。这是<strong>L0 物理层监控的"百宝箱"</strong>。
+    </p>
+
+    <h4 style="margin-top:var(--space-4);">4.4.1 传感器值（entSensorValueTable）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>entSensorType</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.1</span></td>
+            <td>★ 传感器类型（13 种：voltsAC/voltsDC/amperes/watts/hertz/celsius/percentRH/rpm/cmm/truthvalue/specialEnum）★</td>
+          </tr>
+          <tr>
+            <td>entSensorScale</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.2</span></td>
+            <td>SI 单位幂指数（micro/milli/units/kilo/mega 等）</td>
+          </tr>
+          <tr>
+            <td>entSensorPrecision</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.3</span></td>
+            <td>小数位数</td>
+          </tr>
+          <tr>
+            <td><strong>entSensorValue</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.4</span></td>
+            <td>★ 当前测量值（结合 Type/Scale/Precision 解读）★</td>
+          </tr>
+          <tr>
+            <td><strong>entSensorStatus</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.5</span></td>
+            <td>★ 传感器状态（ok/unavailable/nonoperational）★</td>
+          </tr>
+          <tr>
+            <td>entSensorValueTimeStamp</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.6</span></td>
+            <td>测量值年龄</td>
+          </tr>
+          <tr>
+            <td>entSensorValueUpdateRate</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.1.1.1.7</span></td>
+            <td>更新频率（秒）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">4.4.2 传感器阈值（entSensorThresholdTable）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>entSensorThresholdSeverity</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.2.1.1.2</span></td>
+            <td>严重程度（other/minor/major/critical）</td>
+          </tr>
+          <tr>
+            <td>entSensorThresholdRelation</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.2.1.1.3</span></td>
+            <td>关系运算符（lessThan/greaterThan/equalTo 等）</td>
+          </tr>
+          <tr>
+            <td>entSensorThresholdValue</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.2.1.1.4</span></td>
+            <td>阈值（与 entSensorValue 同 scale）</td>
+          </tr>
+          <tr>
+            <td><strong>entSensorThresholdEvaluation</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.2.1.1.5</span></td>
+            <td>★ 阈值是否被触发（true/false）★</td>
+          </tr>
+          <tr>
+            <td>entSensorThresholdNotificationEnable</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.91.1.2.1.1.6</span></td>
+            <td>是否启用 Trap</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">★ 关键 Trap：entSensorThresholdNotification ★</h4>
+    <ul>
+      <li><strong>entSensorThresholdNotification</strong> · <span class="oid-tag">1.3.6.1.4.1.9.9.91.2.0.1</span>
+        · ★ 任意传感器突破阈值（携带阈值与当前值）★</li>
+    </ul>
+
+    <h4 style="margin-top:var(--space-4);">4.4.3 SFP / DOM 监控的特殊用法</h4>
+    <p>
+      <strong>对于光模块（DOM/DDM）的监控</strong>，建议结合 ENTITY-MIB 的 <code>entPhysicalClass = sensor(8)</code>
+      和 <code>entPhysicalDescr</code> 来识别传感器语义：
+    </p>
+    <ul>
+      <li>"Tx Power Sensor" + entSensorType = <code>specialEnum(13)</code> → 光发射功率（dBm × 10000）</li>
+      <li>"Rx Power Sensor" + entSensorType = <code>specialEnum(13)</code> → 光接收功率（dBm × 10000）</li>
+      <li>"Temperature Sensor" + entSensorType = <code>celsius(8)</code> → 模块温度</li>
+      <li>"Bias Current Sensor" + entSensorType = <code>amperes(5)</code> → 激光器偏置电流</li>
+    </ul>
+
+    <div class="callout">
+      <strong>🎯 制造业 OT 网络的实战建议</strong>：
+      <strong>Rx Power 趋势比绝对值更重要</strong>。
+      建议建立 7 天移动均值基线，
+      若当前 Rx Power 比基线下降 &gt; 3dB（即降至 50% 以下），即使尚未触发硬件告警，
+      也应触发<strong>"光纤劣化预警"</strong>——这能让你在链路完全 down 之前 7-30 天就开始准备替换。
+    </div>
+
+    <!-- ============================================================================
+         4.5 ENTITY-MIB · 物理设备资产
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.5 ENTITY-MIB：所有传感器/模块/FRU 的"户口本"</h3>
+    <p>
+      <code>ENTITY-MIB</code>（RFC 4133）是所有 Cisco 私有 MIB 的"基础索引"——
+      <code>entPhysicalIndex</code> 是 CPU、内存、风扇、电源、传感器、模块的<strong>统一身份证</strong>。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>entPhysicalDescr</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.2</span></td>
+            <td>物理实体描述（"WS-C9300-48UXM"、"Te1/0/1 Module Temperature"）</td>
+          </tr>
+          <tr>
+            <td>entPhysicalContainedIn</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.4</span></td>
+            <td>所属父实体的 entPhysicalIndex（构建拓扑树）</td>
+          </tr>
+          <tr>
+            <td><strong>entPhysicalClass</strong></td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.5</span></td>
+            <td>★ 实体类型（chassis/backplane/container/powerSupply/fan/sensor/module/port/stack/cpu）★</td>
+          </tr>
+          <tr>
+            <td>entPhysicalName</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.7</span></td>
+            <td>本地命名（如 "Switch1"、"Fan1"、"PS1"）</td>
+          </tr>
+          <tr>
+            <td>entPhysicalSerialNum</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.11</span></td>
+            <td>序列号（资产合规审计）</td>
+          </tr>
+          <tr>
+            <td>entPhysicalModelName</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.13</span></td>
+            <td>型号</td>
+          </tr>
+          <tr>
+            <td>entPhysicalIsFRU</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.16</span></td>
+            <td>是否为可现场替换单元</td>
+          </tr>
+          <tr>
+            <td>entPhysicalSoftwareRev</td>
+            <td><span class="oid-tag">1.3.6.1.2.1.47.1.1.1.1.10</span></td>
+            <td>软件版本</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">配置变更追踪（CISCO-CONFIG-MAN-MIB）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ccmHistoryRunningLastChanged</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.43.1.1.1</span></td>
+            <td>★ Running config 最后修改时间 ★</td>
+          </tr>
+          <tr>
+            <td>ccmHistoryRunningLastSaved</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.43.1.1.2</span></td>
+            <td>Running config 最后保存时间</td>
+          </tr>
+          <tr>
+            <td>ccmCTID</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.43.1.1.4.1</span></td>
+            <td>Config Change Tracking ID（每次变更递增）</td>
+          </tr>
+          <tr>
+            <td><strong>ciscoConfigManEvent</strong> Trap</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.43.2.0.1</span></td>
+            <td>★ 配置变更事件 Trap（含命令源/用户）★</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>🔐 合规与审计</strong>：通过 <code>ccmHistoryRunningLastChanged</code> 与
+      <code>ccmHistoryRunningLastSaved</code> 比较，可以发现"已修改但未保存"的设备
+      ——这些设备一旦重启，所有未保存配置都会丢失，是<strong>极易被忽略的运维风险</strong>。
+    </div>
+
+    <!-- ============================================================================
+         4.6 StackWise 监控
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.6 StackWise 监控：堆叠环的"心电图"</h3>
+    <p>
+      Catalyst 9300 系列广泛使用 StackWise 堆叠技术——多台设备物理堆叠成一个逻辑设备。
+      <strong>堆叠环断裂、堆叠成员降级、堆叠端口劣化</strong>都是关键监控点。
+      OID 来自您上传的 <code>CISCO-STACKWISE-MIB</code>。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>OID 名称</th><th>OID 数值</th><th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>cswRingRedundant</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.1.3</span></td>
+            <td>★ 堆叠环是否冗余（true=双向环 / false=已断为链）★</td>
+          </tr>
+          <tr>
+            <td>cswMaxSwitchNum</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.1.1</span></td>
+            <td>堆叠支持的最大成员数</td>
+          </tr>
+          <tr>
+            <td><strong>cswSwitchRole</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.2.1.1.3</span></td>
+            <td>★ 该成员的角色（master/member/notMember/standby）★</td>
+          </tr>
+          <tr>
+            <td><strong>cswSwitchState</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.2.1.1.6</span></td>
+            <td>★ 成员状态（11 种枚举：waiting/progressing/added/ready/sdmMismatch 等）★</td>
+          </tr>
+          <tr>
+            <td>cswSwitchMacAddress</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.2.1.1.7</span></td>
+            <td>该成员 MAC 地址</td>
+          </tr>
+          <tr>
+            <td><strong>cswStackPortOperStatus</strong></td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.2.2.1.1</span></td>
+            <td>★ 堆叠端口状态（up/down/forcedDown）★</td>
+          </tr>
+          <tr>
+            <td>cswStackPortNeighbor</td>
+            <td><span class="oid-tag">1.3.6.1.4.1.9.9.500.1.2.2.1.2</span></td>
+            <td>该堆叠端口连接的对端 entPhysicalIndex</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-4);">堆叠 Trap</h4>
+    <ul>
+      <li><strong>cswStackPortChange</strong> · <span class="oid-tag">1.3.6.1.4.1.9.9.500.0.1</span> · 堆叠端口状态变化</li>
+      <li><strong>cswStackNewMaster</strong> · <span class="oid-tag">1.3.6.1.4.1.9.9.500.0.2</span> · ★ 新 Master 选举（说明原 Master 挂了）★</li>
+      <li><strong>cswStackRingRedundant</strong> · <span class="oid-tag">1.3.6.1.4.1.9.9.500.0.4</span> · ★ 堆叠环冗余状态变化 ★</li>
+      <li>cswStackNewMember · <span class="oid-tag">1.3.6.1.4.1.9.9.500.0.5</span> · 新成员加入</li>
+      <li>cswStackMemberRemoved · <span class="oid-tag">1.3.6.1.4.1.9.9.500.0.6</span> · 成员被移除</li>
+    </ul>
+
+    <!-- ============================================================================
+         4.7 一图总览：网元健康度仪表盘
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.7 一图总览：网元健康度仪表盘</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="网元健康度仪表盘">
+        <text x="490" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="#0D274D">
+          网元健康度仪表盘 · 5 大核心维度
+        </text>
+
+        <!-- CPU 卡片 -->
+        <g>
+          <rect x="40" y="60" width="280" height="160" rx="10" fill="#fff" stroke="#049FD9" stroke-width="2"/>
+          <text x="60" y="90" font-size="14" font-weight="700" fill="#049FD9">① CPU 健康度</text>
+          <text x="60" y="115" font-size="11" fill="#1A1A1A">• cpmCPUTotal5minRev</text>
+          <text x="60" y="135" font-size="11" fill="#1A1A1A">• cpmCore5min（per-core）</text>
+          <text x="60" y="155" font-size="11" fill="#1A1A1A">• cpmProcExtUtil5MinRev（top N）</text>
+          <text x="60" y="175" font-size="11" fill="#1A1A1A">• cpmCPUInterruptMonIntervalValue</text>
+          <text x="60" y="200" font-size="10" fill="#67B346" font-weight="700">阈值：5min &gt; 80% = P1</text>
+        </g>
+
+        <!-- 内存卡片 -->
+        <g>
+          <rect x="340" y="60" width="280" height="160" rx="10" fill="#fff" stroke="#9232AC" stroke-width="2"/>
+          <text x="360" y="90" font-size="14" font-weight="700" fill="#9232AC">② 内存健康度</text>
+          <text x="360" y="115" font-size="11" fill="#1A1A1A">• ciscoMemoryPoolUsed</text>
+          <text x="360" y="135" font-size="11" fill="#1A1A1A">• ciscoMemoryPoolFree</text>
+          <text x="360" y="155" font-size="11" fill="#1A1A1A">• ciscoMemoryPoolLargestFree</text>
+          <text x="360" y="175" font-size="11" fill="#1A1A1A">• ciscoMemoryPoolUtilization5Min</text>
+          <text x="360" y="200" font-size="10" fill="#FBAB18" font-weight="700">关注：碎片化（LargestFree 暴跌）</text>
+        </g>
+
+        <!-- FRU 卡片 -->
+        <g>
+          <rect x="640" y="60" width="280" height="160" rx="10" fill="#fff" stroke="#67B346" stroke-width="2"/>
+          <text x="660" y="90" font-size="14" font-weight="700" fill="#67B346">③ FRU 状态</text>
+          <text x="660" y="115" font-size="11" fill="#1A1A1A">• cefcFanTrayOperStatus</text>
+          <text x="660" y="135" font-size="11" fill="#1A1A1A">• cefcFRUPowerOperStatus</text>
+          <text x="660" y="155" font-size="11" fill="#1A1A1A">• cefcModuleOperStatus</text>
+          <text x="660" y="175" font-size="11" fill="#1A1A1A">• cefcModuleResetReason</text>
+          <text x="660" y="200" font-size="10" fill="#E2231A" font-weight="700">事件驱动：6 个 Trap 必收</text>
+        </g>
+
+        <!-- 传感器卡片 -->
+        <g>
+          <rect x="40" y="240" width="430" height="160" rx="10" fill="#fff" stroke="#FBAB18" stroke-width="2"/>
+          <text x="60" y="270" font-size="14" font-weight="700" fill="#FBAB18">④ 传感器（温度/电压/光功率/PoE）</text>
+          <text x="60" y="295" font-size="11" fill="#1A1A1A">• entSensorValue（按 entSensorType 解读）</text>
+          <text x="60" y="315" font-size="11" fill="#1A1A1A">• entSensorStatus（ok / unavailable / nonoperational）</text>
+          <text x="60" y="335" font-size="11" fill="#1A1A1A">• entSensorThresholdEvaluation（true=已超阈）</text>
+          <text x="60" y="355" font-size="11" fill="#1A1A1A">• Trap: entSensorThresholdNotification</text>
+          <text x="60" y="380" font-size="10" fill="#9232AC" font-weight="700">秘诀：Rx Power 7天基线 → 提前 30 天预警</text>
+        </g>
+
+        <!-- 堆叠卡片 -->
+        <g>
+          <rect x="490" y="240" width="430" height="160" rx="10" fill="#fff" stroke="#005073" stroke-width="2"/>
+          <text x="510" y="270" font-size="14" font-weight="700" fill="#005073">⑤ StackWise 堆叠</text>
+          <text x="510" y="295" font-size="11" fill="#1A1A1A">• cswRingRedundant（环冗余）</text>
+          <text x="510" y="315" font-size="11" fill="#1A1A1A">• cswSwitchRole（master/member/standby）</text>
+          <text x="510" y="335" font-size="11" fill="#1A1A1A">• cswSwitchState（11 种状态）</text>
+          <text x="510" y="355" font-size="11" fill="#1A1A1A">• cswStackPortOperStatus</text>
+          <text x="510" y="380" font-size="10" fill="#E2231A" font-weight="700">关键：cswStackNewMaster Trap = 灾难信号</text>
+        </g>
+
+        <!-- 底部：综合评分 -->
+        <rect x="40" y="420" width="880" height="30" rx="6" fill="#0D274D"/>
+        <text x="490" y="440" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">
+          网元健康度评分 = 0.30×CPU + 0.20×Memory + 0.20×FRU + 0.20×Sensor + 0.10×Stack
+        </text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 4-1 · 网元健康度的 5 大维度与综合评分公式。</p>
+
+    <!-- ============================================================================
+         4.8 Zabbix 实战：网元健康度模板
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">4.8 Zabbix 实战：网元健康度模板与告警矩阵</h3>
+
+    <h4 style="margin-top:var(--space-4);">告警矩阵（含 5 维度分级）</h4>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">优先级</th>
+            <th>触发器</th>
+            <th>表达式</th>
+            <th>响应建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>Power Supply Failed</td>
+            <td><code>last(...cefcFRUPowerOperStatus) IN (4,5,8,10)</code></td>
+            <td>立即更换电源</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>Module Failed/Diag Failed</td>
+            <td><code>last(...cefcModuleOperStatus) IN (7,11)</code></td>
+            <td>立即排查/RMA</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>Stack Ring Broken</td>
+            <td><code>last(...cswRingRedundant) = 2</code> (false)</td>
+            <td>立即检查堆叠端口</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>Critical Sensor Threshold</td>
+            <td>来自 <code>entSensorThresholdNotification</code> Trap，Severity=critical(30)</td>
+            <td>立即响应</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p0">P0</span></td>
+            <td>CPU Sustained &gt; 90% (5min)</td>
+            <td><code>last(...cpmCPUTotal5minRev) &gt; 90</code></td>
+            <td>抓 top process，立即介入</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>CPU Sustained &gt; 80% (5min)</td>
+            <td><code>last(...cpmCPUTotal5minRev) &gt; 80</code></td>
+            <td>分析 top 进程</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Memory Utilization &gt; 85%</td>
+            <td><code>last(...ciscoMemoryPoolUtilization5Min) &gt; 85</code></td>
+            <td>检查内存泄露</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Largest Free Block Drop</td>
+            <td><code>change(...ciscoMemoryPoolLargestFree, 1h) &lt; -50%</code></td>
+            <td>内存碎片化预警</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Fan Tray Warning/Down</td>
+            <td><code>last(...cefcFanTrayOperStatus) IN (3,4)</code></td>
+            <td>1 周内更换</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Optical Rx Power Below Baseline</td>
+            <td>Rx Power 比 7 天基线下降 &gt; 3dB</td>
+            <td>计划维护期更换光纤/SFP</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p1">P1</span></td>
+            <td>Stack Member State Abnormal</td>
+            <td><code>last(...cswSwitchState) NOT IN (3,4)</code></td>
+            <td>检查堆叠成员</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>Per-Core CPU Imbalance</td>
+            <td>某核心 5min &gt; 70% 而其他核心 &lt; 30%</td>
+            <td>记录入趋势库</td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>Config Changed But Not Saved</td>
+            <td><code>ccmHistoryRunningLastChanged &gt; ccmHistoryRunningLastSaved</code> 持续 1h</td>
+            <td>提醒运维 <code>write memory</code></td>
+          </tr>
+          <tr>
+            <td><span class="prio prio-p2">P2</span></td>
+            <td>Module Reset Excessive</td>
+            <td>1d 内 cefcModuleResetReason 变化 &gt; 1</td>
+            <td>记录入趋势</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:var(--space-6);">关键 LLD（自动发现）配置</h4>
+    <pre><code># LLD 1: 自动发现所有 Sensor
+- name: "Discover Cisco Sensors"
+  snmp_oid: "discovery[
+      {#ENT_IDX}, 1.3.6.1.2.1.47.1.1.1.1.7,
+      {#ENT_DESCR}, 1.3.6.1.2.1.47.1.1.1.1.2,
+      {#SENSOR_TYPE}, 1.3.6.1.4.1.9.9.91.1.1.1.1.1,
+      {#SENSOR_SCALE}, 1.3.6.1.4.1.9.9.91.1.1.1.1.2,
+      {#SENSOR_PRECISION}, 1.3.6.1.4.1.9.9.91.1.1.1.1.3
+  ]"
+  filter:
+    - {macro: "{#SENSOR_TYPE}", operator: "MATCHES_REGEX", value: "^(8|3|4|5|6|13)$"}
+
+# LLD 2: 自动发现所有电源
+- name: "Discover Power Supplies"
+  snmp_oid: "discovery[{#PS_IDX}, 1.3.6.1.4.1.9.9.117.1.1.2.1.2]"
+
+# LLD 3: 自动发现所有风扇
+- name: "Discover Fans"
+  snmp_oid: "discovery[{#FAN_IDX}, 1.3.6.1.4.1.9.9.117.1.4.1.1.1]"
+
+# LLD 4: 自动发现 Top N CPU 进程
+- name: "Discover Top CPU Processes"
+  snmp_oid: "discovery[{#PID}, 1.3.6.1.4.1.9.9.109.1.2.1.1.2,
+                       {#PNAME}, 1.3.6.1.4.1.9.9.109.1.1.1.1.2.2]"
+  filter:
+    - {macro: "{#PNAME}", operator: "MATCHES_REGEX", value: ".*(BGP|OSPF|ISIS|LISP|IP Input|SNMP).*"}</code></pre>
+
+    <h4 style="margin-top:var(--space-6);">SNMP Trap 接收清单（事件驱动核心）</h4>
+    <pre><code>! Cisco IOS-XE 启用关键 Trap：
+snmp-server enable traps cpu threshold
+snmp-server enable traps memory bufferpeak
+snmp-server enable traps entity-sensor threshold
+snmp-server enable traps entity-fru-control
+snmp-server enable traps stackwise
+snmp-server enable traps config
+
+! Zabbix 关注的 Trap OID：
+1.3.6.1.4.1.9.9.109.2.0.1   → cpmCPURisingThreshold     ★
+1.3.6.1.4.1.9.9.48.2.0.1    → ciscoMemoryPoolLowMemory  ★
+1.3.6.1.4.1.9.9.91.2.0.1    → entSensorThresholdNotif   ★
+1.3.6.1.4.1.9.9.117.2.0.1   → cefcModuleStatusChange    ★
+1.3.6.1.4.1.9.9.117.2.0.2   → cefcPowerStatusChange     ★
+1.3.6.1.4.1.9.9.117.2.0.6   → cefcFanTrayStatusChange   ★
+1.3.6.1.4.1.9.9.500.0.4     → cswStackRingRedundant     ★
+1.3.6.1.4.1.9.9.500.0.2     → cswStackNewMaster         ★ (灾难信号)
+1.3.6.1.4.1.9.9.43.2.0.1    → ciscoConfigManEvent       (审计)</code></pre>
+
+    <!-- ======================== 章节金句 ======================== -->
+    <p class="key-quote">
+      监控网元，要像中医把脉——<br>
+      不是看哪根线断，而是听气血、听脏腑、听节律。
+    </p>
+
+    <p style="text-align:center; color:var(--text-secondary);">
+      → 最后一章，我们将把前四章的所有 OID、Trap、阈值整合成<br>
+      <strong style="color:var(--cisco-blue);">Zabbix 实施路线图</strong>——
+      从模板设计、分层告警、到团队协同的完整工程方法论。
+    </p>
+  </div>
+</section>
+<!-- ============================================================================
+     第五章 · Zabbix 实施路线图（从蓝图到落地）
+============================================================================ -->
+<section class="chapter" id="ch5">
+  <div class="container">
+    <div class="chapter-num">05</div>
+    <span class="section-eyebrow">Chapter Five · 从认知到行动</span>
+    <h2>把 OID 变成 SLA：6 周实施路线图</h2>
+
+    <p style="font-size:1.1rem; color:var(--text-secondary); max-width:880px;">
+      前面四章我们建立了完整的认知体系——<strong>分层 · 多维 · 变化</strong>。<br>
+      但认知不会自动转化为运维能力。这一章，我们把所有 OID、Trap、阈值<br>
+      凝练成一份<strong style="color:var(--cisco-accent);">可执行的 6 周工程计划</strong>，
+      让每一行代码、每一个告警，都精确指向 SLA 提升的目标。
+    </p>
+
+    <!-- ============================================================================
+         5.1 Zabbix 监控架构总图
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-8);">5.1 总体架构：分层模板 + 双通道采集</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zabbix 监控架构总图">
+        <defs>
+          <linearGradient id="arch-blue" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#049FD9"/><stop offset="100%" stop-color="#67d8f0"/>
+          </linearGradient>
+          <linearGradient id="arch-purple" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#9232AC"/><stop offset="100%" stop-color="#b96bd0"/>
+          </linearGradient>
+          <linearGradient id="arch-green" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#67B346"/><stop offset="100%" stop-color="#a8d68a"/>
+          </linearGradient>
+        </defs>
+
+        <text x="490" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="#0D274D">
+          Zabbix 网络监控架构 · 分层模板 + 双通道采集
+        </text>
+
+        <!-- 设备层 -->
+        <rect x="40" y="60" width="900" height="80" rx="8" fill="#005073"/>
+        <text x="60" y="90" font-size="14" font-weight="700" fill="#fff">① 设备层</text>
+        <text x="60" y="115" font-size="11" fill="#fff">Catalyst 9300LM (mGig) · Catalyst 9500 (Border) · Catalyst 9120 AP · SDA Fabric Edge/Border</text>
+        <text x="60" y="132" font-size="10" fill="#fff" opacity="0.85">SNMP v3 (推荐) / v2c · 启用关键 Trap 主动通告</text>
+
+        <!-- 双通道 -->
+        <g>
+          <rect x="40" y="160" width="430" height="60" rx="8" fill="url(#arch-blue)"/>
+          <text x="60" y="185" font-size="13" font-weight="700" fill="#fff">② Polling 通道（拉模式）</text>
+          <text x="60" y="208" font-size="11" fill="#fff">SNMP Get / Walk · 周期性采集 · 30s ~ 5min</text>
+        </g>
+        <g>
+          <rect x="510" y="160" width="430" height="60" rx="8" fill="url(#arch-purple)"/>
+          <text x="530" y="185" font-size="13" font-weight="700" fill="#fff">③ Trap 通道（推模式）</text>
+          <text x="530" y="208" font-size="11" fill="#fff">snmptrapd → Zabbix Trapper · 事件驱动 · 秒级</text>
+        </g>
+
+        <!-- Zabbix Server -->
+        <rect x="220" y="240" width="540" height="80" rx="8" fill="#0D274D"/>
+        <text x="240" y="270" font-size="14" font-weight="700" fill="#fff">④ Zabbix Server / Proxy 集群</text>
+        <text x="240" y="295" font-size="11" fill="#fff">分层模板继承：Common → L1/L2 → SDA → 网元 · LLD 自动发现</text>
+        <text x="240" y="312" font-size="10" fill="#fff" opacity="0.85">触发器依赖关系（Dependency）防止告警风暴</text>
+
+        <!-- 模板层 -->
+        <g>
+          <rect x="40" y="340" width="220" height="100" rx="8" fill="url(#arch-green)"/>
+          <text x="60" y="365" font-size="12" font-weight="700" fill="#fff">📦 物理层模板</text>
+          <text x="60" y="385" font-size="10" fill="#fff">tmpl_cisco_phy_l1l2</text>
+          <text x="60" y="402" font-size="10" fill="#fff">• ifHighSpeed / Carrier</text>
+          <text x="60" y="418" font-size="10" fill="#fff">• TDR / DOM / FCS</text>
+        </g>
+        <g>
+          <rect x="280" y="340" width="220" height="100" rx="8" fill="#9232AC"/>
+          <text x="300" y="365" font-size="12" font-weight="700" fill="#fff">📦 SDA 模板</text>
+          <text x="300" y="385" font-size="10" fill="#fff">tmpl_cisco_sda_full</text>
+          <text x="300" y="402" font-size="10" fill="#fff">• ISIS / BFD / RIB</text>
+          <text x="300" y="418" font-size="10" fill="#fff">• LISP / VXLAN / Trap</text>
+        </g>
+        <g>
+          <rect x="520" y="340" width="220" height="100" rx="8" fill="#FBAB18"/>
+          <text x="540" y="365" font-size="12" font-weight="700" fill="#1A1A1A">📦 网元健康模板</text>
+          <text x="540" y="385" font-size="10" fill="#1A1A1A">tmpl_cisco_health</text>
+          <text x="540" y="402" font-size="10" fill="#1A1A1A">• CPU / Memory / FRU</text>
+          <text x="540" y="418" font-size="10" fill="#1A1A1A">• Sensor / Stack</text>
+        </g>
+        <g>
+          <rect x="760" y="340" width="180" height="100" rx="8" fill="#E2231A"/>
+          <text x="780" y="365" font-size="12" font-weight="700" fill="#fff">📦 通用模板</text>
+          <text x="780" y="385" font-size="10" fill="#fff">tmpl_cisco_common</text>
+          <text x="780" y="402" font-size="10" fill="#fff">• ICMP / SNMP</text>
+          <text x="780" y="418" font-size="10" fill="#fff">• 资产 / 配置审计</text>
+        </g>
+      </svg>
+    </div>
+    <p class="svg-caption">图 5-1 · Zabbix 监控架构。双通道采集 + 4 套分层模板，覆盖前 4 章所有监控点。</p>
+
+    <!-- ============================================================================
+         5.2 6 周实施计划
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">5.2 6 周实施甘特图：从奠基到智能</h3>
+
+    <div class="svg-scroll-wrapper">
+      <svg viewBox="0 0 980 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="6 周实施计划">
+        <text x="490" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0D274D">
+          6 周实施甘特图 · 风险可控的渐进式上线
+        </text>
+
+        <!-- 周次表头 -->
+        <g font-size="11" fill="#0D274D" font-weight="700">
+          <rect x="280" y="55" width="100" height="28" fill="#EEF0F3"/>
+          <text x="330" y="74" text-anchor="middle">Week 1</text>
+          <rect x="380" y="55" width="100" height="28" fill="#EEF0F3"/>
+          <text x="430" y="74" text-anchor="middle">Week 2</text>
+          <rect x="480" y="55" width="100" height="28" fill="#EEF0F3"/>
+          <text x="530" y="74" text-anchor="middle">Week 3</text>
+          <rect x="580" y="55" width="100" height="28" fill="#EEF0F3"/>
+          <text x="630" y="74" text-anchor="middle">Week 4</text>
+          <rect x="680" y="55" width="100" height="28" fill="#EEF0F3"/>
+          <text x="730" y="74" text-anchor="middle">Week 5</text>
+          <rect x="780" y="55" width="100" height="28" fill="#EEF0F3"/>
+          <text x="830" y="74" text-anchor="middle">Week 6</text>
+        </g>
+
+        <!-- 任务 1: 基线 -->
+        <text x="40" y="105" font-size="11" font-weight="700" fill="#0D274D">奠基 · 基线评估</text>
+        <rect x="280" y="92" width="200" height="22" rx="4" fill="#67B346"/>
+        <text x="380" y="108" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">现网 SNMP 健康检查 + MIB 编译</text>
+
+        <!-- 任务 2: 物理层 -->
+        <text x="40" y="140" font-size="11" font-weight="700" fill="#0D274D">物理层 · 模板</text>
+        <rect x="380" y="127" width="200" height="22" rx="4" fill="#049FD9"/>
+        <text x="480" y="143" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">Downshift / TDR / FCS 模板</text>
+
+        <!-- 任务 3: 网元 -->
+        <text x="40" y="175" font-size="11" font-weight="700" fill="#0D274D">网元健康 · 模板</text>
+        <rect x="380" y="162" width="200" height="22" rx="4" fill="#FBAB18"/>
+        <text x="480" y="178" text-anchor="middle" font-size="10" fill="#1A1A1A" font-weight="700">CPU/Mem/FRU/Sensor 模板</text>
+
+        <!-- 任务 4: SDA -->
+        <text x="40" y="210" font-size="11" font-weight="700" fill="#0D274D">SDA 全栈 · 模板</text>
+        <rect x="480" y="197" width="200" height="22" rx="4" fill="#9232AC"/>
+        <text x="580" y="213" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">ISIS / BFD / LISP / VXLAN</text>
+
+        <!-- 任务 5: Trap -->
+        <text x="40" y="245" font-size="11" font-weight="700" fill="#0D274D">事件驱动 · Trap</text>
+        <rect x="580" y="232" width="100" height="22" rx="4" fill="#E2231A"/>
+        <text x="630" y="248" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">snmptrapd 联调</text>
+
+        <!-- 任务 6: 灰度 -->
+        <text x="40" y="280" font-size="11" font-weight="700" fill="#0D274D">灰度试运行</text>
+        <rect x="580" y="267" width="200" height="22" rx="4" fill="#005073"/>
+        <text x="680" y="283" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">10% 关键节点试点</text>
+
+        <!-- 任务 7: 全量 -->
+        <text x="40" y="315" font-size="11" font-weight="700" fill="#0D274D">全量上线 + 调优</text>
+        <rect x="680" y="302" width="200" height="22" rx="4" fill="#0D274D"/>
+        <text x="780" y="318" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">阈值收敛 + 告警降噪</text>
+
+        <!-- 任务 8: 智能 -->
+        <text x="40" y="350" font-size="11" font-weight="700" fill="#0D274D">智能基线（可选）</text>
+        <rect x="780" y="337" width="100" height="22" rx="4" fill="#00BCEB"/>
+        <text x="830" y="353" text-anchor="middle" font-size="10" fill="#0D274D" font-weight="700">7天基线</text>
+
+        <!-- 关键里程碑 -->
+        <line x1="380" y1="50" x2="380" y2="380" stroke="#E2231A" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        <line x1="580" y1="50" x2="580" y2="380" stroke="#E2231A" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        <line x1="780" y1="50" x2="780" y2="380" stroke="#E2231A" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+
+        <text x="380" y="395" text-anchor="middle" font-size="10" fill="#E2231A" font-weight="700">M1 · 模板就绪</text>
+        <text x="580" y="395" text-anchor="middle" font-size="10" fill="#E2231A" font-weight="700">M2 · Trap 通</text>
+        <text x="780" y="395" text-anchor="middle" font-size="10" fill="#E2231A" font-weight="700">M3 · 全量上线</text>
+      </svg>
+    </div>
+    <p class="svg-caption">图 5-2 · 6 周实施甘特图。3 个里程碑（M1/M2/M3）作为强制 Gate，确保每阶段质量。</p>
+
+    <!-- ============================================================================
+         5.3 每周交付物清单
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">5.3 每周交付物清单（可直接落地）</h3>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">阶段</th>
+            <th>核心任务</th>
+            <th>交付物</th>
+            <th>验收标准</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Week 1</strong><br>奠基</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>现网 SNMP 健康检查（v2c/v3 配置审计）</li>
+                <li>编译/导入 22 个 Cisco 私有 MIB</li>
+                <li>Zabbix Server / Proxy 资源评估</li>
+                <li>命名规范与标签体系定义</li>
+              </ul>
+            </td>
+            <td>
+              <code>baseline_assessment.xlsx</code><br>
+              <code>mib_inventory.md</code><br>
+              <code>naming_convention.md</code>
+            </td>
+            <td>所有目标设备 SNMP Walk 成功率 ≥ 99%</td>
+          </tr>
+          <tr>
+            <td><strong>Week 2</strong><br>物理层</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>开发 <code>tmpl_cisco_phy_l1l2</code></li>
+                <li>LLD：物理端口（过滤 ifConnectorPresent=true）</li>
+                <li>触发器：Downshift / Carrier Transitions / FCS</li>
+                <li>TDR 按需触发脚本</li>
+              </ul>
+            </td>
+            <td>
+              <code>tmpl_cisco_phy_l1l2.yaml</code><br>
+              <code>tdr_trigger.sh</code>
+            </td>
+            <td>实验室测试：人为拔插光纤可触发 P1 告警</td>
+          </tr>
+          <tr>
+            <td><strong>Week 2-3</strong><br>网元</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>开发 <code>tmpl_cisco_health</code></li>
+                <li>LLD：CPU/Process/Sensor/Fan/PSU/Stack</li>
+                <li>14 项告警触发器</li>
+                <li>5 维度仪表盘</li>
+              </ul>
+            </td>
+            <td>
+              <code>tmpl_cisco_health.yaml</code><br>
+              <code>health_dashboard.json</code>
+            </td>
+            <td>所有传感器、风扇、电源 LLD 自动发现成功</td>
+          </tr>
+          <tr>
+            <td><strong>Week 3-4</strong><br>SDA</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>开发 <code>tmpl_cisco_sda_full</code></li>
+                <li>LLD：ISIS Adjacency / BFD Session / LISP EID / VTEP Peer</li>
+                <li>12 项 SDA 告警触发器</li>
+                <li>3 层关联视图</li>
+              </ul>
+            </td>
+            <td>
+              <code>tmpl_cisco_sda_full.yaml</code><br>
+              <code>sda_topology_map.json</code>
+            </td>
+            <td>实验室测试：拔光纤后 BFD 50ms 内告警</td>
+          </tr>
+          <tr>
+            <td><strong>Week 4</strong><br>Trap</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>snmptrapd 配置 + Zabbix Trapper Item</li>
+                <li>Trap OID 字典（21 个核心 Trap）</li>
+                <li>Trap 与 Polling 触发器关联</li>
+              </ul>
+            </td>
+            <td>
+              <code>snmptrapd.conf</code><br>
+              <code>trap_oid_dict.csv</code>
+            </td>
+            <td>所有 21 个 Trap 在测试环境可被正确解析</td>
+          </tr>
+          <tr>
+            <td><strong>Week 5</strong><br>灰度</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>选 10% 关键节点上线（接入交换机 + 1 对 Border）</li>
+                <li>告警噪声评估 + 阈值微调</li>
+                <li>触发器依赖关系（防止级联告警风暴）</li>
+              </ul>
+            </td>
+            <td>
+              <code>alert_noise_report.xlsx</code><br>
+              <code>threshold_v2.yaml</code>
+            </td>
+            <td>每日告警量稳定 ≤ 50 条<br>P0 告警准确率 ≥ 95%</td>
+          </tr>
+          <tr>
+            <td><strong>Week 6</strong><br>全量</td>
+            <td>
+              <ul style="margin:0; padding-left:1.2em;">
+                <li>全量铺开</li>
+                <li>开通 NMS-OT 数据对接</li>
+                <li>建立 Rx Power 7 天基线（智能预警）</li>
+                <li>团队培训 + Runbook 上线</li>
+              </ul>
+            </td>
+            <td>
+              <code>runbook_v1.0.pdf</code><br>
+              <code>baseline_baseline.json</code>
+            </td>
+            <td>SLA 看板可对外发布<br>运维团队独立处理 80% 告警</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================================
+         5.4 团队角色与协同矩阵
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">5.4 团队角色与协同矩阵</h3>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>角色</th><th>职责</th><th>关键产出</th><th>建议人月投入</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>项目经理</strong></td>
+            <td>整体协调、风险管控、Gate 评审</td>
+            <td>项目章程 / 周会议纪要 / 风险清单</td>
+            <td>0.3 人月 × 6 周</td>
+          </tr>
+          <tr>
+            <td><strong>网络架构师</strong></td>
+            <td>OID 选型、阈值定义、SDA 拓扑映射</td>
+            <td>OID 字典 / 阈值矩阵 / SDA 拓扑图</td>
+            <td>1.0 人月 × 6 周</td>
+          </tr>
+          <tr>
+            <td><strong>Zabbix 工程师</strong></td>
+            <td>模板开发、触发器编写、看板设计</td>
+            <td>4 套模板 / 仪表盘 / Runbook</td>
+            <td>1.0 人月 × 6 周</td>
+          </tr>
+          <tr>
+            <td><strong>运维工程师</strong></td>
+            <td>现场配置、Trap 联调、灰度反馈</td>
+            <td>设备 SNMP 配置 / 告警噪声评估</td>
+            <td>0.5 人月 × 6 周</td>
+          </tr>
+          <tr>
+            <td><strong>OT 业务对接</strong></td>
+            <td>业务 SLA 定义、关键节点识别、误报反馈</td>
+            <td>SLA 等级表 / 业务关联映射</td>
+            <td>0.2 人月 × 6 周（仅 Week 5-6）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================================================
+         5.5 ROI 测算
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">5.5 ROI 测算：监控提升 SLA 的量化价值</h3>
+
+    <p>以一家中型制造业园区（200 台 Cisco 网络设备）为例：</p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th><th>实施前</th><th>实施后</th><th>改善幅度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>故障平均发现时间（MTTD）</td>
+            <td>30-60 分钟（用户报障驱动）</td>
+            <td>30 秒-3 分钟（系统自检测）</td>
+            <td><strong style="color:var(--color-success);">↓ 95%</strong></td>
+          </tr>
+          <tr>
+            <td>故障平均修复时间（MTTR）</td>
+            <td>2-4 小时（盲目排查）</td>
+            <td>30-90 分钟（精准定位）</td>
+            <td><strong style="color:var(--color-success);">↓ 70%</strong></td>
+          </tr>
+          <tr>
+            <td>P0 故障数（年）</td>
+            <td>20-30 次</td>
+            <td>5-8 次（提前预警转化）</td>
+            <td><strong style="color:var(--color-success);">↓ 75%</strong></td>
+          </tr>
+          <tr>
+            <td>OT 网络可用性</td>
+            <td>99.5%（≈ 43 小时停机/年）</td>
+            <td>99.95%（≈ 4.4 小时停机/年）</td>
+            <td><strong style="color:var(--color-success);">↑ 0.45 个百分点</strong></td>
+          </tr>
+          <tr>
+            <td>线缆/光模块计划替换率</td>
+            <td>失效后被动更换</td>
+            <td>基于 Rx Power 趋势提前 30 天预测</td>
+            <td><strong style="color:var(--color-success);">主动维护率 ↑ 85%</strong></td>
+          </tr>
+          <tr>
+            <td>运维人力浪费（无效告警筛选）</td>
+            <td>每人每天 1.5 小时</td>
+            <td>每人每天 0.3 小时</td>
+            <td><strong style="color:var(--color-success);">↓ 80%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>💰 经济效益估算</strong>：
+      对于一条产值 5000 万元/年的智能制造产线，
+      网络停机 1 小时直接损失约 5.7 万元。
+      将网络可用性从 99.5% 提升到 99.95%，
+      <strong>每年可挽回直接损失约 220 万元</strong>，
+      远超监控系统建设成本（通常 30-80 万元）。
+    </div>
+
+    <!-- ============================================================================
+         5.6 治理与持续优化
+    ============================================================================ -->
+    <h3 style="margin-top:var(--space-12);">5.6 持续治理：让监控系统不退化</h3>
+
+    <p>
+      监控系统最大的敌人不是技术，而是<strong>"熵增"</strong>——
+      告警越积越多、阈值越来越宽、运维越来越麻木。
+      用以下三条治理纪律保持系统的"年轻态"：
+    </p>
+
+    <ol>
+      <li>
+        <strong>月度告警噪声审查</strong>：
+        统计 Top 10 告警源（按设备 + 触发器维度），
+        若某条告警一个月内触发 &gt; 100 次但都是误报，必须降噪或重新设计阈值。
+      </li>
+      <li>
+        <strong>季度 OID 失效检查</strong>：
+        IOS-XE 升级后某些私有 OID 可能弃用。
+        每季度跑一次全 OID Walk 测试，发现"返回空值"的 OID 立即排查。
+      </li>
+      <li>
+        <strong>半年度阈值再校准</strong>：
+        网络业务量在变，去年的"正常"可能今年就是"异常"。
+        基于过去 6 个月的实际数据重新计算 P95/P99 分位数，作为新的告警阈值。
+      </li>
+    </ol>
+
+    <p class="key-quote" style="margin-top:var(--space-12);">
+      监控不是项目，而是一种持续的纪律。<br>
+      网络在变，业务在变，监控也必须随之进化。
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================================
+     收尾章节 · 闭环呼应
+============================================================================ -->
+<section class="chapter" id="closing" style="background:linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue) 100%); color:#fff;">
+  <div class="container" style="text-align:center;">
+    <span class="section-eyebrow" style="color:var(--cisco-accent);">Closing · 回到开篇的那个问题</span>
+    <h2 style="color:#fff; border-bottom-color:var(--cisco-accent); display:inline-block;">
+      监控系统从未告警，意味着一切正常吗？
+    </h2>
+
+    <p style="font-size:1.2rem; max-width:880px; margin:var(--space-8) auto; line-height:1.8;">
+      读完这五章，您应该已经有了答案：<br>
+      <strong style="color:var(--cisco-accent);">恰恰相反</strong>。<br><br>
+      监控系统的"沉默"，可能是因为我们看错了维度、采错了粒度、漏掉了变化率。<br>
+      Downshift 不告警，因为我们只看 ifSpeed 不看 ifHighSpeed。<br>
+      Stale RIB 不告警，因为我们只看 ISIS 邻居却不联动 RIB Age。<br>
+      光纤老化不告警，因为我们只看绝对值却没建立基线。<br><br>
+      <strong>真正成熟的监控，是用最少的观测点，
+      在最早的时间窗，发现最隐蔽的趋势</strong>。
+    </p>
+
+    <div class="stat-grid" style="margin-top:var(--space-12);">
+      <div class="stat-card" style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2);">
+        <div class="num" style="color:var(--cisco-accent);">5</div>
+        <div class="label" style="color:rgba(255,255,255,0.85);">章节 · 从认知到行动</div>
+      </div>
+      <div class="stat-card" style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2);">
+        <div class="num" style="color:var(--cisco-accent);">22</div>
+        <div class="label" style="color:rgba(255,255,255,0.85);">Cisco MIB · 真实 OID 来源</div>
+      </div>
+      <div class="stat-card" style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2);">
+        <div class="num" style="color:var(--cisco-accent);">150+</div>
+        <div class="label" style="color:rgba(255,255,255,0.85);">核心 OID + Trap · 全栈覆盖</div>
+      </div>
+    </div>
+
+    <p style="margin-top:var(--space-12); font-size:1rem; color:rgba(255,255,255,0.75);">
+      网络监控的尽头，不是堆砌指标，<br>
+      而是<strong style="color:var(--cisco-accent);">让设备主动告诉你它需要什么</strong>。
+    </p>
+
+    <a href="#ch1" class="btn" style="margin-top:var(--space-8); background:var(--cisco-accent);">↑ 回到第一章 · 重新开始这场旅程</a>
+  </div>
+</section>
+
+<!-- ============================================================================
+     术语表（Glossary）
+============================================================================ -->
+<section class="chapter" id="glossary">
+  <div class="container">
+    <span class="section-eyebrow">Glossary · 术语表</span>
+    <h2>关键术语速查</h2>
+    <p style="color:var(--text-secondary);">
+      按字母顺序排列，含中英文对照与一句话定义。所有术语均出自前 5 章正文。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:25%;">英文术语</th>
+            <th style="width:20%;">中文</th>
+            <th>一句话定义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>AFI</strong> (Address Family Identifier)</td><td>地址族标识符</td><td>IANA 定义的地址族编号（IPv4=1, IPv6=2, LCAF=16387 等），用于多协议路由识别。</td></tr>
+          <tr><td><strong>BFD</strong> (Bidirectional Forwarding Detection)</td><td>双向转发检测</td><td>RFC 5880 定义的轻量级链路检测协议，毫秒级故障发现，独立于路由协议。</td></tr>
+          <tr><td><strong>BUM Traffic</strong></td><td>BUM 流量</td><td>Broadcast/Unknown unicast/Multicast 三类需要泛洪的流量；VXLAN Overlay 中通过组播或 Ingress Replication 处理。</td></tr>
+          <tr><td><strong>Carrier Transition</strong></td><td>载波跳变</td><td>物理层载波信号 up/down 切换次数；Downshift 与链路抖动的核心证据指标。</td></tr>
+          <tr><td><strong>CTID</strong> (Config Tracking ID)</td><td>配置变更追踪 ID</td><td>IOS 中每次 running-config 变更递增的版本号，用于精确审计配置漂移。</td></tr>
+          <tr><td><strong>DOM / DDM</strong></td><td>光模块数字诊断</td><td>Digital Optical/Diagnostic Monitoring，监测 SFP/QSFP 的 Tx/Rx Power、温度、Bias 电流。</td></tr>
+          <tr><td><strong>Downshift</strong></td><td>速率降级</td><td>IEEE 802.3ab/bz 协商机制：当 SNR 持续下降，链路自动妥协到更低但更稳定的速率。</td></tr>
+          <tr><td><strong>EID</strong> (Endpoint Identifier)</td><td>终端身份标识</td><td>LISP 中代表终端"身份"的地址，与 RLOC（位置）解耦。</td></tr>
+          <tr><td><strong>ETR</strong> (Egress Tunnel Router)</td><td>出口隧道路由器</td><td>LISP 角色：将 LISP 封装报文解封并转发到 EID 终端的设备。</td></tr>
+          <tr><td><strong>FCS Error</strong></td><td>帧校验序列错误</td><td>以太网帧到达时 CRC 校验失败；典型电缆/光纤质量问题的指标。</td></tr>
+          <tr><td><strong>FRU</strong> (Field Replaceable Unit)</td><td>现场可替换单元</td><td>可在现场更换的硬件模块，如电源、风扇、SFP、线卡。</td></tr>
+          <tr><td><strong>HLD</strong> (High Level Design)</td><td>高层设计</td><td>系统级架构设计文档，描述模块、接口、数据流的整体蓝图。</td></tr>
+          <tr><td><strong>IS-IS</strong></td><td>IS-IS 路由协议</td><td>Intermediate System to Intermediate System，链路状态路由协议；Cisco SDA Underlay 的默认协议。</td></tr>
+          <tr><td><strong>ITR</strong> (Ingress Tunnel Router)</td><td>入口隧道路由器</td><td>LISP 角色：将原始报文封装成 LISP 报文并发往目的 RLOC 的设备。</td></tr>
+          <tr><td><strong>LCAF</strong> (LISP Canonical Address Format)</td><td>LISP 规范地址格式</td><td>LISP 定义的扩展地址编码格式（AFI=16387），支持 Instance ID、AS Path 等元数据。</td></tr>
+          <tr><td><strong>LISP</strong> (Locator/ID Separation Protocol)</td><td>位置/身份分离协议</td><td>RFC 6830，将 IP 拆分为 EID 和 RLOC 两个独立语义；Cisco SDA Control Plane 核心协议。</td></tr>
+          <tr><td><strong>LLD</strong> (Low Level Discovery)</td><td>低层发现</td><td>Zabbix 自动发现设备资源（端口、传感器、进程等）的机制。</td></tr>
+          <tr><td><strong>LSP</strong> (Link State PDU)</td><td>链路状态 PDU</td><td>IS-IS 中携带本设备链路状态信息的报文。</td></tr>
+          <tr><td><strong>Map-Cache</strong></td><td>映射缓存</td><td>LISP ITR 上短期存储的 EID-to-RLOC 映射表。</td></tr>
+          <tr><td><strong>Map-Server / Map-Resolver</strong></td><td>映射服务器/解析器</td><td>LISP 控制平面中维护 EID-to-RLOC 数据库的中央服务（类似 DNS）。</td></tr>
+          <tr><td><strong>MAU</strong> (Medium Attachment Unit)</td><td>介质连接单元</td><td>以太网物理层与介质之间的接口模块，包含 Auto-Negotiation 状态信息。</td></tr>
+          <tr><td><strong>MIB</strong> (Management Information Base)</td><td>管理信息库</td><td>SNMP 协议中描述被管对象的层次化定义文件。</td></tr>
+          <tr><td><strong>mGig</strong> (Multi-Gigabit Ethernet)</td><td>多速率以太网</td><td>支持 100M/1G/2.5G/5G/10G 多种速率自动协商的以太网技术（IEEE 802.3bz）。</td></tr>
+          <tr><td><strong>MTTD / MTTR</strong></td><td>平均故障发现/修复时间</td><td>Mean Time To Detect / Repair，衡量监控与运维效率的核心 SLA 指标。</td></tr>
+          <tr><td><strong>MTU</strong> (Maximum Transmission Unit)</td><td>最大传输单元</td><td>链路允许的最大帧长；超过会触发 Giant Errors。</td></tr>
+          <tr><td><strong>NMS</strong> (Network Management System)</td><td>网络管理系统</td><td>对网络设备进行集中监控、配置、告警的平台（如 Zabbix、Cisco Catalyst Center）。</td></tr>
+          <tr><td><strong>NVE</strong> (Network Virtualization Endpoint)</td><td>网络虚拟化端点</td><td>VXLAN/NVGRE 隧道的封装与解封装设备，对应物理 VTEP。</td></tr>
+          <tr><td><strong>OID</strong> (Object Identifier)</td><td>对象标识符</td><td>SNMP 中唯一标识一个被管对象的点分十进制路径。</td></tr>
+          <tr><td><strong>PoE</strong> (Power over Ethernet)</td><td>以太网供电</td><td>通过以太网线缆给终端（IP 电话、AP、摄像头）供电的技术。</td></tr>
+          <tr><td><strong>PSNP / CSNP</strong></td><td>部分/完整序号 PDU</td><td>IS-IS 中用于 LSP 数据库同步的报文类型。</td></tr>
+          <tr><td><strong>RIB / FIB</strong></td><td>路由表 / 转发表</td><td>RIB（Routing Information Base）控制平面视图；FIB（Forwarding Information Base）数据平面视图。</td></tr>
+          <tr><td><strong>RLOC</strong> (Routing Locator)</td><td>路由位置标识</td><td>LISP 中代表"位置"的可路由 IP 地址，与 EID（身份）解耦。</td></tr>
+          <tr><td><strong>SDA</strong> (Software Defined Access)</td><td>软件定义接入</td><td>Cisco 园区网络架构，使用 IS-IS（Underlay）+ LISP（Control Plane）+ VXLAN（Overlay）实现端到端虚拟化。</td></tr>
+          <tr><td><strong>SDM</strong> (Switch Database Management)</td><td>交换机数据库管理</td><td>Catalyst 交换机硬件资源（TCAM）分配模板。</td></tr>
+          <tr><td><strong>SFP / QSFP</strong></td><td>小型可插拔光模块</td><td>Small Form-factor Pluggable，可热插拔的光/电收发器模块。</td></tr>
+          <tr><td><strong>SLA</strong> (Service Level Agreement)</td><td>服务级别协议</td><td>对系统可用性、性能、响应时间等的量化承诺。</td></tr>
+          <tr><td><strong>SNMP Trap</strong></td><td>SNMP 通告</td><td>设备主动向 NMS 推送的事件通告（推模式），与 Polling（拉模式）互补。</td></tr>
+          <tr><td><strong>SPF</strong> (Shortest Path First)</td><td>最短路径优先</td><td>IS-IS / OSPF 中基于 Dijkstra 算法的路由计算过程。</td></tr>
+          <tr><td><strong>SR / Sustained Overload</strong></td><td>持续过载</td><td>设备资源（电源/CPU）持续超出额定值的状态，可能触发负载抖动（Load Shedding）。</td></tr>
+          <tr><td><strong>StackWise</strong></td><td>堆叠技术</td><td>Cisco Catalyst 多台物理设备组成单一逻辑设备的堆叠架构，支持环形冗余。</td></tr>
+          <tr><td><strong>Stale RIB</strong></td><td>陈旧路由表</td><td>控制平面已失效但 RIB 中仍保留的路由条目，会形成数据黑洞。</td></tr>
+          <tr><td><strong>TDR</strong> (Time Domain Reflectometry)</td><td>时域反射</td><td>基于电磁波反射原理的线缆诊断技术，可定位故障点距离与类型。</td></tr>
+          <tr><td><strong>TLV</strong> (Type-Length-Value)</td><td>类型-长度-值</td><td>协议中携带可扩展数据的通用编码格式，IS-IS LSP 内部即为 TLV 序列。</td></tr>
+          <tr><td><strong>VNI</strong> (Virtual Network Identifier)</td><td>虚拟网络标识</td><td>VXLAN 中 24-bit 的租户隔离 ID，理论上支持 1600 万个租户。</td></tr>
+          <tr><td><strong>VRF</strong> (Virtual Routing and Forwarding)</td><td>虚拟路由转发</td><td>设备上的独立路由实例，用于多租户隔离。</td></tr>
+          <tr><td><strong>VTEP</strong> (VXLAN Tunnel Endpoint)</td><td>VXLAN 隧道端点</td><td>VXLAN 封装/解封装的物理设备节点，每个 VTEP 有唯一的 IP 地址。</td></tr>
+          <tr><td><strong>VXLAN</strong></td><td>虚拟可扩展局域网</td><td>RFC 7348，将 L2 帧封装在 UDP 中跨 L3 网络传输的隧道协议。</td></tr>
+          <tr><td><strong>Zabbix</strong></td><td>开源监控平台</td><td>支持 SNMP / Trap / Telemetry / Agent 多种采集方式的开源 NMS。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="text-align:center; color:var(--text-muted); margin-top:var(--space-12); font-size:0.9rem;">
+      © 2026 · Cisco Network Observability Whitepaper · 基于 IETF / IEEE / Cisco MIB 真实 OID · 编写于
+      <span id="genDate"></span>
+    </p>
+
+  </div>
+</section>
+
+<!-- ============================================================================
+     页脚导航
+============================================================================ -->
+<footer style="background:#0D274D; color:rgba(255,255,255,0.85); padding:var(--space-8) 0; text-align:center;">
+  <div class="container">
+    <p style="margin:0; font-size:0.85rem;">
+      面向网络运维团队负责人 · 第一性原理驱动 · 真实 MIB 来源
+    </p>
+    <p style="margin-top:var(--space-2); font-size:0.8rem; color:rgba(255,255,255,0.55);">
+      使用 Cisco 2026 Digital Identity 设计语言 · Light Mode · 全屏响应式
+    </p>
+  </div>
+</footer>
+
+<!-- ============================================================================
+     轻量级 JavaScript（仅必要交互）
+============================================================================ -->
+<script>
+  // 动态显示生成日期
+  (function () {
+    var el = document.getElementById('genDate');
+    if (el) {
+      var d = new Date();
+      el.textContent = d.toISOString().slice(0, 10);
+    }
+  })();
+
+  // 移动端导航：点击锚点后自动收起菜单
+  document.querySelectorAll('.top-nav ul a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      document.getElementById('navMenu').classList.remove('open');
+    });
+  });
+
+  // 滚动到顶部按钮（轻量实现，无第三方库）
+  (function () {
+    var btn = document.createElement('button');
+    btn.textContent = '↑';
+    btn.setAttribute('aria-label', '回到顶部');
+    btn.style.cssText = 'position:fixed;right:24px;bottom:24px;width:44px;height:44px;border-radius:50%;border:none;background:var(--cisco-blue);color:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(13,39,77,0.25);opacity:0;transition:opacity .25s;z-index:200;';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    window.addEventListener('scroll', function () {
+      btn.style.opacity = window.scrollY > 600 ? '1' : '0';
+      btn.style.pointerEvents = window.scrollY > 600 ? 'auto' : 'none';
+    });
+  })();
+</script>
+
+</body>
+</html>
