@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>从救火到推理：制造业 IT 在 Agent AI 时代的"韧性资产负债表"</title>
+  <meta name="description" content="Cisco 首席架构师视角：用因果链账本、Agent AI 工作流编排和最低可运行工厂，把制造业 IT 的每一笔预算转化为可解释的业务韧性。">
+  <meta name="keywords" content="制造业IT, Agent AI, Network FinOps, eBPF, Tetragon, Digital Resilience, BCP, 红蓝对抗, IT/OT, CISSP, Cisco">
+  <meta name="author" content="Weibo Rao">
+  <meta property="og:title" content="从救火到推理：制造业 IT 在 Agent AI 时代的韧性资产负债表">
+  <meta property="og:description" content="把专线、云账单、漏洞修复、SLA、BCP 与红蓝对抗，纳入一份可推理、可解释、可审计的韧性账本。">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="zh_CN">
+  <link rel="stylesheet" href="cisco-style.css">
+  <style>
+    /* Page-specific enhancements. 复用 cisco-style.css 的变量与组件。 */
+    .topnav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .topnav-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0.8rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--cisco-navy); font-weight: 800; border: 0; }
+    .brand span { color: var(--cisco-blue-dark); }
+    .topnav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0; margin: 0; }
+    .topnav li { margin: 0; }
+    .topnav a {
+      border: 0; color: var(--text-secondary);
+      font-size: 0.9rem; padding: 0.35rem 0.65rem; border-radius: 999px;
+    }
+    .topnav a:hover { color: var(--cisco-blue-dark); background: var(--bg-soft); }
+
+    .hero { position: relative; overflow: hidden; padding: 5.5rem 0 5rem; text-align: left; }
+    .hero::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 12% 15%, rgba(255,255,255,0.30), transparent 28%),
+        radial-gradient(circle at 85% 75%, rgba(255,0,127,0.18), transparent 30%),
+        radial-gradient(circle at 70% 20%, rgba(255,144,0,0.14), transparent 28%);
+    }
+    .hero .container { position: relative; z-index: 1; max-width: 1140px; }
+    .hero-kicker {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      color: #fff; background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 999px; padding: 0.4rem 0.9rem;
+      font-size: 0.86rem; font-weight: 700; letter-spacing: 0.04em;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      max-width: 1000px;
+      font-size: clamp(2.3rem, 5vw, 4.1rem);
+      line-height: 1.08;
+    }
+    .hero-subtitle {
+      max-width: 880px;
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+      line-height: 1.75;
+    }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.6rem; }
+    .hero-meta span {
+      color: #fff; background: rgba(7,24,45,0.18);
+      border: 1px solid rgba(255,255,255,0.26);
+      border-radius: 999px; padding: 0.4rem 0.85rem; font-size: 0.9rem;
+    }
+    .hero-author {
+      margin-top: 1.4rem; color: rgba(255,255,255,0.78);
+      font-size: 0.92rem; letter-spacing: 0.02em;
+    }
+
+    .lead-card { margin-top: -2.6rem; position: relative; z-index: 3; }
+    .section-eyebrow {
+      color: var(--cisco-blue-dark);
+      font-size: 0.82rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .big-quote {
+      font-size: clamp(1.2rem, 2.2vw, 1.7rem);
+      line-height: 1.55; color: var(--cisco-navy);
+      font-weight: 750; margin-bottom: 0;
+    }
+
+    /* 三种运维状态 */
+    .states-grid {
+      display: grid; gap: var(--space-6);
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      margin-top: var(--space-6);
+    }
+    .state-card { position: relative; padding-top: 2.4rem; }
+    .state-card .state-tag {
+      position: absolute; top: -14px; left: 24px;
+      background: var(--cisco-navy); color: #fff;
+      font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em;
+      padding: 0.35rem 0.8rem; border-radius: 999px;
+    }
+    .state-card.s1 { border-top: 5px solid #9B9CA0; }
+    .state-card.s2 { border-top: 5px solid var(--cisco-blue); }
+    .state-card.s3 {
+      border-top: 5px solid var(--cisco-blue-dark);
+      background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+    }
+    .state-card.s3 .state-tag { background: var(--cisco-blue-dark); }
+
+    /* 因果链账本 */
+    .ledger {
+      display: grid; gap: 0;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      margin: var(--space-6) 0;
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: #fff;
+    }
+    .ledger > div {
+      padding: 1.1rem 1rem;
+      border-right: 1px solid var(--border-color);
+      position: relative;
+    }
+    .ledger > div:last-child { border-right: 0; }
+    .ledger > div::after {
+      content: "→"; position: absolute;
+      right: -10px; top: 50%; transform: translateY(-50%);
+      color: var(--cisco-blue-dark); font-weight: 800;
+      background: #fff; padding: 0 0.2rem; z-index: 2;
+    }
+    .ledger > div:last-child::after { display: none; }
+    .ledger h4 { font-size: 0.95rem; color: var(--cisco-blue-dark); margin-bottom: 0.4rem; padding: 0; }
+    .ledger p { font-size: 0.92rem; color: var(--text-secondary); margin: 0; line-height: 1.55; }
+
+    /* 通用两列 */
+    .two-col {
+      display: grid; gap: var(--space-6);
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      align-items: start;
+    }
+    .definition-pair {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      margin: var(--space-6) 0;
+    }
+    .definition-pair .card:first-child { border-top: 4px solid var(--cisco-blue-dark); }
+    .definition-pair .card:last-child { border-top: 4px solid var(--cisco-orange); }
+
+    .svg-card {
+      background: #fff; border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-md);
+      padding: var(--space-4); box-shadow: var(--shadow-sm);
+    }
+    .svg-caption {
+      color: var(--text-secondary); font-size: 0.92rem;
+      margin: 0.75rem 0 0; text-align: center;
+    }
+
+    .pill-list {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      padding: 0; margin: var(--space-4) 0 0; list-style: none;
+    }
+    .pill-list li {
+      margin: 0; color: var(--cisco-navy);
+      background: var(--bg-soft); border: 1px solid var(--border-color);
+      border-radius: 999px; padding: 0.35rem 0.75rem; font-size: 0.92rem;
+    }
+
+    /* Agent 编排 */
+    .agent-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      margin-top: var(--space-6);
+    }
+    .agent-card {
+      border-top: 4px solid var(--cisco-blue);
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    }
+    .agent-card .role {
+      display: inline-block; font-size: 0.75rem;
+      letter-spacing: 0.08em; font-weight: 800;
+      color: var(--cisco-blue-dark);
+      background: var(--bg-soft); padding: 0.2rem 0.55rem;
+      border-radius: 999px; margin-bottom: 0.5rem;
+    }
+
+    /* 红蓝对抗成本表 */
+    .pillar-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      margin-top: var(--space-6);
+    }
+    .pillar-card {
+      border-top: 4px solid var(--cisco-orange);
+      background: linear-gradient(180deg, #ffffff 0%, #fffaf3 100%);
+    }
+    .pillar-card h3 { color: var(--cisco-navy); font-size: 1.12rem; }
+
+    /* 阶段路线图 */
+    .phase-grid {
+      display: grid; gap: var(--space-6);
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+    .phase-card { position: relative; }
+    .phase-card .phase-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 2.2rem; height: 2.2rem; border-radius: 50%;
+      color: #fff; background: var(--cisco-blue-dark);
+      font-weight: 800; margin-bottom: 0.8rem;
+    }
+    .phase-card.p1 .phase-num { background: #9B9CA0; }
+    .phase-card.p2 .phase-num { background: var(--cisco-blue); }
+    .phase-card.p3 .phase-num { background: var(--cisco-blue-dark); }
+
+    /* 反模式 */
+    .anti-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+    .anti-card {
+      border-left: 6px solid var(--cisco-red);
+      background: #fff;
+    }
+    .anti-card h3 { color: var(--cisco-navy); font-size: 1.1rem; }
+    .anti-card .verdict {
+      display: inline-block; font-size: 0.76rem; font-weight: 800;
+      color: #fff; background: var(--cisco-red);
+      padding: 0.18rem 0.55rem; border-radius: 999px; margin-bottom: 0.5rem;
+      letter-spacing: 0.06em;
+    }
+
+    /* 交互模拟 */
+    .reasoner {
+      background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-md);
+      padding: var(--space-6); box-shadow: var(--shadow-md);
+    }
+    .scenario-tabs {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .scenario-tabs button {
+      border: 1px solid var(--border-color);
+      background: #fff; color: var(--cisco-navy);
+      padding: 0.55rem 1rem; border-radius: 999px;
+      font-weight: 700; cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .scenario-tabs button.active {
+      background: var(--cisco-blue-dark); color: #fff;
+      border-color: var(--cisco-blue-dark);
+    }
+    .reasoner-panel { display: none; }
+    .reasoner-panel.active { display: block; }
+    .reasoner-step {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 0.9rem; align-items: start;
+      padding: 0.7rem 0.5rem; border-bottom: 1px dashed var(--border-color);
+    }
+    .reasoner-step:last-child { border-bottom: 0; }
+    .reasoner-step .num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--cisco-blue-dark); color: #fff;
+      font-weight: 800; font-size: 0.9rem;
+    }
+    .reasoner-step .agent {
+      font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em;
+      color: var(--cisco-blue-dark); margin-right: 0.4rem;
+    }
+    .reasoner-step .body { color: var(--text-primary); font-size: 0.97rem; line-height: 1.6; }
+    .reasoner-step .body strong { color: var(--cisco-navy); }
+
+    .scorecard table { min-width: 720px; }
+
+    .glossary-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+    .glossary-grid dt { color: var(--cisco-navy); font-weight: 800; margin-bottom: 0.25rem; }
+    .glossary-grid dd { color: var(--text-secondary); margin: 0 0 1rem; }
+
+    .mobile-break { display: none; }
+
+    @media (max-width: 1024px) {
+      .ledger { grid-template-columns: 1fr; }
+      .ledger > div { border-right: 0; border-bottom: 1px solid var(--border-color); }
+      .ledger > div::after {
+        content: "↓"; right: 50%; top: auto; bottom: -12px;
+        transform: translateX(50%);
+      }
+      .ledger > div:last-child { border-bottom: 0; }
+    }
+    @media (max-width: 980px) {
+      .topnav ul { display: none; }
+      .states-grid, .two-col, .agent-grid, .pillar-grid, .phase-grid,
+      .anti-grid, .definition-pair, .glossary-grid { grid-template-columns: 1fr; }
+      .mobile-break { display: inline; }
+    }
+
+    /* ===== Additive enhancements (merged from advice.html + efficiency.html) ===== */
+    .pull-quote-strong {
+      position: relative;
+      padding: 1.6rem 1.6rem 1.4rem 2.4rem;
+      margin: var(--space-6) 0;
+      background: linear-gradient(135deg, var(--cisco-navy) 0%, #0A60FF 100%);
+      color: #fff;
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+      font-weight: 600;
+      line-height: 1.65;
+    }
+    .pull-quote-strong::before {
+      content: "“"; position: absolute; left: 0.7rem; top: -0.2rem;
+      font-size: 3.2rem; color: var(--cisco-accent); line-height: 1;
+    }
+    .pull-quote-strong cite {
+      display: block; margin-top: 0.7rem;
+      font-size: 0.85rem; font-weight: 500; opacity: 0.85;
+      font-style: normal; letter-spacing: 0.04em;
+    }
+
+    .command-callout {
+      padding: var(--space-4) var(--space-6);
+      margin: var(--space-6) 0 0;
+      background: linear-gradient(135deg, #fffaf3 0%, #fff 100%);
+      border-left: 6px solid var(--cisco-orange);
+      border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    }
+    .command-callout h4 {
+      color: var(--cisco-navy); margin-bottom: 0.6rem;
+      padding-bottom: 0; font-size: 1.05rem;
+    }
+    .command-callout ol { margin: 0; padding-left: 1.4em; }
+    .command-callout ol li {
+      margin-bottom: 0.35em; color: var(--text-primary); font-weight: 600;
+    }
+    .command-callout .small-note {
+      margin-top: 0.6rem; color: var(--text-secondary);
+      font-size: 0.9rem; font-weight: 500;
+    }
+
+    .sovereignty-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      margin: var(--space-6) 0 0;
+    }
+    .sovereignty-card {
+      text-align: center;
+      border-top: 4px solid var(--cisco-blue-dark);
+      background: linear-gradient(180deg, #ffffff 0%, #f2f8ff 100%);
+    }
+    .sovereignty-card .crown {
+      display: inline-block; width: 54px; height: 54px;
+      border-radius: 50%; background: var(--cisco-navy); color: var(--cisco-accent);
+      font-size: 1.5rem; font-weight: 800; line-height: 54px;
+      margin-bottom: 0.5rem;
+    }
+    .sovereignty-card h3 { color: var(--cisco-navy); font-size: 1.18rem; }
+
+    .strength-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      margin: var(--space-6) 0;
+    }
+    .strength-card { padding-top: 1.2rem; position: relative; }
+    .strength-card .lvl {
+      display: inline-block;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em;
+      border-radius: 999px; color: #fff;
+      margin-bottom: 0.55rem;
+    }
+    .strength-card.l1 { border-top: 4px solid #9B9CA0; }
+    .strength-card.l1 .lvl { background: #58585B; }
+    .strength-card.l2 { border-top: 4px solid var(--cisco-blue); }
+    .strength-card.l2 .lvl { background: var(--cisco-blue-dark); }
+    .strength-card.l3 { border-top: 4px solid var(--cisco-red); }
+    .strength-card.l3 .lvl { background: var(--cisco-red); }
+
+    .formula-callout {
+      padding: var(--space-6);
+      margin: var(--space-6) 0;
+      background: linear-gradient(135deg, #07182D 0%, #0A60FF 100%);
+      border-radius: var(--border-radius-md);
+      color: #fff;
+    }
+    .formula-callout .formula-eq {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      font-weight: 700;
+      color: #fff;
+      background: rgba(0,0,0,0.22);
+      padding: 1rem 1.1rem;
+      border-radius: var(--border-radius-sm);
+      margin: 0.8rem 0 0.6rem;
+      border-left: 4px solid var(--cisco-accent);
+      letter-spacing: 0.02em;
+      line-height: 1.6;
+    }
+    .formula-callout .formula-eq em {
+      color: var(--cisco-accent); font-style: normal;
+    }
+    .formula-callout p { color: rgba(255,255,255,0.92); margin: 0; }
+    .formula-callout p + p { margin-top: 0.6rem; }
+    .formula-callout strong { color: #fff; }
+
+    @media (max-width: 980px) {
+      .sovereignty-grid, .strength-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== Review pass v2 additions ===== */
+
+    /* Reading paths map (after lead-card) */
+    .reading-paths {
+      margin-top: var(--space-6);
+      padding: var(--space-4) var(--space-6);
+      background: linear-gradient(135deg, #f7fbff 0%, #ffffff 100%);
+      border: 1px dashed var(--cisco-blue);
+      border-radius: var(--border-radius-md);
+    }
+    .path-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+    .path-card { padding: 0.4rem 0.2rem; }
+    .path-card .path-time {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em;
+      background: var(--cisco-blue-dark); color: #fff;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      margin-bottom: 0.4rem;
+    }
+    .path-card p { margin: 0; color: var(--text-primary); font-size: 0.95rem; line-height: 1.55; }
+
+    /* Per-chapter ledger row (本章入账) */
+    .chapter-ledger {
+      margin-top: var(--space-6);
+      padding: var(--space-4) var(--space-6);
+      background: var(--bg-soft);
+      border-radius: var(--border-radius-md);
+      border-left: 4px solid var(--cisco-blue-dark);
+    }
+    .chapter-ledger .cl-tag {
+      display: inline-block;
+      font-size: 0.74rem; font-weight: 800; letter-spacing: 0.1em;
+      color: #fff; background: var(--cisco-blue-dark);
+      padding: 0.18rem 0.6rem; border-radius: 999px;
+      margin-bottom: 0.6rem;
+    }
+    .chapter-ledger .cl-row {
+      display: grid; gap: 0.5rem 1rem;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+    }
+    .chapter-ledger .cl-row span {
+      font-size: 0.88rem; color: var(--text-primary); line-height: 1.5;
+    }
+    .chapter-ledger .cl-row strong {
+      display: block; color: var(--cisco-blue-dark);
+      font-size: 0.74rem; letter-spacing: 0.08em; margin-bottom: 0.15rem;
+    }
+
+    /* Back-to-top floating button */
+    .back-to-top {
+      position: fixed;
+      right: 1.2rem; bottom: 1.2rem;
+      width: 44px; height: 44px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--cisco-blue-dark); color: #fff;
+      border-radius: 50%; border: 0;
+      font-size: 1.4rem; font-weight: 700;
+      text-decoration: none;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
+      z-index: 60;
+    }
+    .back-to-top:hover {
+      background: var(--cisco-navy); color: #fff;
+      transform: translateY(-2px);
+      border: 0;
+    }
+    @media print { .back-to-top { display: none; } }
+
+    /* Reasoner tabs focus ring */
+    .scenario-tabs button:focus-visible {
+      outline: 3px solid var(--cisco-accent);
+      outline-offset: 3px;
+    }
+
+    /* Emoji font fallback for sovereignty crowns */
+    .sovereignty-card .crown {
+      font-family: "Apple Color Emoji", "Segoe UI Emoji",
+                   "Noto Color Emoji", "Twemoji", system-ui, sans-serif;
+    }
+    @media print {
+      .sovereignty-card .crown {
+        color: var(--cisco-navy);
+        background: #fff;
+        border: 2px solid var(--cisco-navy);
+      }
+    }
+
+    /* Data gravity checklist (orange callout) */
+    .gravity-checklist {
+      margin-top: var(--space-6);
+      padding: var(--space-4) var(--space-6);
+      background: #fffaf3;
+      border-left: 4px solid var(--cisco-orange);
+      border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    }
+    .gravity-checklist ul { margin: 0; padding-left: 1.4em; }
+    .gravity-checklist li { color: var(--text-primary); margin-bottom: 0.3em; }
+    .gravity-checklist h4 { padding: 0; margin-bottom: 0.6rem; }
+
+    /* Final three (closing) */
+    .final-three {
+      margin-top: var(--space-6);
+      padding: var(--space-6);
+      background: linear-gradient(135deg, #07182D 0%, #0A60FF 100%);
+      border-radius: var(--border-radius-md);
+      color: #fff;
+    }
+    .final-three ol { margin: 0; padding-left: 1.4em; }
+    .final-three li { color: rgba(255,255,255,0.95); margin-bottom: 0.5em; line-height: 1.65; }
+    .final-three strong { color: var(--cisco-accent); }
+
+    @media (max-width: 980px) {
+      .path-grid { grid-template-columns: 1fr; }
+      .chapter-ledger .cl-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav" aria-label="文章导航">
+    <div class="topnav-inner">
+      <a class="brand" href="#top">Cisco<span>+</span> Agentic Ops</a>
+      <ul>
+        <li><a href="#states">三种状态</a></li>
+        <li><a href="#ledger">因果链账本</a></li>
+        <li><a href="#network">专线与云</a></li>
+        <li><a href="#live">Live Protection</a></li>
+        <li><a href="#resilience">韧性</a></li>
+        <li><a href="#agents">Agent 编排</a></li>
+        <li><a href="#itot">IT/OT</a></li>
+        <li><a href="#reasoner">推理实验</a></li>
+        <li><a href="#roadmap">路线图</a></li>
+        <li><a href="#antipatterns">反模式</a></li>
+        <li><a href="#scorecard">汇报</a></li>
+        <li><a href="#glossary">术语</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="container">
+      <p class="hero-kicker">Cisco Chief Architect · Manufacturing IT · Agent AI Era</p>
+      <h1>从救火到推理：制造业 IT 在 Agent AI 时代的"韧性资产负债表"</h1>
+      <p class="hero-subtitle">预算紧缩不是少花钱的命令，而是要求把每一笔支出从"项目"翻译成"能力"，再翻译成"业务韧性"。在 Agent AI 时代，IT 运维不再是工单处理员，而是用因果链账本和受控 Agent 工作流，把不确定性变成可解释、可审计、可复盘的工程结果。</p>
+      <div class="hero-meta" aria-label="关键标签">
+        <span>Network FinOps</span>
+        <span>eBPF Live Protection</span>
+        <span>Digital Resilience</span>
+        <span>Agent Workflow</span>
+        <span>IT/OT Convergence</span>
+        <span>CISSP Guardrails</span>
+      </div>
+      <p class="hero-author">作者视角：Cisco 首席架构师 · 制造业 IT/OT 20 年 · CISSP · eBPF / Linux / Network FinOps 实践</p>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="chapter lead-card" id="states">
+      <div class="container">
+        <article class="card">
+          <p class="section-eyebrow">Executive Frame</p>
+          <p class="big-quote">管理层要的不是"少花钱"，而是"每一笔钱都能解释、可追溯、可验证"。这意味着 IT 运维必须穿越三种成熟度：被动救火、主动巡检、Agentic 推理。预算评审的真正分水岭，就在这里。</p>
+        </article>
+
+        <aside class="reading-paths" aria-label="阅读路径地图">
+          <p class="section-eyebrow" style="margin-bottom: 0.6rem;">Reading Map</p>
+          <div class="path-grid">
+            <div class="path-card">
+              <span class="path-time">5 分钟</span>
+              <p>读 Hero + <a href="#scorecard">韧性资产负债表</a>。如果你是 CFO 或决策者，先看这两段。</p>
+            </div>
+            <div class="path-card">
+              <span class="path-time">15 分钟</span>
+              <p>加读 <a href="#ledger">因果链账本</a> + <a href="#antipatterns">反模式</a>。理解方法论与最容易踩的坑。</p>
+            </div>
+            <div class="path-card">
+              <span class="path-time">30 分钟</span>
+              <p>按 Pain 1 → 2 → 3 依次读 <a href="#network">专线与云</a> / <a href="#live">Live Protection</a> / <a href="#resilience">韧性</a>，再读 <a href="#agents">Agent 编排</a> 与 <a href="#roadmap">路线图</a>。</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="states-grid">
+          <div class="card state-card s1">
+            <span class="state-tag">STATE 1</span>
+            <h3>被动救火</h3>
+            <p>问题出现后才被发现。带宽不够就扩容、漏洞紧急就停机、产线停摆就连夜抢修。预算被动消耗，价值难以解释。</p>
+            <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0;"><strong>典型话术：</strong>"先把这条专线扩到 2G，回头再分析。"</p>
+          </div>
+          <div class="card state-card s2">
+            <span class="state-tag">STATE 2</span>
+            <h3>主动巡检</h3>
+            <p>引入 NetScout、Zabbix、APM、CMDB、Telemetry、SOC 看板。看得见，但解释靠人；告警多，但收敛靠经验；账单清楚，但归因不到业务。</p>
+            <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0;"><strong>典型话术：</strong>"我们有监控，但要找根因还得拉个会。"</p>
+          </div>
+          <div class="card state-card s3">
+            <span class="state-tag">STATE 3</span>
+            <h3>Agentic 推理</h3>
+            <p>数据、政策、知识、动作被组织成受控工作流。Agent 负责关联、解释、排序、模拟、提议；人负责审批、决策、问责。预算可见、风险可推理、恢复可验证。</p>
+            <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0;"><strong>典型话术：</strong>"这条扩容请求被驳回，因为业务负载没变，根因在跨云同步策略。"</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>架构师判断：</strong>本文讨论的三个痛点 —— 专线与云成本、不停机修漏洞、Digital Resilience —— 单独看都是工程问题，合在一起其实是 <em>运维成熟度跃迁</em> 的问题。Agent AI 不是新的工具品类，而是让"主动巡检"真正变成"主动决策"的胶水层。
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="ledger">
+      <div class="container">
+        <p class="section-eyebrow">Causal Ledger</p>
+        <h2>因果链账本：让每一笔预算都能反向追溯到业务结果</h2>
+        <p>管理层那句"花出去的每一笔钱都要见到成效"，在工程语言里翻译成五个字段的强制连接：<strong>支出 → 能力 → 信号 → 业务结果 → 证据</strong>。任何一笔预算如果在这五个字段中断链，就属于"无法解释"的支出，应在评审中被挑战。</p>
+        <div class="ledger" aria-label="因果链账本五字段">
+          <div>
+            <h4>① 支出</h4>
+            <p>专线月费、云出流量、SaaS、安全工具、Agent 算力、人月。</p>
+          </div>
+          <div>
+            <h4>② 能力</h4>
+            <p>这笔钱买到了什么可被复用、可被度量的能力？</p>
+          </div>
+          <div>
+            <h4>③ 信号</h4>
+            <p>有什么指标、日志、Trace、账单字段能持续证明这个能力在工作？</p>
+          </div>
+          <div>
+            <h4>④ 业务结果</h4>
+            <p>它保护了哪条产线、哪个 SLA、哪类订单、哪种合规要求？</p>
+          </div>
+          <div>
+            <h4>⑤ 证据</h4>
+            <p>事故、演练、复盘、复测和审计是否反复印证该结果？</p>
+          </div>
+        </div>
+        <div class="definition-pair">
+          <div class="card">
+            <p class="section-eyebrow">精准定义</p>
+            <h3>因果链账本（Causal Ledger）</h3>
+            <p>一种把财务支出、IT 能力、运行时信号、业务结果与历史证据强制对齐的运营账本。它不是新的报表，而是预算评审、架构评审、安全评审与 BCP 评审共享的同一张事实表，确保任何一笔支出都能在五个字段上闭环。</p>
+          </div>
+          <div class="card">
+            <p class="section-eyebrow">精妙类比</p>
+            <h3>不是"水电表"，而是"健康档案"</h3>
+            <p>传统 IT 账单像水电表，只告诉你"用了多少"。因果链账本像一份健康档案：每一次检查、每一次用药、每一次手术都对应到一个症状、一个诊断和一个长期结果。架构师的工作，就是让企业 IT 拥有这份档案。</p>
+          </div>
+        </div>
+        <p>下面三章按这张账本的结构，分别处理你提出的三类支出：<strong>专线与云互联</strong>、<strong>SLA 与运行时防护</strong>、<strong>Digital Resilience 与红蓝对抗</strong>。每一章都会回到"支出 → 能力 → 信号 → 业务结果 → 证据"这条主线。</p>
+
+        <article class="card" style="margin-top: var(--space-8); border-top: 4px solid var(--cisco-blue);">
+          <p class="section-eyebrow">Case Bridge · 一笔被驳回的扩容</p>
+          <h3>"BI 跑批跨海回读"复盘：账本如何让专线不扩容、云账单还下降</h3>
+          <p>下面这个真实模式在很多制造业 IT 都见过：早会报表延迟、网络部门收到扩容工单、应用部门坚持"业务没变"。如果按因果链账本五字段反向追问，结论往往出乎所有人意料。</p>
+          <div class="table-scroll-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>表层观察</th>
+                  <th>账本追问</th>
+                  <th>真相</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>早会报表越来越慢，业务投诉。</td>
+                  <td>这份报表的数据在哪里产生？计算在哪里发生？</td>
+                  <td>原始数据在本地工厂 MES，BI 计算在另一区域的云上，每天清晨跨海回读全表。</td>
+                </tr>
+                <tr>
+                  <td>网络收到专线扩容工单，理由"业务高峰带宽不够"。</td>
+                  <td>业务量（订单数、用户数、事务数）真的变了吗？</td>
+                  <td>同比持平，扩容根因不是"业务增长"，而是"跨海全量回读"的数据搬运。</td>
+                </tr>
+                <tr>
+                  <td>云账单中 egress 与对象存储读取费持续上升。</td>
+                  <td>是否同一份数据被反复跨域读取，且大部分行根本未变？</td>
+                  <td>是。每天回读 100% 数据，实际增量不足 3%。</td>
+                </tr>
+                <tr>
+                  <td>NetScout 显示该专线峰值接近 100%。</td>
+                  <td>峰值是业务流量还是数据搬运？是否错峰可消？</td>
+                  <td>峰值与 BI 跑批时间窗完全重合，与产线业务流量错峰。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-bottom: 0;"><strong>反高潮结局：</strong>专线没扩容，反而通过"增量同步 + 本地缓存 + 跑批就近化"重构数据通路，云账单当月下降，早会报表从 2 分钟压缩到 18 秒。<em>真正花钱的不是带宽，是错位的架构。</em></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="chapter" id="network">
+      <div class="container">
+        <div class="two-col">
+          <article>
+            <p class="section-eyebrow">Pain 1 · Network FinOps</p>
+            <h2>专线扩容是症状，不是结论：用数据重力看穿账单</h2>
+            <p>当应用部门定期要求扩容专线，扩容之后用户数不变、云端计算用量却同步上升，这条信息本身就在说话：<strong>架构正在用带宽掩盖设计问题</strong>。在 AWS、阿里云、Azure 三朵云之间，跨云同步、跨域读写、对象存储出流量、NAT 网关计费、LB 转发计费会像复利一样积累。NetScout 这类网络可视化是必要的，但它只能回答"链路上发生了什么"，回答不了"为什么发生"和"由谁付费"。</p>
+            <p>云端应用是动态的：容器漂移、Pod 伸缩、Service Mesh 改写五元组，IP 不再是身份。所以"按流量占比分摊云互联开支"这个模型在静态网络成立，在云原生网络只能做粗粒度，必须叠加 <em>身份层</em> 和 <em>账单层</em> 才能精准归因。</p>
+            <div class="definition-pair">
+              <div class="card">
+                <p class="section-eyebrow">精准定义</p>
+                <h3>数据重力（Data Gravity）</h3>
+                <p>数据规模越大、复制成本越高、依赖越多，就越会吸引计算、应用和分析靠近它。频繁让计算"跨云去找数据"或"把数据搬到另一朵云"，会持续产生跨域流量费、API 费和延迟代价，这是云时代账单膨胀的核心机制。</p>
+              </div>
+              <div class="card">
+                <p class="section-eyebrow">精妙类比</p>
+                <h3>不是"水管粗细"，是"工厂选址"</h3>
+                <p>扩专线像加粗水管，但真正的问题往往是把净水厂建在了离用户最远的地方。Network FinOps 的工作，是回到"工厂选址"层面：让计算、数据、用户和合规边界落在同一片地理与计费区域内。</p>
+              </div>
+            </div>
+            <p>对应到因果链账本，专线与云互联的归因必须由四层叠加：</p>
+            <ul>
+              <li><strong>网络流（What）</strong>：NetScout、Flow Logs、Direct Connect / ExpressRoute 接口指标。</li>
+              <li><strong>云账单（How much）</strong>：CUR、阿里云费用中心、Azure Cost Management 的 egress、NAT、LB、对象存储字段。</li>
+              <li><strong>应用身份（Who）</strong>：CMDB、K8s label、APM Trace、Service Mesh、eBPF 进程与 socket 事件。</li>
+              <li><strong>业务价值（Why）</strong>：MES、WMS、PLM、质量追溯、订单履约、合规审计要求。</li>
+            </ul>
+          </article>
+          <aside class="svg-card">
+            <div class="svg-scroll-wrapper">
+              <svg viewBox="0 0 760 560" role="img" aria-labelledby="net-title net-desc">
+                <title id="net-title">数据重力下的多云流量与归因</title>
+                <desc id="net-desc">本地工厂、AWS、阿里云、Azure 之间因数据重力产生跨域流量，由四层归因模型解释。</desc>
+                <defs>
+                  <linearGradient id="netBlue" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#0A60FF"/>
+                    <stop offset="1" stop-color="#02C8FF"/>
+                  </linearGradient>
+                  <filter id="netShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#07182D" flood-opacity="0.14"/>
+                  </filter>
+                </defs>
+                <rect x="20" y="20" width="720" height="520" rx="28" fill="#F7F8FA" stroke="#D4D8DE"/>
+
+                <!-- 中央：归因 -->
+                <rect x="270" y="240" width="220" height="80" rx="20" fill="url(#netBlue)" filter="url(#netShadow)"/>
+                <text x="380" y="276" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">因果链账本</text>
+                <text x="380" y="302" text-anchor="middle" fill="#fff" font-size="14">流 + 账单 + 身份 + 价值</text>
+
+                <!-- 四个云/工厂节点 -->
+                <g fill="#fff" stroke="#D4D8DE" stroke-width="2" filter="url(#netShadow)">
+                  <rect x="60"  y="70"  width="170" height="86" rx="18"/>
+                  <rect x="520" y="70"  width="170" height="86" rx="18"/>
+                  <rect x="60"  y="410" width="170" height="86" rx="18"/>
+                  <rect x="520" y="410" width="170" height="86" rx="18"/>
+                </g>
+                <g fill="#07182D" font-weight="700" font-size="18">
+                  <text x="145" y="110" text-anchor="middle">工厂数据中心</text>
+                  <text x="605" y="110" text-anchor="middle">AWS</text>
+                  <text x="145" y="450" text-anchor="middle">阿里云</text>
+                  <text x="605" y="450" text-anchor="middle">Azure</text>
+                </g>
+                <g fill="#58585B" font-size="12">
+                  <text x="145" y="132" text-anchor="middle">MES · WMS · 质量 · PLM</text>
+                  <text x="605" y="132" text-anchor="middle">分析 · AI · SaaS 集成</text>
+                  <text x="145" y="472" text-anchor="middle">业务应用 · 移动入口</text>
+                  <text x="605" y="472" text-anchor="middle">协作 · 身份 · 灾备</text>
+                </g>
+
+                <!-- 跨云流量线，标注 egress 类型 -->
+                <g stroke="#0A60FF" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="6 5">
+                  <path d="M230 113 C320 140 340 200 290 240"/>
+                  <path d="M520 113 C430 140 410 200 470 240"/>
+                  <path d="M230 453 C320 420 340 360 290 320"/>
+                  <path d="M520 453 C430 420 410 360 470 320"/>
+                  <path d="M230 130 C360 210 400 210 520 130"/>
+                  <path d="M230 440 C360 360 400 360 520 440"/>
+                </g>
+                <g fill="#FF007F" font-size="12" font-weight="700">
+                  <text x="380" y="160" text-anchor="middle">跨云 egress</text>
+                  <text x="380" y="404" text-anchor="middle">跨云同步</text>
+                </g>
+                <g fill="#0A60FF" font-size="12">
+                  <text x="245" y="200">DX</text>
+                  <text x="500" y="200">DX</text>
+                  <text x="245" y="380">VPN</text>
+                  <text x="500" y="380">ER</text>
+                </g>
+              </svg>
+            </div>
+            <p class="svg-caption">图 1：跨云、跨域、跨工厂的每一条数据线，背后都有 egress、NAT、LB 计费。</p>
+          </aside>
+        </div>
+
+        <div class="table-scroll-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>账单常见膨胀点</th>
+                <th>根因模式</th>
+                <th>Agent 可解释的证据</th>
+                <th>架构动作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>AWS → 阿里云 数据同步</td>
+                <td>同一份原始数据在两朵云分别落库，再相互校对。</td>
+                <td>对比 S3/OSS 写入对象集 + 业务表 schema，识别"无差异同步"。</td>
+                <td>建立单一权威数据源（System of Record），把同步换成按需查询或事件驱动。</td>
+              </tr>
+              <tr>
+                <td>本地 → 云端读数据</td>
+                <td>本地数据中心是数据源，云端应用每次请求都跨链路拉数据。</td>
+                <td>关联 APM Trace 与 egress 字段，发现 N+1 查询和大对象往返。</td>
+                <td>引入本地边缘缓存、增量同步或把消费端下沉到数据所在地。</td>
+              </tr>
+              <tr>
+                <td>专线被压满</td>
+                <td>备份、补丁分发、镜像拉取与业务流量挤在同一时段。</td>
+                <td>Flow + 进程身份联动，识别非业务巨流的时间窗。</td>
+                <td>错峰调度、镜像就近镜像源、备份走专用低优先级 QoS。</td>
+              </tr>
+              <tr>
+                <td>NAT / LB 流量费</td>
+                <td>同区域内私网调用被错误路由到 NAT 出口。</td>
+                <td>解析路由表与目标地址，找出"本可走 VPC 内部"的连接。</td>
+                <td>修正子网、PrivateLink、VPC 对等或 Transit Gateway 设计。</td>
+              </tr>
+              <tr>
+                <td>容量"棘轮效应"</td>
+                <td>每次扩容都是单向的，应用从不主动归还容量。</td>
+                <td>对比扩容前后 30 天的峰谷、利用率与业务量。</td>
+                <td>引入"扩容回退条款"：N 周后若利用率不达标，自动评审下调。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>架构师建议：</strong>在制造业，不要用"上云率"或"下云率"评价先进性。把指标换成 <em>单位业务交易的 IT 成本</em>、<em>跨域数据移动费用占比</em>、<em>容量利用率</em> 和 <em>关键流程恢复时间</em>。一旦改变指标，工作负载放置矩阵（留云 / 回迁 / 混合 / 边缘）就会自然给出答案，不必再陷入"上云还是下云"的意识形态争论。
+        </div>
+
+        <div class="command-callout" role="note">
+          <h4>把这三个问题贴在运维室墙上：扩容请求"三连问"</h4>
+          <ol>
+            <li>数据现在在哪里被读？</li>
+            <li>计算现在在哪里发生？</li>
+            <li>跨域 / 跨云同步是必要的，还是历史遗留？</li>
+          </ol>
+          <p class="small-note">这三连问能在 80% 的情况下，把"扩带宽"的工单挡在源头。不要做带宽的搬运工，要做业务的架构师。</p>
+        </div>
+
+        <aside class="gravity-checklist" aria-label="数据重力判别条">
+          <h4 style="color: var(--cisco-orange);">数据重力判别条 · 5 题速判工作负载该放哪</h4>
+          <ul>
+            <li>这个工作负载读写的数据集，单日跨域同步量是否 <strong>&gt; 100 GB</strong>？</li>
+            <li>读延迟是否对 <strong>产线节拍 / MES 工单 / 质量回溯</strong> 直接敏感？</li>
+            <li>是否存在 <strong>合规 / 行业监管</strong> 要求数据不出厂区或不出境？</li>
+            <li>计算与数据所在域之间，<strong>专线带宽成本</strong> 是否已超过本地化重建成本的 30%？</li>
+            <li>未来 18 个月内，业务侧是否计划新增 <strong>AI/视觉/数据分析</strong> 负载共用该数据？</li>
+          </ul>
+          <p class="small-note" style="margin-top: 0.6rem;">≥ 3 个 "是"：工作负载应靠近数据落地（边缘 / 本地 / 同 Region 私有云）；≤ 2 个 "是"：可以放入公有云或集中数据中心。</p>
+        </aside>
+
+        <div class="pull-quote-strong">
+          管理层不是反对花钱，他们反对的是<em>看不见的钱</em>。把每一笔扩容请求都翻译成"它解释了什么、它替代了什么、它放弃了什么"，CFO 就会变成 IT 最稳的盟友。
+          <cite>— 来自一位汽车制造业 CIO 的预算评审会原话</cite>
+        </div>
+
+        <aside class="chapter-ledger" aria-label="本章入账">
+          <span class="cl-tag">本章入账 · Pain 1</span>
+          <div class="cl-row">
+            <span><strong>触发</strong>专线扩容/云账单暴涨</span>
+            <span><strong>动作</strong>会话级流量画像 + 数据重力评估</span>
+            <span><strong>替代</strong>盲目扩容、按月加带宽</span>
+            <span><strong>证据</strong>Top-N 业务流 × 单位带宽成本</span>
+            <span><strong>责任</strong>网络架构 + 业务负责人共签</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="chapter" id="live">
+      <div class="container">
+        <div class="two-col">
+          <article>
+            <p class="section-eyebrow">Pain 2 · Live Protection</p>
+            <h2>不停机修漏洞：把"补丁焦虑"转换成"运行时控制"</h2>
+            <p>业务要求 SLA 越来越高，漏洞越发越多，可接受的停机窗口越来越短。这看似不可能三角，但拆开来其实是三个相互独立的命题：<strong>能不能在不停服务的前提下修复</strong>、<strong>能不能在补丁到位前先压住风险</strong>、<strong>能不能用证据告诉管理层"风险确实被降低了"</strong>。</p>
+            <p>第一个命题是架构能力问题：冗余、灰度、蓝绿、金丝雀、健康检查、自动回滚、不可变镜像。如果这些都没有，每一次补丁都会被业务部门当成一次停机事件。第二个命题是运行时能力问题，正是基于 eBPF 的 Tetragon Live Protection 价值所在。第三个命题是观测与证据问题，需要把策略命中、阻断动作、误报率、修复 SLA 全部纳入因果链账本。</p>
+            <div class="definition-pair">
+              <div class="card">
+                <p class="section-eyebrow">精准定义</p>
+                <h3>Live Protection（eBPF · Tetragon）</h3>
+                <p>在 Linux 内核以 eBPF 程序的方式观测进程、系统调用、文件、网络与容器事件，按声明式策略实时识别可疑行为，并在必要时通过 kill、信号或网络截断实现"<em>检测即阻断</em>"。它面向"补丁尚未完成、攻击可能已在发生"的窗口。</p>
+              </div>
+              <div class="card">
+                <p class="section-eyebrow">精妙类比</p>
+                <h3>"先派保安，再换大门"</h3>
+                <p>打补丁是更换一扇更结实的门，往往需要停服务才能完成。Live Protection 是在门没换好之前，先安排门禁、摄像头和保安：可疑行为先被拦下，正式补丁可以按节奏走灰度窗口，不再被迫"半夜停机救火"。</p>
+              </div>
+            </div>
+            <p>但要避免把 Tetragon 当成万能药。它不替代补丁、不替代架构冗余、不替代变更管理。它的真正作用是 <em>压缩"暴露窗口"</em>，让管理层接受"以更小的业务中断成本换取更高的安全成熟度"。这正是值得投入的部分。</p>
+          </article>
+          <aside class="card">
+            <h3>把 CVE 翻译成"业务风险队列"</h3>
+            <p>制造业的优先级排序不能停在 CVSS 数字，而要叠加六个维度：</p>
+            <ul class="pill-list">
+              <li>漏洞严重性 CVSS</li>
+              <li>资产关键性</li>
+              <li>攻击可达性</li>
+              <li>业务中断代价</li>
+              <li>是否有公开 exploit</li>
+              <li>是否有运行时缓解</li>
+              <li>是否可灰度</li>
+              <li>是否可回滚</li>
+            </ul>
+            <p style="margin-top: var(--space-4);">这八个维度合在一起，才能告诉团队 "今晚必须打、本周可以打、这一季度计划打、可以接受不打"。Agent 在这里做的不是替代决策，而是把分散在 CMDB、Vuln Scanner、APM、SOC、变更系统、业务系统里的字段对齐到同一行。</p>
+          </aside>
+        </div>
+
+        <h3 style="margin-top: var(--space-8);">一张高管一眼看懂的对照：传统补丁 vs eBPF Live Protection</h3>
+        <p>当 CFO 问"安全已经买了一堆，为什么还要再上 eBPF？"，下面这张五维对照表比任何 PPT 都更有说服力。</p>
+        <div class="table-scroll-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>对比维度</th>
+                <th>传统补丁 / 漏洞管理</th>
+                <th>eBPF Live Protection（Tetragon 等）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>修复粒度</td>
+                <td>软件版本级，必须重启或重载</td>
+                <td>内核可观测的事件级，按策略实时拦截</td>
+              </tr>
+              <tr>
+                <td>响应时间</td>
+                <td>受变更窗口约束，常以"天 / 周"计</td>
+                <td>策略热加载，分钟级生效，无需停服</td>
+              </tr>
+              <tr>
+                <td>业务影响</td>
+                <td>需要停机窗口、灰度协调、回滚演练</td>
+                <td>对业务进程透明，可对单一行为做最小化阻断</td>
+              </tr>
+              <tr>
+                <td>适用范围</td>
+                <td>厂商仍在维护、可重启、可重新认证的系统</td>
+                <td>覆盖 HMI / SCADA / 老旧 Windows、无补丁可打的资产</td>
+              </tr>
+              <tr>
+                <td>核心价值</td>
+                <td>关闭漏洞 —— 解决"为什么会被攻破"</td>
+                <td>压缩暴露窗口 —— 解决"在没修好之前怎么办"</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>让系统可切换</h3>
+            <p>负载均衡、主备或双活、数据库复制、消息队列缓冲、健康检查、配置中心和自动回滚，是"不停机维护"的工程地基。没有地基，谈不上灰度。</p>
+          </div>
+          <div class="card">
+            <h3>让变更变小</h3>
+            <p>灰度发布、金丝雀、分批补丁、节点轮换、容器镜像重建、不可变基础设施，把一次"高风险大变更"拆成多个"低风险小变更"。Agent 可生成分批计划。</p>
+          </div>
+          <div class="card">
+            <h3>先把风险压住</h3>
+            <p>Tetragon、WAF、API Gateway、身份策略、微分段和可观测性合在一起，降低 exploit 可达性，为正式修复争取窗口。证据要回写到风险队列。</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>架构师建议：</strong>评估 Live Protection 投资时，向管理层呈现的指标不是"部署了多少节点"，而是 <em>高危漏洞缓解时间从 N 天压缩到 M 小时</em>、<em>紧急停机次数 / 季度</em>、<em>补丁 SLA 达成率</em> 和 <em>误报率</em>。这是能进入因果链账本"业务结果 + 证据"列的硬数据。
+        </div>
+
+        <h3 style="margin-top: var(--space-8);">叙事化场景：Log4Shell 级漏洞的"分钟级响应时间轴"</h3>
+        <p>把一次想象中的 Log4Shell 级 0-day 摆到时间轴上，你会清楚地看到 Live Protection 真正改变了什么。</p>
+        <div class="svg-card">
+          <div class="svg-scroll-wrapper">
+            <svg viewBox="0 0 1000 300" role="img" aria-labelledby="timeline-title timeline-desc">
+              <title id="timeline-title">CVE 应急响应时间轴：T+0 → T+N</title>
+              <desc id="timeline-desc">从漏洞披露到稳态修复，传统流程与 Live Protection 流程并行对比。</desc>
+              <defs>
+                <linearGradient id="tlBlue" x1="0" x2="1"><stop offset="0" stop-color="#0A60FF"/><stop offset="1" stop-color="#02C8FF"/></linearGradient>
+              </defs>
+              <rect x="20" y="20" width="960" height="260" rx="22" fill="#F7F8FA" stroke="#D4D8DE"/>
+
+              <!-- Main timeline -->
+              <line x1="80" y1="150" x2="940" y2="150" stroke="#07182D" stroke-width="3"/>
+              <g fill="#07182D">
+                <circle cx="120" cy="150" r="8"/>
+                <circle cx="340" cy="150" r="8"/>
+                <circle cx="560" cy="150" r="8"/>
+                <circle cx="780" cy="150" r="8"/>
+                <circle cx="920" cy="150" r="8"/>
+              </g>
+              <g fill="#07182D" font-size="14" font-weight="800" text-anchor="middle">
+                <text x="120" y="180">T+0</text>
+                <text x="340" y="180">T+15min</text>
+                <text x="560" y="180">T+30min</text>
+                <text x="780" y="180">T+24h</text>
+                <text x="920" y="180">T+N days</text>
+              </g>
+
+              <!-- Top: Live Protection lane -->
+              <rect x="60"  y="55" width="170" height="60" rx="12" fill="url(#tlBlue)"/>
+              <rect x="250" y="55" width="200" height="60" rx="12" fill="url(#tlBlue)"/>
+              <rect x="470" y="55" width="200" height="60" rx="12" fill="url(#tlBlue)"/>
+              <rect x="690" y="55" width="240" height="60" rx="12" fill="url(#tlBlue)"/>
+              <g fill="#fff" font-size="12" font-weight="700" text-anchor="middle">
+                <text x="145" y="80">情报入库</text>
+                <text x="145" y="100" font-size="10" font-weight="500">CVE / IoC 同步</text>
+                <text x="350" y="80">策略热加载</text>
+                <text x="350" y="100" font-size="10" font-weight="500">Tetragon kprobe 上线</text>
+                <text x="570" y="80">可疑行为阻断</text>
+                <text x="570" y="100" font-size="10" font-weight="500">检测即处置</text>
+                <text x="810" y="80">从容计划补丁</text>
+                <text x="810" y="100" font-size="10" font-weight="500">灰度 + 业务验证</text>
+              </g>
+              <text x="40" y="90" fill="#0A60FF" font-size="12" font-weight="800">L i v e</text>
+
+              <!-- Bottom: Traditional lane -->
+              <rect x="60"  y="195" width="240" height="60" rx="12" fill="#fff" stroke="#FF007F" stroke-width="2"/>
+              <rect x="320" y="195" width="280" height="60" rx="12" fill="#fff" stroke="#FF007F" stroke-width="2"/>
+              <rect x="620" y="195" width="320" height="60" rx="12" fill="#fff" stroke="#FF007F" stroke-width="2"/>
+              <g fill="#07182D" font-size="12" font-weight="700" text-anchor="middle">
+                <text x="180" y="220">收集影响清单</text>
+                <text x="180" y="240" font-size="10" font-weight="500">CMDB / 资产盘点</text>
+                <text x="460" y="220">紧急变更评审</text>
+                <text x="460" y="240" font-size="10" font-weight="500">业务方协调停机窗口</text>
+                <text x="780" y="220">分批打补丁 · 重启 · 验证</text>
+                <text x="780" y="240" font-size="10" font-weight="500">暴露窗口持续，期间高度紧张</text>
+              </g>
+              <text x="40" y="230" fill="#FF007F" font-size="12" font-weight="800">Patch</text>
+            </svg>
+          </div>
+          <p class="svg-caption">图 4：传统流程把"安全"和"业务"绑死在变更窗口上；Live Protection 把它们解耦 —— <em>补丁不再是必须立刻执行的命令，而是可以从容计划的工程。</em></p>
+        </div>
+
+        <h3 style="margin-top: var(--space-8);">从执行层翻译到管理层：运维三大主权</h3>
+        <p>把 Live Protection 卖给 CFO，不能讲"内核 hook 与 kprobe"。要讲三个名词：</p>
+        <div class="sovereignty-grid">
+          <article class="card sovereignty-card">
+            <span class="crown">⏱</span>
+            <h3>时间主权</h3>
+            <p>不再被 0-day 的钟摆牵着鼻子走。漏洞披露的那一刻不再等于"全员熬夜的开始"，而是策略热加载的开始。</p>
+          </article>
+          <article class="card sovereignty-card">
+            <span class="crown">🪟</span>
+            <h3>窗口主权</h3>
+            <p>停机窗口由业务节奏决定，不再由攻击节奏决定。补丁可以排进合理的变更日历，而不是凌晨三点的紧急工单。</p>
+          </article>
+          <article class="card sovereignty-card">
+            <span class="crown">📜</span>
+            <h3>证据主权</h3>
+            <p>每一次阻断、每一条策略命中、每一笔暴露窗口压缩，都自动落入因果链账本的"证据"列，向董事会讲得清。</p>
+          </article>
+        </div>
+
+        <div class="pull-quote-strong">
+          卓越运维的标志，不是没有事故，而是 IT 团队从<em>救火队</em>变成<em>消防工程师</em> —— 用规则、传感器和预案，让大多数"火"在烧起来之前就被掐灭。
+          <cite>— Live Protection 改变的，不只是修补方式，而是运维范式</cite>
+        </div>
+
+        <aside class="chapter-ledger" aria-label="本章入账">
+          <span class="cl-tag">本章入账 · Pain 2</span>
+          <div class="cl-row">
+            <span><strong>触发</strong>0day/横向移动/补丁窗口受限</span>
+            <span><strong>动作</strong>eBPF/Tetragon 实时拦截 + 策略下发</span>
+            <span><strong>替代</strong>停机打补丁、被动等待 CVE</span>
+            <span><strong>证据</strong>拦截事件链 + MTTR 缩短百分比</span>
+            <span><strong>责任</strong>SecOps + 产线 IT 联签</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="chapter" id="resilience">
+      <div class="container">
+        <p class="section-eyebrow">Pain 3 · Digital Resilience</p>
+        <h2>Digital Resilience：从"系统不宕机"到"工厂还能动"</h2>
+        <p>公司对 Resilience 提出的新要求，本质上是把"高可用"从 IT 视角升级到业务视角。问题不再是"服务器是否还活着"，而是"无论发生什么 —— 网络中断、云 API 异常、勒索攻击、误操作、供应链断供、OT 设备失效 —— 工厂能否维持最低可接受产能，并在可控时间内恢复"。</p>
+        <div class="definition-pair">
+          <div class="card">
+            <p class="section-eyebrow">精准定义</p>
+            <h3>Minimum Viable Factory（MVF）</h3>
+            <p>最低可运行工厂是一种业务连续性目标：在故障、攻击或外部服务中断条件下，工厂仍能完成的最低产能、关键流程、人工替代路径与恢复时间约定。MVF 不是 IT 单方面声明，而是生产、物流、质量、安全、IT 与 OT 联合签字的业务事实。</p>
+          </div>
+          <div class="card">
+            <p class="section-eyebrow">精妙类比</p>
+            <h3>不是"备胎"，是"绕行体系"</h3>
+            <p>高可用像汽车有备胎，灾备像有另一辆车；Resilience 像整个城市物流：某条路封了，依然知道哪些货必须先送、哪条路可以绕、哪些环节可以人工接管、谁来批准降级。</p>
+          </div>
+        </div>
+        <p>制造业的 BCP 必须延伸到 OT 与人工动作。AGV 因网络或 MQTT 异常停摆，需要人工推车与调度卡；电动扳手出故障，需要切换力矩扳手并复核扭矩；MES 不可用，需要纸质工单与离线数采；身份系统不可用，需要应急账号与事后审计补录。IT 运维团队的责任，是把这些 <em>降级模式背后的数字依赖</em> 找出来、可视化、演练、并固化为变更管控的前置条件。</p>
+
+        <div class="svg-card">
+          <div class="svg-scroll-wrapper">
+            <svg viewBox="0 0 980 440" role="img" aria-labelledby="res-title res-desc">
+              <title id="res-title">最低可运行工厂依赖地图</title>
+              <desc id="res-desc">从业务动作倒推 IT/OT 依赖，标记哪些环节有人工降级。</desc>
+              <defs>
+                <linearGradient id="resGrad" x1="0" x2="1">
+                  <stop offset="0" stop-color="#0A60FF"/>
+                  <stop offset="1" stop-color="#02C8FF"/>
+                </linearGradient>
+              </defs>
+              <rect x="20" y="20" width="940" height="400" rx="28" fill="#F7F8FA" stroke="#D4D8DE"/>
+              <rect x="370" y="60" width="240" height="70" rx="20" fill="url(#resGrad)"/>
+              <text x="490" y="93" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">最低可运行工厂</text>
+              <text x="490" y="116" text-anchor="middle" fill="#fff" font-size="13">关键产能 · 关键订单 · 关键合规</text>
+
+              <g fill="#fff" stroke="#D4D8DE" stroke-width="2">
+                <rect x="60"  y="190" width="150" height="62" rx="16"/>
+                <rect x="230" y="190" width="150" height="62" rx="16"/>
+                <rect x="400" y="190" width="150" height="62" rx="16"/>
+                <rect x="570" y="190" width="150" height="62" rx="16"/>
+                <rect x="740" y="190" width="180" height="62" rx="16"/>
+                <rect x="60"  y="310" width="150" height="62" rx="16"/>
+                <rect x="230" y="310" width="150" height="62" rx="16"/>
+                <rect x="400" y="310" width="150" height="62" rx="16"/>
+                <rect x="570" y="310" width="150" height="62" rx="16"/>
+                <rect x="740" y="310" width="180" height="62" rx="16"/>
+              </g>
+              <g fill="#07182D" font-size="16" font-weight="700" text-anchor="middle">
+                <text x="135" y="225">MES / WMS</text>
+                <text x="305" y="225">AGV · MQTT</text>
+                <text x="475" y="225">电动扳手</text>
+                <text x="645" y="225">质量追溯</text>
+                <text x="830" y="225">身份 / 权限</text>
+                <text x="135" y="345">纸质工单</text>
+                <text x="305" y="345">人工推车</text>
+                <text x="475" y="345">力矩扳手</text>
+                <text x="645" y="345">离线采集</text>
+                <text x="830" y="345">应急账号</text>
+              </g>
+              <g fill="#58585B" font-size="11" text-anchor="middle">
+                <text x="135" y="244">IT 应用层</text>
+                <text x="305" y="244">IT/OT 边界</text>
+                <text x="475" y="244">OT 工具</text>
+                <text x="645" y="244">合规链路</text>
+                <text x="830" y="244">控制平面</text>
+                <text x="135" y="364">人工降级</text>
+                <text x="305" y="364">人工降级</text>
+                <text x="475" y="364">人工降级</text>
+                <text x="645" y="364">人工降级</text>
+                <text x="830" y="364">人工降级</text>
+              </g>
+
+              <g stroke="#0A60FF" stroke-width="3" fill="none" stroke-linecap="round">
+                <path d="M490 130 L135 190"/>
+                <path d="M490 130 L305 190"/>
+                <path d="M490 130 L475 190"/>
+                <path d="M490 130 L645 190"/>
+                <path d="M490 130 L830 190"/>
+                <path d="M135 252 L135 310"/>
+                <path d="M305 252 L305 310"/>
+                <path d="M475 252 L475 310"/>
+                <path d="M645 252 L645 310"/>
+                <path d="M830 252 L830 310"/>
+              </g>
+            </svg>
+          </div>
+          <p class="svg-caption">图 2：BCP 要从业务动作倒推数字依赖，而不是从服务器清单开始。每一个 IT/OT 节点都要有对应的人工降级路径。</p>
+        </div>
+
+        <aside class="formula-callout" aria-label="韧性预算翻译公式">
+          <p class="section-eyebrow" style="color: var(--cisco-accent);">Resilience Budget Formula</p>
+          <h3 style="color: #fff; border: 0; padding: 0; margin-bottom: 0.2rem;">把"韧性"翻译成 CFO 能算的乘法</h3>
+          <p>韧性项目最难的不是技术，而是说服管理层"它值得花"。给 CFO 一行可以代入数字的公式，胜过一百页方案：</p>
+          <code class="formula-eq">投资价值 ≈ <em>场景概率</em> × <em>单次中断损失</em> × <em>当前能力缺口暴露度</em></code>
+          <p>三个因子都能从历史事件、行业基准和红蓝对抗结果中给出可辩护的区间。当三者相乘的期望损失大于投资金额，预算就有了硬证据。</p>
+          <p><strong>金句：</strong>100% 可用是神话；<em>出事还能继续运转，才是真本事</em>。这一行字，请贴在每一次 BCP 评审会的开场。</p>
+        </aside>
+
+        <h3 style="margin-top: var(--space-8);">红蓝对抗：把"演习"变成"预算论证"</h3>
+
+        <div class="pull-quote-strong">
+          红蓝对抗的本质，是<em>业务连续性的一次压力测试</em>。带着锤子去敲自己家的墙，比等台风来把房子掀掉，便宜 100 倍。
+          <cite>— 这就是为什么"能让工厂停产"的演习才有价值</cite>
+        </div>
+
+        <h4 style="margin-top: var(--space-6);">先分级，再交付：三种强度对应三种证据</h4>
+        <p>把昂贵的实战对抗用在错误的对象上，是"双重浪费"：既花钱又得不到证据。下面三档强度对应三类预算决策，错档使用就是浪费预算。</p>
+        <div class="strength-grid">
+          <article class="card strength-card l1">
+            <span class="lvl">L1 · 桌面推演</span>
+            <h3>验证流程是否能走通</h3>
+            <p>低成本、高频次。验证应急流程、角色职责、上下游沟通、SOP 是否在纸面上闭环。<strong>用于流程债清理。</strong></p>
+          </article>
+          <article class="card strength-card l2">
+            <span class="lvl">L2 · 紫队联合</span>
+            <h3>验证检测与响应能力</h3>
+            <p>红队执行受控攻击，蓝队同步可见。聚焦 MTTD / MTTR、告警可解释性、规则覆盖率。<strong>用于安全工具与流程联调。</strong></p>
+          </article>
+          <article class="card strength-card l3">
+            <span class="lvl">L3 · 全实战</span>
+            <h3>允许触及业务停产</h3>
+            <p>不预先告知蓝队，允许触发真实停产后果。产出"具名攻击路径成本对照表"，复测证明路径已被封堵。<strong>用于关键预算续投的硬证据。</strong></p>
+          </article>
+        </div>
+        <p>选错强度的代价：用 L3 去验证"流程能不能走通"，是把炸药包用来打蚊子；用 L1 去申请"重投千万级预算"，没有任何证据力。</p>
+
+        <h4 style="margin-top: var(--space-6);">无论哪一档强度，都要回答的四个问题</h4>
+        <p>实战红蓝对抗如果允许后果触及"工厂停产"，价值就不在于"红队赢了还是蓝队赢了"，而在于回答四个能写进预算评审的问题：</p>
+        <div class="pillar-grid">
+          <div class="card pillar-card">
+            <h3>① 攻击路径</h3>
+            <p>攻击者如何从入口横向移动到生产关键系统？切断哪些节点能让整条路径失效？</p>
+          </div>
+          <div class="card pillar-card">
+            <h3>② 暴露面</h3>
+            <p>哪些资产、账号、API、远程访问与供应商通道被过度暴露？哪些是技术债，哪些是流程债？</p>
+          </div>
+          <div class="card pillar-card">
+            <h3>③ 业务影响</h3>
+            <p>哪些攻击动作会让 AGV、MES、WMS、质量追溯或身份系统真正中断？影响多少产能、多少时间？</p>
+          </div>
+          <div class="card pillar-card">
+            <h3>④ 复测证据</h3>
+            <p>修复后是否真的挡住了同一条路径？MTTD / MTTR 是否实测缩短？这就是预算成效的硬证据。</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>架构师建议：</strong>红蓝对抗的预算价值在于把模糊的"安全建设"变成 <em>具名攻击路径的成本对照表</em>：修这条路径花多少钱、避免多少停产时间、降低多少恢复成本。这一对照表直接落进因果链账本的"证据"列，是最有说服力的"花钱见效"语言。
+        </div>
+
+        <aside class="chapter-ledger" aria-label="本章入账">
+          <span class="cl-tag">本章入账 · Pain 3</span>
+          <div class="cl-row">
+            <span><strong>触发</strong>勒索/数据破坏/合规审计</span>
+            <span><strong>动作</strong>红蓝对抗 + 备份恢复演练 + 韧性预算公式</span>
+            <span><strong>替代</strong>买更多 EDR/SIEM 而不演练</span>
+            <span><strong>证据</strong>攻击路径 × 修复成本对照表 + RTO/RPO 实测</span>
+            <span><strong>责任</strong>CISO + 业务连续性负责人共签</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="chapter" id="agents">
+      <div class="container">
+        <p class="section-eyebrow">Agent AI Orchestration</p>
+        <h2>Agent 工作流：把三大痛点拧成一条可推理的运营回路</h2>
+        <p>Agent AI 在 IT 运维的真正价值，不是让某个聊天机器人替你写脚本，而是让 <em>解释、归因、排序、模拟、提议、复盘</em> 这些过去靠"老员工脑子"的动作，被组织成 <strong>可观测、可审计、可回滚</strong> 的工作流。下面这张编排图，把专线扩容、漏洞修复和 BCP 演练统一到同一根回路上：感知 → 关联 → 推理 → 提议 → 审批 → 执行 → 复盘。</p>
+
+        <div class="svg-card">
+          <div class="svg-scroll-wrapper">
+            <svg viewBox="0 0 1000 460" role="img" aria-labelledby="agent-title agent-desc">
+              <title id="agent-title">受控 Agent 工作流编排</title>
+              <desc id="agent-desc">从数据源到执行系统，多个 Agent 在治理护栏下协作。</desc>
+              <defs>
+                <linearGradient id="agentGrad" x1="0" x2="1">
+                  <stop offset="0" stop-color="#0A60FF"/>
+                  <stop offset="1" stop-color="#02C8FF"/>
+                </linearGradient>
+                <filter id="agentShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#07182D" flood-opacity="0.14"/>
+                </filter>
+              </defs>
+              <rect x="20" y="20" width="960" height="420" rx="28" fill="#F7F8FA" stroke="#D4D8DE"/>
+
+              <!-- 数据源层 -->
+              <g fill="#fff" stroke="#D4D8DE" stroke-width="2">
+                <rect x="40"  y="60"  width="150" height="58" rx="14"/>
+                <rect x="40"  y="135" width="150" height="58" rx="14"/>
+                <rect x="40"  y="210" width="150" height="58" rx="14"/>
+                <rect x="40"  y="285" width="150" height="58" rx="14"/>
+                <rect x="40"  y="360" width="150" height="58" rx="14"/>
+              </g>
+              <g fill="#07182D" font-size="13" font-weight="700" text-anchor="middle">
+                <text x="115" y="93">NetScout / Flow</text>
+                <text x="115" y="168">云账单 CUR</text>
+                <text x="115" y="243">CMDB · APM</text>
+                <text x="115" y="318">CVE · SOC</text>
+                <text x="115" y="393">MES · WMS · OT</text>
+              </g>
+
+              <!-- Agent 层 -->
+              <g filter="url(#agentShadow)">
+                <rect x="280" y="60"  width="200" height="78" rx="16" fill="url(#agentGrad)"/>
+                <rect x="280" y="160" width="200" height="78" rx="16" fill="url(#agentGrad)"/>
+                <rect x="280" y="260" width="200" height="78" rx="16" fill="url(#agentGrad)"/>
+                <rect x="280" y="360" width="200" height="60" rx="16" fill="url(#agentGrad)"/>
+              </g>
+              <g fill="#fff" font-size="14" font-weight="700" text-anchor="middle">
+                <text x="380" y="92">账单解释 Agent</text>
+                <text x="380" y="111" font-size="11" font-weight="500">归因 · 异常 · 优化建议</text>
+                <text x="380" y="192">容量治理 Agent</text>
+                <text x="380" y="211" font-size="11" font-weight="500">扩容请求合理性校验</text>
+                <text x="380" y="292">漏洞优先级 Agent</text>
+                <text x="380" y="311" font-size="11" font-weight="500">CVE × 资产 × exploit × 业务</text>
+                <text x="380" y="395">变更影响 Agent</text>
+              </g>
+
+              <!-- 编排中枢 -->
+              <circle cx="600" cy="230" r="80" fill="#07182D"/>
+              <text x="600" y="222" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">Workflow</text>
+              <text x="600" y="245" text-anchor="middle" fill="#02C8FF" font-size="15" font-weight="700">Orchestrator</text>
+
+              <!-- 治理护栏 -->
+              <g filter="url(#agentShadow)">
+                <rect x="730" y="80"  width="230" height="60" rx="14" fill="#fff" stroke="#FF9000" stroke-width="2"/>
+                <rect x="730" y="160" width="230" height="60" rx="14" fill="#fff" stroke="#FF9000" stroke-width="2"/>
+                <rect x="730" y="240" width="230" height="60" rx="14" fill="#fff" stroke="#FF9000" stroke-width="2"/>
+                <rect x="730" y="320" width="230" height="60" rx="14" fill="#fff" stroke="#FF9000" stroke-width="2"/>
+              </g>
+              <g fill="#07182D" font-size="13" font-weight="700" text-anchor="middle">
+                <text x="845" y="105">数据权限</text>
+                <text x="845" y="125" font-size="11" font-weight="500">字段级脱敏 · 行级隔离</text>
+                <text x="845" y="185">动作权限</text>
+                <text x="845" y="205" font-size="11" font-weight="500">只读 · 建议 · 执行 三级</text>
+                <text x="845" y="265">人工审批</text>
+                <text x="845" y="285" font-size="11" font-weight="500">单人 · 双人 · 委员会</text>
+                <text x="845" y="345">审计与回滚</text>
+                <text x="845" y="365" font-size="11" font-weight="500">证据链 · 一键回滚</text>
+              </g>
+
+              <!-- 连线 -->
+              <g stroke="#0A60FF" stroke-width="2" fill="none" stroke-linecap="round">
+                <path d="M190 89  L280 99"/>
+                <path d="M190 164 L280 175"/>
+                <path d="M190 239 L280 275"/>
+                <path d="M190 314 L280 295"/>
+                <path d="M190 389 L280 390"/>
+                <path d="M480 99  L520 200"/>
+                <path d="M480 199 L520 220"/>
+                <path d="M480 299 L520 250"/>
+                <path d="M480 390 L520 270"/>
+                <path d="M680 200 L730 110"/>
+                <path d="M680 215 L730 190"/>
+                <path d="M680 245 L730 270"/>
+                <path d="M680 260 L730 350"/>
+              </g>
+            </svg>
+          </div>
+          <p class="svg-caption">图 3：Agent 不是越权自动化，而是把"数据 → 推理 → 提议"的过程组织成可审计的工作流，人始终保留决策权。</p>
+        </div>
+
+        <h3 style="margin-top: var(--space-8);">五个起手 Agent：从"解释"开始，而不是从"执行"开始</h3>
+        <div class="agent-grid">
+          <div class="card agent-card">
+            <span class="role">READ-ONLY</span>
+            <h3>账单解释 Agent</h3>
+            <p>关联云账单字段、专线流量、CMDB 与负责人，输出"为什么这笔钱发生"的可读说明，并提示同类账单的历史模式。</p>
+          </div>
+          <div class="card agent-card">
+            <span class="role">ADVISE</span>
+            <h3>容量治理 Agent</h3>
+            <p>每次专线 / 云配额扩容请求都要它出具"证据三件套"：真实峰值、业务量变化、是否存在跨域同步异常。无证据则驳回。</p>
+          </div>
+          <div class="card agent-card">
+            <span class="role">RANK</span>
+            <h3>漏洞优先级 Agent</h3>
+            <p>把 CVE × 资产 × exploit 情报 × 业务影响合成同一张排序表，明确"今晚 / 本周 / 季度 / 不修"四档，附运行时缓解状态。</p>
+          </div>
+          <div class="card agent-card">
+            <span class="role">SIMULATE</span>
+            <h3>变更影响 Agent</h3>
+            <p>在补丁、路由策略、安全控制变更前，基于依赖图模拟受影响服务、批次划分、回滚路径与最坏情况。</p>
+          </div>
+          <div class="card agent-card">
+            <span class="role">EXERCISE</span>
+            <h3>BCP 演练 Agent</h3>
+            <p>根据 MVF 依赖地图生成桌面演练剧本、故障注入清单、观察项与复盘模板，把每一次演练固化为下一版预算依据。</p>
+          </div>
+          <div class="card agent-card">
+            <span class="role">GUARDRAIL</span>
+            <h3>治理护栏</h3>
+            <p>为每个 Agent 设定数据权限、动作权限、审批阈值、敏感字段脱敏、日志留存、人工兜底与一键 kill switch。</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>关键原则：</strong>Agent 可以建议、排序、解释、生成变更计划与演练脚本；但涉及路由切换、安全策略下发、生产系统补丁、应急切换等"会改变物理世界"的动作，必须保留人工审批、双人复核与完整审计链。受控自动化优先于完全自动化。
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="itot">
+      <div class="container">
+        <div class="two-col">
+          <article>
+            <p class="section-eyebrow">IT/OT Convergence</p>
+            <h2>制造业的特殊性：每一次 IT 决策都会落到 OT 现场</h2>
+            <p>制造业的运维和互联网公司最大的不同，是 IT 决策会以毫秒、扭矩、温度、AGV 路径的方式落到物理世界。这意味着每一项 Agent 提议、每一条策略变更、每一个补丁批次，都需要回答四个 OT 维度的问题：</p>
+            <ul>
+              <li><strong>时序与确定性：</strong>变更窗口是否落在班次切换之间？是否影响 PLC 周期与 OPC UA 通信稳定性？</li>
+              <li><strong>失效模式：</strong>这一变更若失败，AGV 会走错路径还是直接停车？操作人员能否第一时间察觉？</li>
+              <li><strong>人工接管：</strong>降级到力矩扳手、纸质工单、人工推车后，单班产能能维持多少？多长时间？</li>
+              <li><strong>安全合规：</strong>是否影响质量追溯、批次记录、ISO/GMP/汽车行业 IATF 等合规链条？</li>
+            </ul>
+            <p>从架构上，这要求 IT 与 OT 共用一张依赖图与一套变更治理流程。Cisco IE/IR 工业网络、安全工厂参考架构、ISA/IEC 62443 分区分级、Purdue 模型不是合规文档，而是把 IT 的"灰度、回滚、可观测"工程文化嫁接到 OT"确定性、可预测、可手动接管"工程文化上的桥梁。</p>
+
+            <div class="command-callout" role="note" style="border-left-color: var(--cisco-red);">
+              <h4>OT 头顶的达摩克利斯之剑：那些"打不了补丁"的资产</h4>
+              <p style="margin: 0 0 0.5rem; color: var(--text-primary);">HMI、SCADA、老旧 Windows Server、专用工业网关 —— 这些资产的现实是：<strong>厂商根本不再发布补丁，或者一打补丁就影响产线认证、保修与合规</strong>。在过去，这就是悬在 IT 头上的剑：明知有漏洞，却不能动。</p>
+              <p class="small-note" style="color: var(--text-primary);">eBPF / Live Protection 第一次给了制造业一把"不打补丁也能防御的剑鞘"：在不改动应用、不重启系统、不破坏认证的前提下，把可疑行为按事件级拦截。这正是 OT 场景最稀缺的能力。</p>
+            </div>
+          </article>
+          <aside class="card">
+            <p class="section-eyebrow">CISSP Guardrail</p>
+            <h3>八个必须落在 Agent 上的安全护栏</h3>
+            <ul class="pill-list">
+              <li>最小权限</li>
+              <li>职责分离</li>
+              <li>双人复核</li>
+              <li>变更窗口</li>
+              <li>不可篡改审计</li>
+              <li>敏感字段脱敏</li>
+              <li>密钥与凭据托管</li>
+              <li>一键 Kill Switch</li>
+            </ul>
+            <p style="margin-top: var(--space-4);">这八条是 CISSP CBK 的工程化映射，也是 Agent 进入生产环境的入场券。任何缺一条的 Agent 都只能停在沙箱或只读模式。</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="reasoner">
+      <div class="container">
+        <p class="section-eyebrow">Interactive Reasoning Lab</p>
+        <h2>三个场景的"推理回放"：看 Agent 如何把决策摆到桌面上</h2>
+        <p>这不是财务模型，也不是产品演示，而是把上面三章里"Agent 工作流"的内部对话外显出来，让管理层、IT 和业务方在同一张桌子上看清：每一步推理用了哪些证据、给出了什么提议、由谁审批、留下了什么证据。</p>
+        <div class="reasoner" aria-label="Agent 推理回放">
+          <div class="scenario-tabs" role="tablist">
+            <button class="active" data-scenario="net" type="button" role="tab" id="tab-net" aria-controls="panel-net" aria-selected="true">场景 A · 专线扩容驳回</button>
+            <button data-scenario="cve" type="button" role="tab" id="tab-cve" aria-controls="panel-cve" aria-selected="false">场景 B · 高危漏洞排程</button>
+            <button data-scenario="bcp" type="button" role="tab" id="tab-bcp" aria-controls="panel-bcp" aria-selected="false">场景 C · AGV 停摆降级</button>
+          </div>
+
+          <div class="reasoner-panel active" data-panel="net" role="tabpanel" id="panel-net" aria-labelledby="tab-net">
+            <div class="reasoner-step"><span class="num">1</span><div class="body"><span class="agent">[感知]</span> 收到应用部门提交的 <strong>AWS ⇄ 阿里云专线由 1G 扩到 2G</strong> 的申请，理由："业务高峰带宽不足"。</div></div>
+            <div class="reasoner-step"><span class="num">2</span><div class="body"><span class="agent">[关联]</span> 账单 Agent 拉取近 30 天 CUR + 阿里云费用 + Flow Logs，发现 <strong>78% 跨云流量来自 OSS ↔ S3 的同步任务</strong>，与申请描述的"业务高峰"无关。</div></div>
+            <div class="reasoner-step"><span class="num">3</span><div class="body"><span class="agent">[推理]</span> 容量治理 Agent 对比业务量（订单数、用户数、MES 事务数）<strong>同期持平</strong>，扩容请求无业务证据支撑。</div></div>
+            <div class="reasoner-step"><span class="num">4</span><div class="body"><span class="agent">[提议]</span> 给出三选项：① 驳回并优化同步策略；② 同意临时扩容 30 天 + 强制回退条款；③ 改造为事件驱动同步。Agent 推荐选项 ①。</div></div>
+            <div class="reasoner-step"><span class="num">5</span><div class="body"><span class="agent">[审批]</span> 网络运营经理 + 应用负责人双签，选择选项 ①，Agent 自动生成驳回说明、技术整改建议与 OKR 跟踪项。</div></div>
+            <div class="reasoner-step"><span class="num">6</span><div class="body"><span class="agent">[证据]</span> 30 天后回放：跨云出流量下降，专线利用率回归健康区间，<strong>本笔潜在年化成本节省进入因果链账本"业务结果"列</strong>。</div></div>
+          </div>
+
+          <div class="reasoner-panel" data-panel="cve" role="tabpanel" id="panel-cve" aria-labelledby="tab-cve" hidden>
+            <div class="reasoner-step"><span class="num">1</span><div class="body"><span class="agent">[感知]</span> 漏洞扫描器报告一枚 <strong>CVSS 9.8 的内核组件漏洞</strong>，影响 240 台 Linux 主机，含 MES 应用节点。</div></div>
+            <div class="reasoner-step"><span class="num">2</span><div class="body"><span class="agent">[关联]</span> 优先级 Agent 叠加 CMDB（资产关键性）、APM（业务关联）、SOC（exploit 情报）、Tetragon（运行时缓解可行性）四类信号。</div></div>
+            <div class="reasoner-step"><span class="num">3</span><div class="body"><span class="agent">[推理]</span> 输出排序：MES 节点为最高，但 <strong>已有 Tetragon 策略可压制利用路径</strong>，可在 72 小时灰度窗口内完成；其余节点按业务关键性分四批。</div></div>
+            <div class="reasoner-step"><span class="num">4</span><div class="body"><span class="agent">[提议]</span> 变更影响 Agent 生成分批补丁计划、灰度路由切换脚本、健康检查阈值与一键回滚链路。</div></div>
+            <div class="reasoner-step"><span class="num">5</span><div class="body"><span class="agent">[审批]</span> 安全 + 网络 + 生产 IT 三方在变更评审会签字，发起执行，Agent 全程只读监听并记录证据。</div></div>
+            <div class="reasoner-step"><span class="num">6</span><div class="body"><span class="agent">[证据]</span> 复盘报告写入因果链账本：<strong>高危漏洞暴露窗口从 14 天压到 3 天，无紧急停机，无 P1 事件</strong>。</div></div>
+          </div>
+
+          <div class="reasoner-panel" data-panel="bcp" role="tabpanel" id="panel-bcp" aria-labelledby="tab-bcp" hidden>
+            <div class="reasoner-step"><span class="num">1</span><div class="body"><span class="agent">[感知]</span> MQTT Broker 集群故障，<strong>AGV 调度中断</strong>，5 条产线物料补给受阻。</div></div>
+            <div class="reasoner-step"><span class="num">2</span><div class="body"><span class="agent">[关联]</span> BCP Agent 拉取 MVF 依赖图，识别"AGV → MQTT → 调度服务 → MES"链路上的故障点与可用替代路径。</div></div>
+            <div class="reasoner-step"><span class="num">3</span><div class="body"><span class="agent">[推理]</span> 评估：技术修复预计 90 分钟；超过 30 分钟将影响日产能 KPI。建议立即启动 <strong>人工推车 + 纸质调度卡</strong> 的 MVF 模式。</div></div>
+            <div class="reasoner-step"><span class="num">4</span><div class="body"><span class="agent">[提议]</span> 推送降级 SOP 给产线班长、安全员与物流主管，包含路径图、安全注意事项与恢复触发条件。</div></div>
+            <div class="reasoner-step"><span class="num">5</span><div class="body"><span class="agent">[审批]</span> 生产经理批准切换至 MVF，IT 同步推进 MQTT 恢复；Agent 持续追踪两条线的进度与产能影响。</div></div>
+            <div class="reasoner-step"><span class="num">6</span><div class="body"><span class="agent">[证据]</span> 复盘：实际人工接管 75 分钟，产能损失被控制在阈值内；演练剧本与本次事件被合并入下一版 BCP 与红蓝对抗范围。</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="roadmap">
+      <div class="container">
+        <p class="section-eyebrow">Execution Roadmap</p>
+        <h2>三阶段路线图：观测 → 推理 → 闭环</h2>
+        <p>不要把这件事做成一次性的"AI 项目"。它是一段成熟度跃迁，按季度推进比按月推进更有可能成功。每个阶段都要有 Agent 的"只读 → 建议 → 执行"权限升级闸门。</p>
+        <div class="phase-grid">
+          <div class="card phase-card p1">
+            <span class="phase-num">1</span>
+            <h3>第 1 季度 · 观测层就位</h3>
+            <ul>
+              <li>建立因果链账本骨架，强制五个字段。</li>
+              <li>打通 NetScout、云账单、CMDB、APM、CVE、SOC 与 MES/WMS 关键字段映射。</li>
+              <li>识别 Top 20 跨云流量与 Top 20 停产单点依赖。</li>
+              <li>上线"账单解释 Agent"与"漏洞优先级 Agent"的<strong>只读版本</strong>。</li>
+              <li>冻结无证据扩容，所有扩容请求必须附 Agent 证据三件套。</li>
+            </ul>
+          </div>
+          <div class="card phase-card p2">
+            <span class="phase-num">2</span>
+            <h3>第 2 季度 · 推理层成熟</h3>
+            <ul>
+              <li>容量治理、变更影响、BCP 演练三个 Agent 进入<strong>建议模式</strong>。</li>
+              <li>制定工作负载放置矩阵，启动 2–3 个回迁 / 重构 / 边缘下沉试点。</li>
+              <li>引入 Tetragon Live Protection，针对 Top 10 高危漏洞建立运行时缓解策略。</li>
+              <li>完成首次以"工厂停产路径"为目标的 BCP 桌面演练。</li>
+            </ul>
+          </div>
+          <div class="card phase-card p3">
+            <span class="phase-num">3</span>
+            <h3>第 3 季度 · 闭环层落地</h3>
+            <ul>
+              <li>选定 3–5 类低风险动作（如标签纠错、QoS 调整、镜像同步）开放<strong>受控执行</strong>。</li>
+              <li>红蓝对抗复测：从攻击路径出发证明 MTTD/MTTR 实测缩短。</li>
+              <li>把因果链账本接入预算评审，每一笔续费都必须呈现五字段证据。</li>
+              <li>向管理层交付"韧性资产负债表"季度报告：成本、风险、恢复三类资产的余额表。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="antipatterns">
+      <div class="container">
+        <p class="section-eyebrow">Anti-Patterns</p>
+        <h2>六个最容易踩的反模式：避免把好方案用错地方</h2>
+        <p>预算紧缩下，最危险的不是"没钱做事"，而是"花了钱却走错方向"。下面六条是常见误区，每一条都应在架构评审中被直接挑战。</p>
+        <div class="anti-grid">
+          <div class="card anti-card">
+            <span class="verdict">反模式</span>
+            <h3>把可视化当成归因</h3>
+            <p>NetScout 看到的是"链路上发生了什么"，不能直接等同于"由谁付费"。归因必须叠加云账单、应用身份与业务标签。</p>
+          </div>
+          <div class="card anti-card">
+            <span class="verdict">反模式</span>
+            <h3>把运行时防护当成补丁</h3>
+            <p>Tetragon Live Protection 是缓解层，不是修复层。它压缩暴露窗口，最终仍要完成版本修复或架构改造。</p>
+          </div>
+          <div class="card anti-card">
+            <span class="verdict">反模式</span>
+            <h3>把上云 / 下云当成意识形态</h3>
+            <p>真正的指标是单位业务交易成本、跨域流量占比、容量利用率与恢复时间，而不是"上云率"或"回迁率"。</p>
+          </div>
+          <div class="card anti-card">
+            <span class="verdict">反模式</span>
+            <h3>把 BCP 当成 IT 独角戏</h3>
+            <p>最低可运行工厂必须由生产、物流、质量、安全、IT 与 OT 联合定义并签字，IT 自己写的 BCP 永远是"半张地图"。</p>
+          </div>
+          <div class="card anti-card">
+            <span class="verdict">反模式</span>
+            <h3>把 Agent 当成无限权限同事</h3>
+            <p>Agent 越权自动化是审计灾难的高发区。先从"解释 / 排序 / 模拟"切入，等数据质量与流程成熟再开放低风险动作。</p>
+          </div>
+          <div class="card anti-card">
+            <span class="verdict">反模式</span>
+            <h3>把红蓝对抗当成表演</h3>
+            <p>不能停产的对抗只是合规打卡。允许触及停产的实战对抗，才能产出能写进预算评审的"具名攻击路径成本对照表"。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter scorecard" id="scorecard">
+      <div class="container">
+        <p class="section-eyebrow">Management Scorecard</p>
+        <h2>向管理层汇报：不要汇报项目，要汇报"韧性资产负债表"</h2>
+        <p>管理层听不懂"我们部署了 X 个节点"，但听得懂"今年高危漏洞暴露窗口从 14 天压到 3 天，单位业务交易的网络与云成本下降 18%"。把每一笔预算都翻译成下面这张表。</p>
+        <div class="table-scroll-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>预算项</th>
+                <th>不要这样汇报</th>
+                <th>应该这样汇报</th>
+                <th>可度量指标</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>专线与多云互联</td>
+                <td>某条专线从 1G 扩到 2G。</td>
+                <td>关键业务高峰拥塞消除，同时识别并减少无价值跨云同步。</td>
+                <td>单位业务交易网络成本、Top 流量归因率、扩容回退率。</td>
+              </tr>
+              <tr>
+                <td>云成本治理</td>
+                <td>云账单下降了多少。</td>
+                <td>哪些工作负载被优化 / 重构 / 重新放置，业务体验是否保持。</td>
+                <td>工作负载 TCO、egress 占比、利用率、标签覆盖率。</td>
+              </tr>
+              <tr>
+                <td>运行时防护（eBPF）</td>
+                <td>部署了一套安全工具。</td>
+                <td>在正式补丁前降低 exploit 成功概率，减少紧急停机修复。</td>
+                <td>高危漏洞缓解时间、阻断策略覆盖率、误报率、补丁 SLA。</td>
+              </tr>
+              <tr>
+                <td>Digital Resilience / BCP</td>
+                <td>更新了灾备文档。</td>
+                <td>验证了最低可运行工厂，明确人工降级与恢复路径。</td>
+                <td>RTO、RPO、演练通过率、关键单点减少数、人工接管时间。</td>
+              </tr>
+              <tr>
+                <td>红蓝对抗</td>
+                <td>跑了一次对抗演习。</td>
+                <td>产出具名攻击路径成本对照表，复测证明路径已封堵。</td>
+                <td>MTTD / MTTR 实测、路径复测通过率、修复成本 / 停产代价比。</td>
+              </tr>
+              <tr>
+                <td>Agent AI 编排</td>
+                <td>引入 AI 提升效率。</td>
+                <td>把账单解释、容量评审、漏洞排序、演练复盘变成稳定流程。</td>
+                <td>分析工时节省、建议采纳率、审批时长、审计覆盖率、回滚率。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="glossary">
+      <div class="container">
+        <p class="section-eyebrow">Glossary</p>
+        <h2>术语表</h2>
+        <dl class="glossary-grid">
+          <div class="card">
+            <dt>因果链账本（Causal Ledger）</dt>
+            <dd>把支出、能力、信号、业务结果与证据强制对齐的运营账本，是预算 / 架构 / 安全 / BCP 评审共享的同一张事实表。</dd>
+          </div>
+          <div class="card">
+            <dt>Network FinOps</dt>
+            <dd>把网络流量、云账单、应用身份与业务价值关联起来，用于解释、优化与分摊网络及云互联成本的运营方法。</dd>
+          </div>
+          <div class="card">
+            <dt>数据重力（Data Gravity）</dt>
+            <dd>数据规模越大、依赖越多，越会吸引计算靠近它。频繁跨云搬运会持续产生 egress、NAT、LB 与延迟代价。</dd>
+          </div>
+          <div class="card">
+            <dt>eBPF · Tetragon · Live Protection</dt>
+            <dd>基于 Linux 内核 eBPF 的运行时观测与策略执行能力，可在补丁完成前对可疑行为进行检测与阻断，是缓解层而非修复层。</dd>
+          </div>
+          <div class="card">
+            <dt>Minimum Viable Factory（MVF）</dt>
+            <dd>最低可运行工厂：在故障或攻击下仍需维持的最低产能、关键流程、人工替代路径与恢复时间承诺。</dd>
+          </div>
+          <div class="card">
+            <dt>Agent AI Workflow</dt>
+            <dd>在数据权限、动作权限、审批阈值与审计边界内，让多个职能 Agent 协同完成感知 → 关联 → 推理 → 提议 → 审批 → 执行 → 复盘的运营回路。</dd>
+          </div>
+          <div class="card">
+            <dt>IT/OT Convergence</dt>
+            <dd>把 IT 的灰度、回滚、可观测工程文化与 OT 的确定性、可预测、可手动接管文化对齐，以 ISA/IEC 62443、Purdue 模型为分区分级基础。</dd>
+          </div>
+          <div class="card">
+            <dt>CISSP Guardrail</dt>
+            <dd>把最小权限、职责分离、双人复核、不可篡改审计等 CISSP CBK 原则工程化为 Agent 入场券。</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="chapter" id="closing">
+      <div class="container">
+        <article class="card">
+          <p class="section-eyebrow">Final Takeaway</p>
+          <h2>聪明的降本，不是少花钱，而是减少不确定性</h2>
+          <p>制造业 IT 的预算压力不会消失，业务对 SLA、对韧性、对安全的要求只会更高。真正成熟的团队不会用"砍项目"回应压力，而是把每一笔钱放进同一张因果链账本：它降低了哪类成本，切断了哪条攻击路径，缩短了哪段恢复时间，保护了哪条产线，保留了哪种未来选择权。</p>
+          <p>在 Agent AI 时代，IT 运维团队的新角色已经清晰：不是链路管理员、服务器管理员或工单处理员，而是 <strong>业务连续性的架构师、风险的翻译者、数据驱动的投资组合经理</strong>。Agent 不会取代你，但善用 Agent 工作流的团队，会重新定义"运维"这两个字的边界。</p>
+          <p style="color: var(--text-secondary); margin-bottom: 0;">预算越紧，越要架构聪明；变化越快，越要把人的经验、工具的数据与 Agent 的推理能力组合成一条可解释、可审计、可复盘的运营回路。这就是从救火到推理的真正含义，也是制造业 IT 在这个时代最值得投入的能力跃迁。</p>
+        </article>
+
+        <aside class="final-three" aria-label="必须记住的三件事">
+          <p class="section-eyebrow" style="color: var(--cisco-accent); margin-bottom: 0.6rem;">必须记住的三件事</p>
+          <ol>
+            <li><strong>没有账本，就没有谈判桌。</strong>每一笔预算请求都要能写进"触发 → 动作 → 替代 → 证据 → 责任"这五字段，CFO 才会从拦路人变成盟友。</li>
+            <li><strong>救火队 → 消防工程师。</strong>价值的拐点不是工具更贵，而是范式从"事后修补"切到"事前规则与传感器"。eBPF、Live Protection、红蓝演练都是这条路径上的具体抓手。</li>
+            <li><strong>Agent 编排是放大器，不是替代器。</strong>团队经验和因果链账本越扎实，Agent 的推理就越值钱；账本越糊，Agent 只是在放大噪声。</li>
+          </ol>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+  <a href="#top" class="back-to-top" aria-label="返回顶部" title="返回顶部">&uarr;</a>
+  <script>
+    // Scenario tabs
+    const tabs = document.querySelectorAll('.scenario-tabs button');
+    const panels = document.querySelectorAll('.reasoner-panel');
+    tabs.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-scenario');
+        tabs.forEach((b) => {
+          const on = b === btn;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        panels.forEach((p) => {
+          const on = p.getAttribute('data-panel') === target;
+          p.classList.toggle('active', on);
+          if (on) { p.removeAttribute('hidden'); } else { p.setAttribute('hidden', ''); }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

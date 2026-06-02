@@ -372,10 +372,11 @@ layout: false
       从红蓝对抗到 Agent AI，把零散的决策拧成一根可度量的运营主线。
     </p>
     <div class="hero-stats">
-      <div class="hero-stat"><span class="num">4 层</span><span class="lbl">可解释成本归因模型</span></div>
-      <div class="hero-stat"><span class="num">5 类</span><span class="lbl">数字运维 Agent</span></div>
-      <div class="hero-stat"><span class="num">90 天</span><span class="lbl">从止血到自动化路线图</span></div>
-      <div class="hero-stat"><span class="num">0 停机</span><span class="lbl">运行时漏洞防护目标</span></div>
+<div class="hero-stat"><span class="num">88%</span><span class="lbl">K8s 用户 TCO 同比上涨</span></div>
+<div class="hero-stat"><span class="num">17 万/天</span><span class="lbl">中大型企业告警量（AI 时代将再翻 3 倍）</span></div>
+<div class="hero-stat"><span class="num">85%</span><span class="lbl">商用应用至少含 1 个高危漏洞</span></div>
+<div class="hero-stat"><span class="num">~50%</span><span class="lbl">威胁告警是误报</span></div>
+<div class="hero-stat"><span class="num">90 天</span><span class="lbl">把"看不见"变成"自动处置"的飞轮周期</span></div>
     </div>
   </div>
 </header>
@@ -1054,6 +1055,94 @@ layout: false
         </tbody>
       </table>
     </div>
+
+    <h3>2.4.1 一个被低估的事实：Kubernetes 让账单更难看清</h3>
+
+<p>
+  四层归因模型对所有云架构通用，但<strong>Kubernetes 把账单可见性问题放大了一个数量级</strong>。
+  最新业界数据显示——<strong>88% 使用 Kubernetes 的组织在过去一年总拥有成本（TCO）上涨</strong>，
+  而上涨速度往往比团队的追踪能力更快。这不是巧合，而是 K8s 的<strong>抽象、调度和动态性</strong>本身造成的归因困境。
+</p>
+
+<div class="defbox">
+  <span class="tag">K8s 成本三层结构</span>
+  <p style="margin-bottom:0.4rem"><strong>① 核心基础设施成本</strong>——控制平面 + Worker 节点。Worker 实例类型与计费模式占大头，自管集群还要叠加 SRE 工时。</p>
+  <p style="margin-bottom:0.4rem"><strong>② 平台与附加成本</strong>——持久化卷与快照、可观测性（指标/日志/追踪）、CI/CD（构建/镜像存储）、安全工具（扫描/策略）。</p>
+  <p style="margin:0"><strong>③ 隐性运营成本</strong>——集群蔓延（Cluster Sprawl）、SRE 与平台日常维护工时——这是预算评审会上<strong>最难辩护的那一档</strong>。</p>
+</div>
+
+<h3>2.4.2 反讽：可观测性自己就是账单刺客</h3>
+
+<p>
+  这是一条业界正在被频繁验证的反讽——<strong>"为可观测性支付的费用，可能超过被观测工作负载本身"</strong>。
+  原因是 K8s 环境下，传统 Sidecar / Agent 收集模式与默认配置共同制造了三个"<strong>静默成本放大器</strong>"：
+</p>
+
+<div class="grid grid-3">
+  <div class="feature-card" style="border-top:4px solid var(--cisco-red)">
+    <h4>① Scrape 间隔过密</h4>
+    <p>默认高频指标采集（如 15s 一次）极大抬高 ingestion / 存储 / 查询费。<strong>多数节点级和应用指标降到 60s 间隔不会丢失任何运维价值</strong>。</p>
+  </div>
+  <div class="feature-card" style="border-top:4px solid var(--cisco-red)">
+    <h4>② Retention 一刀切</h4>
+    <p>把高保真指标和日志全部长期保留是巨大的浪费。正确做法是<strong>分级保留</strong>——短期高保真、中期降采样、长期冷存。</p>
+  </div>
+  <div class="feature-card" style="border-top:4px solid var(--cisco-red)">
+    <h4>③ Metric Cardinality 爆炸</h4>
+    <p>把 <code>pod_id</code> / <code>request_id</code> / 动态值放进 label，时间序列数量指数级膨胀。这是<strong>很多团队账单暴涨却查不到原因的真凶</strong>。</p>
+  </div>
+</div>
+
+<div class="callout">
+  <strong>口诀：</strong>
+  ① 默认 scrape 60s，关键控制平面才上 15s；
+  ② 短期保留 7–14 天高保真，30 天后降采样，180 天后归档；
+  ③ 高基数 label 在采集端聚合，<strong>不要把"用户 ID""请求 ID"塞进指标</strong>；
+  ④ 选 eBPF 类零 Sidecar 方案，从根上消除"为遥测付额外流量费"的循环。
+</div>
+
+<h3>2.4.3 K8s 成本治理的三阶段操作模型</h3>
+
+<p>
+  Splunk 总结的 K8s 成本管理操作模型，与本白皮书第八章的三阶段路线图<strong>逻辑同构</strong>——
+  这从侧面验证了"<strong>看见 → 治理 → 持续控制</strong>"是跨场景普适的运营心法。
+</p>
+
+<div class="table-scroll-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:18%">阶段</th>
+        <th style="width:34%">关键动作</th>
+        <th>对应工具 / 实践</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>① 可见性</strong></td>
+        <td>把云开支映射到 Namespace / Service / Deployment；统一 label 策略（team / app / env）</td>
+        <td>OpenCost / Kubecost · Cilium Hubble · Prometheus + Grafana</td>
+      </tr>
+      <tr>
+        <td><strong>② 优化</strong></td>
+        <td>基于历史用量做 right-sizing（CPU / Memory request 调优）；审查 HPA / Cluster Autoscaler 是否在"为不存在的需求扩容"</td>
+        <td>VPA recommendation mode · Goldilocks · Karpenter 替代 Cluster Autoscaler</td>
+      </tr>
+      <tr>
+        <td><strong>③ 持续控制</strong></td>
+        <td>成本异常告警 + 阈值预算 + 月度审计 + 强制 owner label / namespace quota 政策</td>
+        <td>FinOps 平台预算告警 · OPA / Kyverno 策略守门 · 定期清理 PV / 镜像</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+  特别值得点出的一类<strong>"扩容连锁反应"陷阱</strong>：
+  HPA 增加副本数 → Cluster Autoscaler 增加节点 → 节点利用率反而下降 → 但账单已经涨了。
+  根因往往是 <strong>request 设得过大</strong>——稍微调小 request，就能避免扩节点。
+  这是"<strong>用 8 块钱配置改变 8000 块钱账单</strong>"的经典杠杆。
+</p>
 
     <h3>2.5 三个最常被忽视的"账单刺客"</h3>
 
@@ -1858,6 +1947,51 @@ layout: false
         </tbody>
       </table>
     </div>
+
+    <h3>4.3.1 攻防经济学：85% / 50% / 30% 这三个数字</h3>
+
+<p>
+  在讨论运行时防护之前，必须先把"<strong>攻防成本对比</strong>"看清楚。三个业界公开数据值得贴在每个 IT 团队的墙上：
+</p>
+
+<div class="grid grid-3">
+  <div class="feature-card" style="border-top:4px solid var(--cisco-red)">
+    <div class="icon" style="color:var(--cisco-red); background:#FCE8E7"><strong style="font-size:1.4rem">85%</strong></div>
+    <h4>商用应用存在高危漏洞</h4>
+    <p>超过 <strong>85% 的商用应用至少包含一个 critical vulnerability</strong>。这意味着"<strong>等补丁"的策略,等于把你的产线长期暴露在已知攻击面下。</strong></p>
+  </div>
+  <div class="feature-card" style="border-top:4px solid var(--color-warning)">
+    <div class="icon" style="color:var(--color-warning); background:#FFF8E7"><strong style="font-size:1.4rem">~50%</strong></div>
+    <h4>威胁告警是误报</h4>
+    <p>近<strong> 50% 的威胁告警是 false positive</strong>。如果团队没有"<strong>降噪机制</strong>"，所有真实威胁都会被淹没在伪信号海里。</p>
+  </div>
+  <div class="feature-card" style="border-top:4px solid var(--cisco-purple)">
+    <div class="icon" style="color:var(--cisco-purple); background:#F5E6FA"><strong style="font-size:1.4rem">30%</strong></div>
+    <h4>告警没人看</h4>
+    <p>1500–4000 人规模企业平均<strong> 30% 的告警从未被调查</strong>——这就是"<strong>告警疲劳（Alert Fatigue）</strong>"。它不是态度问题，是物理极限。</p>
+  </div>
+</div>
+
+<p>
+  这三个数字共同说明：<strong>仅靠"加规则、加扫描、加告警"是死路一条</strong>。
+  正确解法不是制造更多告警，而是建立<strong>有效的可见性 + 优先级 + 运行时压制</strong>三件套。
+  这正是 4.4 节运行时防护的真正价值——它不是"<strong>更多告警</strong>",是"<strong>把高危行为在内核态直接终止</strong>",
+  把团队从"<strong>看不完的告警</strong>"中解放出来。
+</p>
+
+<div class="defbox">
+  <span class="tag">关键术语</span>
+  <p style="margin-bottom:0.4rem">
+    <strong>Anomaly-based Threat Detection（基于异常的威胁检测）</strong>：
+    先建立"正常"的行为基线（流量、进程调用、身份访问），把偏离基线的活动作为优先排查对象。
+    这是 NIST Cybersecurity Framework 明确推荐的网络监控范式。
+  </p>
+  <p style="margin:0">
+    <strong>Alert Fatigue（告警疲劳）</strong>：
+    安全/运维团队长期面对海量告警（其中大量误报）后，对告警普遍脱敏的现象——
+    最危险的不是"<strong>没看见</strong>",是"<strong>看见了但下意识忽略</strong>"。
+  </p>
+</div>
 
     <h3>4.4 引入 eBPF / Tetragon Live Protection：把"补丁日"延后</h3>
 
@@ -3106,6 +3240,55 @@ layout: false
       </table>
     </div>
 
+    <h3>6.7.1 制造业最常被忽视的攻击面：第三方与外协接入</h3>
+
+<p>
+  几乎 <strong>90% 的安全负责人</strong>对"第三方进入企业网络"表示担忧——
+  在制造业语境下，这个比例可能更高。每一家工厂都有一长串<strong>"非员工但持有网络访问权"</strong>的角色：
+</p>
+
+<ul>
+  <li><strong>外协承包商</strong>——设备调试、产线改造、IT 集成商驻场</li>
+  <li><strong>供应商工程师</strong>——PLC / 机器人 / SCADA 的厂家远程支持</li>
+  <li><strong>访客网络共用者</strong>——审厂客户、参观访客、临时工程师</li>
+  <li><strong>SaaS / 云供应商</strong>——MES / ERP / 安全产品的运营接入通道</li>
+  <li><strong>OT 设备 OEM</strong>——通过专网或 4G 远程升级固件的设备</li>
+</ul>
+
+<p>
+  本白皮书第六章的真实复盘案例（外协笔记本 → 访客网 → 横向移动 → MES 工单注入 → A 线停 47 分钟），
+  正是<strong>第三方接入失控的典型路径</strong>。红蓝对抗设计场景时，<strong>必须把"第三方入口"作为高优先级的攻击起点</strong>——
+  因为攻击者很清楚：内部员工的笔记本通常防护严密，但<strong>外协人员的设备往往是企业 IT 控制盲区</strong>。
+</p>
+
+<div class="callout">
+  <strong>外协接入治理三件套：</strong>
+  ① <strong>独立网络区</strong>——访客 / 外协走专门 VLAN，与生产网严格隔离；
+  ② <strong>临时身份 + 时间盒</strong>——发临时账号、限定生效窗口、自动过期；
+  ③ <strong>设备准入检查</strong>——接入前强制扫描合规性（补丁、防病毒、磁盘加密）；
+  ④ <strong>会话录像 + 审计</strong>——高权限远程操作必须留下可回放证据。
+</div>
+
+<h3>6.7.2 合规对齐：NIST 框架对网络可见性的明确要求</h3>
+
+<p>
+  红蓝对抗的产出不只是"修复优先级"，也是"<strong>合规证据</strong>"。
+  美国 NIST《Security and Privacy Controls for Information Systems and Organizations》（NIST SP 800-53）
+  对组织提出了明确要求——<strong>必须维持足够的网络可见性以检测两类信号</strong>：
+</p>
+
+<ol>
+  <li><strong>未授权的网络、本地与远程连接</strong>（Unauthorized network, local, and remote connections）</li>
+  <li><strong>潜在攻击指标与失陷指标</strong>（Indicators of potential attacks and Indicators of Compromise, IoC）</li>
+</ol>
+
+<p>
+  这意味着——红蓝对抗的"<strong>六件硬核工件</strong>"中的"<strong>暴露面清单</strong>"和"<strong>关键控制点缺口</strong>"，
+  天然就是<strong>NIST 合规审计的可交付证据</strong>。把演练成果同时映射到合规框架，
+  能让原本看似"额外开支"的红蓝预算，在合规视角下也变成"<strong>必要支出</strong>"——
+  对在欧美客户面前需要证明合规姿态的制造业出口商而言，这是预算辩护的<strong>第二条腿</strong>。
+</p>
+
     <h3>6.8 把红蓝对抗变成"组织肌肉"</h3>
 
     <p>
@@ -3695,6 +3878,45 @@ layout: false
       <strong>组织韧性提升（演练频率）</strong>。
       把这四项加起来，几乎一定远超 Agent AI 平台的年度运营成本。<strong>但前提是把它做对——不是把它做大</strong>。
     </div>
+
+    <h3>7.7.1 Agent AI 真正解决的不是"工时"，而是"告警疲劳"</h3>
+
+<p>
+  上一节的 ROI 表把 Agent AI 翻译成"<strong>每月释放 2.5 人天</strong>"等可量化数字。但有一类价值更难量化、却同样关键——
+  <strong>对抗告警疲劳</strong>。
+</p>
+
+<div class="callout">
+  <strong>把数字摆在一起看：</strong>
+  ① 中大型制造业 IT 团队每天面对 <strong>~17 万条网络与安全告警</strong>，AI 工作负载的引入预计让这个数字再翻 3 倍；
+  ② 其中近<strong> 50% 是误报</strong>；
+  ③ 1500–4000 人企业平均<strong> 30% 的告警从未被调查</strong>。
+  这意味着：当真正的"<strong>停产级攻击信号</strong>"出现在告警海里时，被人眼及时捕获的概率<strong>从结构上就接近零</strong>——
+  不是团队不够努力，是物理极限。
+</div>
+
+<p>
+  Agent AI 的<strong>第二个价值</strong>，正是打破这个物理极限：
+</p>
+
+<div class="grid grid-2">
+  <div class="feature-card" style="border-top:4px solid var(--cisco-blue)">
+    <h4>① 把"看不过来"变成"看得过来"</h4>
+    <p>多 Agent 流水线在毫秒级完成"<strong>情报提取 → 行为评估 → 优先级排序 → 噪音过滤</strong>"。
+    经过基线对比和上下文关联后，<strong>~90% 的静态噪音被自动降级</strong>，留给人类的只有真正需要决策的少数事件。</p>
+  </div>
+  <div class="feature-card" style="border-top:4px solid var(--cisco-purple)">
+    <h4>② 把"看见了也忽略"变成"看见就响应"</h4>
+    <p>当告警量降到人类可处理范围内，蓝队工程师重新拥有"<strong>认真看每一条</strong>"的心理带宽。
+    这是 Agent AI 给团队的<strong>无形红利</strong>——它把"<strong>从结构上不可能</strong>"的工作重新变成"<strong>从结构上可能</strong>"。</p>
+  </div>
+</div>
+
+<p>
+  这也回应了第六章的"演练即合规证据"主题——<strong>Agent AI 让"NIST 要求的持续可见性"从口号变成可执行</strong>。
+  没有 Agent，"<strong>持续监控</strong>"在 17 万告警/天的现实下根本不成立；有了 Agent，
+  它才第一次在数字上和经济上同时<strong>成为可承诺的能力</strong>。
+</p>
 
     <h3>7.8 一份真实运行的 Agent 编排剧本</h3>
 
@@ -4479,6 +4701,33 @@ layout: false
 
       <dt>飞轮（Flywheel）</dt>
       <dd>看见→治理→自动化的自我加速循环。第 91 天后能"自己转起来"才算真正成功。</dd>
+
+      <dt>Cluster Sprawl（集群蔓延）</dt>
+<dd>Kubernetes 集群数量与规模在缺乏治理时的失控扩张。是隐性运营成本的主要来源。<em>类比：办公室里没人管的盆栽，越长越大、越长越多，最后占满了整个空间。</em></dd>
+
+<dt>Metric Cardinality（指标基数）</dt>
+<dd>指标系统中独立时间序列的数量。把高变化值（pod ID / 请求 ID）当 label 会导致基数爆炸，是可观测账单暴涨的常见真凶。</dd>
+
+<dt>Right-sizing（资源右配）</dt>
+<dd>基于历史真实使用量为工作负载设置合适的 CPU / 内存 request 与 limit。VPA recommendation mode、Goldilocks 是常见辅助工具。</dd>
+
+<dt>Anomaly-based Threat Detection（基于异常的威胁检测）</dt>
+<dd>先建立"正常"行为基线（流量/进程/身份），把偏离基线的活动作为优先排查对象。是 NIST 推荐的核心检测范式。</dd>
+
+<dt>Alert Fatigue（告警疲劳）</dt>
+<dd>团队长期面对海量告警（含大量误报）后对告警普遍脱敏的现象。最危险的不是"没看见"，是"看见了但下意识忽略"。</dd>
+
+<dt>Network Visibility（网络可见性）</dt>
+<dd>看见整个数字足迹中所有流入流出的能力——回答"谁在我的网络里、他们在做什么"。NIST 框架下被列为合规必备能力之一。</dd>
+
+<dt>Indicators of Compromise（IoC · 失陷指标）</dt>
+<dd>系统已被攻陷的可观测证据（异常外联、可疑进程、未授权连接等）。NIST 要求组织持续监测两类信号：未授权连接 + IoC。</dd>
+
+<dt>SSL/TLS Decryption（加密流量解密）</dt>
+<dd>在边缘节点选择性解密加密流量以做深度检查，再重新加密转发。提升可见性但需谨慎权衡性能、合规与密钥管理。</dd>
+
+<dt>K8s 成本三层结构</dt>
+<dd>核心基础设施（控制面/Worker）+ 平台与附加（存储/可观测/CI/CD/安全）+ 隐性运营（Cluster Sprawl/SRE 工时）。第三层最难辩护、最易被忽视。</dd>
     </dl>
 
   </div>
