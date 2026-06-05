@@ -1,0 +1,1730 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>给安防引擎装上 F1 赛车 | Cisco Foundry Security Spec 通俗指南</title>
+<link rel="stylesheet" href="cisco-style.css">
+<style>
+/* ============================================================
+   页面专属补充样式（克制使用，仅补全全局CSS未覆盖部分）
+   ============================================================ */
+
+/* ── 顶部固定导航 ── */
+.site-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(13, 39, 77, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+}
+.site-nav .nav-inner {
+  max-width: var(--container-max); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem var(--space-6);
+}
+.site-nav .brand {
+  color: #fff; font-weight: 700; font-size: 1.15rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  border: none;
+}
+.site-nav .brand span { color: var(--cisco-accent); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; padding: 0; margin: 0; }
+.nav-links a {
+  color: #cdd6e4; font-size: 0.9rem; font-weight: 500;
+  padding: 0.4rem 0.85rem; border-radius: 50px; border: none;
+  transition: all var(--transition-fast);
+}
+.nav-links a:hover { background: rgba(0,188,235,0.18); color: #fff; }
+.nav-toggle {
+  display: none; background: none; border: none; cursor: pointer;
+  flex-direction: column; gap: 5px; padding: 6px;
+}
+.nav-toggle span { width: 26px; height: 3px; background: #fff; border-radius: 3px; transition: var(--transition-fast); }
+
+@media (max-width: 1024px) {
+  .nav-toggle { display: flex; }
+  .nav-links {
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; background: var(--cisco-navy);
+    padding: var(--space-4); gap: 0.25rem;
+    max-height: 0; overflow: hidden; transition: max-height var(--transition-fast);
+  }
+  .nav-links.open { max-height: 420px; padding: var(--space-4); }
+  .nav-links a { display: block; padding: 0.7rem 1rem; }
+}
+
+/* ── Hero 增强 ── */
+.hero { position: relative; overflow: hidden; }
+.hero-eyebrow {
+  display: inline-block; background: rgba(0,188,235,0.2);
+  border: 1px solid var(--cisco-accent); color: #fff;
+  padding: 0.4rem 1.1rem; border-radius: 50px;
+  font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;
+  margin-bottom: var(--space-6);
+}
+.hero .subtitle {
+  font-size: 1.3rem; color: #d6e4f0; max-width: 760px;
+  margin: 0 auto var(--space-8); line-height: 1.6;
+}
+.hero-stats {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: var(--space-6); margin-top: var(--space-8);
+}
+.hero-stat {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-6) var(--space-8); min-width: 180px;
+  backdrop-filter: blur(6px);
+}
+.hero-stat .num {
+  font-size: 2.4rem; font-weight: 800; color: var(--cisco-accent);
+  line-height: 1; display: block; margin-bottom: 0.4rem;
+}
+.hero-stat .label { font-size: 0.92rem; color: #cdd6e4; }
+.hero-cta { margin-top: var(--space-12); display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; }
+.btn-ghost {
+  background: transparent; border: 2px solid rgba(255,255,255,0.5); color: #fff;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
+
+/* ── 章节引导标记 ── */
+.chapter-tag {
+  display: inline-block; font-size: 0.85rem; font-weight: 700;
+  color: var(--cisco-blue); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+.socratic-q {
+  background: linear-gradient(135deg, var(--bg-soft) 0%, var(--bg-light) 100%);
+  border-left: 6px solid var(--cisco-purple);
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+  padding: var(--space-6) var(--space-8);
+  margin: var(--space-8) 0;
+  position: relative;
+}
+.socratic-q::before {
+  content: "?"; position: absolute; top: -18px; left: -18px;
+  width: 44px; height: 44px; background: var(--cisco-purple); color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 800; box-shadow: var(--shadow-md);
+}
+.socratic-q .q-label { font-size: 0.8rem; font-weight: 700; color: var(--cisco-purple); letter-spacing: 0.1em; }
+.socratic-q p:last-child { margin-bottom: 0; font-size: 1.15rem; color: var(--cisco-navy); font-weight: 600; }
+
+/* ── 定义 + 类比 卡片 ── */
+.def-analogy { display: grid; gap: var(--space-6); margin: var(--space-8) 0; }
+@media (min-width: 768px) { .def-analogy { grid-template-columns: 1fr 1fr; } }
+.def-box, .analogy-box {
+  border-radius: var(--border-radius-md); padding: var(--space-6);
+  box-shadow: var(--shadow-sm); transition: all var(--transition-fast);
+}
+.def-box { background: var(--cisco-navy); color: #fff; }
+.def-box h4 { color: var(--cisco-accent); border: none; }
+.def-box p { color: #e2eaf2; margin-bottom: 0; }
+.analogy-box { background: #fff; border: 2px dashed var(--cisco-blue); }
+.analogy-box h4 { color: var(--cisco-blue); border: none; }
+.analogy-box p { color: var(--text-secondary); margin-bottom: 0; }
+.def-box:hover, .analogy-box:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+
+/* ── 金句收束 ── */
+.golden-quote {
+  text-align: center; font-size: 1.5rem; font-weight: 700;
+  color: var(--cisco-navy); line-height: 1.5;
+  padding: var(--space-8) var(--space-6); margin-top: var(--space-12);
+  border-top: 3px solid var(--cisco-accent);
+  border-bottom: 3px solid var(--cisco-accent);
+}
+.golden-quote span { color: var(--cisco-blue); }
+
+/* ── Tooltip 术语 ── */
+.term {
+  border-bottom: 2px dotted var(--cisco-blue); cursor: help;
+  position: relative; color: var(--cisco-blue-dark); font-weight: 600;
+}
+.term .tip {
+  visibility: hidden; opacity: 0;
+  position: absolute; bottom: 135%; left: 50%; transform: translateX(-50%);
+  background: var(--cisco-navy); color: #fff; padding: 0.7rem 1rem;
+  border-radius: var(--border-radius-sm); width: 260px; max-width: 80vw;
+  font-size: 0.85rem; font-weight: 400; line-height: 1.5;
+  box-shadow: var(--shadow-md); z-index: 50; transition: all var(--transition-fast);
+  pointer-events: none;
+}
+.term .tip::after {
+  content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 7px solid transparent; border-top-color: var(--cisco-navy);
+}
+.term:hover .tip { visibility: visible; opacity: 1; }
+
+/* ── 数字徽标列表 ── */
+.numbered-step { display: flex; gap: var(--space-4); margin-bottom: var(--space-6); align-items: flex-start; }
+.numbered-step .step-num {
+  flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%;
+  background: var(--cisco-blue); color: #fff; font-weight: 800; font-size: 1.2rem;
+  display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);
+}
+.numbered-step .step-body { flex: 1; }
+.numbered-step .step-body h4 { margin-bottom: 0.4rem; }
+.numbered-step .step-body p { margin-bottom: 0; }
+
+/* ── 强调标签 ── */
+.pill {
+  display: inline-block; padding: 0.2rem 0.7rem; border-radius: 50px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.03em;
+}
+.pill-blue { background: rgba(4,159,217,0.12); color: var(--cisco-blue-dark); }
+.pill-green { background: rgba(103,179,70,0.15); color: #3d7a1f; }
+.pill-red { background: rgba(226,35,26,0.12); color: var(--cisco-red); }
+.pill-orange { background: rgba(245,128,37,0.15); color: #b85a10; }
+
+/* ── 进度阅读条 ── */
+.read-progress {
+  position: fixed; top: 0; left: 0; height: 4px; width: 0%;
+  background: linear-gradient(90deg, var(--cisco-accent), var(--cisco-blue));
+  z-index: 2000; transition: width 0.1s linear;
+}
+
+/* ── Fade-in 滚动动画 ── */
+.fade-in { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* ── SVG 内文字统一 ── */
+svg text { font-family: var(--font-sans); }
+</style>
+</head>
+<body>
+
+<!-- 阅读进度条 -->
+<div class="read-progress" id="readProgress"></div>
+
+<!-- ============ 顶部导航 ============ -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="#hero" class="brand">🛡️ Foundry<span>Spec</span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#ch1">挑战</a></li>
+      <li><a href="#ch2">是什么</a></li>
+      <li><a href="#ch3">为何有价值</a></li>
+      <li><a href="#ch4">如何组成</a></li>
+      <li><a href="#ch5">如何落地</a></li>
+      <li><a href="#glossary">术语表</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="hero">
+  <div class="container">
+    <span class="hero-eyebrow">CISCO 开源安全规范 · 通俗深度指南</span>
+    <h1>把 8 年的安全研究，<br>压缩进 8 周完成</h1>
+    <p class="subtitle">
+      当 Cisco 用 AI 在 8 周内扫描了 <strong>18 亿行代码</strong>，误报率却低于 3% ——
+      真正的秘密不是那个聪明的 AI 模型，而是一套让 AI "跑得稳、跑得准"的赛道规范。<br>
+      它的名字，叫 <strong>Foundry Security Spec</strong>。
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="num">18亿</span>
+        <span class="label">行代码被扫描</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">8周</span>
+        <span class="label">完成 = 人工 8 年</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">&lt;3%</span>
+        <span class="label">误报率</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">6</span>
+        <span class="label">个前沿 AI 模型验证</span>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#ch1" class="btn">开始这趟旅程 ↓</a>
+      <a href="#ch2" class="btn btn-ghost">直接看它是什么</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 第一章：挑战 ============ -->
+<section class="chapter" id="ch1">
+  <div class="container">
+    <span class="chapter-tag fade-in">第一幕 · 挑战</span>
+    <h2 class="fade-in">一辆 F1 赛车，为什么菜鸟开不快？</h2>
+
+    <div class="fade-in">
+      <p>
+        让我们从一个 Cisco 安全负责人 Anthony Grieco 讲过的精妙比喻开始（来源：Cisco 博客
+        <em>《8 Years of Security Research in 8 Weeks》</em>）：
+      </p>
+
+      <blockquote>
+        "如果一个普通人，平时只骑过自行车，现在突然得到一辆 F1 赛车的钥匙——
+        他或许能勉强沿着赛道挪动，但他<strong>绝不可能赢得比赛</strong>。"
+      </blockquote>
+
+      <p>
+        这句话，精准地戳破了当下"AI 安全"领域最大的幻觉：
+        <strong>很多人以为，只要拿到最强的 AI 模型（那辆 F1 赛车），安全问题就解决了。</strong>
+        但现实是——光有引擎，赢不了比赛。
+      </p>
+    </div>
+
+    <!-- 苏格拉底提问 1 -->
+    <div class="socratic-q fade-in">
+      <span class="q-label">先别急着要答案，先问自己：</span>
+      <p>如果 AI 模型已经这么强大，为什么过去几十年，网络安全防御依然慢得令人绝望？</p>
+    </div>
+
+    <h3 class="fade-in">第一性原理：拆解"安全防御"这件事的本质</h3>
+
+    <p class="fade-in">
+      要理解 Foundry 为什么重要，我们不能从"AI 很厉害"出发，而要回到最根本的问题：
+      <strong>一次软件安全评估，到底要解决哪几个最基础的矛盾？</strong>
+      把它拆到不能再拆，只剩下三个本质矛盾：
+    </p>
+
+    <div class="grid grid-3 fade-in">
+      <div class="card">
+        <h4>① 范围矛盾<br><span class="pill pill-red">看得全 vs 看得起</span></h4>
+        <p>
+          一个产品动辄上亿行代码。过去，安全团队<strong>被迫做选择题</strong>：
+          基于"风险画像"挑几个模块来查，明知道没扫的地方藏着 Bug，
+          却只能祈祷黑客也没发现。这就像房间太黑，你只有一支<strong>手电筒</strong>，
+          只能照亮一角。
+        </p>
+      </div>
+      <div class="card">
+        <h4>② 噪音矛盾<br><span class="pill pill-orange">信号 vs 噪音</span></h4>
+        <p>
+          传统静态分析工具臭名昭著——
+          <strong>每 10,000 条警告里，可能只有 1 条是真问题</strong>。
+          安全专家被淹没在告警的海洋里，陷入无止境的"三连击"：
+          看告警、排查、发现是误报……再看下一条。
+        </p>
+      </div>
+      <div class="card">
+        <h4>③ 速度矛盾<br><span class="pill pill-blue">人脑 vs 机器</span></h4>
+        <p>
+          人工红队（模拟攻击）和专家审计，
+          受限于人脑的速度。再聪明的专家，一天也只能读那么多代码。
+          于是<strong>速度成了天花板</strong>，
+          整个行业被这个天花板压了几十年。
+        </p>
+      </div>
+    </div>
+
+    <h3 class="fade-in">那么，AI 模型解决了哪个矛盾？</h3>
+
+    <p class="fade-in">
+      答案是：<strong>只解决了第三个（速度），而且如果用错方法，反而会让前两个变得更糟。</strong>
+      因为一个未经约束的强大 AI，会以惊人的速度生产出<strong>更多看似可信、实则编造</strong>的漏洞报告。
+      这就是行业里那句著名的批评：<strong>"AI 会把你淹死在噪音里。"</strong>
+    </p>
+
+    <!-- SVG：三个矛盾 vs AI 单独发力的图 -->
+    <div class="svg-scroll-wrapper fade-in">
+      <svg viewBox="0 0 900 360" width="900" role="img" aria-label="单纯使用AI模型只解决速度，却放大了噪音问题">
+        <!-- 背景 -->
+        <rect width="900" height="360" fill="#F7F8FA"/>
+        <text x="450" y="38" text-anchor="middle" font-size="20" font-weight="800" fill="#0D274D">单凭一辆"F1 赛车"（强大 AI 模型）会发生什么？</text>
+
+        <!-- 左：原始问题 -->
+        <rect x="40" y="80" width="230" height="220" rx="12" fill="#FFFFFF" stroke="#D4D8DE" stroke-width="2"/>
+        <text x="155" y="110" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">三大本质矛盾</text>
+        <rect x="65" y="130" width="180" height="40" rx="8" fill="#FDECEA"/>
+        <text x="155" y="155" text-anchor="middle" font-size="13" fill="#E2231A" font-weight="600">范围：看不全</text>
+        <rect x="65" y="180" width="180" height="40" rx="8" fill="#FEF4E6"/>
+        <text x="155" y="205" text-anchor="middle" font-size="13" fill="#B85A10" font-weight="600">噪音：误报多</text>
+        <rect x="65" y="230" width="180" height="40" rx="8" fill="#E8F4FB"/>
+        <text x="155" y="255" text-anchor="middle" font-size="13" fill="#005073" font-weight="600">速度：人脑慢</text>
+
+        <!-- 中间箭头 + AI -->
+        <path d="M280 190 L360 190" stroke="#049FD9" stroke-width="3" marker-end="url(#arr1)"/>
+        <circle cx="450" cy="190" r="55" fill="#049FD9"/>
+        <text x="450" y="183" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">裸用</text>
+        <text x="450" y="205" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">AI 模型</text>
+        <path d="M540 190 L620 190" stroke="#049FD9" stroke-width="3" marker-end="url(#arr1)"/>
+
+        <!-- 右：结果 -->
+        <rect x="630" y="80" width="230" height="220" rx="12" fill="#FFFFFF" stroke="#D4D8DE" stroke-width="2"/>
+        <text x="745" y="110" text-anchor="middle" font-size="15" font-weight="700" fill="#0D274D">结果</text>
+        <rect x="655" y="130" width="180" height="40" rx="8" fill="#FDECEA"/>
+        <text x="745" y="155" text-anchor="middle" font-size="13" fill="#E2231A" font-weight="600">范围：依旧看不全 ✗</text>
+        <rect x="655" y="180" width="180" height="40" rx="8" fill="#FDECEA"/>
+        <text x="745" y="205" text-anchor="middle" font-size="13" fill="#E2231A" font-weight="600">噪音：被放大 ✗✗</text>
+        <rect x="655" y="230" width="180" height="40" rx="8" fill="#EAF6E4"/>
+        <text x="745" y="255" text-anchor="middle" font-size="13" fill="#3D7A1F" font-weight="600">速度：极快 ✓</text>
+
+        <text x="450" y="335" text-anchor="middle" font-size="14" fill="#58585B" font-style="italic">引擎只是加速器；没有"赛道与方法"，速度反而把噪音放大成灾难。</text>
+
+        <defs>
+          <marker id="arr1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#049FD9"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="callout fade-in">
+      <p style="margin:0;">
+        <strong>💡 关键洞察：</strong>
+        模型是<strong>加速器（accelerant）</strong>，而真正的<strong>引擎（engine）</strong>，
+        是那套约束、引导、验证 AI 的"方法论框架"。
+        这句话，正是 Cisco 博客的原文："The model is the accelerant; the harness is the engine."
+        （模型是燃料，编排框架才是引擎。）
+      </p>
+    </div>
+
+    <div class="golden-quote fade-in">
+      光有最快的引擎赢不了比赛，<br>
+      你还需要一条<span>专业的赛道</span>和一位<span>懂方法的车手</span>。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第二章：是什么 ============ -->
+<section class="chapter" id="ch2">
+  <div class="container">
+    <span class="chapter-tag fade-in">第二幕 · 是什么（What）</span>
+    <h2 class="fade-in">那条"赛道"，到底是什么？</h2>
+
+    <p class="fade-in">
+      我们在第一章得出了结论：真正的引擎是"方法论框架"。
+      那么 Cisco 把这套引擎开源了出来，取名 <strong>Foundry Security Spec</strong>。
+      在认识它之前，我们先用苏格拉底的方式，逼自己想清楚一个最容易被忽略的问题——
+    </p>
+
+    <!-- 苏格拉底提问 2 -->
+    <div class="socratic-q fade-in">
+      <span class="q-label">第一性追问：</span>
+      <p>Cisco 既然已经做出了能扫描 18 亿行代码的内部系统，为什么开源时给的是一份"规范文档"，<br>而不是直接把那套能跑的"代码工具"送给你？</p>
+    </div>
+
+    <h3 class="fade-in">先破一个误解：它不是工具，是"图纸"</h3>
+
+    <p class="fade-in">
+      这是理解 Foundry 的<strong>第一道、也是最关键的一道坎</strong>。
+      Foundry 仓库里<strong>没有一行可运行的代码</strong>（来源：<code>README.md</code> ——
+      "There is <strong>no code</strong> in this repository, and that is intentional."）。
+      这是<strong>故意的</strong>。原因藏在第一性原理里：
+    </p>
+
+    <div class="fade-in">
+      <p>
+        Cisco 内部那套能跑的系统，被深度"焊死"在 Cisco 自己的基础设施上——
+        它用的是 Cisco 的云、Cisco 的工单系统、Cisco 的 LLM 网关、Cisco 的部署平台、Cisco 的漏洞分级标准。
+        如果把这套代码原封不动开源给你，
+        你拿到的将是<strong>"一套只能在 Cisco 那一个环境里跑起来的东西"</strong>
+        （来源：<code>README.md</code> §"Why we're releasing a spec instead of a tool"）。
+      </p>
+      <p>
+        真正能<strong>跨越组织、可被任何人复用</strong>的，从来不是代码本身，而是<strong>设计</strong>：
+        你需要哪些 AI 角色、每个角色必须保证什么、漏洞从发现到上报如何流动、
+        什么叫"评估完成"、质量关卡设在哪里、以及——
+        <strong>哪些捷径会在半年后反咬你一口</strong>。这套设计，是与基础设施无关的，
+        这才是这个仓库真正交付的东西。
+      </p>
+    </div>
+
+    <!-- 精准定义 + 精妙类比 -->
+    <div class="def-analogy fade-in">
+      <div class="def-box">
+        <h4>📐 精准定义</h4>
+        <p>
+          <strong>Foundry Security Spec</strong> 是一份<strong>"由 AI 智能体组成的自动化安全评估系统"的开源参考规范（Specification / Seed 种子）</strong>。
+          它不提供运行代码，而是提供：系统应由哪些角色组成、每个角色的行为契约、漏洞的完整生命周期、
+          以及 11 条不可违背的设计铁律。你拿它当蓝图，在<strong>你自己的技术栈</strong>上建造属于你的系统。
+        </p>
+      </div>
+      <div class="analogy-box">
+        <h4>🏗️ 精妙类比：建筑设计图</h4>
+        <p>
+          它就像一套<strong>世界级建筑事务所沉淀下来的"抗震大楼设计规范"</strong>。
+          规范不会送你砖头水泥（代码），但它告诉你：承重墙必须设在哪、
+          地基要打多深、哪种偷工减料会在地震时塌楼（踩过的坑）。
+          你用本地的建材，盖出适合你城市的楼——但楼是<strong>不会塌的</strong>。
+        </p>
+      </div>
+    </div>
+
+    <h3 class="fade-in">它要解决的，正是第一章那三大矛盾</h3>
+
+    <p class="fade-in">
+      回到本质。Foundry 解决的核心问题，用它自己的话说就是
+      （来源：<code>spec.md</code> §1.1）：<br>
+      <em>"把一台前沿大模型，变成一个能产出<strong>有边界、可验证、有优先级</strong>的漏洞清单，
+      并且能告诉你<strong>什么时候算干完了</strong>的安全评估系统。"</em>
+    </p>
+
+    <div class="table-scroll-wrapper fade-in">
+      <table>
+        <thead>
+          <tr>
+            <th>本质矛盾（第一章）</th>
+            <th>裸用 AI 的下场</th>
+            <th>Foundry 的破解之道</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>① 范围：看不全</strong></td>
+            <td>仍需人工挑模块</td>
+            <td>从"手电筒"换成"泛光灯"：可评估<strong>整个代码库</strong>，不再被迫做选择题（来源：博客原文 flashlight → floodlight）</td>
+          </tr>
+          <tr>
+            <td><strong>② 噪音：误报多</strong></td>
+            <td>噪音被放大数倍</td>
+            <td>在 18 亿行代码上做到<strong>误报率 &lt; 3%</strong>，靠的是"证据闸门 + 人机混合验证"（来源：博客 + <code>spec.md</code> §7.3）</td>
+          </tr>
+          <tr>
+            <td><strong>③ 速度：人脑慢</strong></td>
+            <td>极快，但产出不可信</td>
+            <td>速度照单全收，且通过<strong>角色分工与多重关卡</strong>让快的同时还准（来源：<code>spec.md</code> §4）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="fade-in">它的独特性：三个别人没有的"基因"</h3>
+
+    <p class="fade-in">
+      市面上"AI 找漏洞"的概念满天飞，但 Foundry 有三个独一无二的基因，
+      让它从"演示玩具"升级为"生产级蓝图"：
+    </p>
+
+    <div class="numbered-step fade-in">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>模型无关（Model-Agnostic）—— 锁定的是方法，不是模型</h4>
+        <p>
+          Cisco 用<strong>六个</strong>不同的前沿 AI 模型验证了这套规范（来源：博客 +
+          <code>README.md</code> "tested across six frontier models"）。
+          这意味着它不绑死在任何一家 AI 厂商身上。模型会过时、会被超越，
+          但<strong>方法论是稳定的</strong>。这就像一份优秀的菜谱，
+          换了哪个品牌的灶台都能做出好菜。
+        </p>
+      </div>
+    </div>
+
+    <div class="numbered-step fade-in">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>每一条规则，都是"血的教训"凝结成的铁律</h4>
+        <p>
+          Foundry 附带一部 <span class="term">宪法<span class="tip">constitution.md：包含 11 条"不可违背原则"，每条都对应一个 Cisco 内部曾经踩过、修复过的生产故障。</span></span>
+          （<code>constitution.md</code>），里面有 <strong>11 条不可违背的原则</strong>。
+          关键在于——<strong>每一条都不是凭空设计的偏好，而是 Cisco
+          亲手上线、亲眼看着它崩溃、再亲手修复后写下的"伤疤"</strong>
+          （来源：<code>constitution.md</code> §Purpose："each one encodes a failure the seed authors shipped, diagnosed, and fixed"）。
+          违背任何一条，就等于重现那次故障。
+        </p>
+      </div>
+    </div>
+
+    <div class="numbered-step fade-in">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>站在巨人肩上：用 GitHub Spec Kit 开放共建</h4>
+        <p>
+          它构建于社区驱动的 <span class="term">GitHub Spec Kit<span class="tip">一套"规范驱动开发（Spec-Driven Development）"的开源工作流。先写规范，再由 AI 辅助把规范转化为设计、任务和代码。</span></span> 之上。
+          这意味着任何团队都能用<strong>熟悉、可信的开源协作方式</strong>去扩展和改造它
+          （来源：博客 "built on the community-driven GitHub Spec Kit"）。
+          你不是被锁进 Cisco 的黑箱，而是拿到一张可自由修改的开放蓝图。
+        </p>
+      </div>
+    </div>
+
+    <!-- SVG：是什么 - 蓝图到实现 -->
+    <div class="svg-scroll-wrapper fade-in">
+      <svg viewBox="0 0 900 420" width="900" role="img" aria-label="Foundry是蓝图，经由Spec Kit转化为你自己的系统">
+        <rect width="900" height="420" fill="#FFFFFF"/>
+        <text x="450" y="36" text-anchor="middle" font-size="19" font-weight="800" fill="#0D274D">Foundry 不是工具，是一张"可落地的蓝图"</text>
+
+        <!-- 阶段1：种子 -->
+        <rect x="40" y="80" width="220" height="280" rx="14" fill="#0D274D"/>
+        <text x="150" y="115" text-anchor="middle" font-size="16" font-weight="800" fill="#00BCEB">① 你拿到的种子</text>
+        <rect x="62" y="135" width="176" height="46" rx="8" fill="#163a66"/>
+        <text x="150" y="163" text-anchor="middle" font-size="13" fill="#fff">spec.md（规范）</text>
+        <rect x="62" y="190" width="176" height="46" rx="8" fill="#163a66"/>
+        <text x="150" y="218" text-anchor="middle" font-size="13" fill="#fff">constitution.md（宪法）</text>
+        <rect x="62" y="245" width="176" height="46" rx="8" fill="#163a66"/>
+        <text x="150" y="273" text-anchor="middle" font-size="13" fill="#fff">11 条铁律 + ~130 项需求</text>
+        <text x="150" y="325" text-anchor="middle" font-size="12" fill="#9bb4d4">无代码 · 故意为之</text>
+
+        <!-- 箭头 + Spec Kit -->
+        <path d="M270 220 L355 220" stroke="#049FD9" stroke-width="3" marker-end="url(#arr2)"/>
+        <rect x="360" y="170" width="180" height="100" rx="12" fill="#E8F4FB" stroke="#049FD9" stroke-width="2"/>
+        <text x="450" y="205" text-anchor="middle" font-size="14" font-weight="800" fill="#005073">② Spec Kit</text>
+        <text x="450" y="228" text-anchor="middle" font-size="12" fill="#005073">/clarify 澄清</text>
+        <text x="450" y="248" text-anchor="middle" font-size="12" fill="#005073">/specify 硬化</text>
+        <path d="M540 220 L625 220" stroke="#049FD9" stroke-width="3" marker-end="url(#arr2)"/>
+
+        <!-- 阶段3：你的系统 -->
+        <rect x="630" y="80" width="230" height="280" rx="14" fill="#FFFFFF" stroke="#67B346" stroke-width="3"/>
+        <text x="745" y="115" text-anchor="middle" font-size="16" font-weight="800" fill="#3D7A1F">③ 你的专属系统</text>
+        <rect x="652" y="135" width="186" height="46" rx="8" fill="#EAF6E4"/>
+        <text x="745" y="163" text-anchor="middle" font-size="13" fill="#3D7A1F">跑在你的云 / K8s 上</text>
+        <rect x="652" y="190" width="186" height="46" rx="8" fill="#EAF6E4"/>
+        <text x="745" y="218" text-anchor="middle" font-size="13" fill="#3D7A1F">接你的工单 / 数据库</text>
+        <rect x="652" y="245" width="186" height="46" rx="8" fill="#EAF6E4"/>
+        <text x="745" y="273" text-anchor="middle" font-size="13" fill="#3D7A1F">用你选的 AI 模型</text>
+        <text x="745" y="325" text-anchor="middle" font-size="12" fill="#58585B">同一蓝图，万千实现</text>
+
+        <defs>
+          <marker id="arr2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#049FD9"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="callout fade-in">
+      <p style="margin:0;">
+        <strong>🧭 一句话理清：</strong>
+        你带来两样东西——<strong>一台前沿大模型</strong> 和 <strong>一个要评估的目标软件</strong>；
+        Foundry 给你<strong>架构、不变量（invariants）和护栏（guardrails）</strong>；
+        然后你在自己的技术栈上，建造属于你自己的实现。
+        （来源：<code>README.md</code> "You bring a frontier LLM and a target… Foundry gives you the architecture, the invariants, and the guardrails."）
+      </p>
+    </div>
+
+    <div class="golden-quote fade-in">
+      它不送你砖瓦，<br>
+      却给你一张<span>永不塌楼的设计图</span>。
+    </div>
+  </div>
+</section>
+<!-- ============ 第三章：为何有价值 ============ -->
+<section class="chapter" id="ch3">
+  <div class="container">
+    <span class="chapter-tag fade-in">第三幕 · 为什么（Why）</span>
+    <h2 class="fade-in">为什么 CISO 应该睡得更香了？</h2>
+
+    <p class="fade-in">
+      我们已经知道 Foundry <strong>是什么</strong>。但作为企业的安全负责人、架构师或技术决策者，
+      你真正关心的是一个更尖锐的问题：<strong>它凭什么值得我投入团队、改造流程？</strong>
+      在回答之前，先用苏格拉底的方式，戳破一个几乎所有人都会掉进去的陷阱——
+    </p>
+
+    <!-- 苏格拉底提问 3 -->
+    <div class="socratic-q fade-in">
+      <span class="q-label">一个反直觉的追问：</span>
+      <p>当一个 AI 安全系统宣称"我们今年发现的漏洞数量增长了 10 倍"——<br>这究竟是一个好消息，还是一个危险信号？</p>
+    </div>
+
+    <h3 class="fade-in">第一性原理：安全的价值，从来不是"数量"</h3>
+
+    <p class="fade-in">
+      让我们回到本质。安全团队的终极目标是什么？不是"发现更多漏洞"，
+      而是<strong>"让真正危险的问题被修复"</strong>。这两者之间，隔着一道致命的鸿沟——
+      <strong>人的注意力是有限的</strong>。
+    </p>
+
+    <p class="fade-in">
+      Cisco 在博客里给出了一句堪称"清醒剂"的判断（来源：博客 §"What this means for industry collaboration"）：
+    </p>
+
+    <blockquote class="fade-in">
+      "不要把<strong>数量（Volume）</strong>误认为<strong>价值（Value）</strong>。<br>
+      随着 AI 普及，被发现的漏洞数量一定会暴涨。但如果这是你唯一在数的指标，
+      你或许该问问自己：你真的抓住这个时代的价值了吗？"
+    </blockquote>
+
+    <p class="fade-in">
+      这就是 Foundry 价值观的基石：<strong>真正的 AI 驱动安全，衡量的是"规模化的可执行精度（actionable precision at scale）"，
+      而不是漏洞的数量</strong>。如果你的团队收到的是一万条未经验证的告警，
+      那不是能力，那是灾难——你只是把"人工找不过来"的问题，
+      换成了"人工看不过来"的问题。
+    </p>
+
+    <!-- 定义 + 类比：可执行精度 -->
+    <div class="def-analogy fade-in">
+      <div class="def-box">
+        <h4>📐 精准定义</h4>
+        <p>
+          <strong>可执行的精度（Actionable Precision）</strong>：每一条交付给工程师的发现，
+          都已经过<strong>AI 与人类专家的混合验证</strong>，附带完整证据、复现步骤和优先级，
+          工程师拿到即可直接动手修复，无需二次甄别真伪。
+        </p>
+      </div>
+      <div class="analogy-box">
+        <h4>🩺 精妙类比：体检报告 vs 化验单堆</h4>
+        <p>
+          劣质 AI 给你的是<strong>一摞看不懂的原始化验单</strong>（一万条告警），
+          你得自己当医生逐条判断。Foundry 给你的是<strong>一份医生签字的体检报告</strong>：
+          "你有 3 个真问题，按这个顺序处理，这是依据。"——后者才叫价值。
+        </p>
+      </div>
+    </div>
+
+    <h3 class="fade-in">价值一：从"被迫取舍"到"全面照亮"</h3>
+
+    <p class="fade-in">
+      过去安全团队最大的隐痛，是<strong>"已知的未知"</strong>——
+      明知道没扫的代码里藏着 Bug，却没有资源去查。Foundry 把
+      <strong>"扫描整个产品代码库"</strong>从"奢望"变成了"日常"。
+      18 亿行代码、25 种以上编程语言、8 周完成（人工需 8 年）——
+      这组数字背后，是企业第一次能够<strong>诚实地</strong>对管理层说：
+      "我们看遍了，没有漏掉的角落。"
+    </p>
+
+    <h3 class="fade-in">价值二：那个最迷人的"安全飞轮"</h3>
+
+    <p class="fade-in">
+      如果说前面是"做得更全更准"，那么 Foundry 设计里最深的价值，
+      在于一个能<strong>自我增强、永不停转</strong>的机制——它的官方名字叫
+      <strong>"检测到预防的飞轮（Detection-to-Prevention Flywheel）"</strong>
+      （来源：<code>README.md</code> §Companion + <code>docs/architecture/rule-gap-flywheel.md</code>）。
+    </p>
+
+    <p class="fade-in">
+      它的逻辑链条精妙到令人拍案，我们一步步拆开：
+    </p>
+
+    <div class="numbered-step fade-in">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>规则扫荡（系统性）</h4>
+        <p>系统用一套"检测规则"逐个函数地扫遍代码，找出<strong>已知套路</strong>的漏洞。稳定、可重复。</p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>探索狩猎（创造性）</h4>
+        <p>同时，另一批 AI 智能体自由探索，去找<strong>那些没有任何规则描述过的、针对这个产品独特设计的新型漏洞</strong>。Cisco 发现：最高危的漏洞，往往来自这种探索，而非现成规则。</p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>记录"规则缺口"（Rule-Gap）</h4>
+        <p>当探索发现了一个真漏洞，而<strong>现有规则没有一条能抓到它</strong>时，系统会自动记录下这个"缺口"（来源：<code>spec.md</code> FR-042）。</p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>缺口 → 新规则，沉淀进语料库</h4>
+        <p>专家（或自动化的 Self-Improver 角色）把这次的一次性发现，<strong>提炼成一条通用规则</strong>，加入规则语料库。</p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>下次扫描，整类漏洞首轮即灭</h4>
+        <p>从此，在这个产品<strong>以及所有未来的产品</strong>上，这一整类漏洞都会在第一遍扫描时就被系统性捕获。探索智能体被解放出来，去更远的地方狩猎新东西。</p>
+      </div>
+    </div>
+
+    <p class="fade-in">
+      这就是飞轮：<strong>没有终点，每一次评估都在让规则语料库变大；
+      语料库越大，下一次扫描第一遍就能抓到越多</strong>——飞轮越转越快。
+    </p>
+
+    <!-- SVG：飞轮 -->
+    <div class="svg-scroll-wrapper fade-in">
+      <svg viewBox="0 0 760 440" width="760" role="img" aria-label="检测到预防的安全飞轮示意图">
+        <rect width="760" height="440" fill="#F7F8FA"/>
+        <text x="380" y="34" text-anchor="middle" font-size="19" font-weight="800" fill="#0D274D">检测 → 预防 飞轮：越转越聪明</text>
+
+        <!-- 中心 -->
+        <circle cx="380" cy="235" r="62" fill="#049FD9"/>
+        <text x="380" y="228" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">规则</text>
+        <text x="380" y="250" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">语料库</text>
+
+        <!-- 环形5节点 -->
+        <!-- 节点坐标围绕中心 -->
+        <!-- 1 上 -->
+        <circle cx="380" cy="90" r="45" fill="#0D274D"/>
+        <text x="380" y="86" text-anchor="middle" font-size="12" font-weight="700" fill="#00BCEB">①规则扫荡</text>
+        <text x="380" y="104" text-anchor="middle" font-size="11" fill="#cdd6e4">系统性</text>
+        <!-- 2 右上 -->
+        <circle cx="610" cy="170" r="45" fill="#9232AC"/>
+        <text x="610" y="166" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">②探索狩猎</text>
+        <text x="610" y="184" text-anchor="middle" font-size="11" fill="#f0d6f7">创造性</text>
+        <!-- 3 右下 -->
+        <circle cx="560" cy="380" r="45" fill="#F58025"/>
+        <text x="560" y="376" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">③记录缺口</text>
+        <text x="560" y="394" text-anchor="middle" font-size="11" fill="#fce4cf">Rule-Gap</text>
+        <!-- 4 左下 -->
+        <circle cx="200" cy="380" r="45" fill="#67B346"/>
+        <text x="200" y="376" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">④提炼成规则</text>
+        <text x="200" y="394" text-anchor="middle" font-size="11" fill="#e0f2d6">沉淀</text>
+        <!-- 5 左上 -->
+        <circle cx="150" cy="170" r="45" fill="#005073"/>
+        <text x="150" y="166" text-anchor="middle" font-size="12" font-weight="700" fill="#00BCEB">⑤首轮即灭</text>
+        <text x="150" y="184" text-anchor="middle" font-size="11" fill="#cdd6e4">整类捕获</text>
+
+        <!-- 旋转箭头（环形） -->
+        <path d="M 420 110 A 200 200 0 0 1 600 130" fill="none" stroke="#58585B" stroke-width="2.5" marker-end="url(#arrF)"/>
+        <path d="M 630 215 A 200 200 0 0 1 595 345" fill="none" stroke="#58585B" stroke-width="2.5" marker-end="url(#arrF)"/>
+        <path d="M 510 405 A 220 220 0 0 1 250 405" fill="none" stroke="#58585B" stroke-width="2.5" marker-end="url(#arrF)"/>
+        <path d="M 165 345 A 200 200 0 0 1 130 215" fill="none" stroke="#58585B" stroke-width="2.5" marker-end="url(#arrF)"/>
+        <path d="M 160 130 A 200 200 0 0 1 340 110" fill="none" stroke="#58585B" stroke-width="2.5" marker-end="url(#arrF)"/>
+
+        <defs>
+          <marker id="arrF" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#58585B"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3 class="fade-in">价值三：检测一次，预防处处（投资的复利效应）</h3>
+
+    <p class="fade-in">
+      飞轮还有一个更惊人的"第二级效果"。这套规则语料库（Cisco 用的格式叫
+      <span class="term">CodeGuard<span class="tip">一种开源的检测规则格式，由 Cisco 原创并捐赠给 CoSAI（安全 AI 联盟），现作为 OASIS 开放项目维护。一份规则可同时用于"评估时检测"和"编码时预防"。</span></span>）是<strong>可移植的</strong>。
+    </p>
+
+    <p class="fade-in">
+      同一条规则，在"<strong>评估已完成的代码</strong>"时是<strong>检测器</strong>；
+      把它加载进开发者的 AI 编程助手（IDE 插件），在"<strong>代码正在被写出来</strong>"时就变成了<strong>预防器</strong>。
+      于是：
+    </p>
+
+    <div class="callout fade-in">
+      <p style="margin:0;">
+        <strong>🔁 复利公式：</strong>
+        你上一次评估教会语料库<strong>"识别"</strong>的那一类 Bug，
+        现在会在每一个开发者的编辑器里、在敲下那行有问题代码的<strong>瞬间</strong>，
+        被<strong>"预防"</strong>掉——比下一次评估还要早。
+        <strong>每转一圈飞轮，都同时提升了"这里的检测能力"和"处处的预防能力"。</strong>
+        （来源：<code>README.md</code> "Every turn of the loop improves detection here and prevention everywhere."）
+      </p>
+    </div>
+
+    <p class="fade-in">
+      这就是 Foundry 与所有"一次性扫描工具"的根本区别：
+      <strong>探索的成果是一次性的（一个发现就是一个发现），
+      但只要把它的教训沉淀成规则，检测投入就会变成跨越所有未来评估的复利。</strong>
+    </p>
+
+    <!-- 对比表：传统 vs Foundry -->
+    <div class="table-scroll-wrapper fade-in">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>传统静态分析 / 裸用 AI</th>
+            <th>Foundry 驱动的安全评估</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>核心指标</strong></td>
+            <td>漏洞<span class="pill pill-red">数量</span></td>
+            <td>可执行<span class="pill pill-green">精度</span></td>
+          </tr>
+          <tr>
+            <td><strong>信噪比</strong></td>
+            <td>1 个有效 / 10,000 条告警</td>
+            <td><strong>误报率 &lt; 3%</strong>（经混合验证）</td>
+          </tr>
+          <tr>
+            <td><strong>覆盖范围</strong></td>
+            <td>被迫挑选模块（手电筒）</td>
+            <td>整个代码库（泛光灯）</td>
+          </tr>
+          <tr>
+            <td><strong>价值积累</strong></td>
+            <td>每次从零开始</td>
+            <td>飞轮复利，越用越聪明</td>
+          </tr>
+          <tr>
+            <td><strong>检测与预防</strong></td>
+            <td>割裂的两件事</td>
+            <td>同一套规则，检测即预防</td>
+          </tr>
+          <tr>
+            <td><strong>交付物</strong></td>
+            <td>一堵告警之墙</td>
+            <td>已验证、带证据、可直接修</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="golden-quote fade-in">
+      不要用<span>数量</span>来衡量价值，<br>
+      真正的护城河是那个<span>越转越快的飞轮</span>。
+    </div>
+  </div>
+</section>
+<!-- ============ 第四章：如何组成 ============ -->
+<section class="chapter" id="ch4">
+  <div class="container">
+    <span class="chapter-tag fade-in">第四幕 · 怎么构成（How · 上）</span>
+    <h2 class="fade-in">掀开引擎盖：里面究竟有哪些零件？</h2>
+
+    <p class="fade-in">
+      我们知道了 Foundry 是什么、为什么有价值。现在到了最硬核的部分——
+      <strong>掀开引擎盖</strong>。在拆零件之前，先用第一性原理问一个最根本的问题：
+    </p>
+
+    <!-- 苏格拉底提问 4 -->
+    <div class="socratic-q fade-in">
+      <span class="q-label">设计的本源追问：</span>
+      <p>如果只让<strong>一个</strong>万能 AI 智能体去"读代码、找漏洞、判真假、写报告"全包了，<br>会出什么问题？为什么 Cisco 偏偏要把它拆成 8 个角色？</p>
+    </div>
+
+    <h3 class="fade-in">第一性原理：每个角色，都在"补救"上一个角色的盲区</h3>
+
+    <p class="fade-in">
+      答案藏在一句极其深刻的设计哲学里（来源：<code>spec.md</code> §4.2 Rationale）：
+      <strong>"每个角色都有一个独特的失败模式，而下一个角色的存在，正是为了捕获这个失败。"</strong>
+    </p>
+
+    <p class="fade-in">
+      Cisco 反复发现一个规律：<strong>只要把任意两个角色合并，合并后角色的质量标准，就会向两者中较弱的那个滑落。</strong>
+      让我们顺着这条"失败链"往下推，你会发现 8 个角色是被"逼"出来的，而非凭空设计：
+    </p>
+
+    <div class="def-analogy fade-in">
+      <div class="def-box">
+        <h4>📐 精准定义：智能体（Agent）与角色（Role）</h4>
+        <p>
+          <strong>智能体</strong>是一个由大模型驱动、按固定职责在循环中工作、通过共享"基质（Substrate）"与同伴协调的工作单元。
+          <strong>角色</strong>是一种命名的专长（检测器、分诊员……）；<strong>一个角色可以有许多并发实例</strong>。
+        </p>
+      </div>
+      <div class="analogy-box">
+        <h4>🏥 精妙类比：一家专科分工的医院</h4>
+        <p>
+          你不会让<strong>一个医生</strong>同时做挂号、拍片、读片、手术、写病历——那样每个环节都是业余水平。
+          Foundry 就像一家医院：<strong>导诊、影像科、放射科医生、外科医生、质控、出报告</strong>各司其职，
+          一道工序的疏漏，被下一道专业工序兜住。
+        </p>
+      </div>
+    </div>
+
+    <h3 class="fade-in">8 大核心角色：一条流水线，三大分层</h3>
+
+    <p class="fade-in">
+      这 8 个角色（来源：<code>spec.md</code> §4.2）可以归入<strong>三大分层</strong>：
+      <span class="pill pill-blue">知识层</span> 负责"看懂目标"，
+      <span class="pill pill-orange">流水线层</span> 负责"找—判—证—报"，
+      <span class="pill pill-green">监督层</span> 则统管全局与"何时算完"。
+    </p>
+
+    <!-- SVG：8角色架构总图 -->
+    <div class="svg-scroll-wrapper fade-in">
+      <svg viewBox="0 0 940 560" width="940" role="img" aria-label="Foundry八大核心角色架构总图">
+        <rect width="940" height="560" fill="#FFFFFF"/>
+        <text x="470" y="34" text-anchor="middle" font-size="20" font-weight="800" fill="#0D274D">Foundry 八大核心角色 · 架构总览</text>
+
+        <!-- 操作员 -->
+        <rect x="395" y="56" width="150" height="42" rx="21" fill="#1A1A1A"/>
+        <text x="470" y="83" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">👤 操作员 Operator</text>
+        <path d="M470 98 L470 122" stroke="#58585B" stroke-width="2" marker-end="url(#a4)"/>
+
+        <!-- 编排器 Orchestrator -->
+        <rect x="270" y="124" width="400" height="56" rx="12" fill="#0D274D"/>
+        <text x="470" y="148" text-anchor="middle" font-size="15" font-weight="800" fill="#00BCEB">① 编排器 Orchestrator</text>
+        <text x="470" y="168" text-anchor="middle" font-size="11.5" fill="#cdd6e4">唯一对外接口：启停 · 监控 · 预算 · 答疑 · 派活</text>
+
+        <!-- Substrate -->
+        <rect x="180" y="200" width="580" height="44" rx="10" fill="#005073"/>
+        <text x="470" y="227" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">⚙ 共享基质 Substrate：工作队列 · 发现库 · 沙箱 · 预算 · 仪表盘</text>
+
+        <!-- 三大分层标题 -->
+        <text x="155" y="285" text-anchor="middle" font-size="13" font-weight="800" fill="#049FD9">知识层</text>
+        <text x="470" y="285" text-anchor="middle" font-size="13" font-weight="800" fill="#F58025">发现流水线</text>
+        <text x="838" y="285" text-anchor="middle" font-size="13" font-weight="800" fill="#67B346">监督层</text>
+
+        <!-- 知识层 -->
+        <rect x="40" y="300" width="230" height="120" rx="12" fill="#E8F4FB" stroke="#049FD9" stroke-width="2"/>
+        <rect x="58" y="318" width="86" height="84" rx="8" fill="#fff" stroke="#049FD9"/>
+        <text x="101" y="352" text-anchor="middle" font-size="12.5" font-weight="700" fill="#005073">②索引器</text>
+        <text x="101" y="370" text-anchor="middle" font-size="10.5" fill="#58585B">Indexer</text>
+        <text x="101" y="386" text-anchor="middle" font-size="10" fill="#58585B">代码结构</text>
+        <rect x="156" y="318" width="98" height="84" rx="8" fill="#fff" stroke="#049FD9"/>
+        <text x="205" y="352" text-anchor="middle" font-size="12.5" font-weight="700" fill="#005073">③制图师</text>
+        <text x="205" y="370" text-anchor="middle" font-size="10.5" fill="#58585B">Cartographer</text>
+        <text x="205" y="386" text-anchor="middle" font-size="10" fill="#58585B">安全地图</text>
+
+        <!-- 流水线层 -->
+        <rect x="290" y="300" width="370" height="120" rx="12" fill="#FEF4E6" stroke="#F58025" stroke-width="2"/>
+        <!-- 4 detector -->
+        <rect x="304" y="318" width="80" height="84" rx="8" fill="#fff" stroke="#F58025"/>
+        <text x="344" y="350" text-anchor="middle" font-size="12" font-weight="700" fill="#b85a10">④检测器</text>
+        <text x="344" y="367" text-anchor="middle" font-size="9.5" fill="#58585B">Detector</text>
+        <text x="344" y="383" text-anchor="middle" font-size="9.5" fill="#58585B">广撒网</text>
+        <!-- 5 triager -->
+        <rect x="392" y="318" width="80" height="84" rx="8" fill="#fff" stroke="#F58025"/>
+        <text x="432" y="350" text-anchor="middle" font-size="12" font-weight="700" fill="#b85a10">⑤分诊员</text>
+        <text x="432" y="367" text-anchor="middle" font-size="9.5" fill="#58585B">Triager</text>
+        <text x="432" y="383" text-anchor="middle" font-size="9.5" fill="#58585B">滤噪音</text>
+        <!-- 6 validator -->
+        <rect x="480" y="318" width="80" height="84" rx="8" fill="#fff" stroke="#F58025"/>
+        <text x="520" y="350" text-anchor="middle" font-size="12" font-weight="700" fill="#b85a10">⑥验证器</text>
+        <text x="520" y="367" text-anchor="middle" font-size="9.5" fill="#58585B">Validator</text>
+        <text x="520" y="383" text-anchor="middle" font-size="9.5" fill="#58585B">证真伪</text>
+        <!-- 8 reporter -->
+        <rect x="568" y="318" width="80" height="84" rx="8" fill="#fff" stroke="#F58025"/>
+        <text x="608" y="350" text-anchor="middle" font-size="12" font-weight="700" fill="#b85a10">⑧报告员</text>
+        <text x="608" y="367" text-anchor="middle" font-size="9.5" fill="#58585B">Reporter</text>
+        <text x="608" y="383" text-anchor="middle" font-size="9.5" fill="#58585B">写报告</text>
+        <!-- 流水线箭头 -->
+        <path d="M384 360 L392 360" stroke="#F58025" stroke-width="2.5" marker-end="url(#a4o)"/>
+        <path d="M472 360 L480 360" stroke="#F58025" stroke-width="2.5" marker-end="url(#a4o)"/>
+        <path d="M560 360 L568 360" stroke="#F58025" stroke-width="2.5" marker-end="url(#a4o)"/>
+
+        <!-- 监督层 -->
+        <rect x="680" y="300" width="220" height="120" rx="12" fill="#EAF6E4" stroke="#67B346" stroke-width="2"/>
+        <rect x="755" y="330" width="120" height="60" rx="8" fill="#fff" stroke="#67B346"/>
+        <text x="815" y="358" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3D7A1F">⑦覆盖向导</text>
+        <text x="815" y="376" text-anchor="middle" font-size="10" fill="#58585B">Coverage-Guide · 判断"做完没"</text>
+
+        <!-- 底部说明 -->
+        <text x="470" y="460" text-anchor="middle" font-size="13" fill="#58585B" font-style="italic">每个角色都捕获上一个角色的失败模式：检测产噪音 → 分诊滤噪音 → 验证防虚构 → 覆盖保完整</text>
+
+        <!-- 扩展角色 -->
+        <rect x="120" y="486" width="700" height="50" rx="10" fill="#F7F8FA" stroke="#D4D8DE" stroke-dasharray="6 4"/>
+        <text x="470" y="507" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9232AC">5 个可选扩展角色（核心跑通后再上）</text>
+        <text x="470" y="525" text-anchor="middle" font-size="11" fill="#58585B">深度测试 · 变体猎手 · 攻击链测绘 · 修复器 · 自我改进</text>
+
+        <defs>
+          <marker id="a4" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#58585B"/></marker>
+          <marker id="a4o" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#F58025"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h4 class="fade-in">逐一认识这 8 位"专科医生"</h4>
+
+    <div class="table-scroll-wrapper fade-in">
+      <table>
+        <thead>
+          <tr>
+            <th>角色</th>
+            <th>一句话职责</th>
+            <th>它捕获的"失败"</th>
+            <th>类比</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>① 编排器<br>Orchestrator</strong></td>
+            <td>操作员唯一的接口：验证配置、生成与维护整个团队、监控状态、管预算；同时答疑、派活、接受指挥</td>
+            <td>—（总指挥）</td>
+            <td>医院<strong>院长 + 前台</strong></td>
+          </tr>
+          <tr>
+            <td><strong>② 索引器<br>Indexer</strong></td>
+            <td>建立代码的<strong>结构知识</strong>：符号、调用图、谁调用谁</td>
+            <td>没它，下游问"谁调了这个函数"无人能答</td>
+            <td>图书馆<strong>目录系统</strong></td>
+          </tr>
+          <tr>
+            <td><strong>③ 制图师<br>Cartographer</strong></td>
+            <td>绘制<strong>安全地图</strong>：架构、攻击面、信任边界、数据流、威胁模型</td>
+            <td>没它，分诊只能逐个瞎猜边界</td>
+            <td>城市<strong>安防地图</strong></td>
+          </tr>
+          <tr>
+            <td><strong>④ 检测器<br>Detector</strong></td>
+            <td><strong>广度优先</strong>：规则扫荡 + 自由探索，把一切可疑都丢进库</td>
+            <td>—（故意高产、低精度）</td>
+            <td>地毯式<strong>初筛护士</strong></td>
+          </tr>
+          <tr>
+            <td><strong>⑤ 分诊员<br>Triager</strong></td>
+            <td><strong>噪音过滤器</strong>：逐一调查候选，凭证据判定真伪</td>
+            <td>捕获检测器的"噪音"</td>
+            <td><strong>主治医师</strong>读片</td>
+          </tr>
+          <tr>
+            <td><strong>⑥ 验证器<br>Validator</strong></td>
+            <td><strong>证明过滤器</strong>：在真实靶场上独立复现，证明"真能被利用"</td>
+            <td>捕获分诊"听起来对、实则虚构"</td>
+            <td><strong>手术确诊</strong></td>
+          </tr>
+          <tr>
+            <td><strong>⑦ 覆盖向导<br>Coverage-Guide</strong></td>
+            <td>把目标拆成清单，追踪进度，宣布"覆盖完成"</td>
+            <td>捕获"找到一堆但不知是否全"</td>
+            <td><strong>质控主管</strong></td>
+          </tr>
+          <tr>
+            <td><strong>⑧ 报告员<br>Reporter</strong></td>
+            <td>产出人类可读的报告：严重度、分类、复现步骤、汇总</td>
+            <td>捕获"一堆无法行动的结论"</td>
+            <td>出具<strong>诊断报告</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout fade-in">
+      <p style="margin:0;">
+        <strong>📌 流水线的精髓：</strong>
+        检测器<strong>故意</strong>高产低精度（广撒网，宁可多不可漏）；
+        分诊员把噪音滤掉；验证器把"嘴上说的"变成"手上证的"；
+        报告员只把<strong>已确认</strong>的写成报告。
+        关键铁律：<strong>检测器绝不直接给人看任何东西</strong>，
+        所有候选先躺在内部库里，只有通过分诊的才会浮出水面（这正是宪法第 II 条）。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第四章 · 下半：宪法与证据闸门 ============ -->
+<section class="chapter" id="ch4b">
+  <div class="container">
+    <span class="chapter-tag fade-in">第四幕 · 怎么构成（How · 下）</span>
+    <h2 class="fade-in">11 条宪法铁律 & "误报率 &lt;3%"的真正秘密</h2>
+
+    <p class="fade-in">
+      角色解决了"谁来干活"，但还有一个更深的问题：<strong>如何保证这些 AI 智能体不会"自信地胡说八道"？</strong>
+      这就要请出 Foundry 的灵魂——那部 <strong>宪法（Constitution）</strong>。
+    </p>
+
+    <!-- 苏格拉底提问 5 -->
+    <div class="socratic-q fade-in">
+      <span class="q-label">直击要害的追问：</span>
+      <p>大模型最擅长的，就是生成"流畅、自信、看似合理却完全错误"的内容。<br>那么——你凭什么相信它报上来的漏洞是<strong>真</strong>的？</p>
+    </div>
+
+    <h3 class="fade-in">宪法第一条：证据高于断言（Evidence Over Assertion）</h3>
+
+    <p class="fade-in">
+      这是整个系统<strong>最重要的质量控制</strong>，也是"误报率 &lt;3%"背后的核心机密。
+      Cisco 的原话振聋发聩（来源：<code>constitution.md</code> §I）：
+    </p>
+
+    <blockquote class="fade-in">
+      "前沿模型会以一种<strong>让未经审查的输出毫无价值</strong>的比率，
+      生产出流畅、自信、看似合理的漏洞声明——而它们是错的。<br>
+      我们没有靠'要求模型更小心'来解决这个问题。<br>
+      我们的解法是：<strong>要求它的声明必须可被核查，然后真的去核查。</strong>"
+    </blockquote>
+
+    <h3 class="fade-in">那把锁：证据闸门（Evidence Gate）的"三条腿"</h3>
+
+    <p class="fade-in">
+      具体怎么核查？分诊员若想把一个发现判定为 <span class="pill pill-green">真阳性（true-positive）</span>，
+      它的调查报告<strong>必须</strong>为以下三件事各引用至少一处<strong>具体代码位置</strong>
+      （来源：<code>spec.md</code> §7.3 / FR-087）：
+    </p>
+
+    <div class="grid grid-3 fade-in">
+      <div class="card">
+        <h4>🚪 第一条腿<br>可达性 Reachability</h4>
+        <p>必须指出一个<strong>攻击者能控制的入口</strong>，并证明从这里能抵达那个危险的"汇聚点"。<br><em>不是空中楼阁，是真能走到。</em></p>
+      </div>
+      <div class="card">
+        <h4>🧱 第二条腿<br>信任边界 Trust Boundary</h4>
+        <p>必须指出<strong>不可信数据未经充分校验、就跨进可信处理区</strong>的那个临界点。<br><em>这正是制图师的"安全地图"派上用场之处。</em></p>
+      </div>
+      <div class="card">
+        <h4>💥 第三条腿<br>影响 Impact</h4>
+        <p>必须指出在汇聚点产生的<strong>具体安全后果</strong>。<br><em>到底能造成什么实质危害？</em></p>
+      </div>
+    </div>
+
+    <p class="fade-in">
+      而最致命的一招在 <strong>FR-088</strong>：
+      <strong>每一处被引用的代码位置，都会被"机械地"验证它是否真实存在于代码里。</strong>
+      只要有一处引用<strong>解析不到真实代码</strong>（比如模型编造了一个不存在的函数名），
+      该判定立刻被<strong>降级</strong>为"待复核（needs-review）"——
+      <strong>无论它的论述听起来多么天衣无缝。</strong>
+    </p>
+
+    <!-- 定义+类比：证据闸门 -->
+    <div class="def-analogy fade-in">
+      <div class="def-box">
+        <h4>📐 精准定义</h4>
+        <p>
+          <strong>证据闸门</strong>：一个发现被标记为"真阳性"前必须满足的结构化要求——
+          为可达性、信任边界、影响各提供可机械验证的代码引用。
+          <strong>模型无权给自己颁发"真阳性"勋章；是闸门在颁发。</strong>
+        </p>
+      </div>
+      <div class="analogy-box">
+        <h4>⚖️ 精妙类比：法庭不认"我觉得"</h4>
+        <p>
+          就像法庭定罪不能靠检察官"我觉得他有罪"，必须出示<strong>三样能被核实的物证</strong>：
+          作案路径、越界时刻、造成的伤害。任何一件物证经查是伪造的（地址不存在），
+          案子当场降级。<strong>幻觉的函数名，就是伪造的物证。</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="callout fade-in">
+      <p style="margin:0;">
+        <strong>🎯 秘密揭晓：</strong>
+        "误报率 &lt;3%" 不是因为模型更聪明，而是因为<strong>这道闸门把"无法被核实的声明"挡在了门外</strong>。
+        一个幻觉出来的函数名，过不了机械核查；一个缺少"三条腿"的发现，至多是"线索"，绝不会被当成"真漏洞"递到工程师面前。
+        Cisco 说：这一道闸门，<strong>把真阳性精度从"不可用"提升到了"审阅者愿意信任这个标签"</strong>。
+      </p>
+    </div>
+
+    <h3 class="fade-in">其余十条铁律：每一条都是一道伤疤</h3>
+
+    <p class="fade-in">
+      宪法共 11 条，每条都对应一次真实的生产事故。我们用一张表，
+      让你一眼读懂它们各自"踩过的坑"（来源：<code>constitution.md</code> §Core Principles）：
+    </p>
+
+    <div class="table-scroll-wrapper fade-in">
+      <table>
+        <thead>
+          <tr><th>#</th><th>铁律</th><th>它防的"坑"（血泪教训）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>I</strong></td><td>证据高于断言</td><td>模型自信地胡编，未经核查的输出毫无价值 → 要求可核查并真的核查</td></tr>
+          <tr><td><strong>II</strong></td><td>只浮现"幸存者"</td><td>曾为每条检测建一个工单 → 单个目标产出上万工单，工具"正确却无用"</td></tr>
+          <tr><td><strong>III</strong></td><td>靠心跳判活，绝不靠时钟</td><td>固定超时无法区分"卡死"和"在等限流" → 90%+ 误杀健康智能体，吞吐趋近于零</td></tr>
+          <tr><td><strong>IV</strong></td><td>任务认领原子且会随主而亡</td><td>无原子认领 → 多智能体重复劳动、互相覆盖；无"随主而亡" → 崩溃后任务永久卡死</td></tr>
+          <tr><td><strong>V</strong></td><td>供应商才是限速裁判</td><td>每个内部限速值几天就过时 → 要么浪费已付产能，要么形同虚设、掩盖真信号</td></tr>
+          <tr><td><strong>VI</strong></td><td>先覆盖，再看产出率</td><td>只看产出率会在"头六小时没找到东西"时误停 → 而那往往是开始，不是结束</td></tr>
+          <tr><td><strong>VII</strong></td><td>"已利用"=已实证</td><td>每一次对"已利用"标签的稀释，都在一个汇报周期内摧毁审阅者的信任</td></tr>
+          <tr><td><strong>VIII</strong></td><td>指纹在编辑下保持稳定</td><td>指纹含行号 → 代码一改，每次重跑都把同一发现当新的重报，操作员永远在重复分诊</td></tr>
+          <tr><td><strong>IX</strong></td><td>靠基础设施隔离，绝不靠提示词</td><td>智能体会读到含恶意指令的内容 → 只靠提示词约束的边界，迟早被越过</td></tr>
+          <tr><td><strong>X</strong></td><td>操作员的权威高于一切智能体</td><td>智能体会互相"劝退" → 一个说"这块查完了"，全队跟着信，最终用自己的共识当证据</td></tr>
+          <tr><td><strong>XI</strong></td><td>原子化持久化</td><td>"先删旧再写新"中途崩溃 → 读者啥都读不到且无报错，曾反复丢失数小时的索引构建</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="fade-in">
+      请特别注意宪法 §Amendment 的态度（来源：<code>constitution.md</code>）：
+      <strong>"'它不方便'和'我们的基础设施做起来很难'，都不构成修改这些原则的理由。</strong>
+      每一条原则实现起来都不方便；但每一条<strong>缺席的代价，都比它存在的代价更昂贵。"</strong>
+    </p>
+
+    <h3 class="fade-in">5 个可选扩展角色：核心跑通后的"进阶装备"</h3>
+
+    <p class="fade-in">
+      除了 8 个核心角色，Foundry 还描述了 5 个<strong>可选扩展角色</strong>
+      （来源：<code>spec.md</code> §6）。官方强烈建议：<strong>第一次构建时，全部说"不"</strong>——
+      先让 8 个核心角色稳定产出可信的发现，再来考虑这些"进阶装备"：
+    </p>
+
+    <div class="grid grid-3 fade-in">
+      <div class="card">
+        <h4>🔬 深度测试器<br>Deep-Tester</h4>
+        <p>对特定函数/端点做模糊测试（Fuzzing）与属性测试，<strong>在检测器给出广度之处，补上深度</strong>。</p>
+      </div>
+      <div class="card">
+        <h4>🔎 变体猎手<br>Variant-Hunter</h4>
+        <p>拿到一个确认漏洞，<strong>在代码库其余部分搜寻同类模式</strong>，揪出系统性同款问题。</p>
+      </div>
+      <div class="card">
+        <h4>🗺️ 攻击链测绘<br>Attack-Mapper</h4>
+        <p>把多个确认漏洞<strong>组装成"权限提升图"</strong>，显示攻击者如何从入口一步步链到目标。</p>
+      </div>
+      <div class="card">
+        <h4>🔧 修复器<br>Remediator</h4>
+        <p>为确认漏洞<strong>生成并验证候选补丁</strong>，但永远是"供人类审阅的提案"，绝不自动合并。</p>
+      </div>
+      <div class="card">
+        <h4>🧠 自我改进<br>Self-Improver</h4>
+        <p>阅读团队自己的日志、指标、规则缺口，<strong>向操作员提议配置、提示词与新规则</strong>——它就是飞轮第④步的自动化引擎。</p>
+      </div>
+    </div>
+
+    <div class="golden-quote fade-in">
+      8 个角色是"分工的智慧"，<br>
+      11 条铁律是"踩坑的智慧"，<br>
+      而那道<span>证据闸门</span>，是"信任的源头"。
+    </div>
+  </div>
+</section>
+<!-- ============ 第五章：如何落地 ============ -->
+<section class="chapter" id="ch5">
+  <div class="container">
+    <span class="chapter-tag fade-in">第五幕 · 怎么落地（How · 实践）</span>
+    <h2 class="fade-in">从图纸到大楼：你的团队该怎么动手？</h2>
+
+    <p class="fade-in">
+      我们已经看清了引擎的全部零件。最后一个问题，也是最实际的问题：
+      <strong>作为企业，我拿到这份开源蓝图后，第一步该做什么？</strong>
+      在给出步骤之前，先用第一性原理破除一个最常见的落地误区——
+    </p>
+
+    <!-- 苏格拉底提问 6 -->
+    <div class="socratic-q fade-in">
+      <span class="q-label">落地前的清醒追问：</span>
+      <p>既然这是一份"通用蓝图"，我能不能直接照着它一字不改地开始编码？<br>如果不能，那些"留白"的地方，又该由谁、在什么时候填上？</p>
+    </div>
+
+    <h3 class="fade-in">第一性原理：蓝图是"故意留白"的</h3>
+
+    <p class="fade-in">
+      答案是<strong>不能直接编码</strong>。因为这份种子规范（<code>spec.md</code>）在每一个
+      "取决于你的组织、基础设施或威胁模型"的决策点上，都<strong>故意留了白</strong>，
+      用一个醒目的标记标注：<code>[NEEDS CLARIFICATION: ...]</code>
+      （需要澄清）。整份规范里，这样的"待你填空"约有<strong>三十多处</strong>。
+    </p>
+
+    <p class="fade-in">
+      这不是规范"没写完"，而是<strong>它把"该由你决定的事"诚实地交还给你</strong>。
+      落地的本质，就是<strong>把这些留白，逐一替换成你自己的答案</strong>，
+      最终得到一份属于你、为你的技术栈量身定制的规范。
+    </p>
+
+    <div class="def-analogy fade-in">
+      <div class="def-box">
+        <h4>📐 精准定义：澄清（Clarify）</h4>
+        <p>
+          落地的核心动作。借助 Spec Kit 的 <code>/speckit.clarify</code> 命令，
+          AI 会逐一找出规范里的 <code>[NEEDS CLARIFICATION]</code> 标记，
+          把它们变成一个个问题向你提问；你回答后，规范被<strong>就地改写</strong>，
+          留白被你的决定替换。
+        </p>
+      </div>
+      <div class="analogy-box">
+        <h4>👔 精妙类比：定制西装的量体</h4>
+        <p>
+          蓝图是一套<strong>顶级西装的版型</strong>，但它故意留白了"袖长、肩宽、面料"。
+          澄清，就是裁缝拿着皮尺<strong>逐项量你的身材</strong>：
+          "用 GitHub 还是 GitLab？用哪个大模型？有没有测试靶场？"
+          量完，才能裁出<strong>只合你身</strong>的那一套。
+        </p>
+      </div>
+    </div>
+
+    <h3 class="fade-in">Spec Kit 七步法：从种子到运行</h3>
+
+    <p class="fade-in">
+      Cisco 给出了清晰的落地路径（来源：<code>README.md</code> §Getting started），
+      我们把它梳理成<strong>七个步骤</strong>。注意：第 0 步看似简单，却是官方最强调的一步。
+    </p>
+
+    <!-- SVG：七步法流程 -->
+    <div class="svg-scroll-wrapper fade-in">
+      <svg viewBox="0 0 920 470" width="920" role="img" aria-label="Spec Kit 七步落地流程">
+        <rect width="920" height="470" fill="#FFFFFF"/>
+        <text x="460" y="34" text-anchor="middle" font-size="19" font-weight="800" fill="#0D274D">从"种子"到"运行"：Spec Kit 七步法</text>
+
+        <!-- 步骤盒子函数化布局 -->
+        <!-- 第0步 -->
+        <rect x="40" y="70" width="180" height="70" rx="10" fill="#0D274D"/>
+        <text x="130" y="100" text-anchor="middle" font-size="14" font-weight="800" fill="#00BCEB">第 0 步</text>
+        <text x="130" y="122" text-anchor="middle" font-size="12.5" fill="#fff">通读宪法（必做！）</text>
+
+        <!-- 第1步 -->
+        <rect x="250" y="70" width="180" height="70" rx="10" fill="#005073"/>
+        <text x="340" y="100" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">第 1 步</text>
+        <text x="340" y="122" text-anchor="middle" font-size="12.5" fill="#cdd6e4">安装 Spec Kit</text>
+
+        <!-- 第2步 -->
+        <rect x="460" y="70" width="180" height="70" rx="10" fill="#005073"/>
+        <text x="550" y="100" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">第 2 步</text>
+        <text x="550" y="122" text-anchor="middle" font-size="12.5" fill="#cdd6e4">装入宪法</text>
+
+        <!-- 第3步 -->
+        <rect x="670" y="70" width="180" height="70" rx="10" fill="#005073"/>
+        <text x="760" y="100" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">第 3 步</text>
+        <text x="760" y="122" text-anchor="middle" font-size="12.5" fill="#cdd6e4">植入种子规范</text>
+
+        <!-- 横向箭头 第一行 -->
+        <path d="M220 105 L248 105" stroke="#58585B" stroke-width="2.5" marker-end="url(#a5)"/>
+        <path d="M430 105 L458 105" stroke="#58585B" stroke-width="2.5" marker-end="url(#a5)"/>
+        <path d="M640 105 L668 105" stroke="#58585B" stroke-width="2.5" marker-end="url(#a5)"/>
+
+        <!-- 折回箭头 -->
+        <path d="M760 140 L760 175 L130 175 L130 205" stroke="#58585B" stroke-width="2.5" fill="none" marker-end="url(#a5)"/>
+
+        <!-- 第4步 + 第6步迭代环 -->
+        <rect x="40" y="210" width="240" height="100" rx="12" fill="#FEF4E6" stroke="#F58025" stroke-width="2.5"/>
+        <text x="160" y="240" text-anchor="middle" font-size="14" font-weight="800" fill="#b85a10">第 4 步 · 澄清 Clarify</text>
+        <text x="160" y="262" text-anchor="middle" font-size="11.5" fill="#58585B">回答 ~30 处留白</text>
+        <text x="160" y="282" text-anchor="middle" font-size="11.5" fill="#58585B">身份/集成/策略/扩展四组</text>
+
+        <rect x="330" y="210" width="240" height="100" rx="12" fill="#E8F4FB" stroke="#049FD9" stroke-width="2.5"/>
+        <text x="450" y="240" text-anchor="middle" font-size="14" font-weight="800" fill="#005073">第 5 步 · 硬化 Specify</text>
+        <text x="450" y="262" text-anchor="middle" font-size="11.5" fill="#58585B">展开章节、连续编号</text>
+        <text x="450" y="282" text-anchor="middle" font-size="11.5" fill="#58585B">SEED → DRAFT</text>
+
+        <!-- 第6步迭代 -->
+        <rect x="620" y="210" width="240" height="100" rx="12" fill="#F3E6F7" stroke="#9232AC" stroke-width="2.5"/>
+        <text x="740" y="240" text-anchor="middle" font-size="14" font-weight="800" fill="#9232AC">第 6 步 · 迭代收敛</text>
+        <text x="740" y="262" text-anchor="middle" font-size="11.5" fill="#58585B">硬化常引出新留白</text>
+        <text x="740" y="282" text-anchor="middle" font-size="11.5" fill="#58585B">重复 4↔5，通常 2-3 轮</text>
+
+        <!-- 4-5-6 箭头 -->
+        <path d="M280 260 L328 260" stroke="#F58025" stroke-width="2.5" marker-end="url(#a5o)"/>
+        <path d="M570 260 L618 260" stroke="#049FD9" stroke-width="2.5" marker-end="url(#a5)"/>
+        <!-- 6回4循环虚线 -->
+        <path d="M740 310 L740 340 L160 340 L160 312" stroke="#9232AC" stroke-width="2.5" fill="none" stroke-dasharray="6 4" marker-end="url(#a5p)"/>
+        <text x="450" y="333" text-anchor="middle" font-size="11" fill="#9232AC" font-style="italic">若仍有留白 → 循环回澄清</text>
+
+        <!-- 第7步 -->
+        <rect x="330" y="375" width="240" height="70" rx="12" fill="#EAF6E4" stroke="#67B346" stroke-width="3"/>
+        <text x="450" y="405" text-anchor="middle" font-size="14" font-weight="800" fill="#3D7A1F">第 7 步 · plan → tasks → implement</text>
+        <text x="450" y="427" text-anchor="middle" font-size="11.5" fill="#58585B">设计 → 任务清单 → 编码实现</text>
+        <path d="M450 340 L450 373" stroke="#67B346" stroke-width="2.5" marker-end="url(#a5g)"/>
+
+        <defs>
+          <marker id="a5" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#58585B"/></marker>
+          <marker id="a5o" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#F58025"/></marker>
+          <marker id="a5p" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9232AC"/></marker>
+          <marker id="a5g" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#67B346"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="numbered-step fade-in">
+      <div class="step-num">0</div>
+      <div class="step-body">
+        <h4>通读宪法（最被强调的一步）</h4>
+        <p>
+          官方原话：<strong>"如果某条原则看起来不适合你的情况，答案往往是'我们还没踩到那个坑'，
+          而不是'那个坑在我这儿不会发生'。"</strong>（来源：<code>README.md</code> Step 0）
+          先理解 11 条铁律为何不可违背，再动手。
+        </p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">1-3</div>
+      <div class="step-body">
+        <h4>安装工具 → 装入宪法 → 植入种子</h4>
+        <p>
+          在你的项目里安装 Spec Kit；把 <code>constitution.md</code> 拷入
+          <code>.specify/memory/</code>，注册为后续每一步都要校验的"最高权威"；
+          再把 <code>spec.md</code> 拷入 <code>specs/001-foundry/</code>。
+        </p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>澄清 Clarify —— 这是种子被设计出来的目的</h4>
+        <p>
+          运行 <code>/speckit.clarify</code>，AI 会逐一向你提问约三十多个留白。
+          它们分为<strong>四组</strong>：身份与范围、集成选择、策略选择、扩展范围。
+          <strong>"我还不知道"对集成/策略是可接受的，但对身份与范围不可接受。</strong>
+        </p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">5-6</div>
+      <div class="step-body">
+        <h4>硬化 Specify → 迭代收敛</h4>
+        <p>
+          <code>/speckit.specify</code> 把澄清后的种子硬化成完整规范，状态从 <code>SEED</code> 变 <code>DRAFT</code>。
+          <strong>注意：硬化常会引出新的留白</strong>（例如你说"用 GitHub 企业版"，下一轮就会追问"API 端点是什么"）。
+          所以要<strong>重复"澄清↔硬化"，通常 2-3 轮</strong>，直到不再有留白、且通读全文都是"你自己做的决定"。
+        </p>
+      </div>
+    </div>
+    <div class="numbered-step fade-in">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <h4>设计 → 任务 → 实现</h4>
+        <p>
+          依次运行 <code>/speckit.plan</code>（技术设计）、<code>/speckit.tasks</code>（依赖有序的任务清单）、
+          <code>/speckit.implement</code>（逐项编码）。每个里程碑后跑 <code>/speckit.analyze</code>，
+          自动校验规范、计划、任务、代码<strong>与宪法是否漂移</strong>。
+        </p>
+      </div>
+    </div>
+
+    <h3 class="fade-in">那约三十个"留白"，到底在问你什么？</h3>
+
+    <p class="fade-in">
+      这些问题分为<strong>四组</strong>（来源：<code>README.md</code> Step 4 + <code>docs/adoption/clarification-playbook.md</code>），
+      建议<strong>按顺序作答</strong>——身份范围先定，它决定后面一切：
+    </p>
+
+    <div class="table-scroll-wrapper fade-in">
+      <table>
+        <thead>
+          <tr><th>分组</th><th>典型问题</th><th>作答要点</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>A · 身份与范围</strong><br><span class="pill pill-red">最先答</span></td>
+            <td>系统叫什么名？是否"有源码+有授权"？8 个核心角色要合并/拆分/省略吗？</td>
+            <td>必须给出具体答案，不能"以后再说"。它塑造后面的一切。</td>
+          </tr>
+          <tr>
+            <td><strong>B · 集成选择</strong></td>
+            <td>用哪个代码托管/工单？哪个 LLM？哪个数据库？跑在哪里？用什么隔离运行时？</td>
+            <td>种子描述的是每个集成的"接口契约"。"我们用 GitLab、一台 VM、Docker、SQLite"就是完整答案。</td>
+          </tr>
+          <tr>
+            <td><strong>C · 策略选择</strong></td>
+            <td>严重度方案？弱点分类法（CWE？）？是否浮现"待复核"？标签如何命名？</td>
+            <td>尽量沿用你组织已有的惯例。</td>
+          </tr>
+          <tr>
+            <td><strong>D · 扩展范围</strong></td>
+            <td>5 个可选扩展角色，各要不要？</td>
+            <td><strong>官方建议：首次构建，五个全说"不"。</strong>先让核心跑稳。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="fade-in">给企业的三条黄金原则</h3>
+
+    <p class="fade-in">
+      最后，Cisco 在博客里给所有想部署前沿大模型的企业团队，留下了三条凝练的建议
+      （来源：博客 §"What this means for industry collaboration"）：
+    </p>
+
+    <div class="grid grid-3 fade-in">
+      <div class="card">
+        <h4>① 用经过验证的框架<br><span class="pill pill-blue">Use a Proven Harness</span></h4>
+        <p>
+          <strong>不要从零开始。</strong>采用像 Foundry Security Spec 这样
+          身经百战的架构。它构建于 GitHub Spec Kit 之上，
+          任何团队都能用可信、熟悉的开源协作模式去扩展和适配。
+        </p>
+      </div>
+      <div class="card">
+        <h4>② 嵌入你的专业知识<br><span class="pill pill-green">Embed Your Expertise</span></h4>
+        <p>
+          把过往漏洞、领域特定的测试靶场喂给 AI 当向导。
+          <strong>你把知识"种"进框架里，模型才会强大得多。</strong>
+          这正是 Cisco 把"多年领域知识"嵌入编排框架的做法。
+        </p>
+      </div>
+      <div class="card">
+        <h4>③ 动态验证<br><span class="pill pill-orange">Test Dynamically</span></h4>
+        <p>
+          用 AI 驱动的自动化，在<strong>类生产环境</strong>中验证发现，
+          确保<strong>只有被实证过的漏洞</strong>才被升级递交给开发者。
+          这正是"验证器"角色与宪法第 VII 条的精神。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout fade-in">
+      <p style="margin:0;">
+        <strong>🧭 一句忠告：</strong>
+        不要被"留白多、要迭代"吓退。官方说得很清楚——
+        <strong>第一次澄清最难，大部分决策都在那一轮敲定；硬化引出新问题是正常的，不是缺陷；
+        两三轮收敛是常态。</strong> 但凡你认真走完，得到的将不是"别人的系统"，
+        而是<strong>三年后你的组织依然在运行的那个系统</strong>。
+      </p>
+    </div>
+
+    <div class="golden-quote fade-in">
+      蓝图给你<span>不塌的骨架</span>，<br>
+      澄清替你<span>量身裁衣</span>，<br>
+      而你嵌入的专业知识，是让它<span>真正强大的灵魂</span>。
+    </div>
+  </div>
+</section>
+<!-- ============ 尾声：呼应开篇 ============ -->
+<section class="chapter" id="closing" style="background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue) 100%);">
+  <div class="container" style="color:#fff;">
+    <span class="chapter-tag fade-in" style="color:#00BCEB;">终章 · 回到起点</span>
+    <h2 class="fade-in" style="color:#fff; border-bottom-color:#00BCEB;">现在，你真的能赢得这场比赛了</h2>
+
+    <div class="fade-in">
+      <p style="color:#e2eaf2; font-size:1.15rem;">
+        让我们回到第一章那辆 F1 赛车。
+      </p>
+      <p style="color:#e2eaf2; font-size:1.15rem;">
+        故事开始时，前沿大模型把<strong style="color:#fff;">一辆 F1 赛车的钥匙</strong>交到了整个行业手里。
+        但我们很快明白——光有引擎，菜鸟开不快，甚至会因为速度太快而<strong style="color:#fff;">把噪音放大成灾难</strong>。
+      </p>
+      <p style="color:#e2eaf2; font-size:1.15rem;">
+        而现在，走完这趟旅程，你已经握有了赢得比赛真正需要的三样东西：
+      </p>
+    </div>
+
+    <div class="grid grid-3 fade-in" style="margin-top:2rem;">
+      <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:var(--border-radius-md); padding:var(--space-6);">
+        <h4 style="color:#00BCEB; border:none;">🏎️ 引擎</h4>
+        <p style="color:#e2eaf2; margin:0;">前沿大模型——那台提供澎湃动力的加速器。模型会更迭，但它只是<strong style="color:#fff;">燃料</strong>。</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:var(--border-radius-md); padding:var(--space-6);">
+        <h4 style="color:#00BCEB; border:none;">🛣️ 赛道</h4>
+        <p style="color:#e2eaf2; margin:0;"><strong style="color:#fff;">Foundry Security Spec</strong>——8 个角色、11 条铁律、证据闸门构成的那条专业赛道。这才是<strong style="color:#fff;">真正的引擎</strong>。</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:var(--border-radius-md); padding:var(--space-6);">
+        <h4 style="color:#00BCEB; border:none;">🧑‍✈️ 车手</h4>
+        <p style="color:#e2eaf2; margin:0;">你和你的团队——通过<strong style="color:#fff;">澄清</strong>量身定制、通过<strong style="color:#fff;">嵌入专业知识</strong>注入灵魂的驾驭者。</p>
+      </div>
+    </div>
+
+    <div class="fade-in" style="margin-top:2.5rem;">
+      <p style="color:#e2eaf2; font-size:1.15rem;">
+        18 亿行代码、8 周、误报率低于 3%——这组数字不再是遥不可及的神话，
+        而是一个<strong style="color:#fff;">可被任何企业复制的方法论</strong>。因为正如 Cisco 所言：
+      </p>
+      <blockquote style="border-left-color:#00BCEB; background:rgba(255,255,255,0.07); color:#fff;">
+        "网络安全既是一项团队运动，也是一段长期旅程。<br>
+        我们在这里，是为了让天平向<strong>所有防御者</strong>倾斜。我们同舟共济，永不止步。"
+      </blockquote>
+      <p style="color:#e2eaf2; font-size:1.15rem;">
+        而衡量你是否抓住了这个时代价值的标尺，永远不是漏洞的<strong style="color:#fff;">数量</strong>，
+        而是<strong style="color:#fff;">规模化的可执行精度</strong>。
+        你的团队，不必再淹没在告警的噪音里。
+      </p>
+    </div>
+
+    <div class="hero-cta fade-in" style="margin-top:3rem;">
+      <a href="#hero" class="btn">↑ 回到开篇</a>
+      <a href="#glossary" class="btn btn-ghost">查阅术语表</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 术语表 Glossary ============ -->
+<section class="chapter" id="glossary">
+  <div class="container">
+    <span class="chapter-tag fade-in">附录 · 共同语言</span>
+    <h2 class="fade-in">完整术语表 Glossary</h2>
+    <p class="fade-in">
+      尊重每一位读者，意味着建立共同的认知。以下是本文涉及的全部关键术语，
+      均提炼自 Foundry 官方文档（<code>spec.md</code> §2 / <code>GLOSSARY.md</code> / <code>constitution.md</code>）。
+    </p>
+
+    <div class="table-scroll-wrapper fade-in">
+      <table>
+        <thead>
+          <tr><th>术语</th><th>英文</th><th>通俗解释</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>种子规范</strong></td><td>Seed / Spec</td><td>一份"参考蓝图"而非可运行代码，需经澄清后变成你自己的规范。</td></tr>
+          <tr><td><strong>宪法</strong></td><td>Constitution</td><td>11 条不可违背的设计铁律，每条都对应一次真实的生产故障。优先级高于规范本身。</td></tr>
+          <tr><td><strong>目标</strong></td><td>Target</td><td>被评估的软件：它的源码，以及（可选）一个运行中的部署实例。</td></tr>
+          <tr><td><strong>测试靶场</strong></td><td>Testbed</td><td>目标的一个运行实例，智能体可对它进行探测与利用。可能不存在。</td></tr>
+          <tr><td><strong>操作员</strong></td><td>Operator</td><td>配置、启动、引导、停止整个评估的那个人。其指令权威高于一切智能体。</td></tr>
+          <tr><td><strong>智能体</strong></td><td>Agent</td><td>由大模型驱动、按角色在循环中工作的工作单元。</td></tr>
+          <tr><td><strong>角色</strong></td><td>Role</td><td>智能体的命名专长（检测器、分诊员……）。一个角色可有多个并发实例。</td></tr>
+          <tr><td><strong>编排器</strong></td><td>Orchestrator</td><td>操作员唯一的接口：管生灭、管预算、答疑、派活。两个互不阻塞的"门面"。</td></tr>
+          <tr><td><strong>索引器</strong></td><td>Indexer</td><td>构建代码的结构知识：符号、调用图、交叉引用。下游一切角色都要查询它。</td></tr>
+          <tr><td><strong>制图师</strong></td><td>Cartographer</td><td>绘制安全地图：架构、攻击面、信任边界、数据流、威胁模型。</td></tr>
+          <tr><td><strong>检测器</strong></td><td>Detector</td><td>广度优先地产出"候选发现"：规则扫荡 + 自由探索。故意高产、低精度。</td></tr>
+          <tr><td><strong>分诊员</strong></td><td>Triager</td><td>噪音过滤器：调查每个候选，凭证据闸门给出判定。</td></tr>
+          <tr><td><strong>验证器</strong></td><td>Validator</td><td>证明过滤器：在靶场上独立、洁净室式地复现影响，才能盖"已利用"章。</td></tr>
+          <tr><td><strong>覆盖向导</strong></td><td>Coverage-Guide</td><td>把目标拆成清单、追踪进度、宣布"覆盖完成"。"做完没"信号的一半。</td></tr>
+          <tr><td><strong>报告员</strong></td><td>Reporter</td><td>产出人类可读的报告与汇总：严重度、分类、复现步骤。</td></tr>
+          <tr><td><strong>共享基质</strong></td><td>Substrate</td><td>所有角色都依赖的非智能体机器：工作队列、发现库、沙箱、预算、仪表盘。</td></tr>
+          <tr><td><strong>发现</strong></td><td>Finding</td><td>任意生命周期阶段的"被声明的漏洞"，从候选到确认上报。</td></tr>
+          <tr><td><strong>候选</strong></td><td>Candidate</td><td>已被检测、但尚未调查的发现。</td></tr>
+          <tr><td><strong>判定</strong></td><td>Verdict</td><td>分诊员的分类：真阳性、假阳性、待复核、不适用、代码质量问题。</td></tr>
+          <tr><td><strong>证据闸门</strong></td><td>Evidence Gate</td><td>一个发现被判"真阳性"前必须满足的结构化要求：为可达性、信任边界、影响各提供可机械验证的代码引用。</td></tr>
+          <tr><td><strong>已利用</strong></td><td>Exploited</td><td>一个真阳性发现的标志：其核心影响已在靶场上被独立洁净室复现。只有验证器能设置，绝不靠推断。</td></tr>
+          <tr><td><strong>指纹</strong></td><td>Fingerprint</td><td>发现的稳定标识（路径+符号+漏洞类）。<strong>不含行号</strong>，以便代码改动后仍能去重。</td></tr>
+          <tr><td><strong>检测规则</strong></td><td>Detection Rule</td><td>针对某一漏洞类、可复用、有版本的检查项。规则语料库独立于智能体代码。</td></tr>
+          <tr><td><strong>规则缺口</strong></td><td>Rule-Gap</td><td>探索确认了一个真漏洞、却没有任何现成规则能抓到它——这就是"飞轮"成长的燃料。</td></tr>
+          <tr><td><strong>覆盖</strong></td><td>Coverage</td><td>评估目标被"可信地尝试过"的程度。"看了但没找到"也算覆盖。</td></tr>
+          <tr><td><strong>产出率</strong></td><td>Yield</td><td>按严重度加权的确认发现数 ÷ 单位花费，在一个滑动窗口内度量。</td></tr>
+          <tr><td><strong>沙箱</strong></td><td>Sandbox</td><td>围住智能体团队的隔离边界，由<strong>基础设施</strong>而非提示词强制执行网络与文件边界。</td></tr>
+          <tr><td><strong>CodeGuard</strong></td><td>—</td><td>Cisco 原创、捐给 CoSAI 的开源检测规则格式。一份规则可同时用于"评估时检测"与"编码时预防"。</td></tr>
+          <tr><td><strong>Spec Kit</strong></td><td>—</td><td>GitHub 的"规范驱动开发"开源工作流。提供 clarify / specify / plan / tasks / implement 等命令。</td></tr>
+          <tr><td><strong>飞轮</strong></td><td>Flywheel</td><td>"检测→记录缺口→提炼规则→预防"的自增强循环。每转一圈，检测与预防能力同时提升。</td></tr>
+          <tr><td><strong>可执行精度</strong></td><td>Actionable Precision</td><td>每条交付的发现都经混合验证、附带证据，工程师拿到即可直接修复。Foundry 衡量价值的真正标尺。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="golden-quote fade-in">
+      逻辑让人信服，<span>故事让人行动</span>。<br>
+      现在，轮到你的团队上场了。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 页脚 ============ -->
+<footer style="background:#0D274D; color:#cdd6e4; padding:3rem 0 2rem;">
+  <div class="container" style="text-align:center;">
+    <p style="color:#fff; font-size:1.2rem; font-weight:700; margin-bottom:1rem;">
+      🛡️ 准备好开始你自己的评估了吗？
+    </p>
+    <div class="hero-cta" style="margin-top:0;">
+      <a href="https://github.com/CiscoDevNet/foundry" class="btn" target="_blank" rel="noopener">下载 Foundry Security Spec</a>
+      <a href="https://project-codeguard.org" class="btn btn-ghost" target="_blank" rel="noopener">了解 CodeGuard</a>
+    </div>
+    <p style="margin-top:2rem; font-size:0.88rem; color:#9bb4d4; line-height:1.7;">
+      本文为基于 Cisco 公开资料的<strong>通俗化解读白皮书</strong>，引用来源包括：<br>
+      Cisco 博客《8 Years of Security Research in 8 Weeks》、Foundry 仓库
+      <code style="background:rgba(255,255,255,0.1); color:#cdd6e4;">spec.md</code> /
+      <code style="background:rgba(255,255,255,0.1); color:#cdd6e4;">constitution.md</code> /
+      <code style="background:rgba(255,255,255,0.1); color:#cdd6e4;">README.md</code> 及 <code style="background:rgba(255,255,255,0.1); color:#cdd6e4;">docs/</code> 文档集。
+    </p>
+    <p style="margin-top:1.5rem; font-size:0.82rem; color:#6b85a8;">
+      © 2026 · 第一性原理 × 苏格拉底提问法 · Foundry Security Spec 深度通俗指南
+    </p>
+  </div>
+</footer>
+
+<!-- ============ 交互脚本 ============ -->
+<script>
+(function () {
+  'use strict';
+
+  // ── 1. 汉堡菜单 ──
+  var navToggle = document.getElementById('navToggle');
+  var navLinks  = document.getElementById('navLinks');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', function () {
+      navLinks.classList.toggle('open');
+    });
+    // 点击链接后收起（移动端）
+    navLinks.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { navLinks.classList.remove('open'); });
+    });
+  }
+
+  // ── 2. 阅读进度条 ──
+  var progress = document.getElementById('readProgress');
+  function updateProgress() {
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var height = h.scrollHeight - h.clientHeight;
+    var pct = height > 0 ? (scrolled / height) * 100 : 0;
+    if (progress) progress.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  // ── 3. 滚动淡入动画 (IntersectionObserver) ──
+  var faders = document.querySelectorAll('.fade-in');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    faders.forEach(function (el) { io.observe(el); });
+  } else {
+    // 兜底：直接全部显示
+    faders.forEach(function (el) { el.classList.add('visible'); });
+  }
+
+  // ── 4. 平滑锚点滚动（兼容固定导航偏移） ──
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var id = this.getAttribute('href');
+      if (id.length > 1) {
+        var target = document.querySelector(id);
+        if (target) {
+          e.preventDefault();
+          var navH = 64;
+          var top = target.getBoundingClientRect().top + window.pageYOffset - navH;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
