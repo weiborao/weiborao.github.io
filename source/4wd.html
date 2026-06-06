@@ -1,0 +1,1234 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四驱车的秘密：让一辆小车跑赢的科学</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ===== 设计令牌 (Design Tokens) ===== */
+:root{
+  --c-bg:#fdfcf9;
+  --c-bg-soft:#f5f1e8;
+  --c-ink:#1f2533;
+  --c-ink-soft:#4a5468;
+  --c-line:#e3ddd0;
+  --c-primary:#e85d2a;     /* 赛车橙 */
+  --c-primary-soft:#fbe5da;
+  --c-accent:#1e6fd9;      /* 工程蓝 */
+  --c-accent-soft:#dceafc;
+  --c-gold:#c89b3c;
+  --c-green:#2e9e6b;
+  --c-purple:#7a52c7;
+  --radius:18px;
+  --radius-sm:10px;
+  --shadow-sm:0 2px 10px rgba(31,37,51,.06);
+  --shadow-md:0 8px 30px rgba(31,37,51,.10);
+  --shadow-lg:0 18px 50px rgba(31,37,51,.16);
+  --maxw:920px;
+  --fs-base:17px;
+  --lh:1.85;
+  --ease:cubic-bezier(.16,.84,.44,1);
+}
+
+/* ===== 基础重置 ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-block-start:80px}
+body{
+  font-family:'Noto Sans SC',system-ui,sans-serif;
+  font-size:var(--fs-base);
+  line-height:var(--lh);
+  color:var(--c-ink);
+  background:var(--c-bg);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+code,.mono{font-family:'JetBrains Mono',monospace}
+
+/* ===== 顶部导航 ===== */
+.topbar{
+  position:sticky;inset-block-start:0;z-index:100;
+  background:rgba(253,252,249,.82);
+  backdrop-filter:blur(14px);
+  border-block-end:1px solid var(--c-line);
+}
+.topbar-inner{
+  max-width:var(--maxw);margin-inline:auto;
+  padding:14px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:1.05rem}
+.brand .dot{width:14px;height:14px;border-radius:50%;
+  background:linear-gradient(135deg,var(--c-primary),var(--c-gold));
+  box-shadow:0 0 0 4px var(--c-primary-soft);animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px var(--c-primary-soft)}50%{box-shadow:0 0 0 9px transparent}}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{
+  text-decoration:none;color:var(--c-ink-soft);font-size:.86rem;font-weight:500;
+  padding:6px 12px;border-radius:999px;transition:.25s var(--ease);white-space:nowrap;
+}
+.nav-links a:hover{background:var(--c-primary-soft);color:var(--c-primary)}
+.hamburger{display:none;background:none;border:1px solid var(--c-line);
+  border-radius:10px;padding:8px 11px;cursor:pointer;font-size:1.1rem}
+
+/* ===== 进度条 ===== */
+.progress{position:fixed;inset-block-start:0;inset-inline-start:0;height:3px;width:0;
+  background:linear-gradient(90deg,var(--c-primary),var(--c-gold));z-index:200;transition:width .1s}
+
+/* ===== 容器 & 章节 ===== */
+.container{max-width:var(--maxw);margin-inline:auto;padding-inline:22px}
+.chapter{padding-block:64px 40px;border-block-end:1px dashed var(--c-line)}
+.chapter:last-of-type{border:none}
+
+/* ===== Hero ===== */
+.hero{
+  position:relative;text-align:center;
+  padding-block:80px 70px;
+  background:
+    radial-gradient(circle at 20% 20%,var(--c-primary-soft),transparent 45%),
+    radial-gradient(circle at 85% 30%,var(--c-accent-soft),transparent 50%),
+    var(--c-bg);
+  overflow:hidden;
+}
+.hero .eyebrow{
+  display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.18em;
+  color:var(--c-primary);text-transform:uppercase;
+  background:var(--c-primary-soft);padding:6px 16px;border-radius:999px;margin-block-end:22px;
+}
+.hero h1{
+  font-size:clamp(2rem,6vw,3.4rem);font-weight:900;line-height:1.18;
+  letter-spacing:-.01em;margin-block-end:20px;
+}
+.hero h1 .hl{
+  background:linear-gradient(120deg,var(--c-primary),var(--c-gold));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .sub{font-size:1.12rem;color:var(--c-ink-soft);max-width:600px;margin:0 auto 32px}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ===== 按钮 ===== */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  text-decoration:none;font-weight:700;font-size:.95rem;
+  padding:13px 26px;border-radius:999px;cursor:pointer;border:none;
+  transition:.3s var(--ease);
+}
+.btn-primary{background:var(--c-primary);color:#fff;box-shadow:var(--shadow-md)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.btn-ghost{background:#fff;color:var(--c-ink);border:1px solid var(--c-line);box-shadow:var(--shadow-sm)}
+.btn-ghost:hover{border-color:var(--c-primary);color:var(--c-primary);transform:translateY(-3px)}
+
+/* ===== 标题层级 ===== */
+.kicker{
+  display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;
+  letter-spacing:.12em;color:var(--c-accent);text-transform:uppercase;margin-block-end:14px;
+}
+.kicker .num{
+  display:grid;place-items:center;width:26px;height:26px;border-radius:8px;
+  background:var(--c-accent);color:#fff;font-size:.85rem;
+}
+h2{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;line-height:1.25;margin-block-end:18px;letter-spacing:-.01em}
+h3{font-size:1.3rem;font-weight:700;margin-block:34px 14px;color:var(--c-ink);
+  display:flex;align-items:center;gap:10px}
+h3::before{content:"";width:5px;height:1.1em;border-radius:3px;
+  background:linear-gradient(var(--c-primary),var(--c-gold))}
+h4{font-size:1.08rem;font-weight:700;margin-block:22px 10px;color:var(--c-accent)}
+p{margin-block-end:16px;color:var(--c-ink-soft)}
+.lead{font-size:1.15rem;color:var(--c-ink);font-weight:500}
+strong{color:var(--c-ink);font-weight:700}
+
+/* ===== 定义 + 类比 卡片 ===== */
+.concept{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-block:26px;
+}
+.concept .box{
+  border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-sm);
+  border:1px solid var(--c-line);transition:.3s var(--ease);position:relative;overflow:hidden;
+}
+.concept .box:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.concept .def{background:linear-gradient(160deg,#fff,var(--c-accent-soft))}
+.concept .ana{background:linear-gradient(160deg,#fff,var(--c-primary-soft))}
+.concept .tag{font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 11px;border-radius:999px;display:inline-block;margin-block-end:10px}
+.concept .def .tag{background:var(--c-accent);color:#fff}
+.concept .ana .tag{background:var(--c-primary);color:#fff}
+.concept .box p{margin:0;color:var(--c-ink)}
+
+/* ===== 苏格拉底提问块 ===== */
+.ask{
+  background:var(--c-bg-soft);border-inline-start:5px solid var(--c-gold);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:20px 24px;margin-block:24px;font-size:1.12rem;font-weight:500;color:var(--c-ink);
+  position:relative;
+}
+.ask::before{content:"🤔 想一想";display:block;font-size:.78rem;font-weight:700;
+  letter-spacing:.1em;color:var(--c-gold);margin-block-end:8px}
+
+/* ===== 公式块 ===== */
+.formula{
+  background:#1f2533;color:#f5f1e8;border-radius:var(--radius-sm);
+  padding:18px 22px;margin-block:18px;font-family:'JetBrains Mono',monospace;
+  font-size:1rem;overflow-x:auto;box-shadow:var(--shadow-md);position:relative;
+}
+.formula::before{content:"公式";position:absolute;inset-block-start:0;inset-inline-end:0;
+  font-size:.66rem;letter-spacing:.1em;background:var(--c-gold);color:#1f2533;
+  padding:3px 10px;border-radius:0 var(--radius-sm) 0 var(--radius-sm);font-weight:700}
+.formula .hl{color:var(--c-primary);font-weight:600}
+.formula .res{color:var(--c-green);font-weight:600}
+
+/* ===== 表格 ===== */
+.table-scroll-wrapper,.svg-scroll-wrapper{
+  overflow-x:auto;margin-block:24px;border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);border:1px solid var(--c-line);background:#fff;
+  -webkit-overflow-scrolling:touch;
+}
+.svg-scroll-wrapper{display:flex;justify-content:center;padding:24px 16px}
+table{border-collapse:collapse;width:100%;min-width:480px;font-size:.95rem}
+thead th{background:var(--c-ink);color:#fff;font-weight:700;text-align:start;
+  padding:14px 16px;white-space:nowrap}
+tbody td{padding:13px 16px;border-block-start:1px solid var(--c-line);color:var(--c-ink-soft)}
+tbody tr{transition:.2s}
+tbody tr:hover{background:var(--c-primary-soft)}
+tbody td:first-child{font-weight:600;color:var(--c-ink)}
+
+/* ===== Tooltip 术语 ===== */
+.term{
+  border-block-end:2px dotted var(--c-accent);cursor:help;position:relative;
+  color:var(--c-accent);font-weight:600;
+}
+.term:hover::after{
+  content:attr(data-tip);position:absolute;inset-block-end:135%;inset-inline-start:50%;
+  transform:translateX(-50%);background:var(--c-ink);color:#fff;font-weight:400;
+  font-size:.82rem;line-height:1.5;padding:10px 14px;border-radius:10px;
+  width:max-content;max-width:240px;box-shadow:var(--shadow-md);z-index:50;white-space:normal;
+}
+.term:hover::before{
+  content:"";position:absolute;inset-block-end:115%;inset-inline-start:50%;
+  transform:translateX(-50%);border:6px solid transparent;border-block-start-color:var(--c-ink);z-index:50;
+}
+
+/* ===== 金句 ===== */
+.punch{
+  text-align:center;font-size:clamp(1.15rem,3vw,1.5rem);font-weight:900;
+  line-height:1.5;margin-block:38px;padding:30px 24px;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--c-ink),#2c3548);color:#fff;
+  position:relative;box-shadow:var(--shadow-lg);
+}
+.punch::before{content:"“";position:absolute;inset-block-start:-10px;inset-inline-start:20px;
+  font-size:4rem;color:var(--c-gold);opacity:.4;font-family:Georgia,serif}
+.punch .hl{color:var(--c-gold)}
+
+/* ===== 滚动出现动画 ===== */
+.reveal{opacity:0;transform:translateY(28px);transition:.7s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ===== 响应式 ===== */
+@media(max-width:768px){
+  :root{--fs-base:16px}
+  .nav-links{display:none;position:absolute;inset-block-start:100%;inset-inline:0;
+    flex-direction:column;background:var(--c-bg);border-block-end:1px solid var(--c-line);
+    padding:14px 22px;box-shadow:var(--shadow-md)}
+  .nav-links.open{display:flex}
+  .hamburger{display:block}
+  .concept{grid-template-columns:1fr}
+}
+
+/* ===== 打印 ===== */
+@media print{
+  .topbar,.progress,.hero-cta,.hamburger{display:none!important}
+  body{font-size:12pt;background:#fff}
+  h2{break-before:page}
+  .chapter{padding-block:20px}
+  .punch{background:#eee!important;color:#000!important;box-shadow:none}
+  .formula{background:#f0f0f0!important;color:#000!important}
+  @page{margin:18mm;@bottom-center{content:"第 " counter(page) " 页"}}
+}
+</style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="dot"></span>四驱车的秘密</div>
+    <nav class="nav-links" id="navlinks">
+      <a href="#ch1">挑战</a>
+      <a href="#ch2">底盘</a>
+      <a href="#ch3">速度</a>
+      <a href="#ch4">齿轮</a>
+      <a href="#ch5">轮胎</a>
+      <a href="#ch6">电池</a>
+      <a href="#ch7">单圈公式</a>
+      <a href="#ch8">实战</a>
+      <a href="#glossary">术语表</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="菜单">☰</button>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">写给初一同学的工程笔记</span>
+    <h1>为什么<span class="hl">最快的车</span><br>不一定能<span class="hl">赢比赛</span>？</h1>
+    <p class="sub">一辆叫"暗夜蝙蝠"的迷你四驱车，藏着数学、物理、电学和工程的全部秘密。让我们像真正的工程师一样，把它从头拆到尾。</p>
+    <div class="hero-cta">
+      <a href="#ch1" class="btn btn-primary">开始拆解 →</a>
+      <a href="#ch7" class="btn btn-ghost">直接看制胜公式</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第一章：挑战 ===== -->
+<section class="chapter" id="ch1">
+  <div class="container">
+    <span class="kicker"><span class="num">1</span>挑战 · 一个反常识的发现</span>
+    <h2>比赛规则里藏着一个"陷阱"</h2>
+
+    <p class="lead reveal">假设老师给你 45 分钟，发给你一盒零件，让你拼一辆"暗夜蝙蝠"四驱车去参加比赛。你的第一反应大概是：<strong>让它跑得越快越好！</strong></p>
+
+    <p class="reveal">这个想法很自然，但它正好掉进了比赛设计者埋下的陷阱。因为这场比赛有一条铁律：</p>
+
+    <div class="formula reveal">
+      如果飞出赛道，<span class="hl">成绩无效</span>
+    </div>
+
+    <div class="ask reveal">
+      如果一辆车在直道上是全场最快的，但每次过弯都飞出去——它的成绩是多少？<br>
+      答案是：<strong>零</strong>。它连一圈都跑不完。
+    </div>
+
+    <p class="reveal">所以真正的目标，不是"瞬间速度最大"，而是一句听起来很绕、却价值千金的话：</p>
+
+    <div class="formula reveal">
+      在 <span class="hl">不飞车</span> 的前提下，让单圈时间 <span class="res">T_lap</span> 最小
+    </div>
+
+    <h3 class="reveal">先认识我们的主角：暗夜蝙蝠</h3>
+    <p class="reveal">在动手之前，工程师做的第一件事永远是<strong>"搞清楚手里到底有什么"</strong>。下面这张表，把公开资料能确认的、和需要我们亲手测量的，分得清清楚楚。注意看"说明"那一列——<strong>凡是写"待实测"的，绝不能当成官方数据去用</strong>，这是科学态度的第一课。</p>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead>
+          <tr><th>项目</th><th>已确认 / 合理判断</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>品牌车型</td><td>爱乐猫 暗夜蝙蝠</td><td>比赛款 / 学校比赛器材</td></tr>
+          <tr><td>比例</td><td>1:32</td><td>迷你四驱车常见比例</td></tr>
+          <tr><td>底盘</td><td>W1 底盘</td><td>电商页面明确出现</td></tr>
+          <tr><td>马达</td><td>双头直流马达</td><td>两端同时输出，带动前后轮</td></tr>
+          <tr><td>电池</td><td>2 节 5 号电池</td><td>比赛要求碱性干电池</td></tr>
+          <tr><td>电压</td><td>标称 3.0V</td><td>每节碱性 AA 约 1.5V</td></tr>
+          <tr><td>马达转速</td><td>待实测（约 12000–20000 rpm）</td><td>不能把区间当官方参数</td></tr>
+          <tr><td>马达扭矩</td><td>待实测（约 1–3 mN·m）</td><td>决定起步、爬坡、出弯恢复</td></tr>
+          <tr><td>齿轮比</td><td>待实测（约 3.5:1–5:1）</td><td>要数齿或转动测量</td></tr>
+          <tr><td>轮胎直径</td><td>待实测（约 23–26 mm）</td><td>越大极速越高，但重心也更高</td></tr>
+          <tr><td>底盘尺寸</td><td>待实测</td><td>量车长、车宽、轴距、轮距、离地、重量</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal">把四驱车看成一个"会跑的小生命"</h3>
+    <p class="reveal">复杂的机器，用<strong>身体</strong>来类比最容易懂。一辆四驱车，其实就是一个微缩的"小型赛车系统"——每个零件都像身体的一个器官，各司其职。</p>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="640" height="300" viewBox="0 0 640 300" role="img" aria-label="四驱车部件与身体类比图">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fbe5da"/><stop offset="1" stop-color="#fff"/>
+          </linearGradient>
+        </defs>
+        <!-- 车身轮廓 -->
+        <rect x="120" y="120" width="400" height="70" rx="22" fill="url(#g1)" stroke="#e85d2a" stroke-width="2.5"/>
+        <!-- 轮子 -->
+        <circle cx="190" cy="200" r="30" fill="#2c3548"/><circle cx="190" cy="200" r="13" fill="#c89b3c"/>
+        <circle cx="450" cy="200" r="30" fill="#2c3548"/><circle cx="450" cy="200" r="13" fill="#c89b3c"/>
+        <!-- 标注 -->
+        <g font-family="Noto Sans SC" font-size="14" fill="#1f2533" font-weight="700">
+          <text x="320" y="160" text-anchor="middle" fill="#e85d2a" font-size="17">暗夜蝙蝠</text>
+          <!-- 电池 心脏 -->
+          <line x1="320" y1="120" x2="320" y2="60" stroke="#1e6fd9" stroke-width="1.5" stroke-dasharray="3"/>
+          <rect x="250" y="28" width="140" height="32" rx="8" fill="#dceafc" stroke="#1e6fd9"/>
+          <text x="320" y="49" text-anchor="middle" fill="#1e6fd9" font-size="13">电池 = 能量包🔋</text>
+          <!-- 马达 心脏 -->
+          <line x1="380" y1="155" x2="500" y2="95" stroke="#e85d2a" stroke-width="1.5" stroke-dasharray="3"/>
+          <rect x="450" y="64" width="130" height="32" rx="8" fill="#fbe5da" stroke="#e85d2a"/>
+          <text x="515" y="85" text-anchor="middle" fill="#e85d2a" font-size="13">马达 = 心脏❤️</text>
+          <!-- 轮胎 鞋子 -->
+          <line x1="450" y1="230" x2="500" y2="265" stroke="#2e9e6b" stroke-width="1.5" stroke-dasharray="3"/>
+          <rect x="430" y="262" width="150" height="32" rx="8" fill="#d9f2e6" stroke="#2e9e6b"/>
+          <text x="505" y="283" text-anchor="middle" fill="#2e9e6b" font-size="13">轮胎 = 鞋子👟</text>
+          <!-- 底盘 骨架 -->
+          <line x1="190" y1="155" x2="120" y2="95" stroke="#7a52c7" stroke-width="1.5" stroke-dasharray="3"/>
+          <rect x="40" y="64" width="140" height="32" rx="8" fill="#ece4fa" stroke="#7a52c7"/>
+          <text x="110" y="85" text-anchor="middle" fill="#7a52c7" font-size="13">底盘 = 骨架🦴</text>
+          <!-- 齿轮 变速器 -->
+          <line x1="260" y1="155" x2="140" y2="265" stroke="#c89b3c" stroke-width="1.5" stroke-dasharray="3"/>
+          <rect x="40" y="262" width="170" height="32" rx="8" fill="#f7eecf" stroke="#c89b3c"/>
+          <text x="125" y="283" text-anchor="middle" fill="#a87f20" font-size="13">齿轮 = 自行车变速器⚙️</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>部件</th><th>身体类比</th><th>它的真正作用</th></tr></thead>
+        <tbody>
+          <tr><td>电池</td><td>食物 / 能量包</td><td>给马达供电</td></tr>
+          <tr><td>马达</td><td>心脏</td><td>把电能变成旋转</td></tr>
+          <tr><td>齿轮</td><td>自行车变速器</td><td>用速度换力量，或用力量换速度</td></tr>
+          <tr><td>传动轴</td><td>骨骼里的关节</td><td>把动力传到前后轮</td></tr>
+          <tr><td>底盘</td><td>骨架</td><td>决定稳定性、重心、传动效率</td></tr>
+          <tr><td>轮胎</td><td>鞋子</td><td>决定抓地力和滚动阻力</td></tr>
+          <tr><td>导轮 / 滚轮</td><td>过弯时手扶墙</td><td>碰赛道壁，防止飞出</td></tr>
+          <tr><td>车壳</td><td>外衣</td><td>影响重量、重心和空气阻力</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="reveal">看懂了这张"器官表"，你就掌握了整辆车的全貌。接下来，我们要像医生研究每个器官一样，<strong>一个一个深入它们的工作原理</strong>——而旅程的起点，是那个常被忽略、却最关键的部件：<strong>底盘</strong>。</p>
+
+    <div class="punch reveal">
+      冠军不是<span class="hl">跑得最快</span>的车，<br>而是<span class="hl">又快又不飞</span>的车。
+    </div>
+  </div>
+</section>
+<!-- ===== 第二章：底盘 ===== -->
+<section class="chapter" id="ch2">
+  <div class="container">
+    <span class="kicker"><span class="num">2</span>底盘 · 看不见的功臣</span>
+    <h2>为什么"骨架"决定了一辆车的命运？</h2>
+
+    <p class="lead reveal">很多同学拿到车，眼睛只盯着马达和轮胎，觉得底盘不过是"一块塑料板"。但真正的工程师知道：<strong>马达再强，底盘不行，全是白费。</strong></p>
+
+    <div class="ask reveal">
+      同样一颗心脏，装在一个东倒西歪、关节松垮的身体里，能跑得快吗？
+      底盘，就是四驱车的"身体素质"。
+    </div>
+
+    <h3 class="reveal">用第一性原理拆开底盘</h3>
+    <p class="reveal">所谓<strong>第一性原理</strong>，就是不听别人怎么说，而是问：<em>"这个东西最根本要解决什么问题？"</em> 我们把底盘要干的事，剥到只剩三件——它的全部使命，就藏在这三句话里：</p>
+
+    <div class="formula reveal">
+      底盘的本质 = <span class="hl">减少传动损耗</span> + <span class="hl">降低重心</span> + <span class="hl">提高动态稳定性</span>
+    </div>
+
+    <h4 class="reveal">① 减少传动损耗：别让力气白白漏掉</h4>
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="动力从马达传到车轮的过程中，因为摩擦、卡顿、零件不对齐而损失掉的那部分能量。">传动损耗</span>，是指马达发出的力量，在传到车轮的路上"漏掉"的部分。漏得越多，到达轮子的力量就越少。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>就像你用一根<strong>生锈、卡顿的吸管</strong>喝奶茶——明明用力吸了，珍珠却卡在中间上不来。底盘装配得越精密、齿轮咬合越顺，这根"吸管"就越通畅。</p>
+      </div>
+    </div>
+
+    <h4 class="reveal">② 降低重心：越"趴"越稳</h4>
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="一个物体所有重量仿佛集中在一点上，这个点就是重心。重心越低，物体越不容易翻倒。">重心</span>，是整辆车"重量集中的那一点"。重心越低，车在过弯时越不容易翻、不容易飞。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>想想<strong>不倒翁</strong>：它为什么推不倒？因为重量都堆在最底下。再想想一个<strong>头重脚轻的高个子</strong>转急弯，是不是很容易摔？低重心的车，就是那个稳稳的不倒翁。</p>
+      </div>
+    </div>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="640" height="280" viewBox="0 0 640 280" role="img" aria-label="高重心与低重心过弯对比图">
+        <g font-family="Noto Sans SC" font-size="14" font-weight="700">
+          <!-- 左：高重心 -->
+          <text x="160" y="30" text-anchor="middle" fill="#e85d2a" font-size="16">高重心 · 容易飞 ✗</text>
+          <line x1="40" y1="220" x2="280" y2="220" stroke="#c89b3c" stroke-width="3"/>
+          <rect x="120" y="150" width="90" height="22" rx="6" fill="#fbe5da" stroke="#e85d2a" stroke-width="2" transform="rotate(-12 165 161)"/>
+          <circle cx="135" cy="200" r="14" fill="#2c3548"/><circle cx="200" cy="190" r="14" fill="#2c3548"/>
+          <circle cx="170" cy="120" r="9" fill="#e85d2a"/>
+          <text x="170" y="105" text-anchor="middle" fill="#e85d2a" font-size="12">重心高</text>
+          <path d="M210 130 q30 -20 50 5" stroke="#e85d2a" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+          <text x="262" y="120" fill="#e85d2a" font-size="12">翻!</text>
+
+          <!-- 右：低重心 -->
+          <text x="480" y="30" text-anchor="middle" fill="#2e9e6b" font-size="16">低重心 · 稳如不倒翁 ✓</text>
+          <line x1="360" y1="220" x2="600" y2="220" stroke="#c89b3c" stroke-width="3"/>
+          <rect x="430" y="188" width="100" height="20" rx="6" fill="#d9f2e6" stroke="#2e9e6b" stroke-width="2"/>
+          <circle cx="450" cy="208" r="14" fill="#2c3548"/><circle cx="510" cy="208" r="14" fill="#2c3548"/>
+          <circle cx="480" cy="195" r="9" fill="#2e9e6b"/>
+          <text x="480" y="178" text-anchor="middle" fill="#2e9e6b" font-size="12">重心低</text>
+        </g>
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#e85d2a"/></marker></defs>
+      </svg>
+    </div>
+
+    <h4 class="reveal">③ 提高动态稳定性：跑起来还能稳</h4>
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="不是静止时稳，而是在高速运动、震动、过弯、起伏中依然能保持平稳的能力。">动态稳定性</span>，是指车在<strong>高速跑动</strong>中，遇到震动、过弯、起伏时还能稳稳贴着赛道的能力。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>站着不动谁都稳，但<strong>在颠簸的公交车上还能稳稳站着</strong>，才是真本事。底盘的动态稳定性，就是车在"颠簸公交"上的平衡感。</p>
+      </div>
+    </div>
+
+    <h3 class="reveal">底盘的六个关键尺寸，每一个都要量</h3>
+    <p class="reveal">要研究底盘，光看不行，必须<strong>亲手测量</strong>。下面六个数据，是判断一个底盘好不好的"体检报告"。记住第一性原理那句话：凡是写"待实测"的，就老老实实拿尺子去量。</p>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>测量项</th><th>是什么</th><th>为什么重要</th></tr></thead>
+        <tbody>
+          <tr><td>车长 / 车宽</td><td>车的长度和宽度</td><td>车越宽，过弯越不容易翻</td></tr>
+          <tr><td>轴距</td><td>前后两轴之间的距离</td><td>影响直线稳定与转弯灵活</td></tr>
+          <tr><td>轮距</td><td>左右两轮之间的距离</td><td>越宽越稳，但太宽会蹭壁</td></tr>
+          <tr><td>离地间隙</td><td>底盘离地面的高度</td><td>决定重心高低</td></tr>
+          <tr><td>重量</td><td>整车有多重</td><td>越轻加速越快，但太轻易飞</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ask reveal">
+      底盘把动力顺畅地、稳稳地送到了车轮——可这股动力，最初是从哪儿来的、又能让车跑多快？
+      答案藏在那颗"心脏"里：<strong>马达</strong>。
+    </div>
+
+    <div class="punch reveal">
+      底盘不制造速度，<br>但它决定了速度能不能<span class="hl">安全落地</span>。
+    </div>
+  </div>
+</section>
+<!-- ===== 第三章：速度 ===== -->
+<section class="chapter" id="ch3">
+  <div class="container">
+    <span class="kicker"><span class="num">3</span>速度 · 双引擎的真相</span>
+    <h2>"快"其实是两种能力，不是一种</h2>
+
+    <p class="lead reveal">问一个看似简单的问题：什么决定了一辆车跑得快？大多数人会说"马达功率大"。但这个答案太笼统了，工程师从不满足于笼统。我们要把"快"拆成<strong>两种完全不同的能力</strong>。</p>
+
+    <div class="formula reveal">
+      <span class="hl">马达转速</span> 决定速度上限<br>
+      <span class="hl">马达扭矩</span> 决定加速和出弯能力
+    </div>
+
+    <h3 class="reveal">认识马达的两块"肌肉"</h3>
+
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="rpm = Revolutions Per Minute，每分钟转的圈数。数字越大，马达转得越快。">转速（rpm）</span>：马达每分钟转多少圈。转速越高，车的<strong>最高速度</strong>越快。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>转速就像<strong>短跑运动员的腿速</strong>——腿摆得飞快，直道上谁也追不上。但起跑那一瞬间的爆发，靠的不是腿速。</p>
+      </div>
+    </div>
+
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="扭矩是旋转的力量，单位常用 mN·m（毫牛·米）。扭矩越大，转动东西、克服阻力的能力越强。">扭矩</span>：马达"拧动东西"的力量。扭矩越大，<strong>起步、加速、爬坡、出弯恢复</strong>越猛。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>扭矩就像<strong>大力士的力气</strong>——一把就能把重物推动起来。出弯那一刻车速被拖慢，靠的就是这股"猛劲"把车重新提速。</p>
+      </div>
+    </div>
+
+    <h3 class="reveal">短跑选手 vs 大力士：选谁？</h3>
+    <p class="reveal">这里有个关键的、违反直觉的结论：<strong>在"飞车无效"的比赛里，转速最高的马达不一定最好。</strong></p>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="640" height="240" viewBox="0 0 640 240" role="img" aria-label="高转速马达与大扭矩马达对比">
+        <g font-family="Noto Sans SC">
+          <!-- 高转速 -->
+          <circle cx="170" cy="90" r="50" fill="#fbe5da" stroke="#e85d2a" stroke-width="2.5"/>
+          <text x="170" y="85" text-anchor="middle" font-size="34">🏃</text>
+          <text x="170" y="118" text-anchor="middle" font-size="13" fill="#e85d2a" font-weight="700">高转速马达</text>
+          <text x="170" y="165" text-anchor="middle" font-size="12.5" fill="#4a5468">直道飞快</text>
+          <text x="170" y="185" text-anchor="middle" font-size="12.5" fill="#4a5468">出弯恢复慢</text>
+          <!-- VS -->
+          <text x="320" y="100" text-anchor="middle" font-size="26" fill="#c89b3c" font-weight="900">VS</text>
+          <!-- 大扭矩 -->
+          <circle cx="470" cy="90" r="50" fill="#dceafc" stroke="#1e6fd9" stroke-width="2.5"/>
+          <text x="470" y="85" text-anchor="middle" font-size="34">💪</text>
+          <text x="470" y="118" text-anchor="middle" font-size="13" fill="#1e6fd9" font-weight="700">大扭矩马达</text>
+          <text x="470" y="165" text-anchor="middle" font-size="12.5" fill="#4a5468">起步猛、出弯快</text>
+          <text x="470" y="185" text-anchor="middle" font-size="12.5" fill="#4a5468">极速稍低</text>
+        </g>
+      </svg>
+    </div>
+
+    <p class="reveal">为什么这样？因为赛道上有很多弯。每次过弯都要<strong>减速→出弯→再加速</strong>。如果马达扭矩不足，出弯后"提速很肉"，那么短短的直道还没追回速度，下一个弯又到了。所以这类比赛真正需要的是：</p>
+
+    <div class="formula reveal">
+      直道够快 + 弯道不飞 + <span class="res">出弯恢复快</span>
+    </div>
+
+    <h3 class="reveal">动手算一算：理论车速到底多少？</h3>
+    <p class="reveal">现在我们用数学，把"快"变成一个可以计算的数字。别担心，公式背后都是常识，我们一步步来。</p>
+
+    <h4 class="reveal">第 1 步：轮胎转一圈，能走多远？</h4>
+    <p class="reveal">车轮是圆的，转一圈走过的距离 = 轮胎的<span class="term" data-tip="圆一圈的长度，等于圆周率 π（约 3.14）乘以直径 D。">周长</span>。</p>
+    <div class="formula reveal">
+      C = π × D &nbsp;&nbsp;（D 是轮胎直径）
+    </div>
+    <p class="reveal">假设轮胎直径 <strong>24 mm = 0.024 m</strong>：</p>
+    <div class="formula reveal">
+      C = 3.14 × 0.024 = <span class="res">0.07536 m</span>
+    </div>
+
+    <h4 class="reveal">第 2 步：车轮转得多快？</h4>
+    <p class="reveal">马达转得飞快，但齿轮会把它"减速换力"（下一章详讲）。车轮转速 = 马达转速 ÷ 齿轮比。</p>
+    <div class="formula reveal">
+      轮轴转速 = 马达转速 ÷ 齿轮比 = 14000 ÷ 4 = <span class="res">3500 rpm</span>
+    </div>
+
+    <h4 class="reveal">第 3 步：把它们乘起来，就是速度</h4>
+    <p class="reveal">每分钟转 3500 圈，每圈走 0.07536 m，再除以 60 换成"每秒"：</p>
+    <div class="formula reveal">
+      v = 轮轴转速 × 周长 ÷ 60<br>
+      v = 3500 × 0.07536 ÷ 60 ≈ <span class="res">4.40 m/s</span>
+    </div>
+
+    <div class="ask reveal">
+      4.40 m/s 是什么概念？大约是 <strong>15.8 km/h</strong>，比你骑自行车还快。但请注意——这只是<strong>理论值</strong>。
+    </div>
+
+    <h4 class="reveal">第 4 步：真实速度，要打折扣</h4>
+    <p class="reveal">现实里有摩擦、打滑、碰壁、过弯减速，所以真实速度永远比理论值低。工程师会加上两个"折扣系数"：</p>
+    <div class="formula reveal">
+      v_real = (马达负载转速 ÷ 齿轮比) × 周长 ÷ 60 × <span class="hl">传动效率</span> × <span class="hl">稳定系数</span>
+    </div>
+    <p class="reveal">底盘装配越精密、齿轮越顺，<strong>传动效率</strong>越接近 1，真实速度就越接近理论值。这正好呼应了上一章——<strong>底盘的功劳，在这里变成了实实在在的速度。</strong></p>
+
+    <h3 class="reveal">加速度：起步快不快，看这个</h3>
+    <p class="reveal">速度是"跑多快"，加速度是"提速多猛"。它由牛顿第二定律决定：</p>
+    <div class="formula reveal">
+      a ≈ 牵引力 ÷ 车重
+    </div>
+    <p class="reveal">更工程化地写出来，你会发现扭矩、齿轮、车重全在里面：</p>
+    <div class="formula reveal">
+      a ≈ ( <span class="hl">马达扭矩</span> × 齿轮比 × 传动效率 ÷ 轮胎半径 − 阻力 ) ÷ <span class="hl">车重</span>
+    </div>
+    <p class="reveal">读懂这个公式，你就掌握了三条"提速秘籍"：</p>
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>怎么做</th><th>为什么有效</th></tr></thead>
+        <tbody>
+          <tr><td>扭矩大</td><td>分子变大，起步更猛</td></tr>
+          <tr><td>车更轻</td><td>分母变小，同样的力推得更快</td></tr>
+          <tr><td>摩擦小（润滑好）</td><td>阻力变小，力气不浪费</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="punch reveal">
+      转速给你<span class="hl">天花板</span>，<br>扭矩帮你<span class="hl">够到它</span>。
+    </div>
+  </div>
+</section>
+<!-- ===== 第四章：齿轮比 ===== -->
+<section class="chapter" id="ch4">
+  <div class="container">
+    <span class="kicker"><span class="num">4</span>齿轮比 · 看不见的魔法杠杆</span>
+    <h2>马达就那么大力气，怎么"变"出速度或力量？</h2>
+
+    <p class="lead reveal">上一章我们发现：马达既要转速高（极速），又要扭矩大（加速）。可一颗小马达的力气是<strong>固定的</strong>——这就出现了一个矛盾。解决这个矛盾的，正是四驱车里最聪明的零件：<strong>齿轮</strong>。</p>
+
+    <div class="ask reveal">
+      如果马达的"总能力"是固定的，那它能不能<strong>又快又有力</strong>？
+      答案很残酷：不能。你只能在两者之间做一笔"交换"。
+    </div>
+
+    <h3 class="reveal">齿轮比的第一性原理：一场公平的交换</h3>
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="齿轮比 = 马达端齿轮转的圈数 ÷ 车轮端齿轮转的圈数。比如 4:1，表示马达转 4 圈，车轮才转 1 圈。">齿轮比</span>：用有限的马达功率，在<strong>转速</strong>和<strong>扭矩</strong>之间做交换。给车轮更多力量，就要牺牲转速；想要更高转速，就要牺牲力量。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>就像<strong>自行车换挡</strong>：上坡时挂"轻挡"，蹬起来省力但跑得慢；平路冲刺挂"重挡"，蹬一圈走很远但起步费劲。齿轮，就是四驱车的"变速器"。</p>
+      </div>
+    </div>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="640" height="260" viewBox="0 0 640 260" role="img" aria-label="齿轮比换力换速示意图">
+        <defs>
+          <g id="gear">
+            <circle r="40" fill="#f7eecf" stroke="#c89b3c" stroke-width="2.5"/>
+            <g stroke="#c89b3c" stroke-width="2.5">
+              <line x1="0" y1="-40" x2="0" y2="-50"/><line x1="0" y1="40" x2="0" y2="50"/>
+              <line x1="-40" y1="0" x2="-50" y2="0"/><line x1="40" y1="0" x2="50" y2="0"/>
+              <line x1="-28" y1="-28" x2="-35" y2="-35"/><line x1="28" y1="28" x2="35" y2="35"/>
+              <line x1="-28" y1="28" x2="-35" y2="35"/><line x1="28" y1="-28" x2="35" y2="-35"/>
+            </g>
+            <circle r="9" fill="#c89b3c"/>
+          </g>
+        </g>
+        <g font-family="Noto Sans SC" font-weight="700">
+          <!-- 小齿轮(马达) -->
+          <use href="#gear" transform="translate(160,120) scale(0.45)"/>
+          <text x="160" y="135" text-anchor="middle" font-size="12" fill="#a87f20">马达·小</text>
+          <text x="160" y="55" text-anchor="middle" font-size="13" fill="#e85d2a">转得快 →</text>
+          <!-- 箭头 -->
+          <path d="M205 120 L255 120" stroke="#1f2533" stroke-width="2.5" marker-end="url(#a2)"/>
+          <!-- 大齿轮(车轮) -->
+          <use href="#gear" transform="translate(330,120) scale(0.95)"/>
+          <text x="330" y="128" text-anchor="middle" font-size="12" fill="#a87f20">车轮·大</text>
+          <text x="330" y="225" text-anchor="middle" font-size="13" fill="#1e6fd9">转得慢但有力</text>
+          <!-- 说明 -->
+          <text x="510" y="90" text-anchor="middle" font-size="13" fill="#4a5468" font-weight="500">小齿轮转 4 圈，</text>
+          <text x="510" y="112" text-anchor="middle" font-size="13" fill="#4a5468" font-weight="500">大齿轮才转 1 圈</text>
+          <text x="510" y="145" text-anchor="middle" font-size="14" fill="#2e9e6b">→ 齿轮比 4:1</text>
+        </g>
+        <defs><marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#1f2533"/></marker></defs>
+      </svg>
+    </div>
+
+    <h3 class="reveal">数字里的杠杆：齿轮比怎么影响车速</h3>
+    <p class="reveal">还记得第三章的公式吗？<strong>轮轴转速 = 马达转速 ÷ 齿轮比</strong>。齿轮比就在分母上，它一变，速度和力量立刻此消彼长。我们用 16000 rpm 的马达算给你看：</p>
+
+    <div class="formula reveal">
+      马达 16000 rpm，齿轮比 4:1<br>
+      → 轮轴转速 = 16000 ÷ 4 = <span class="res">4000 rpm</span>
+    </div>
+
+    <p class="reveal">如果换成更小的齿轮比 3.5:1，车轮转得更快（极速更高）；换成更大的 5:1，车轮转得更慢，但每一下都更有劲（更稳、更好出弯）。一句话：<strong>分母越小越快，越大越有力。</strong></p>
+
+    <h3 class="reveal">三种齿轮比，各有各的"性格"</h3>
+    <p class="reveal">不同的赛道，需要不同性格的齿轮比。这就像跑步：百米直道要爆发腿速，盘山小路要稳扎稳打。</p>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>齿轮比</th><th>性格特点</th><th>适合的赛道</th></tr></thead>
+        <tbody>
+          <tr><td>小齿比 ≈ 3.5:1</td><td>轮子转得飞快，极速高，但扭矩小（起步肉）</td><td>长直道多的赛道</td></tr>
+          <tr><td>中齿比 ≈ 4:1 / 4.2:1</td><td>速度与加速平衡，最稳妥</td><td>综合赛道</td></tr>
+          <tr><td>大齿比 ≈ 5:1</td><td>起步强、稳定，但极速低</td><td>弯多、坡多、容易飞车</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ask reveal">
+      作为初一同学第一次比赛，你该选哪种？
+      记住第一章的铁律——<strong>飞车成绩无效</strong>。所以答案很清楚：<strong>优先选稳定的中等齿比，不要盲目追求极速齿比。</strong>极速再高，飞出去就是 0 分。
+    </div>
+
+    <h3 class="reveal">怎么知道自己车上是几比几？亲手测！</h3>
+    <p class="reveal">齿轮比不能猜，要么<strong>数齿数</strong>，要么用一个超简单的实验测出来——这是真正工程师的做法：</p>
+    <div class="formula reveal">
+      让马达轴转 N 圈，数车轮转了几圈<br>
+      齿轮比 = 马达轴圈数 ÷ 车轮圈数
+    </div>
+    <p class="reveal">比如你让马达轴转 8 圈，车轮正好转了 2 圈，那么齿轮比 = 8 ÷ 2 = <strong>4:1</strong>。简单、可靠、不用任何贵的仪器。</p>
+
+    <div class="punch reveal">
+      齿轮不创造力量，<br>它只是把力量<span class="hl">借给</span>速度，或把速度<span class="hl">借给</span>力量。
+    </div>
+  </div>
+</section>
+<!-- ===== 第五章：轮胎 ===== -->
+<section class="chapter" id="ch5">
+  <div class="container">
+    <span class="kicker"><span class="num">5</span>轮胎 · 唯一接触地面的零件</span>
+    <h2>整辆车的力量，最后都要靠这四个"小圈圈"落地</h2>
+
+    <p class="lead reveal">想一想：马达再强、齿轮再聪明、底盘再稳——这些力量最终通过什么传到赛道上？答案只有一个：<strong>轮胎</strong>。它是全车唯一碰到地面的零件。它要是不行，前面所有努力都"打滑"了。</p>
+
+    <div class="ask reveal">
+      轮胎是不是越粘越好？越粘不是抓得越牢吗？
+      错。粘和滑，各有各的代价。这正是轮胎最迷人的地方——它是一场<strong>博弈</strong>。
+    </div>
+
+    <h3 class="reveal">轮胎的第一性原理：两股力量的拔河</h3>
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="两个表面接触时，阻止它们相对滑动的力。摩擦系数越大，抓地越牢。">抓地力（摩擦力）</span>：轮胎"咬住"地面、不让它打滑的能力。抓地越强，过弯越不容易飞、起步越不打滑。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>就像穿不同的鞋跑步：<strong>防滑跑鞋</strong>抓地牢、转弯不摔，但脚感"黏"；<strong>光滑皮鞋</strong>滑溜溜，跑得轻快却容易打滑摔跤。</p>
+      </div>
+    </div>
+
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="物体抵抗转动状态改变的特性。轮胎越重、越大，转起来越费力，刹车也越难。属于'簧下质量'。">旋转惯性（簧下质量）</span>：轮胎转起来后，<strong>抵抗加速和减速</strong>的"懒劲"。轮胎越重越大，这股懒劲越大。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>转动<strong>一把小折扇</strong>很轻快，转动<strong>一个大铁锅盖</strong>就很费劲、停下也慢。又大又重的轮胎，就是那个"大锅盖"——起步慢、刹车也慢。</p>
+      </div>
+    </div>
+
+    <h3 class="reveal">四种轮胎，四种取舍</h3>
+    <p class="reveal">轮胎的选择，永远是"按下葫芦浮起瓢"。我们从两个维度——<strong>软硬</strong>和<strong>大小</strong>——来看清每一种的得失。</p>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="640" height="280" viewBox="0 0 640 280" role="img" aria-label="软胎硬胎大胎小胎对比">
+        <g font-family="Noto Sans SC" font-weight="700">
+          <!-- 软胎 -->
+          <ellipse cx="120" cy="80" rx="42" ry="38" fill="#fbe5da" stroke="#e85d2a" stroke-width="2.5"/>
+          <text x="120" y="86" text-anchor="middle" font-size="13" fill="#e85d2a">软胎</text>
+          <text x="120" y="140" text-anchor="middle" font-size="12" fill="#2e9e6b">✓ 抓地强</text>
+          <text x="120" y="160" text-anchor="middle" font-size="12" fill="#e85d2a">✗ 变形大、耗能</text>
+          <!-- 硬胎 -->
+          <circle cx="280" cy="80" r="40" fill="#dceafc" stroke="#1e6fd9" stroke-width="3.5"/>
+          <text x="280" y="86" text-anchor="middle" font-size="13" fill="#1e6fd9">硬胎</text>
+          <text x="280" y="140" text-anchor="middle" font-size="12" fill="#2e9e6b">✓ 滚动阻力小</text>
+          <text x="280" y="160" text-anchor="middle" font-size="12" fill="#e85d2a">✗ 抓地、缓冲差</text>
+          <!-- 大胎 -->
+          <circle cx="440" cy="78" r="48" fill="#f7eecf" stroke="#c89b3c" stroke-width="2.5"/>
+          <text x="440" y="84" text-anchor="middle" font-size="13" fill="#a87f20">大直径</text>
+          <text x="440" y="148" text-anchor="middle" font-size="12" fill="#2e9e6b">✓ 极速高</text>
+          <text x="440" y="168" text-anchor="middle" font-size="12" fill="#e85d2a">✗ 重心高、惯性大</text>
+          <!-- 小胎 -->
+          <circle cx="570" cy="88" r="30" fill="#d9f2e6" stroke="#2e9e6b" stroke-width="2.5"/>
+          <text x="570" y="93" text-anchor="middle" font-size="12" fill="#2e9e6b">小直径</text>
+          <text x="570" y="148" text-anchor="middle" font-size="12" fill="#2e9e6b">✓ 重心低、稳</text>
+          <text x="570" y="168" text-anchor="middle" font-size="12" fill="#e85d2a">✗ 极速低</text>
+          <!-- 分隔 -->
+          <line x1="360" y1="30" x2="360" y2="190" stroke="#e3ddd0" stroke-width="1.5" stroke-dasharray="5"/>
+          <text x="200" y="225" text-anchor="middle" font-size="14" fill="#4a5468">软 vs 硬（材质）</text>
+          <text x="505" y="225" text-anchor="middle" font-size="14" fill="#4a5468">大 vs 小（直径）</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>轮胎类型</th><th>优点</th><th>代价</th></tr></thead>
+        <tbody>
+          <tr><td>软胎</td><td>抓地强，过弯稳</td><td>变形大，能量损失多</td></tr>
+          <tr><td>硬胎</td><td>滚动阻力小，省力</td><td>抓地差、缓冲差</td></tr>
+          <tr><td>大直径胎</td><td>理论极速高（每圈走更远）</td><td>重心高、旋转惯性大、加速慢</td></tr>
+          <tr><td>小直径胎</td><td>重心低、加速好、更稳</td><td>极速低</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal">大直径的"双刃剑"</h3>
+    <p class="reveal">很多同学一听"大轮胎极速高"，就想换最大的。但请回忆第三章公式：<strong>v = 轮轴转速 × 周长 ÷ 60</strong>。直径大，周长 C 就大，每圈走得远，理论极速确实更高——</p>
+    <div class="formula reveal">
+      C = π × D ↑ &nbsp;&nbsp;→&nbsp;&nbsp; v ↑（极速变高）
+    </div>
+    <p class="reveal">但代价是：轮胎位置越大，<strong>重心越高</strong>（违反第二章"降重心"原则），而且<strong>旋转惯性更大</strong>（起步、刹车都变"肉"）。这就是工程里永恒的取舍：<strong>没有完美的选择，只有最合适的选择。</strong></p>
+
+    <h3 class="reveal">所以，初一同学的轮胎黄金法则</h3>
+    <p class="reveal">把所有取舍汇总，再套上那条不变的铁律——<strong>飞车成绩无效</strong>——结论自然浮现：</p>
+    <div class="formula reveal">
+      轮胎选择原则：<span class="hl">先保证稳定，再追求速度</span>
+    </div>
+
+    <div class="ask reveal">
+      现在，从马达到齿轮到轮胎，整条"动力链"我们都打通了。
+      但还有一个最根本的问题：这一切力量的<strong>源头</strong>——电，到底从哪来、强不强？
+    </div>
+
+    <div class="punch reveal">
+      轮胎不是越粘越好，<br>它是<span class="hl">抓地</span>与<span class="hl">轻快</span>之间，那条最聪明的中线。
+    </div>
+  </div>
+</section>
+<!-- ===== 第六章：电池 ===== -->
+<section class="chapter" id="ch6">
+  <div class="container">
+    <span class="kicker"><span class="num">6</span>电池 · 被低估的胜负手</span>
+    <h2>同样的车，换一对电池，可能就从倒数变第一</h2>
+
+    <p class="lead reveal">这是最容易被忽略、却常常决定胜负的环节。很多同学觉得"电池不就是 1.5V 嘛，随便装两节"。但工程师会反问一句：<strong>1.5V 是写在标签上的，可它跑起来还能稳住 1.5V 吗？</strong></p>
+
+    <div class="ask reveal">
+      为什么有的电池"标称 1.5V"，一加速马达却没劲？
+      因为电压会"掉"。而让它掉下去的"幕后黑手"，叫<strong>内阻</strong>。
+    </div>
+
+    <h3 class="reveal">电池的第一性原理：不只看电压，要看"扛不扛得住"</h3>
+    <div class="formula reveal">
+      电池的本质 = 提供 <span class="hl">高而稳定的电压、电流</span> + <span class="hl">极低的内阻</span>
+    </div>
+
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="电池内部自己也有电阻。电流越大，内阻消耗掉的电压越多，能给马达的就越少。">内阻</span>：电池"内部自带的电阻"。马达一加速，需要大电流，内阻就会偷偷"吃掉"一部分电压，让马达拿到的电变少。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>就像用一根<strong>很细的吸管</strong>喝奶昔——奶昔再多，吸管太细也吸不快。内阻就是这根"细吸管"，内阻越大，电流越"卡"，马达越没劲。</p>
+      </div>
+    </div>
+
+    <h3 class="reveal">两节电池串联：1.5 + 1.5 = 3.0</h3>
+    <p class="reveal">暗夜蝙蝠用 2 节 5 号（AA）电池，它们是<strong>串联</strong>的——首尾相接，电压相加。</p>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="560" height="200" viewBox="0 0 560 200" role="img" aria-label="两节电池串联示意图">
+        <g font-family="Noto Sans SC" font-weight="700">
+          <!-- 电池1 -->
+          <rect x="80" y="70" width="120" height="50" rx="8" fill="#dceafc" stroke="#1e6fd9" stroke-width="2.5"/>
+          <rect x="200" y="82" width="10" height="26" fill="#1e6fd9"/>
+          <text x="140" y="100" text-anchor="middle" font-size="14" fill="#1e6fd9">1.5V</text>
+          <!-- 连接 -->
+          <line x1="210" y1="95" x2="240" y2="95" stroke="#1f2533" stroke-width="3"/>
+          <text x="225" y="80" text-anchor="middle" font-size="20" fill="#c89b3c">+</text>
+          <!-- 电池2 -->
+          <rect x="240" y="70" width="120" height="50" rx="8" fill="#dceafc" stroke="#1e6fd9" stroke-width="2.5"/>
+          <rect x="360" y="82" width="10" height="26" fill="#1e6fd9"/>
+          <text x="300" y="100" text-anchor="middle" font-size="14" fill="#1e6fd9">1.5V</text>
+          <!-- 等于 -->
+          <text x="400" y="102" text-anchor="middle" font-size="24" fill="#1f2533">=</text>
+          <!-- 结果 -->
+          <rect x="425" y="68" width="100" height="54" rx="10" fill="#d9f2e6" stroke="#2e9e6b" stroke-width="3"/>
+          <text x="475" y="102" text-anchor="middle" font-size="20" fill="#2e9e6b">3.0V</text>
+          <text x="300" y="165" text-anchor="middle" font-size="13" fill="#4a5468">串联：电压相加 → 马达得到 3.0V 驱动</text>
+        </g>
+      </svg>
+    </div>
+
+    <p class="reveal">所以暗夜蝙蝠的标称电压 = 1.5 + 1.5 = <strong>3.0V</strong>。但请记住——这只是"开路电压"（没干活时的电压）。真正比赛时电流很大，电压会因内阻往下掉。<strong>好电池掉得少，差电池掉得多。</strong></p>
+
+    <h3 class="reveal">为什么比赛只能用碱性电池，不能用锂电池？</h3>
+    <p class="reveal">比赛规则要求使用<strong>碱性干电池</strong>，禁止锂电池。这是为了<strong>公平</strong>——锂电池电压更高、放电更猛，会让比赛变成"拼电池"而不是"拼技术"。所以选电池的功夫，要全花在"挑出一对最好的碱性电池"上。</p>
+
+    <h3 class="reveal">挑电池的"工程师七步法"</h3>
+    <p class="reveal">这是一份可以直接照做的清单。它把"凭感觉装电池"，变成"用数据选电池"。</p>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>步骤</th><th>怎么做</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>选全新的高性能碱性 AA 电池</td><td>新电池内阻低、电压足</td></tr>
+          <tr><td>2</td><td>两节必须同品牌、同型号、同批次</td><td>性能一致，不会"一强一弱拖后腿"</td></tr>
+          <tr><td>3</td><td>赛前用万用表测电压</td><td>用数据说话，不靠猜</td></tr>
+          <tr><td>4</td><td>挑开路电压 ≈ 1.60V，两节差值 &lt; 0.02V</td><td>电压高且匹配，输出最稳</td></tr>
+          <tr><td>5</td><td>不用碳性、旧电池、充电锂电池</td><td>内阻高或违规，速度会明显下降</td></tr>
+          <tr><td>6</td><td>上场前再装电池</td><td>减少空转，避免提前耗电</td></tr>
+          <tr><td>7</td><td>保持电池触点干净</td><td>接触不良 = 速度大跌</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ask reveal">
+      到这里，五大核心部件——底盘、马达、齿轮、轮胎、电池——你都吃透了。
+      但还差最后、也是最关键的一块拼图：把这一切<strong>串成一个能算出胜负的公式</strong>。
+    </div>
+
+    <div class="punch reveal">
+      电池的强弱，<br>不看标签上的 1.5V，<br>而看它在<span class="hl">最累的时候</span>能稳住多少。
+    </div>
+  </div>
+</section>
+<!-- ===== 第七章：单圈公式 ===== -->
+<section class="chapter" id="ch7">
+  <div class="container">
+    <span class="kicker"><span class="num">7</span>单圈公式 · 胜负的总账本</span>
+    <h2>把前面所有的努力，浓缩成一个数字</h2>
+
+    <p class="lead reveal">底盘、马达、齿轮、轮胎、电池——这五样我们都研究透了。现在到了揭晓答案的时刻：<strong>它们到底怎么决定比赛输赢？</strong>所有的奥秘，都收束在一个公式里。</p>
+
+    <h3 class="reveal">最简单的版本：一句话就能懂</h3>
+    <div class="formula reveal">
+      单圈成绩 T = 赛道长度 L ÷ 平均速度 v_avg
+    </div>
+    <p class="reveal">很直白：跑完一圈用的时间，等于路程除以平均速度。<strong>平均速度越高，单圈时间越短，名次越靠前。</strong>请特别注意，是<strong>平均速度</strong>，不是最高速度——这个区别，是全篇最重要的一句话。</p>
+
+    <h3 class="reveal">工程师版本：把赛道切成无数小段</h3>
+    <p class="reveal">真实赛道有直道、有弯道，每一段的速度都不一样。所以工程师会写一个更精确的版本：</p>
+    <div class="formula reveal">
+      T_lap = ∫ ds / v(s)
+    </div>
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">这个符号在说什么</span>
+        <p>那个像拉长的 S 的符号叫<strong>积分</strong>。它的意思朴素得很：把整条赛道<strong>切成很多很多小段</strong>，每一小段的时间 = 小段长度 ÷ 当时的速度，然后<strong>全部加起来</strong>。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>就像记<strong>一笔流水账</strong>：你不是只记"今天总共花了多少",而是把每一笔小开销一条条记下来再求和。赛道也是——每一小段慢一点点，累加起来就慢一大截。</p>
+      </div>
+    </div>
+
+    <h3 class="reveal">最关键的约束：那条不变的铁律</h3>
+    <p class="reveal">但单圈时间再短也没用——如果车飞出去了。回到第一章的铁律：</p>
+    <div class="formula reveal">
+      如果飞出赛道，<span class="hl">成绩无效</span>
+    </div>
+    <p class="reveal">所以真正的、完整的目标，是一句带"约束条件"的话。这正是整篇文章的核心：</p>
+    <div class="formula reveal">
+      在 <span class="hl">不飞车</span> 的前提下，让 <span class="res">T_lap</span> 最小
+    </div>
+
+    <h3 class="reveal">弯道里的物理：车为什么会"飞"出去？</h3>
+    <p class="reveal">要"不飞车"，得先搞懂车为什么会飞。过弯时，车需要一个<strong>向心力</strong>把它"拉"向弯道内侧；这个力不够，车就沿直线冲出去了。</p>
+
+    <div class="concept reveal">
+      <div class="box def">
+        <span class="tag">精准定义</span>
+        <p><span class="term" data-tip="物体做圆周运动时，指向圆心的那个力。它越不够，物体越容易沿切线飞出去。">向心力 / 向心加速度</span>：让车"拐弯"而不是"直冲"的力。需求大小由速度和弯道半径决定。</p>
+      </div>
+      <div class="box ana">
+        <span class="tag">精妙类比</span>
+        <p>就像你<strong>甩一个系着绳子的球</strong>转圈：绳子拉着球转，就是向心力。转得越快、圈越小，绳子越紧；一旦绳子断了（力不够），球就"嗖"地飞出去。</p>
+      </div>
+    </div>
+
+    <div class="formula reveal">
+      向心加速度 a_c = v² ÷ R &nbsp;&nbsp;（R 是弯道半径）
+    </div>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="560" height="280" viewBox="0 0 560 280" role="img" aria-label="过弯向心力与飞车示意图">
+        <g font-family="Noto Sans SC" font-weight="700">
+          <!-- 弯道 -->
+          <path d="M280 250 A130 130 0 0 1 280 50" fill="none" stroke="#c89b3c" stroke-width="14" stroke-linecap="round" opacity="0.5"/>
+          <!-- 圆心 -->
+          <circle cx="280" cy="150" r="5" fill="#1f2533"/>
+          <text x="280" y="135" text-anchor="middle" font-size="12" fill="#1f2533">圆心</text>
+          <!-- 半径 -->
+          <line x1="280" y1="150" x2="150" y2="150" stroke="#1f2533" stroke-width="1.5" stroke-dasharray="4"/>
+          <text x="210" y="143" text-anchor="middle" font-size="13" fill="#1f2533">R 半径</text>
+          <!-- 安全车 -->
+          <rect x="125" y="138" width="40" height="22" rx="5" fill="#d9f2e6" stroke="#2e9e6b" stroke-width="2"/>
+          <path d="M145 138 L145 150" stroke="#2e9e6b" stroke-width="0"/>
+          <!-- 向心力箭头 -->
+          <path d="M150 130 L240 145" stroke="#2e9e6b" stroke-width="2.5" marker-end="url(#a3)"/>
+          <text x="200" y="115" text-anchor="middle" font-size="12" fill="#2e9e6b">向心力够 → 安全过弯 ✓</text>
+          <!-- 飞车 -->
+          <rect x="300" y="40" width="40" height="22" rx="5" fill="#fbe5da" stroke="#e85d2a" stroke-width="2" transform="rotate(-20 320 51)"/>
+          <path d="M340 45 L440 20" stroke="#e85d2a" stroke-width="2.5" marker-end="url(#a4)"/>
+          <text x="410" y="55" text-anchor="middle" font-size="12" fill="#e85d2a">力不够 → 飞出去 ✗</text>
+        </g>
+        <defs>
+          <marker id="a3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2e9e6b"/></marker>
+          <marker id="a4" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#e85d2a"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <p class="reveal">从公式 <strong>a_c = v² ÷ R</strong> 能读出两件事：速度 v 越大、弯半径 R 越小，需要的力就越大、越容易飞。所以"过弯安全速度"大致要满足：</p>
+    <div class="formula reveal">
+      v ≤ √(稳定能力 × R)
+    </div>
+    <p class="reveal">翻译成大白话：<strong>弯越急（R 越小），车就越不能太快。</strong>而"稳定能力"从哪来？正是前几章的功劳——<strong>低重心的底盘、抓地的轮胎、防飞的导轮</strong>，它们共同决定了你能多快地安全过弯。</p>
+
+    <h3 class="reveal">现在，把整篇文章连成一条因果链</h3>
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>你想要的</th><th>靠哪个部件</th><th>背后的公式</th></tr></thead>
+        <tbody>
+          <tr><td>直道极速高</td><td>高转速马达 + 小齿比 + 合适轮径</td><td>v = 转速 ÷ 齿比 × 周长 ÷ 60</td></tr>
+          <tr><td>出弯提速猛</td><td>大扭矩 + 轻车身 + 低摩擦</td><td>a ≈ 牵引力 ÷ 车重</td></tr>
+          <tr><td>过弯不飞</td><td>低重心底盘 + 抓地轮胎 + 导轮</td><td>v ≤ √(稳定能力 × R)</td></tr>
+          <tr><td>动力不打折</td><td>精密装配 + 顺滑齿轮 + 强电池</td><td>v_real = v × 传动效率 × 稳定系数</td></tr>
+          <tr><td>全程不掉链子</td><td>低内阻、匹配的碱性电池</td><td>内阻低 → 电流稳 → 速度稳</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="reveal">看懂这张表，你就真正理解了那句贯穿全篇的话——它不是口号，而是一条严密的因果推理的终点：</p>
+
+    <div class="formula reveal">
+      单圈成绩 = 赛道长度 ÷ 平均速度<br>
+      但冠军来自 <span class="res">"最高的稳定平均速度"</span>，<br>而不是最高瞬时速度。
+    </div>
+
+    <div class="punch reveal">
+      最快的那一下，<span class="hl">不算数</span>；<br>每一圈都不飞的那辆车，<span class="hl">才是冠军</span>。
+    </div>
+  </div>
+</section>
+<!-- ===== 第八章：落地 ===== -->
+<section class="chapter" id="ch8">
+  <div class="container">
+    <span class="kicker"><span class="num">8</span>落地 · 从理论到赛场</span>
+    <h2>道理都懂了，45 分钟里到底怎么做？</h2>
+
+    <p class="lead reveal">前面七章是"为什么"，这一章是"怎么做"。比赛现场往往只给你 45 分钟装车。时间紧、零件多，唯一不慌的办法，就是<strong>把时间切成块，每块只盯一件事</strong>——这正是工程师的工作方式。</p>
+
+    <h3 class="reveal">45 分钟拼装时间表</h3>
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>时间</th><th>任务</th><th>重点</th></tr></thead>
+        <tbody>
+          <tr><td>0–5 分钟</td><td>清点零件</td><td>马达、齿轮、轴、轮胎、电池片，一个都不能少</td></tr>
+          <tr><td>5–15 分钟</td><td>装底盘、齿轮、传动轴</td><td>齿轮咬合要顺，不能卡</td></tr>
+          <tr><td>15–25 分钟</td><td>装马达、电池片、开关</td><td>接触可靠，<strong>马达方向要正确</strong></td></tr>
+          <tr><td>25–32 分钟</td><td>装轮胎、轮轴、导轮</td><td>四轮不歪，转动轻快</td></tr>
+          <tr><td>32–37 分钟</td><td>装车壳</td><td>不刮轮胎、不碰赛道</td></tr>
+          <tr><td>37–42 分钟</td><td>短时间试车</td><td>检查跑偏、异响、卡齿</td></tr>
+          <tr><td>42–45 分钟</td><td>最终检查</td><td>换新电池，确认轮胎和导轮牢固</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ask reveal">
+      装完车，怎么用<strong>一秒钟</strong>判断它合不合格？
+      用手轻轻拨一下车轮——
+    </div>
+
+    <div class="formula reveal">
+      用手轻拨车轮，应该能 <span class="res">顺滑转动</span>
+    </div>
+    <p class="reveal">如果听到"咔咔声"、看到"轮胎蹭车壳"、感觉"轴很紧"，速度一定会明显下降。这背后正是第二章的<strong>传动损耗</strong>——力气还没到轮子，就在半路被"吸管"卡掉了。</p>
+
+    <h3 class="reveal">真正的研究：七个动手实验</h3>
+    <p class="reveal">还记得整篇文章里反复出现的"待实测"吗？工程师不靠猜，靠测。下面七个实验，能把暗夜蝙蝠的每一个"问号"变成"确定的数字"。</p>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>实验</th><th>方法</th><th>得到什么</th></tr></thead>
+        <tbody>
+          <tr><td>测轮胎直径</td><td>用尺子或卡尺量</td><td>算理论速度（C = πD）</td></tr>
+          <tr><td>测齿轮比</td><td>马达轴转 N 圈，看车轮转几圈</td><td>真实齿轮比</td></tr>
+          <tr><td>测马达转速</td><td>测速仪或慢动作视频</td><td>转速 rpm</td></tr>
+          <tr><td>测车重</td><td>电子秤</td><td>判断加速能力</td></tr>
+          <tr><td>测滑行阻力</td><td>关电后推车，看滑多远</td><td>判断传动损耗</td></tr>
+          <tr><td>测电池电压</td><td>万用表测开路 & 运行电压</td><td>判断电池强弱</td></tr>
+          <tr><td>测稳定性</td><td>不同电池、不同润滑跑圈</td><td>找最快稳定组合</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal">比赛策略：优先级清单</h3>
+    <p class="reveal">如果时间不够、只能顾几件事，按这个顺序来——<strong>越靠前越重要</strong>。它把整篇文章的智慧，压成了一张随手可用的行动卡。</p>
+
+    <div class="svg-scroll-wrapper reveal">
+      <svg width="560" height="320" viewBox="0 0 560 320" role="img" aria-label="比赛策略优先级金字塔">
+        <g font-family="Noto Sans SC" font-weight="700" text-anchor="middle">
+          <!-- 金字塔 6 层 -->
+          <polygon points="280,20 340,70 220,70" fill="#2e9e6b"/>
+          <text x="280" y="58" font-size="13" fill="#fff">不飞车</text>
+
+          <rect x="200" y="72" width="160" height="36" fill="#3aa876"/>
+          <text x="280" y="96" font-size="13" fill="#fff">齿轮顺滑</text>
+
+          <rect x="170" y="110" width="220" height="36" fill="#46b282"/>
+          <text x="280" y="134" font-size="13" fill="#fff">电池强且稳定</text>
+
+          <rect x="140" y="148" width="280" height="36" fill="#5cbf92"/>
+          <text x="280" y="172" font-size="13" fill="#1f2533">轮胎不偏、不蹭、不松</text>
+
+          <rect x="110" y="186" width="340" height="36" fill="#7dccaa"/>
+          <text x="280" y="210" font-size="13" fill="#1f2533">马达方向、电池接触正确</text>
+
+          <rect x="80" y="224" width="400" height="38" fill="#c89b3c"/>
+          <text x="280" y="249" font-size="13" fill="#1f2533">最后才追求更高极速</text>
+
+          <text x="280" y="295" font-size="14" fill="#4a5468">↑ 越往上越优先，地基稳了再谈速度</text>
+        </g>
+      </svg>
+    </div>
+
+    <h3 class="reveal">回到最初的问题</h3>
+    <p class="reveal">还记得开篇那个反常识的发现吗？为什么最快的车不一定能赢？现在你已经走完了从底盘到电池、从公式到实战的完整旅程，答案不再是直觉，而是一条你亲手推导出来的真理：</p>
+
+    <div class="punch reveal">
+      稳定完赛 <span class="hl">&gt;</span> 极限速度。<br>
+      冠军，属于<span class="hl">又快又不飞</span>的那辆车。
+    </div>
+  </div>
+</section>
+
+<!-- ===== 术语表 ===== -->
+<section class="chapter" id="glossary">
+  <div class="container">
+    <span class="kicker"><span class="num">📖</span>术语表 · Glossary</span>
+    <h2>把所有"行话"一次说清楚</h2>
+    <p class="reveal">这是你随时可以回来查的"词典"。每个词都配了最朴素的解释。</p>
+
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>术语</th><th>通俗解释</th></tr></thead>
+        <tbody>
+          <tr><td>转速 (rpm)</td><td>马达每分钟转多少圈，决定最高速度。像短跑选手的腿速。</td></tr>
+          <tr><td>扭矩</td><td>马达"拧动东西"的力量，决定起步和出弯提速。像大力士的力气。</td></tr>
+          <tr><td>齿轮比</td><td>马达转几圈、车轮才转一圈。用来在转速和力量间做交换，像自行车换挡。</td></tr>
+          <tr><td>传动损耗</td><td>力量从马达传到车轮路上"漏掉"的部分。像生锈的吸管。</td></tr>
+          <tr><td>传动效率</td><td>力量没漏掉的比例，越接近 1 越好。</td></tr>
+          <tr><td>重心</td><td>整车重量集中的那一点，越低越稳。像不倒翁的底部。</td></tr>
+          <tr><td>动态稳定性</td><td>高速跑动中还能稳稳贴地的能力。像在颠簸公交上站稳。</td></tr>
+          <tr><td>抓地力 (摩擦力)</td><td>轮胎"咬住"地面、不打滑的能力。像防滑跑鞋。</td></tr>
+          <tr><td>旋转惯性 (簧下质量)</td><td>轮胎转起来后抵抗加减速的"懒劲"。像大锅盖难转动。</td></tr>
+          <tr><td>周长 (C = πD)</td><td>轮胎转一圈走过的距离，直径越大走得越远。</td></tr>
+          <tr><td>内阻</td><td>电池内部自带的电阻，越大越"卡电流"。像很细的吸管。</td></tr>
+          <tr><td>开路电压</td><td>电池没干活时测到的电压，比赛时会因内阻往下掉。</td></tr>
+          <tr><td>串联</td><td>电池首尾相接，电压相加（1.5V + 1.5V = 3.0V）。</td></tr>
+          <tr><td>向心力 / 向心加速度</td><td>让车拐弯而不是直冲的力，不够车就飞出去。像甩绳子的球。</td></tr>
+          <tr><td>导轮 / 滚轮</td><td>过弯时碰赛道壁、防止飞车的小轮子。像过弯时手扶墙。</td></tr>
+          <tr><td>单圈成绩 T_lap</td><td>跑完一圈的时间 = 赛道长度 ÷ 平均速度。越小越好。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal">你已掌握的知识地图</h3>
+    <p class="reveal">从这辆小小的暗夜蝙蝠出发，你其实已经摸到了六大学科的门：</p>
+    <div class="table-scroll-wrapper reveal">
+      <table>
+        <thead><tr><th>学科</th><th>你在这篇文章里用到的</th></tr></thead>
+        <tbody>
+          <tr><td>数学</td><td>长度、时间、速度、平均速度、比例、圆周长、单位换算</td></tr>
+          <tr><td>物理</td><td>力、摩擦力、重力、惯性、向心力、功率、能量</td></tr>
+          <tr><td>电学</td><td>电压、电流、电阻、内阻、电池串联</td></tr>
+          <tr><td>机械</td><td>齿轮、传动效率、轴承、润滑、扭矩</td></tr>
+          <tr><td>工程</td><td>稳定性、重心、装配精度、误差、测试优化</td></tr>
+          <tr><td>比赛策略</td><td>不是最快的车赢，而是最快且不飞的车赢</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="punch reveal">
+      你研究的不只是一辆玩具车，<br>而是一整套<span class="hl">看懂世界的方法</span>。
+    </div>
+
+    <a href="#ch1" class="btn btn-primary" style="display:block;width:max-content;margin-inline:auto;margin-block-start:30px">↑ 回到开头，再读一遍</a>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer style="background:#1f2533;color:#cbd2e0;padding-block:40px;text-align:center">
+  <div class="container">
+    <p style="color:#cbd2e0;margin-block-end:8px;font-weight:700;font-size:1.05rem">🏎️ 四驱车的秘密 · 写给每一位好奇的工程师</p>
+    <p style="color:#8b94a8;font-size:.88rem;margin:0">逻辑让人信服，故事让人行动。先稳，再快。</p>
+  </div>
+</footer>
+<script>
+/* 进度条 */
+const prog=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+});
+/* 汉堡菜单 */
+const ham=document.getElementById('hamburger'),nav=document.getElementById('navlinks');
+ham.addEventListener('click',()=>nav.classList.toggle('open'));
+nav.addEventListener('click',e=>{if(e.target.tagName==='A')nav.classList.remove('open')});
+/* 滚动出现 */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
