@@ -1,0 +1,1980 @@
+---
+layout: false
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>暗夜蝙蝠四驱车技术白皮书：最快的车，先要不飞</title>
+  <style>
+    :root {
+      --bg: #fbf8f1;
+      --surface: #ffffff;
+      --surface-soft: #fffaf0;
+      --ink: #172033;
+      --muted: #526070;
+      --line: #ded6c6;
+      --brand: #0b6b6f;
+      --brand-2: #e76f51;
+      --brand-3: #f4a261;
+      --brand-4: #264653;
+      --ok: #217a4f;
+      --warn: #9d4f12;
+      --danger: #a4302f;
+      --shadow: 0 22px 60px rgba(23, 32, 51, 0.12);
+      --shadow-soft: 0 14px 36px rgba(23, 32, 51, 0.08);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --container: min(1120px, calc(100vw - 32px));
+      --step--1: clamp(0.92rem, 0.87rem + 0.25vw, 1.02rem);
+      --step-0: clamp(1rem, 0.94rem + 0.32vw, 1.14rem);
+      --step-1: clamp(1.2rem, 1.05rem + 0.72vw, 1.55rem);
+      --step-2: clamp(1.55rem, 1.24rem + 1.5vw, 2.25rem);
+      --step-3: clamp(2.1rem, 1.55rem + 2.7vw, 3.35rem);
+      --step-4: clamp(2.85rem, 1.9rem + 4.5vw, 5.1rem);
+      --space-1: clamp(0.55rem, 0.45rem + 0.45vw, 0.8rem);
+      --space-2: clamp(0.9rem, 0.75rem + 0.7vw, 1.25rem);
+      --space-3: clamp(1.3rem, 1.05rem + 1.15vw, 2rem);
+      --space-4: clamp(2rem, 1.55rem + 2vw, 3.2rem);
+      --space-5: clamp(3rem, 2.15rem + 3.8vw, 5rem);
+      --focus: 0 0 0 4px rgba(11, 107, 111, 0.24);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 6%, rgba(244, 162, 97, 0.18), transparent 32rem),
+        radial-gradient(circle at 85% 14%, rgba(11, 107, 111, 0.14), transparent 36rem),
+        linear-gradient(180deg, #fffdf8 0%, var(--bg) 38%, #fff 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      font-size: var(--step-0);
+      line-height: 1.78;
+    }
+
+    a {
+      color: var(--brand);
+      text-decoration-thickness: 0.09em;
+      text-underline-offset: 0.18em;
+    }
+
+    a:hover {
+      color: var(--brand-2);
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    summary:focus-visible,
+    [tabindex]:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    p {
+      margin-block: 0 1.05em;
+    }
+
+    strong {
+      color: #0f2835;
+      font-weight: 760;
+    }
+
+    code,
+    .formula {
+      border: 1px solid rgba(11, 107, 111, 0.2);
+      border-radius: 0.55em;
+      background: #edf8f6;
+      color: #06484c;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.96em;
+      padding: 0.12em 0.38em;
+    }
+
+    .page-shell {
+      overflow: clip;
+    }
+
+    .container {
+      inline-size: var(--container);
+      margin-inline: auto;
+    }
+
+    .skip-link {
+      position: fixed;
+      inset-block-start: 10px;
+      inset-inline-start: 10px;
+      z-index: 1000;
+      transform: translateY(-130%);
+      border-radius: 999px;
+      background: var(--brand-4);
+      color: #fff;
+      padding: 0.7rem 1rem;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .site-header {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 100;
+      border-block-end: 1px solid rgba(222, 214, 198, 0.78);
+      background: rgba(255, 253, 248, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-wrap {
+      display: flex;
+      min-block-size: 72px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: var(--ink);
+      font-weight: 850;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      display: grid;
+      inline-size: 42px;
+      block-size: 42px;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--brand-4), var(--brand));
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(11, 107, 111, 0.24);
+      font-weight: 900;
+    }
+
+    .nav-toggle {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      padding: 0.55rem 0.8rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      display: inline-flex;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 720;
+      padding: 0.52rem 0.76rem;
+      text-decoration: none;
+      transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a[aria-current="true"] {
+      background: rgba(11, 107, 111, 0.1);
+      color: var(--brand);
+      transform: translateY(-1px);
+    }
+
+    main {
+      isolation: isolate;
+    }
+
+    .hero {
+      position: relative;
+      padding-block: var(--space-5) var(--space-4);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.03fr) minmax(320px, 0.72fr);
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      border: 1px solid rgba(11, 107, 111, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--brand);
+      font-size: var(--step--1);
+      font-weight: 800;
+      padding: 0.44rem 0.78rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .eyebrow::before {
+      content: "";
+      inline-size: 0.65rem;
+      block-size: 0.65rem;
+      border-radius: 999px;
+      background: var(--brand-2);
+      box-shadow: 0 0 0 6px rgba(231, 111, 81, 0.16);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      color: var(--ink);
+      line-height: 1.08;
+      letter-spacing: -0.05em;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-inline-size: 12ch;
+      margin: 1rem 0;
+      font-size: var(--step-4);
+    }
+
+    h2 {
+      margin: 0 0 var(--space-3);
+      font-size: var(--step-3);
+    }
+
+    h3 {
+      margin: 0 0 0.8rem;
+      font-size: var(--step-2);
+    }
+
+    h4 {
+      margin: 0 0 0.55rem;
+      font-size: var(--step-1);
+      letter-spacing: -0.035em;
+    }
+
+    .hero-lede {
+      max-inline-size: 64ch;
+      color: var(--muted);
+      font-size: var(--step-1);
+      line-height: 1.7;
+    }
+
+    .hero-actions,
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-block-start: var(--space-3);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-block-size: 46px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 820;
+      line-height: 1;
+      padding: 0.85rem 1.08rem;
+      text-decoration: none;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand), #0a888d);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(11, 107, 111, 0.22);
+    }
+
+    .btn-secondary {
+      border-color: rgba(38, 70, 83, 0.18);
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--brand-4);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .hero-card {
+      position: relative;
+      border: 1px solid rgba(222, 214, 198, 0.82);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.86), rgba(255, 250, 240, 0.74));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: var(--space-3);
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: -30% -20% auto auto;
+      inline-size: 220px;
+      block-size: 220px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(231, 111, 81, 0.22), transparent 70%);
+    }
+
+    .metric-stack {
+      display: grid;
+      gap: 0.85rem;
+      margin-block-start: 1rem;
+    }
+
+    .metric {
+      position: relative;
+      border: 1px solid rgba(222, 214, 198, 0.78);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.78);
+      padding: 1rem;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .metric:hover {
+      transform: translateY(-3px);
+      border-color: rgba(11, 107, 111, 0.32);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric b {
+      display: block;
+      color: var(--brand-4);
+      font-size: 1.05rem;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: var(--step--1);
+    }
+
+    .chapter {
+      padding-block: var(--space-5);
+      scroll-margin-block-start: 88px;
+    }
+
+    .chapter:nth-of-type(even) {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(237, 248, 246, 0.58), rgba(255, 255, 255, 0));
+    }
+
+    .section-kicker {
+      display: inline-flex;
+      margin-block-end: 0.85rem;
+      border-radius: 999px;
+      background: rgba(231, 111, 81, 0.1);
+      color: #943b25;
+      font-size: var(--step--1);
+      font-weight: 840;
+      padding: 0.34rem 0.68rem;
+    }
+
+    .lead {
+      max-inline-size: 76ch;
+      color: var(--muted);
+      font-size: var(--step-1);
+      line-height: 1.72;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid rgba(222, 214, 198, 0.86);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: var(--shadow-soft);
+      padding: var(--space-3);
+      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(11, 107, 111, 0.3);
+      box-shadow: var(--shadow);
+    }
+
+    .card.compact {
+      padding: var(--space-2);
+    }
+
+    .card-tag {
+      display: inline-flex;
+      margin-block-end: 0.7rem;
+      border-radius: 999px;
+      background: #edf8f6;
+      color: var(--brand);
+      font-size: 0.84rem;
+      font-weight: 850;
+      padding: 0.25rem 0.58rem;
+    }
+
+    .question-card {
+      border-inline-start: 6px solid var(--brand-2);
+    }
+
+    .definition {
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #edf8f6, #fffaf0);
+      padding: 1rem;
+    }
+
+    .analogy {
+      position: relative;
+      border-radius: var(--radius-md);
+      background: #fff7e8;
+      color: #61330f;
+      padding: 1rem 1rem 1rem 3.1rem;
+    }
+
+    .analogy::before {
+      content: "像";
+      position: absolute;
+      inset-block-start: 1rem;
+      inset-inline-start: 1rem;
+      display: grid;
+      inline-size: 1.55rem;
+      block-size: 1.55rem;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--brand-3);
+      color: #fff;
+      font-size: 0.86rem;
+      font-weight: 900;
+    }
+
+    .source-note {
+      color: var(--muted);
+      font-size: var(--step--1);
+    }
+
+    .source-note::before {
+      content: "资料依据：";
+      color: var(--brand-4);
+      font-weight: 850;
+    }
+
+    .golden-line {
+      margin-block-start: var(--space-3);
+      border: 1px solid rgba(231, 111, 81, 0.22);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(231, 111, 81, 0.08), rgba(244, 162, 97, 0.12));
+      color: #5a2d1d;
+      font-size: var(--step-1);
+      font-weight: 850;
+      padding: 1.2rem 1.35rem;
+    }
+
+    .svg-scroll-wrapper,
+    .table-scroll-wrapper {
+      inline-size: 100%;
+      max-inline-size: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-block: var(--space-3);
+      border: 1px solid rgba(222, 214, 198, 0.9);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .svg-scroll-wrapper svg {
+      display: block;
+      inline-size: 100%;
+      min-inline-size: 720px;
+      block-size: auto;
+      margin-inline: auto;
+      font-family: inherit;
+    }
+
+    table {
+      inline-size: 100%;
+      min-inline-size: 760px;
+      border-collapse: collapse;
+      font-size: var(--step--1);
+    }
+
+    th,
+    td {
+      border-block-end: 1px solid #e8e0d0;
+      padding: 0.9rem 0.85rem;
+      text-align: start;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      inset-block-start: 0;
+      background: #f2fbfa;
+      color: var(--brand-4);
+      font-weight: 900;
+      z-index: 1;
+    }
+
+    tr:hover td {
+      background: #fffaf0;
+    }
+
+    .formula-box {
+      display: grid;
+      gap: 0.7rem;
+      border: 1px solid rgba(11, 107, 111, 0.22);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #edf8f6, #ffffff);
+      box-shadow: var(--shadow-soft);
+      padding: var(--space-3);
+    }
+
+    .formula-line {
+      display: block;
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      background: #0f2835;
+      color: #f7fff9;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: clamp(1rem, 0.93rem + 0.35vw, 1.22rem);
+      line-height: 1.55;
+      padding: 1rem;
+      white-space: nowrap;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pill-list li {
+      border: 1px solid rgba(11, 107, 111, 0.16);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--brand-4);
+      font-weight: 760;
+      padding: 0.4rem 0.7rem;
+    }
+
+    details {
+      border: 1px solid rgba(222, 214, 198, 0.88);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow-soft);
+      overflow: clip;
+    }
+
+    details + details {
+      margin-block-start: 0.85rem;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--brand-4);
+      font-weight: 880;
+      list-style: none;
+      padding: 1rem 1.1rem;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      float: inline-end;
+      color: var(--brand);
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    #glossary details {
+      overflow: visible;
+    }
+
+    #glossary summary {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    #glossary summary::after,
+    #glossary details[open] summary::after {
+      content: none;
+    }
+
+    .details-body {
+      border-block-start: 1px solid #eee4d5;
+      padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .term {
+      position: relative;
+      border-block-end: 2px dotted rgba(11, 107, 111, 0.55);
+      color: #06484c;
+      cursor: help;
+      font-weight: 760;
+    }
+
+    .term::after {
+      content: attr(data-tip);
+      position: absolute;
+      inset-block-end: calc(100% + 10px);
+      inset-inline-start: 50%;
+      z-index: 20;
+      inline-size: min(280px, 80vw);
+      transform: translate(-50%, 6px);
+      border-radius: 12px;
+      background: #102634;
+      color: #fff;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      opacity: 0;
+      padding: 0.7rem 0.8rem;
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .term:hover::after,
+    .term:focus::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 1rem;
+      counter-reset: step;
+    }
+
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: start;
+      border: 1px solid rgba(222, 214, 198, 0.88);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 1rem;
+    }
+
+    .timeline-item::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      inline-size: 2.2rem;
+      block-size: 2.2rem;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .callout {
+      border: 1px solid rgba(11, 107, 111, 0.18);
+      border-radius: var(--radius-lg);
+      background: rgba(237, 248, 246, 0.72);
+      padding: var(--space-3);
+    }
+
+    .warning {
+      border-color: rgba(157, 79, 18, 0.24);
+      background: rgba(255, 247, 232, 0.88);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 520ms ease, transform 520ms ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .footer {
+      padding-block: var(--space-4);
+      border-block-start: 1px solid rgba(222, 214, 198, 0.88);
+      background: #fffaf0;
+    }
+
+    .print-footer {
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .hero-grid,
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+
+      .nav-links {
+        position: absolute;
+        inset-block-start: 72px;
+        inset-inline: 16px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        border: 1px solid rgba(222, 214, 198, 0.92);
+        border-radius: var(--radius-lg);
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: var(--shadow);
+        padding: 0.8rem;
+      }
+
+      .nav-links.is-open {
+        display: flex;
+      }
+
+      .nav-links a {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --container: min(100vw - 22px, 1120px);
+      }
+
+      .hero {
+        padding-block-start: var(--space-4);
+      }
+
+      .svg-scroll-wrapper,
+      .table-scroll-wrapper {
+        padding: 0.7rem;
+        border-radius: var(--radius-md);
+      }
+
+      .svg-scroll-wrapper svg {
+        min-inline-size: 640px;
+      }
+
+      .hero-actions,
+      .button-row {
+        flex-direction: column;
+      }
+
+      .btn {
+        inline-size: 100%;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @page {
+      margin: 16mm 14mm 18mm;
+      @bottom-center {
+        content: "第 " counter(page) " 页";
+        color: #526070;
+        font-size: 10pt;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+        font-size: 11pt;
+        line-height: 1.55;
+      }
+
+      .site-header,
+      .hero-actions,
+      .button-row,
+      .nav-toggle,
+      .print-hidden {
+        display: none !important;
+      }
+
+      .container {
+        inline-size: 100%;
+      }
+
+      .chapter {
+        padding-block: 0;
+      }
+
+      h2 {
+        break-before: page;
+        page-break-before: always;
+      }
+
+      .hero h1 {
+        break-before: avoid;
+      }
+
+      .card,
+      .formula-box,
+      .svg-scroll-wrapper,
+      .table-scroll-wrapper,
+      details {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+
+      details:not([open]) .details-body {
+        display: block;
+      }
+
+      .svg-scroll-wrapper,
+      .table-scroll-wrapper {
+        overflow: visible;
+      }
+
+      table,
+      .svg-scroll-wrapper svg {
+        min-inline-size: 0;
+      }
+
+      .print-footer {
+        position: fixed;
+        inset-block-end: 0;
+        inset-inline: 0;
+        display: block;
+        color: #526070;
+        font-size: 10pt;
+        text-align: center;
+      }
+    }
+  </style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="page-shell">
+    <header class="site-header print-hidden" aria-label="页面导航">
+      <div class="container nav-wrap">
+        <a class="brand-mark" href="#top" aria-label="回到顶部">
+          <span class="brand-icon" aria-hidden="true">4WD</span>
+          <span>暗夜蝙蝠白皮书</span>
+        </a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navLinks">菜单</button>
+        <nav aria-label="章节导航">
+          <ul class="nav-links" id="navLinks">
+            <li><a href="#ch1">挑战</a></li>
+            <li><a href="#ch2">系统</a></li>
+            <li><a href="#ch3">公式</a></li>
+            <li><a href="#ch4">动力</a></li>
+            <li><a href="#ch5">赛道</a></li>
+            <li><a href="#ch6">实测</a></li>
+            <li><a href="#ch7">落地</a></li>
+            <li><a href="#glossary">术语表</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="container hero-grid">
+          <div class="reveal">
+            <span class="eyebrow">给初一学生的四驱车工程入门</span>
+            <h1 id="hero-title">最快的车，先要不飞。</h1>
+            <p class="hero-lede">如果一辆“暗夜蝙蝠”在直道像闪电，却在第一个弯道冲出赛道，它还是冠军车吗？这份白皮书把四驱车拆成能量、传动、轮胎、底盘、赛道五个问题：每个问题都先问“为什么”，再给出能动手验证的答案。</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#ch1">开始拆解</a>
+              <a class="btn btn-secondary" href="#ch6">直接看实测清单</a>
+            </div>
+          </div>
+          <aside class="hero-card reveal" aria-label="核心结论摘要">
+            <h2 class="print-hidden">一句话结论</h2>
+            <p>冠军不是“瞬间最快”的车，而是<strong>在不飞车的前提下，平均速度最高</strong>的车。</p>
+            <div class="metric-stack">
+              <div class="metric">
+                <b>单圈时间</b>
+                <span><code>T = L / v_avg</code>，长度固定时，平均速度决定成绩。</span>
+              </div>
+              <div class="metric">
+                <b>工程目标</b>
+                <span><code>min T_lap</code>，但前提是不能飞出赛道。</span>
+              </div>
+              <div class="metric">
+                <b>核心抓手</b>
+                <span>减少损耗、降低重心、提高动态稳定性。</span>
+              </div>
+            </div>
+            <p class="source-note">参考内容《结论》《第一性原理》《关键公式》。</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch1">
+        <div class="container">
+          <span class="section-kicker">第一章：挑战</span>
+          <h2>为什么“跑得最快”不等于“赢得比赛”？</h2>
+          <p class="lead">我们先不急着换马达、抹润滑油、挑轮胎。先问一个看似幼稚、其实最工程的问题：如果成绩单只承认完赛车辆，那么一辆会飞出去的高速车，速度还算优势吗？</p>
+
+          <div class="grid-2">
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 1</span>
+              <h3>比赛真正奖励的是什么？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="单圈成绩是车辆跑完整条赛道一圈所用的时间。时间越短，成绩越好。">单圈成绩</span>不是最高速度排行榜，而是“从起点安全回到起点用多久”。</p>
+              <p class="analogy">它像考试总分：数学满分但语文交白卷，不会成为第一。四驱车直道再快，只要飞出赛道，成绩就是无效。</p>
+              <p>所以我们要研究的不是“怎样让车在某一瞬间最快”，而是“怎样让车在每一段都足够快，并且永远留在赛道里”。</p>
+              <p class="source-note">参考内容《结论》《比赛策略》。</p>
+            </article>
+
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 2</span>
+              <h3>为什么直道英雄常常弯道翻车？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="向心加速度是物体转弯时需要的指向弯心的加速度。速度越高、弯越急，需要的向心加速度越大。">向心加速度</span>是车辆转弯时必须“向内拽住自己”的能力需求，公式是 <code>a_c = v² / R</code>。</p>
+              <p class="analogy">它像你端着一碗汤跑过拐角：跑得越快、拐得越急，汤越容易洒。四驱车的“汤”就是稳定性，洒了就是飞车。</p>
+              <p>速度在公式里是平方，意味着速度增加一点，过弯难度会增加很多。这就是为什么极限速度不是唯一目标。</p>
+              <p class="source-note">参考内容《关键公式：过弯稳定公式》。</p>
+            </article>
+          </div>
+
+          <div class="svg-scroll-wrapper reveal" role="img" aria-label="速度、稳定与成绩关系示意图">
+            <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="roadGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#0b6b6f"/>
+                  <stop offset="1" stop-color="#264653"/>
+                </linearGradient>
+                <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#172033" flood-opacity="0.16"/>
+                </filter>
+              </defs>
+              <rect width="960" height="420" rx="28" fill="#fffaf0"/>
+              <path d="M115 280 C210 105 350 105 455 230 S695 350 840 132" fill="none" stroke="url(#roadGrad)" stroke-width="54" stroke-linecap="round" filter="url(#softShadow)"/>
+              <path d="M115 280 C210 105 350 105 455 230 S695 350 840 132" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" opacity="0.88"/>
+              <circle cx="265" cy="151" r="42" fill="#e76f51" opacity="0.96"/>
+              <text x="265" y="146" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">快</text>
+              <text x="265" y="169" text-anchor="middle" fill="#fff" font-size="14">但可能飞</text>
+              <circle cx="520" cy="274" r="48" fill="#0b6b6f" opacity="0.96"/>
+              <text x="520" y="269" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">稳</text>
+              <text x="520" y="292" text-anchor="middle" fill="#fff" font-size="14">平均更高</text>
+              <rect x="90" y="326" width="780" height="58" rx="18" fill="#ffffff" stroke="#ded6c6"/>
+              <text x="122" y="362" fill="#172033" font-size="20" font-weight="800">真正目标：</text>
+              <text x="230" y="362" fill="#0b6b6f" font-size="20" font-weight="800">在不飞车的前提下，让整圈平均速度最大</text>
+              <text x="90" y="58" fill="#264653" font-size="24" font-weight="900">直道速度只是故事开头，稳定完赛才是比赛结尾</text>
+            </svg>
+          </div>
+
+          <div class="formula-box reveal">
+            <h3>单圈成绩的最小模型</h3>
+            <span class="formula-line">T = 赛道长度 L / 平均速度 v_avg</span>
+            <span class="formula-line">T_lap = ∫ ds / v(s)</span>
+            <p>第一条公式像一张简化地图：如果赛道长度固定，平均速度越高，单圈时间越短。第二条公式像工程师的放大镜：把赛道切成很多小段，每一小段都用“小段长度 ÷ 当时速度”算时间，最后全部加起来。</p>
+            <p class="analogy">这就像从家到学校：不是看你某一秒跑得多快，而是看你经过红绿灯、上坡、转弯、进校门之后，总共用了多久。</p>
+          </div>
+
+          <p class="golden-line">金句：速度是冲锋，稳定是边界；冠军只在边界之内诞生。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch2">
+        <div class="container">
+          <span class="section-kicker">第二章：系统</span>
+          <h2>一辆四驱车到底由哪些“器官”组成？</h2>
+          <p class="lead">如果把四驱车看成一个小型赛车系统，它不是零件堆在一起，而是一条能量流：电池把化学能交给马达，马达把电能变成旋转，齿轮把旋转分配给轮子，轮胎把旋转变成前进，底盘负责让这一切少损失、少晃动、少飞车。</p>
+
+          <div class="svg-scroll-wrapper reveal" role="img" aria-label="四驱车能量流架构图">
+            <svg viewBox="0 0 980 520" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#0b6b6f"/>
+                </marker>
+                <linearGradient id="cardGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#ffffff"/>
+                  <stop offset="1" stop-color="#edf8f6"/>
+                </linearGradient>
+              </defs>
+              <rect width="980" height="520" rx="28" fill="#ffffff"/>
+              <text x="64" y="60" fill="#264653" font-size="28" font-weight="900">从电池到赛道：四驱车是一条能量接力赛</text>
+              <g font-size="18" font-weight="800">
+                <rect x="70" y="120" width="150" height="96" rx="22" fill="url(#cardGrad)" stroke="#cfe2df"/>
+                <text x="145" y="156" text-anchor="middle" fill="#172033">电池</text>
+                <text x="145" y="184" text-anchor="middle" fill="#526070" font-size="14">能量包</text>
+                <path d="M220 168 H285" stroke="#0b6b6f" stroke-width="5" marker-end="url(#arrow)"/>
+                <rect x="300" y="120" width="150" height="96" rx="22" fill="url(#cardGrad)" stroke="#cfe2df"/>
+                <text x="375" y="156" text-anchor="middle" fill="#172033">马达</text>
+                <text x="375" y="184" text-anchor="middle" fill="#526070" font-size="14">心脏</text>
+                <path d="M450 168 H515" stroke="#0b6b6f" stroke-width="5" marker-end="url(#arrow)"/>
+                <rect x="530" y="120" width="150" height="96" rx="22" fill="url(#cardGrad)" stroke="#cfe2df"/>
+                <text x="605" y="156" text-anchor="middle" fill="#172033">齿轮</text>
+                <text x="605" y="184" text-anchor="middle" fill="#526070" font-size="14">变速器</text>
+                <path d="M680 168 H745" stroke="#0b6b6f" stroke-width="5" marker-end="url(#arrow)"/>
+                <rect x="760" y="120" width="150" height="96" rx="22" fill="url(#cardGrad)" stroke="#cfe2df"/>
+                <text x="835" y="156" text-anchor="middle" fill="#172033">轮胎</text>
+                <text x="835" y="184" text-anchor="middle" fill="#526070" font-size="14">鞋子</text>
+              </g>
+              <rect x="120" y="300" width="740" height="118" rx="34" fill="#fffaf0" stroke="#ded6c6"/>
+              <text x="490" y="342" text-anchor="middle" fill="#264653" font-size="24" font-weight="900">底盘：骨架 + 地基 + 稳定平台</text>
+              <text x="490" y="382" text-anchor="middle" fill="#526070" font-size="18">减少传动损耗 · 降低重心 · 提高动态稳定性</text>
+              <path d="M145 216 C145 270 260 294 490 300" fill="none" stroke="#e76f51" stroke-width="4" stroke-dasharray="10 8"/>
+              <path d="M835 216 C835 270 720 294 490 300" fill="none" stroke="#e76f51" stroke-width="4" stroke-dasharray="10 8"/>
+              <text x="84" y="470" fill="#526070" font-size="16">读图方法：上方是能量如何流动；下方是底盘如何让能量少浪费、车身少晃动。</text>
+            </svg>
+          </div>
+
+          <div class="table-scroll-wrapper reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>部件</th>
+                  <th>精准定义</th>
+                  <th>精妙类比</th>
+                  <th>对成绩的影响</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>电池</td>
+                  <td>提供电压和电流的能量源，关键不只是标称 1.5V，还包括内阻和放电稳定性。</td>
+                  <td>像运动员的早餐：热量够不够、能不能持续供能都重要。</td>
+                  <td>影响马达持续输出；内阻高会导致加速时电压下跌。</td>
+                </tr>
+                <tr>
+                  <td>马达</td>
+                  <td>把电能转化为旋转机械能的装置，核心指标是转速和扭矩。</td>
+                  <td>像心脏：跳得快决定上限，泵得有力决定恢复能力。</td>
+                  <td>转速决定理论极速，扭矩决定起步、爬坡、出弯。</td>
+                </tr>
+                <tr>
+                  <td>齿轮</td>
+                  <td>通过齿数比例改变输出转速和输出扭矩的机械杠杆。</td>
+                  <td>像自行车变速器：轻档好爬坡，重档直道快。</td>
+                  <td>决定“极速”和“加速”的交换方式。</td>
+                </tr>
+                <tr>
+                  <td>传动轴</td>
+                  <td>把马达和齿轮的旋转传递到前后轮的轴系。</td>
+                  <td>像身体关节：关节顺，力量才传得出去。</td>
+                  <td>轴歪、卡滞、摩擦大会吃掉速度。</td>
+                </tr>
+                <tr>
+                  <td>底盘</td>
+                  <td>承载零件并控制重心、刚性、传动效率和动态姿态的结构平台。</td>
+                  <td>像房子的地基：地基稳，上面怎么动都不容易塌。</td>
+                  <td>影响损耗、稳定、跑偏、飞车概率。</td>
+                </tr>
+                <tr>
+                  <td>轮胎</td>
+                  <td>车与赛道接触的唯一部件，核心是摩擦、滚阻、直径和旋转惯性。</td>
+                  <td>像鞋子：鞋底太滑会摔，太粘会跑不动。</td>
+                  <td>影响抓地、滚动阻力、加速和重心。</td>
+                </tr>
+                <tr>
+                  <td>导轮/滚轮</td>
+                  <td>车辆过弯时与赛道壁接触，减少车身撞壁损失并限制姿态。</td>
+                  <td>像走廊里的扶手：拐弯时扶一下，不至于冲出去。</td>
+                  <td>影响过弯稳定和碰壁损耗。</td>
+                </tr>
+                <tr>
+                  <td>车壳</td>
+                  <td>覆盖车身的外壳，影响重量、重心和少量空气阻力。</td>
+                  <td>像外衣：太厚重会拖慢动作，太松会刮到身体。</td>
+                  <td>不应刮轮胎，不应提高过多重心。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="source-note">参考内容《四驱车的组成》《第一性原理》。</p>
+
+          <div class="grid-3">
+            <article class="card reveal">
+              <span class="card-tag">暗夜蝙蝠已确认</span>
+              <h3>公开资料能确认什么？</h3>
+              <p>爱乐猫“暗夜蝙蝠”是 <strong>1:32 迷你四驱车</strong>、比赛款、<strong>W1 底盘</strong>、双头直流马达，使用 <strong>2 节 5 号电池</strong>，标称电压约 3.0V。</p>
+            </article>
+            <article class="card reveal">
+              <span class="card-tag">不能瞎写</span>
+              <h3>哪些必须实测？</h3>
+              <p>马达真实负载转速、扭矩、齿轮比、轮胎直径、轮胎硬度、整车重量、轴距、轮距、离地间隙，都不能把常见范围当官方参数。</p>
+            </article>
+            <article class="card reveal">
+              <span class="card-tag">工程态度</span>
+              <h3>为什么要分清？</h3>
+              <p>工程不是背答案，而是建立“已知、未知、如何测”的清单。知道不知道，才是变强的第一步。</p>
+            </article>
+          </div>
+
+          <p class="golden-line">金句：四驱车不是玩具堆装，而是一条从电池到赛道的能量链。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch3">
+        <div class="container">
+          <span class="section-kicker">第三章：公式</span>
+          <h2>怎样用数学看见一辆车的速度？</h2>
+          <p class="lead">数学不是把人吓跑的符号墙，而是把“感觉很快”变成“我知道为什么快”的尺子。四驱车最先要掌握四把尺：长度、时间、转速、比例。</p>
+
+          <div class="grid-2">
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 3</span>
+              <h3>轮胎为什么一转就能前进？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="圆周长是圆绕一圈的边界长度，公式 C = πD。轮胎转一圈，理论上前进一个周长。">轮胎周长</span>是轮胎外圈一整圈的长度，公式是 <code>C = πD</code>。</p>
+              <p class="analogy">轮胎像一卷透明胶带：滚一圈，地上留下的长度就是胶带外圈的周长。轮胎越大，每转一圈走得越远。</p>
+            </article>
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 4</span>
+              <h3>马达转得快，为什么轮子没那么快？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="齿轮比表示马达转多少圈，轮轴转一圈。例如 4:1 表示马达转 4 圈，轮轴转 1 圈。">齿轮比</span>是马达转速和轮轴转速之间的比例。轮轴转速 = 马达转速 / 齿轮比。</p>
+              <p class="analogy">它像自行车档位：低档踩很多圈，车轮转得少，但很有力；高档踩得重，车轮转得多，适合直道。</p>
+            </article>
+          </div>
+
+          <div class="formula-box reveal">
+            <h3>从轮胎到车速的推导</h3>
+            <span class="formula-line">轮胎周长：C = πD</span>
+            <span class="formula-line">轮轴转速 = 马达转速 / 齿轮比</span>
+            <span class="formula-line">理论车速 v = 马达转速 / 齿轮比 × 轮胎周长 / 60</span>
+            <span class="formula-line">估算车速 v_est = 马达负载转速 / 齿轮比 × 轮胎周长 / 60 × 传动效率</span>
+            <span class="formula-line">比赛有效速度 v_race ≈ v_est × 稳定发挥系数</span>
+            <p>注意单位必须统一：如果轮胎直径用米，速度就是米/秒；如果马达转速是 rpm，除以 60 才能变成每秒。这里的“稳定发挥系数”不是标准物理常数，而是工程记录里的经验折扣：碰壁、跳车、过弯降速越多，它越低；能稳定贴着赛道跑，它越接近 1。</p>
+          </div>
+
+          <div class="svg-scroll-wrapper reveal" role="img" aria-label="理论速度计算示意图">
+            <svg viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#e76f51"/>
+                </marker>
+              </defs>
+              <rect width="960" height="500" rx="28" fill="#fff"/>
+              <text x="58" y="58" fill="#264653" font-size="28" font-weight="900">示例：24 mm 轮胎 + 14000 rpm 负载转速 + 4:1 齿轮比</text>
+              <g transform="translate(78 110)">
+                <circle cx="105" cy="110" r="78" fill="#edf8f6" stroke="#0b6b6f" stroke-width="8"/>
+                <circle cx="105" cy="110" r="10" fill="#0b6b6f"/>
+                <line x1="27" y1="110" x2="183" y2="110" stroke="#e76f51" stroke-width="5" marker-end="url(#arrow2)" marker-start="url(#arrow2)"/>
+                <text x="105" y="222" text-anchor="middle" fill="#172033" font-size="20" font-weight="800">D = 0.024 m</text>
+                <text x="105" y="252" text-anchor="middle" fill="#526070" font-size="16">C = 3.14 × 0.024 = 0.07536 m</text>
+              </g>
+              <g transform="translate(356 120)">
+                <rect x="0" y="0" width="240" height="82" rx="20" fill="#fffaf0" stroke="#ded6c6"/>
+                <text x="120" y="35" text-anchor="middle" fill="#172033" font-size="20" font-weight="900">轮轴转速</text>
+                <text x="120" y="62" text-anchor="middle" fill="#0b6b6f" font-size="18" font-weight="800">14000 / 4 = 3500 rpm</text>
+                <rect x="0" y="120" width="240" height="106" rx="20" fill="#edf8f6" stroke="#cfe2df"/>
+                <text x="120" y="154" text-anchor="middle" fill="#172033" font-size="20" font-weight="900">理论车速</text>
+                <text x="120" y="184" text-anchor="middle" fill="#0b6b6f" font-size="18" font-weight="800">3500 × 0.07536 / 60</text>
+                <text x="120" y="211" text-anchor="middle" fill="#0b6b6f" font-size="20" font-weight="900">≈ 4.40 m/s</text>
+              </g>
+              <g transform="translate(670 116)">
+                <rect x="0" y="0" width="226" height="254" rx="24" fill="#264653"/>
+                <text x="113" y="42" text-anchor="middle" fill="#fff" font-size="22" font-weight="900">现实折扣</text>
+                <text x="34" y="85" fill="#f7fff9" font-size="17">齿轮摩擦</text>
+                <text x="34" y="120" fill="#f7fff9" font-size="17">轴歪和卡滞</text>
+                <text x="34" y="155" fill="#f7fff9" font-size="17">轮胎打滑</text>
+                <text x="34" y="190" fill="#f7fff9" font-size="17">碰壁损耗</text>
+                <text x="34" y="225" fill="#f7fff9" font-size="17">过弯降速</text>
+              </g>
+              <text x="78" y="440" fill="#526070" font-size="17">结论：理论速度是天花板；真实比赛还要扣掉传动损耗、碰壁和失稳损失。</text>
+            </svg>
+          </div>
+
+          <div class="table-scroll-wrapper reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>知识类型</th>
+                  <th>必须掌握的概念</th>
+                  <th>为什么与四驱车有关</th>
+                  <th>初中生练习方式</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>数学</td>
+                  <td>长度、时间、速度、平均速度、比例、圆周长、单位换算</td>
+                  <td>没有这些，就无法从轮胎直径、马达转速推导车速。</td>
+                  <td>量轮胎直径，计算周长，再估算理论车速。</td>
+                </tr>
+                <tr>
+                  <td>物理</td>
+                  <td>力、摩擦力、重力、惯性、向心力、功率、能量</td>
+                  <td>解释为什么会加速、为什么会飞车、为什么能量会损失。</td>
+                  <td>比较不同轮胎在同一轨道上的稳定性。</td>
+                </tr>
+                <tr>
+                  <td>电学</td>
+                  <td>电压、电流、电阻、内阻、串联电池</td>
+                  <td>解释为什么同样 1.5V 的电池，跑起来可能差很多。</td>
+                  <td>用万用表测开路电压和运行电压。</td>
+                </tr>
+                <tr>
+                  <td>机械</td>
+                  <td>齿轮、传动效率、轴承、润滑、扭矩</td>
+                  <td>解释为什么装得顺比盲目换高速零件更重要。</td>
+                  <td>拨动车轮，听是否有卡齿声，观察滑行距离。</td>
+                </tr>
+                <tr>
+                  <td>工程</td>
+                  <td>稳定性、重心、装配精度、误差、测试优化</td>
+                  <td>解释为什么比赛是系统优化，不是单零件炫耀。</td>
+                  <td>每次只改一个变量，记录圈速和飞车次数。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="source-note">参考内容《关键公式》《理论知识构建任务》。</p>
+
+          <div class="formula-box reveal">
+            <h3>加速度：为什么“出弯恢复”能决定胜负？</h3>
+            <span class="formula-line">a ≈ 牵引力 / 车重</span>
+            <span class="formula-line">a ≈ (马达扭矩 × 齿轮比 × 传动效率 / 轮胎半径 - 阻力) / 车重</span>
+            <p><strong>精准定义：</strong>加速度是速度变快的快慢，不是“最高能跑多快”，而是“多久能重新快起来”。</p>
+            <p class="analogy">它像跑步出弯后的重新冲刺：有的人最高速度很快，但从慢到快需要很久；有的人最高速度一般，却能每个弯后立刻恢复节奏。</p>
+            <p>这条公式也提醒我们：扭矩越大、齿轮比越偏向力量、传动越顺、车越轻，起步和出弯越有利；但齿轮比过大又会牺牲极速，所以仍然要回到“整圈平均速度”判断。</p>
+          </div>
+
+          <p class="golden-line">金句：公式不是答案本身，而是把感觉变成证据的仪器。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch4">
+        <div class="container">
+          <span class="section-kicker">第四章：动力</span>
+          <h2>马达、齿轮、电池，谁才是速度的真正来源？</h2>
+          <p class="lead">四驱车的动力系统像一个三人小队：电池负责供能，马达负责转换，齿轮负责分配。任何一个人掉链子，整队都会慢。</p>
+
+          <div class="grid-3">
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 5</span>
+              <h3>速度上限由谁决定？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="rpm 是 revolutions per minute，每分钟转多少圈。">转速 rpm</span>是马达每分钟旋转的圈数，决定理论最高速度的上限。</p>
+              <p class="analogy">高速马达像短跑运动员：步频极快，直道很有优势，但如果力量不足，起步和出弯会吃亏。</p>
+            </article>
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 6</span>
+              <h3>提速和出弯由谁决定？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="扭矩是让物体旋转的力矩，可以理解为拧瓶盖的力量。">扭矩</span>是“拧动轮轴”的力量，决定起步、爬坡和出弯恢复。</p>
+              <p class="analogy">大扭矩马达像力气大的同学：推车很猛、爬坡不怕，但最高步频可能没有短跑运动员快。</p>
+            </article>
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 7</span>
+              <h3>齿轮为什么像杠杆？</h3>
+              <p><strong>精准定义：</strong>齿轮比是在有限马达功率下，对转速和扭矩做交换的比例。</p>
+              <p class="analogy">它像跷跷板：一边抬起“极速”，另一边就会压低“扭矩”；一边抬起“扭矩”，另一边就会压低“极速”。</p>
+            </article>
+          </div>
+
+          <div class="svg-scroll-wrapper reveal" role="img" aria-label="齿轮比杠杆交换示意图">
+            <svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg">
+              <rect width="960" height="430" rx="28" fill="#ffffff"/>
+              <text x="58" y="58" fill="#264653" font-size="28" font-weight="900">齿轮比：在转速和扭矩之间做杠杆交换</text>
+              <line x1="180" y1="250" x2="780" y2="170" stroke="#264653" stroke-width="18" stroke-linecap="round"/>
+              <polygon points="480,245 430,345 530,345" fill="#e76f51"/>
+              <circle cx="210" cy="246" r="70" fill="#edf8f6" stroke="#0b6b6f" stroke-width="6"/>
+              <text x="210" y="238" text-anchor="middle" fill="#0b6b6f" font-size="22" font-weight="900">大齿比</text>
+              <text x="210" y="268" text-anchor="middle" fill="#526070" font-size="16">扭矩↑ 稳定↑ 极速↓</text>
+              <circle cx="750" cy="174" r="70" fill="#fff7e8" stroke="#e76f51" stroke-width="6"/>
+              <text x="750" y="166" text-anchor="middle" fill="#9d4f12" font-size="22" font-weight="900">小齿比</text>
+              <text x="750" y="196" text-anchor="middle" fill="#526070" font-size="16">极速↑ 扭矩↓ 风险↑</text>
+              <rect x="290" y="350" width="380" height="46" rx="23" fill="#edf8f6"/>
+              <text x="480" y="380" text-anchor="middle" fill="#264653" font-size="18" font-weight="900">综合赛道通常先找平衡点，例如 4:1 或 4.2:1</text>
+            </svg>
+          </div>
+
+          <div class="table-scroll-wrapper reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>齿轮比</th>
+                  <th>特点</th>
+                  <th>适合赛道</th>
+                  <th>风险</th>
+                  <th>给初中比赛的建议</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>小齿轮比，如 3.5:1</td>
+                  <td>轮子转得快，理论极速高，但输出扭矩小。</td>
+                  <td>长直道多、弯少、赛道稳定。</td>
+                  <td>起步弱、出弯恢复慢，容易在弯道失控。</td>
+                  <td>除非试跑证明不飞，否则不要盲目追。</td>
+                </tr>
+                <tr>
+                  <td>中等齿轮比，如 4:1 / 4.2:1</td>
+                  <td>速度和加速比较平衡。</td>
+                  <td>综合赛道，直道和弯道都有。</td>
+                  <td>不是单项最强，但容错高。</td>
+                  <td>优先选择，用实测微调。</td>
+                </tr>
+                <tr>
+                  <td>大齿轮比，如 5:1</td>
+                  <td>起步强、爬坡强、控制感好，但极速低。</td>
+                  <td>弯多、坡多、容易飞车的赛道。</td>
+                  <td>直道可能被拉开。</td>
+                  <td>当飞车频繁时，先用它找稳定基线。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grid-2">
+            <div class="card reveal">
+              <h3>电池为什么不是“只看 1.5V”？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="内阻是电池内部对电流流动的阻碍。内阻越大，大电流输出时电压掉得越厉害。">内阻</span>是电池身体里的“堵车程度”。电池空载时看起来电压高，但一加速需要大电流，如果内阻高，电压就会塌下去。</p>
+              <p class="analogy">水塔高度像电压，水管粗细像内阻。水塔再高，如果水管太细，消防车一接水，水流也不够猛。</p>
+            </div>
+            <div class="card reveal">
+              <h3>比赛电池清单</h3>
+              <ul>
+                <li>使用全新的高性能碱性 AA 电池。</li>
+                <li>两节电池同品牌、同型号、同批次。</li>
+                <li>赛前用万用表测电压，优先选电压接近的一对。</li>
+                <li>新碱性电池的开路电压常见约 1.55-1.65V；优先选择两节差值小于 0.02V 的一对。</li>
+                <li>不要用碳性电池、旧电池、充电锂电池。</li>
+                <li>如果规则允许测运行电压，更要看车辆启动时电压是否明显下跌。</li>
+                <li>上场前再装电池，保持触点干净，不要长时间空转消耗。</li>
+              </ul>
+              <p class="source-note">参考内容《电池建议》。</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card reveal">
+              <h3>润滑油为什么不能乱抹？</h3>
+              <p><strong>精准定义：</strong>润滑是用极薄油膜降低轴、齿轮、轴承接触面的摩擦；它的目标是减少损耗，不是让零件“泡在油里”。</p>
+              <p class="analogy">润滑像给门轴滴一滴油：一滴能让门安静顺滑，倒半瓶只会流得到处都是，还会粘灰。</p>
+              <p>实操原则是少量、精准、避开轮胎和电刷接触区域。润滑过多会吸附灰尘、甩到轮胎上降低抓地，甚至让电接触变差。</p>
+            </div>
+            <div class="card reveal">
+              <h3>润滑检查三步</h3>
+              <ul>
+                <li>先清洁：去掉毛刺、塑料屑和灰尘，再考虑润滑。</li>
+                <li>再少量：只在齿轮轴、轴承位、低速摩擦点极少量使用。</li>
+                <li>最后复测：润滑前后都拨动车轮并记录滑行距离，不凭手感下结论。</li>
+              </ul>
+            </div>
+          </div>
+
+          <details class="reveal">
+            <summary>如果只能优化一个动力环节，先做什么？</summary>
+            <div class="details-body">
+              <p>先让传动顺。原因很简单：高速马达、好电池、合适齿轮都要通过齿轮和轴传到轮胎。如果齿轮咬合紧、轴弯、轮胎蹭车壳，所有动力都会变成热、噪音和塑料磨损。</p>
+              <p>最朴素的检查方法是：关电，用手轻轻拨动车轮。它应该顺滑转动，没有明显“咔咔声”，也不应该立刻停住。</p>
+            </div>
+          </details>
+
+          <p class="golden-line">金句：马达给上限，齿轮做取舍，电池决定这份上限能不能持续兑现。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch5">
+        <div class="container">
+          <span class="section-kicker">第五章：赛道</span>
+          <h2>轮胎和底盘为什么决定“敢不敢快”？</h2>
+          <p class="lead">当动力已经足够，真正的竞争就从“能跑多快”变成“能不能控制住快”。轮胎负责和地面谈判，底盘负责让车身别乱晃。</p>
+
+          <div class="grid-2">
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 8</span>
+              <h3>轮胎越粘越好吗？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="抓地力是轮胎抵抗打滑并把旋转变成前进的能力，主要来自轮胎与赛道之间的摩擦。">抓地力</span>是轮胎把马达旋转变成前进的能力；<span class="term" tabindex="0" data-tip="滚动阻力是轮胎滚动时因为形变、摩擦等造成的能量损失。">滚动阻力</span>是轮胎滚动时吃掉能量的阻碍。</p>
+              <p class="analogy">鞋底太滑会摔，太粘像踩在口香糖上，跑不起来。好轮胎不是最粘，而是在“不滑”和“不拖”之间找到平衡。</p>
+            </article>
+            <article class="card question-card reveal">
+              <span class="card-tag">问题 9</span>
+              <h3>轮胎越大越快吗？</h3>
+              <p><strong>精准定义：</strong><span class="term" tabindex="0" data-tip="旋转惯性表示物体改变旋转速度的难易程度。轮胎越大、越重，提速越费劲。">旋转惯性</span>是轮胎“不愿意改变转速”的程度。</p>
+              <p class="analogy">转一把小钥匙很轻松，转一个大磨盘很费劲。大轮胎每圈走得远，但提速更费力，还可能抬高重心。</p>
+            </article>
+          </div>
+
+          <div class="svg-scroll-wrapper reveal" role="img" aria-label="轮胎选择天平图">
+            <svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg">
+              <rect width="960" height="430" rx="28" fill="#fff"/>
+              <text x="58" y="58" fill="#264653" font-size="28" font-weight="900">轮胎的本质：抓地力与旋转惯性的博弈</text>
+              <line x1="230" y1="230" x2="730" y2="230" stroke="#264653" stroke-width="14" stroke-linecap="round"/>
+              <polygon points="480,230 430,340 530,340" fill="#0b6b6f"/>
+              <g>
+                <circle cx="260" cy="230" r="78" fill="#edf8f6" stroke="#0b6b6f" stroke-width="6"/>
+                <text x="260" y="210" text-anchor="middle" fill="#0b6b6f" font-size="22" font-weight="900">抓地力</text>
+                <text x="260" y="240" text-anchor="middle" fill="#526070" font-size="16">防打滑</text>
+                <text x="260" y="266" text-anchor="middle" fill="#526070" font-size="16">保过弯</text>
+              </g>
+              <g>
+                <circle cx="700" cy="230" r="78" fill="#fff7e8" stroke="#e76f51" stroke-width="6"/>
+                <text x="700" y="210" text-anchor="middle" fill="#9d4f12" font-size="22" font-weight="900">旋转惯性</text>
+                <text x="700" y="240" text-anchor="middle" fill="#526070" font-size="16">提速变慢</text>
+                <text x="700" y="266" text-anchor="middle" fill="#526070" font-size="16">重心变高</text>
+              </g>
+              <rect x="180" y="356" width="600" height="46" rx="23" fill="#fffaf0" stroke="#ded6c6"/>
+              <text x="480" y="386" text-anchor="middle" fill="#264653" font-size="18" font-weight="900">原则：先保证稳定，再追求速度</text>
+            </svg>
+          </div>
+
+          <div class="table-scroll-wrapper reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>选择</th>
+                  <th>好处</th>
+                  <th>代价</th>
+                  <th>适用判断</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>软胎</td>
+                  <td>抓地强，缓冲好，弯道更安心。</td>
+                  <td>形变大，能量损失多，直道可能慢。</td>
+                  <td>赛道滑、弯多、经常飞车时优先。</td>
+                </tr>
+                <tr>
+                  <td>硬胎</td>
+                  <td>滚动阻力小，直道轻快。</td>
+                  <td>抓地和缓冲差，过弯容错低。</td>
+                  <td>赛道平顺、车辆已很稳时尝试。</td>
+                </tr>
+                <tr>
+                  <td>大直径轮胎</td>
+                  <td>每转一圈走得远，理论极速高。</td>
+                  <td>重心高，旋转惯性大，提速慢。</td>
+                  <td>长直道多且不易飞车时考虑。</td>
+                </tr>
+                <tr>
+                  <td>小直径轮胎</td>
+                  <td>重心低，加速好，更稳。</td>
+                  <td>理论极速低。</td>
+                  <td>弯多、短直道、飞车风险高时优先。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grid-2">
+            <div class="card reveal">
+              <h3>底盘的三条底层任务</h3>
+              <ul>
+                <li><strong>减少传动损耗：</strong>让马达的能量尽量变成前进，而不是噪音、发热和卡顿。</li>
+                <li><strong>降低重心：</strong>让车像趴在赛道上，而不是像踩高跷跑步。</li>
+                <li><strong>提高动态稳定性：</strong>在加速、过弯、碰壁、落下时都尽量不失控。</li>
+              </ul>
+            </div>
+            <div class="card reveal">
+              <h3>稳定能力从哪里来？</h3>
+              <p>稳定不是单个零件给的，而是低重心、合适轮胎、顺滑导轮、合适齿比、装配精度共同形成的结果。</p>
+              <p class="analogy">它像班级接力赛：最后成绩不是看某个同学多厉害，而是每一次交棒都不掉。</p>
+            </div>
+          </div>
+
+          <div class="formula-box reveal">
+            <h3>过弯安全速度的直觉公式</h3>
+            <span class="formula-line">向心加速度 a_c = v² / R</span>
+            <span class="formula-line">理想摩擦上限可近似写成：v ≤ √(μgR)</span>
+            <span class="formula-line">真实赛道还要考虑导轮、重心、轨道壁、跳动和碰撞损耗</span>
+            <p>弯道半径 R 越小，弯越急；速度 v 越高，需要的向心能力按平方上升。<code>μgR</code> 是一个帮助理解的理想模型：μ 表示轮胎与赛道的摩擦系数，g 表示重力加速度。但迷你四驱车并不是只靠轮胎摩擦过弯，导轮会碰轨道壁，车身会跳动，重心会带来翻滚风险，所以最终仍要靠实测确认安全速度。</p>
+          </div>
+
+          <p class="golden-line">金句：轮胎决定能不能抓住赛道，底盘决定抓住之后会不会乱晃。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch6">
+        <div class="container">
+          <span class="section-kicker">第六章：实测</span>
+          <h2>怎样把“感觉快”变成“证据快”？</h2>
+          <p class="lead">公开资料没有可靠给出暗夜蝙蝠的完整硬参数，所以真正的研究从测量开始。测量不是高级实验室的专利，一把尺、一个万用表、一台手机慢动作、一个电子秤，就能把玩具变成工程课。</p>
+
+          <div class="table-scroll-wrapper reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>实验</th>
+                  <th>方法</th>
+                  <th>得到什么</th>
+                  <th>为什么重要</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>测轮胎直径</td>
+                  <td>用尺或卡尺量轮胎外径，多量几次取平均。</td>
+                  <td>轮胎直径 D、周长 C。</td>
+                  <td>用来计算理论车速。</td>
+                </tr>
+                <tr>
+                  <td>测齿轮比</td>
+                  <td>让马达轴转 N 圈，看车轮转几圈；或数齿轮齿数。</td>
+                  <td>真实齿轮比。</td>
+                  <td>判断是偏极速还是偏加速。</td>
+                </tr>
+                <tr>
+                  <td>测马达转速</td>
+                  <td>用非接触式测速仪，或手机慢动作拍带标记的轴；测试时固定车辆，手指、头发和衣物远离旋转件。</td>
+                  <td>空载/负载 rpm。</td>
+                  <td>估算速度上限，不把常见区间当官方参数。</td>
+                </tr>
+                <tr>
+                  <td>测车重</td>
+                  <td>用电子秤称整车含电池重量。</td>
+                  <td>总质量。</td>
+                  <td>质量越大，同样牵引力下加速度越小。</td>
+                </tr>
+                <tr>
+                  <td>测滑行阻力</td>
+                  <td>关电后从同一位置轻推，看滑多远。</td>
+                  <td>传动损耗和轮胎滚阻的粗略判断。</td>
+                  <td>滑得短可能说明轴紧、齿轮卡、轮胎蹭。</td>
+                </tr>
+                <tr>
+                  <td>测电池电压</td>
+                  <td>万用表测开路电压和运行时电压；避免短接电池两端。</td>
+                  <td>电池强弱、压降情况。</td>
+                  <td>运行压降大，说明供电平台不稳或内阻偏高。</td>
+                </tr>
+                <tr>
+                  <td>测稳定性</td>
+                  <td>不同电池、润滑状态、轮胎组合跑圈并记录。</td>
+                  <td>圈速、飞车次数、异常声音。</td>
+                  <td>找“最快稳定组合”，不是最高瞬时速度。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="source-note">参考内容《实测任务》《暗夜蝙蝠参数整理》。</p>
+
+          <div class="svg-scroll-wrapper reveal" role="img" aria-label="四驱车实验流程图">
+            <svg viewBox="0 0 960 480" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="arrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#0b6b6f"/>
+                </marker>
+              </defs>
+              <rect width="960" height="480" rx="28" fill="#fff"/>
+              <text x="58" y="58" fill="#264653" font-size="28" font-weight="900">实验闭环：一次只改一个变量</text>
+              <g font-size="18" font-weight="850" text-anchor="middle">
+                <rect x="70" y="140" width="160" height="82" rx="22" fill="#edf8f6" stroke="#cfe2df"/>
+                <text x="150" y="176" fill="#172033">建立基线</text>
+                <text x="150" y="203" fill="#526070" font-size="14">原装状态跑 3 圈</text>
+                <path d="M230 181 H300" stroke="#0b6b6f" stroke-width="5" marker-end="url(#arrow3)"/>
+                <rect x="315" y="140" width="160" height="82" rx="22" fill="#fffaf0" stroke="#ded6c6"/>
+                <text x="395" y="176" fill="#172033">只改一项</text>
+                <text x="395" y="203" fill="#526070" font-size="14">如电池或润滑</text>
+                <path d="M475 181 H545" stroke="#0b6b6f" stroke-width="5" marker-end="url(#arrow3)"/>
+                <rect x="560" y="140" width="160" height="82" rx="22" fill="#edf8f6" stroke="#cfe2df"/>
+                <text x="640" y="176" fill="#172033">记录结果</text>
+                <text x="640" y="203" fill="#526070" font-size="14">圈速 + 飞车 + 异响</text>
+                <path d="M720 181 H790" stroke="#0b6b6f" stroke-width="5" marker-end="url(#arrow3)"/>
+                <rect x="805" y="140" width="110" height="82" rx="22" fill="#fff7e8" stroke="#f4a261"/>
+                <text x="860" y="176" fill="#172033">判断</text>
+                <text x="860" y="203" fill="#526070" font-size="14">保留或撤回</text>
+              </g>
+              <path d="M860 222 C860 330 150 330 150 222" fill="none" stroke="#e76f51" stroke-width="5" stroke-dasharray="10 8" marker-end="url(#arrow3)"/>
+              <rect x="160" y="360" width="640" height="58" rx="20" fill="#264653"/>
+              <text x="480" y="397" text-anchor="middle" fill="#fff" font-size="20" font-weight="900">不要同时换马达、轮胎、电池和润滑油，否则你不知道是谁起了作用。</text>
+            </svg>
+          </div>
+
+          <div class="grid-2">
+            <div class="card reveal">
+              <h3>记录表建议</h3>
+              <p>每次试跑记录：日期、车重、电池电压、齿轮比、轮胎直径、润滑状态、赛道类型、三圈时间、是否飞车、异常声音、改动项。</p>
+              <p class="analogy">它像侦探笔记。没有记录，你只有印象；有记录，你才有证据链。</p>
+            </div>
+            <div class="card warning reveal">
+              <h3>最常见的实验错误</h3>
+              <ul>
+                <li>用不同新旧程度的电池比较零件。</li>
+                <li>一次改太多东西，无法判断原因。</li>
+                <li>只看最快一圈，不看是否稳定完赛。</li>
+                <li>忽略异响、跑偏、轮胎蹭壳这些损耗信号。</li>
+                <li>把空载马达转速直接当赛道速度，忘了负载、摩擦和碰壁损耗。</li>
+                <li>测试旋转部件时用手靠得太近，或让电池意外短路。</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="golden-line">金句：没有记录的调车叫感觉，有记录的调车才叫工程。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="ch7">
+        <div class="container">
+          <span class="section-kicker">第七章：落地</span>
+          <h2>45 分钟内，怎样把暗夜蝙蝠装成稳定完赛车？</h2>
+          <p class="lead">拼装比赛最怕两件事：前面慢悠悠，后面慌张张；或者装得很快，却把齿轮、轮轴、电池触点这些关键细节弄坏。下面这张表把 45 分钟变成可执行路线。</p>
+
+          <div class="table-scroll-wrapper reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>任务</th>
+                  <th>重点</th>
+                  <th>检查口令</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0-5 分钟</td>
+                  <td>清点零件</td>
+                  <td>马达、齿轮、轴、轮胎、电池片不能少。</td>
+                  <td>“少一个关键件，后面全白忙。”</td>
+                </tr>
+                <tr>
+                  <td>5-15 分钟</td>
+                  <td>装底盘、齿轮、传动轴</td>
+                  <td>齿轮咬合顺，不要卡，不要强压。</td>
+                  <td>“能轻拨，才算顺。”</td>
+                </tr>
+                <tr>
+                  <td>15-25 分钟</td>
+                  <td>装马达、电池片、开关</td>
+                  <td>接触可靠，马达方向正确。</td>
+                  <td>“接触不良就是隐形刹车。”</td>
+                </tr>
+                <tr>
+                  <td>25-32 分钟</td>
+                  <td>装轮胎、轮轴、导轮</td>
+                  <td>四轮不歪，导轮牢固，转动轻快。</td>
+                  <td>“轮歪一毫米，赛道上放大十倍。”</td>
+                </tr>
+                <tr>
+                  <td>32-37 分钟</td>
+                  <td>装车壳</td>
+                  <td>不刮轮胎，不碰赛道，不压电线。</td>
+                  <td>“外衣好看，更要不碍手脚。”</td>
+                </tr>
+                <tr>
+                  <td>37-42 分钟</td>
+                  <td>短时间试车</td>
+                  <td>检查跑偏、异响、卡齿、飞车倾向。</td>
+                  <td>“小问题不上赛道放大。”</td>
+                </tr>
+                <tr>
+                  <td>42-45 分钟</td>
+                  <td>最终检查</td>
+                  <td>换新电池，确认轮胎和导轮牢固。</td>
+                  <td>“最后三分钟，只做可靠性。”</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="source-note">参考内容《45 分钟拼装任务拆分》。</p>
+
+          <div class="timeline reveal">
+            <div class="timeline-item">
+              <div>
+                <h3>先完赛</h3>
+                <p>如果飞车，所有极速都没有意义。初次调车先选稳定齿比、确保导轮和轮胎可靠。</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div>
+                <h3>再顺滑</h3>
+                <p>用手轻拨车轮，听声音、看停转。顺滑的车通常安静，卡滞的车通常吵。</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div>
+                <h3>再供电</h3>
+                <p>选同批次新碱性电池，检查触点清洁。电池弱，马达再好也像没吃饭。</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div>
+                <h3>最后追速</h3>
+                <p>只有稳定完赛后，才逐步尝试更小齿比、更轻轮胎、更低损耗润滑。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout reveal">
+            <h3>最终策略：最高的稳定平均速度</h3>
+            <p>单圈成绩的公式是 <code>T = L / v_avg</code>，但比赛约束是“飞出赛道成绩无效”。因此真正目标不是最高瞬时速度，而是在赛道允许的边界内，让整圈平均速度尽可能高。</p>
+            <p class="analogy">这像骑车上学：一路狂冲但摔一跤，会迟到；稍微稳一点但全程不停，反而更早到。</p>
+          </div>
+
+          <div class="button-row print-hidden">
+            <a class="btn btn-primary" href="#glossary">查看完整术语表</a>
+            <a class="btn btn-secondary" href="#top">回到开头</a>
+          </div>
+
+          <p class="golden-line">金句：冠军来自最高的稳定平均速度，不是最高的瞬时冲动。</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="glossary">
+        <div class="container">
+          <span class="section-kicker">Glossary</span>
+          <h2>完整术语表：把每个大词讲成人话</h2>
+          <p class="lead">如果你能把下面这些词讲给同学听，并且能举出自己的例子，你就已经不是“会拼车”的人，而是开始像工程师一样理解四驱车的人。</p>
+
+          <div class="grid-2">
+            <details open class="reveal">
+              <summary>单圈成绩</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>车辆完成一圈赛道所用时间，越短越好。</p>
+                <p><strong>类比：</strong>从家到学校的总耗时，不是某一秒跑多快。</p>
+              </div>
+            </details>
+            <details open class="reveal">
+              <summary>平均速度</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>总路程除以总时间。</p>
+                <p><strong>类比：</strong>看一整天学习效率，不只看某十分钟特别专注。</p>
+              </div>
+            </details>
+            <details open class="reveal">
+              <summary>rpm</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>每分钟旋转圈数，常用于描述马达转速。</p>
+                <p><strong>类比：</strong>跳绳每分钟跳多少下。</p>
+              </div>
+            </details>
+            <details open class="reveal">
+              <summary>扭矩</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>让物体旋转的力量，影响起步和出弯恢复。</p>
+                <p><strong>类比：</strong>拧开紧瓶盖的力气。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>齿轮比</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>马达转速与轮轴转速的比例，例如 4:1 表示马达转 4 圈，轮轴转 1 圈。</p>
+                <p><strong>类比：</strong>自行车变速档位。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>传动效率</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>马达输出能量有多少真正传到轮胎上。</p>
+                <p><strong>类比：</strong>水从水管流到杯子，中途漏得越少，效率越高。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>重心</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>物体重量可以看作集中在一点的位置，越低通常越稳定。</p>
+                <p><strong>类比：</strong>背书包时书包越低、越贴身，跑起来越稳。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>动态稳定性</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>车辆在加速、转弯、碰壁、落下等运动状态中保持可控的能力。</p>
+                <p><strong>类比：</strong>不是站着不摔，而是跑步急转弯也不摔。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>抓地力</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>轮胎抵抗打滑、把动力传给地面的能力。</p>
+                <p><strong>类比：</strong>鞋底在地面上抓得住。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>滚动阻力</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>轮胎滚动时因形变和摩擦造成的能量损失。</p>
+                <p><strong>类比：</strong>在软沙地跑步比在操场跑步更费力。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>旋转惯性</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>物体改变旋转速度的难易程度，越大越难加速或减速。</p>
+                <p><strong>类比：</strong>小风扇叶片容易转起来，大磨盘转起来很费劲。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>内阻</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>电池内部阻碍电流输出的因素，内阻越高，大电流时电压越容易下降。</p>
+                <p><strong>类比：</strong>水管越细，水流越难冲出来。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>开路电压</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>电池没有接负载时测到的电压。</p>
+                <p><strong>类比：</strong>考试前看起来精神很好，但还没真正上场跑。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>负载转速</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>马达带着齿轮和轮胎工作时的真实转速，通常低于空载转速。</p>
+                <p><strong>类比：</strong>空手跑和背书包跑，速度不一样。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>向心加速度</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>车辆转弯时指向弯心的加速度需求，公式 <code>a_c = v² / R</code>。</p>
+                <p><strong>类比：</strong>坐旋转木马时身体被甩出去的感觉，需要有力量把你拉回弯心。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>摩擦系数 μ</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>描述两个接触表面之间“容易打滑还是容易抓住”的比例，用来估算摩擦上限。</p>
+                <p><strong>类比：</strong>冰面 μ 低，橡胶跑道 μ 高；同一个人穿不同鞋，抓地感觉完全不同。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>加速度</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>速度变化的快慢，四驱车里常用来理解起步、爬坡和出弯恢复。</p>
+                <p><strong>类比：</strong>不是谁最终能跑最快，而是谁能更快从慢跑切到冲刺。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>润滑</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>用极薄油膜减少接触面摩擦和磨损，目标是降低损耗。</p>
+                <p><strong>类比：</strong>给门轴滴一滴油就够，倒太多只会粘灰、弄脏和拖慢。</p>
+              </div>
+            </details>
+            <details class="reveal">
+              <summary>稳定发挥系数</summary>
+              <div class="details-body">
+                <p><strong>定义：</strong>工程记录里的经验折扣，用来描述车辆在真实赛道上能否把估算速度安全发挥出来；它不是标准物理常数。</p>
+                <p><strong>类比：</strong>会考试不等于考场能发挥，稳定发挥系数就是临场发挥能力。</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="callout reveal">
+            <h3>回到开头：暗夜蝙蝠到底该怎么赢？</h3>
+            <p>先承认约束：公开资料能确认它是 1:32、W1 底盘、双头马达、2 节 5 号电池，但关键硬参数必须实测。再建立目标：<code>在不飞车的前提下，让 T_lap 最小</code>。最后落到行动：装配顺滑、重心稳定、电池可靠、轮胎合适、一次只改一个变量。</p>
+            <p>这就是从玩具到工程的跨越：不是迷信某个神奇零件，而是看见能量如何流动、损耗在哪里发生、稳定边界在哪里被突破。</p>
+          </div>
+
+          <p class="golden-line">终章金句：会拼装，是把零件放到车上；会思考，是把原因放到脑中。</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p><strong>暗夜蝙蝠四驱车技术白皮书</strong>：面向初一学生的四驱车工程认知框架。所有关键硬参数以实测为准，常见区间仅用于建立估算意识，不作为官方参数。</p>
+        <p class="source-note">参考内容《结论》《暗夜蝙蝠参数整理》《四驱车的组成》《第一性原理》《关键公式》《马达怎么理解》《齿轮比怎么理解》《轮胎怎么理解》《电池建议》《45 分钟拼装任务拆分》《理论知识构建任务》《实测任务》《比赛策略》。</p>
+      </div>
+    </footer>
+    <div class="print-footer">暗夜蝙蝠四驱车技术白皮书</div>
+  </div>
+
+  <script>
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('#navLinks');
+    const links = [...document.querySelectorAll('.nav-links a')];
+
+    navToggle?.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('is-open');
+        navToggle?.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+
+    document.querySelectorAll('#glossary details').forEach((details) => {
+      details.open = true;
+      details.addEventListener('toggle', () => {
+        if (!details.open) details.open = true;
+      });
+    });
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        links.forEach((link) => {
+          link.setAttribute('aria-current', link.getAttribute('href') === `#${entry.target.id}` ? 'true' : 'false');
+        });
+      });
+    }, { rootMargin: '-40% 0px -52% 0px', threshold: 0 });
+
+    document.querySelectorAll('section[id]').forEach((section) => sectionObserver.observe(section));
+  </script>
+</body>
+</html>
