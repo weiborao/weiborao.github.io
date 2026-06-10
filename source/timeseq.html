@@ -521,7 +521,9 @@ layout: false
       <li><a href="#s2">场景二</a></li>
       <li><a href="#s3">场景三</a></li>
       <li><a href="#s4">场景四</a></li>
+      <li><a href="#okc-deep">OKC 答疑</a></li>
       <li><a href="#s5">场景五</a></li>
+      <li><a href="#mixed-mode">Mixed Mode</a></li>
       <li><a href="#compare">对比总表</a></li>
       <li><a href="#glossary">术语表</a></li>
     </ul>
@@ -1716,6 +1718,58 @@ layout: false
 </section>
 
 <!-- ============================================================
+     深度问答 · 承接场景四：为什么 OKC 不是 IEEE 标准
+============================================================ -->
+<section class="chapter" id="okc-deep">
+  <div class="container">
+    <div class="chapter-badge">深度问答 · 承接场景四</div>
+    <h2>为什么 OKC 没有写进 IEEE 标准？</h2>
+
+    <div class="callout">
+      <strong>一句话答案：</strong>OKC 是 2001 年厂商（Airespace，后于 2005 年被 Cisco 收购）为补 WPA2 漫游慢自行发明的"民间增强"，
+      IEEE 后来另起炉灶走了「802.11i 预认证 + 802.11r 快速过渡」两条官方路线，从未把 OKC 收编。
+      没有官方名分，意味着没有任何厂商必须实现它——这就是你在工业 AGV 上经常碰壁的根本原因。
+    </div>
+
+    <h3>① 出身：WPA2 PMKID 缓存的"私自增强"</h3>
+    <p>
+      标准 WPA2 只规定了"客户端连过某 AP 才能缓存这台 AP 的 PMK"（SKC，Strict Key Caching）。
+      OKC 把它扩大到"整个 WLAN 基础设施共享同一把 PMK"——一台 AP 上算出的 PMK，其他 AP 直接复用。
+      这个"扩展"从未进入 IEEE 802.11 规范，技术上是 Cisco / Aruba 等厂商的<strong>事实标准（de facto）</strong>，不是法定标准（de jure）。
+    </p>
+
+    <h3>② IEEE 的选择：另起炉灶</h3>
+    <p>面对相同的漫游慢问题，IEEE 没有照搬 OKC，而是发布了两个完全不同的官方机制：</p>
+    <ul>
+      <li><strong>预认证（Preauthentication，802.11i 内置）：</strong>终端在还连着旧 AP 时，通过骨干网提前与目标 AP 完成 802.1X 认证。和 OKC「共享密钥」的思路完全不同——这边是「提前认证」。</li>
+      <li><strong>802.11r FT（Fast BSS Transition）：</strong>2008 年正式发布的独立修正案，重构了密钥层级（PMK-R0 / PMK-R1）和漫游状态机，关联前就已经协商好密钥。这条路线最终成为快速安全漫游的官方答案，也就是本文的<a href="#s5">场景五</a>。</li>
+    </ul>
+
+    <h3>③ 工程现实：终端支持的"碎片化反噬"</h3>
+    <p>
+      没有 RFC、没有 IEEE 强制规范，意味着没有任何官方文档要求网卡驱动必须实现 OKC。直接后果：
+    </p>
+    <ul>
+      <li><strong>桌面 / 手机阵营：</strong>Intel / Apple / Microsoft 出于行业默契普遍支持，部署成功率较高。</li>
+      <li><strong>工业 IoT 阵营：</strong>AGV、扫码枪、PLC 网卡等芯片厂商追求极致成本，<strong>没有任何动力去实现一个非标准协议</strong>。这就是为什么你在产线上经常发现"WLC 明明开了 OKC，但 AGV 仍然走完整 EAP-TLS"。</li>
+    </ul>
+
+    <div class="callout" style="border-left-color:var(--cisco-red);">
+      <strong>给架构师的三条可执行建议：</strong>
+      <ol style="margin:0.4em 0;">
+        <li>OKC 落地前必须<strong>现场抓包验证</strong>每一类终端：看 Association Request 的 RSN IE 是否真的携带 PMKID。不携带 = 该终端不支持。</li>
+        <li>对不支持 OKC 的终端，立刻叠加 <a href="#s3"><strong>AAA Cache</strong>（场景三）</a>作为故障兜底，不要赌 ISE 永远健康。</li>
+        <li>长期路线：推动终端供应商支持 <a href="#s5"><strong>802.11r Mixed Mode</strong>（场景五）</a>，用法定标准彻底替代厂商方言。</li>
+      </ol>
+    </div>
+
+    <div class="chapter-quote">
+      "OKC 是 Cisco 的英文俚语，11r 才是国际通用语——和老外打电话，谁能保证对方听得懂你的俚语？"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
      场景五：802.11R Mixed Mode
 ============================================================ -->
 <section class="chapter" id="s5">
@@ -1939,6 +1993,123 @@ layout: false
 
     <div class="chapter-quote">
       "还没离开旧房间，就已经把新门的钥匙配好了——漫游的那一步，门直接开着。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     深度问答 · 承接场景五：Mixed Mode 兼容性
+============================================================ -->
+<section class="chapter" id="mixed-mode">
+  <div class="container">
+    <div class="chapter-badge">深度问答 · 承接场景五</div>
+    <h2>Catalyst 9800 的 Mixed Mode 真的能让新旧 AGV 共存吗？</h2>
+
+    <div class="callout">
+      <strong>一句话答案：能。</strong>这正是 Cisco 2025 年最新最佳实践，且强烈推荐摒弃此前的 Adaptive 11r。
+      原理是 AP 在 Beacon / Probe Response 的 RSN IE 中<strong>同时声明 FT 和非 FT 两套 AKM 套件</strong>，
+      把"用哪种漫游"的决定权交还给客户端自己。
+    </div>
+
+    <h3>① 第一性原理：终端如何判断 AP 支不支持 11r？</h3>
+    <p>
+      关键在 Beacon 帧内部的 <strong>RSN IE（Robust Security Network IE）</strong>，其中包含一份
+      <strong>AKM 套件列表</strong>（Authentication and Key Management）：
+    </p>
+    <ul>
+      <li>老旧终端只认 <code>802.1X</code>、<code>PSK</code> 这类基础 AKM。</li>
+      <li>支持 11r 的新终端会找 <code>FT+802.1X</code>、<code>FT+PSK</code> 这类带 FT 标识的 AKM。</li>
+    </ul>
+    <p>
+      <strong>致命陷阱：</strong>如果 WLAN 配置为 Fast Transition = Enabled 且<strong>只勾选</strong> <code>FT+802.1X</code>，
+      旧终端读 Beacon 时根本不认识这个 AKM，连 Association Request 都不会发——直接判定网络不兼容，<strong>完全无法上线</strong>。
+    </p>
+
+    <h3>② 三种部署模式对比</h3>
+    <div class="table-scroll-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>模式</th>
+          <th>RSN IE 里广播什么</th>
+          <th>11r 新设备</th>
+          <th>非 11r 旧设备</th>
+          <th>推荐度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>FT Only</strong><br><small>仅勾 FT AKM</small></td>
+          <td>只有 <code>FT+802.1X</code></td>
+          <td>✓ 极速漫游</td>
+          <td>✗ <strong>无法连接</strong></td>
+          <td>⚠ 仅纯新设备环境</td>
+        </tr>
+        <tr>
+          <td><strong>Adaptive 11r</strong><br><small>暗号机制</small></td>
+          <td>隐藏 FT AKM，只广播基础 AKM + 私有 MDIE</td>
+          <td>仅 Apple / 三星少数生态识别"暗号"</td>
+          <td>✓ 兼容</td>
+          <td>❌ <strong>已废弃</strong>，与 WPA3 / 6 GHz 不兼容</td>
+        </tr>
+        <tr>
+          <td><strong>Mixed Mode</strong><br><small>双 AKM 并列</small></td>
+          <td>同时广播 <code>FT+802.1X</code> 和 <code>802.1X</code></td>
+          <td>✓ 走 FT 极速漫游（场景五）</td>
+          <td>✓ 走标准 802.1X（退化为场景二）</td>
+          <td>🏆 <strong>2025 官方推荐</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>③ 历史插曲：Adaptive 11r 为什么被淘汰</h3>
+    <p>
+      早年（2015 前后）一批劣质工业网卡<strong>无法正确解析含多个 AKM 套件的 RSN IE</strong>，会直接拒绝连接。
+      Cisco 联手 Apple / 三星搞出 Adaptive 11r 这套"暗号"机制：表面只广播基础 AKM 骗过老网卡，私下用 MDIE 与 Apple / 三星协商 FT。
+    </p>
+    <p>
+      到了 2025，这种劣质网卡几乎已退役；反而 Adaptive 自己暴露出两大新问题：
+      <strong>(1)</strong> 与 WPA3-Enterprise / 6 GHz 强制要求显式 FT AKM 的规则冲突；
+      <strong>(2)</strong> 部分不支持 FT 的现代设备反而因为看不到熟悉的 RSN IE 出现连接故障。
+      Cisco 因此在 17.x 后的官方最佳实践中明确：<strong>停用 Adaptive，回归标准 Mixed Mode</strong>。
+    </p>
+
+    <h3>④ Catalyst 9800 推荐配置（GUI 路径 + CLI 片段）</h3>
+    <p><strong>GUI 路径：</strong>Configuration → Tags &amp; Profiles → WLANs → 选中 WLAN → Security → Layer2</p>
+    <ul>
+      <li>Fast Transition Status：<code>Enabled</code></li>
+      <li>Over the DS：<code>Enabled</code>（适合大部分场景）</li>
+      <li>Auth Key Management：<strong>同时勾选</strong> <code>802.1X</code> + <code>FT 802.1X</code>（PSK 场景则同时勾 <code>PSK</code> + <code>FT PSK</code>）</li>
+    </ul>
+    <p><strong>等效 CLI 片段：</strong></p>
+    <pre><code>wlan W19L5000 21 W19L5000
+  security ft
+  security ft over-the-ds
+  security wpa akm dot1x       ! 非 FT，老终端走这条
+  security wpa akm ft dot1x    ! FT，新终端走这条
+  ! 如需 WPA3，继续叠加：security wpa akm sae 与 security wpa akm ft sae</code></pre>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>新设备漫游</h4>
+        <div class="metric" style="color:#3a8a1e">≤ 50ms</div>
+        <p>走 FT 通道，完全跳过 EAP-TLS</p>
+      </div>
+      <div class="analysis-card">
+        <h4>旧设备漫游</h4>
+        <div class="metric" style="color:#b05500;font-size:1.1rem;">退化为场景二</div>
+        <p>仍走完整 EAP-TLS，但至少能持续在网</p>
+      </div>
+      <div class="analysis-card">
+        <h4>WPA3 / 6 GHz 兼容</h4>
+        <div class="metric" style="color:#049FD9">✓ 原生支持</div>
+        <p>显式 FT AKM 与 WPA3 规范完全一致</p>
+      </div>
+    </div>
+
+    <div class="chapter-quote">
+      "好的兼容设计不是让所有人走同一条路，而是同一个路口给每种车辆挂好对应路标——Mixed Mode 就是无线网络的双语路标。"
     </div>
   </div>
 </section>
