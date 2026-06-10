@@ -14,7 +14,7 @@ layout: false
 
     <meta name="keywords" content="Cisco CURWB, 超可靠无线回传, URWB, 工业无线, Fluidmesh, Fluidity 漫游, Make-Before-Break, MPO 多路径优化, Catalyst 9800, IW9165, IW9167, AGV 无线通信, 工业互联网">
 
-    <meta name="revised" content="Thursday, April 16th, 2026, 13:35 pm" />
+    <meta name="revised" content="Thursday, April 16th, 2026, 13:35" />
     <meta property="og:title" content="Cisco CURWB 超可靠无线回传技术 | 工业无线深度解析">
     <meta property="og:description" content="从第一性原理拆解 Cisco URWB 技术栈：详解 Fluidity 无缝漫游、MPO 路径冗余及 L2 MPLS Overlay 架构，赋能工业 AGV 与高可靠移动场景。">
     <meta property="og:type" content="article">
@@ -402,7 +402,7 @@ pre, code {
   <p>在当今全球制造业与物流产业加速数字化转型的浪潮中，<strong>工业无线通信</strong>正从"可选"升级为"刚需"。自动导引车（AGV／AMR）、港口远控岸桥、矿山无人卡车、智慧铁路列车通信等场景，对无线网络提出了截然不同于传统办公 Wi-Fi 的严苛要求：<em>亚毫秒级漫游、确定性低时延、工业级可靠性、宽带高吞吐</em>。传统 802.11 无线局域网（WLAN）从诞生之初便以"尽力而为（Best-Effort）"的服务模型为设计基点——它解决的是"人"在固定或缓慢移动中访问互联网的需求，而非"机器"在高速移动中执行任务关键型通信的需求。两种场景在物理层行为、移动性管理、流量工程和可靠性保障等方面存在根本性差异，因此必须以全新的技术范式来回应工业需求。</p>
   <p>Cisco <strong>Ultra-Reliable Wireless Backhaul（URWB）</strong>——在产品早期阶段常被称为 <em>Cisco Ultra-Reliable Wireless Backhaul</em> 或 <em>CURWB</em>，其技术前身为 Fluidmesh 公司的 Prodigy 协议栈——正是为此而生。它将 <strong>MPLS 级别的确定性转发</strong>与 <strong>802.11 物理层的灵活频谱利用</strong>相结合，在标准 Wi-Fi 硬件之上构建出一个具备电信级可靠性的<em>无线回传域</em>。自 Cisco 于 2020 年收购 Fluidmesh Networks 以来，URWB 技术已深度整合到 Cisco 的 Catalyst 工业无线产品线（IW9165、IW9167、CW9178 等）以及 Catalyst 9800 无线局域网控制器（WLC）管理平面中，形成了涵盖硬件、软件、控制器和云管理的端到端解决方案。</p>
   <p>然而，由于 CURWB 的技术栈横跨了传统 Wi-Fi、MPLS、工业以太网与移动性管理等多个领域，其学习曲线远比常规 WLAN 陡峭。工程师常常在以下问题上感到困惑：Standalone 模式下的 Mesh End 与 9800 托管模式下的 Coordinator 是同一件事吗？Fluidity、Fluidmax、Fixed 到底对应哪些拓扑？Underlay 和 Overlay 各自承担什么角色？MPO 与 TITAN 有何区别？本文档旨在以<strong>一份自洽、可离线阅读的完整知识图谱</strong>回答上述所有问题，并为每一个技术概念提供来源于 Cisco 官方文档、CiscoLive 演讲（BRKIOT-2027、TECIOT-2584、TECIOT-2000）以及工程白皮书的权威依据。</p>
-  <p>全文按照"<strong>概念 → 架构 → 机制 → 实践</strong>"的逻辑递进展开，共分为十七个章节。第一至四章回答"CURWB 是什么、与传统 Wi-Fi 有何不同"；第五至八章详述设备角色与网络拓扑；第九至十章深入漫游与无线层；第十一至十二章解析分层架构与数据包转发；第十三至十六章聚焦性能保障技术（MPO、超低时延、时延预算）；第十七章提供一个可直接上手的快速部署指南。最后附有术语表供查阅。</p>
+  <p>全文按照"<strong>概念 → 架构 → 机制 → 实践</strong>"的逻辑递进展开，共分为十七个章节。第一至四章回答"CURWB 是什么、与传统 Wi-Fi 有何不同"；第五至八章详述设备角色与网络拓扑；第九至十章深入漫游与无线层；第十一至十二章解析分层架构与数据包转发；第十三章聚焦 MPO 多路径优化；第十四章通过港口 RTG 真实案例串联前述设计；第十五至十六章拆解超低时延机制与端到端时延预算；第十七章提供一个可直接上手的快速部署指南。最后附有术语表供查阅。</p>
   <div class="note">
     <span class="note-title">📌 阅读提示</span>
     本文档内容基于 <strong>IOS-XE 17.18.x</strong> 及 <strong>CURWB 软件 17.18.x</strong> 版本整理，部分新增功能（如 Wi-Fi 7 CW9178 支持、URWB-WLAN 共存）属于该版本引入的特性。如果您使用的是更早版本的软件，请以对应版本的官方 Release Notes 为准。
@@ -735,7 +735,7 @@ pre, code {
         <tr>
           <td>单路径传输</td>
           <td>路径故障 = 数据丢失</td>
-          <td>MPO 多路径复制，最多 8 条冗余路径</td>
+          <td>MPO 多路径复制，最多 4 条冗余路径</td>
         </tr>
         <tr>
           <td>客户端驱动依赖</td>
@@ -1453,7 +1453,7 @@ pre, code {
   <h4>7.1.1 基本原理</h4>
   <p>PtP 是最简单的 CURWB 拓扑：两台设备（一台配置为 Coordinator / Fixed Base，另一台配置为 Fixed Client）之间建立一条专用的无线桥接链路。这条链路在 L2 层完全透明——两端以太口之间的帧原样传输，包括 VLAN Tag、LLDP、工业协议帧（如 PROFINET、EtherNet/IP）等。</p>
 
-  <p>PtP 链路通常使用 5 GHz 频段（或 6 GHz，取决于国家法规），支持最高 80 MHz 或 160 MHz 信道带宽（IW9167E 系列），理论物理层速率可达 2.4 Gbps（Wi-Fi 6，4×4 MIMO，160 MHz）。实际 TCP 吞吐量在视距（LOS）条件下可达 800 Mbps–1.2 Gbps。</p>
+  <p>PtP 链路通常使用 5 GHz 频段（或 6 GHz——后者需 CW9176/CW9178 等 Wi-Fi 6E/7 平台并取决于国家法规），支持最高 80 MHz 或 160 MHz 信道带宽（IW9167E 系列、CW9178I 等），理论物理层速率可达 2.4 Gbps（Wi-Fi 6，4×4 MIMO，160 MHz）。实际 TCP 吞吐量在视距（LOS）条件下可达 800 Mbps–1.2 Gbps。</p>
 
   <h4>7.1.2 数据流路径</h4>
   <p>数据流极为简单：</p>
@@ -2028,7 +2028,7 @@ pre, code {
 </table></div>
 
 <div class="note">
-<strong>📌 硬件实现</strong>：IW9165E 具备 2×2 MIMO 双射频（5 GHz + 5 GHz 可配）；IW9167E 具备 3 射频（含 6 GHz），可同时维持更多候选链路。CW9178I 则利用其三射频架构实现在 5 GHz 与 6 GHz 间的跨频段 Make-Before-Break。
+<strong>📌 硬件实现</strong>：IW9165E 具备 2×2 MIMO 双射频（5 GHz + 5 GHz 可配）；IW9167E/EH 具备 3 射频（2.4 GHz + 5 GHz-low + 5 GHz-high，Wi-Fi 6），可同时维持更多 5 GHz 候选链路。CW9178I 则利用其三射频架构（含 6 GHz）实现在 5 GHz 与 6 GHz 间的跨频段 Make-Before-Break。
 </div>
 
 <h4>9.2.2   漫游决策引擎（Handoff Decision Engine）</h4>
@@ -2046,7 +2046,7 @@ pre, code {
 <tr><td><strong>链路质量（Link Quality）</strong></td><td>中–高</td><td>综合 PER（误包率）、MCS 等级、重传率，即使 RSSI 尚可但 PER 突增也可触发切换。</td></tr>
 <tr><td><strong>负载均衡（Load Balancing）</strong></td><td>低–中</td><td>若候选基站当前关联客户端数远少于当前基站，可给予一定加分。</td></tr>
 <tr><td><strong>速度与方向估算</strong></td><td>低（可选）</td><td>对于高速列车/地铁场景，结合连续 RSSI 变化率估算移动方向，提前选择前方基站。</td></tr>
-<tr><td><strong>频段优先级</strong></td><td>策略性</td><td>在 IW9167E / CW9178I 多频设备上，可配置优先使用 6 GHz（更宽信道、更低干扰）。</td></tr>
+<tr><td><strong>频段优先级</strong></td><td>策略性</td><td>在 CW9176I / CW9178I 等支持 6 GHz 的多频设备上，可配置优先使用 6 GHz（更宽信道、更低干扰）；IW9167E/EH 仅在 5 GHz 内做子频段调度。</td></tr>
 </tbody>
 </table></div>
 
@@ -2297,7 +2297,7 @@ pre, code {
 <!-- Row 1 -->
 <text x="200" y="520" text-anchor="middle" font-size="10" fill="#333">漫游中断</text>
 <text x="380" y="520" text-anchor="middle" font-size="10" fill="#c62828">30–80 ms</text>
-<text x="580" y="520" text-anchor="middle" font-size="10" font-weight="bold" fill="#2e7d32"><1 ms (零可感知)</text>
+<text x="580" y="520" text-anchor="middle" font-size="10" font-weight="bold" fill="#2e7d32"><3 ms (近零中断)</text>
 <text x="780" y="520" text-anchor="middle" font-size="10" fill="#333">>30×</text>
 
 
@@ -2476,13 +2476,13 @@ pre, code {
 <tbody>
 <tr><td><strong>核心功能</strong></td><td>快速密钥协商（跳过完整 4WHS）</td><td>邻居 AP 报告，辅助扫描</td><td>BSS 转网管理（AP 引导客户端漫游）</td><td>Make-Before-Break 双射频并行漫游</td></tr>
 <tr><td><strong>漫游范式</strong></td><td>Break-Before-Make（优化版）</td><td>辅助 BBM 加速扫描</td><td>辅助 BBM 减少粘性</td><td><strong>Make-Before-Break</strong></td></tr>
-<tr><td><strong>漫游中断</strong></td><td>30–50 ms（理想值）</td><td>不直接减少中断</td><td>不直接减少中断</td><td><strong>&lt;1 ms</strong></td></tr>
+<tr><td><strong>漫游中断</strong></td><td>30–50 ms（理想值）</td><td>不直接减少中断</td><td>不直接减少中断</td><td><strong>&lt;3 ms</strong></td></tr>
 <tr><td><strong>丢包</strong></td><td>3–10 帧</td><td>—</td><td>—</td><td><strong>0 帧</strong></td></tr>
 <tr><td><strong>射频要求</strong></td><td>单射频即可</td><td>单射频</td><td>单射频</td><td><strong>双射频（硬件强制要求）</strong></td></tr>
 <tr><td><strong>客户端配合</strong></td><td>客户端必须支持 FT</td><td>客户端需支持 11k</td><td>客户端需支持 11v</td><td>客户端无需任何特殊能力（透明桥接）</td></tr>
 <tr><td><strong>AP/基站配合</strong></td><td>所有 AP 需同一 Mobility Domain</td><td>AP 发送邻居报告</td><td>AP 发送 BTM 帧</td><td>所有 Mobility Base 在同一 URWB 域</td></tr>
 <tr><td><strong>IP 地址保持</strong></td><td>L2/L3 无缝保持（支持 Layer 2 Flat 拓扑与 Layer 3 路由拓扑，跨子网漫游同样保持终端 IP 不变）</td><td>—</td><td>—</td><td><strong>始终保持</strong>（L2 桥接透明）</td></tr>
-<tr><td><strong>高速移动</strong></td><td>≤30 km/h（受扫描延迟限制）</td><td>—</td><td>—</td><td><strong>≤300+ km/h</strong>（铁路实测验证）</td></tr>
+<tr><td><strong>高速移动</strong></td><td>实测可用约 ≤30 km/h（受扫描与重认证延迟限制）</td><td>—</td><td>—</td><td><strong>支持 300+ km/h</strong>（Cisco 官方在铁路场景验证，公开案例多见 200–225 km/h，部分实验环境达 300+ km/h）</td></tr>
 <tr><td><strong>协议标准</strong></td><td>IEEE 802.11r-2008</td><td>IEEE 802.11k-2008</td><td>IEEE 802.11v-2011</td><td>Cisco 私有（Fluidity 协议）</td></tr>
 <tr><td><strong>适用场景</strong></td><td>办公移动终端、VoWLAN</td><td>企业 WLAN 辅助</td><td>企业 WLAN 辅助</td><td><strong>工业移动体：AGV、天车、地铁、矿车</strong></td></tr>
 <tr><td><strong>与 WLC 集成</strong></td><td>需要 WLC 维护 PMK-R0/R1 缓存</td><td>WLC 配置邻居列表</td><td>WLC 推送 BTM 帧</td><td>C9800 WLC 统一管理（17.18+）</td></tr>
@@ -2508,7 +2508,7 @@ pre, code {
 <tr><td><strong>fluidity scan-interval</strong></td><td>Radio B 扫描间隔</td><td>20 ms</td><td>高速列车场景可缩短至 10 ms；低速 AGV 场景可放宽至 50 ms 以节省射频资源</td></tr>
 <tr><td><strong>fluidity roam-threshold</strong></td><td>触发漫游的 RSSI 差值阈值（ΔH）</td><td>3 dB</td><td>在基站密度高的场景（如港口）可提高至 6 dB 以抑制乒乓漫游；在基站稀疏场景可降低至 2 dB 以加速漫游响应</td></tr>
 <tr><td><strong>fluidity trend-window</strong></td><td>RSSI 趋势预测窗口（采样点数）</td><td>5</td><td>高速场景增大至 8–10（更平滑的预测曲线）；低速场景减小至 3（更快响应）</td></tr>
-<tr><td><strong>fluidity preferred-band</strong></td><td>优先使用频段</td><td>auto</td><td>多频设备（IW9167E/CW9178I）可设为 <code>6ghz-preferred</code> 以优先使用更干净的 6 GHz 频段</td></tr>
+<tr><td><strong>fluidity preferred-band</strong></td><td>优先使用频段</td><td>auto</td><td>支持 6 GHz 的设备（如 CW9178I、CW9176I）可设为 <code>6ghz-preferred</code> 以优先使用更干净的 6 GHz 频段；IW9167E/EH 仅支持 5 GHz</td></tr>
 <tr><td><strong>fluidity max-miss</strong></td><td>连续未收到 Beacon 的最大次数（断链判定）</td><td>3</td><td>高干扰环境可放宽至 5 以避免误判断链</td></tr>
 </tbody>
 </table></div>
@@ -2543,7 +2543,7 @@ pre, code {
 <li><strong>Break-Before-Make → Make-Before-Break</strong>：新链路完全就绪后才释放旧链路</li>
 <li><strong>单射频串行 → 双射频并行</strong>：扫描与数据传输互不干扰</li>
 <li><strong>被动响应 → 预测性漫游</strong>：基于 RSSI 趋势预判而非阈值触发</li>
-<li><strong>漫游中断从 30–1500 ms → <1 ms</strong>，丢包从数十帧 → 0 帧</li>
+<li><strong>漫游中断从 30–1500 ms → &lt;3 ms</strong>，丢包从数十帧 → 0 帧</li>
 <li><strong>支持时速 300+ km/h 的高速移动</strong>，满足铁路、地铁等极端场景</li>
 </ul>
 <p>这一机制是 CURWB 能够在工业控制领域替代有线连接的最关键技术基石之一。配合下一章将介绍的 Underlay / Overlay 双层架构，以及第 13 章的 MPO 多径冗余技术，CURWB 构建了一套完整的"工业级无线可靠性"体系。</p>
@@ -2596,10 +2596,10 @@ pre, code {
 <tr><th>参数</th><th>802.11ax（通用）</th><th>CURWB 典型配置</th><th>备注</th></tr>
 </thead>
 <tbody>
-<tr><td>频段</td><td>2.4 GHz / 5 GHz / 6 GHz（Wi-Fi 6E）</td><td>5 GHz（主力）；IW9167E 及 CW 系列支持 6 GHz（Wi-Fi 6E）频段</td><td>CURWB 在工业场景中主要使用 5 GHz 频段，信道更多、干扰更少</td></tr>
+<tr><td>频段</td><td>2.4 GHz / 5 GHz / 6 GHz（Wi-Fi 6E）</td><td>5 GHz（主力）；CW9176I / CW9178I（Wi-Fi 6E/7）支持 6 GHz；IW9167E/EH 为 Wi-Fi 6（仅 2.4/5 GHz）</td><td>CURWB 在工业场景中主要使用 5 GHz 频段，信道更多、干扰更少</td></tr>
 <tr><td>信道带宽</td><td>20/40/80/160 MHz</td><td>PtP/PtMP 常用 40/80 MHz；Mobility 场景可能用 20/40 MHz 以保持覆盖</td><td>越窄的信道带宽，覆盖距离越远、抗干扰性越强，但吞吐量降低</td></tr>
 <tr><td>最高 MCS</td><td>MCS 11（1024-QAM）</td><td>取决于链路质量；在 LoS 环境中可达 MCS 11</td><td>CURWB 的自适应速率算法可能更保守——宁可降低 MCS 也不丢帧</td></tr>
-<tr><td>空间流（Spatial Streams）</td><td>最多 8×8（理论）；AP 通常 4×4 或 8×8</td><td>IW9165E: 2×2；IW9167EH: 4×4（5 GHz 射频）</td><td>工业环境中多径效应复杂，过多空间流不一定有效</td></tr>
+<tr><td>空间流（Spatial Streams）</td><td>最多 8×8（理论）；AP 通常 4×4 或 8×8</td><td>IW9165E: 2×2；IW9167EH: 硬件 4×4（5 GHz 射频），URWB 模式下通常按 2×2 运行</td><td>工业环境中多径效应复杂，过多空间流不一定有效；URWB 在移动场景下倾向使用更稳健的 2×2 配置</td></tr>
 <tr><td>Guard Interval</td><td>0.8 / 1.6 / 3.2 μs</td><td>CURWB 通常使用 0.8 μs（短 GI）以最大化吞吐量；在长距离 PtP 中可能使用 1.6 μs 或 3.2 μs</td><td>长距离链路多径扩展大，需要更长 GI 防止符号间干扰</td></tr>
 <tr><td>MIMO 模式</td><td>SU-MIMO / MU-MIMO（DL + UL）</td><td>PtP 为 SU-MIMO；PtMP 中 AP 角色可使用 DL MU-MIMO；Mobility 场景主要 SU-MIMO</td><td>CURWB 节点数少，MU-MIMO 的统计复用增益有限</td></tr>
 <tr><td>OFDMA 子载波间距</td><td>78.125 kHz（802.11ax 标准）</td><td>相同</td><td>这是 802.11ax 相对 802.11ac 的关键改进——子载波间距缩小 4 倍，频谱效率更高</td></tr>
@@ -2863,7 +2863,7 @@ MPLS Overlay 数据帧进行加密。</li>
 
 <p>标准 802.11 中，一个 STA 在任何时刻只与一个 AP 关联——单点连接。如果该链路发生干扰或遮挡，就会出现丢包甚至断连。</p>
 
-<p>CURWB 的 MPO（Multiple Path Optimization）Overlay 允许同一数据流<strong>同时通过最多 8 条不同的无线路径</strong>传输，接收端选取最先到达或最完整的副本。这种冗余在 Underlay 层是无法实现的——802.11 标准不允许一个 STA 同时与多个 AP 保持数据传输。</p>
+<p>CURWB 的 MPO（Multiple Path Optimization）Overlay 允许同一数据流<strong>同时通过最多 4 条不同的无线路径</strong>传输，接收端选取最先到达或最完整的副本。这种冗余在 Underlay 层是无法实现的——802.11 标准不允许一个 STA 同时与多个 AP 保持数据传输。</p>
 
 <h4>11.2.3 802.11 的 L2 转发在 Mesh 中容易环路</h4>
 
@@ -2884,7 +2884,7 @@ MPLS Overlay 数据帧进行加密。</li>
 </thead>
 <tbody>
 <tr><td>Break-Before-Make 漫游</td><td>零中断移动连接</td><td>Fluidity：Make-Before-Break + L2/L3 漫游</td></tr>
-<tr><td>单 AP 关联（单路径）</td><td>链路冗余、零丢包</td><td>MPO：最多 8 路径同时传输</td></tr>
+<tr><td>单 AP 关联（单路径）</td><td>链路冗余、零丢包</td><td>MPO：最多 4 路径同时传输</td></tr>
 <tr><td>Mesh 环路风险（STP 慢收敛）</td><td>Mesh 拓扑 + 快速收敛</td><td>Autotap：毫秒级环路避免</td></tr>
 <tr><td>开放关联安全模型</td><td>封闭、安全的工业网络</td><td>Network Key + AES + 封闭 Overlay</td></tr>
 <tr><td>WMM 4 队列 QoS</td><td>精细化工业流量分级</td><td>MPLS EXP 8 级 QoS</td></tr>
@@ -3628,7 +3628,7 @@ MPLS Overlay 数据帧进行加密。</li>
 <caption>表 13-1　MPO 设计目标矩阵</caption>
 <thead><tr><th>设计目标</th><th>具体描述</th><th>对标传统方案</th></tr></thead>
 <tbody>
-<tr><td><strong>极致可靠性</strong></td><td>通过多路径同时传输，将链路可用性从"三个九"（99.9%）提升至"五个九"（99.999%）以上</td><td>ARQ 重传仅提供"四个九"级别保护</td></tr>
+<tr><td><strong>极致可靠性</strong></td><td>通过多路径同时传输，将链路可用性从"三个九"（99.9%）提升至"五个九"（99.999%）以上</td><td>相比之下，仅靠 ARQ 重传通常只能将单链路可用性维持在"四个九"（99.99%）量级</td></tr>
 <tr><td><strong>零额外延迟</strong></td><td>MPO 是并行发送而非重传机制，不增加任何往返延迟</td><td>ARQ 每次重传增加 RTT（毫秒级）</td></tr>
 <tr><td><strong>自动化运作</strong></td><td>路径发现、质量评估、流量分配全部自动完成，无需人工配置路由</td><td>传统 ECMP/LACP 需手动配置</td></tr>
 <tr><td><strong>与 Fluidity 协同</strong></td><td>在漫游过程中 MPO 路径动态调整，MBB 期间自动增加冗余路径</td><td>传统冗余方案不感知移动性</td></tr>
@@ -3834,7 +3834,7 @@ MPLS Overlay 数据帧进行加密。</li>
 <tr>
 <td><strong>频段分离</strong></td>
 <td>如果设备支持，不同路径优先使用不同频段（如 5GHz + 6GHz），以获得最大的频率间隔</td>
-<td>IW9167EH 支持三射频，可分别使用 5GHz-low、5GHz-high、6GHz</td>
+<td>IW9167EH 支持三射频（2.4GHz + 5GHz-low + 5GHz-high），可分别承载不同 5GHz 子频段；CW9178I 则可同时使用 5GHz 与 6GHz</td>
 </tr>
 <tr>
 <td><strong>避免同频干扰</strong></td>
@@ -3856,7 +3856,7 @@ MPLS Overlay 数据帧进行加密。</li>
 
 <div class="note-warn">
 <strong>⚠️ 工程警示：MPO 路径数与可用信道数的关系</strong><br>
-MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（JP 域）的 5GHz 频段中，可用的非 DFS 非重叠 80MHz 信道仅有 2-3 个（如 W52 的 36/40/44/48 和 W56 的 100/104/108/112），因此在该法规域下 MPO 通常限制在双路径。如果需要三路径 MPO，建议使用支持 6GHz 频段的 Wi-Fi 6E/7 设备（如 CW9178I），以获取更多可用信道。
+MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（JP 域）的 5GHz 频段中，可用的非 DFS 非重叠 80MHz 信道仅有 2 个（W52 的 36/40/44/48 和 W58 的 149/153/157/161）——W53（52-64）与 W56（100-140）均为 DFS 信道，使用前需通过 CAC 雷达检测。因此在该法规域下若要严格规避 DFS，MPO 通常限制在双路径。如果需要三路径 MPO，建议使用支持 6GHz 频段的 Wi-Fi 6E/7 设备（如 CW9178I），以获取更多可用信道。
 </div>
 
 <h3>13.6　MPO 可靠性数学模型</h3>
@@ -3896,7 +3896,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 <thead><tr><th>参数</th><th>取值范围</th><th>默认值</th><th>说明</th></tr></thead>
 <tbody>
 <tr><td>MPO 开关</td><td>Enable / Disable</td><td>Disable</td><td>全局启用或禁用 MPO</td></tr>
-<tr><td>最大路径数</td><td>2 / 3</td><td>2</td><td>MPO 同时使用的最大路径数</td></tr>
+<tr><td>最大路径数</td><td>2 / 3 / 4</td><td>2</td><td>MPO 同时使用的最大路径数；硬件上限为 4，实际部署受限于可用非重叠信道数（典型 2-3）</td></tr>
 <tr><td>分发策略</td><td>Replication / Distribution / Auto</td><td>Replication</td><td>Auto 模式下根据流量类型自动选择</td></tr>
 <tr><td>路径评估周期</td><td>50 ~ 500 ms</td><td>100 ms</td><td>每隔此时间重新评估路径质量</td></tr>
 <tr><td>路径替换阈值</td><td>连续 1 ~ 10 次不合格</td><td>3 次</td><td>连续多少个评估周期路径不合格后触发替换</td></tr>
@@ -3970,7 +3970,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 <tr><td><strong>路侧基站</strong></td><td>28× IW9165DH，沿堆场两侧和中央通道等间距部署，间距约 60m</td></tr>
 <tr><td><strong>Coordinator</strong></td><td>2× IW9167EH（主 + 冗余），部署在控制中心机房</td></tr>
 <tr><td><strong>有线回传</strong></td><td>每个 IW9165DH 通过 Cat6A 线缆连接到堆场侧配电箱内的工业交换机（IE3400），再通过光纤汇聚至核心（C9500）</td></tr>
-<tr><td><strong>频率规划</strong></td><td>双频段：5GHz-low（W52: Ch36-48）用于路径 ①；5GHz-high（W56: Ch100-144）用于路径 ②</td></tr>
+<tr><td><strong>频率规划</strong></td><td>双频段：5GHz-low（W52: Ch36-48，非 DFS）用于路径 ①；5GHz-high（W58: Ch149-161，非 DFS）用于路径 ②，规避雷达检测中断风险</td></tr>
 <tr><td><strong>MPO 配置</strong></td><td>启用双路径 MPO（Replication 模式），控制流和视频关键帧均双份发送</td></tr>
 <tr><td><strong>MBB 参数</strong></td><td>漫游阈值 RSSI -70 dBm，扫描周期 50ms</td></tr>
 <tr><td><strong>QoS 策略</strong></td><td>控制流（DSCP EF）→ MPLS EXP 5（最高优先级）；视频流（DSCP AF41）→ MPLS EXP 3</td></tr>
@@ -4188,8 +4188,6 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 </div>
 <p>这些优化的综合效果使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，<strong>在工程意义上等效于固定调度的确定性表现</strong>——但其底层机制仍然是 CSMA/CA 框架内的极端优化，而非真正的 TDMA 时隙分配。</p>
 
-<p>这些优化使得 CURWB 的 MAC 层延迟从传统 Wi-Fi 的 2-20 ms 降低到 0.2-1.5 ms，且具有更确定性的上界。</p>
-
 <h3>15.3　维度 ②：协议栈处理——MPLS 标签交换的速度优势</h3>
 
 <p>当数据帧到达中间节点（如 Base 或 Coordinator）时，需要进行转发决策。传统网络中，这一过程通常涉及：</p>
@@ -4385,7 +4383,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 </svg>
         </div>
 
-        <p>上图清晰展示了 CURWB 与传统 Wi-Fi 在各延迟分量上的巨大差异。传统 Wi-Fi 最大的延迟瓶颈在于<strong>漫游切换</strong>（50–200 ms）和<strong>竞争调度</strong>（2–15 ms），而 CURWB 通过 Make-Before-Break 机制将漫游切换控制在 0 ms 中断，通过通过极端 EDCA 参数优化（AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3）与单客户端 BSS 设计将竞争延迟降至确定性的 0.1–0.3 ms。</p>
+        <p>上图清晰展示了 CURWB 与传统 Wi-Fi 在各延迟分量上的巨大差异。传统 Wi-Fi 最大的延迟瓶颈在于<strong>漫游切换</strong>（50–200 ms）和<strong>竞争调度</strong>（2–15 ms），而 CURWB 通过 Make-Before-Break 机制将漫游切换控制在 &lt;3 ms 中断，通过极端 EDCA 参数优化（AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3）与单客户端 BSS 设计将竞争延迟降至确定性的 0.1–0.3 ms。</p>
 
         <h3>15.9 本章小结</h3>
 
@@ -4396,7 +4394,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
           <li><strong>调度机制</strong>：极端 EDCA 调优重构 CSMA/CA（非 TDMA 替代），消除随机退避和隐藏节点问题，提供严格 QoS 保障。</li>
           <li><strong>漫游切换</strong>：Make-Before-Break 实现 0 ms 中断漫游，Fluidity 协议提供 &lt; 5 ms 的 AP 切换。</li>
           <li><strong>重传与纠错</strong>：FEC 前向纠错 + 快速 ARQ（&lt; 1 ms 单次重传），结合 MPO 多路径冗余，丢包恢复延迟极低。</li>
-          <li><strong>有线段延迟</strong>：配合工业级交换机（IE3x00/IE4000/IE5000），有线段延迟可控制在 0.1–0.5 ms。</li>
+          <li><strong>有线段延迟</strong>：配合工业级交换机（IE3300/IE3400/IE9300），有线段延迟可控制在 0.1–0.5 ms。</li>
         </ol>
 
         <p>综合以上六个维度，CURWB 实现了<strong>端到端单向延迟 &lt; 5 ms、往返延迟 &lt; 10 ms</strong> 的工业级超低延迟性能，满足 AGV 导航、机械臂远程控制、视频流实时回传等关键工业应用的严苛要求。</p>
@@ -4410,7 +4408,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
            CHAPTER 16: 端到端延迟预算分析
            ============================================================ -->
       <section id="ch16">
-        <h2>十六、端到端延迟预算分析——从 AGV 应用到控制器的完整链路</h2>
+        <h2>第十六章　端到端延迟预算分析——从 AGV 应用到控制器的完整链路</h2>
 
         <h3>16.1 为什么需要端到端延迟预算分析</h3>
 
@@ -4813,7 +4811,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.1 ms</td>
               <td>0.2 ms</td>
               <td>0.5 ms</td>
-              <td>6.3%</td>
+              <td>6.6%</td>
             </tr>
             <tr>
               <td>② 车载无线处理</td>
@@ -4821,7 +4819,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.1 ms</td>
               <td>0.15 ms</td>
               <td>0.2 ms</td>
-              <td>4.7%</td>
+              <td>4.9%</td>
             </tr>
             <tr>
               <td>③ 无线空口传输</td>
@@ -4829,7 +4827,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.3 ms</td>
               <td>0.5 ms</td>
               <td>0.8 ms</td>
-              <td>15.6%</td>
+              <td>16.4%</td>
             </tr>
             <tr>
               <td>④ 路侧 AP 处理</td>
@@ -4837,7 +4835,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.05 ms</td>
               <td>0.08 ms</td>
               <td>0.1 ms</td>
-              <td>2.5%</td>
+              <td>2.6%</td>
             </tr>
             <tr>
               <td>⑤ 有线骨干网</td>
@@ -4845,7 +4843,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.1 ms</td>
               <td>0.15 ms</td>
               <td>0.5 ms</td>
-              <td>4.7%</td>
+              <td>4.9%</td>
             </tr>
             <tr>
               <td>⑥ 控制服务器处理</td>
@@ -4853,7 +4851,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.5 ms</td>
               <td>0.8 ms</td>
               <td>2.0 ms</td>
-              <td>25.0%</td>
+              <td>26.7%</td>
             </tr>
             <tr>
               <td>⑦ 服务器发送</td>
@@ -4861,7 +4859,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.05 ms</td>
               <td>0.08 ms</td>
               <td>0.1 ms</td>
-              <td>2.5%</td>
+              <td>2.6%</td>
             </tr>
             <tr>
               <td>⑧ 有线骨干网</td>
@@ -4869,7 +4867,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.1 ms</td>
               <td>0.15 ms</td>
               <td>0.5 ms</td>
-              <td>4.7%</td>
+              <td>4.9%</td>
             </tr>
             <tr>
               <td>⑨ 路侧 AP 转发</td>
@@ -4877,7 +4875,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.05 ms</td>
               <td>0.08 ms</td>
               <td>0.1 ms</td>
-              <td>2.5%</td>
+              <td>2.6%</td>
             </tr>
             <tr>
               <td>⑩ 无线空口传输</td>
@@ -4885,7 +4883,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.3 ms</td>
               <td>0.5 ms</td>
               <td>0.8 ms</td>
-              <td>15.6%</td>
+              <td>16.4%</td>
             </tr>
             <tr>
               <td>⑪ 车载接收处理</td>
@@ -4893,7 +4891,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.1 ms</td>
               <td>0.15 ms</td>
               <td>0.2 ms</td>
-              <td>4.7%</td>
+              <td>4.9%</td>
             </tr>
             <tr>
               <td>⑫ AGV 执行层</td>
@@ -4901,7 +4899,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <td>0.1 ms</td>
               <td>0.2 ms</td>
               <td>0.3 ms</td>
-              <td>6.3%</td>
+              <td>6.6%</td>
             </tr>
             <tr style="background:#e8f5e9; font-weight:bold;">
               <td>🔄 往返总计 (RTT)</td>
@@ -4948,7 +4946,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 
             <!-- Segment 6: Server (25% = 225px) -->
             <rect x="354" y="80" width="225" height="40" fill="#ef5350"/>
-            <text x="466" y="104" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">⑥ 控制服务器 (25.0%)</text>
+            <text x="466" y="104" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">⑥ 控制服务器 (26.7%)</text>
 
             <!-- Segment 7: Server Tx (2.5%) -->
             <rect x="579" y="80" width="23" height="40" fill="#ec407a"/>
@@ -4979,40 +4977,40 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
               <text x="0" y="0" fill="#333" font-size="12" font-weight="bold">图例：</text>
 
               <rect x="0" y="12" width="14" height="14" rx="2" fill="#42a5f5"/>
-              <text x="20" y="23" fill="#333" font-size="10">① AGV应用层 (6.3%)</text>
+              <text x="20" y="23" fill="#333" font-size="10">① AGV应用层 (6.6%)</text>
 
               <rect x="170" y="12" width="14" height="14" rx="2" fill="#66bb6a"/>
-              <text x="190" y="23" fill="#333" font-size="10">② 车载无线 (4.7%)</text>
+              <text x="190" y="23" fill="#333" font-size="10">② 车载无线 (4.9%)</text>
 
               <rect x="330" y="12" width="14" height="14" rx="2" fill="#26a69a"/>
-              <text x="350" y="23" fill="#333" font-size="10">③⑩ 无线空口 (31.2%)</text>
+              <text x="350" y="23" fill="#333" font-size="10">③⑩ 无线空口 (32.9%)</text>
 
               <rect x="520" y="12" width="14" height="14" rx="2" fill="#78909c"/>
-              <text x="540" y="23" fill="#333" font-size="10">④⑨ 路侧AP (5.0%)</text>
+              <text x="540" y="23" fill="#333" font-size="10">④⑨ 路侧AP (5.2%)</text>
 
               <rect x="680" y="12" width="14" height="14" rx="2" fill="#ffb74d"/>
-              <text x="700" y="23" fill="#333" font-size="10">⑤⑧ 有线骨干 (9.4%)</text>
+              <text x="700" y="23" fill="#333" font-size="10">⑤⑧ 有线骨干 (9.8%)</text>
 
               <rect x="0" y="36" width="14" height="14" rx="2" fill="#ef5350"/>
-              <text x="20" y="47" fill="#333" font-size="10">⑥ 服务器处理 (25.0%)</text>
+              <text x="20" y="47" fill="#333" font-size="10">⑥ 服务器处理 (26.7%)</text>
 
               <rect x="170" y="36" width="14" height="14" rx="2" fill="#ec407a"/>
-              <text x="190" y="47" fill="#333" font-size="10">⑦ 服务器发送 (2.5%)</text>
+              <text x="190" y="47" fill="#333" font-size="10">⑦ 服务器发送 (2.6%)</text>
 
               <rect x="330" y="36" width="14" height="14" rx="2" fill="#81c784"/>
-              <text x="350" y="47" fill="#333" font-size="10">⑪ 车载接收 (4.7%)</text>
+              <text x="350" y="47" fill="#333" font-size="10">⑪ 车载接收 (4.9%)</text>
 
               <rect x="520" y="36" width="14" height="14" rx="2" fill="#64b5f6"/>
-              <text x="540" y="47" fill="#333" font-size="10">⑫ AGV执行 (6.3%)</text>
+              <text x="540" y="47" fill="#333" font-size="10">⑫ AGV执行 (6.6%)</text>
             </g>
 
             <!-- Key Insight Box -->
             <rect x="50" y="220" width="900" height="160" rx="10" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
             <text x="70" y="245" fill="#e65100" font-size="14" font-weight="bold">💡 关键洞察</text>
 
-            <text x="70" y="270" fill="#333" font-size="12">1. 无线空口（上行+下行）占总 RTT 的 31.2%——CURWB 已将此压缩至理论极限附近。</text>
-            <text x="70" y="292" fill="#333" font-size="12">2. 控制服务器是最大单一延迟贡献者（25.0%）——服务器端优化对整体延迟影响最大。</text>
-            <text x="70" y="314" fill="#333" font-size="12">3. 有线骨干网仅占 9.4%——已经足够低，进一步优化的边际收益有限。</text>
+            <text x="70" y="270" fill="#333" font-size="12">1. 无线空口（上行+下行）占总 RTT 的 32.9%——CURWB 已将此压缩至理论极限附近。</text>
+            <text x="70" y="292" fill="#333" font-size="12">2. 控制服务器是最大单一延迟贡献者（26.7%）——服务器端优化对整体延迟影响最大。</text>
+            <text x="70" y="314" fill="#333" font-size="12">3. 有线骨干网仅占 9.8%——已经足够低，进一步优化的边际收益有限。</text>
             <text x="70" y="336" fill="#333" font-size="12">4. 即使在最坏情况（6.1 ms RTT）下，CURWB 方案仍远低于 20 ms 的 AGV SLA 要求。</text>
             <text x="70" y="358" fill="#333" font-size="12">5. 传统 Wi-Fi 仅漫游切换一项就可能超过 50 ms——已远超整个 CURWB 方案的最坏 RTT。</text>
           </svg>
@@ -5115,7 +5113,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
         <ul>
           <li>生产环境中的电磁干扰（EMI）可能导致偶发重传。</li>
           <li>设备老化或固件版本差异导致的性能波动。</li>
-          <li>未来扩容时（AGV 数量增加）EDCA 信道竞争加剧（Client 增多时退避碰撞概率上升）</li>
+          <li>未来扩容时（AGV 数量增加，同信道 BSS 数量上升）CCA 忙时占比与 EDCA 竞争加剧</li>
           <li>网络流量突发峰值（如多台 AGV 同时上传视频流）。</li>
         </ul>
 
@@ -5126,7 +5124,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
           <li><strong>Ping/Traceroute</strong>：测量基本 ICMP 往返延迟。</li>
           <li><strong>iPerf3 + 时间戳</strong>：测量 UDP 单向延迟（需 NTP/PTP 时钟同步）。</li>
           <li><strong>Wireshark 抓包分析</strong>：在 AGV 端和服务器端同时抓包，对比时间戳差值。</li>
-          <li><strong>Cisco DNA Center / Catalyst Center</strong>：集中监控无线链路质量和延迟指标。</li>
+          <li><strong>Cisco Catalyst Center（原 DNA Center）</strong>：集中监控无线链路质量和延迟指标。</li>
         </ul>
 
         <h3>16.9 本章小结</h3>
@@ -5135,7 +5133,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
 
         <ol>
           <li>CURWB 系统的<strong>典型往返延迟 (RTT) 约 3.0 ms</strong>，即使在最坏情况下也不超过 6.1 ms，远低于 AGV 应用的 20 ms SLA 要求。</li>
-          <li>无线空口延迟（上行+下行）合计仅占 RTT 的 31.2%，CURWB 已将其优化至极端 EDCA 参数下竞争接入的理论极限。</li>
+          <li>无线空口延迟（上行+下行）合计仅占 RTT 的 32.9%，CURWB 已将其优化至极端 EDCA 参数下竞争接入的理论极限。</li>
           <li><strong>控制服务器是最大的单一延迟贡献者</strong>（25.0%），服务器端的优化对整体性能提升至关重要。</li>
           <li>相比之下，传统 Wi-Fi 仅漫游切换一项就可能产生 50–200 ms 的延迟，远超整个 CURWB 系统的最坏 RTT。</li>
           <li>延迟预算分析是系统设计不可或缺的环节，应在项目规划阶段即完成，并在部署后实测验证。</li>
@@ -5150,7 +5148,7 @@ MPO 的最大有效路径数受限于可用的非重叠信道数。在日本（J
            CHAPTER 17: 快速启动部署指南
            ============================================================ -->
       <section id="ch17">
-        <h2>十七、快速启动部署指南——Layer 2 Mobility 拓扑实战</h2>
+        <h2>第十七章　快速启动部署指南——Layer 2 Mobility 拓扑实战</h2>
 
         <h3>17.1 部署概述</h3>
 
@@ -5829,7 +5827,7 @@ show fluidity roaming-history
 
         <ul>
           <li><strong>确定性延迟</strong>：极端 EDCA 优化（AIFS=1, CW<sub>min</sub>=2, CW<sub>max</sub>=3），端到端延迟 &lt; 5 ms，P99 &lt; 10 ms。</li>
-          <li><strong>确定性漫游</strong>：Make-Before-Break 替代 Break-Before-Make，零中断切换。</li>
+          <li><strong>确定性漫游</strong>：Make-Before-Break 替代 Break-Before-Make，近零中断（&lt;3 ms）切换。</li>
           <li><strong>确定性可靠性</strong>：MPO 多路径保护提供 99.999% 以上的链路可用性。</li>
           <li><strong>确定性覆盖</strong>：单客户端 BSS + 极端 EDCA 参数实现的近确定性接入 + 功率控制确保每个移动设备获得稳定的带宽分配。</li>
         </ul>
@@ -5950,7 +5948,7 @@ show fluidity roaming-history
     <!-- ── Title ── -->
     <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="bold"
           fill="#1a3c6e" font-family="'Segoe UI',sans-serif">
-      E80 AGV — Make-Before-Break 漫遊示意 ⟨左右拖动 AGV⟩
+      E80 AGV — Make-Before-Break 漫游示意 ⟨左右拖动 AGV⟩
     </text>
 
     <!-- ── WLC / Coordinator ── -->
@@ -6215,7 +6213,7 @@ show fluidity roaming-history
 <!-- ========== END MBB DRAG DEMO ========== -->
 
   <h4>MPO 多路径优化：数据传输的“饱和式救援”</h4>
-  <p>在遍布金属货架的立体仓库中，多径衰落是不可逾越的物理法则。CURWB 独有的 <strong>MPO (Multiple Path Optimization)</strong> 技术允许将最高优先级的控制信令复制多份，通过最多 8 条独立的无线路径同时发射出去。这就像是为了一份绝密军情，你同时派出了顺丰、DHL 和联邦快递。只要有任意一个包裹穿透干扰抵达终点，系统便会进行去重合并，任务即告成功。这种“用带宽换可靠性”的冗余策略，将链路丢包率降低了数个数量级。</p>
+  <p>在遍布金属货架的立体仓库中，多径衰落是不可逾越的物理法则。CURWB 独有的 <strong>MPO (Multiple Path Optimization)</strong> 技术允许将最高优先级的控制信令复制多份，通过最多 4 条独立的无线路径同时发射出去。这就像是为了一份绝密军情，你同时派出了顺丰、DHL 和联邦快递。只要有任意一个包裹穿透干扰抵达终点，系统便会进行去重合并，任务即告成功。这种"用带宽换可靠性"的冗余策略，将链路丢包率降低了数个数量级。</p>
 
   <h3>4. 价值重塑：选择 CURWB 带来的极致收益</h3>
   <p>通过全面拥抱 CURWB 架构，E80 Group 为其客户解锁了深远的商业与运营价值：</p>
@@ -6348,7 +6346,7 @@ show fluidity roaming-history
       <tr>
         <td><strong>MPO</strong><br>(Multiple Path Optimization)</td>
         <td>多路径优化</td>
-        <td>CURWB 独有的链路层冗余技术。同一数据帧通过最多 8 条物理独立的无线路径同时传输，接收端仅需任一路径成功即可交付。当单链路丢包率为 <em>p</em> 时，N 条独立路径的同时丢包率降至 <em>p<sup>N</sup></em>。支持复制模式（全量冗余，适合控制流）和分发模式（轮流分配，适合大带宽流）。与 Make-Before-Break 漫游协同，在漫游期间自动增加临时冗余路径。</td>
+        <td>CURWB 独有的链路层冗余技术。同一数据帧通过最多 4 条物理独立的无线路径同时传输，接收端仅需任一路径成功即可交付。当单链路丢包率为 <em>p</em> 时，N 条独立路径的同时丢包率降至 <em>p<sup>N</sup></em>。支持复制模式（全量冗余，适合控制流）和分发模式（轮流分配，适合大带宽流）。与 Make-Before-Break 漫游协同，在漫游期间自动增加临时冗余路径。</td>
       </tr>
       <tr>
         <td><strong>Network Key</strong><br>Standalone 术语：<em>Passphrase</em><br>9800 WLC 术语：<em>CURWB Profile Key</em></td>
@@ -6455,7 +6453,7 @@ show fluidity roaming-history
   <p>本文档由Rao Weibo借助CIRCUIT Claude Opus模型，基于 Cisco 官方技术资料编写，仅供技术交流与学习参考。</p>
   <p>参考来源：CiscoLive BRKIOT-2027 · TECIOT-2584 · TECIOT-2000 · Cisco CURWB Software Configuration Guide · ABI Research White Paper</p>
   <p>文中TDMA相关的内容来自于Fluidmesh早期的文档，在新的Catalyst IOS-XE平台中，没有找到支持文档。</p>
-  <p style="margin-top:12px;">© 2026 Cisco Systems, Inc. 保留所有权利。Cisco、Cisco LOGO、CURWB、Catalyst、IOS-XE 为 Cisco Systems, Inc. 的商标。</p>
+  <p style="margin-top:12px;">© 2026 本文作者 Rao Weibo。文中提及的 Cisco、Cisco LOGO、CURWB、Catalyst、IOS-XE 等名称均为 Cisco Systems, Inc. 的商标，本文档为独立技术整理作品，不代表 Cisco 官方立场。</p>
 </footer>
 
 </div><!-- /.container 页面主容器结束 -->
