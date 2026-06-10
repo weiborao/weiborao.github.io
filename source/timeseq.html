@@ -524,6 +524,7 @@ layout: false
       <li><a href="#okc-deep">OKC 答疑</a></li>
       <li><a href="#s5">场景五</a></li>
       <li><a href="#mixed-mode">Mixed Mode</a></li>
+      <li><a href="#nic-selection">网卡选型</a></li>
       <li><a href="#compare">对比总表</a></li>
       <li><a href="#glossary">术语表</a></li>
     </ul>
@@ -872,8 +873,8 @@ layout: false
     <div class="analysis-grid">
       <div class="analysis-card">
         <h4>总断网时长估算</h4>
-        <div class="metric">800ms~1s+</div>
-        <p>ISE 高负载时可达 2~3 秒，远超 MQTT 心跳超时阈值</p>
+        <div class="metric">800ms~3s+</div>
+        <p>ISE 健康时通常落在 800ms 量级；ISE 高负载或证书链长时可达 2~3 秒，远超 MQTT 心跳超时阈值</p>
       </div>
       <div class="analysis-card">
         <h4>ISE 依赖程度</h4>
@@ -1133,7 +1134,7 @@ layout: false
       <li class="highlight">
         <div class="step-content">
           <div class="step-title">EAP-TLS 完整认证（瓶颈不变）</div>
-          <div class="step-desc">与场景一完全相同：10~15 轮 RADIUS 交互，ISE 证书验证是关键路径。ISE 延迟直接决定本阶段时长。</div>
+          <div class="step-desc">与场景一完全相同：10~15 轮 RADIUS 交互，ISE 证书验证是关键路径。ISE 延迟直接决定本阶段时长。<strong>证书分片丢包风险也与场景一相同</strong>——11K/V 只解决了"怎么找到下家"，并没有解决"为什么过桥那么慢"。</div>
         </div>
         <span class="step-time">200~600ms+</span>
       </li>
@@ -1423,6 +1424,7 @@ layout: false
             WLC 使用配置的 EAP Profile（Trustpoint）作为 EAP Server，与 AGV 完成 TLS 双向握手。
             全程在 WLC 本地处理，<strong>无需任何 RADIUS 往返 ISE</strong>。
             延迟稳定、可预期，不受 ISE 负载影响。
+            <strong>隐性收益：</strong>证书分片（见场景一）只在 WLC↔AP 的空口 / CAPWAP 这一段传输，跨 WAN 抖动不再放大丢包概率。
           </div>
         </div>
         <span class="step-time">100~200ms</span>
@@ -1503,7 +1505,7 @@ layout: false
       新 AP 不认识这把"钥匙"，只能重新认证。
     </p>
     <p>
-      <strong>OKC 的解法：</strong>Cisco 9800 WLC 将 PMK 缓存在 WLC 的全局缓存中，
+      <strong>OKC 的解法：</strong>Catalyst 9800 WLC 将 PMK 缓存在 WLC 的全局缓存中，
       所有 AP 共享访问。当 AGV 漫游到新 AP 时，会在 Association Request 中携带
       <strong>PMKID</strong>（PMK 的指纹哈希）。WLC 一查全局缓存，命中！
       直接跳过整个 EAP 认证流程，进入四步握手。
@@ -1763,6 +1765,10 @@ layout: false
       </ol>
     </div>
 
+    <p style="text-align:right;color:var(--text-secondary);font-size:0.9em;margin-top:var(--space-4);">
+      → 下一章回到主线，进入 <a href="#s5">场景五：802.11r FT 在关联前完成密钥协商</a>
+    </p>
+
     <div class="chapter-quote">
       "OKC 是 Cisco 的英文俚语，11r 才是国际通用语——和老外打电话，谁能保证对方听得懂你的俚语？"
     </div>
@@ -2006,7 +2012,7 @@ layout: false
     <h2>Catalyst 9800 的 Mixed Mode 真的能让新旧 AGV 共存吗？</h2>
 
     <div class="callout">
-      <strong>一句话答案：能。</strong>这正是 Cisco 2025 年最新最佳实践，且强烈推荐摒弃此前的 Adaptive 11r。
+      <strong>一句话答案：能。</strong>这正是 Cisco 当前 Catalyst 9800 的最佳实践（IOS-XE 17.x 之后），且强烈推荐摒弃此前的 Adaptive 11r。
       原理是 AP 在 Beacon / Probe Response 的 RSN IE 中<strong>同时声明 FT 和非 FT 两套 AKM 套件</strong>，
       把"用哪种漫游"的决定权交还给客户端自己。
     </div>
@@ -2057,7 +2063,7 @@ layout: false
           <td>同时广播 <code>FT+802.1X</code> 和 <code>802.1X</code></td>
           <td>✓ 走 FT 极速漫游（场景五）</td>
           <td>✓ 走标准 802.1X（退化为场景二）</td>
-          <td>🏆 <strong>2025 官方推荐</strong></td>
+          <td>🏆 <strong>官方当前推荐</strong></td>
         </tr>
       </tbody>
     </table>
@@ -2089,6 +2095,9 @@ layout: false
   security wpa akm dot1x       ! 非 FT，老终端走这条
   security wpa akm ft dot1x    ! FT，新终端走这条
   ! 如需 WPA3，继续叠加：security wpa akm sae 与 security wpa akm ft sae</code></pre>
+    <p style="margin-top:-0.5em;font-size:0.85em;color:var(--text-secondary);">
+      <strong>版本提示：</strong>示例基于 IOS-XE 17.18.x；不同版本下 CLI 顺序与子命令可能略有差异，请以设备 <code>?</code> 上下文提示为准。
+    </p>
 
     <div class="analysis-grid">
       <div class="analysis-card">
@@ -2108,8 +2117,138 @@ layout: false
       </div>
     </div>
 
+    <p style="text-align:right;color:var(--text-secondary);font-size:0.9em;margin-top:var(--space-4);">
+      → 接下来落到硬件层：<a href="#nic-selection">给 AGV 选支持 802.11r 的网卡</a>
+    </p>
+
     <div class="chapter-quote">
       "好的兼容设计不是让所有人走同一条路，而是同一个路口给每种车辆挂好对应路标——Mixed Mode 就是无线网络的双语路标。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     深度问答 · 网卡选型清单
+============================================================ -->
+<section class="chapter" id="nic-selection">
+  <div class="container">
+    <div class="chapter-badge">深度问答 · 网卡选型</div>
+    <h2>给 AGV 选支持 802.11r 的网卡，看这张表</h2>
+
+    <p>
+      为 AGV 选合适的无线网卡芯片，是决定整条产线网络 SLA 的<strong>绝对基石</strong>。
+      到了 Wi-Fi 6 及更高世代，底层芯片对 IEEE 802.11r（Fast BSS Transition）的支持力度，
+      直接决定了 AGV 跨越 AP 时的交互时延与稳定性。
+    </p>
+
+    <div class="callout">
+      <strong>精准定义：</strong>802.11r 是一种在关联目标 AP 之前，提前完成密钥（PTK）预协商的快速漫游标准。
+      <strong>"芯片层支持"</strong>意味着网卡的 MAC 硬件和底层固件能原生识别并加速处理 FT 认证帧
+      （携带 MDE / FTE 信息元素），把加密算法卸载在硬件层完成，无需把所有底层信令抛给主机 CPU 慢速处理。
+      <p style="margin-top:0.6em;">
+        <strong>精妙类比：</strong>芯片硬件支持 802.11r 就像汽车拥有一台<em>"支持弹射起步的发动机"</em>；
+        但要真正实现无缝漫游，还需要上层操作系统（Linux 上的 <code>wpa_supplicant</code>、Windows 上的 Native WLAN）
+        这台<em>"变速箱"</em>完美配合。<strong>仅有硬件入场券是不够的，软硬协同才能跑出极速</strong>。
+      </p>
+    </div>
+
+    <h3>主流支持 802.11r 的工业级 Wi-Fi 6 / 6E / 7 芯片清单</h3>
+    <p>下表覆盖适用于工业及 AGV 场景的主流芯片。除无线协议本身外，重点关注<strong>宽温支持</strong>与<strong>驱动生态</strong>。</p>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>厂商</th>
+            <th>型号</th>
+            <th>世代</th>
+            <th>核心特性与 802.11r 表现</th>
+            <th>工业应用适配性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Qualcomm</strong><br><small>(高通)</small></td>
+            <td><strong>QCA6490</strong><br><small>FastConnect 6900</small></td>
+            <td>Wi-Fi 6E</td>
+            <td><strong>旗舰标杆。</strong>原生支持 160 MHz、三频段；底层固件对 802.11r 卸载机制极成熟，与各厂牌企业级 WLC 的交互兼容性极佳。</td>
+            <td>极高。-40 ~ +85 ℃ 宽温（车规衍生版 QCA6595）。国内一线重型 AGV / AMR 主机厂的高端首选。</td>
+          </tr>
+          <tr>
+            <td><strong>Qualcomm</strong><br><small>(高通)</small></td>
+            <td><strong>QCA6391</strong><br><small>FastConnect 6800</small></td>
+            <td>Wi-Fi 6</td>
+            <td><strong>经典基石。</strong>2×2 MIMO。面市早，其 802.11r 状态机经历了最广泛的工业级打磨与迭代。</td>
+            <td>高。性价比突出，在无需 6 GHz 的传统仓储网络环境中普及率极高。</td>
+          </tr>
+          <tr>
+            <td><strong>NXP</strong><br><small>(恩智浦)</small></td>
+            <td><strong>AW693</strong></td>
+            <td>Wi-Fi 6E</td>
+            <td><strong>双路并发。</strong>独特的并发双 Wi-Fi（CDW）能力，可同时建立两条物理链路，是极致漫游平滑度的利器。</td>
+            <td>极高。-40 ~ +105 ℃；适合绝对不容毫秒级丢包的精密自动化产线。</td>
+          </tr>
+          <tr>
+            <td><strong>NXP</strong><br><small>(恩智浦)</small></td>
+            <td><strong>IW612</strong></td>
+            <td>Wi-Fi 6</td>
+            <td><strong>三模共存。</strong>业界首款单片集成 Wi-Fi 6 + 蓝牙 5.2 + 802.15.4（Thread / Matter）的芯片，原生支持快速漫游协议栈。</td>
+            <td>中高。-40 ~ +85 ℃；适合同时承载 Wi-Fi 调度与低功耗传感器采集的轻量化 AGV。</td>
+          </tr>
+          <tr>
+            <td><strong>Intel</strong><br><small>(英特尔)</small></td>
+            <td><strong>AX210 / AX211</strong></td>
+            <td>Wi-Fi 6E</td>
+            <td><strong>驱动最透明。</strong>硬件原生支持 802.11k / v / r；Linux <code>iwlwifi</code> 驱动极度开源成熟，调优 802.11r 参数时控制权最大。</td>
+            <td>高。Intel 原厂 die 仅 0 ~ +70 ℃；但市场上有大量 SparkLAN 等第三方供应商提供 -40 ~ +85 ℃ 工业级加固 M.2 模块。</td>
+          </tr>
+          <tr>
+            <td><strong>Intel</strong><br><small>(英特尔)</small></td>
+            <td><strong>BE200</strong></td>
+            <td>Wi-Fi 7</td>
+            <td><strong>下一代演进。</strong>引入 Wi-Fi 7 核心的 MLO（多链路操作）。MLO 允许多频段并发通信，机制上对传统 802.11r 形成降维打击式的漫游平滑度。</td>
+            <td>新兴。适合具备前瞻性网络技术预研能力的 AGV 厂商布局新一代产品。</td>
+          </tr>
+          <tr>
+            <td><strong>Synaptics</strong><br><small>(原 Broadcom IoT)</small></td>
+            <td><strong>BCM43752</strong></td>
+            <td>Wi-Fi 6</td>
+            <td><strong>极致低功耗。</strong>底层 MAC 原生支持 FT 状态机；继承 Broadcom 强大的射频稳定基因，抗多径干扰能力强。</td>
+            <td>中高。-40 ~ +85 ℃；通常以邮票孔 SoM 模块形式焊装在体积受限的 AGV 嵌入式主板上。</td>
+          </tr>
+          <tr>
+            <td><strong>MediaTek</strong><br><small>(联发科)</small></td>
+            <td><strong>MT7922</strong><br><small>(RZ616)</small></td>
+            <td>Wi-Fi 6E</td>
+            <td><strong>生态新秀。</strong>驱动与固件层面明确支持完整 802.11k / v / r 漫游协议簇。</td>
+            <td>中高。常与联发科 Genio 工业级边缘计算平台打包进入 AGV 控制系统。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>架构侧实施避坑清单（Checklist）</h3>
+    <p>硬件选型敲定后，必须在试产阶段验证下面三条软件栈链路，否则芯片的 802.11r 能力将一直处于"休眠"状态：</p>
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>① Supplicant 编译确认</h4>
+        <p>Linux 系统的 <code>wpa_supplicant</code> 必须在编译时显式开启 <code>CONFIG_IEEE80211R=y</code>，否则上层根本无法处理 FT 认证。</p>
+      </div>
+      <div class="analysis-card">
+        <h4>② Windows 驱动验证</h4>
+        <p>Windows 上位机须向网卡模组厂商索取 INF 配置文件，确认其显式释放了 802.11r 控制权限（原生 Native WLAN API 需使能）。</p>
+      </div>
+      <div class="analysis-card">
+        <h4>③ 空口抓包验证</h4>
+        <p>验证唯一真理是空口抓包（OTA Capture）。观察漫游时的 <code>Reassociation Request</code> 是否真正携带包含 SNonce 的 FTE 字段。</p>
+      </div>
+    </div>
+
+    <p style="text-align:right;color:var(--text-secondary);font-size:0.9em;margin-top:var(--space-4);">
+      → 至此五场景 + 三个深度问答全部讲完，进入 <a href="#compare">五场景全景对比</a> 形成系统性判断
+    </p>
+
+    <div class="chapter-quote">
+      "选芯片是入场券，跑通 11r 是综合体育成绩——别把入场券当成金牌。"
     </div>
   </div>
 </section>
@@ -2363,11 +2502,11 @@ layout: false
       </div>
       <div class="glossary-item">
         <div class="glossary-term">OKC <span class="glossary-abbr">机会性密钥缓存</span></div>
-        <p class="glossary-def">Opportunistic Key Caching — Cisco 9800 实现的 PMKSA 缓存机制。WLC 在全局共享 PMK，漫游时终端携带 PMKID，WLC 验证命中后直接进入四步握手，跳过 EAP-TLS。</p>
+        <p class="glossary-def">Opportunistic Key Caching — Catalyst 9800 实现的 PMKSA 缓存机制。WLC 在全局共享 PMK，漫游时终端携带 PMKID，WLC 验证命中后直接进入四步握手，跳过 EAP-TLS。</p>
       </div>
       <div class="glossary-item">
         <div class="glossary-term">802.11r / FT <span class="glossary-abbr">快速漫游</span></div>
-        <p class="glossary-def">IEEE 802.11r Fast BSS Transition — 漫游前与目标 AP 完成密钥预协商（FT 认证）。Reassociation 阶段同时完成关联和密钥确认，实现最低时延的无缝切换。<br><strong>避坑提示：</strong>Cisco C9800 提供 <em>Adaptive 11r</em> 和 <em>Mixed Mode 11r</em> 两种部署方式。<em>Adaptive 11r</em> 是 Beacon 层面的 OTA 兼容性技巧，与 WPA3-Enterprise 及 6 GHz（Wi-Fi 6E/7）不兼容；本文及生产环境推荐使用标准 <strong>Mixed Mode 11r</strong>。</p>
+        <p class="glossary-def">IEEE 802.11r Fast BSS Transition — 漫游前与目标 AP 完成密钥预协商（FT 认证）。Reassociation 阶段同时完成关联和密钥确认，实现最低时延的无缝切换。<br><strong>避坑提示：</strong>Cisco Catalyst 9800 提供 <em>Adaptive 11r</em> 和 <em>Mixed Mode 11r</em> 两种部署方式。<em>Adaptive 11r</em> 是 Beacon 层面的 OTA 兼容性技巧，与 WPA3-Enterprise 及 6 GHz（Wi-Fi 6E/7）不兼容；本文及生产环境推荐使用标准 <strong>Mixed Mode 11r</strong>。</p>
       </div>
       <div class="glossary-item">
         <div class="glossary-term">802.11K <span class="glossary-abbr">邻居列表</span></div>
@@ -2379,7 +2518,7 @@ layout: false
       </div>
       <div class="glossary-item">
         <div class="glossary-term">AAA Cache <span class="glossary-abbr">认证缓存</span></div>
-        <p class="glossary-def">Cisco 9800 WLC 从 17.18.1 起支持的功能。将 ISE 认证结果（用户名、授权属性）缓存在 WLC 本地（WNCD AAA Cache）。ISE 不可达时自动切换到本地 EAP 认证，默认有效期 24 小时。</p>
+        <p class="glossary-def">Catalyst 9800 WLC 从 17.18.1 起支持的功能。将 ISE 认证结果（用户名、授权属性）缓存在 WLC 本地（WNCD AAA Cache）。ISE 不可达时自动切换到本地 EAP 认证，默认有效期 24 小时。</p>
       </div>
       <div class="glossary-item">
         <div class="glossary-term">Local EAP <span class="glossary-abbr">本地 EAP</span></div>
@@ -2405,6 +2544,22 @@ layout: false
         <div class="glossary-term">R0KH / R1KH <span class="glossary-abbr">FT 密钥持有者</span></div>
         <p class="glossary-def">802.11r 中的密钥层级。R0KH（通常为 WLC）持有 PMK-R0 并分发 PMK-R1 给各 AP（R1KH）。FT 预协商时，终端向目标 R1KH 请求 PTK 推导材料。</p>
       </div>
+      <div class="glossary-item">
+        <div class="glossary-term">EAP Fragmentation <span class="glossary-abbr">EAP 分片</span></div>
+        <p class="glossary-def">EAP-TLS 证书通常 2~8 KB，远超 EAP 链路 MTU（典型 <code>Framed-MTU = 1485</code>）。握手报文被切成 4~6 个 EAP 分片传输；弱信号边缘只要丢任意一片就要重传或推倒重来——这是漫游时延不可控的物理根因。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">RSN IE / AKM <span class="glossary-abbr">安全套件声明</span></div>
+        <p class="glossary-def">RSN IE（Robust Security Network Information Element）是 AP 在 Beacon / Probe Response 中携带的安全能力描述，其中包含 <strong>AKM</strong>（Authentication and Key Management）套件列表。终端通过解析 AKM 判断 AP 支持的认证方式（<code>802.1X</code> / <code>FT+802.1X</code> / <code>PSK</code> / <code>SAE</code> 等），决定走哪条漫游路径。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">FTE / MDE <span class="glossary-abbr">FT 信息元素</span></div>
+        <p class="glossary-def">FTE（Fast BSS Transition Element）与 MDE（Mobility Domain Element）是 802.11r 漫游帧（Reassociation Request / Response、Auth 帧）中携带的字段。FTE 内含 SNonce / ANonce / MIC 等密钥协商材料；MDE 标识移动域。空口抓包看到这两个字段，是判断 FT 真正生效的"金标准"。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">MLO <span class="glossary-abbr">多链路操作</span></div>
+        <p class="glossary-def">Multi-Link Operation — Wi-Fi 7 引入的核心机制。终端可同时在 2.4 / 5 / 6 GHz 多个频段上建立并发链路。漫游时单链路切换不再造成整体断网，对传统 802.11r 形成机制上的"降维打击"。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -2426,7 +2581,7 @@ layout: false
     </p>
     <p>
       对于今天的制造业 AGV 网络，推荐路径是：
-      <strong>验证终端 OKC/11r 支持情况 → 部署 AAA Cache 作为故障兜底 → 长期推进终端升级以支持 OKC 或 802.11r</strong>。
+      <strong>验证终端 OKC/11r 支持情况（见 <a href="#nic-selection" style="color:var(--cisco-accent);">网卡选型</a>） → 部署 AAA Cache 作为故障兜底 → 长期推进终端升级以支持 OKC 或 802.11r</strong>。
       三者并不互斥，可以叠加部署，共同构建高弹性的工业无线网络。
     </p>
     <a href="#s1" class="btn" style="margin-top:1rem;">回到顶部重读 →</a>
