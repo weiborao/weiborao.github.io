@@ -1,0 +1,2276 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGV无线漫游认证全景解析 | Cisco 9800 EAP-TLS 时序深度分析</title>
+<link rel="stylesheet" href="cisco-style.css">
+<style>
+/* ── 补充局部样式 ── */
+/* 导航栏 */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--cisco-navy);
+  border-bottom: 3px solid var(--cisco-accent);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  height: 60px;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border-bottom: none;
+}
+.nav-logo svg { flex-shrink: 0; }
+.nav-links {
+  display: flex;
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.nav-links a {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+  transition: all var(--transition-fast);
+}
+.nav-links a:hover {
+  color: var(--cisco-accent);
+  border-bottom-color: var(--cisco-accent);
+}
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+.hamburger span {
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--cisco-navy);
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 2px solid var(--cisco-accent);
+    gap: var(--space-4);
+  }
+}
+
+/* Hero 增强 */
+.hero {
+  background: linear-gradient(135deg, var(--cisco-navy) 0%, #005073 60%, var(--cisco-blue) 100%);
+  padding: 5rem 0 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(4,159,217,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  background: rgba(0,188,235,0.18);
+  color: var(--cisco-accent);
+  border: 1px solid var(--cisco-accent);
+  border-radius: 50px;
+  padding: 0.3em 1.2em;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+.hero h1 {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  color: #fff;
+  margin-bottom: var(--space-4);
+  line-height: 1.2;
+}
+.hero-sub {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.75);
+  max-width: 680px;
+  margin: 0 auto var(--space-8);
+  line-height: 1.7;
+}
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  margin-top: var(--space-8);
+}
+.hero-stat {
+  text-align: center;
+}
+.hero-stat .num {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--cisco-accent);
+  display: block;
+}
+.hero-stat .label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+
+/* 章节编号徽章 */
+.chapter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-soft);
+  color: var(--cisco-blue-dark);
+  border-radius: 50px;
+  padding: 0.25em 1em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--border-color);
+}
+
+/* 金句 */
+.chapter-quote {
+  border-left: 5px solid var(--cisco-accent);
+  background: linear-gradient(90deg, rgba(4,159,217,0.06) 0%, transparent 100%);
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-8) 0 var(--space-4);
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--cisco-blue-dark);
+  font-weight: 600;
+}
+
+/* 场景标题卡片 */
+.scenario-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue-dark) 100%);
+  color: #fff;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+.scenario-number {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  background: var(--cisco-accent);
+  color: var(--cisco-navy);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.scenario-header h3 {
+  color: #fff;
+  margin: 0 0 var(--space-2);
+  font-size: 1.3rem;
+  border: none;
+  padding: 0;
+}
+.scenario-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.config-tag {
+  display: inline-block;
+  padding: 0.2em 0.8em;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.config-tag.off {
+  background: rgba(226,35,26,0.18);
+  color: #ff6b6b;
+  border: 1px solid rgba(226,35,26,0.3);
+}
+.config-tag.on {
+  background: rgba(103,179,70,0.18);
+  color: #67B346;
+  border: 1px solid rgba(103,179,70,0.3);
+}
+.config-tag.neutral {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* SVG 时序图容器：让 SVG 占满容器宽度，按 viewBox 比例自动等比缩放 */
+.seq-diagram-wrap {
+  background: var(--bg-light);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  padding: var(--space-4);
+  margin: var(--space-6) 0;
+}
+.seq-diagram-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+/* 卡片下方的 SVG 滚动容器：屏幕模式下同样占满容器宽度 */
+.svg-scroll-wrapper svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* 分析卡片组 */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+.analysis-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-5);
+  border-top: 4px solid var(--cisco-accent);
+  transition: all var(--transition-fast);
+}
+.analysis-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+}
+.analysis-card h4 {
+  font-size: 1rem;
+  color: var(--cisco-navy);
+  margin-bottom: var(--space-2);
+  padding: 0;
+  border: none;
+}
+.analysis-card .metric {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--cisco-blue);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.analysis-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 步骤序号 */
+.step-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: step-counter;
+}
+.step-list li {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  counter-increment: step-counter;
+}
+.step-list li:hover {
+  border-color: var(--cisco-accent);
+  box-shadow: var(--shadow-sm);
+}
+.step-list li::before {
+  content: counter(step-counter);
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background: var(--cisco-blue);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.step-list li.highlight::before {
+  background: var(--cisco-red);
+}
+.step-list li .step-content { flex: 1; }
+.step-list li .step-title {
+  font-weight: 700;
+  color: var(--cisco-navy);
+  margin-bottom: 2px;
+  font-size: 0.95rem;
+}
+.step-list li .step-desc {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin: 0;
+}
+.step-list li .step-time {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--cisco-blue);
+  background: var(--bg-soft);
+  padding: 2px 8px;
+  border-radius: 50px;
+  align-self: center;
+}
+.step-list li.highlight .step-time {
+  color: var(--cisco-red);
+  background: rgba(226,35,26,0.08);
+}
+
+/* 痛点警示框 */
+.pain-box {
+  background: linear-gradient(135deg, rgba(226,35,26,0.06) 0%, rgba(245,128,37,0.06) 100%);
+  border: 1.5px solid rgba(226,35,26,0.25);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-6);
+  margin: var(--space-6) 0;
+}
+.pain-box .pain-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cisco-red);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pain-box p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* 对比总表（最终章） */
+.compare-table th:nth-child(1) { width: 22%; }
+.compare-table th { font-size: 0.82rem; }
+.compare-table td { font-size: 0.88rem; vertical-align: top; }
+.badge-yes {
+  display: inline-block;
+  background: rgba(103,179,70,0.15);
+  color: #3a8a1e;
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.badge-no {
+  display: inline-block;
+  background: rgba(226,35,26,0.12);
+  color: var(--cisco-red);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.badge-partial {
+  display: inline-block;
+  background: rgba(251,171,24,0.15);
+  color: #b07800;
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* 术语表 */
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+.glossary-item {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-4);
+  border-left: 4px solid var(--cisco-blue);
+}
+.glossary-term {
+  font-weight: 700;
+  color: var(--cisco-navy);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.glossary-abbr {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--cisco-blue);
+  background: var(--bg-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 600;
+}
+.glossary-def {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 结语章节 */
+#closing {
+  background: linear-gradient(135deg, var(--cisco-navy) 0%, var(--cisco-blue-dark) 100%);
+  color: #fff;
+  padding: 4rem 0;
+  text-align: center;
+}
+#closing h2 {
+  color: #fff;
+  border-bottom-color: var(--cisco-accent);
+  display: inline-block;
+}
+#closing p { color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto var(--space-6); }
+
+/* 时间线标记 */
+.timeline-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: var(--space-2) 0;
+}
+
+/* 补充：var(--space-5) */
+:root { --space-5: 1.25rem; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     导航栏
+============================================================ -->
+<nav class="site-nav" role="navigation" aria-label="主导航">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">
+      <!-- Cisco Logo SVG -->
+      <svg width="60" height="22" viewBox="0 0 60 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="0" y="8" width="6" height="6" rx="1" fill="#00BCEB"/>
+        <rect x="9" y="4" width="6" height="14" rx="1" fill="#00BCEB"/>
+        <rect x="18" y="0" width="6" height="22" rx="1" fill="#00BCEB"/>
+        <rect x="27" y="4" width="6" height="14" rx="1" fill="#00BCEB"/>
+        <rect x="36" y="8" width="6" height="6" rx="1" fill="#00BCEB"/>
+        <text x="46" y="15" fill="white" font-size="10" font-weight="700" font-family="sans-serif">9800</text>
+      </svg>
+      AGV 漫游认证
+    </a>
+    <button class="hamburger" aria-label="菜单" onclick="this.nextElementSibling.classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links">
+      <li><a href="#s1">场景一</a></li>
+      <li><a href="#s2">场景二</a></li>
+      <li><a href="#s3">场景三</a></li>
+      <li><a href="#s4">场景四</a></li>
+      <li><a href="#s5">场景五</a></li>
+      <li><a href="#compare">对比总表</a></li>
+      <li><a href="#glossary">术语表</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============================================================
+     Hero Section
+============================================================ -->
+<header class="hero" id="hero">
+  <div class="container">
+    <div class="hero-badge">技术深度解析 · Cisco 9800 系列</div>
+    <h1>AGV漫游的"认证之旅"<br>从痛点到极速漫游的五幕剧</h1>
+    <p class="hero-sub">
+      当工厂里的 AGV 小车穿越无线信号边界，每一次漫游切换的背后，
+      都藏着一段复杂的"身份验证"对话。弄清楚这五个场景的本质差异，
+      是实现零停摆调度网络的第一步。
+    </p>
+    <a href="#s1" class="btn">开始探索 →</a>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="num">5</span>
+        <span class="label">漫游场景对比</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">802.1X</span>
+        <span class="label">EAP-TLS 全流程</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">~0ms</span>
+        <span class="label">最优场景 ISE 依赖</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     问题引入
+============================================================ -->
+<section class="chapter" id="intro">
+  <div class="container">
+    <div class="chapter-badge">背景</div>
+    <h2>为什么一次漫游会让整条产线瘫痪？</h2>
+
+    <p>
+      想象这样一幕：总装车间里，数十台 AGV 如同训练有素的快递员，沿着虚拟轨道穿梭，
+      将零件精准送往每一个工位。整个流程行云流水，直到某一刻，MQTT 调度心跳包忽然沉默——
+      AGV 们像被施了魔法，就地停摆。
+    </p>
+    <p>
+      根源追查下来，不是无线信号问题，而是 <strong>ISE（身份验证服务器）遭遇了高延迟</strong>。
+      每次 AGV 从一块 AP 的覆盖区漫游到另一块，都要重新进行完整的 <strong>802.1X EAP-TLS 证书握手</strong>——
+      这个过程完全依赖 ISE，ISE 一旦慢了，AGV 就断网了。
+    </p>
+
+    <div class="pain-box">
+      <div class="pain-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        核心矛盾
+      </div>
+      <p>
+        EAP-TLS 认证安全性极高，但代价是每次漫游都需要 10~30 轮 RADIUS 交互。
+        ISE 是整个流程的"咽喉"——它一旦成为瓶颈，所有 AGV 的漫游都被卡住。
+        本文将用五个递进场景，揭示如何逐步"解开" ISE 的枷锁。
+      </p>
+    </div>
+
+    <div class="callout">
+      <strong>阅读指南：</strong>本文共五个场景，每个场景都有完整的 SVG 时序图和逐步分析。
+      建议按顺序阅读以建立完整认知，最终通过<a href="#compare">对比总表</a>形成系统性理解。
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     场景一：无任何快速漫游特性
+============================================================ -->
+<section class="chapter" id="s1">
+  <div class="container">
+    <div class="chapter-badge">场景一</div>
+
+    <div class="scenario-header">
+      <div class="scenario-number">1</div>
+      <div>
+        <h3>裸奔漫游：无任何快速漫游特性</h3>
+        <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin:0 0 var(--space-2);">
+          最原始状态——所有保护机制全部关闭，每次漫游都是一次"完整初次入网"
+        </p>
+        <div class="scenario-config">
+          <span class="config-tag off">802.11K ✗</span>
+          <span class="config-tag off">802.11V ✗</span>
+          <span class="config-tag off">OKC ✗</span>
+          <span class="config-tag off">802.11R ✗</span>
+          <span class="config-tag off">AAA Cache ✗</span>
+          <span class="config-tag neutral">EAP-TLS 完整认证</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>问题一：没有任何辅助的情况下，漫游到底发生了什么？</h3>
+    <p>
+      思考一个基本问题：<em>为什么 AGV 在没有开启 802.11K/V 的情况下，漫游会更慢、更不稳定？</em>
+    </p>
+    <p>
+      答案藏在"侦察成本"里。没有 802.11K 的邻居列表，AGV 的无线网卡就像一个没有地图的外卖员——
+      不知道附近哪个 AP 信号更好，只能暂停送餐、挨个敲门（主动扫描所有信道），
+      扫描完才能决定去哪家"驻扎"。扫描本身就要耗费数百毫秒。
+    </p>
+    <p>
+      找到目标 AP 之后，麻烦还没完——没有 OKC / 802.11R，之前在旧 AP 上做的 EAP-TLS 证书握手
+      <strong>完全作废</strong>，必须从头来过。这等于每次漫游都要重新"入职面试"，不论已经工作多久。
+    </p>
+
+    <h4>完整时序图</h4>
+    <div class="seq-diagram-wrap">
+      <svg viewBox="0 0 900 820" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <!-- 背景 -->
+        <rect width="900" height="820" fill="#F7F8FA" rx="8"/>
+
+        <!-- 标题 -->
+        <text x="450" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D" font-family="sans-serif">场景一：无 802.11K/V/OKC/802.11R — 完整 EAP-TLS 漫游时序</text>
+
+        <!-- 参与者 -->
+        <rect x="30" y="50" width="110" height="38" rx="6" fill="#0D274D"/>
+        <text x="85" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AGV（终端）</text>
+
+        <rect x="200" y="50" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="255" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">旧 AP（AP1）</text>
+
+        <rect x="380" y="50" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="435" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">新 AP（AP2）</text>
+
+        <rect x="570" y="50" width="110" height="38" rx="6" fill="#049FD9"/>
+        <text x="625" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">WLC（9800）</text>
+
+        <rect x="750" y="50" width="110" height="38" rx="6" fill="#9232AC"/>
+        <text x="805" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">ISE（RADIUS）</text>
+
+        <!-- 生命线 -->
+        <line x1="85"  y1="88" x2="85"  y2="815" stroke="#0D274D" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="255" y1="88" x2="255" y2="815" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="435" y1="88" x2="435" y2="815" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="625" y1="88" x2="625" y2="815" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="805" y1="88" x2="805" y2="815" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+
+        <!-- ─── 阶段标签 ─── -->
+        <!-- 阶段一背景 -->
+        <rect x="12" y="95" width="876" height="140" rx="4" fill="rgba(4,159,217,0.06)" stroke="rgba(4,159,217,0.2)" stroke-width="1"/>
+        <text x="18" y="112" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">① 漫游扫描阶段（无 11K，主动盲扫）</text>
+
+        <!-- Step 1 主动扫描 -->
+        <line x1="85" y1="125" x2="435" y2="125" stroke="#C00" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <polygon points="430,120 440,125 430,130" fill="#C00"/>
+        <text x="260" y="119" text-anchor="middle" font-size="10" fill="#C00" font-family="sans-serif">主动扫描所有信道（Probe Request）</text>
+        <text x="260" y="133" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">耗时 150 ~ 400ms，无邻居列表指引</text>
+
+        <!-- Step 2 Probe Response -->
+        <line x1="435" y1="148" x2="85" y2="148" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,143 80,148 90,153" fill="#049FD9"/>
+        <text x="260" y="144" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">Probe Response（AP2 回应）</text>
+
+        <!-- Step 3 Deauth from AP1 -->
+        <line x1="255" y1="168" x2="85" y2="168" stroke="#888" stroke-width="1.5"/>
+        <polygon points="90,163 80,168 90,173" fill="#888"/>
+        <text x="170" y="163" text-anchor="middle" font-size="10" fill="#666" font-family="sans-serif">Deauthentication（从 AP1 断开）</text>
+
+        <!-- Step 4 802.11 Auth + Assoc -->
+        <line x1="85" y1="188" x2="435" y2="188" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="430,183 440,188 430,193" fill="#0D274D"/>
+        <text x="260" y="183" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">802.11 Auth Request → AP2</text>
+
+        <line x1="435" y1="208" x2="85" y2="208" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="90,203 80,208 90,213" fill="#0D274D"/>
+        <text x="260" y="204" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">802.11 Auth Response</text>
+
+        <line x1="85" y1="225" x2="435" y2="225" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="430,220 440,225 430,230" fill="#0D274D"/>
+        <text x="260" y="220" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">Association Request（全新关联，无 PMKID）</text>
+
+        <line x1="435" y1="240" x2="85" y2="240" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="90,235 80,240 90,245" fill="#0D274D"/>
+        <text x="260" y="236" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">Association Response</text>
+
+        <!-- ─── 阶段二 ─── -->
+        <rect x="12" y="250" width="876" height="380" rx="4" fill="rgba(146,50,172,0.05)" stroke="rgba(146,50,172,0.2)" stroke-width="1"/>
+        <text x="18" y="267" font-size="10.5" font-weight="700" fill="#9232AC" font-family="sans-serif">② 完整 EAP-TLS 认证阶段（每次漫游必须经历，高度依赖 ISE）</text>
+
+        <!-- EAP Start -->
+        <line x1="435" y1="280" x2="85" y2="280" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="90,275 80,280 90,285" fill="#9232AC"/>
+        <text x="260" y="276" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">EAP-Request/Identity</text>
+
+        <line x1="85" y1="298" x2="435" y2="298" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="430,293 440,298 430,303" fill="#9232AC"/>
+        <text x="260" y="294" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">EAP-Response/Identity（SYLYD02173）</text>
+
+        <!-- RADIUS forward -->
+        <line x1="625" y1="316" x2="805" y2="316" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="800,311 810,316 800,321" fill="#9232AC"/>
+        <text x="715" y="312" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Request → ISE</text>
+
+        <line x1="805" y1="333" x2="625" y2="333" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="630,328 620,333 630,338" fill="#9232AC"/>
+        <text x="715" y="329" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Challenge（EAP-TLS Start）</text>
+
+        <!-- TLS Handshake - ClientHello -->
+        <line x1="85" y1="352" x2="435" y2="352" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,347 440,352 430,357" fill="#049FD9"/>
+        <text x="260" y="348" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ClientHello</text>
+
+        <line x1="625" y1="366" x2="805" y2="366" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="800,361 810,366 800,371" fill="#9232AC"/>
+        <text x="715" y="362" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Request（ClientHello）→ ISE</text>
+
+        <!-- ISE ServerHello + Certificate -->
+        <line x1="805" y1="385" x2="625" y2="385" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="630,380 620,385 630,390" fill="#9232AC"/>
+        <text x="715" y="381" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Challenge（ServerHello + Certificate）</text>
+
+        <line x1="435" y1="400" x2="85" y2="400" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,395 80,400 90,405" fill="#049FD9"/>
+        <text x="260" y="396" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ServerHello + Certificate + CertRequest</text>
+
+        <!-- Client Certificate -->
+        <line x1="85" y1="420" x2="435" y2="420" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,415 440,420 430,425" fill="#049FD9"/>
+        <text x="260" y="416" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: Certificate + ClientKeyExchange + Finished（多分片）</text>
+
+        <line x1="625" y1="438" x2="805" y2="438" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="800,433 810,438 800,443" fill="#9232AC"/>
+        <text x="715" y="434" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Request（Client Cert）→ ISE 验证</text>
+
+        <!-- ISE 验证证书 -->
+        <rect x="742" y="448" width="126" height="22" rx="4" fill="rgba(146,50,172,0.12)"/>
+        <text x="805" y="463" text-anchor="middle" font-size="11" fill="#9232AC" font-family="sans-serif">ISE: 验证客户端证书链</text>
+        <text x="805" y="476" text-anchor="middle" font-size="9" fill="#9232AC" font-family="sans-serif">CRL/OCSP 检查</text>
+
+        <!-- Access-Accept -->
+        <line x1="805" y1="485" x2="625" y2="485" stroke="#67B346" stroke-width="2"/>
+        <polygon points="630,480 620,485 630,490" fill="#67B346"/>
+        <text x="715" y="481" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">Access-Accept + EAP-Success（VLAN, dACL）</text>
+
+        <line x1="435" y1="503" x2="85" y2="503" stroke="#67B346" stroke-width="2"/>
+        <polygon points="90,498 80,503 90,508" fill="#67B346"/>
+        <text x="260" y="499" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">EAP-Success（认证通过）</text>
+
+        <!-- ─── 阶段三 ─── -->
+        <rect x="12" y="512" width="876" height="130" rx="4" fill="rgba(4,159,217,0.06)" stroke="rgba(4,159,217,0.2)" stroke-width="1"/>
+        <text x="18" y="529" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">③ 四步握手 + 端口放行（建立加密信道）</text>
+
+        <line x1="435" y1="542" x2="85" y2="542" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,537 80,542 90,547" fill="#049FD9"/>
+        <text x="260" y="538" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M1（ANonce）</text>
+
+        <line x1="85" y1="558" x2="435" y2="558" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,553 440,558 430,563" fill="#049FD9"/>
+        <text x="260" y="554" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M2（SNonce + MIC）</text>
+
+        <line x1="435" y1="573" x2="85" y2="573" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,568 80,573 90,578" fill="#049FD9"/>
+        <text x="260" y="569" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M3（GTK + MIC）</text>
+
+        <line x1="85" y1="588" x2="435" y2="588" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,583 440,588 430,593" fill="#049FD9"/>
+        <text x="260" y="584" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M4（确认）</text>
+
+        <!-- DHCP -->
+        <line x1="85" y1="610" x2="625" y2="610" stroke="#F58025" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="620,605 630,610 620,615" fill="#F58025"/>
+        <text x="355" y="606" text-anchor="middle" font-size="10" fill="#F58025" font-family="sans-serif">（DHCP Renew — 如开启 DHCP Required）</text>
+
+        <!-- 端口放行 -->
+        <rect x="388" y="625" width="94" height="22" rx="4" fill="rgba(103,179,70,0.15)"/>
+        <text x="435" y="640" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">端口 → Authorized</text>
+
+        <!-- AGV 数据流 -->
+        <line x1="85" y1="660" x2="625" y2="660" stroke="#67B346" stroke-width="2"/>
+        <polygon points="620,655 630,660 620,665" fill="#67B346"/>
+        <text x="355" y="656" text-anchor="middle" font-size="11" font-weight="700" fill="#3a8a1e" font-family="sans-serif">AGV 数据流恢复（MQTT 心跳重连）</text>
+
+        <!-- 总时间标注 -->
+        <rect x="12" y="675" width="876" height="60" rx="4" fill="rgba(226,35,26,0.07)" stroke="rgba(226,35,26,0.25)" stroke-width="1"/>
+        <text x="450" y="700" text-anchor="middle" font-size="12" font-weight="700" fill="#C00" font-family="sans-serif">⚠ 总计断网时长估算：400 ~ 800ms（含扫描）+ EAP-TLS 时延（依赖 ISE 响应速度）</text>
+        <text x="450" y="722" text-anchor="middle" font-size="10.5" fill="#C00" font-family="sans-serif">ISE 高负载时可能超过 1~3 秒 → MQTT 心跳超时 → AGV 停摆</text>
+
+        <!-- 时间轴箭头 -->
+        <line x1="855" y1="95" x2="855" y2="670" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="850,665 855,675 860,665" fill="#ccc"/>
+        <text x="868" y="385" text-anchor="middle" font-size="9" fill="#aaa" transform="rotate(90,868,385)" font-family="sans-serif">时间轴（非等比例）</text>
+
+        <!-- 图例 -->
+        <line x1="30" y1="755" x2="75" y2="755" stroke="#C00" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="80" y="759" font-size="11" fill="#666" font-family="sans-serif">主动扫描（慢）</text>
+        <line x1="180" y1="755" x2="225" y2="755" stroke="#9232AC" stroke-width="1.5"/>
+        <text x="230" y="759" font-size="11" fill="#666" font-family="sans-serif">ISE 交互（关键路径）</text>
+        <line x1="380" y1="755" x2="425" y2="755" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="430" y="759" font-size="11" fill="#666" font-family="sans-serif">TLS / 4-Way 握手</text>
+        <line x1="570" y1="755" x2="615" y2="755" stroke="#67B346" stroke-width="2"/>
+        <text x="620" y="759" font-size="11" fill="#666" font-family="sans-serif">成功 / 数据流</text>
+      </svg>
+    </div>
+
+    <h3>逐步分析</h3>
+    <ol class="step-list">
+      <li>
+        <div class="step-content">
+          <div class="step-title">主动盲扫（无地图的外卖员）</div>
+          <div class="step-desc">AGV 不知道周围有哪些 AP，必须逐信道广播 Probe Request。2.4GHz 有 13 个信道，5GHz 有更多 DFS 信道，盲扫耗时 150~400ms。</div>
+        </div>
+        <span class="step-time">150~400ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">802.11 关联（全新入网）</div>
+          <div class="step-desc">没有 PMKID 缓存，Association Request 中不携带任何身份凭证。WLC 检查：无匹配 PMKID → 触发完整 EAP 认证。</div>
+        </div>
+        <span class="step-time">20~40ms</span>
+      </li>
+      <li class="highlight">
+        <div class="step-content">
+          <div class="step-title">EAP-TLS 完整握手（完全依赖 ISE）</div>
+          <div class="step-desc">
+            包括：EAP Identity 交换 → TLS ClientHello → ISE ServerHello + 证书下发 → 客户端证书上传 → ISE 证书验证（CRL/OCSP）→ Access-Accept。
+            约 10~15 轮 RADIUS 往返。ISE 每增加 100ms 延迟，整体延迟线性增加。
+            <br><strong>物理根因（Fragmentation）：</strong>EAP-TLS 证书通常 2~8 KB，远超 EAP 链路 MTU（实测 <code>Framed-MTU = 1485</code>），握手报文被切成 4~6 个 EAP 分片传输。AGV 在弱信号边缘只要丢掉任意一片，整段 TLS 就要重传或推倒重来，这是漫游时延不可控的根本原因。
+          </div>
+        </div>
+        <span class="step-time">200~600ms+</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">四步握手（4-Way Handshake）</div>
+          <div class="step-desc">基于 EAP-TLS 生成的 MSK 派生 PMK，再通过 4-Way Handshake 生成 PTK/GTK，建立加密数据信道。此阶段不依赖 ISE。</div>
+        </div>
+        <span class="step-time">20~40ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">端口放行，数据流恢复</div>
+          <div class="step-desc">802.1X 端口状态转为 Authorized，AGV 重建 TCP 连接，MQTT 心跳恢复。</div>
+        </div>
+        <span class="step-time">20~50ms</span>
+      </li>
+    </ol>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>总断网时长估算</h4>
+        <div class="metric">800ms~1s+</div>
+        <p>ISE 高负载时可达 2~3 秒，远超 MQTT 心跳超时阈值</p>
+      </div>
+      <div class="analysis-card">
+        <h4>ISE 依赖程度</h4>
+        <div class="metric" style="color:var(--cisco-red)">极高</div>
+        <p>每次漫游 100% 依赖 ISE，ISE 延迟直接等比放大漫游时延</p>
+      </div>
+      <div class="analysis-card">
+        <h4>RADIUS 交互轮次</h4>
+        <div class="metric">10~15 轮</div>
+        <p>每轮 RADIUS 报文均为 UDP，无可靠重传，网络抖动风险高</p>
+      </div>
+    </div>
+
+    <div class="chapter-quote">
+      "没有地图的漫游，是最昂贵的漫游——每一次都要重新证明自己是谁。"
+    </div>
+  </div>
+</section>
+<!-- ============================================================
+     场景二：开启 802.11K/V，终端不支持 OKC
+============================================================ -->
+<section class="chapter" id="s2">
+  <div class="container">
+    <div class="chapter-badge">场景二</div>
+
+    <div class="scenario-header">
+      <div class="scenario-number">2</div>
+      <div>
+        <h3>有了导航，但身份证还是要重新办</h3>
+        <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin:0 0 var(--space-2);">
+          802.11K 提供邻居列表、802.11V 提供漫游建议，扫描阶段大幅优化；
+          但没有 OKC，EAP-TLS 仍需完整重跑
+        </p>
+        <div class="scenario-config">
+          <span class="config-tag on">802.11K ✓</span>
+          <span class="config-tag on">802.11V ✓</span>
+          <span class="config-tag off">OKC ✗（终端不支持）</span>
+          <span class="config-tag off">802.11R ✗</span>
+          <span class="config-tag off">AAA Cache ✗</span>
+          <span class="config-tag neutral">EAP-TLS 完整认证</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>问题二：有了 802.11K/V，漫游到底快了哪里？</h3>
+    <p>
+      802.11K 给了 AGV 一份"附近 AP 信号排行榜"——当 AGV 向当前 AP 请求邻居列表时，
+      WLC 会根据 RF 关系精心计算一份候选名单，AGV 只需扫描名单上的几个 AP，而不必盲扫所有信道。
+      这相当于从"挨家敲门"升级为"按图索骥"，扫描时间从数百毫秒缩短到 20~50ms。
+    </p>
+    <p>
+      802.11V 则是 AP 主动"推一把"——当 AGV 的 RSSI 跌破阈值，WLC 通过 BSS Transition Management
+      Request 告诉 AGV："你该换 AP 了，去找 AP2 吧。" 这解决了"粘性客户端"问题，让漫游时机更精准。
+    </p>
+    <p>
+      <strong>但关键矛盾未解决：</strong>漫游时机和目标选择都优化了，
+      然而到达新 AP 之后，因为终端不支持 OKC（Opportunistic Key Caching，机会性密钥缓存），
+      新 AP 和 WLC 无法找到任何有效的 PMK 缓存，仍然必须触发完整的 EAP-TLS 认证。
+      <em>就像换了一条更好走的路，但到了目的地还是要重新过安检。</em>
+    </p>
+
+    <h4>完整时序图</h4>
+    <div class="seq-diagram-wrap">
+      <svg viewBox="0 0 900 840" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <rect width="900" height="840" fill="#F7F8FA" rx="8"/>
+        <text x="450" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D" font-family="sans-serif">场景二：802.11K/V 开启，终端不支持 OKC — 完整 EAP-TLS 漫游时序</text>
+
+        <!-- 参与者 -->
+        <rect x="30" y="50" width="110" height="38" rx="6" fill="#0D274D"/>
+        <text x="85" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AGV（终端）</text>
+        <rect x="200" y="50" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="255" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">旧 AP（AP1）</text>
+        <rect x="380" y="50" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="435" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">新 AP（AP2）</text>
+        <rect x="570" y="50" width="110" height="38" rx="6" fill="#049FD9"/>
+        <text x="625" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">WLC（9800）</text>
+        <rect x="750" y="50" width="110" height="38" rx="6" fill="#9232AC"/>
+        <text x="805" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">ISE（RADIUS）</text>
+
+        <!-- 生命线 -->
+        <line x1="85"  y1="88" x2="85"  y2="835" stroke="#0D274D" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="255" y1="88" x2="255" y2="835" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="435" y1="88" x2="435" y2="835" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="625" y1="88" x2="625" y2="835" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+        <line x1="805" y1="88" x2="805" y2="835" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.35"/>
+
+        <!-- ─── 阶段一：802.11K/V 加速扫描 ─── -->
+        <rect x="12" y="95" width="876" height="175" rx="4" fill="rgba(103,179,70,0.07)" stroke="rgba(103,179,70,0.3)" stroke-width="1"/>
+        <text x="18" y="112" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">① 802.11K 邻居列表 + 802.11V BSS Transition（漫游扫描大幅提速）</text>
+
+        <!-- 802.11K Neighbor Request -->
+        <line x1="85" y1="125" x2="255" y2="125" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="250,120 260,125 250,130" fill="#67B346"/>
+        <text x="170" y="119" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">11K Neighbor Report Request</text>
+
+        <line x1="255" y1="142" x2="85" y2="142" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="90,137 80,142 90,147" fill="#67B346"/>
+        <text x="170" y="138" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">11K Neighbor Report（含 AP2 候选列表）</text>
+        <text x="170" y="153" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">WLC 按 RF 关系精选候选 AP，AGV 只需定向扫描</text>
+
+        <!-- 802.11V BSS Transition -->
+        <line x1="255" y1="168" x2="85" y2="168" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,163 80,168 90,173" fill="#049FD9"/>
+        <text x="170" y="164" text-anchor="middle" font-size="10" fill="#005073" font-family="sans-serif">11V BSS Transition Mgmt Request（AP1 主动推送）</text>
+        <text x="170" y="179" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">建议漫游至 AP2，RSSI 已跌破阈值</text>
+
+        <!-- 定向 Probe -->
+        <line x1="85" y1="195" x2="435" y2="195" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="430,190 440,195 430,200" fill="#67B346"/>
+        <text x="260" y="191" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">定向 Probe Request → AP2（仅扫描候选 AP）</text>
+        <text x="260" y="205" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">耗时约 20~50ms（vs 场景一的 150~400ms）</text>
+
+        <line x1="435" y1="220" x2="85" y2="220" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="90,215 80,220 90,225" fill="#67B346"/>
+        <text x="260" y="216" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">Probe Response（AP2）</text>
+
+        <line x1="85" y1="237" x2="255" y2="237" stroke="#888" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <polygon points="250,232 260,237 250,242" fill="#888"/>
+        <text x="170" y="233" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">11V BSS Transition Response（接受建议）</text>
+
+        <!-- ─── 阶段二：关联 ─── -->
+        <rect x="12" y="248" width="876" height="95" rx="4" fill="rgba(4,159,217,0.06)" stroke="rgba(4,159,217,0.2)" stroke-width="1"/>
+        <text x="18" y="265" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">② 802.11 重新关联（无 PMKID 可用，OKC 不支持）</text>
+
+        <line x1="85" y1="278" x2="435" y2="278" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="430,273 440,278 430,283" fill="#0D274D"/>
+        <text x="260" y="274" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">802.11 Auth Request → AP2</text>
+
+        <line x1="435" y1="293" x2="85" y2="293" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="90,288 80,293 90,298" fill="#0D274D"/>
+        <text x="260" y="289" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">802.11 Auth Response</text>
+
+        <line x1="85" y1="310" x2="435" y2="310" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="430,305 440,310 430,315" fill="#0D274D"/>
+        <text x="260" y="306" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">Association Request（无有效 PMKID → 触发完整 EAP）</text>
+
+        <line x1="435" y1="327" x2="85" y2="327" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="90,322 80,327 90,332" fill="#0D274D"/>
+        <text x="260" y="323" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">Association Response</text>
+
+        <!-- ─── 阶段三：完整 EAP-TLS（同场景一）─── -->
+        <rect x="12" y="338" width="876" height="340" rx="4" fill="rgba(146,50,172,0.05)" stroke="rgba(146,50,172,0.2)" stroke-width="1"/>
+        <text x="18" y="355" font-size="10.5" font-weight="700" fill="#9232AC" font-family="sans-serif">③ 完整 EAP-TLS 认证（与场景一完全相同，仍高度依赖 ISE）</text>
+
+        <line x1="435" y1="368" x2="85" y2="368" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="90,363 80,368 90,373" fill="#9232AC"/>
+        <text x="260" y="364" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">EAP-Request/Identity</text>
+
+        <line x1="85" y1="384" x2="435" y2="384" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="430,379 440,384 430,389" fill="#9232AC"/>
+        <text x="260" y="380" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">EAP-Response/Identity（SYLYD02173）</text>
+
+        <line x1="625" y1="400" x2="805" y2="400" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="800,395 810,400 800,405" fill="#9232AC"/>
+        <text x="715" y="396" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Request → ISE</text>
+
+        <line x1="805" y1="416" x2="625" y2="416" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="630,411 620,416 630,421" fill="#9232AC"/>
+        <text x="715" y="412" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Challenge（EAP-TLS Start）</text>
+
+        <line x1="85" y1="434" x2="435" y2="434" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,429 440,434 430,439" fill="#049FD9"/>
+        <text x="260" y="430" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ClientHello</text>
+
+        <line x1="625" y1="450" x2="805" y2="450" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="800,445 810,450 800,455" fill="#9232AC"/>
+        <text x="715" y="446" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Request（ClientHello）→ ISE</text>
+
+        <line x1="805" y1="466" x2="625" y2="466" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="630,461 620,466 630,471" fill="#9232AC"/>
+        <text x="715" y="462" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Challenge（ServerHello + Certificate）</text>
+
+        <line x1="435" y1="482" x2="85" y2="482" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,477 80,482 90,487" fill="#049FD9"/>
+        <text x="260" y="478" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ServerHello + Certificate + CertRequest</text>
+
+        <line x1="85" y1="500" x2="435" y2="500" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,495 440,500 430,505" fill="#049FD9"/>
+        <text x="260" y="496" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: Certificate + ClientKeyExchange + Finished（多分片）</text>
+
+        <line x1="625" y1="516" x2="805" y2="516" stroke="#9232AC" stroke-width="1.5"/>
+        <polygon points="800,511 810,516 800,521" fill="#9232AC"/>
+        <text x="715" y="512" text-anchor="middle" font-size="10" fill="#9232AC" font-family="sans-serif">Access-Request（Client Cert）→ ISE 验证</text>
+
+        <rect x="742" y="526" width="126" height="20" rx="4" fill="rgba(146,50,172,0.12)"/>
+        <text x="805" y="540" text-anchor="middle" font-size="11" fill="#9232AC" font-family="sans-serif">ISE: 验证证书链 + CRL/OCSP</text>
+
+        <line x1="805" y1="550" x2="625" y2="550" stroke="#67B346" stroke-width="2"/>
+        <polygon points="630,545 620,550 630,555" fill="#67B346"/>
+        <text x="715" y="546" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">Access-Accept + EAP-Success（VLAN, dACL）</text>
+
+        <line x1="435" y1="567" x2="85" y2="567" stroke="#67B346" stroke-width="2"/>
+        <polygon points="90,562 80,567 90,572" fill="#67B346"/>
+        <text x="260" y="563" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">EAP-Success（认证通过）</text>
+
+        <!-- ─── 阶段四：四步握手 ─── -->
+        <rect x="12" y="578" width="876" height="110" rx="4" fill="rgba(4,159,217,0.06)" stroke="rgba(4,159,217,0.2)" stroke-width="1"/>
+        <text x="18" y="595" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">④ 四步握手 + 端口放行</text>
+
+        <line x1="435" y1="606" x2="85" y2="606" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,601 80,606 90,611" fill="#049FD9"/>
+        <text x="260" y="602" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M1 → M4（4-Way Handshake）</text>
+
+        <rect x="388" y="618" width="94" height="20" rx="4" fill="rgba(103,179,70,0.15)"/>
+        <text x="435" y="632" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">端口 → Authorized</text>
+
+        <line x1="85" y1="650" x2="625" y2="650" stroke="#67B346" stroke-width="2"/>
+        <polygon points="620,645 630,650 620,655" fill="#67B346"/>
+        <text x="355" y="646" text-anchor="middle" font-size="11" font-weight="700" fill="#3a8a1e" font-family="sans-serif">AGV 数据流恢复（MQTT 心跳重连）</text>
+
+        <!-- 对比说明 -->
+        <rect x="12" y="663" width="876" height="75" rx="4" fill="rgba(103,179,70,0.07)" stroke="rgba(103,179,70,0.3)" stroke-width="1"/>
+        <text x="450" y="685" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">✓ 与场景一对比：扫描阶段节省 130~350ms（11K 精准导航 + 11V 主动推送）</text>
+        <text x="450" y="703" text-anchor="middle" font-size="10.5" fill="#C00" font-family="sans-serif">✗ EAP-TLS 阶段完全相同，ISE 仍是瓶颈 — 总断网仍达 400~700ms+</text>
+        <text x="450" y="720" text-anchor="middle" font-size="10" fill="#666" font-family="sans-serif">（抓包文件 dot1x(1-60).txt 实测：ISE 健康时单次完整 EAP-PEAP 认证 ≈ 135 ms，详见下方实测数据）</text>
+
+        <!-- 时间轴 -->
+        <line x1="855" y1="95" x2="855" y2="655" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="850,650 855,660 860,650" fill="#ccc"/>
+        <text x="868" y="380" text-anchor="middle" font-size="9" fill="#aaa" transform="rotate(90,868,380)" font-family="sans-serif">时间轴（非等比例）</text>
+
+        <!-- 图例 -->
+        <line x1="30" y1="760" x2="75" y2="760" stroke="#67B346" stroke-width="1.5"/>
+        <text x="80" y="764" font-size="11" fill="#666" font-family="sans-serif">11K/V 优化阶段（快）</text>
+        <line x1="220" y1="760" x2="265" y2="760" stroke="#9232AC" stroke-width="1.5"/>
+        <text x="270" y="764" font-size="11" fill="#666" font-family="sans-serif">ISE 交互（关键路径）</text>
+        <line x1="420" y1="760" x2="465" y2="760" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="470" y="764" font-size="11" fill="#666" font-family="sans-serif">TLS / 4-Way 握手</text>
+        <line x1="610" y1="760" x2="655" y2="760" stroke="#67B346" stroke-width="2"/>
+        <text x="660" y="764" font-size="11" fill="#666" font-family="sans-serif">成功 / 数据流</text>
+      </svg>
+    </div>
+
+    <h3>逐步分析</h3>
+    <ol class="step-list">
+      <li>
+        <div class="step-content">
+          <div class="step-title">802.11K 邻居列表（精准导航）</div>
+          <div class="step-desc">WLC 根据每块 AP 的 RF 邻居关系，为 AGV 定制候选 AP 排行榜。AGV 只需扫描名单内的 2~3 个 AP，精准快速。</div>
+        </div>
+        <span class="step-time">5~15ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">802.11V BSS Transition（主动推送）</div>
+          <div class="step-desc">当 AGV 信号质量下降，AP 主动发送 BSS Transition Request，告知最佳目标 AP，解决"粘性客户端"不肯漫游的问题。</div>
+        </div>
+        <span class="step-time">10~20ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">定向 Probe + 重新关联</div>
+          <div class="step-desc">只 Probe 候选 AP2，耗时 20~50ms。关联时 Association Request 中无有效 PMKID（终端不支持 OKC），WLC 触发完整 EAP 流程。</div>
+        </div>
+        <span class="step-time">20~50ms</span>
+      </li>
+      <li class="highlight">
+        <div class="step-content">
+          <div class="step-title">EAP-TLS 完整认证（瓶颈不变）</div>
+          <div class="step-desc">与场景一完全相同：10~15 轮 RADIUS 交互，ISE 证书验证是关键路径。ISE 延迟直接决定本阶段时长。</div>
+        </div>
+        <span class="step-time">200~600ms+</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">四步握手 + 数据流恢复</div>
+          <div class="step-desc">与场景一相同，不依赖 ISE。</div>
+        </div>
+        <span class="step-time">40~90ms</span>
+      </li>
+    </ol>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>相比场景一节省</h4>
+        <div class="metric" style="color:#3a8a1e">130~350ms</div>
+        <p>11K 精准扫描 + 11V 主动推送消除盲扫时间</p>
+      </div>
+      <div class="analysis-card">
+        <h4>ISE 依赖程度</h4>
+        <div class="metric" style="color:var(--cisco-red)">极高（不变）</div>
+        <p>EAP-TLS 阶段与场景一完全相同，ISE 仍是决定性瓶颈</p>
+      </div>
+      <div class="analysis-card">
+        <h4>总断网时长估算</h4>
+        <div class="metric">400~700ms</div>
+        <p>扫描阶段优化显著，但 EAP-TLS 时延主导总时长</p>
+      </div>
+    </div>
+
+    <div class="callout" style="border-left-color:#3a8a1e;">
+      <strong>实测数据 · 来自 <code>dot1x(1-60).txt</code>（ISE 正常负载，EAP-PEAP/MSCHAPv2）</strong>
+      <p style="margin:0.6em 0 0.4em;">同一 AGV 终端在三个 AP 间发生 4 次完整认证，WLC↔ISE 之间 RADIUS 全过程稳定耗时：</p>
+      <table style="margin:0.4em 0 0.8em; font-size:0.92em; min-width:0; width:auto;">
+        <thead><tr><th>会话</th><th>AP</th><th>RADIUS 全程</th><th>最终 Access-Accept 时延</th></tr></thead>
+        <tbody>
+          <tr><td>#1</td><td>db:34:c0</td><td>134.1 ms</td><td>3.4 ms</td></tr>
+          <tr><td>#2</td><td>db:24:e0</td><td>131.9 ms</td><td>4.3 ms</td></tr>
+          <tr><td>#3</td><td>db:34:c0</td><td>139.4 ms</td><td>4.3 ms</td></tr>
+          <tr><td>#4</td><td>db:30:e0</td><td>142.9 ms</td><td>3.7 ms</td></tr>
+          <tr><td><strong>均值</strong></td><td>—</td><td><strong>137.1 ms</strong>（抖动 &lt; 5 ms）</td><td><strong>3.9 ms</strong></td></tr>
+        </tbody>
+      </table>
+      <p style="margin:0.4em 0;"><strong>关键发现：</strong></p>
+      <ul style="margin:0.2em 0 0.6em;">
+        <li>ISE 单次响应普遍落在 <b>3–10 ms</b>，最终 Accept 仅 3.9 ms — 健康状态下 ISE 本身毫无瓶颈。</li>
+        <li>整条 EAP 链路上唯二的 <b>~35 ms 间隙</b>出现在 ServerHello+Cert 和 ClientKeyExchange 步骤，是 TLS 握手两端的密码学计算开销，并非 ISE 处理慢。</li>
+        <li>本场景估算的 <b>200~600ms+</b> EAP 段是按 EAP-TLS（双向证书）和 ISE 中高负载推算的保守上限；ISE 健康且采用 EAP-PEAP 时实测落在区间下沿之下。EAP-TLS 因多了客户端证书校验/CRL 查询，通常会比 PEAP 多 50~150 ms。</li>
+        <li><strong>结论：</strong>即使 ISE 完全健康，单次 137 ms 对 AGV 仍意味着 100+ ms 断网。彻底消除该段时间，必须靠场景四/五的 OKC 或 802.11r 直接跳过 EAP。</li>
+      </ul>
+    </div>
+
+    <div class="chapter-quote">
+      "换了一条高速公路，但收费站（ISE）还在——路好了，堵的地方没变。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     场景三：开启 802.11K/V + AAA Cache，终端不支持 OKC
+============================================================ -->
+<section class="chapter" id="s3">
+  <div class="container">
+    <div class="chapter-badge">场景三</div>
+
+    <div class="scenario-header">
+      <div class="scenario-number">3</div>
+      <div>
+        <h3>WLC 本地代劳：AAA Cache 让 ISE 退居幕后</h3>
+        <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin:0 0 var(--space-2);">
+          WLC 在本地缓存认证结果，ISE 故障或高延迟时仍能完成认证；
+          但 EAP-TLS 握手流程仍需执行（本地 EAP），只是不再依赖远端 ISE
+        </p>
+        <div class="scenario-config">
+          <span class="config-tag on">802.11K ✓</span>
+          <span class="config-tag on">802.11V ✓</span>
+          <span class="config-tag off">OKC ✗（终端不支持）</span>
+          <span class="config-tag off">802.11R ✗</span>
+          <span class="config-tag on">AAA Cache ✓（17.18.1+）</span>
+          <span class="config-tag neutral">本地 EAP-TLS 认证</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>问题三：AAA Cache 的本质是什么？它真的消除了 EAP-TLS 认证吗？</h3>
+    <p>
+      先回答第二个问题：<strong>不，AAA Cache 并未消除 EAP-TLS 握手，它消除的是对远端 ISE 的依赖。</strong>
+    </p>
+    <p>
+      理解这一点需要先弄清 AAA Cache 的工作机制。当 AGV 第一次成功通过 ISE 认证后，
+      WLC（WNCD 进程）会在本地存储这份认证结果——包括用户名、Profile、授权属性（VLAN、dACL）等，
+      有效期默认 24 小时（可配置，设为 0 则永不过期）。
+    </p>
+    <p>
+      当 AGV 下次漫游时，WLC 会按照方法列表的优先级检查：
+      <em>先去问 ISE（如果 ISE 可达）；ISE 不可达或超时，再用本地缓存。</em>
+      若配置为"cache first"，则先查缓存、缓存命中直接用，ISE 只是候补。
+    </p>
+    <p>
+      但有一个关键细节（来自 Cisco TAC 文档的重要提示）：
+      对于 <strong>EAP-TLS 这类"安全类型 8"</strong>，缓存命中后 WLC 并不能直接放行——
+      TLS 握手涉及证书双向验证，密钥材料不可复用，
+      WLC 会转用 <strong>Local EAP</strong> 在本地完成 TLS 握手，
+      无需将报文转发给远端 ISE。整个过程对 AGV 透明，认证速度更快也更稳定。
+    </p>
+
+    <div class="callout">
+      <strong>关键日志印证（来自文档 RA Trace）：</strong>
+      <code style="display:block;margin-top:8px;font-size:0.85rem;">
+        [aaa-sg-cache]: AAA/AUTHEN/CACHE: Secure authen type 8 cannot be authenticated directly from cache &gt;&gt;&gt; We may need local eap<br>
+        [aaa-sg-cache]: AAA/AUTHEN/CACHE(00000000): PASS for username vk@wireless.com
+      </code>
+      这两行日志完整揭示了 AAA Cache + EAP-TLS 的工作机制：先查缓存确认用户存在，再用 Local EAP 完成握手，最终认证通过。
+    </div>
+
+    <h4>完整时序图</h4>
+    <div class="seq-diagram-wrap">
+      <svg viewBox="0 0 920 860" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <rect width="920" height="860" fill="#F7F8FA" rx="8"/>
+        <text x="460" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D" font-family="sans-serif">场景三：802.11K/V + AAA Cache（17.18.1+）— 本地 EAP-TLS 漫游时序</text>
+
+        <!-- 参与者 -->
+        <rect x="20" y="50" width="100" height="38" rx="6" fill="#0D274D"/>
+        <text x="70" y="73" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="sans-serif">AGV（终端）</text>
+        <rect x="175" y="50" width="100" height="38" rx="6" fill="#005073"/>
+        <text x="225" y="73" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="sans-serif">AP2（新）</text>
+        <rect x="340" y="50" width="120" height="38" rx="6" fill="#049FD9"/>
+        <text x="400" y="66" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">WLC / Local EAP</text>
+        <text x="400" y="80" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.8)" font-family="sans-serif">（WNCD + AAA Cache）</text>
+        <rect x="530" y="50" width="120" height="38" rx="6" fill="#F58025"/>
+        <text x="590" y="66" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">WLC AAA Cache</text>
+        <text x="590" y="80" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.8)" font-family="sans-serif">（本地缓存数据库）</text>
+        <rect x="720" y="50" width="100" height="38" rx="6" fill="#9232AC"/>
+        <text x="770" y="66" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">ISE（RADIUS）</text>
+        <text x="770" y="80" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.8)" font-family="sans-serif">（退居幕后）</text>
+
+        <!-- 生命线 -->
+        <line x1="70"  y1="88" x2="70"  y2="850" stroke="#0D274D" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="225" y1="88" x2="225" y2="850" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="400" y1="88" x2="400" y2="850" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="590" y1="88" x2="590" y2="850" stroke="#F58025" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="770" y1="88" x2="770" y2="850" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.25"/>
+
+        <!-- ─── ISE 高负载图示 ─── -->
+        <rect x="722" y="98" width="96" height="36" rx="4" fill="rgba(226,35,26,0.1)" stroke="rgba(226,35,26,0.3)" stroke-width="1"/>
+        <text x="770" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#C00" font-family="sans-serif">ISE 高负载</text>
+        <text x="770" y="127" text-anchor="middle" font-size="9" fill="#C00" font-family="sans-serif">延迟 or 不可达</text>
+
+        <!-- ─── 阶段一：11K/V 扫描（同场景二，简化）─── -->
+        <rect x="8" y="142" width="900" height="82" rx="4" fill="rgba(103,179,70,0.07)" stroke="rgba(103,179,70,0.3)" stroke-width="1"/>
+        <text x="14" y="158" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">① 802.11K/V 加速扫描（同场景二，约 30~70ms）</text>
+
+        <line x1="70" y1="170" x2="225" y2="170" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="220,165 230,170 220,175" fill="#67B346"/>
+        <text x="148" y="165" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">11K 邻居列表 + 11V BSS Transition</text>
+
+        <line x1="70" y1="190" x2="225" y2="190" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="220,185 230,190 220,195" fill="#0D274D"/>
+        <text x="148" y="186" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">定向 Probe + 802.11 Auth + Association</text>
+        <text x="148" y="202" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">Association Request 中无有效 PMKID</text>
+
+        <!-- ─── 阶段二：AAA Cache 查询 ─── -->
+        <rect x="8" y="230" width="900" height="100" rx="4" fill="rgba(245,128,37,0.08)" stroke="rgba(245,128,37,0.3)" stroke-width="1"/>
+        <text x="14" y="247" font-size="10.5" font-weight="700" fill="#b05500" font-family="sans-serif">② WLC 触发认证 → 查询 AAA Cache（ISE 不可达 / Cache First 模式）</text>
+
+        <line x1="225" y1="260" x2="400" y2="260" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="395,255 405,260 395,265" fill="#0D274D"/>
+        <text x="313" y="256" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">EAP-Request/Identity</text>
+
+        <line x1="70" y1="278" x2="225" y2="278" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="220,273 230,278 220,283" fill="#0D274D"/>
+        <text x="148" y="274" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">EAP-Response/Identity（SYLYD02173）</text>
+
+        <!-- WLC 查本地 Cache -->
+        <line x1="400" y1="296" x2="590" y2="296" stroke="#F58025" stroke-width="1.5"/>
+        <polygon points="585,291 595,296 585,301" fill="#F58025"/>
+        <text x="495" y="291" text-anchor="middle" font-size="10" fill="#b05500" font-family="sans-serif">查询 AAA Cache（用户名 SYLYD02173）</text>
+
+        <line x1="590" y1="312" x2="400" y2="312" stroke="#F58025" stroke-width="2"/>
+        <polygon points="405,307 395,312 405,317" fill="#F58025"/>
+        <text x="495" y="308" text-anchor="middle" font-size="10" font-weight="700" fill="#b05500" font-family="sans-serif">Cache 命中！返回用户 Profile + 授权属性</text>
+
+        <!-- ISE 方向显示被跳过 -->
+        <line x1="400" y1="330" x2="770" y2="330" stroke="#ccc" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="585" y="326" text-anchor="middle" font-size="11" fill="#aaa" font-family="sans-serif">（ISE 不可达，跳过远端查询）</text>
+
+        <!-- ─── 阶段三：Local EAP-TLS ─── -->
+        <rect x="8" y="342" width="900" height="290" rx="4" fill="rgba(4,159,217,0.07)" stroke="rgba(4,159,217,0.25)" stroke-width="1"/>
+        <text x="14" y="359" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">③ Local EAP-TLS 认证（WLC 本地完成 TLS 握手，无需 ISE 往返）</text>
+
+        <!-- Local EAP Start -->
+        <line x1="225" y1="372" x2="400" y2="372" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="395,367 405,372 395,377" fill="#049FD9"/>
+        <text x="313" y="368" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS Start（WLC 作为 EAP Server）</text>
+
+        <line x1="70" y1="390" x2="225" y2="390" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="220,385 230,390 220,395" fill="#049FD9"/>
+        <text x="148" y="386" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ClientHello</text>
+
+        <!-- WLC 本地处理 -->
+        <rect x="338" y="400" width="124" height="20" rx="4" fill="rgba(4,159,217,0.12)"/>
+        <text x="400" y="414" text-anchor="middle" font-size="11" fill="#005073" font-family="sans-serif">WLC 本地生成 ServerHello + 证书</text>
+
+        <line x1="225" y1="428" x2="70" y2="428" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="75,423 65,428 75,433" fill="#049FD9"/>
+        <text x="148" y="424" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ServerHello + WLC Certificate + CertRequest</text>
+
+        <line x1="70" y1="448" x2="225" y2="448" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="220,443 230,448 220,453" fill="#049FD9"/>
+        <text x="148" y="444" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: Client Certificate + ClientKeyExchange（多分片）</text>
+
+        <!-- WLC 本地验证客户端证书 -->
+        <rect x="338" y="458" width="124" height="30" rx="4" fill="rgba(4,159,217,0.12)"/>
+        <text x="400" y="470" text-anchor="middle" font-size="11" fill="#005073" font-family="sans-serif">WLC 本地验证客户端证书</text>
+        <text x="400" y="483" text-anchor="middle" font-size="9" fill="#005073" font-family="sans-serif">（Trustpoint 配置，无需 ISE）</text>
+
+        <line x1="225" y1="496" x2="70" y2="496" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="75,491 65,496 75,501" fill="#049FD9"/>
+        <text x="148" y="492" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: ChangeCipherSpec + Finished</text>
+
+        <line x1="70" y1="514" x2="225" y2="514" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="220,509 230,514 220,519" fill="#049FD9"/>
+        <text x="148" y="510" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAP-TLS: Finished（AGV 确认）</text>
+
+        <!-- WLC 验证通过，查 Cache 授权属性 -->
+        <line x1="400" y1="532" x2="590" y2="532" stroke="#F58025" stroke-width="1.5"/>
+        <polygon points="585,527 595,532 585,537" fill="#F58025"/>
+        <text x="495" y="528" text-anchor="middle" font-size="10" fill="#b05500" font-family="sans-serif">从 Cache 读取授权属性（VLAN, dACL, SGT）</text>
+
+        <line x1="590" y1="548" x2="400" y2="548" stroke="#F58025" stroke-width="2"/>
+        <polygon points="405,543 395,548 405,553" fill="#F58025"/>
+        <text x="495" y="544" text-anchor="middle" font-size="10" font-weight="700" fill="#b05500" font-family="sans-serif">返回授权属性（替代 Access-Accept）</text>
+
+        <!-- EAP-Success -->
+        <line x1="225" y1="566" x2="70" y2="566" stroke="#67B346" stroke-width="2"/>
+        <polygon points="75,561 65,566 75,571" fill="#67B346"/>
+        <text x="148" y="562" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">EAP-Success（Local EAP 认证通过）</text>
+
+        <!-- ─── 阶段四：四步握手 ─── -->
+        <rect x="8" y="578" width="900" height="85" rx="4" fill="rgba(4,159,217,0.06)" stroke="rgba(4,159,217,0.2)" stroke-width="1"/>
+        <text x="14" y="594" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">④ 四步握手 + 端口放行</text>
+
+        <line x1="225" y1="606" x2="70" y2="606" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="75,601 65,606 75,611" fill="#049FD9"/>
+        <text x="148" y="602" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M1 → M4（4-Way Handshake）</text>
+
+        <rect x="178" y="618" width="94" height="20" rx="4" fill="rgba(103,179,70,0.15)"/>
+        <text x="225" y="632" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">端口 → Authorized</text>
+
+        <line x1="70" y1="648" x2="400" y2="648" stroke="#67B346" stroke-width="2"/>
+        <polygon points="395,643 405,648 395,653" fill="#67B346"/>
+        <text x="235" y="643" text-anchor="middle" font-size="11" font-weight="700" fill="#3a8a1e" font-family="sans-serif">AGV 数据流恢复（MQTT 心跳重连）</text>
+
+        <!-- 总结对比 -->
+        <rect x="8" y="663" width="900" height="80" rx="4" fill="rgba(245,128,37,0.08)" stroke="rgba(245,128,37,0.3)" stroke-width="1"/>
+        <text x="460" y="683" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b05500" font-family="sans-serif">✓ 核心价值：ISE 故障 / 高延迟时，AGV 漫游仍可正常完成认证，不再停摆</text>
+        <text x="460" y="701" text-anchor="middle" font-size="10.5" fill="#005073" font-family="sans-serif">✓ Local EAP-TLS 在 WLC 本地完成，延迟稳定可预期（约 100~200ms）</text>
+        <text x="460" y="718" text-anchor="middle" font-size="10" fill="#888" font-family="sans-serif">△ EAP-TLS 握手仍需执行（证书交换不可省略），总认证时延约 200~400ms</text>
+
+        <!-- 时间轴 -->
+        <line x1="880" y1="142" x2="880" y2="652" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="875,647 880,657 885,647" fill="#ccc"/>
+        <text x="893" y="400" text-anchor="middle" font-size="9" fill="#aaa" transform="rotate(90,893,400)" font-family="sans-serif">时间轴（非等比例）</text>
+      </svg>
+    </div>
+
+    <h3>逐步分析</h3>
+    <ol class="step-list">
+      <li>
+        <div class="step-content">
+          <div class="step-title">802.11K/V 加速扫描（同场景二）</div>
+          <div class="step-desc">精准定向扫描候选 AP，耗时 30~70ms。</div>
+        </div>
+        <span class="step-time">30~70ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">AAA Cache 命中查询</div>
+          <div class="step-desc">AGV 提交 Identity 后，WLC 先查本地缓存（WNCD AAA Cache）。命中用户 SYLYD02173 的 Profile，确认用户存在，但 EAP-TLS 握手仍需在本地执行。</div>
+        </div>
+        <span class="step-time">1~5ms（本地查询）</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">Local EAP-TLS 握手（WLC 本地完成）</div>
+          <div class="step-desc">
+            WLC 使用配置的 EAP Profile（Trustpoint）作为 EAP Server，与 AGV 完成 TLS 双向握手。
+            全程在 WLC 本地处理，<strong>无需任何 RADIUS 往返 ISE</strong>。
+            延迟稳定、可预期，不受 ISE 负载影响。
+          </div>
+        </div>
+        <span class="step-time">100~200ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">从缓存读取授权属性</div>
+          <div class="step-desc">TLS 握手成功后，WLC 从 AAA Cache 读取预存的授权属性（VLAN ID、dACL、SGT），无需 ISE 下发 Access-Accept。</div>
+        </div>
+        <span class="step-time">1~3ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">四步握手 + 数据流恢复</div>
+          <div class="step-desc">标准 4-Way Handshake，端口放行，MQTT 恢复。</div>
+        </div>
+        <span class="step-time">40~90ms</span>
+      </li>
+    </ol>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>总断网时长估算</h4>
+        <div class="metric" style="color:#b05500">200~400ms</div>
+        <p>Local EAP-TLS 延迟稳定，不随 ISE 负载变化</p>
+      </div>
+      <div class="analysis-card">
+        <h4>ISE 依赖程度</h4>
+        <div class="metric" style="color:#3a8a1e">极低</div>
+        <p>ISE 故障时 AGV 仍可正常漫游认证，业务不中断</p>
+      </div>
+      <div class="analysis-card">
+        <h4>核心价值</h4>
+        <div class="metric" style="font-size:1.2rem;color:#049FD9">故障隔离</div>
+        <p>将 ISE 从关键路径移除，显著提升网络弹性和 SLA</p>
+      </div>
+    </div>
+
+    <div class="chapter-quote">
+      "把通行证存在门卫室——即使总部电话打不通，门卫也能让认识的人进门。"
+    </div>
+  </div>
+</section>
+<!-- ============================================================
+     场景四：802.11K/V + OKC，终端支持 OKC
+============================================================ -->
+<section class="chapter" id="s4">
+  <div class="container">
+    <div class="chapter-badge">场景四</div>
+
+    <div class="scenario-header">
+      <div class="scenario-number">4</div>
+      <div>
+        <h3>钥匙提前复制好：OKC 让 EAP-TLS 消失于漫游路径</h3>
+        <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin:0 0 var(--space-2);">
+          终端支持 OKC，WLC 在全局共享 PMK 缓存；漫游时无需重新认证，
+          仅凭 PMKID 即可直接进入四步握手
+        </p>
+        <div class="scenario-config">
+          <span class="config-tag on">802.11K ✓</span>
+          <span class="config-tag on">802.11V ✓</span>
+          <span class="config-tag on">OKC ✓（终端支持）</span>
+          <span class="config-tag off">802.11R ✗</span>
+          <span class="config-tag neutral">无需 EAP-TLS 重认证</span>
+          <span class="config-tag neutral">ISE 依赖 = 0（漫游时）</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>问题四：OKC 的魔法究竟是什么？PMK 怎么"传递"到新 AP？</h3>
+    <p>
+      要理解 OKC，先要理解一个基本事实：EAP-TLS 认证成功后，最终产物是一个
+      <strong>PMK（Pairwise Master Key，成对主密钥）</strong>——这是双方身份验证的"信任结晶"。
+      有了 PMK，就可以直接做四步握手，推导出加密数据用的 PTK，而无需重新证明身份。
+    </p>
+    <p>
+      <strong>场景一和二的问题：</strong>PMK 只保存在原来的 AP 和 WLC 上。AGV 漫游到新 AP 时，
+      新 AP 不认识这把"钥匙"，只能重新认证。
+    </p>
+    <p>
+      <strong>OKC 的解法：</strong>Cisco 9800 WLC 将 PMK 缓存在 WLC 的全局缓存中，
+      所有 AP 共享访问。当 AGV 漫游到新 AP 时，会在 Association Request 中携带
+      <strong>PMKID</strong>（PMK 的指纹哈希）。WLC 一查全局缓存，命中！
+      直接跳过整个 EAP 认证流程，进入四步握手。
+    </p>
+    <p>
+      这就像酒店的万能门卡系统——前台认证一次，生成房卡（PMK），
+      之后在酒店任何一层楼、任何一个副卡读卡器（任何 AP）都能直接刷卡进门，
+      不需要每次都回前台重新办理。
+    </p>
+
+    <div class="callout">
+      <strong>OKC vs 802.11r 的区别：</strong>OKC（Opportunistic Key Caching）是 Cisco 的实现方案，
+      基于 IEEE 802.11i 的 PMKSA 缓存机制。关联请求中携带 PMKID，WLC 验证后直接许可。
+      整个过程发生在 <em>关联之后</em>、<em>四步握手之前</em>，无需提前与目标 AP 预协商。
+      这是与 802.11r FT（Fast Transition）的核心区别——FT 要求在关联 <em>之前</em> 就与目标 AP 完成密钥推导。
+    </div>
+
+    <h4>完整时序图</h4>
+    <div class="seq-diagram-wrap">
+      <svg viewBox="0 0 900 680" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <rect width="900" height="680" fill="#F7F8FA" rx="8"/>
+        <text x="450" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0D274D" font-family="sans-serif">场景四：802.11K/V + OKC — 跳过 EAP-TLS，直接四步握手</text>
+
+        <!-- 参与者 -->
+        <rect x="30" y="50" width="110" height="38" rx="6" fill="#0D274D"/>
+        <text x="85" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AGV（终端）</text>
+        <rect x="200" y="50" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="255" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AP1（旧）</text>
+        <rect x="380" y="50" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="435" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AP2（新）</text>
+        <rect x="570" y="50" width="120" height="38" rx="6" fill="#049FD9"/>
+        <text x="630" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="sans-serif">WLC（9800）</text>
+        <text x="630" y="80" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.8)" font-family="sans-serif">PMK 全局缓存</text>
+        <rect x="750" y="50" width="110" height="38" rx="6" fill="#9232AC" opacity="0.45"/>
+        <text x="805" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="sans-serif">ISE（RADIUS）</text>
+        <text x="805" y="80" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)" font-family="sans-serif">漫游时不参与</text>
+
+        <!-- 生命线 -->
+        <line x1="85"  y1="88" x2="85"  y2="670" stroke="#0D274D" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="255" y1="88" x2="255" y2="670" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="435" y1="88" x2="435" y2="670" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="630" y1="88" x2="630" y2="670" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="805" y1="88" x2="805" y2="670" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.15"/>
+
+        <!-- ISE 划掉标记 -->
+        <line x1="750" y1="55" x2="860" y2="83" stroke="rgba(226,35,26,0.5)" stroke-width="2"/>
+        <line x1="860" y1="55" x2="750" y2="83" stroke="rgba(226,35,26,0.5)" stroke-width="2"/>
+
+        <!-- ─── 前提：初次认证时 PMK 已缓存 ─── -->
+        <rect x="8" y="95" width="880" height="50" rx="4" fill="rgba(13,39,77,0.06)" stroke="rgba(13,39,77,0.2)" stroke-width="1"/>
+        <text x="450" y="113" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0D274D" font-family="sans-serif">【前提】AGV 初次接入时已完成完整 EAP-TLS 认证，WLC 全局 PMK Cache 中已存有 PMK（与 PMKID 对应）</text>
+        <text x="450" y="132" text-anchor="middle" font-size="10" fill="#666" font-family="sans-serif">后续每次漫游均可复用此 PMK，无需重复 EAP-TLS 认证</text>
+
+        <!-- ─── 阶段一：11K/V 加速扫描 ─── -->
+        <rect x="8" y="152" width="880" height="82" rx="4" fill="rgba(103,179,70,0.07)" stroke="rgba(103,179,70,0.3)" stroke-width="1"/>
+        <text x="14" y="168" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">① 802.11K/V 加速漫游决策（约 30~70ms，同场景二/三）</text>
+
+        <line x1="85" y1="180" x2="255" y2="180" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="250,175 260,180 250,185" fill="#67B346"/>
+        <text x="170" y="176" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">11K Neighbor Report Request/Response</text>
+
+        <line x1="255" y1="198" x2="85" y2="198" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,193 80,198 90,203" fill="#049FD9"/>
+        <text x="170" y="194" text-anchor="middle" font-size="10" fill="#005073" font-family="sans-serif">11V BSS Transition Request（推荐 AP2）</text>
+
+        <line x1="85" y1="218" x2="435" y2="218" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="430,213 440,218 430,223" fill="#67B346"/>
+        <text x="260" y="214" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">定向 Probe Request → AP2（仅扫描候选 AP）</text>
+
+        <line x1="435" y1="232" x2="85" y2="232" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="90,227 80,232 90,237" fill="#67B346"/>
+        <text x="260" y="228" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">Probe Response（AP2，携带 PMKID 列表）</text>
+
+        <!-- ─── 阶段二：OKC 快速关联 ─── -->
+        <rect x="8" y="245" width="880" height="130" rx="4" fill="rgba(4,159,217,0.08)" stroke="rgba(4,159,217,0.3)" stroke-width="1"/>
+        <text x="14" y="262" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">② OKC 快速关联（携带 PMKID，WLC 验证缓存命中 → 跳过 EAP-TLS）</text>
+
+        <line x1="85" y1="275" x2="435" y2="275" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="430,270 440,275 430,280" fill="#0D274D"/>
+        <text x="260" y="271" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">802.11 Auth Request → AP2</text>
+
+        <line x1="435" y1="290" x2="85" y2="290" stroke="#0D274D" stroke-width="1.5"/>
+        <polygon points="90,285 80,290 90,295" fill="#0D274D"/>
+        <text x="260" y="286" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">802.11 Auth Response</text>
+
+        <!-- OKC 关键步骤 -->
+        <line x1="85" y1="310" x2="435" y2="310" stroke="#049FD9" stroke-width="2"/>
+        <polygon points="430,305 440,310 430,315" fill="#049FD9"/>
+        <text x="260" y="304" text-anchor="middle" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">Association Request（携带 PMKID = Hash(PMK)）</text>
+
+        <!-- WLC 验证 PMKID -->
+        <line x1="435" y1="326" x2="630" y2="326" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="625,321 635,326 625,331" fill="#049FD9"/>
+        <text x="533" y="322" text-anchor="middle" font-size="10" fill="#005073" font-family="sans-serif">PMKID 验证请求 → WLC 全局 PMK Cache</text>
+
+        <rect x="568" y="334" width="124" height="20" rx="4" fill="rgba(103,179,70,0.15)"/>
+        <text x="630" y="348" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">✓ PMKID 命中！复用 PMK</text>
+
+        <line x1="435" y1="360" x2="85" y2="360" stroke="#67B346" stroke-width="2"/>
+        <polygon points="90,355 80,360 90,365" fill="#67B346"/>
+        <text x="260" y="354" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">Association Response（成功，EAP-TLS 直接跳过！）</text>
+
+        <!-- ISE 不参与标记 -->
+        <text x="805" y="320" text-anchor="middle" font-size="10" fill="rgba(146,50,172,0.4)" font-family="sans-serif">（不参与）</text>
+
+        <!-- ─── 阶段三：四步握手 ─── -->
+        <rect x="8" y="375" width="880" height="115" rx="4" fill="rgba(103,179,70,0.07)" stroke="rgba(103,179,70,0.3)" stroke-width="1"/>
+        <text x="14" y="392" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">③ 四步握手（基于复用的 PMK 推导 PTK，无需 EAP）</text>
+
+        <line x1="435" y1="405" x2="85" y2="405" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,400 80,405 90,410" fill="#049FD9"/>
+        <text x="260" y="401" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M1（ANonce）</text>
+
+        <line x1="85" y1="420" x2="435" y2="420" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,415 440,420 430,425" fill="#049FD9"/>
+        <text x="260" y="416" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M2（SNonce + MIC）</text>
+
+        <line x1="435" y1="435" x2="85" y2="435" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,430 80,435 90,440" fill="#049FD9"/>
+        <text x="260" y="431" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M3（GTK + MIC）</text>
+
+        <line x1="85" y1="450" x2="435" y2="450" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="430,445 440,450 430,455" fill="#049FD9"/>
+        <text x="260" y="446" text-anchor="middle" font-size="10" fill="#049FD9" font-family="sans-serif">EAPOL M4（确认）</text>
+
+        <rect x="388" y="462" width="94" height="20" rx="4" fill="rgba(103,179,70,0.15)"/>
+        <text x="435" y="476" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">端口 → Authorized</text>
+
+        <line x1="85" y1="492" x2="630" y2="492" stroke="#67B346" stroke-width="2.5"/>
+        <polygon points="625,487 635,492 625,497" fill="#67B346"/>
+        <text x="357" y="487" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">AGV 数据流恢复（MQTT 心跳重连）</text>
+
+        <!-- 总结 -->
+        <rect x="8" y="505" width="880" height="65" rx="4" fill="rgba(103,179,70,0.1)" stroke="rgba(103,179,70,0.35)" stroke-width="1"/>
+        <text x="450" y="525" text-anchor="middle" font-size="12" font-weight="700" fill="#3a8a1e" font-family="sans-serif">✓ EAP-TLS 认证完全消除于漫游路径！ISE 依赖 = 0（漫游时）</text>
+        <text x="450" y="544" text-anchor="middle" font-size="10.5" fill="#005073" font-family="sans-serif">总断网时长估算：80~180ms（11K/V 扫描 + 关联 + 四步握手）</text>
+        <text x="450" y="560" text-anchor="middle" font-size="10" fill="#888" font-family="sans-serif">△ 前提：终端必须支持 OKC；PMK 缓存需在同一 WLC / Site Tag 范围内有效</text>
+
+        <!-- 时间轴 -->
+        <line x1="858" y1="152" x2="858" y2="495" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="853,490 858,500 863,490" fill="#ccc"/>
+        <text x="871" y="325" text-anchor="middle" font-size="9" fill="#aaa" transform="rotate(90,871,325)" font-family="sans-serif">时间轴（非等比例）</text>
+
+        <!-- 图例 -->
+        <line x1="30" y1="628" x2="75" y2="628" stroke="#67B346" stroke-width="1.5"/>
+        <text x="80" y="632" font-size="11" fill="#666" font-family="sans-serif">11K/V 优化</text>
+        <line x1="175" y1="628" x2="220" y2="628" stroke="#049FD9" stroke-width="2"/>
+        <text x="225" y="632" font-size="11" fill="#666" font-family="sans-serif">OKC 关键路径</text>
+        <line x1="350" y1="628" x2="395" y2="628" stroke="#049FD9" stroke-width="1.5"/>
+        <text x="400" y="632" font-size="11" fill="#666" font-family="sans-serif">4-Way Handshake</text>
+        <line x1="540" y1="628" x2="585" y2="628" stroke="#67B346" stroke-width="2.5"/>
+        <text x="590" y="632" font-size="11" fill="#666" font-family="sans-serif">数据流恢复</text>
+        <rect x="695" y="621" width="55" height="14" rx="3" fill="rgba(146,50,172,0.15)"/>
+        <text x="722" y="632" text-anchor="middle" font-size="11" fill="rgba(146,50,172,0.6)" font-family="sans-serif">ISE 不参与</text>
+      </svg>
+    </div>
+
+    <h3>逐步分析</h3>
+    <ol class="step-list">
+      <li>
+        <div class="step-content">
+          <div class="step-title">初次认证（一次性成本）</div>
+          <div class="step-desc">AGV 首次接入时完整执行 EAP-TLS，成功后 WLC 将 PMK 存入全局缓存。此后所有漫游均可复用。</div>
+        </div>
+        <span class="step-time">一次性</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">802.11K/V 精准导航（同前）</div>
+          <div class="step-desc">邻居列表 + BSS Transition，快速定位目标 AP2。</div>
+        </div>
+        <span class="step-time">30~70ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">携带 PMKID 的 Association Request（OKC 核心）</div>
+          <div class="step-desc">AGV 在 Association Request 的 RSN IE 中携带 PMKID = HMAC-SHA1(PMK, AP MAC + AGV MAC)。WLC 比对全局 PMK Cache，命中即免 EAP。</div>
+        </div>
+        <span class="step-time">10~20ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">四步握手（EAP-TLS 完全跳过）</div>
+          <div class="step-desc">直接用复用的 PMK 推导 PTK/GTK，完成加密信道建立。整个流程不涉及 ISE，延迟稳定极短。</div>
+        </div>
+        <span class="step-time">20~40ms</span>
+      </li>
+    </ol>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>总断网时长估算</h4>
+        <div class="metric" style="color:#3a8a1e">80~180ms</div>
+        <p>达到企业无线漫游的优秀水准，MQTT 通常不受影响</p>
+      </div>
+      <div class="analysis-card">
+        <h4>ISE 依赖（漫游时）</h4>
+        <div class="metric" style="color:#3a8a1e">零</div>
+        <p>ISE 完全退出漫游关键路径，故障也不影响 AGV 漫游</p>
+      </div>
+      <div class="analysis-card">
+        <h4>关键前提</h4>
+        <div class="metric" style="font-size:1.1rem;color:#049FD9">终端支持 OKC</div>
+        <p>需确认 AGV 无线网卡驱动支持 OKC（PMKSA 缓存），部分工业终端可能不支持</p>
+      </div>
+    </div>
+
+    <div class="chapter-quote">
+      "钥匙提前配好，换门的时候直接刷——不用回前台，不用排队，门一秒就开了。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     场景五：802.11R Mixed Mode
+============================================================ -->
+<section class="chapter" id="s5">
+  <div class="container">
+    <div class="chapter-badge">场景五</div>
+
+    <div class="scenario-header">
+      <div class="scenario-number">5</div>
+      <div>
+        <h3>提前谈好条件：802.11r FT 在关联前完成密钥协商</h3>
+        <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin:0 0 var(--space-2);">
+          Mixed Mode 兼容 11r 与非 11r 终端；支持 11r 的 AGV 可在漫游前
+          完成密钥推导，关联即放行；不支持 11r 的终端退化为场景二
+        </p>
+        <div class="scenario-config">
+          <span class="config-tag on">802.11K ✓</span>
+          <span class="config-tag on">802.11V ✓</span>
+          <span class="config-tag on">802.11R Mixed Mode ✓</span>
+          <span class="config-tag neutral">支持 11r 终端：无 EAP-TLS</span>
+          <span class="config-tag neutral">不支持 11r 终端：退化为场景二</span>
+          <span class="config-tag neutral">ISE 依赖 = 0（漫游时）</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>问题五：802.11r 与 OKC 都能跳过 EAP-TLS，它们有什么本质区别？</h3>
+    <p>
+      两者解决的是同一个问题（避免漫游时重复 EAP 认证），但切入点不同：
+    </p>
+    <p>
+      <strong>OKC（场景四）：</strong>在 Association 时携带 PMKID，WLC 验证缓存命中后免 EAP，
+      然后再做四步握手。密钥推导发生在 <em>关联完成之后</em>。
+    </p>
+    <p>
+      <strong>802.11r FT（场景五）：</strong>AGV 在还连接着 AP1 时，就提前与目标 AP2 通过
+      <strong>FT 预认证（Over-the-DS 或 Over-the-Air）</strong>完成密钥协商，
+      生成 PTK 所需的 ANonce/SNonce。漫游时的 Reassociation Request/Response
+      同时完成关联和密钥确认，实现真正的"无缝切换"。密钥推导发生在 <em>关联之前</em>。
+    </p>
+    <p>
+      类比：OKC 是"到了新门口，掏出备用钥匙开门"；
+      802.11r 是"还没离开旧房间，就已经在门口等好了，钥匙都对好了，一步跨进去"。
+    </p>
+
+    <div class="callout">
+      <strong>Mixed Mode 的关键价值：</strong>开启 Mixed Mode 后，SSID 同时宣告 FT 和非 FT 的 AKM Suite。
+      支持 802.11r 的 AGV 使用 FT 流程（最优路径）；
+      不支持 802.11r 的老旧终端使用标准 802.1X 流程（即场景二的完整 EAP-TLS）。
+      两类终端共存于同一 SSID，互不影响。
+    </div>
+
+    <h4>完整时序图（支持 802.11r 的 AGV）</h4>
+    <div class="seq-diagram-wrap">
+      <svg viewBox="0 0 900 720" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <rect width="900" height="720" fill="#F7F8FA" rx="8"/>
+        <text x="450" y="28" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0D274D" font-family="sans-serif">场景五：802.11R Mixed Mode（支持 11r 的终端）— FT Over-the-DS 时序</text>
+
+        <!-- 参与者 -->
+        <rect x="30" y="45" width="110" height="38" rx="6" fill="#0D274D"/>
+        <text x="85" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AGV（终端）</text>
+        <rect x="200" y="45" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="255" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AP1（当前）</text>
+        <rect x="380" y="45" width="110" height="38" rx="6" fill="#005073"/>
+        <text x="435" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">AP2（目标）</text>
+        <rect x="570" y="45" width="120" height="38" rx="6" fill="#049FD9"/>
+        <text x="630" y="61" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="sans-serif">WLC（9800）</text>
+        <text x="630" y="75" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.8)" font-family="sans-serif">FT 控制器</text>
+        <rect x="750" y="45" width="110" height="38" rx="6" fill="#9232AC" opacity="0.4"/>
+        <text x="805" y="61" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="sans-serif">ISE（RADIUS）</text>
+        <text x="805" y="75" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)" font-family="sans-serif">漫游时不参与</text>
+
+        <!-- 生命线 -->
+        <line x1="85"  y1="83" x2="85"  y2="710" stroke="#0D274D" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="255" y1="83" x2="255" y2="710" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="435" y1="83" x2="435" y2="710" stroke="#005073" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="630" y1="83" x2="630" y2="710" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.3"/>
+        <line x1="805" y1="83" x2="805" y2="710" stroke="#9232AC" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.12"/>
+
+        <!-- ISE 划掉 -->
+        <line x1="750" y1="50" x2="860" y2="78" stroke="rgba(226,35,26,0.45)" stroke-width="2"/>
+        <line x1="860" y1="50" x2="750" y2="78" stroke="rgba(226,35,26,0.45)" stroke-width="2"/>
+
+        <!-- 前提 -->
+        <rect x="8" y="90" width="880" height="40" rx="4" fill="rgba(13,39,77,0.06)" stroke="rgba(13,39,77,0.2)" stroke-width="1"/>
+        <text x="450" y="107" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0D274D" font-family="sans-serif">【前提】初次 EAP-TLS 认证成功后，R0KH（WLC）持有 PMK-R0；R1KH（AP1）持有 PMK-R1</text>
+        <text x="450" y="122" text-anchor="middle" font-size="10" fill="#666" font-family="sans-serif">AGV 持有 PMK-R1-Name，可在漫游前向目标 AP 预协商密钥</text>
+
+        <!-- ─── 阶段一：仍在 AP1 连接中的预协商 ─── -->
+        <rect x="8" y="137" width="880" height="140" rx="4" fill="rgba(4,159,217,0.08)" stroke="rgba(4,159,217,0.3)" stroke-width="1.5"/>
+        <text x="14" y="154" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">① FT 预协商阶段（AGV 仍在 AP1 连接中，提前与 AP2 完成密钥推导）</text>
+
+        <!-- 11K 邻居列表 -->
+        <line x1="85" y1="167" x2="255" y2="167" stroke="#67B346" stroke-width="1.5"/>
+        <polygon points="250,162 260,167 250,172" fill="#67B346"/>
+        <text x="170" y="162" text-anchor="middle" font-size="10" fill="#3a8a1e" font-family="sans-serif">11K Neighbor Report（含 AP2 候选）</text>
+
+        <!-- FT Auth Request Over-the-DS -->
+        <line x1="85" y1="185" x2="255" y2="185" stroke="#049FD9" stroke-width="2"/>
+        <polygon points="250,180 260,185 250,190" fill="#049FD9"/>
+        <text x="170" y="179" text-anchor="middle" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">FT Auth Request（通过 AP1 DS 转发）</text>
+        <text x="170" y="197" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">携带 MDE + FTE（SNonce, R0KH-ID）</text>
+
+        <!-- AP1 通过 DS 转发给 AP2/WLC -->
+        <line x1="255" y1="210" x2="630" y2="210" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="625,205 635,210 625,215" fill="#049FD9"/>
+        <text x="443" y="206" text-anchor="middle" font-size="11" fill="#005073" font-family="sans-serif">AP1 通过 CAPWAP DS 转发至 WLC → AP2</text>
+
+        <!-- AP2/WLC 生成 ANonce，推导 PMK-R1, PTK -->
+        <rect x="558" y="218" width="144" height="28" rx="4" fill="rgba(4,159,217,0.12)"/>
+        <text x="630" y="230" text-anchor="middle" font-size="11" fill="#005073" font-family="sans-serif">WLC: 推导 PMK-R1（AP2）</text>
+        <text x="630" y="243" text-anchor="middle" font-size="9" fill="#005073" font-family="sans-serif">生成 ANonce，准备 PTK</text>
+
+        <!-- FT Auth Response -->
+        <line x1="630" y1="252" x2="255" y2="252" stroke="#049FD9" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="260,247 250,252 260,257" fill="#049FD9"/>
+
+        <line x1="255" y1="267" x2="85" y2="267" stroke="#049FD9" stroke-width="2"/>
+        <polygon points="90,262 80,267 90,272" fill="#049FD9"/>
+        <text x="170" y="261" text-anchor="middle" font-size="10.5" font-weight="700" fill="#005073" font-family="sans-serif">FT Auth Response（经 AP1 DS 返回）</text>
+        <text x="170" y="275" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">携带 ANonce + FTE，AGV 推导 PTK</text>
+
+        <!-- ─── 阶段二：漫游切换 ─── -->
+        <rect x="8" y="283" width="880" height="130" rx="4" fill="rgba(103,179,70,0.08)" stroke="rgba(103,179,70,0.3)" stroke-width="1.5"/>
+        <text x="14" y="300" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">② 漫游切换（Reassociation = 关联 + 密钥确认，一步完成）</text>
+
+        <!-- 11V BSS Transition -->
+        <line x1="255" y1="313" x2="85" y2="313" stroke="#049FD9" stroke-width="1.5"/>
+        <polygon points="90,308 80,313 90,318" fill="#049FD9"/>
+        <text x="170" y="309" text-anchor="middle" font-size="10" fill="#005073" font-family="sans-serif">11V BSS Transition Request（RSSI 跌破阈值）</text>
+
+        <!-- Reassociation -->
+        <line x1="85" y1="332" x2="435" y2="332" stroke="#67B346" stroke-width="2.5"/>
+        <polygon points="430,327 440,332 430,337" fill="#67B346"/>
+        <text x="260" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#3a8a1e" font-family="sans-serif">Reassociation Request → AP2（携带 FTE，含 SNonce）</text>
+        <text x="260" y="343" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">同时完成重新关联 + PTK 确认，无需另行 EAP-TLS</text>
+
+        <line x1="435" y1="360" x2="85" y2="360" stroke="#67B346" stroke-width="2.5"/>
+        <polygon points="90,355 80,360 90,365" fill="#67B346"/>
+        <text x="260" y="355" text-anchor="middle" font-size="11" font-weight="700" fill="#3a8a1e" font-family="sans-serif">Reassociation Response（成功！端口立即 Authorized）</text>
+        <text x="260" y="372" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">RA Trace: 11r PMKID match found / Fast roam = True</text>
+
+        <!-- ISE 不参与 -->
+        <text x="805" y="340" text-anchor="middle" font-size="10" fill="rgba(146,50,172,0.4)" font-family="sans-serif">（不参与）</text>
+
+        <!-- ─── 阶段三：数据流立即恢复 ─── -->
+        <rect x="8" y="418" width="880" height="65" rx="4" fill="rgba(103,179,70,0.1)" stroke="rgba(103,179,70,0.35)" stroke-width="1"/>
+        <text x="14" y="435" font-size="10.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">③ 数据流即时恢复（无需额外四步握手，PTK 已在预协商阶段完成）</text>
+
+        <line x1="85" y1="453" x2="630" y2="453" stroke="#67B346" stroke-width="2.5"/>
+        <polygon points="625,448 635,453 625,458" fill="#67B346"/>
+        <text x="357" y="448" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3a8a1e" font-family="sans-serif">AGV 数据流恢复（MQTT 心跳重连）</text>
+
+        <!-- 总结 -->
+        <rect x="8" y="490" width="880" height="80" rx="4" fill="rgba(4,159,217,0.08)" stroke="rgba(4,159,217,0.3)" stroke-width="1"/>
+        <text x="450" y="512" text-anchor="middle" font-size="12" font-weight="700" fill="#005073" font-family="sans-serif">✓ 最优路径：总断网时长 50~120ms，达到语音级漫游标准</text>
+        <text x="450" y="531" text-anchor="middle" font-size="10.5" fill="#3a8a1e" font-family="sans-serif">✓ EAP-TLS 完全消除；PTK 在漫游前已推导完毕；Reassociation = 关联 + 完成</text>
+        <text x="450" y="550" text-anchor="middle" font-size="10" fill="#888" font-family="sans-serif">△ 需终端支持 802.11r；Mixed Mode 可兼容不支持 11r 的老旧设备（退化为场景二）</text>
+
+        <!-- 不支持 11r 终端说明 -->
+        <rect x="8" y="578" width="880" height="50" rx="4" fill="rgba(13,39,77,0.05)" stroke="rgba(13,39,77,0.15)" stroke-width="1"/>
+        <text x="450" y="598" text-anchor="middle" font-size="11" font-weight="700" fill="#0D274D" font-family="sans-serif">不支持 802.11r 的终端（Mixed Mode 退化）</text>
+        <text x="450" y="617" text-anchor="middle" font-size="10.5" fill="#58585B" font-family="sans-serif">WLC 检测到无 FT AKM → 按标准 802.1X 流程处理 → 与场景二完全相同（完整 EAP-TLS）</text>
+
+        <!-- 时间轴 -->
+        <line x1="858" y1="137" x2="858" y2="456" stroke="#ccc" stroke-width="1.5"/>
+        <polygon points="853,451 858,461 863,451" fill="#ccc"/>
+        <text x="871" y="300" text-anchor="middle" font-size="9" fill="#aaa" transform="rotate(90,871,300)" font-family="sans-serif">时间轴（非等比例）</text>
+      </svg>
+    </div>
+
+    <h3>逐步分析</h3>
+    <ol class="step-list">
+      <li>
+        <div class="step-content">
+          <div class="step-title">初次认证（一次性成本）</div>
+          <div class="step-desc">完整 EAP-TLS，WLC（R0KH）生成 PMK-R0，分发给各 AP（R1KH）。此后漫游无需重复。</div>
+        </div>
+        <span class="step-time">一次性</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">FT 预协商（Over-the-DS，仍在 AP1 连接中）</div>
+          <div class="step-desc">
+            AGV 通过 AP1 的 DS（分布式系统）向目标 AP2 发送 FT Auth Request，
+            携带 MDE + FTE。WLC 作为中转，完成 PMK-R1 推导和 ANonce 生成。
+            AGV 收到 FT Auth Response 后，已具备推导 PTK 的全部材料。
+          </div>
+        </div>
+        <span class="step-time">20~40ms</span>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">Reassociation（关联即完成，无需额外四步握手）</div>
+          <div class="step-desc">
+            AGV 向 AP2 发送 Reassociation Request，同时携带 FTE（含 SNonce + MIC），
+            AP2/WLC 验证后回复 Reassociation Response。
+            此时 PTK 已确认，端口立即放行，数据流可立即恢复。
+          </div>
+        </div>
+        <span class="step-time">10~20ms</span>
+      </li>
+    </ol>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>总断网时长估算</h4>
+        <div class="metric" style="color:#3a8a1e">50~120ms</div>
+        <p>业界最优，达到语音/实时视频级漫游标准</p>
+      </div>
+      <div class="analysis-card">
+        <h4>ISE 依赖（漫游时）</h4>
+        <div class="metric" style="color:#3a8a1e">零</div>
+        <p>漫游全程不涉及 ISE，业务连续性最高</p>
+      </div>
+      <div class="analysis-card">
+        <h4>Mixed Mode 兼容性</h4>
+        <div class="metric" style="color:#049FD9">双轨并行</div>
+        <p>11r 终端走 FT 快速路径；非 11r 终端自动回退到标准 EAP 流程</p>
+      </div>
+    </div>
+
+    <div class="chapter-quote">
+      "还没离开旧房间，就已经把新门的钥匙配好了——漫游的那一步，门直接开着。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     对比总表
+============================================================ -->
+<section class="chapter" id="compare">
+  <div class="container">
+    <div class="chapter-badge">综合对比</div>
+    <h2>五场景全景对比</h2>
+    <p>
+      用一张表，看清五个场景在每个关键维度上的差异——
+      从扫描到认证，从 ISE 依赖到最终断网时长，一目了然。
+    </p>
+
+    <div class="table-scroll-wrapper">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>场景一<br><small>无任何特性</small></th>
+            <th>场景二<br><small>11K/V，无 OKC</small></th>
+            <th>场景三<br><small>11K/V + AAA Cache</small></th>
+            <th>场景四<br><small>11K/V + OKC</small></th>
+            <th>场景五<br><small>11K/V + 802.11r</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>802.11K 邻居列表</strong></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-yes">有</span></td>
+            <td><span class="badge-yes">有</span></td>
+            <td><span class="badge-yes">有</span></td>
+            <td><span class="badge-yes">有</span></td>
+          </tr>
+          <tr>
+            <td><strong>802.11V BSS Transition</strong></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-yes">有</span></td>
+            <td><span class="badge-yes">有</span></td>
+            <td><span class="badge-yes">有</span></td>
+            <td><span class="badge-yes">有</span></td>
+          </tr>
+          <tr>
+            <td><strong>OKC（PMKSA 缓存）</strong></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-no">无/不支持</span></td>
+            <td><span class="badge-no">无/不支持</span></td>
+            <td><span class="badge-yes">有（终端支持）</span></td>
+            <td><span class="badge-partial">不适用（FT 替代）</span></td>
+          </tr>
+          <tr>
+            <td><strong>802.11r Fast Transition</strong></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-yes">有（Mixed Mode）</span></td>
+          </tr>
+          <tr>
+            <td><strong>AAA Cache</strong></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-no">无</span></td>
+            <td><span class="badge-yes">有（17.18.1+）</span></td>
+            <td><span class="badge-no">无（可叠加）</span></td>
+            <td><span class="badge-no">无（可叠加）</span></td>
+          </tr>
+          <tr>
+            <td><strong>扫描阶段时延</strong></td>
+            <td>150~400ms<br><small>全信道盲扫</small></td>
+            <td>20~50ms<br><small>定向扫描</small></td>
+            <td>20~50ms<br><small>定向扫描</small></td>
+            <td>20~50ms<br><small>定向扫描</small></td>
+            <td>20~50ms<br><small>定向扫描</small></td>
+          </tr>
+          <tr>
+            <td><strong>EAP-TLS 认证</strong></td>
+            <td><span class="badge-no">完整（远端 ISE）</span></td>
+            <td><span class="badge-no">完整（远端 ISE）</span></td>
+            <td><span class="badge-partial">完整（本地 EAP）</span></td>
+            <td><span class="badge-yes">跳过</span></td>
+            <td><span class="badge-yes">跳过</span></td>
+          </tr>
+          <tr>
+            <td><strong>ISE 依赖程度</strong></td>
+            <td>🔴 极高<br><small>每次漫游依赖</small></td>
+            <td>🔴 极高<br><small>每次漫游依赖</small></td>
+            <td>🟡 极低<br><small>故障时自动本地</small></td>
+            <td>🟢 零<br><small>漫游时不涉及</small></td>
+            <td>🟢 零<br><small>漫游时不涉及</small></td>
+          </tr>
+          <tr>
+            <td><strong>四步握手</strong></td>
+            <td>需要</td>
+            <td>需要</td>
+            <td>需要</td>
+            <td>需要</td>
+            <td>Reassoc 内完成<br><small>无独立四步握手</small></td>
+          </tr>
+          <tr>
+            <td><strong>总断网时长估算</strong></td>
+            <td>800ms~3s+<br><small>ISE 延迟决定</small></td>
+            <td>400~700ms<br><small>ISE 延迟决定</small></td>
+            <td>200~400ms<br><small>本地 EAP，稳定</small></td>
+            <td>80~180ms<br><small>无 EAP</small></td>
+            <td>50~120ms<br><small>最优</small></td>
+          </tr>
+          <tr>
+            <td><strong>MQTT 停摆风险</strong></td>
+            <td>🔴 极高</td>
+            <td>🟠 高</td>
+            <td>🟡 低</td>
+            <td>🟢 极低</td>
+            <td>🟢 极低</td>
+          </tr>
+          <tr>
+            <td><strong>终端兼容性要求</strong></td>
+            <td>无特殊要求</td>
+            <td>支持 11K/V</td>
+            <td>支持 11K/V</td>
+            <td>必须支持 OKC</td>
+            <td>支持 11r（Mixed 可兼容不支持设备）</td>
+          </tr>
+          <tr>
+            <td><strong>适用场景</strong></td>
+            <td>不推荐<br><small>仅测试/基准</small></td>
+            <td>老旧终端<br><small>无更好选择时</small></td>
+            <td>ISE 稳定性保障<br><small>作为兜底方案</small></td>
+            <td>工业 AGV 推荐<br><small>终端支持 OKC</small></td>
+            <td>最优方案<br><small>新终端首选</small></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>时延构成可视化对比</h3>
+    <div class="seq-diagram-wrap">
+      <svg viewBox="0 0 860 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <rect width="860" height="320" fill="#F7F8FA" rx="8"/>
+        <text x="430" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#0D274D" font-family="sans-serif">各场景漫游断网时长构成对比（估算值，ISE 正常负载）</text>
+
+        <!-- Y 轴 -->
+        <line x1="80" y1="45" x2="80" y2="260" stroke="#ccc" stroke-width="1.5"/>
+        <line x1="80" y1="260" x2="840" y2="260" stroke="#ccc" stroke-width="1.5"/>
+
+        <!-- Y 轴刻度 -->
+        <text x="72" y="264" text-anchor="end" font-size="11" fill="#888" font-family="sans-serif">0ms</text>
+        <line x1="78" y1="210" x2="840" y2="210" stroke="#eee" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="72" y="214" text-anchor="end" font-size="11" fill="#888" font-family="sans-serif">200ms</text>
+        <line x1="78" y1="160" x2="840" y2="160" stroke="#eee" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="72" y="164" text-anchor="end" font-size="11" fill="#888" font-family="sans-serif">400ms</text>
+        <line x1="78" y1="110" x2="840" y2="110" stroke="#eee" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="72" y="114" text-anchor="end" font-size="11" fill="#888" font-family="sans-serif">600ms</text>
+        <line x1="78" y1="60" x2="840" y2="60" stroke="#eee" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="72" y="64" text-anchor="end" font-size="11" fill="#888" font-family="sans-serif">800ms</text>
+
+        <!-- 比例：260 - y = value/1000 * 200；1000ms = 200px -->
+        <!-- 即 y = 260 - value * 0.25 -->
+
+        <!-- 场景一：800ms = 200px -->
+        <!-- 扫描 275ms=69px, EAP 400ms=100px, 握手+其他 125ms=31px -->
+        <rect x="105" y="61" width="60" height="69" rx="3" fill="#E2231A" opacity="0.75"/>
+        <rect x="105" y="130" width="60" height="100" rx="3" fill="#9232AC" opacity="0.75"/>
+        <rect x="105" y="230" width="60" height="30" rx="3" fill="#049FD9" opacity="0.75"/>
+        <text x="135" y="277" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">场景一</text>
+        <text x="135" y="50" text-anchor="middle" font-size="10" font-weight="700" fill="#C00" font-family="sans-serif">~800ms</text>
+
+        <!-- 场景二：550ms=138px -->
+        <!-- 扫描 35ms=9px, EAP 400ms=100px, 握手 115ms=29px -->
+        <rect x="220" y="122" width="60" height="9"  rx="3" fill="#E2231A" opacity="0.75"/>
+        <rect x="220" y="131" width="60" height="100" rx="3" fill="#9232AC" opacity="0.75"/>
+        <rect x="220" y="231" width="60" height="29" rx="3" fill="#049FD9" opacity="0.75"/>
+        <text x="250" y="277" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">场景二</text>
+        <text x="250" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#b05500" font-family="sans-serif">~550ms</text>
+
+        <!-- 场景三：300ms=75px -->
+        <!-- 扫描 35ms=9px, LocalEAP 150ms=38px, 握手 115ms=28px -->
+        <rect x="335" y="176" width="60" height="9"  rx="3" fill="#67B346" opacity="0.75"/>
+        <rect x="335" y="185" width="60" height="37" rx="3" fill="#F58025" opacity="0.85"/>
+        <rect x="335" y="222" width="60" height="38" rx="3" fill="#049FD9" opacity="0.75"/>
+        <text x="365" y="277" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">场景三</text>
+        <text x="365" y="168" text-anchor="middle" font-size="10" font-weight="700" fill="#b05500" font-family="sans-serif">~300ms</text>
+
+        <!-- 场景四：130ms=33px -->
+        <!-- 扫描 35ms=9px, OKC关联 25ms=6px, 握手 70ms=18px -->
+        <rect x="450" y="218" width="60" height="9"  rx="3" fill="#67B346" opacity="0.75"/>
+        <rect x="450" y="227" width="60" height="6"  rx="3" fill="#049FD9" opacity="0.6"/>
+        <rect x="450" y="233" width="60" height="27" rx="3" fill="#049FD9" opacity="0.75"/>
+        <text x="480" y="277" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">场景四</text>
+        <text x="480" y="209" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">~130ms</text>
+
+        <!-- 场景五：85ms=21px -->
+        <!-- 扫描 35ms=9px, FT 30ms=8px, Reassoc 20ms=5px -->
+        <rect x="565" y="230" width="60" height="9"  rx="3" fill="#67B346" opacity="0.75"/>
+        <rect x="565" y="239" width="60" height="7"  rx="3" fill="#049FD9" opacity="0.6"/>
+        <rect x="565" y="246" width="60" height="14" rx="3" fill="#67B346" opacity="0.9"/>
+        <text x="595" y="277" text-anchor="middle" font-size="10" fill="#0D274D" font-family="sans-serif">场景五</text>
+        <text x="595" y="221" text-anchor="middle" font-size="10" font-weight="700" fill="#3a8a1e" font-family="sans-serif">~85ms</text>
+
+        <!-- 图例 -->
+        <rect x="130" y="293" width="14" height="12" rx="2" fill="#E2231A" opacity="0.75"/>
+        <text x="148" y="303" font-size="11" fill="#555" font-family="sans-serif">扫描（盲扫）</text>
+        <rect x="255" y="293" width="14" height="12" rx="2" fill="#67B346" opacity="0.75"/>
+        <text x="273" y="303" font-size="11" fill="#555" font-family="sans-serif">扫描（定向）</text>
+        <rect x="370" y="293" width="14" height="12" rx="2" fill="#9232AC" opacity="0.75"/>
+        <text x="388" y="303" font-size="11" fill="#555" font-family="sans-serif">EAP-TLS（远端 ISE）</text>
+        <rect x="545" y="293" width="14" height="12" rx="2" fill="#F58025" opacity="0.85"/>
+        <text x="563" y="303" font-size="11" fill="#555" font-family="sans-serif">Local EAP</text>
+        <rect x="650" y="293" width="14" height="12" rx="2" fill="#049FD9" opacity="0.75"/>
+        <text x="668" y="303" font-size="11" fill="#555" font-family="sans-serif">4-Way / FT / OKC</text>
+      </svg>
+    </div>
+
+    <div class="chapter-quote">
+      "从盲目闯关到提前预约，五个场景是一部 AGV 告别'漫游焦虑'的进化史。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     术语表
+============================================================ -->
+<section class="chapter" id="glossary">
+  <div class="container">
+    <div class="chapter-badge">术语表</div>
+    <h2>Glossary — 核心术语速查</h2>
+    <p>本文涉及的所有关键术语，每条都有精准定义。建议收藏备查。</p>
+
+    <div class="glossary-grid">
+      <div class="glossary-item">
+        <div class="glossary-term">802.1X <span class="glossary-abbr">NAC</span></div>
+        <p class="glossary-def">IEEE 802.1X — 基于端口的网络访问控制标准。设备连接网络时必须先通过身份认证，认证通过后端口才被授权放行数据流量。是企业无线安全的基石。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">EAP-TLS <span class="glossary-abbr">证书认证</span></div>
+        <p class="glossary-def">EAP-Transport Layer Security — 基于 TLS 证书的双向认证方法。客户端和服务器均需出示证书，是安全性最高的 EAP 类型。AGV 环境中使用设备证书代替用户名/密码。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">PMK <span class="glossary-abbr">成对主密钥</span></div>
+        <p class="glossary-def">Pairwise Master Key — EAP 认证成功后产生的顶层密钥材料（512 bits）。是四步握手推导 PTK 的基础。有了 PMK，漫游时可绕过重复 EAP 认证。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">PMKID <span class="glossary-abbr">PMK 指纹</span></div>
+        <p class="glossary-def">PMK Identifier — PMK 的哈希摘要（128 bits），用于在 Association Request 中快速标识身份。WLC 通过比对 PMKID 判断是否可跳过 EAP 认证（OKC / FT 均依赖此机制）。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">PTK <span class="glossary-abbr">成对临时密钥</span></div>
+        <p class="glossary-def">Pairwise Transient Key — 由 PMK + ANonce + SNonce 推导的会话密钥，用于加密当次连接的数据流量。每次关联都生成新的 PTK，防止重放攻击。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">OKC <span class="glossary-abbr">机会性密钥缓存</span></div>
+        <p class="glossary-def">Opportunistic Key Caching — Cisco 9800 实现的 PMKSA 缓存机制。WLC 在全局共享 PMK，漫游时终端携带 PMKID，WLC 验证命中后直接进入四步握手，跳过 EAP-TLS。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">802.11r / FT <span class="glossary-abbr">快速漫游</span></div>
+        <p class="glossary-def">IEEE 802.11r Fast BSS Transition — 漫游前与目标 AP 完成密钥预协商（FT 认证）。Reassociation 阶段同时完成关联和密钥确认，实现最低时延的无缝切换。<br><strong>避坑提示：</strong>Cisco C9800 提供 <em>Adaptive 11r</em> 和 <em>Mixed Mode 11r</em> 两种部署方式。<em>Adaptive 11r</em> 是 Beacon 层面的 OTA 兼容性技巧，与 WPA3-Enterprise 及 6 GHz（Wi-Fi 6E/7）不兼容；本文及生产环境推荐使用标准 <strong>Mixed Mode 11r</strong>。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">802.11K <span class="glossary-abbr">邻居列表</span></div>
+        <p class="glossary-def">Radio Resource Measurement — 允许终端向当前 AP 请求邻居报告（候选 AP 列表）。WLC 根据 RF 关系动态生成推荐列表，消除盲扫，将扫描时延从数百毫秒降至 20~50ms。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">802.11V / BSS Transition <span class="glossary-abbr">主动漫游建议</span></div>
+        <p class="glossary-def">IEEE 802.11v — AP 主动向终端发送 BSS Transition Management Request，建议漫游至信号更好的 AP，解决"粘性客户端"不肯离开弱信号 AP 的问题。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">AAA Cache <span class="glossary-abbr">认证缓存</span></div>
+        <p class="glossary-def">Cisco 9800 WLC 从 17.18.1 起支持的功能。将 ISE 认证结果（用户名、授权属性）缓存在 WLC 本地（WNCD AAA Cache）。ISE 不可达时自动切换到本地 EAP 认证，默认有效期 24 小时。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Local EAP <span class="glossary-abbr">本地 EAP</span></div>
+        <p class="glossary-def">WLC 作为 EAP Server 在本地完成 TLS 握手，无需向 ISE 发送 RADIUS 报文。AAA Cache 命中 EAP-TLS 用户时触发，认证延迟稳定可预期（约 100~200ms）。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">MQTT <span class="glossary-abbr">消息队列</span></div>
+        <p class="glossary-def">Message Queuing Telemetry Transport — AGV 调度系统常用的轻量级消息协议。依赖持续的 TCP 连接（心跳包）。无线断网超过心跳超时阈值（通常 1~3 秒）即触发会话重连，导致 AGV 停摆。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">ISE <span class="glossary-abbr">身份服务引擎</span></div>
+        <p class="glossary-def">Cisco Identity Services Engine — 统一身份与策略管理平台，同时作为 RADIUS Server、策略决策点（PDP）。在场景一/二中是漫游关键路径的核心节点；AAA Cache 后退居幕后。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">RADIUS <span class="glossary-abbr">远程认证</span></div>
+        <p class="glossary-def">Remote Authentication Dial-In User Service — WLC 与 ISE 之间的认证协议（UDP 1812/1813）。无可靠重传机制，在网络抖动时存在丢包风险，进一步放大认证延迟。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">EAPOL 四步握手 <span class="glossary-abbr">4-Way Handshake</span></div>
+        <p class="glossary-def">EAP over LAN 四步握手协议。用于在 AP 与终端之间基于 PMK 协商生成 PTK/GTK，建立加密数据信道。不依赖 ISE，延迟稳定约 20~40ms。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">R0KH / R1KH <span class="glossary-abbr">FT 密钥持有者</span></div>
+        <p class="glossary-def">802.11r 中的密钥层级。R0KH（通常为 WLC）持有 PMK-R0 并分发 PMK-R1 给各 AP（R1KH）。FT 预协商时，终端向目标 R1KH 请求 PTK 推导材料。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     结语
+============================================================ -->
+<section id="closing">
+  <div class="container">
+    <h2>从"每次漫游都是一次冒险"<br>到"漫游如同呼吸"</h2>
+    <p>
+      五个场景的本质，是对同一个问题的五种回答：
+      <em>如何让 AGV 的无线切换变得更快、更可靠、更不依赖外部系统？</em>
+    </p>
+    <p>
+      场景一是起点，也是警示——每一次漫游都是一场"重新入职"。
+      场景五是终点，也是目标——漫游如同换一个频道，快到感知不到。
+      中间的三个场景，是为不同约束条件下的工程师准备的缓冲地带。
+    </p>
+    <p>
+      对于今天的制造业 AGV 网络，推荐路径是：
+      <strong>验证终端 OKC/11r 支持情况 → 部署 AAA Cache 作为故障兜底 → 长期推进终端升级以支持 OKC 或 802.11r</strong>。
+      三者并不互斥，可以叠加部署，共同构建高弹性的工业无线网络。
+    </p>
+    <a href="#s1" class="btn" style="margin-top:1rem;">回到顶部重读 →</a>
+  </div>
+</section>
+
+<script>
+/* 汉堡菜单关闭逻辑（点击链接后收起） */
+document.querySelectorAll('.nav-links a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    var navLinks = document.querySelector('.nav-links');
+    if (navLinks) navLinks.classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>
