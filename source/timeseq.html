@@ -525,6 +525,7 @@ layout: false
       <li><a href="#s5">场景五</a></li>
       <li><a href="#mixed-mode">Mixed Mode</a></li>
       <li><a href="#nic-selection">网卡选型</a></li>
+      <li><a href="#iw9165e">IW9165E</a></li>
       <li><a href="#compare">对比总表</a></li>
       <li><a href="#glossary">术语表</a></li>
     </ul>
@@ -2244,11 +2245,148 @@ layout: false
     </div>
 
     <p style="text-align:right;color:var(--text-secondary);font-size:0.9em;margin-top:var(--space-4);">
-      → 至此五场景 + 三个深度问答全部讲完，进入 <a href="#compare">五场景全景对比</a> 形成系统性判断
+      → 如果 AGV 是遗留设备、不想动软件栈，看下一章：<a href="#iw9165e">IW9165E 双 Radio 网桥方案</a>；
+      否则直接进入 <a href="#compare">五场景全景对比</a>
     </p>
 
     <div class="chapter-quote">
       "选芯片是入场券，跑通 11r 是综合体育成绩——别把入场券当成金牌。"
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     硬件方案 · IW9165E 无线网桥
+============================================================ -->
+<section class="chapter" id="iw9165e">
+  <div class="container">
+    <div class="chapter-badge">硬件方案 · IW9165E</div>
+    <h2>双 Radio 无线网桥：让老 AGV 也能体验 20 ms 无缝漫游</h2>
+
+    <p>
+      前几章讨论的 OKC / 802.11r / 网卡芯片，都假设 AGV 内部集成 Wi-Fi 网卡、软件栈可以配置。
+      现实中，大量在线 AGV 更换不了主板，<code>wpa_supplicant</code> 版本也升不了。
+      <strong>Cisco IW9165E 工业无线网桥（WGB）</strong>给出了一个<em>不改 AGV 任何软件</em>的硬件级答案。
+    </p>
+
+    <div class="callout">
+      <strong>部署模型一句话：</strong>AGV 通过以太网接口接入 IW9165E，由 IW9165E 代替 AGV 完成全部 Wi-Fi 逻辑
+      （802.1X 认证 / OKC / 802.11r / 漫游扫描）。AGV 自己只看到一根"永远在线的网线"，
+      完全感知不到无线切换。
+    </div>
+
+    <h3>双 Radio 的分工：主战部队 vs 全职斥候</h3>
+    <p>
+      先理解单 Radio 的物理硬伤：单块网卡同一时刻只能在<em>一个信道</em>上收发数据。
+      漫游扫描时它必须<strong>暂时离开当前信道去探测其他信道（Off-channel Scanning）</strong>，
+      这段时间业务数据完全断流 —— 这正是场景一高达 180 ms 扫描时延的物理根源。
+    </p>
+    <p>
+      IW9165E 有两个独立 Radio（Slot 1 / Slot 2），运行 <strong>Auxiliary Scanning Handoff 模式</strong>时两者分工明确：
+    </p>
+    <ul>
+      <li><strong>Serving Radio（主战部队）</strong>：永远锚定在当前 AP 所在信道，专心传输 MQTT 等业务数据，绝不离开去"左顾右盼"。</li>
+      <li><strong>Scanning Radio（全职斥候）</strong>：<em>持续</em>在后台轮询所有信道，实时评估周边 AP 的 RSSI，动态维护一张最优候选列表；该 Radio 与 Serving Radio 共享同一 MAC 地址。</li>
+    </ul>
+    <p>
+      漫游触发时（RSSI 过低 / Beacon 丢失 / 重传超限），IW9165E 直接从斥候已维护的候选列表里取出最优 AP，
+      <strong>完全跳过扫描阶段（0 ms）</strong>，瞬间发起关联。
+      关联完成后两个 Radio 的角色<strong>自动对调</strong>，新的斥候立即开始为下一次漫游踩点。
+    </p>
+
+    <h3>三种漫游模式的时延对比</h3>
+    <div class="table-scroll-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>阶段</th>
+            <th>普通模式（单 Radio）</th>
+            <th>仅辅助扫描</th>
+            <th>辅助扫描 Handoff 模式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>扫描阶段</strong></td>
+            <td>(40+20) × 3 = <strong>180 ms</strong></td>
+            <td>0–40 ms</td>
+            <td><strong style="color:var(--cisco-green,#3a8a1e);">0 ms</strong>（后台持续扫描，触发时已有结果）</td>
+          </tr>
+          <tr>
+            <td><strong>关联阶段</strong></td>
+            <td>30–80 ms</td>
+            <td>30–80 ms</td>
+            <td><strong style="color:var(--cisco-green,#3a8a1e);">20–50 ms</strong></td>
+          </tr>
+          <tr>
+            <td><strong>漫游中断总时长</strong></td>
+            <td>~210 ms</td>
+            <td>70–120 ms</td>
+            <td><strong style="color:var(--cisco-green,#3a8a1e);">20–50 ms</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.85em;color:var(--text-secondary);margin-top:0.4em;">
+      数据来源：Cisco IW9165E 官方文档（IOS-XE 17.15.1+）。
+    </p>
+
+    <h3>核心配置片段</h3>
+    <pre><code>! 将 Slot 2 Radio 配置为辅助扫描 Handoff 模式
+Device# configure dot11Radio 2 mode scan handoff
+
+! （可选）调整切换阈值：候选 AP 信号必须比当前强 7 dB 才触发漫游
+Device# configure wgb mobile aux-scan delta-rssi different-parent 7
+
+! 验证：查看两个 Radio 当前角色及最优候选 AP
+Device# show wgb scan</code></pre>
+    <p style="font-size:0.85em;color:var(--text-secondary);margin-top:-0.5em;">
+      要求 IOS-XE 17.15.1 或更高版本；Slot 2 仅支持 5 GHz 频段。
+    </p>
+
+    <h3>与五场景的定位关系</h3>
+    <p>
+      IW9165E WGB 是一个<strong>在硬件层绕开所有软件栈难题的方案</strong>。
+      无论 AGV 自身是否支持 OKC / 802.11r，IW9165E 都可以在 WGB 层面
+      独立配置这些漫游协议，同时将 Aux Scan Handoff 带来的 20–50 ms
+      物理切换时延降到与<a href="#s5">场景五 802.11r FT</a> 相当的水平。
+    </p>
+    <p>
+      对于已经部署 Catalyst 9800 的网络：WGB 与控制器配合时，
+      <a href="#s5">802.11r Mixed Mode</a> 仍然推荐开启——两者叠加可让关联阶段从 20–50 ms
+      进一步压缩（FT 预协商消除大部分 EAP 重认证开销）。
+    </p>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>漫游中断总时长</h4>
+        <div class="metric" style="color:#3a8a1e">20~50 ms</div>
+        <p>Aux Scan Handoff 模式，扫描时延为零，达到场景五 802.11r 同等水平</p>
+      </div>
+      <div class="analysis-card">
+        <h4>AGV 侧改动量</h4>
+        <div class="metric" style="color:#049FD9">零</div>
+        <p>AGV 只看到一根以太网口，无需改任何 Wi-Fi 驱动、wpa_supplicant 或证书配置</p>
+      </div>
+      <div class="analysis-card">
+        <h4>工业适用性</h4>
+        <div class="metric" style="color:#049FD9;font-size:1rem;">-40 ~ +70 ℃</div>
+        <p>IW9165E 工业级设计，适用于仓储、产线、车间等严苛环境</p>
+      </div>
+    </div>
+
+    <div class="callout" style="border-left-color:var(--cisco-red);">
+      <strong>适用场景判断：</strong>当 AGV 是遗留设备（无法升级驱动 / 不支持 OKC / 无 802.11r supplicant），
+      或希望将所有漫游优化集中到网络侧统一管理而非依赖终端侧配置时，
+      <strong>IW9165E + Aux Scan Handoff 是生产环境最快落地的无缝漫游方案</strong>。
+    </div>
+
+    <p style="text-align:right;color:var(--text-secondary);font-size:0.9em;margin-top:var(--space-4);">
+      → 进入 <a href="#compare">五场景全景对比</a>，看清所有方案的横向排列
+    </p>
+
+    <div class="chapter-quote">
+      "双 Radio 的秘诀不是跑得更快，而是在你还没想到要换路的时候，已经把下一条路勘测好了。"
     </div>
   </div>
 </section>
@@ -2559,6 +2697,14 @@ layout: false
       <div class="glossary-item">
         <div class="glossary-term">MLO <span class="glossary-abbr">多链路操作</span></div>
         <p class="glossary-def">Multi-Link Operation — Wi-Fi 7 引入的核心机制。终端可同时在 2.4 / 5 / 6 GHz 多个频段上建立并发链路。漫游时单链路切换不再造成整体断网，对传统 802.11r 形成机制上的"降维打击"。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">WGB <span class="glossary-abbr">无线工作组网桥</span></div>
+        <p class="glossary-def">Workgroup Bridge — 工业无线网桥设备。AGV 通过以太网接口与 WGB 相连，WGB 作为 Wi-Fi 客户端代替 AGV 完成无线关联、802.1X 认证和漫游决策。AGV 自身无需具备 Wi-Fi 功能。Cisco IW9165E 是典型工业级 WGB 产品，支持双 Radio Aux Scan Handoff 模式，可将漫游中断压缩至 20–50 ms。</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Aux Scan Handoff <span class="glossary-abbr">辅助扫描 Handoff</span></div>
+        <p class="glossary-def">Cisco IW9165E 的双 Radio 漫游模式。一个 Radio 专职服务当前连接，另一个 Radio 持续后台扫描并维护最优 AP 候选列表。触发漫游时直接使用已有扫描结果发起关联（扫描时延 = 0 ms），完成后两个 Radio 角色自动对调。总漫游中断约 20–50 ms，需 IOS-XE 17.15.1+。</p>
       </div>
     </div>
   </div>
