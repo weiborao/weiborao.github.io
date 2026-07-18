@@ -69,6 +69,18 @@
       outline-offset: 4px;
     }
 
+    .sr-only {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .skip-link {
       position: fixed;
       inset-block-start: 0.75rem;
@@ -510,7 +522,7 @@
     .account-flow .svg-scroll-wrapper > svg {
       inline-size: 100%;
       min-inline-size: 980px;
-      block-size: clamp(350px, 56vh, 500px);
+      block-size: clamp(350px, 53.5vh, 480px);
     }
 
     .aiops-flow {
@@ -526,6 +538,37 @@
       inline-size: 100%;
       min-inline-size: 1080px;
       block-size: clamp(390px, 59vh, 510px);
+    }
+
+    .mbb-experience {
+      inline-size: 100%;
+      min-block-size: 0;
+    }
+
+    .mbb-experience .svg-scroll-wrapper {
+      display: flex;
+      justify-content: center;
+      padding-block: 0;
+      touch-action: pan-x;
+    }
+
+    .mbb-experience .svg-scroll-wrapper > svg {
+      inline-size: auto;
+      min-inline-size: 980px;
+      max-inline-size: 100%;
+      block-size: clamp(360px, 59vh, 520px);
+      margin-inline: auto;
+      touch-action: pan-x;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .mbb-agv { cursor: grab; touch-action: none; }
+    .mbb-agv.is-dragging { cursor: grabbing; }
+    .mbb-agv:focus { outline: none; }
+    .mbb-agv:focus-visible .mbb-agv-body {
+      stroke: var(--focus);
+      stroke-width: 6;
     }
 
     .finale {
@@ -678,6 +721,8 @@
       .story-step:nth-child(2)::after { display: none; }
       .chapter .container { justify-content: flex-start; }
       .help { display: none; }
+      .mbb-experience .svg-scroll-wrapper { justify-content: flex-start; }
+      .mbb-experience .svg-scroll-wrapper > svg { margin-inline: 0; }
     }
 
     @media (max-width: 640px) {
@@ -694,6 +739,10 @@
       .help { display: none; }
       .nav { inset-block-end: max(0.75rem, env(safe-area-inset-bottom)); }
       .case-kicker { grid-template-columns: 1fr; }
+      #ch4 .container {
+        padding-block-start: 2.25rem;
+        padding-block-end: 5rem;
+      }
     }
 
     @media (min-width: 900px) and (min-height: 650px) {
@@ -743,6 +792,13 @@
         min-inline-size: 0;
         block-size: auto;
       }
+
+      html:fullscreen .mbb-experience .svg-scroll-wrapper > svg,
+      html:-webkit-full-screen .mbb-experience .svg-scroll-wrapper > svg {
+        inline-size: min(100%, 155dvh);
+        min-inline-size: 0;
+        block-size: auto;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -775,6 +831,11 @@
       .chapter .container { inline-size: 100%; min-block-size: 180mm; padding: 10mm 8mm 14mm; }
       .nav, .progress, .help, .skip-link { display: none !important; }
       .card { break-inside: avoid; box-shadow: none; }
+      .mbb-experience .svg-scroll-wrapper > svg {
+        inline-size: 100%;
+        min-inline-size: 0;
+        block-size: auto;
+      }
       .print-page {
         display: block;
         position: absolute;
@@ -789,7 +850,7 @@
 </head>
 <body>
   <a class="skip-link" href="#ch1">跳到当前演示内容</a>
-  <main class="deck" id="deck" aria-label="AI 应用场景分享，共 6 页">
+  <main class="deck" id="deck" aria-label="AI 应用场景分享，共 7 页">
     <div class="progress" id="progress" aria-hidden="true"></div>
 
     <section class="chapter slide cover active" id="ch1" data-slide="1" aria-labelledby="title-1">
@@ -797,7 +858,7 @@
         <div class="cover-copy">
           <span class="eyebrow">Cisco Internal Sharing · AI in Practice</span>
           <h1 id="title-1">当 AI 成为你的<br><span class="accent">“第二大脑”</span></h1>
-          <p class="cover-subtitle">四个真实应用场景：我如何与 AI 协作完成推理、可视化、研究与执行，把复杂问题变成可验证的行动。</p>
+          <p class="cover-subtitle">五个真实应用场景：我如何与 AI 协作完成推理、可视化、交互解释、研究与执行，把复杂问题变成可验证的行动。</p>
           <div class="speaker-line" aria-label="演讲者和日期">
             <span><b>分享人</b> ____________________</span>
             <span><b>日期</b> ____________________</span>
@@ -1048,8 +1109,136 @@
 
     <section class="chapter slide presentation-fit" id="ch4" data-slide="4" aria-labelledby="title-4">
       <div class="container">
-        <span class="eyebrow">Scenario 03 · Research</span>
-        <h2 id="title-4">面对 20 个新客户，<br>先搭一条<span class="accent">研究装配线</span></h2>
+        <span class="eyebrow">Scenario 03 · Interactive Explanation</span>
+        <h2 id="title-4">把漫游机制，变成可以<span class="accent">“拖动”的理解</span></h2>
+        <p class="lead">上一页用真实抓包回答“发生了什么”；这一页不替客户选择方案，而是展示我如何借助 AI，把“先建新链路、再释放旧链路”的 Make-Before-Break 机制变成可以亲手操作的解释。</p>
+
+        <div class="mbb-experience interaction-stage">
+          <div class="svg-scroll-wrapper" aria-label="E80 AGV Make-Before-Break 交互式漫游示意；左右拖动 AGV，窄屏可横向滚动">
+            <svg id="mbbInteractiveSvg" viewBox="0 0 1400 520" role="group" aria-labelledby="mbbTitle mbbDesc">
+              <title id="mbbTitle">E80 AGV Make-Before-Break 交互式漫游示意</title>
+              <desc id="mbbDesc">拖动自动导引车在 Mobility Base A 与 Base B 之间移动。无线信号、链路状态和文字说明将同步变化，展示当前链路保持、发现下一节点、两条有效路径短暂重叠，以及新链路接管后释放旧链路的过程。本图是机制示意，不代表上一页客户案例的既定方案。</desc>
+              <defs>
+                <linearGradient id="mbbStageGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFFAFF"/>
+                </linearGradient>
+                <linearGradient id="mbbBaseGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F2F7FF"/>
+                </linearGradient>
+                <linearGradient id="mbbAgvGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#0A60FF"/><stop offset="1" stop-color="#02C8FF"/>
+                </linearGradient>
+                <filter id="mbbShadow" x="-20%" y="-30%" width="140%" height="170%">
+                  <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#07182D" flood-opacity="0.12"/>
+                </filter>
+                <marker id="mbbArrowActive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#0A60FF"/>
+                </marker>
+                <marker id="mbbArrowScan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#02C8FF"/>
+                </marker>
+                <marker id="mbbArrowHandoff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#147D64"/>
+                </marker>
+                <marker id="mbbArrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#B8C4D1"/>
+                </marker>
+              </defs>
+              <style>
+                .mbb-ui{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif}.mbb-mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.mbb-kicker{fill:#0A60FF;font-size:16px;font-weight:850;letter-spacing:1.2px}.mbb-title{fill:#07182D;font-size:25px;font-weight:850}.mbb-sub{fill:#425466;font-size:17px;font-weight:650}.mbb-base-title{fill:#07182D;font-size:22px;font-weight:820}.mbb-base-sub{fill:#425466;font-size:16px;font-weight:650}.mbb-rssi{fill:#07182D;font-size:17px;font-weight:780}.mbb-zone{fill:#425466;font-size:15px;font-weight:750}.mbb-status{fill:#FFFFFF;font-size:20px;font-weight:850;letter-spacing:.5px}.mbb-status-desc{fill:#FFFFFF;font-size:18px;font-weight:680}.mbb-bottom{fill:#425466;font-size:16px;font-weight:700}
+              </style>
+
+              <g class="mbb-ui">
+                <rect x="8" y="8" width="1384" height="504" rx="30" fill="url(#mbbStageGradient)" stroke="#B8C4D1"/>
+
+                <g aria-hidden="true">
+                  <rect x="34" y="28" width="174" height="32" rx="16" fill="#F2F7FF" stroke="#B8C4D1"/>
+                  <text x="121" y="50" text-anchor="middle" class="mbb-kicker">INTERACTIVE MODEL</text>
+                  <rect x="1100" y="28" width="258" height="32" rx="16" fill="#07182D"/>
+                  <path d="M1123 44 h28 M1123 44 l9-8 M1123 44 l9 8" fill="none" stroke="#02C8FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <text x="1256" y="50" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="780">拖动 AGV 或使用 ← →</text>
+                </g>
+
+                <g filter="url(#mbbShadow)">
+                  <rect x="570" y="34" width="260" height="62" rx="18" fill="#07182D"/>
+                </g>
+                <circle cx="605" cy="65" r="10" fill="#02C8FF"/>
+                <path d="M595 65 h20 M605 55 v20" stroke="#07182D" stroke-width="2.5" stroke-linecap="round"/>
+                <text x="715" y="60" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="820">Mobility Coordination</text>
+                <text x="715" y="82" text-anchor="middle" fill="#B8C4D1" font-size="14" font-weight="680">管理与路径协调（示意）</text>
+
+                <path d="M620 96 C552 108 474 116 375 130" fill="none" stroke="#B8C4D1" stroke-width="2.5" stroke-dasharray="7 7"/>
+                <path d="M780 96 C848 108 926 116 1025 130" fill="none" stroke="#B8C4D1" stroke-width="2.5" stroke-dasharray="7 7"/>
+
+                <g id="mbbBaseA" filter="url(#mbbShadow)">
+                  <rect x="210" y="124" width="330" height="86" rx="22" fill="url(#mbbBaseGradient)" stroke="#0A60FF" stroke-width="2.5"/>
+                  <circle cx="258" cy="167" r="24" fill="#F2F7FF" stroke="#0A60FF" stroke-width="2"/>
+                  <path d="M258 178 v-20 M249 166 q9-12 18 0 M244 159 q14-18 28 0" fill="none" stroke="#0A60FF" stroke-width="3" stroke-linecap="round"/>
+                  <text x="300" y="163" class="mbb-base-title">Mobility Base A</text>
+                  <text x="300" y="188" class="mbb-base-sub">覆盖节点 A</text>
+                </g>
+
+                <g id="mbbBaseB" filter="url(#mbbShadow)">
+                  <rect x="860" y="124" width="330" height="86" rx="22" fill="url(#mbbBaseGradient)" stroke="#0A60FF" stroke-width="2.5"/>
+                  <circle cx="908" cy="167" r="24" fill="#F2F7FF" stroke="#0A60FF" stroke-width="2"/>
+                  <path d="M908 178 v-20 M899 166 q9-12 18 0 M894 159 q14-18 28 0" fill="none" stroke="#0A60FF" stroke-width="3" stroke-linecap="round"/>
+                  <text x="950" y="163" class="mbb-base-title">Mobility Base B</text>
+                  <text x="950" y="188" class="mbb-base-sub">覆盖节点 B</text>
+                </g>
+
+                <line id="mbbLinkA" x1="375" y1="210" x2="320" y2="298" stroke="#0A60FF" stroke-width="6" stroke-linecap="round" marker-end="url(#mbbArrowActive)"/>
+                <line id="mbbLinkB" x1="1025" y1="210" x2="320" y2="298" stroke="transparent" stroke-width="0" stroke-linecap="round"/>
+
+                <g id="mbbRssiAGroup">
+                  <rect id="mbbRssiBgA" x="255" y="226" width="240" height="38" rx="19" fill="#EFFAFF" stroke="#0A60FF"/>
+                  <circle id="mbbRssiDotA" cx="280" cy="245" r="7" fill="#0A60FF"/>
+                  <text id="mbbRssiA" x="375" y="251" text-anchor="middle" class="mbb-rssi mbb-mono">A 信号: −30 dBm</text>
+                </g>
+                <g id="mbbRssiBGroup">
+                  <rect id="mbbRssiBgB" x="905" y="226" width="240" height="38" rx="19" fill="#F6F8FB" stroke="#B8C4D1"/>
+                  <circle id="mbbRssiDotB" cx="930" cy="245" r="7" fill="#B8C4D1"/>
+                  <text id="mbbRssiB" x="1025" y="251" text-anchor="middle" class="mbb-rssi mbb-mono">B 信号: −65 dBm</text>
+                </g>
+
+                <rect x="150" y="362" width="1100" height="14" rx="7" fill="#E9EEF4"/>
+                <rect x="150" y="362" width="430" height="14" rx="7" fill="#F2F7FF"/>
+                <rect x="580" y="362" width="240" height="14" fill="#EFFAFF"/>
+                <rect x="820" y="362" width="430" height="14" rx="7" fill="#F2F7FF"/>
+                <line x1="580" y1="350" x2="580" y2="388" stroke="#B8C4D1" stroke-width="2" stroke-dasharray="4 4"/>
+                <line x1="820" y1="350" x2="820" y2="388" stroke="#B8C4D1" stroke-width="2" stroke-dasharray="4 4"/>
+                <text x="350" y="402" text-anchor="middle" class="mbb-zone">BASE A 稳定区</text>
+                <text x="700" y="402" text-anchor="middle" fill="#147D64" font-size="16" font-weight="850">双链路重叠区</text>
+                <text x="1050" y="402" text-anchor="middle" class="mbb-zone">BASE B 稳定区</text>
+
+                <g id="mbbAgv" class="mbb-agv" transform="translate(320 324)" role="slider" tabindex="0" focusable="true" aria-label="AGV 漫游进度" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13" aria-valuetext="AGV 稳定连接 Base A">
+                  <rect class="mbb-agv-body" x="-78" y="-34" width="156" height="68" rx="18" fill="url(#mbbAgvGradient)" stroke="#07182D" stroke-width="3" filter="url(#mbbShadow)"/>
+                  <rect x="-54" y="-16" width="40" height="27" rx="6" fill="#FFFFFF" opacity="0.96"/>
+                  <path d="M-34-16 v27 M-54-2 h40" stroke="#B8C4D1" stroke-width="2"/>
+                  <circle cx="34" cy="-7" r="12" fill="#07182D"/>
+                  <circle cx="34" cy="-7" r="5" fill="#02C8FF"/>
+                  <text x="35" y="20" text-anchor="middle" fill="#07182D" font-size="15" font-weight="900">AGV</text>
+                  <circle cx="-48" cy="35" r="11" fill="#07182D"/><circle cx="48" cy="35" r="11" fill="#07182D"/>
+                  <circle cx="-48" cy="35" r="4" fill="#B8C4D1"/><circle cx="48" cy="35" r="4" fill="#B8C4D1"/>
+                </g>
+
+                <rect x="50" y="430" width="1300" height="62" rx="20" fill="#07182D"/>
+                <rect id="mbbStateBadge" x="74" y="445" width="292" height="32" rx="16" fill="#0A60FF"/>
+                <text id="mbbStateLabel" x="220" y="467" text-anchor="middle" class="mbb-status mbb-mono">OLD LINK STABLE</text>
+                <text id="mbbStateDesc" x="395" y="467" class="mbb-status-desc">AGV 稳定连接 Base A；拖动它观察“先搭后拆”</text>
+                <text x="1322" y="467" text-anchor="end" fill="#02C8FF" font-size="16" font-weight="820">先抓住新秋千，再松开旧秋千</text>
+              </g>
+            </svg>
+          </div>
+          <p id="mbbLive" class="sr-only" aria-live="polite">AGV 稳定连接 Base A。</p>
+        </div>
+        <span class="print-page">AI 应用场景分享</span>
+      </div>
+    </section>
+
+    <section class="chapter slide presentation-fit" id="ch5" data-slide="5" aria-labelledby="title-5">
+      <div class="container">
+        <span class="eyebrow">Scenario 04 · Research</span>
+        <h2 id="title-5">面对 20 个新客户，先搭一条<span class="accent">研究装配线</span></h2>
         <p class="lead">我没有让一个 AI 包办全部工作，而是让每个工具只完成最擅长的一站：先固定事实，再形成画像，最后把机会写成可验证的销售假设。</p>
 
         <div class="account-flow">
@@ -1167,16 +1356,16 @@
       </div>
     </section>
 
-    <section class="chapter slide presentation-fit" id="ch5" data-slide="5" aria-labelledby="title-5">
+    <section class="chapter slide presentation-fit" id="ch6" data-slide="6" aria-labelledby="title-6">
       <div class="container">
-        <span class="eyebrow">Scenario 04 · AI for Fun</span>
-        <h2 id="title-5">让树莓派，成为<span class="accent">会主动汇报的系统</span></h2>
-        <p class="lead">我定义目标与边界，Agent 完成盘点、实施、验证与留档；Grafana、Prometheus 与 Bark 构成“看见 → 判断 → 行动”的 <b>AIOps</b> 运维闭环。</p>
+        <span class="eyebrow">Scenario 05 · AI for Fun</span>
+        <h2 id="title-6">让树莓派，成为<span class="accent">会主动汇报的系统</span></h2>
+        <p class="lead">这里的“AI 助手”不是让 AI 接管运维：我定义目标与边界，Agent 完成盘点、实施、验证与留档；Grafana、Prometheus、Bark 与 systemd 构成“看见 → 判断 → 行动 → 恢复”的个人运维闭环。</p>
 
         <div class="aiops-flow">
-          <div class="svg-scroll-wrapper" aria-label="Agent 将树莓派建设为个人 AIOps 系统的完整闭环；窄屏可横向滚动">
+          <div class="svg-scroll-wrapper" aria-label="Agent 将树莓派建设为个人运维助手的完整闭环；窄屏可横向滚动">
             <svg viewBox="0 0 1400 500" role="img" aria-labelledby="aiopsTitle aiopsDesc">
-              <title id="aiopsTitle">从需求边界到个人 AIOps 系统的 Agent 工程闭环</title>
+              <title id="aiopsTitle">从需求边界到个人运维助手的 Agent 工程闭环</title>
               <desc id="aiopsDesc">人先定义持续运行、减少存储卡写入、异常主动通知和变更可回退四个边界。Agent 随后盘点环境、部署采集与展示、进行真实验证并形成留档。最终 Grafana、Prometheus、Bark 和 systemd 组成持续观察、判断、行动和恢复的闭环。</desc>
               <defs>
                 <linearGradient id="aiopsBlue" x1="0" y1="0" x2="1" y2="1">
@@ -1206,7 +1395,7 @@
                   <circle cx="62" cy="191" r="13" fill="#0A60FF"/><path d="M56 191 l4 4 8-10" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <text x="86" y="197" class="ai-kpi">7 × 24 小时持续运行</text>
                   <circle cx="62" cy="237" r="13" fill="#0A60FF"/><path d="M56 237 l4 4 8-10" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <text x="86" y="243" class="ai-kpi">减少 Micro SD 写入</text>
+                  <text x="86" y="243" class="ai-kpi">减少存储卡频繁写入</text>
                   <circle cx="62" cy="283" r="13" fill="#0A60FF"/><path d="M56 283 l4 4 8-10" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <text x="86" y="289" class="ai-kpi">异常主动通知手机</text>
                   <circle cx="62" cy="329" r="13" fill="#0A60FF"/><path d="M56 329 l4 4 8-10" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1247,7 +1436,7 @@
                 <rect x="736" y="34" width="644" height="62" rx="28" fill="#07182D"/>
                 <rect x="736" y="68" width="644" height="28" fill="#07182D"/>
                 <circle cx="766" cy="65" r="6" fill="#FF9000"/><circle cx="786" cy="65" r="6" fill="#02C8FF"/>
-                <text x="812" y="72" fill="#FFFFFF" font-size="21" font-weight="820">树莓派 4B · 全量系统监控</text>
+                <text x="812" y="72" fill="#FFFFFF" font-size="21" font-weight="820">树莓派 4B · 系统运行监控</text>
                 <rect x="1223" y="51" width="126" height="28" rx="14" fill="#143955"/>
                 <circle cx="1242" cy="65" r="6" fill="#54D6A8"/><text x="1256" y="71" fill="#DDF7FF" font-size="14" font-weight="800">TARGET UP</text>
 
@@ -1298,14 +1487,14 @@
       </div>
     </section>
 
-    <section class="chapter slide finale" id="ch6" data-slide="6" aria-labelledby="title-6">
+    <section class="chapter slide finale" id="ch7" data-slide="7" aria-labelledby="title-7">
       <div class="container">
         <span class="eyebrow">Closing · AI-native Work</span>
-        <h2 id="title-6">四个场景，一种工作方式</h2>
+        <h2 id="title-7">五个场景，一种工作方式</h2>
         <p class="finale-quote">在 AI 时代，<span class="question">问题</span>比答案更重要。</p>
         <div class="finale-grid">
           <article class="card"><span class="number">01</span><h3>先让 AI 提问</h3><p>让它理解目标、边界与习惯，而不是急着生成一个看似正确的答案。</p></article>
-          <article class="card"><span class="number">02</span><h3>再给 AI 能力</h3><p>通过沟通规约、技能和 MCP，把工具连接成可以执行的工作系统。</p></article>
+          <article class="card"><span class="number">02</span><h3>再给 AI 能力</h3><p>通过沟通规约、技能和 MCP（工具连接协议），把工具连接成可以执行的工作系统。</p></article>
           <article class="card"><span class="number">03</span><h3>最后由人验收</h3><p>人保留事实判断、风险边界与最终责任；AI 承担推理、表达和执行。</p></article>
         </div>
         <span class="print-page">AI 应用场景分享</span>
@@ -1317,7 +1506,7 @@
     <button id="prev" type="button" aria-label="上一页" title="上一页（←）">
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="nav-status" aria-live="polite"><strong id="current">1</strong> / <span id="total">6</span></div>
+    <div class="nav-status" aria-live="polite"><strong id="current">1</strong> / <span id="total">7</span></div>
     <button id="next" type="button" aria-label="下一页" title="下一页（→）">
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -1401,6 +1590,8 @@
 
       document.addEventListener('keydown', event => {
         if (event.altKey || event.ctrlKey || event.metaKey) return;
+        const insideInteraction = event.target.closest?.('.interaction-stage');
+        if (insideInteraction && ['ArrowRight', 'ArrowLeft', 'Home', 'End', 'PageDown', 'PageUp', ' '].includes(event.key)) return;
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
         if (event.key.toLowerCase() === 'f') {
@@ -1422,10 +1613,18 @@
       });
 
       document.addEventListener('touchstart', event => {
+        if (event.target.closest?.('.interaction-stage')) {
+          touchStartX = null;
+          return;
+        }
         touchStartX = event.changedTouches[0]?.clientX ?? null;
       }, { passive: true });
 
       document.addEventListener('touchend', event => {
+        if (event.target.closest?.('.interaction-stage')) {
+          touchStartX = null;
+          return;
+        }
         if (touchStartX === null) return;
         const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
         if (Math.abs(delta) > 60) showSlide(currentIndex + (delta < 0 ? 1 : -1));
@@ -1434,6 +1633,230 @@
 
       const hashIndex = Number.parseInt(location.hash.replace('#ch', ''), 10) - 1;
       showSlide(Number.isInteger(hashIndex) ? hashIndex : currentIndex, false);
+    })();
+
+    (() => {
+      const svg = document.getElementById('mbbInteractiveSvg');
+      if (!svg) return;
+
+      const agv = document.getElementById('mbbAgv');
+      const linkA = document.getElementById('mbbLinkA');
+      const linkB = document.getElementById('mbbLinkB');
+      const rssiA = document.getElementById('mbbRssiA');
+      const rssiB = document.getElementById('mbbRssiB');
+      const rssiBgA = document.getElementById('mbbRssiBgA');
+      const rssiBgB = document.getElementById('mbbRssiBgB');
+      const rssiDotA = document.getElementById('mbbRssiDotA');
+      const rssiDotB = document.getElementById('mbbRssiDotB');
+      const stateBadge = document.getElementById('mbbStateBadge');
+      const stateLabel = document.getElementById('mbbStateLabel');
+      const stateDesc = document.getElementById('mbbStateDesc');
+      const live = document.getElementById('mbbLive');
+
+      const BASE_A_X = 375;
+      const BASE_B_X = 1025;
+      const BASE_Y = 210;
+      const AGV_Y = 324;
+      const AGV_LINK_Y = 290;
+      const MIN_X = 180;
+      const MAX_X = 1220;
+      const SCAN_A_TO_B = 500;
+      const HANDOFF_A_TO_B = 700;
+      const STABLE_B = 900;
+      const SCAN_B_TO_A = 900;
+      const HANDOFF_B_TO_A = 700;
+      const STABLE_A = 500;
+
+      const linkStyles = {
+        active: { color: '#0A60FF', width: 6, dash: '', marker: 'url(#mbbArrowActive)' },
+        scanning: { color: '#02C8FF', width: 4, dash: '12 9', marker: 'url(#mbbArrowScan)' },
+        handoff: { color: '#147D64', width: 6, dash: '', marker: 'url(#mbbArrowHandoff)' },
+        muted: { color: '#B8C4D1', width: 4, dash: '8 9', marker: 'url(#mbbArrowMuted)' },
+        none: { color: 'transparent', width: 0, dash: '', marker: '' }
+      };
+
+      const states = {
+        A_STABLE: {
+          label: 'OLD LINK STABLE',
+          desc: 'AGV 稳定连接 Base A；拖动它观察“先搭后拆”',
+          aria: 'AGV 稳定连接 Base A',
+          linkA: 'active', linkB: 'none', badge: '#0A60FF', badgeText: '#FFFFFF'
+        },
+        SCAN_B: {
+          label: 'DISCOVERING BASE B',
+          desc: '旧链路继续传输，同时在后台发现 Base B',
+          aria: '旧链路保持连接，正在发现 Base B',
+          linkA: 'active', linkB: 'scanning', badge: '#02C8FF', badgeText: '#07182D'
+        },
+        MBB_A_TO_B: {
+          label: 'MAKE BEFORE BREAK',
+          desc: '新链路已经建立；旧链路仍在，避免“先断后连”的空档',
+          aria: 'Make-Before-Break，Base A 与 Base B 双链路并存',
+          linkA: 'active', linkB: 'handoff', badge: '#147D64', badgeText: '#FFFFFF'
+        },
+        B_STABLE: {
+          label: 'NEW LINK STABLE',
+          desc: 'Base B 接管数据后，旧链路才被释放',
+          aria: 'AGV 已切换并稳定连接 Base B',
+          linkA: 'none', linkB: 'active', badge: '#0A60FF', badgeText: '#FFFFFF'
+        },
+        SCAN_A: {
+          label: 'DISCOVERING BASE A',
+          desc: '返回途中保持 Base B，同时在后台发现 Base A',
+          aria: 'Base B 保持连接，正在发现 Base A',
+          linkA: 'scanning', linkB: 'active', badge: '#02C8FF', badgeText: '#07182D'
+        },
+        MBB_B_TO_A: {
+          label: 'MAKE BEFORE BREAK',
+          desc: '返回时同样先建立 Base A，再释放 Base B，保持路径连续',
+          aria: 'Make-Before-Break，返回途中双链路并存',
+          linkA: 'handoff', linkB: 'active', badge: '#147D64', badgeText: '#FFFFFF'
+        }
+      };
+
+      let position = 320;
+      let state = 'A_STABLE';
+      let dragging = false;
+      let lastAnnouncedState = '';
+      let printSnapshot = null;
+
+      const setLink = (element, styleName, baseX) => {
+        const style = linkStyles[styleName];
+        element.setAttribute('stroke', style.color);
+        element.setAttribute('stroke-width', String(style.width));
+        element.setAttribute('stroke-dasharray', style.dash);
+        element.setAttribute('marker-end', style.marker);
+        element.setAttribute('x1', String(baseX));
+        element.setAttribute('y1', String(BASE_Y));
+        element.setAttribute('x2', String(position));
+        element.setAttribute('y2', String(AGV_LINK_Y));
+      };
+
+      const calculateRssi = baseX => {
+        const distance = Math.abs(position - baseX);
+        return Math.max(-85, Math.round(-30 - 55 * Math.pow(distance / 900, 2)));
+      };
+
+      const styleRssi = (value, background, dot, strongColor) => {
+        const strong = value > -55;
+        background.setAttribute('fill', strong ? '#EFFAFF' : '#F6F8FB');
+        background.setAttribute('stroke', strong ? strongColor : '#B8C4D1');
+        dot.setAttribute('fill', strong ? strongColor : '#B8C4D1');
+      };
+
+      const updateState = () => {
+        for (let guard = 0; guard < 4; guard += 1) {
+          const previous = state;
+          if (state === 'A_STABLE' && position > SCAN_A_TO_B) state = 'SCAN_B';
+          else if (state === 'SCAN_B' && position < STABLE_A) state = 'A_STABLE';
+          else if (state === 'SCAN_B' && position > HANDOFF_A_TO_B) state = 'MBB_A_TO_B';
+          else if (state === 'MBB_A_TO_B' && position < SCAN_A_TO_B) state = 'SCAN_B';
+          else if (state === 'MBB_A_TO_B' && position > STABLE_B) state = 'B_STABLE';
+          else if (state === 'B_STABLE' && position < SCAN_B_TO_A) state = 'SCAN_A';
+          else if (state === 'SCAN_A' && position > STABLE_B) state = 'B_STABLE';
+          else if (state === 'SCAN_A' && position < HANDOFF_B_TO_A) state = 'MBB_B_TO_A';
+          else if (state === 'MBB_B_TO_A' && position > SCAN_B_TO_A) state = 'SCAN_A';
+          else if (state === 'MBB_B_TO_A' && position < STABLE_A) state = 'A_STABLE';
+          if (state === previous) break;
+        }
+      };
+
+      const render = (announce = true) => {
+        const meta = states[state];
+        agv.setAttribute('transform', `translate(${position} ${AGV_Y})`);
+        setLink(linkA, meta.linkA, BASE_A_X);
+        setLink(linkB, meta.linkB, BASE_B_X);
+
+        const valueA = calculateRssi(BASE_A_X);
+        const valueB = calculateRssi(BASE_B_X);
+        rssiA.textContent = `A 信号: ${valueA} dBm`;
+        rssiB.textContent = `B 信号: ${valueB} dBm`;
+        styleRssi(valueA, rssiBgA, rssiDotA, '#0A60FF');
+        styleRssi(valueB, rssiBgB, rssiDotB, '#02C8FF');
+
+        stateBadge.setAttribute('fill', meta.badge);
+        stateLabel.setAttribute('fill', meta.badgeText);
+        stateLabel.textContent = meta.label;
+        stateDesc.textContent = meta.desc;
+        const progress = Math.round(((position - MIN_X) / (MAX_X - MIN_X)) * 100);
+        agv.setAttribute('aria-valuenow', String(progress));
+        agv.setAttribute('aria-valuetext', meta.aria);
+
+        if (announce && state !== lastAnnouncedState) {
+          live.textContent = meta.aria;
+          lastAnnouncedState = state;
+        }
+      };
+
+      const setPosition = nextPosition => {
+        position = Math.max(MIN_X, Math.min(MAX_X, nextPosition));
+        updateState();
+        render();
+      };
+
+      const pointerToSvgX = event => {
+        const point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return point.matrixTransform(svg.getScreenCTM().inverse()).x;
+      };
+
+      agv.addEventListener('pointerdown', event => {
+        dragging = true;
+        agv.classList.add('is-dragging');
+        agv.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      agv.addEventListener('pointermove', event => {
+        if (!dragging) return;
+        setPosition(pointerToSvgX(event));
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      const stopDragging = event => {
+        if (!dragging) return;
+        dragging = false;
+        agv.classList.remove('is-dragging');
+        if (agv.hasPointerCapture(event.pointerId)) agv.releasePointerCapture(event.pointerId);
+        event.stopPropagation();
+      };
+
+      agv.addEventListener('pointerup', stopDragging);
+      agv.addEventListener('pointercancel', stopDragging);
+
+      agv.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft') setPosition(position - 42);
+        else if (event.key === 'ArrowRight') setPosition(position + 42);
+        else if (event.key === 'Home') {
+          state = 'A_STABLE';
+          setPosition(MIN_X);
+        } else if (event.key === 'End') {
+          state = 'B_STABLE';
+          setPosition(MAX_X);
+        } else return;
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      window.addEventListener('beforeprint', () => {
+        printSnapshot = { position, state };
+        position = 760;
+        state = 'MBB_A_TO_B';
+        render(false);
+      });
+
+      window.addEventListener('afterprint', () => {
+        if (!printSnapshot) return;
+        position = printSnapshot.position;
+        state = printSnapshot.state;
+        printSnapshot = null;
+        render(false);
+      });
+
+      render(false);
     })();
   </script>
 </body>
