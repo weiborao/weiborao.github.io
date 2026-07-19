@@ -479,15 +479,36 @@
     .chart-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.35rem 1.25rem;
-      margin-block: 0 0.35rem;
+      align-items: center;
+      gap: 0.45rem 0;
+      margin-block: 0 0.7rem;
       color: var(--slate-600);
-      font-family: var(--font-mono);
-      font-size: clamp(0.76rem, 1.15vw, 0.9rem);
-      font-weight: 700;
+      font-size: clamp(0.82rem, 1.12vw, 0.94rem);
+      font-weight: 680;
     }
 
-    .chart-meta strong { color: var(--midnight); }
+    .chart-meta span {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.32rem;
+      white-space: nowrap;
+    }
+
+    .chart-meta span + span::before {
+      content: "";
+      inline-size: 1px;
+      block-size: 1.05rem;
+      margin-inline: 0.9rem;
+      background: var(--slate-300);
+      translate: 0 0.16rem;
+    }
+
+    .chart-meta strong {
+      color: var(--midnight);
+      font-family: var(--font-mono);
+      font-size: 1.08em;
+      font-weight: 850;
+    }
 
     .roam-chart .svg-scroll-wrapper {
       display: flex;
@@ -497,20 +518,29 @@
 
     .roam-chart .svg-scroll-wrapper > svg {
       inline-size: auto;
-      min-inline-size: 900px;
+      min-inline-size: 960px;
       max-inline-size: 100%;
-      block-size: clamp(400px, 66vh, 510px);
+      block-size: clamp(410px, 65vh, 520px);
       margin-inline: 0;
     }
 
-    .chart-note {
-      margin-block: 0.3rem 0;
-      color: var(--slate-600);
-      font-size: 0.76rem;
-      line-height: 1.4;
-    }
-
-    .account-flow {
+    .roam-chart-svg .roam-band { fill: var(--slate-50); }
+    .roam-chart-svg .roam-band-alt { fill: var(--blue-50); }
+    .roam-chart-svg .roam-grid { stroke: var(--slate-100); stroke-width: 1; stroke-dasharray: 3 7; }
+    .roam-chart-svg .roam-axis { fill: var(--slate-600); font-size: 14px; font-weight: 680; }
+    .roam-chart-svg .roam-axis-time { fill: var(--slate-600); font: 700 13px var(--font-mono); }
+    .roam-chart-svg .roam-ap-pill { fill: var(--white); stroke: var(--slate-300); }
+    .roam-chart-svg .roam-ap-label { fill: var(--midnight); font: 820 16px var(--font-mono); }
+    .roam-chart-svg .roam-trace-shadow { fill: none; stroke: var(--white); stroke-width: 10; stroke-linejoin: round; stroke-linecap: round; }
+    .roam-chart-svg .roam-trace { fill: none; stroke: var(--medium-blue); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+    .roam-chart-svg .roam-ping-segment { stroke: var(--magenta); stroke-width: 7; stroke-linecap: round; }
+    .roam-chart-svg .roam-point { fill: var(--white); stroke: var(--medium-blue); stroke-width: 3; }
+    .roam-chart-svg .roam-point-ping { fill: var(--magenta); stroke: var(--white); stroke-width: 2.5; }
+    .roam-chart-svg .roam-callout-line { fill: none; stroke: var(--midnight); stroke-width: 1.5; }
+    .roam-chart-svg .roam-callout { fill: var(--midnight); }
+    .roam-chart-svg .roam-callout-text { fill: var(--white); font-size: 14px; font-weight: 800; }
+    .roam-chart-svg .roam-caption { fill: var(--slate-600); font-size: 13px; font-weight: 650; }
+    .roam-chart-svg .roam-legend { fill: var(--slate-600); font-size: 13px; font-weight: 720; }
       inline-size: 100%;
       min-block-size: 0;
     }
@@ -860,6 +890,12 @@
       .print-page::after { content: " · " counter(slide); }
     }
   </style>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="cc09374a-e38a-4069-ac46-5a72fb1ad7d5"></script>
 </head>
 <body>
   <a class="skip-link" href="#ch1">跳到当前演示内容</a>
@@ -877,7 +913,9 @@
             <span><b>日期</b> ____________________</span>
           </div>
         </div>
-        <svg class="cover-mark" viewBox="0 0 720 720" role="img" aria-label="问题从多个信号中汇聚成清晰路径的抽象图">
+        <svg class="cover-mark" viewBox="0 0 720 720" role="img" aria-labelledby="coverMarkTitle coverMarkDesc">
+          <title id="coverMarkTitle">多个信号汇聚成问题</title>
+          <desc id="coverMarkDesc">四条路径从不同方向汇聚到中央的问号，象征 AI 帮助人从复杂信号中形成清晰问题。</desc>
           <defs>
             <linearGradient id="coverGradient" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#0A60FF"/>
@@ -1021,98 +1059,17 @@
       <div class="container">
         <span class="eyebrow">Scenario 02 · Visualize</span>
         <h2 id="title-3">让漫游轨迹，<span class="accent">自己说话</span></h2>
+        <p class="lead">RADIUS 抓包导出 JSON 后，AI 按意图生成分析代码，把时间戳变成一眼可读的漫游轨迹。</p>
         <div class="roam-chart">
           <p class="chart-meta" aria-label="抓包摘要">
-            <span><strong>40</strong> 次认证</span><span><strong>03:40</strong> 观察窗口</span>
-            <span><strong>15</strong> 次 5 秒内回切</span><span>最短间隔 <strong>1.577s</strong></span>
+            <span><strong id="roamAuthCount">40</strong> 次认证</span><span><strong id="roamWindow">03:39.445</strong> 观察窗口</span>
+            <span><strong id="roamPingCount">15</strong> 次 5 秒内回切</span><span>最短间隔 <strong id="roamMinGap">1.577s</strong></span>
           </p>
           <div class="svg-scroll-wrapper" aria-label="AGV 漫游时间轨迹图；窄屏可横向滚动">
-            <svg class="roam-chart-svg" viewBox="0 0 1100 470" role="img" aria-labelledby="roamTitle roamDesc">
+            <svg id="roamTimelineSvg" class="roam-chart-svg" viewBox="0 0 1240 500" role="img" aria-labelledby="roamTitle roamDesc">
               <title id="roamTitle">AGV 在四个接入点之间的漫游时间轨迹</title>
-              <desc id="roamDesc">横轴是三分四十秒的时间，纵轴是四个匿名接入点。蓝线连接四十次认证，红色加粗线段表示五秒内返回原接入点的十五次乒乓回切。</desc>
-              <defs>
-                <filter id="pointGlow" x="-80%" y="-80%" width="260%" height="260%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#07182D" flood-opacity="0.25"/>
-                </filter>
-              </defs>
-              <style>
-                .grid-line{stroke:#D9E3ED;stroke-width:1}.time-line{stroke:#E8EEF4;stroke-width:1}.axis-label{fill:#425466;font-size:14px;font-weight:700}.time-label{fill:#617487;font-size:12px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.trace{fill:none;stroke:#0A60FF;stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}.ping-segment{stroke:#B42318;stroke-width:7;stroke-linecap:round}.normal{fill:#FFFFFF;stroke:#0A60FF;stroke-width:3}.ping{fill:#B42318;stroke:#FFFFFF;stroke-width:2;filter:url(#pointGlow)}.annotation{fill:#07182D;font-size:13px;font-weight:800}.legend{fill:#425466;font-size:12px;font-weight:700}
-              </style>
-              <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
-                <rect x="96" y="48" width="934" height="354" rx="18" fill="#FFFFFF" stroke="#C7D4E2"/>
-                <rect x="97" y="48" width="933" height="89" rx="18" fill="#F3F8FF"/>
-                <rect x="97" y="226" width="933" height="89" fill="#F8FBFD"/>
-
-                <g aria-hidden="true">
-                  <line x1="110" y1="100" x2="1010" y2="100" class="grid-line"/>
-                  <line x1="110" y1="190" x2="1010" y2="190" class="grid-line"/>
-                  <line x1="110" y1="280" x2="1010" y2="280" class="grid-line"/>
-                  <line x1="110" y1="370" x2="1010" y2="370" class="grid-line"/>
-                  <line x1="110" y1="68" x2="110" y2="402" class="time-line"/>
-                  <line x1="232.7" y1="68" x2="232.7" y2="402" class="time-line"/>
-                  <line x1="355.5" y1="68" x2="355.5" y2="402" class="time-line"/>
-                  <line x1="478.2" y1="68" x2="478.2" y2="402" class="time-line"/>
-                  <line x1="600.9" y1="68" x2="600.9" y2="402" class="time-line"/>
-                  <line x1="723.6" y1="68" x2="723.6" y2="402" class="time-line"/>
-                  <line x1="846.4" y1="68" x2="846.4" y2="402" class="time-line"/>
-                  <line x1="969.1" y1="68" x2="969.1" y2="402" class="time-line"/>
-                  <line x1="1010" y1="68" x2="1010" y2="402" class="time-line"/>
-                </g>
-
-                <g text-anchor="end" class="axis-label">
-                  <text x="82" y="105">AP-A</text><text x="82" y="195">AP-B</text>
-                  <text x="82" y="285">AP-C</text><text x="82" y="375">AP-D</text>
-                </g>
-                <g text-anchor="middle" class="time-label">
-                  <text x="110" y="432">00:00</text><text x="232.7" y="432">00:30</text>
-                  <text x="355.5" y="432">01:00</text><text x="478.2" y="432">01:30</text>
-                  <text x="600.9" y="432">02:00</text><text x="723.6" y="432">02:30</text>
-                  <text x="846.4" y="432">03:00</text><text x="969.1" y="432">03:30</text>
-                  <text x="1010" y="432">03:40</text>
-                </g>
-                <text x="560" y="460" text-anchor="middle" class="axis-label">抓包经过时间（mm:ss）</text>
-
-                <polyline class="trace" points="110.0,100 120.4,190 135.6,100 144.8,280 194.7,370 203.8,280 219.7,190 272.7,280 289.4,190 337.2,370 354.9,280 364.9,190 386.0,370 394.8,190 422.1,370 429.4,100 436.5,190 586.8,280 601.6,190 610.8,370 618.0,280 634.6,190 646.0,370 653.2,190 697.0,280 704.2,370 718.6,280 725.6,370 732.9,190 787.1,280 795.6,190 824.8,100 833.6,190 847.0,280 854.4,190 869.9,280 877.3,190 980.9,280 988.2,190 1007.7,280"/>
-                <g aria-label="15 段乒乓回切">
-                  <line x1="120.4" y1="190" x2="135.6" y2="100" class="ping-segment"/><line x1="194.7" y1="370" x2="203.8" y2="280" class="ping-segment"/>
-                  <line x1="272.7" y1="280" x2="289.4" y2="190" class="ping-segment"/><line x1="386.0" y1="370" x2="394.8" y2="190" class="ping-segment"/>
-                  <line x1="586.8" y1="280" x2="601.6" y2="190" class="ping-segment"/><line x1="646.0" y1="370" x2="653.2" y2="190" class="ping-segment"/>
-                  <line x1="704.2" y1="370" x2="718.6" y2="280" class="ping-segment"/><line x1="718.6" y1="280" x2="725.6" y2="370" class="ping-segment"/>
-                  <line x1="787.1" y1="280" x2="795.6" y2="190" class="ping-segment"/><line x1="824.8" y1="100" x2="833.6" y2="190" class="ping-segment"/>
-                  <line x1="847.0" y1="280" x2="854.4" y2="190" class="ping-segment"/><line x1="854.4" y1="190" x2="869.9" y2="280" class="ping-segment"/>
-                  <line x1="869.9" y1="280" x2="877.3" y2="190" class="ping-segment"/><line x1="980.9" y1="280" x2="988.2" y2="190" class="ping-segment"/>
-                  <line x1="988.2" y1="190" x2="1007.7" y2="280" class="ping-segment"/>
-                </g>
-                <g aria-label="40 个认证落点">
-                  <circle cx="110.0" cy="100" r="5" class="normal"/><circle cx="120.4" cy="190" r="5" class="normal"/><circle cx="135.6" cy="100" r="7" class="ping"/>
-                  <circle cx="144.8" cy="280" r="5" class="normal"/><circle cx="194.7" cy="370" r="5" class="normal"/><circle cx="203.8" cy="280" r="7" class="ping"/>
-                  <circle cx="219.7" cy="190" r="5" class="normal"/><circle cx="272.7" cy="280" r="5" class="normal"/><circle cx="289.4" cy="190" r="7" class="ping"/>
-                  <circle cx="337.2" cy="370" r="5" class="normal"/><circle cx="354.9" cy="280" r="5" class="normal"/><circle cx="364.9" cy="190" r="5" class="normal"/>
-                  <circle cx="386.0" cy="370" r="5" class="normal"/><circle cx="394.8" cy="190" r="7" class="ping"/><circle cx="422.1" cy="370" r="5" class="normal"/>
-                  <circle cx="429.4" cy="100" r="5" class="normal"/><circle cx="436.5" cy="190" r="5" class="normal"/><circle cx="586.8" cy="280" r="5" class="normal"/>
-                  <circle cx="601.6" cy="190" r="7" class="ping"/><circle cx="610.8" cy="370" r="5" class="normal"/><circle cx="618.0" cy="280" r="5" class="normal"/>
-                  <circle cx="634.6" cy="190" r="5" class="normal"/><circle cx="646.0" cy="370" r="5" class="normal"/><circle cx="653.2" cy="190" r="7" class="ping"/>
-                  <circle cx="697.0" cy="280" r="5" class="normal"/><circle cx="704.2" cy="370" r="5" class="normal"/><circle cx="718.6" cy="280" r="7" class="ping"/>
-                  <circle cx="725.6" cy="370" r="7" class="ping"/><circle cx="732.9" cy="190" r="5" class="normal"/><circle cx="787.1" cy="280" r="5" class="normal"/>
-                  <circle cx="795.6" cy="190" r="7" class="ping"/><circle cx="824.8" cy="100" r="5" class="normal"/><circle cx="833.6" cy="190" r="7" class="ping"/>
-                  <circle cx="847.0" cy="280" r="5" class="normal"/><circle cx="854.4" cy="190" r="7" class="ping"/><circle cx="869.9" cy="280" r="7" class="ping"/>
-                  <circle cx="877.3" cy="190" r="7" class="ping"/><circle cx="980.9" cy="280" r="5" class="normal"/><circle cx="988.2" cy="190" r="7" class="ping"/>
-                  <circle cx="1007.7" cy="280" r="7" class="ping"/>
-                </g>
-
-                <g aria-label="图例">
-                  <line x1="770" y1="25" x2="808" y2="25" class="trace"/><circle cx="789" cy="25" r="5" class="normal"/>
-                  <text x="818" y="30" class="legend">漫游切换</text>
-                  <line x1="920" y1="25" x2="958" y2="25" class="ping-segment"/><circle cx="939" cy="25" r="7" class="ping"/>
-                  <text x="968" y="30" class="legend">5 秒内回切</text>
-                </g>
-
-                <g aria-label="最短漫游间隔标注">
-                  <path d="M618 280 L672 258" fill="none" stroke="#07182D" stroke-width="1.5"/>
-                  <rect x="672" y="238" width="176" height="38" rx="19" fill="#07182D"/>
-                  <text x="760" y="262" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="800">最短间隔 1.577 秒</text>
-                </g>
-              </g>
+              <desc id="roamDesc">横轴按 CSV 中的毫秒级时间差绘制，纵轴是四个匿名接入点。蓝线连接四十次认证，洋红色线段表示 CSV 标记的十五次五秒内回切。绝对时间与原始接入点地址均未展示。</desc>
+              <g id="roamTimelineLayer" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif"></g>
             </svg>
           </div>
         </div>
@@ -1453,7 +1410,7 @@
         <p class="finale-quote">在 AI 时代，<span class="question">问题</span>比答案更重要。</p>
         <div class="finale-grid">
           <article class="card"><span class="number">01</span><h3>先让 AI 提问</h3><p>让它理解目标、边界与习惯，而不是急着生成一个看似正确的答案。</p></article>
-          <article class="card"><span class="number">02</span><h3>再给 AI 能力</h3><p>通过沟通规约、技能和 MCP（工具连接协议），把工具连接成可以执行的工作系统。</p></article>
+          <article class="card"><span class="number">02</span><h3>再给 AI 能力</h3><p>通过沟通规约、技能和 MCP（模型上下文协议），把工具连接成可以执行的工作系统。</p></article>
           <article class="card"><span class="number">03</span><h3>最后由人验收</h3><p>人保留事实判断、风险边界与最终责任；AI 承担推理、表达和执行。</p></article>
         </div>
         <span class="print-page">AI 应用场景分享</span>
@@ -1592,6 +1549,100 @@
 
       const hashIndex = Number.parseInt(location.hash.replace('#ch', ''), 10) - 1;
       showSlide(Number.isInteger(hashIndex) ? hashIndex : currentIndex, false);
+    })();
+
+    (() => {
+      const svg = document.getElementById('roamTimelineSvg');
+      const layer = document.getElementById('roamTimelineLayer');
+      if (!svg || !layer) return;
+
+      // Sanitized derivative of roaming/dot1x.csv: elapsed seconds, anonymous AP, gap, ping-pong flag.
+      const data = [
+        [0,'AP-A',null,0],[2.537,'AP-B',2.403,0],[6.267,'AP-A',3.598,1],[8.495,'AP-C',2.089,0],
+        [20.704,'AP-D',12.066,0],[22.932,'AP-C',2.098,1],[26.809,'AP-B',3.744,0],[39.765,'AP-C',12.811,0],
+        [43.844,'AP-B',3.949,1],[55.538,'AP-D',11.554,0],[59.857,'AP-C',4.186,0],[62.304,'AP-B',2.285,0],
+        [67.474,'AP-D',4.994,0],[69.611,'AP-B',1.931,1],[76.284,'AP-D',6.534,0],[78.076,'AP-A',1.626,0],
+        [79.823,'AP-B',1.620,0],[116.540,'AP-C',36.566,0],[120.158,'AP-B',3.465,1],[122.411,'AP-D',2.132,0],
+        [124.171,'AP-C',1.577,0],[128.234,'AP-B',3.939,0],[131.015,'AP-D',2.637,0],[132.772,'AP-B',1.625,1],
+        [143.483,'AP-C',10.583,0],[145.240,'AP-D',1.581,0],[148.760,'AP-C',3.384,1],[150.477,'AP-D',1.587,1],
+        [152.274,'AP-B',1.659,0],[165.523,'AP-C',13.090,0],[167.603,'AP-B',1.950,1],[174.740,'AP-A',7.008,0],
+        [176.886,'AP-B',1.956,1],[180.161,'AP-C',3.140,0],[181.966,'AP-B',1.668,1],[185.763,'AP-C',3.662,1],
+        [187.568,'AP-B',1.621,1],[212.888,'AP-C',25.192,0],[214.683,'AP-B',1.665,1],[219.445,'AP-C',4.587,1]
+      ].map(([time, ap, gap, ping], index) => ({ event: index + 1, time, ap, gap, ping: Boolean(ping) }));
+
+      const aps = ['AP-A', 'AP-B', 'AP-C', 'AP-D'];
+      const left = 118, right = 1200, top = 92, rowGap = 86, bottom = 402;
+      const duration = data.at(-1).time;
+      const x = time => left + (time / duration) * (right - left);
+      const y = ap => top + aps.indexOf(ap) * rowGap;
+      const point = item => `${x(item.time).toFixed(2)},${y(item.ap).toFixed(2)}`;
+      const formatClock = seconds => {
+        const minutes = Math.floor(seconds / 60);
+        const remainder = seconds - minutes * 60;
+        const decimals = seconds % 1 ? 3 : 0;
+        return `${String(minutes).padStart(2, '0')}:${remainder.toFixed(decimals).padStart(decimals ? 6 : 2, '0')}`;
+      };
+
+      const authCount = data.length;
+      const pingCount = data.filter(item => item.ping).length;
+      const minGapItem = data.filter(item => item.gap !== null).reduce((best, item) => item.gap < best.gap ? item : best);
+      document.getElementById('roamAuthCount').textContent = String(authCount);
+      document.getElementById('roamWindow').textContent = formatClock(duration);
+      document.getElementById('roamPingCount').textContent = String(pingCount);
+      document.getElementById('roamMinGap').textContent = `${minGapItem.gap.toFixed(3)}s`;
+
+      const bands = aps.map((ap, index) => `
+        <rect x="${left}" y="${y(ap) - 31}" width="${right - left}" height="62" rx="20" class="${index % 2 ? 'roam-band' : 'roam-band-alt'}"/>
+        <rect x="20" y="${y(ap) - 20}" width="76" height="40" rx="20" class="roam-ap-pill"/>
+        <text x="58" y="${y(ap) + 6}" text-anchor="middle" class="roam-ap-label">${ap}</text>
+      `).join('');
+
+      const tickValues = [0, 30, 60, 90, 120, 150, 180, duration];
+      const ticks = tickValues.map((time, index) => {
+        const tx = x(time);
+        const anchor = index === 0 ? 'start' : index === tickValues.length - 1 ? 'end' : 'middle';
+        return `
+          <line x1="${tx}" y1="${top - 43}" x2="${tx}" y2="${bottom}" class="roam-grid"/>
+          <text x="${tx}" y="438" text-anchor="${anchor}" class="roam-axis-time">${formatClock(time)}</text>
+        `;
+      }).join('');
+
+      const tracePoints = data.map(point).join(' ');
+      const pingSegments = data.map((item, index) => {
+        if (!item.ping || index === 0) return '';
+        const previous = data[index - 1];
+        return `<line x1="${x(previous.time)}" y1="${y(previous.ap)}" x2="${x(item.time)}" y2="${y(item.ap)}" class="roam-ping-segment"><title>第 ${item.event} 次认证 · ${item.gap.toFixed(3)} 秒内回切至 ${item.ap}</title></line>`;
+      }).join('');
+
+      const points = data.map(item => `
+        <circle cx="${x(item.time)}" cy="${y(item.ap)}" r="${item.ping ? 7 : 5}" class="${item.ping ? 'roam-point-ping' : 'roam-point'}">
+          <title>第 ${item.event} 次认证 · ${formatClock(item.time)} · ${item.ap}${item.gap === null ? '' : ` · 间隔 ${item.gap.toFixed(3)} 秒`}${item.ping ? ' · 5 秒内回切' : ''}</title>
+        </circle>
+      `).join('');
+
+      const calloutX = Math.min(x(minGapItem.time) + 24, right - 188);
+      const calloutY = y(minGapItem.ap) - 58;
+      layer.innerHTML = `
+        <rect x="8" y="10" width="1224" height="474" rx="30" fill="var(--white)" stroke="var(--slate-100)"/>
+        <text x="20" y="40" class="roam-axis">每个点是一笔认证；线段的水平长度来自真实时间间隔</text>
+        <g aria-label="图例">
+          <line x1="860" y1="35" x2="900" y2="35" class="roam-trace"/><circle cx="880" cy="35" r="5" class="roam-point"/>
+          <text x="912" y="40" class="roam-legend">漫游切换</text>
+          <line x1="1035" y1="35" x2="1075" y2="35" class="roam-ping-segment"/><circle cx="1055" cy="35" r="7" class="roam-point-ping"/>
+          <text x="1087" y="40" class="roam-legend">5 秒内回切</text>
+        </g>
+        ${bands}${ticks}
+        <polyline points="${tracePoints}" class="roam-trace-shadow"/>
+        <polyline points="${tracePoints}" class="roam-trace"/>
+        <g aria-label="${pingCount} 段五秒内回切">${pingSegments}</g>
+        <g aria-label="${authCount} 个认证落点">${points}</g>
+        <g aria-label="最短漫游间隔标注">
+          <path d="M${x(minGapItem.time)} ${y(minGapItem.ap) - 8} L${calloutX} ${calloutY + 18}" class="roam-callout-line"/>
+          <rect x="${calloutX}" y="${calloutY}" width="188" height="36" rx="18" class="roam-callout"/>
+          <text x="${calloutX + 94}" y="${calloutY + 23}" text-anchor="middle" class="roam-callout-text">最短间隔 ${minGapItem.gap.toFixed(3)} 秒</text>
+        </g>
+        <text x="${(left + right) / 2}" y="472" text-anchor="middle" class="roam-caption">抓包经过时间（mm:ss.sss） · AP 已匿名化</text>
+      `;
     })();
 
     (() => {
