@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="description" content="AI 应用场景分享原演示文稿第 3–4 页：漫游轨迹可视化与 Make-Before-Break 交互解释。">
+  <title>AI 应用场景分享｜第 3–4 页</title>
+  <style>
+    :root {
+      --white: #FFFFFF;
+      --midnight: #07182D;
+      --midnight-2: #102A43;
+      --cisco-blue: #02C8FF;
+      --medium-blue: #0A60FF;
+      --magenta: #FF007F;
+      --orange: #FF9000;
+      --ice: #EFFAFF;
+      --blue-50: #F2F7FF;
+      --slate-50: #F6F8FB;
+      --slate-100: #E9EEF4;
+      --slate-300: #B8C4D1;
+      --slate-600: #425466;
+      --slate-800: #1C2B3A;
+      --success: #147D64;
+      --focus: #0057B8;
+      --grad-blue: linear-gradient(135deg, #0A60FF 0%, #02C8FF 100%);
+      --grad-brand: linear-gradient(90deg, #0A60FF 5%, #02C8FF 42%, #FF007F 76%, #FF9000 94%);
+      --shadow-sm: 0 4px 14px rgba(7, 24, 45, 0.08);
+      --shadow-md: 0 18px 48px rgba(7, 24, 45, 0.13);
+      --shadow-blue: 0 18px 50px rgba(10, 96, 255, 0.18);
+      --radius-sm: 12px;
+      --radius-md: 22px;
+      --radius-lg: 32px;
+      --container: 1320px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei UI", "Microsoft YaHei", "Hiragino Sans GB", Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --ease: 420ms cubic-bezier(.22, 1, .36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      font-size: 16px;
+      background: var(--white);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-inline-size: 320px;
+      overflow: hidden;
+      color: var(--midnight);
+      background: var(--white);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, a { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    svg { display: block; max-inline-size: 100%; block-size: auto; }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 4px;
+    }
+
+    .sr-only {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      inset-block-start: 0.75rem;
+      inset-inline-start: 0.75rem;
+      z-index: 1000;
+      translate: 0 -180%;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      color: var(--white);
+      background: var(--midnight);
+      font-weight: 750;
+      transition: translate 180ms ease;
+    }
+
+    .skip-link:focus { translate: 0; }
+
+    .deck {
+      position: relative;
+      inline-size: 100vw;
+      block-size: 100dvh;
+      overflow: hidden;
+      counter-reset: slide;
+    }
+
+    .chapter.slide {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      inline-size: 100%;
+      block-size: 100dvh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      opacity: 0;
+      visibility: hidden;
+      translate: 5% 0;
+      background: var(--white);
+      transition: opacity var(--ease), translate var(--ease), visibility var(--ease);
+      counter-increment: slide;
+    }
+
+    .chapter.slide.active {
+      z-index: 2;
+      opacity: 1;
+      visibility: visible;
+      translate: 0;
+    }
+
+    .chapter.slide.before { translate: -5% 0; }
+
+    .chapter .container {
+      position: relative;
+      inline-size: min(100% - 2rem, var(--container));
+      min-block-size: 100%;
+      margin-inline: auto;
+      padding-block: clamp(3.75rem, 8vh, 6rem) clamp(6.5rem, 12vh, 8rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .chapter::before {
+      content: "";
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline: 0;
+      block-size: 3px;
+      background: var(--grad-brand);
+      transform-origin: left center;
+      opacity: 0.92;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-block-end: 0.8rem;
+      color: var(--slate-600);
+      font-family: var(--font-mono);
+      font-size: clamp(0.78rem, 1.2vw, 0.92rem);
+      font-weight: 750;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      inline-size: 2.4rem;
+      block-size: 3px;
+      border-radius: 999px;
+      background: var(--medium-blue);
+    }
+
+    h1, h2, h3, p { margin-block-start: 0; }
+
+    h1, h2, h3 {
+      color: var(--midnight);
+      line-height: 1.12;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-inline-size: 980px;
+      margin-block-end: 1.4rem;
+      font-size: clamp(3rem, 7.8vw, 7rem);
+      font-weight: 820;
+      letter-spacing: -0.055em;
+    }
+
+    h2 {
+      max-inline-size: 1100px;
+      margin-block-end: 1rem;
+      font-size: clamp(2.15rem, 4.6vw, 4.7rem);
+      font-weight: 810;
+      letter-spacing: -0.04em;
+    }
+
+    h3 {
+      margin-block-end: 0.65rem;
+      font-size: clamp(1.15rem, 1.8vw, 1.55rem);
+      font-weight: 780;
+      letter-spacing: -0.018em;
+    }
+
+    .lead {
+      max-inline-size: 820px;
+      margin-block-end: 2rem;
+      color: var(--slate-600);
+      font-size: clamp(1.08rem, 1.8vw, 1.35rem);
+      line-height: 1.65;
+      text-wrap: pretty;
+    }
+
+    .accent { color: var(--medium-blue); }
+
+    .deck-grid {
+      display: grid;
+      gap: clamp(1.5rem, 3vw, 3.25rem);
+      align-items: center;
+    }
+
+    .deck-grid.two { grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); }
+    .deck-grid.equal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .card {
+      position: relative;
+      border: 1px solid rgba(184, 196, 209, 0.58);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow-sm);
+      padding: clamp(1.1rem, 2.2vw, 1.7rem);
+      transition: translate 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .card:hover {
+      translate: 0 -4px;
+      border-color: rgba(10, 96, 255, 0.38);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card p:last-child { margin-block-end: 0; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-block-size: 2rem;
+      margin-block-end: 0.8rem;
+      padding-inline: 0.85rem;
+      border-radius: 999px;
+      color: #064C6B;
+      background: #DDF7FF;
+      font-size: 0.82rem;
+      font-weight: 780;
+    }
+
+    .tag.draft {
+      color: #654200;
+      background: #FFF2D6;
+    }
+
+    .number {
+      color: var(--medium-blue);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .svg-scroll-wrapper,
+    .table-scroll-wrapper {
+      inline-size: 100%;
+      max-inline-size: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      margin-inline: auto;
+      padding-block: 0.25rem 0.75rem;
+      scrollbar-color: var(--slate-300) transparent;
+    }
+
+    .svg-scroll-wrapper > svg {
+      inline-size: 100%;
+      min-inline-size: 660px;
+      margin-inline: auto;
+    }
+
+    .cover {
+      background:
+        radial-gradient(circle at 80% 15%, rgba(2, 200, 255, 0.18), transparent 29%),
+        radial-gradient(circle at 8% 88%, rgba(10, 96, 255, 0.10), transparent 34%),
+        var(--white);
+    }
+
+    .cover .container { isolation: isolate; }
+
+    .cover-copy { position: relative; z-index: 2; }
+
+    .cover-mark {
+      position: absolute;
+      inset-inline-end: clamp(-8rem, -4vw, -2rem);
+      inset-block-start: 50%;
+      z-index: -1;
+      inline-size: min(52vw, 680px);
+      translate: 0 -50%;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .cover-subtitle {
+      max-inline-size: 680px;
+      margin-block-end: 2.5rem;
+      color: var(--slate-600);
+      font-size: clamp(1.18rem, 2.2vw, 1.65rem);
+      line-height: 1.55;
+    }
+
+    .speaker-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 2.5rem;
+      color: var(--slate-600);
+      font-size: 0.98rem;
+    }
+
+    .speaker-line span {
+      display: inline-flex;
+      gap: 0.65rem;
+      align-items: baseline;
+    }
+
+    .speaker-line b { color: var(--midnight); }
+
+    .case-kicker {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.8rem 1rem;
+      align-items: start;
+      max-inline-size: 880px;
+      margin-block: 0 1.5rem;
+      padding: 1rem 1.2rem;
+      border-inline-start: 4px solid var(--medium-blue);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      background: var(--blue-50);
+    }
+
+    .case-kicker strong { color: var(--midnight); }
+    .case-kicker p { margin: 0; color: var(--slate-600); }
+
+    .evidence-shell {
+      position: relative;
+      border: 1px solid rgba(10, 96, 255, 0.16);
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(rgba(10, 96, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10, 96, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(145deg, #FFFFFF, #F5FBFF);
+      background-size: 28px 28px, 28px 28px, auto;
+      box-shadow: var(--shadow-blue);
+      padding: clamp(0.75rem, 1.8vw, 1.4rem);
+      overflow: hidden;
+    }
+
+    .evidence-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem 1rem;
+      margin-block-start: 0.3rem;
+      color: var(--slate-600);
+      font-size: 0.78rem;
+    }
+
+    .evidence-legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+    .evidence-legend i { inline-size: 0.7rem; block-size: 0.7rem; border-radius: 50%; background: var(--medium-blue); }
+    .evidence-legend i.inference { background: var(--cisco-blue); border: 2px solid #006F9B; }
+    .evidence-legend i.conclusion { background: var(--success); }
+
+    .fault-flow {
+      inline-size: 100%;
+      min-block-size: 0;
+    }
+
+    .fault-flow .svg-scroll-wrapper {
+      padding-block: 0;
+    }
+
+    .fault-flow .svg-scroll-wrapper > svg {
+      inline-size: 100%;
+      min-inline-size: 1080px;
+      block-size: clamp(360px, 53vh, 470px);
+    }
+
+    .outcome-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-block-start: 1.25rem;
+    }
+
+    .outcome {
+      min-block-size: 90px;
+      padding: 0.9rem 1rem;
+      border-radius: var(--radius-sm);
+      color: var(--midnight);
+      background: var(--slate-50);
+      border: 1px solid var(--slate-100);
+    }
+
+    .outcome b { display: block; margin-block-end: 0.15rem; font-size: 1rem; }
+    .outcome span { color: var(--slate-600); font-size: 0.84rem; line-height: 1.45; }
+
+    .story-flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-block-start: 1rem;
+    }
+
+    .story-step {
+      position: relative;
+      min-block-size: 155px;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--slate-100);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .story-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      inset-inline-end: -0.72rem;
+      inset-block-start: 50%;
+      z-index: 2;
+      color: var(--medium-blue);
+      font-size: 1.3rem;
+      font-weight: 900;
+      translate: 0 -50%;
+    }
+
+    .story-step p { margin: 0; color: var(--slate-600); font-size: 0.92rem; }
+
+    .definition {
+      margin-block: 1rem 1.5rem;
+      padding: 1rem 1.2rem;
+      border-radius: var(--radius-sm);
+      color: var(--slate-800);
+      background: var(--ice);
+      border: 1px solid rgba(2, 200, 255, 0.26);
+    }
+
+    .definition b { color: var(--medium-blue); }
+
+    .presentation-fit .container {
+      justify-content: flex-start;
+      padding-block: clamp(2rem, 4.5vh, 3.5rem) clamp(5rem, 9vh, 6.5rem);
+    }
+
+    .presentation-fit h2 {
+      max-inline-size: none;
+      margin-block-end: 0.55rem;
+      font-size: clamp(2.05rem, 4.1vw, 4.1rem);
+    }
+
+    .presentation-fit .lead {
+      max-inline-size: 1100px;
+      margin-block-end: 0.7rem;
+      font-size: clamp(1rem, 1.6vw, 1.22rem);
+      line-height: 1.5;
+    }
+
+    .roam-chart {
+      inline-size: 100%;
+      min-block-size: 0;
+    }
+
+    .chart-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem 0;
+      margin-block: 0 0.7rem;
+      color: var(--slate-600);
+      font-size: clamp(0.82rem, 1.12vw, 0.94rem);
+      font-weight: 680;
+    }
+
+    .chart-meta span {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.32rem;
+      white-space: nowrap;
+    }
+
+    .chart-meta span + span::before {
+      content: "";
+      inline-size: 1px;
+      block-size: 1.05rem;
+      margin-inline: 0.9rem;
+      background: var(--slate-300);
+      translate: 0 0.16rem;
+    }
+
+    .chart-meta strong {
+      color: var(--midnight);
+      font-family: var(--font-mono);
+      font-size: 1.08em;
+      font-weight: 850;
+    }
+
+    .roam-chart .svg-scroll-wrapper {
+      display: flex;
+      justify-content: flex-start;
+      padding-block: 0;
+    }
+
+    .roam-chart .svg-scroll-wrapper > svg {
+      inline-size: auto;
+      min-inline-size: 960px;
+      max-inline-size: 100%;
+      block-size: clamp(360px, 54vh, 470px);
+      margin-inline: 0;
+    }
+
+    .experience-note {
+      max-inline-size: 1180px;
+      margin: 0.45rem 0 0;
+      padding: 0.62rem 0.85rem;
+      border-inline-start: 3px solid var(--medium-blue);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      color: var(--slate-600);
+      background: linear-gradient(90deg, var(--blue-50), rgba(242, 247, 255, 0));
+      font-size: clamp(0.76rem, 1vw, 0.88rem);
+      font-weight: 620;
+      line-height: 1.45;
+    }
+
+    .experience-note strong { color: var(--midnight); }
+
+    .roam-chart-svg .roam-band { fill: var(--slate-50); }
+    .roam-chart-svg .roam-band-alt { fill: var(--blue-50); }
+    .roam-chart-svg .roam-grid { stroke: var(--slate-100); stroke-width: 1; stroke-dasharray: 3 7; }
+    .roam-chart-svg .roam-axis { fill: var(--slate-600); font-size: 14px; font-weight: 680; }
+    .roam-chart-svg .roam-axis-time { fill: var(--slate-600); font: 700 13px var(--font-mono); }
+    .roam-chart-svg .roam-ap-pill { fill: var(--white); stroke: var(--slate-300); }
+    .roam-chart-svg .roam-ap-label { fill: var(--midnight); font: 820 16px var(--font-mono); }
+    .roam-chart-svg .roam-trace-shadow { fill: none; stroke: var(--white); stroke-width: 10; stroke-linejoin: round; stroke-linecap: round; }
+    .roam-chart-svg .roam-trace { fill: none; stroke: var(--medium-blue); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+    .roam-chart-svg .roam-ping-segment { stroke: var(--magenta); stroke-width: 7; stroke-linecap: round; }
+    .roam-chart-svg .roam-point { fill: var(--white); stroke: var(--medium-blue); stroke-width: 3; }
+    .roam-chart-svg .roam-point-ping { fill: var(--magenta); stroke: var(--white); stroke-width: 2.5; }
+    .roam-chart-svg .roam-callout-line { fill: none; stroke: var(--midnight); stroke-width: 1.5; }
+    .roam-chart-svg .roam-callout { fill: var(--midnight); }
+    .roam-chart-svg .roam-callout-text { fill: var(--white); font-size: 14px; font-weight: 800; }
+    .roam-chart-svg .roam-caption { fill: var(--slate-600); font-size: 13px; font-weight: 650; }
+    .roam-chart-svg .roam-legend { fill: var(--slate-600); font-size: 13px; font-weight: 720; }
+
+    .account-flow {
+      inline-size: 100%;
+      min-block-size: 0;
+    }
+
+    .account-flow .svg-scroll-wrapper {
+      padding-block: 0;
+    }
+
+    .account-flow .svg-scroll-wrapper > svg {
+      inline-size: 100%;
+      min-inline-size: 980px;
+      block-size: clamp(330px, 48vh, 440px);
+    }
+
+    .aiops-flow {
+      inline-size: 100%;
+      min-block-size: 0;
+    }
+
+    .aiops-flow .svg-scroll-wrapper {
+      padding-block: 0;
+    }
+
+    .aiops-flow .svg-scroll-wrapper > svg {
+      inline-size: 100%;
+      min-inline-size: 1080px;
+      block-size: clamp(390px, 59vh, 510px);
+    }
+
+    .mbb-experience {
+      inline-size: 100%;
+      min-block-size: 0;
+    }
+
+    .mbb-experience .svg-scroll-wrapper {
+      display: flex;
+      justify-content: center;
+      padding-block: 0;
+      touch-action: pan-x;
+    }
+
+    .mbb-experience .svg-scroll-wrapper > svg {
+      inline-size: auto;
+      min-inline-size: 980px;
+      max-inline-size: 100%;
+      block-size: clamp(360px, 59vh, 520px);
+      margin-inline: auto;
+      touch-action: pan-x;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .mbb-agv { cursor: grab; touch-action: none; }
+    .mbb-agv.is-dragging { cursor: grabbing; }
+    .mbb-agv:focus { outline: none; }
+    .mbb-agv:focus-visible .mbb-agv-body {
+      stroke: var(--focus);
+      stroke-width: 6;
+    }
+
+    .finale {
+      background:
+        radial-gradient(circle at 16% 12%, rgba(2, 200, 255, 0.16), transparent 25%),
+        linear-gradient(180deg, #FFFFFF 0%, #F3F8FF 100%);
+    }
+
+    .finale .container {
+      padding-inline-end: clamp(7.5rem, 11vw, 10rem);
+    }
+
+    .finale-quote {
+      max-inline-size: 1100px;
+      margin-block: 1.5rem 2rem;
+      font-size: clamp(2.7rem, 7vw, 6.8rem);
+      font-weight: 850;
+      letter-spacing: -0.055em;
+      line-height: 1.05;
+      text-wrap: balance;
+    }
+
+    .finale-quote .question {
+      display: inline-block;
+      color: var(--medium-blue);
+      border-block-end: 0.12em solid var(--cisco-blue);
+    }
+
+    .finale-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      max-inline-size: 1040px;
+    }
+
+    .finale-grid .card { min-block-size: 150px; }
+
+    .closing-tool-highlight {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+      gap: 1rem;
+      align-items: center;
+      max-inline-size: 1040px;
+      margin: 1.15rem 0 0;
+      padding: 0.9rem 1.1rem 0.95rem 1.35rem;
+      border: 1px solid rgba(10, 96, 255, 0.2);
+      border-radius: var(--radius-sm);
+      color: var(--slate-600);
+      background: linear-gradient(105deg, rgba(2, 200, 255, 0.11), rgba(10, 96, 255, 0.05) 62%, rgba(255, 255, 255, 0.78));
+      font-size: clamp(0.78rem, 1vw, 0.9rem);
+      font-weight: 620;
+      line-height: 1.45;
+    }
+
+    .closing-tool-highlight::before {
+      content: "MCP";
+      position: absolute;
+      inset-inline-start: 1.35rem;
+      inset-block-start: -0.62rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      color: var(--white);
+      background: var(--medium-blue);
+      font: 800 0.66rem var(--font-mono);
+      letter-spacing: 0.08em;
+    }
+
+    .closing-tool-highlight strong { color: var(--midnight); }
+
+    .closing-tool-highlight a {
+      color: var(--medium-blue);
+      font-weight: 800;
+      text-decoration-color: rgba(10, 96, 255, 0.35);
+      text-underline-offset: 0.18em;
+    }
+
+    .closing-tool-highlight a:hover { text-decoration-color: currentColor; }
+
+    .mcp-highlight-main p,
+    .mcp-agent-prompt p,
+    .mcp-agent-prompt blockquote { margin: 0; }
+
+    .mcp-highlight-main > strong {
+      display: block;
+      margin-block-end: 0.25rem;
+      font-size: 1rem;
+    }
+
+    .mcp-agent-prompt {
+      display: grid;
+      gap: 0.35rem;
+      padding-inline-start: 1rem;
+      border-inline-start: 1px solid var(--slate-300);
+    }
+
+    .prompt-label {
+      color: var(--medium-blue);
+      font: 820 0.7rem var(--font-mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .mcp-agent-prompt blockquote {
+      padding: 0.58rem 0.7rem;
+      border-radius: 8px;
+      color: var(--midnight);
+      background: color-mix(in srgb, var(--white) 78%, var(--ice));
+      font-size: clamp(0.76rem, 0.95vw, 0.86rem);
+      font-weight: 680;
+      line-height: 1.45;
+    }
+
+    .prompt-safety {
+      color: var(--slate-600);
+      font-size: 0.72rem;
+    }
+
+    .prompt-safety strong { color: var(--medium-blue); }
+
+    .qa-invite {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-end: clamp(1rem, 2.2vw, 2rem);
+      display: grid;
+      justify-items: center;
+      gap: 0.12em;
+      margin: 0;
+      color: var(--midnight);
+      font-size: clamp(2.5rem, 4vw, 4.25rem);
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      translate: 0 -50%;
+    }
+
+    .qa-invite::before {
+      content: "Q&A";
+      margin-block-end: 0.8rem;
+      color: var(--slate-600);
+      font: 800 0.72rem var(--font-mono);
+      letter-spacing: 0.14em;
+    }
+
+    .qa-invite::after {
+      content: "";
+      inline-size: 3px;
+      block-size: 2.6rem;
+      margin-block-start: 0.8rem;
+      border-radius: 999px;
+      background: var(--grad-blue);
+    }
+
+    .qa-invite span:nth-of-type(n + 3) { color: var(--medium-blue); }
+
+    .nav {
+      position: fixed;
+      inset-inline-start: 50%;
+      inset-block-end: max(1.2rem, env(safe-area-inset-bottom));
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      translate: -50% 0;
+      padding: 0.45rem;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      background: rgba(7, 24, 45, 0.94);
+      box-shadow: 0 16px 42px rgba(7, 24, 45, 0.24);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      display: inline-grid;
+      place-items: center;
+      inline-size: 46px;
+      block-size: 46px;
+      border: 0;
+      border-radius: 50%;
+      color: var(--white);
+      background: transparent;
+      cursor: pointer;
+      transition: color 180ms ease, background 180ms ease, scale 180ms ease;
+    }
+
+    .nav button:hover:not(:disabled) {
+      color: var(--midnight);
+      background: var(--cisco-blue);
+      scale: 1.06;
+    }
+
+    .nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .nav-status {
+      min-inline-size: 4.5rem;
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .nav-status strong { color: var(--cisco-blue); font-size: 1rem; }
+
+    .nav-separator {
+      inline-size: 1px;
+      block-size: 28px;
+      margin-inline: 0.15rem;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav button.fullscreen { color: var(--cisco-blue); }
+    .nav button.fullscreen:hover { color: var(--midnight); }
+    .icon-exit { display: none; }
+
+    html:fullscreen,
+    html:-webkit-full-screen { background: var(--white); }
+
+    html:fullscreen .icon-enter,
+    html:-webkit-full-screen .icon-enter { display: none; }
+
+    html:fullscreen .icon-exit,
+    html:-webkit-full-screen .icon-exit { display: block; }
+
+    .progress {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      z-index: 110;
+      inline-size: 16.6667%;
+      block-size: 3px;
+      background: var(--grad-brand);
+      transform-origin: left center;
+      transition: inline-size var(--ease);
+    }
+
+    .help {
+      position: fixed;
+      inset-inline-end: max(1rem, env(safe-area-inset-right));
+      inset-block-end: max(1.35rem, env(safe-area-inset-bottom));
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      color: var(--slate-600);
+      font-size: 0.78rem;
+    }
+
+    kbd {
+      display: inline-grid;
+      place-items: center;
+      min-inline-size: 1.8rem;
+      block-size: 1.8rem;
+      padding-inline: 0.35rem;
+      border: 1px solid var(--slate-300);
+      border-block-end-width: 2px;
+      border-radius: 6px;
+      color: var(--midnight);
+      background: var(--white);
+      font: 700 0.75rem var(--font-mono);
+    }
+
+    .print-page { display: none; }
+
+    @media (max-width: 980px) {
+      .deck-grid.two,
+      .deck-grid.equal { grid-template-columns: 1fr; }
+      .cover-mark { opacity: 0.42; inline-size: 78vw; }
+      .outcome-strip, .finale-grid { grid-template-columns: 1fr; }
+      .story-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .story-step:nth-child(2)::after { display: none; }
+      .chapter .container { justify-content: flex-start; }
+      .help { display: none; }
+      .mbb-experience .svg-scroll-wrapper { justify-content: flex-start; }
+      .mbb-experience .svg-scroll-wrapper > svg { margin-inline: 0; }
+      .finale .container { padding-inline-end: 5rem; }
+      .closing-tool-highlight { grid-template-columns: 1fr; }
+      .mcp-agent-prompt {
+        padding-block-start: 0.75rem;
+        padding-inline-start: 0;
+        border-block-start: 1px solid var(--slate-300);
+        border-inline-start: 0;
+      }
+      .qa-invite {
+        inset-inline-end: 0.65rem;
+        font-size: clamp(1.9rem, 5.5vw, 2.7rem);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .chapter .container {
+        inline-size: min(100% - 1.25rem, var(--container));
+        padding-block-start: 3rem;
+        padding-block-end: 7.2rem;
+      }
+      h1 { font-size: clamp(2.75rem, 15vw, 4.2rem); }
+      h2 { font-size: clamp(2rem, 10vw, 3.2rem); }
+      .cover-mark { inset-inline-end: -8rem; }
+      .story-flow { grid-template-columns: 1fr; }
+      .story-step:not(:last-child)::after { display: none; }
+      .help { display: none; }
+      .nav { inset-block-end: max(0.75rem, env(safe-area-inset-bottom)); }
+      .case-kicker { grid-template-columns: 1fr; }
+      #ch4 .container {
+        padding-block-start: 2.25rem;
+        padding-block-end: 5rem;
+      }
+      #ch2 .container,
+      #ch6 .container {
+        padding-block-start: 2.5rem;
+        padding-block-end: 5.25rem;
+      }
+      .finale .container { padding-inline-end: 3.75rem; }
+      .qa-invite {
+        inset-inline-end: 0.2rem;
+        font-size: clamp(1.45rem, 7vw, 2rem);
+      }
+      .qa-invite::before { font-size: 0.58rem; }
+      .qa-invite::after { block-size: 1.75rem; }
+    }
+
+    @media (min-width: 900px) and (max-height: 760px) {
+      #ch3 .container { padding-block-end: 4.5rem; }
+      #ch7 .container {
+        padding-block-start: 3.5rem;
+        padding-block-end: 5.75rem;
+      }
+    }
+
+    @media (min-width: 900px) and (min-height: 650px) {
+      .presentation-fit { overflow-y: hidden; }
+
+      html:fullscreen,
+      html:-webkit-full-screen { --container: 1760px; }
+
+      html:fullscreen .presentation-fit .container,
+      html:-webkit-full-screen .presentation-fit .container {
+        justify-content: center;
+        padding-block-start: clamp(2.5rem, 5vh, 4.5rem);
+        padding-block-end: clamp(5.5rem, 9vh, 7rem);
+      }
+
+      html:fullscreen .presentation-fit .svg-scroll-wrapper,
+      html:-webkit-full-screen .presentation-fit .svg-scroll-wrapper {
+        display: flex;
+        justify-content: center;
+      }
+
+      html:fullscreen .fault-flow .svg-scroll-wrapper > svg,
+      html:-webkit-full-screen .fault-flow .svg-scroll-wrapper > svg {
+        inline-size: min(100%, 162dvh);
+        min-inline-size: 0;
+        block-size: auto;
+      }
+
+      html:fullscreen .roam-chart .svg-scroll-wrapper > svg,
+      html:-webkit-full-screen .roam-chart .svg-scroll-wrapper > svg {
+        inline-size: min(100%, 150dvh);
+        min-inline-size: 0;
+        block-size: auto;
+        margin-inline: auto;
+      }
+
+      html:fullscreen .account-flow .svg-scroll-wrapper > svg,
+      html:-webkit-full-screen .account-flow .svg-scroll-wrapper > svg {
+        inline-size: min(100%, 135dvh);
+        min-inline-size: 0;
+        block-size: auto;
+      }
+
+      html:fullscreen .aiops-flow .svg-scroll-wrapper > svg,
+      html:-webkit-full-screen .aiops-flow .svg-scroll-wrapper > svg {
+        inline-size: min(100%, 157dvh);
+        min-inline-size: 0;
+        block-size: auto;
+      }
+
+      html:fullscreen .mbb-experience .svg-scroll-wrapper > svg,
+      html:-webkit-full-screen .mbb-experience .svg-scroll-wrapper > svg {
+        inline-size: min(100%, 155dvh);
+        min-inline-size: 0;
+        block-size: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
+    @media print {
+      @page { size: A4 landscape; margin: 10mm 12mm 12mm; }
+      html, body { overflow: visible; background: var(--white); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      *:focus-visible { outline: none; }
+      .deck { inline-size: auto; block-size: auto; overflow: visible; }
+      .chapter.slide {
+        position: relative;
+        inset: auto;
+        z-index: auto;
+        inline-size: 100%;
+        min-block-size: 180mm;
+        block-size: auto;
+        overflow: visible;
+        opacity: 1;
+        visibility: visible;
+        translate: none;
+        transition: none;
+        break-after: page;
+        page-break-after: always;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+      .chapter.slide.before,
+      .chapter.slide.active {
+        z-index: auto;
+        translate: none;
+      }
+      .chapter.slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+      .chapter.slide h2 { break-before: auto; page-break-before: auto; }
+      .chapter .container {
+        inline-size: 100%;
+        min-block-size: 180mm;
+        padding: 10mm 8mm 14mm;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+      .chapter.slide .svg-scroll-wrapper {
+        overflow: visible;
+      }
+      .chapter.slide .svg-scroll-wrapper > svg {
+        inline-size: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
+      }
+      #ch7 .finale-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4mm;
+        max-inline-size: calc(100% - 20mm);
+      }
+      #ch7 .finale-grid .card {
+        min-block-size: 36mm;
+        padding: 5mm;
+      }
+      #ch7 .qa-invite {
+        inset-inline-end: 3mm;
+        font-size: 24pt;
+      }
+      #ch2 .experience-note,
+      #ch3 .experience-note,
+      #ch5 .experience-note {
+        margin-block-start: 1.5mm;
+        padding: 2.2mm 3mm;
+        font-size: 8.5pt;
+      }
+      #ch2 .fault-flow .svg-scroll-wrapper > svg { block-size: 96mm; }
+      #ch3 .roam-chart .svg-scroll-wrapper > svg {
+        block-size: 96mm;
+      }
+      #ch5 .account-flow .svg-scroll-wrapper > svg { block-size: 91mm; }
+      #ch7 .closing-tool-highlight {
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+        gap: 3mm;
+        margin-block-start: 4mm;
+        padding: 3mm 3.5mm;
+        font-size: 8pt;
+      }
+      #ch7 .mcp-highlight-main > strong { font-size: 9pt; }
+      #ch7 .mcp-agent-prompt {
+        padding-block-start: 0;
+        padding-inline-start: 3mm;
+        border-block-start: 0;
+        border-inline-start: 1px solid var(--slate-300);
+      }
+      #ch7 .mcp-agent-prompt blockquote { font-size: 7.5pt; }
+      #ch7 .prompt-safety { font-size: 7pt; }
+      .nav, .progress, .help, .skip-link { display: none !important; }
+      .card { break-inside: avoid; box-shadow: none; }
+      .mbb-experience .svg-scroll-wrapper > svg {
+        inline-size: 100%;
+        min-inline-size: 0;
+        block-size: auto;
+      }
+      .print-page {
+        display: block;
+        position: absolute;
+        inset-inline-end: 8mm;
+        inset-block-end: 3mm;
+        color: var(--slate-600);
+        font: 700 9pt var(--font-mono);
+      }
+      .print-page::after { content: " · " counter(slide); }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#ch3">跳到当前演示内容</a>
+  <main class="deck" id="deck" aria-label="AI 应用场景分享，第 3 至第 4 页，共 2 页">
+    <div class="progress" id="progress" aria-hidden="true"></div>
+
+    <section class="chapter slide presentation-fit active" id="ch3" data-slide="3" aria-labelledby="title-3">
+      <div class="container">
+        <span class="eyebrow">Scenario 02 · Visualize</span>
+        <h2 id="title-3">让漫游轨迹，<span class="accent">自己说话</span></h2>
+        <div class="roam-chart">
+          <p class="chart-meta" aria-label="抓包摘要">
+            <span><strong id="roamAuthCount">40</strong> 次认证</span><span><strong id="roamWindow">03:39.445</strong> 观察窗口</span>
+            <span><strong id="roamPingCount">15</strong> 次 5 秒内回切</span><span>最短间隔 <strong id="roamMinGap">1.577s</strong></span>
+          </p>
+          <div class="svg-scroll-wrapper" aria-label="AGV 漫游时间轨迹图；窄屏可横向滚动">
+            <svg id="roamTimelineSvg" class="roam-chart-svg" viewBox="0 0 1240 500" role="img" aria-labelledby="roamTitle roamDesc">
+              <title id="roamTitle">AGV 在四个接入点之间的漫游时间轨迹</title>
+              <desc id="roamDesc">横轴按 CSV 中的毫秒级时间差绘制，纵轴是四个匿名接入点。蓝线连接四十次认证，洋红色线段表示 CSV 标记的十五次五秒内回切。绝对时间与原始接入点地址均未展示。</desc>
+              <g id="roamTimelineLayer" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif"></g>
+            </svg>
+          </div>
+        </div>
+        <span class="print-page">AI 应用场景分享</span>
+      </div>
+    </section>
+
+    <section class="chapter slide presentation-fit" id="ch4" data-slide="4" aria-labelledby="title-4">
+      <div class="container">
+        <span class="eyebrow">Scenario 03 · Interactive Explanation</span>
+        <h2 id="title-4">把漫游机制，变成可以<span class="accent">“拖动”的理解</span></h2>
+
+        <div class="mbb-experience interaction-stage">
+          <div class="svg-scroll-wrapper" aria-label="E80 AGV Make-Before-Break 交互式漫游示意；左右拖动 AGV，窄屏可横向滚动">
+            <svg id="mbbInteractiveSvg" viewBox="0 0 1400 520" role="group" aria-labelledby="mbbTitle mbbDesc">
+              <title id="mbbTitle">E80 AGV Make-Before-Break 交互式漫游示意</title>
+              <desc id="mbbDesc">拖动自动导引车在 Mobility Base A 与 Base B 之间移动。无线信号、链路状态和文字说明将同步变化，展示当前链路保持、发现下一节点、两条有效路径短暂重叠，以及新链路接管后释放旧链路的过程。本图是机制示意，不代表上一页客户案例的既定方案。</desc>
+              <defs>
+                <linearGradient id="mbbStageGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFFAFF"/>
+                </linearGradient>
+                <linearGradient id="mbbBaseGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F2F7FF"/>
+                </linearGradient>
+                <linearGradient id="mbbAgvGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#0A60FF"/><stop offset="1" stop-color="#02C8FF"/>
+                </linearGradient>
+                <filter id="mbbShadow" x="-20%" y="-30%" width="140%" height="170%">
+                  <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#07182D" flood-opacity="0.12"/>
+                </filter>
+                <marker id="mbbArrowActive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#0A60FF"/>
+                </marker>
+                <marker id="mbbArrowScan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#02C8FF"/>
+                </marker>
+                <marker id="mbbArrowHandoff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#147D64"/>
+                </marker>
+                <marker id="mbbArrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#B8C4D1"/>
+                </marker>
+              </defs>
+              <style>
+                .mbb-ui{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif}.mbb-mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.mbb-kicker{fill:#0A60FF;font-size:16px;font-weight:850;letter-spacing:1.2px}.mbb-title{fill:#07182D;font-size:25px;font-weight:850}.mbb-sub{fill:#425466;font-size:17px;font-weight:650}.mbb-base-title{fill:#07182D;font-size:22px;font-weight:820}.mbb-base-sub{fill:#425466;font-size:16px;font-weight:650}.mbb-rssi{fill:#07182D;font-size:17px;font-weight:780}.mbb-zone{fill:#425466;font-size:15px;font-weight:750}.mbb-status{fill:#FFFFFF;font-size:20px;font-weight:850;letter-spacing:.5px}.mbb-status-desc{fill:#FFFFFF;font-size:18px;font-weight:680}.mbb-bottom{fill:#425466;font-size:16px;font-weight:700}
+              </style>
+
+              <g class="mbb-ui">
+                <rect x="8" y="8" width="1384" height="504" rx="30" fill="url(#mbbStageGradient)" stroke="#B8C4D1"/>
+
+                <g aria-hidden="true">
+                  <rect x="34" y="28" width="174" height="32" rx="16" fill="#F2F7FF" stroke="#B8C4D1"/>
+                  <text x="121" y="50" text-anchor="middle" class="mbb-kicker">INTERACTIVE MODEL</text>
+                  <rect x="1100" y="28" width="258" height="32" rx="16" fill="#07182D"/>
+                  <path d="M1123 44 h28 M1123 44 l9-8 M1123 44 l9 8" fill="none" stroke="#02C8FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <text x="1256" y="50" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="780">拖动 AGV 或使用 ← →</text>
+                </g>
+
+                <g filter="url(#mbbShadow)">
+                  <rect x="570" y="34" width="260" height="62" rx="18" fill="#07182D"/>
+                </g>
+                <circle cx="605" cy="65" r="10" fill="#02C8FF"/>
+                <path d="M595 65 h20 M605 55 v20" stroke="#07182D" stroke-width="2.5" stroke-linecap="round"/>
+                <text x="715" y="60" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="820">Mobility Coordination</text>
+                <text x="715" y="82" text-anchor="middle" fill="#B8C4D1" font-size="14" font-weight="680">管理与路径协调（示意）</text>
+
+                <path d="M620 96 C552 108 474 116 375 130" fill="none" stroke="#B8C4D1" stroke-width="2.5" stroke-dasharray="7 7"/>
+                <path d="M780 96 C848 108 926 116 1025 130" fill="none" stroke="#B8C4D1" stroke-width="2.5" stroke-dasharray="7 7"/>
+
+                <g id="mbbBaseA" filter="url(#mbbShadow)">
+                  <rect x="210" y="124" width="330" height="86" rx="22" fill="url(#mbbBaseGradient)" stroke="#0A60FF" stroke-width="2.5"/>
+                  <circle cx="258" cy="167" r="24" fill="#F2F7FF" stroke="#0A60FF" stroke-width="2"/>
+                  <path d="M258 178 v-20 M249 166 q9-12 18 0 M244 159 q14-18 28 0" fill="none" stroke="#0A60FF" stroke-width="3" stroke-linecap="round"/>
+                  <text x="300" y="163" class="mbb-base-title">Mobility Base A</text>
+                  <text x="300" y="188" class="mbb-base-sub">覆盖节点 A</text>
+                </g>
+
+                <g id="mbbBaseB" filter="url(#mbbShadow)">
+                  <rect x="860" y="124" width="330" height="86" rx="22" fill="url(#mbbBaseGradient)" stroke="#0A60FF" stroke-width="2.5"/>
+                  <circle cx="908" cy="167" r="24" fill="#F2F7FF" stroke="#0A60FF" stroke-width="2"/>
+                  <path d="M908 178 v-20 M899 166 q9-12 18 0 M894 159 q14-18 28 0" fill="none" stroke="#0A60FF" stroke-width="3" stroke-linecap="round"/>
+                  <text x="950" y="163" class="mbb-base-title">Mobility Base B</text>
+                  <text x="950" y="188" class="mbb-base-sub">覆盖节点 B</text>
+                </g>
+
+                <line id="mbbLinkA" x1="375" y1="210" x2="320" y2="298" stroke="#0A60FF" stroke-width="6" stroke-linecap="round" marker-end="url(#mbbArrowActive)"/>
+                <line id="mbbLinkB" x1="1025" y1="210" x2="320" y2="298" stroke="transparent" stroke-width="0" stroke-linecap="round"/>
+
+                <g id="mbbRssiAGroup">
+                  <rect id="mbbRssiBgA" x="255" y="226" width="240" height="38" rx="19" fill="#EFFAFF" stroke="#0A60FF"/>
+                  <circle id="mbbRssiDotA" cx="280" cy="245" r="7" fill="#0A60FF"/>
+                  <text id="mbbRssiA" x="375" y="251" text-anchor="middle" class="mbb-rssi mbb-mono">A 信号: −30 dBm</text>
+                </g>
+                <g id="mbbRssiBGroup">
+                  <rect id="mbbRssiBgB" x="905" y="226" width="240" height="38" rx="19" fill="#F6F8FB" stroke="#B8C4D1"/>
+                  <circle id="mbbRssiDotB" cx="930" cy="245" r="7" fill="#B8C4D1"/>
+                  <text id="mbbRssiB" x="1025" y="251" text-anchor="middle" class="mbb-rssi mbb-mono">B 信号: −65 dBm</text>
+                </g>
+
+                <rect x="150" y="362" width="1100" height="14" rx="7" fill="#E9EEF4"/>
+                <rect x="150" y="362" width="430" height="14" rx="7" fill="#F2F7FF"/>
+                <rect x="580" y="362" width="240" height="14" fill="#EFFAFF"/>
+                <rect x="820" y="362" width="430" height="14" rx="7" fill="#F2F7FF"/>
+                <line x1="580" y1="350" x2="580" y2="388" stroke="#B8C4D1" stroke-width="2" stroke-dasharray="4 4"/>
+                <line x1="820" y1="350" x2="820" y2="388" stroke="#B8C4D1" stroke-width="2" stroke-dasharray="4 4"/>
+                <text x="350" y="402" text-anchor="middle" class="mbb-zone">BASE A 稳定区</text>
+                <text x="700" y="402" text-anchor="middle" fill="#147D64" font-size="16" font-weight="850">双链路重叠区</text>
+                <text x="1050" y="402" text-anchor="middle" class="mbb-zone">BASE B 稳定区</text>
+
+                <g id="mbbAgv" class="mbb-agv" transform="translate(320 324)" role="slider" tabindex="0" focusable="true" aria-label="AGV 漫游进度" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13" aria-valuetext="AGV 稳定连接 Base A">
+                  <rect class="mbb-agv-body" x="-78" y="-34" width="156" height="68" rx="18" fill="url(#mbbAgvGradient)" stroke="#07182D" stroke-width="3" filter="url(#mbbShadow)"/>
+                  <rect x="-54" y="-16" width="40" height="27" rx="6" fill="#FFFFFF" opacity="0.96"/>
+                  <path d="M-34-16 v27 M-54-2 h40" stroke="#B8C4D1" stroke-width="2"/>
+                  <circle cx="34" cy="-7" r="12" fill="#07182D"/>
+                  <circle cx="34" cy="-7" r="5" fill="#02C8FF"/>
+                  <text x="35" y="20" text-anchor="middle" fill="#07182D" font-size="15" font-weight="900">AGV</text>
+                  <circle cx="-48" cy="35" r="11" fill="#07182D"/><circle cx="48" cy="35" r="11" fill="#07182D"/>
+                  <circle cx="-48" cy="35" r="4" fill="#B8C4D1"/><circle cx="48" cy="35" r="4" fill="#B8C4D1"/>
+                </g>
+
+                <rect x="50" y="430" width="1300" height="62" rx="20" fill="#07182D"/>
+                <rect id="mbbStateBadge" x="74" y="445" width="292" height="32" rx="16" fill="#0A60FF"/>
+                <text id="mbbStateLabel" x="220" y="467" text-anchor="middle" class="mbb-status mbb-mono">OLD LINK STABLE</text>
+                <text id="mbbStateDesc" x="395" y="467" class="mbb-status-desc">AGV 稳定连接 Base A；拖动它观察“先搭后拆”</text>
+                <text x="1322" y="467" text-anchor="end" fill="#02C8FF" font-size="16" font-weight="820">先抓住新秋千，再松开旧秋千</text>
+              </g>
+            </svg>
+          </div>
+          <p id="mbbLive" class="sr-only" aria-live="polite">AGV 稳定连接 Base A。</p>
+        </div>
+        <span class="print-page">AI 应用场景分享</span>
+      </div>
+    </section>
+
+
+  </main>
+
+  <nav class="nav" aria-label="演示导航">
+    <button id="prev" type="button" aria-label="上一页" title="上一页（←）">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="nav-status" aria-live="polite"><strong id="current">1</strong> / <span id="total">2</span></div>
+    <button id="next" type="button" aria-label="下一页" title="下一页（→）">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="nav-separator" id="fullscreen-separator" aria-hidden="true"></span>
+    <button id="fullscreen" class="fullscreen" type="button" aria-label="进入全屏" aria-pressed="false" title="全屏演示（F）">
+      <svg class="icon-enter" viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="icon-exit" viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </nav>
+  <p class="help" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> 翻页 · <kbd>Home</kbd> 首页 · <kbd>End</kbd> 末页 · <span id="fullscreen-help"><kbd>F</kbd> 全屏</span></p>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const prevButton = document.getElementById('prev');
+      const nextButton = document.getElementById('next');
+      const currentLabel = document.getElementById('current');
+      const totalLabel = document.getElementById('total');
+      const progress = document.getElementById('progress');
+      const fullscreenButton = document.getElementById('fullscreen');
+      const fullscreenSeparator = document.getElementById('fullscreen-separator');
+      const fullscreenHelp = document.getElementById('fullscreen-help');
+      let currentIndex = Math.max(0, slides.findIndex(slide => slide.classList.contains('active')));
+      let touchStartX = null;
+
+      totalLabel.textContent = String(slides.length);
+
+      const showSlide = (index, updateHash = true) => {
+        const nextIndex = Math.min(Math.max(index, 0), slides.length - 1);
+        slides.forEach((slide, slideIndex) => {
+          slide.classList.toggle('active', slideIndex === nextIndex);
+          slide.classList.toggle('before', slideIndex < nextIndex);
+          slide.setAttribute('aria-hidden', slideIndex === nextIndex ? 'false' : 'true');
+          if (slideIndex === nextIndex) slide.scrollTop = 0;
+        });
+        currentIndex = nextIndex;
+        currentLabel.textContent = String(currentIndex + 1);
+        prevButton.disabled = currentIndex === 0;
+        nextButton.disabled = currentIndex === slides.length - 1;
+        progress.style.inlineSize = `${((currentIndex + 1) / slides.length) * 100}%`;
+        document.title = `${slides[currentIndex].querySelector('h1, h2')?.textContent.trim() || 'AI 应用场景分享'}｜${currentIndex + 1}/${slides.length}`;
+        if (updateHash) history.replaceState(null, '', `#${slides[currentIndex].id}`);
+      };
+
+      prevButton.addEventListener('click', () => showSlide(currentIndex - 1));
+      nextButton.addEventListener('click', () => showSlide(currentIndex + 1));
+
+      const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+      const requestFullscreen = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+      const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+
+      const syncFullscreenState = () => {
+        const active = Boolean(fullscreenElement());
+        fullscreenButton.setAttribute('aria-pressed', String(active));
+        fullscreenButton.setAttribute('aria-label', active ? '退出全屏' : '进入全屏');
+        fullscreenButton.title = active ? '退出全屏（F 或 Esc）' : '全屏演示（F）';
+      };
+
+      const toggleFullscreen = async () => {
+        try {
+          if (fullscreenElement()) {
+            await exitFullscreen?.call(document);
+          } else {
+            await requestFullscreen?.call(document.documentElement);
+          }
+        } catch (error) {
+          console.warn('Fullscreen request was not completed.', error);
+        }
+      };
+
+      if (requestFullscreen && exitFullscreen) {
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+        document.addEventListener('fullscreenchange', syncFullscreenState);
+        document.addEventListener('webkitfullscreenchange', syncFullscreenState);
+        syncFullscreenState();
+      } else {
+        fullscreenButton.hidden = true;
+        fullscreenSeparator.hidden = true;
+        fullscreenHelp.hidden = true;
+      }
+
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        const insideInteraction = event.target.closest?.('.interaction-stage');
+        if (insideInteraction && ['ArrowRight', 'ArrowLeft', 'Home', 'End', 'PageDown', 'PageUp', ' '].includes(event.key)) return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (event.key.toLowerCase() === 'f') {
+          event.preventDefault();
+          toggleFullscreen();
+        } else if (['ArrowRight', 'PageDown', ' '].includes(event.key)) {
+          event.preventDefault();
+          showSlide(currentIndex + 1);
+        } else if (['ArrowLeft', 'PageUp'].includes(event.key)) {
+          event.preventDefault();
+          showSlide(currentIndex - 1);
+        } else if (event.key === 'Home') {
+          event.preventDefault();
+          showSlide(0);
+        } else if (event.key === 'End') {
+          event.preventDefault();
+          showSlide(slides.length - 1);
+        }
+      });
+
+      document.addEventListener('touchstart', event => {
+        if (event.target.closest?.('.interaction-stage')) {
+          touchStartX = null;
+          return;
+        }
+        touchStartX = event.changedTouches[0]?.clientX ?? null;
+      }, { passive: true });
+
+      document.addEventListener('touchend', event => {
+        if (event.target.closest?.('.interaction-stage')) {
+          touchStartX = null;
+          return;
+        }
+        if (touchStartX === null) return;
+        const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+        if (Math.abs(delta) > 60) showSlide(currentIndex + (delta < 0 ? 1 : -1));
+        touchStartX = null;
+      }, { passive: true });
+
+      const hashIndex = slides.findIndex(slide => `#${slide.id}` === location.hash);
+      showSlide(hashIndex >= 0 ? hashIndex : currentIndex, false);
+    })();
+
+    (() => {
+      const svg = document.getElementById('roamTimelineSvg');
+      const layer = document.getElementById('roamTimelineLayer');
+      if (!svg || !layer) return;
+
+      // Sanitized derivative of roaming/dot1x.csv: elapsed seconds, anonymous AP, gap, ping-pong flag.
+      const data = [
+        [0,'AP-A',null,0],[2.537,'AP-B',2.403,0],[6.267,'AP-A',3.598,1],[8.495,'AP-C',2.089,0],
+        [20.704,'AP-D',12.066,0],[22.932,'AP-C',2.098,1],[26.809,'AP-B',3.744,0],[39.765,'AP-C',12.811,0],
+        [43.844,'AP-B',3.949,1],[55.538,'AP-D',11.554,0],[59.857,'AP-C',4.186,0],[62.304,'AP-B',2.285,0],
+        [67.474,'AP-D',4.994,0],[69.611,'AP-B',1.931,1],[76.284,'AP-D',6.534,0],[78.076,'AP-A',1.626,0],
+        [79.823,'AP-B',1.620,0],[116.540,'AP-C',36.566,0],[120.158,'AP-B',3.465,1],[122.411,'AP-D',2.132,0],
+        [124.171,'AP-C',1.577,0],[128.234,'AP-B',3.939,0],[131.015,'AP-D',2.637,0],[132.772,'AP-B',1.625,1],
+        [143.483,'AP-C',10.583,0],[145.240,'AP-D',1.581,0],[148.760,'AP-C',3.384,1],[150.477,'AP-D',1.587,1],
+        [152.274,'AP-B',1.659,0],[165.523,'AP-C',13.090,0],[167.603,'AP-B',1.950,1],[174.740,'AP-A',7.008,0],
+        [176.886,'AP-B',1.956,1],[180.161,'AP-C',3.140,0],[181.966,'AP-B',1.668,1],[185.763,'AP-C',3.662,1],
+        [187.568,'AP-B',1.621,1],[212.888,'AP-C',25.192,0],[214.683,'AP-B',1.665,1],[219.445,'AP-C',4.587,1]
+      ].map(([time, ap, gap, ping], index) => ({ event: index + 1, time, ap, gap, ping: Boolean(ping) }));
+
+      const aps = ['AP-A', 'AP-B', 'AP-C', 'AP-D'];
+      const left = 118, right = 1200, top = 92, rowGap = 86, bottom = 402;
+      const duration = data.at(-1).time;
+      const x = time => left + (time / duration) * (right - left);
+      const y = ap => top + aps.indexOf(ap) * rowGap;
+      const point = item => `${x(item.time).toFixed(2)},${y(item.ap).toFixed(2)}`;
+      const formatClock = seconds => {
+        const minutes = Math.floor(seconds / 60);
+        const remainder = seconds - minutes * 60;
+        const decimals = seconds % 1 ? 3 : 0;
+        return `${String(minutes).padStart(2, '0')}:${remainder.toFixed(decimals).padStart(decimals ? 6 : 2, '0')}`;
+      };
+
+      const authCount = data.length;
+      const pingCount = data.filter(item => item.ping).length;
+      const minGapItem = data.filter(item => item.gap !== null).reduce((best, item) => item.gap < best.gap ? item : best);
+      document.getElementById('roamAuthCount').textContent = String(authCount);
+      document.getElementById('roamWindow').textContent = formatClock(duration);
+      document.getElementById('roamPingCount').textContent = String(pingCount);
+      document.getElementById('roamMinGap').textContent = `${minGapItem.gap.toFixed(3)}s`;
+
+      const bands = aps.map((ap, index) => `
+        <rect x="${left}" y="${y(ap) - 31}" width="${right - left}" height="62" rx="20" class="${index % 2 ? 'roam-band' : 'roam-band-alt'}"/>
+        <rect x="20" y="${y(ap) - 20}" width="76" height="40" rx="20" class="roam-ap-pill"/>
+        <text x="58" y="${y(ap) + 6}" text-anchor="middle" class="roam-ap-label">${ap}</text>
+      `).join('');
+
+      const tickValues = [0, 30, 60, 90, 120, 150, 180, duration];
+      const ticks = tickValues.map((time, index) => {
+        const tx = x(time);
+        const anchor = index === 0 ? 'start' : index === tickValues.length - 1 ? 'end' : 'middle';
+        return `
+          <line x1="${tx}" y1="${top - 43}" x2="${tx}" y2="${bottom}" class="roam-grid"/>
+          <text x="${tx}" y="438" text-anchor="${anchor}" class="roam-axis-time">${formatClock(time)}</text>
+        `;
+      }).join('');
+
+      const tracePoints = data.map(point).join(' ');
+      const pingSegments = data.map((item, index) => {
+        if (!item.ping || index === 0) return '';
+        const previous = data[index - 1];
+        return `<line x1="${x(previous.time)}" y1="${y(previous.ap)}" x2="${x(item.time)}" y2="${y(item.ap)}" class="roam-ping-segment"><title>第 ${item.event} 次认证 · ${item.gap.toFixed(3)} 秒内回切至 ${item.ap}</title></line>`;
+      }).join('');
+
+      const points = data.map(item => `
+        <circle cx="${x(item.time)}" cy="${y(item.ap)}" r="${item.ping ? 7 : 5}" class="${item.ping ? 'roam-point-ping' : 'roam-point'}">
+          <title>第 ${item.event} 次认证 · ${formatClock(item.time)} · ${item.ap}${item.gap === null ? '' : ` · 间隔 ${item.gap.toFixed(3)} 秒`}${item.ping ? ' · 5 秒内回切' : ''}</title>
+        </circle>
+      `).join('');
+
+      const calloutX = Math.min(x(minGapItem.time) + 24, right - 188);
+      const calloutY = y(minGapItem.ap) - 58;
+      layer.innerHTML = `
+        <rect x="8" y="10" width="1224" height="474" rx="30" fill="var(--white)" stroke="var(--slate-100)"/>
+        <text x="20" y="40" class="roam-axis">每个点是一笔认证；线段的水平长度来自真实时间间隔</text>
+        <g aria-label="图例">
+          <line x1="860" y1="35" x2="900" y2="35" class="roam-trace"/><circle cx="880" cy="35" r="5" class="roam-point"/>
+          <text x="912" y="40" class="roam-legend">漫游切换</text>
+          <line x1="1035" y1="35" x2="1075" y2="35" class="roam-ping-segment"/><circle cx="1055" cy="35" r="7" class="roam-point-ping"/>
+          <text x="1087" y="40" class="roam-legend">5 秒内回切</text>
+        </g>
+        ${bands}${ticks}
+        <polyline points="${tracePoints}" class="roam-trace-shadow"/>
+        <polyline points="${tracePoints}" class="roam-trace"/>
+        <g aria-label="${pingCount} 段五秒内回切">${pingSegments}</g>
+        <g aria-label="${authCount} 个认证落点">${points}</g>
+        <g aria-label="最短漫游间隔标注">
+          <path d="M${x(minGapItem.time)} ${y(minGapItem.ap) - 8} L${calloutX} ${calloutY + 18}" class="roam-callout-line"/>
+          <rect x="${calloutX}" y="${calloutY}" width="188" height="36" rx="18" class="roam-callout"/>
+          <text x="${calloutX + 94}" y="${calloutY + 23}" text-anchor="middle" class="roam-callout-text">最短间隔 ${minGapItem.gap.toFixed(3)} 秒</text>
+        </g>
+        <text x="${(left + right) / 2}" y="472" text-anchor="middle" class="roam-caption">抓包经过时间（mm:ss.sss） · AP 已匿名化</text>
+      `;
+    })();
+
+    (() => {
+      const svg = document.getElementById('mbbInteractiveSvg');
+      if (!svg) return;
+
+      const agv = document.getElementById('mbbAgv');
+      const linkA = document.getElementById('mbbLinkA');
+      const linkB = document.getElementById('mbbLinkB');
+      const rssiA = document.getElementById('mbbRssiA');
+      const rssiB = document.getElementById('mbbRssiB');
+      const rssiBgA = document.getElementById('mbbRssiBgA');
+      const rssiBgB = document.getElementById('mbbRssiBgB');
+      const rssiDotA = document.getElementById('mbbRssiDotA');
+      const rssiDotB = document.getElementById('mbbRssiDotB');
+      const stateBadge = document.getElementById('mbbStateBadge');
+      const stateLabel = document.getElementById('mbbStateLabel');
+      const stateDesc = document.getElementById('mbbStateDesc');
+      const live = document.getElementById('mbbLive');
+
+      const BASE_A_X = 375;
+      const BASE_B_X = 1025;
+      const BASE_Y = 210;
+      const AGV_Y = 324;
+      const AGV_LINK_Y = 290;
+      const MIN_X = 180;
+      const MAX_X = 1220;
+      const SCAN_A_TO_B = 500;
+      const HANDOFF_A_TO_B = 700;
+      const STABLE_B = 900;
+      const SCAN_B_TO_A = 900;
+      const HANDOFF_B_TO_A = 700;
+      const STABLE_A = 500;
+
+      const linkStyles = {
+        active: { color: '#0A60FF', width: 6, dash: '', marker: 'url(#mbbArrowActive)' },
+        scanning: { color: '#02C8FF', width: 4, dash: '12 9', marker: 'url(#mbbArrowScan)' },
+        handoff: { color: '#147D64', width: 6, dash: '', marker: 'url(#mbbArrowHandoff)' },
+        muted: { color: '#B8C4D1', width: 4, dash: '8 9', marker: 'url(#mbbArrowMuted)' },
+        none: { color: 'transparent', width: 0, dash: '', marker: '' }
+      };
+
+      const states = {
+        A_STABLE: {
+          label: 'OLD LINK STABLE',
+          desc: 'AGV 稳定连接 Base A；拖动它观察“先搭后拆”',
+          aria: 'AGV 稳定连接 Base A',
+          linkA: 'active', linkB: 'none', badge: '#0A60FF', badgeText: '#FFFFFF'
+        },
+        SCAN_B: {
+          label: 'DISCOVERING BASE B',
+          desc: '旧链路继续传输，同时在后台发现 Base B',
+          aria: '旧链路保持连接，正在发现 Base B',
+          linkA: 'active', linkB: 'scanning', badge: '#02C8FF', badgeText: '#07182D'
+        },
+        MBB_A_TO_B: {
+          label: 'MAKE BEFORE BREAK',
+          desc: '新链路已经建立；旧链路仍在，避免“先断后连”的空档',
+          aria: 'Make-Before-Break，Base A 与 Base B 双链路并存',
+          linkA: 'active', linkB: 'handoff', badge: '#147D64', badgeText: '#FFFFFF'
+        },
+        B_STABLE: {
+          label: 'NEW LINK STABLE',
+          desc: 'Base B 接管数据后，旧链路才被释放',
+          aria: 'AGV 已切换并稳定连接 Base B',
+          linkA: 'none', linkB: 'active', badge: '#0A60FF', badgeText: '#FFFFFF'
+        },
+        SCAN_A: {
+          label: 'DISCOVERING BASE A',
+          desc: '返回途中保持 Base B，同时在后台发现 Base A',
+          aria: 'Base B 保持连接，正在发现 Base A',
+          linkA: 'scanning', linkB: 'active', badge: '#02C8FF', badgeText: '#07182D'
+        },
+        MBB_B_TO_A: {
+          label: 'MAKE BEFORE BREAK',
+          desc: '返回时同样先建立 Base A，再释放 Base B，保持路径连续',
+          aria: 'Make-Before-Break，返回途中双链路并存',
+          linkA: 'handoff', linkB: 'active', badge: '#147D64', badgeText: '#FFFFFF'
+        }
+      };
+
+      let position = 320;
+      let state = 'A_STABLE';
+      let dragging = false;
+      let lastAnnouncedState = '';
+      let printSnapshot = null;
+
+      const setLink = (element, styleName, baseX) => {
+        const style = linkStyles[styleName];
+        element.setAttribute('stroke', style.color);
+        element.setAttribute('stroke-width', String(style.width));
+        element.setAttribute('stroke-dasharray', style.dash);
+        element.setAttribute('marker-end', style.marker);
+        element.setAttribute('x1', String(baseX));
+        element.setAttribute('y1', String(BASE_Y));
+        element.setAttribute('x2', String(position));
+        element.setAttribute('y2', String(AGV_LINK_Y));
+      };
+
+      const calculateRssi = baseX => {
+        const distance = Math.abs(position - baseX);
+        return Math.max(-85, Math.round(-30 - 55 * Math.pow(distance / 900, 2)));
+      };
+
+      const styleRssi = (value, background, dot, strongColor) => {
+        const strong = value > -55;
+        background.setAttribute('fill', strong ? '#EFFAFF' : '#F6F8FB');
+        background.setAttribute('stroke', strong ? strongColor : '#B8C4D1');
+        dot.setAttribute('fill', strong ? strongColor : '#B8C4D1');
+      };
+
+      const updateState = () => {
+        for (let guard = 0; guard < 4; guard += 1) {
+          const previous = state;
+          if (state === 'A_STABLE' && position > SCAN_A_TO_B) state = 'SCAN_B';
+          else if (state === 'SCAN_B' && position < STABLE_A) state = 'A_STABLE';
+          else if (state === 'SCAN_B' && position > HANDOFF_A_TO_B) state = 'MBB_A_TO_B';
+          else if (state === 'MBB_A_TO_B' && position < SCAN_A_TO_B) state = 'SCAN_B';
+          else if (state === 'MBB_A_TO_B' && position > STABLE_B) state = 'B_STABLE';
+          else if (state === 'B_STABLE' && position < SCAN_B_TO_A) state = 'SCAN_A';
+          else if (state === 'SCAN_A' && position > STABLE_B) state = 'B_STABLE';
+          else if (state === 'SCAN_A' && position < HANDOFF_B_TO_A) state = 'MBB_B_TO_A';
+          else if (state === 'MBB_B_TO_A' && position > SCAN_B_TO_A) state = 'SCAN_A';
+          else if (state === 'MBB_B_TO_A' && position < STABLE_A) state = 'A_STABLE';
+          if (state === previous) break;
+        }
+      };
+
+      const render = (announce = true) => {
+        const meta = states[state];
+        agv.setAttribute('transform', `translate(${position} ${AGV_Y})`);
+        setLink(linkA, meta.linkA, BASE_A_X);
+        setLink(linkB, meta.linkB, BASE_B_X);
+
+        const valueA = calculateRssi(BASE_A_X);
+        const valueB = calculateRssi(BASE_B_X);
+        rssiA.textContent = `A 信号: ${valueA} dBm`;
+        rssiB.textContent = `B 信号: ${valueB} dBm`;
+        styleRssi(valueA, rssiBgA, rssiDotA, '#0A60FF');
+        styleRssi(valueB, rssiBgB, rssiDotB, '#02C8FF');
+
+        stateBadge.setAttribute('fill', meta.badge);
+        stateLabel.setAttribute('fill', meta.badgeText);
+        stateLabel.textContent = meta.label;
+        stateDesc.textContent = meta.desc;
+        const progress = Math.round(((position - MIN_X) / (MAX_X - MIN_X)) * 100);
+        agv.setAttribute('aria-valuenow', String(progress));
+        agv.setAttribute('aria-valuetext', meta.aria);
+
+        if (announce && state !== lastAnnouncedState) {
+          live.textContent = meta.aria;
+          lastAnnouncedState = state;
+        }
+      };
+
+      const setPosition = nextPosition => {
+        position = Math.max(MIN_X, Math.min(MAX_X, nextPosition));
+        updateState();
+        render();
+      };
+
+      const pointerToSvgX = event => {
+        const point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return point.matrixTransform(svg.getScreenCTM().inverse()).x;
+      };
+
+      agv.addEventListener('pointerdown', event => {
+        dragging = true;
+        agv.classList.add('is-dragging');
+        agv.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      agv.addEventListener('pointermove', event => {
+        if (!dragging) return;
+        setPosition(pointerToSvgX(event));
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      const stopDragging = event => {
+        if (!dragging) return;
+        dragging = false;
+        agv.classList.remove('is-dragging');
+        if (agv.hasPointerCapture(event.pointerId)) agv.releasePointerCapture(event.pointerId);
+        event.stopPropagation();
+      };
+
+      agv.addEventListener('pointerup', stopDragging);
+      agv.addEventListener('pointercancel', stopDragging);
+
+      agv.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft') setPosition(position - 42);
+        else if (event.key === 'ArrowRight') setPosition(position + 42);
+        else if (event.key === 'Home') {
+          state = 'A_STABLE';
+          setPosition(MIN_X);
+        } else if (event.key === 'End') {
+          state = 'B_STABLE';
+          setPosition(MAX_X);
+        } else return;
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      window.addEventListener('beforeprint', () => {
+        printSnapshot = { position, state };
+        position = 760;
+        state = 'MBB_A_TO_B';
+        render(false);
+      });
+
+      window.addEventListener('afterprint', () => {
+        if (!printSnapshot) return;
+        position = printSnapshot.position;
+        state = printSnapshot.state;
+        printSnapshot = null;
+        render(false);
+      });
+
+      render(false);
+    })();
+  </script>
+</body>
+</html>
