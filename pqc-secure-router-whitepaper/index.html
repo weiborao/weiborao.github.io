@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="从第一性原理解释后量子密码、Cisco Trustworthy 与 Cisco 8000 Series Secure Routers。">
+<meta name="theme-color" content="#005073">
+<title>先收密文，后破密码｜PQC 时代的可信网络边界</title>
+<link rel="stylesheet" href="cisco-style.css">
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a><div class="reading-progress" aria-hidden="true"><span></span></div>
+<header class="hero" id="top"><div class="container hero-grid">
+<div class="hero-copy"><p class="eyebrow">Cisco 技术白皮书 · 证据截止 2026-09-10</p>
+<h1>真正危险的不是量子计算机何时到来，<span>而是密文今天已经被带走。</span></h1>
+<p class="hero-subtitle">从 PQC、Cisco Trustworthy 到 Cisco 8000 Series Secure Routers：为 CISO 与网络架构师建立一条从风险、信任到迁移决策的完整推理链。</p>
+<div class="hero-actions"><a class="btn" href="#ch1">沿着问题往下走</a><a class="btn btn-secondary" href="#ch7">直接看行动路线</a></div>
+<div class="hero-meta"><span>约 28 分钟</span><span>Light Mode</span><span>可打印 A4</span><span>逐条标源</span></div></div>
+<div class="hero-visual" aria-hidden="true"><svg viewBox="0 0 520 410"><defs><linearGradient id="hs"><stop stop-color="#00bceb"/><stop offset="1" stop-color="#049fd9"/></linearGradient></defs><circle cx="260" cy="205" r="175" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="2"/><path d="M260 66 L382 111 V206 C382 285 332 343 260 372 C188 343 138 285 138 206 V111 Z" fill="url(#hs)" stroke="#fff" stroke-width="3"/><path d="M212 209 L247 244 L317 166" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><g fill="#fff" font-family="system-ui" font-weight="700" text-anchor="middle"><text x="260" y="122" font-size="17">TRUSTED FROM FIRST INSTRUCTION</text><text x="260" y="310" font-size="18">PQC · TRUST · SECURE WAN</text></g></svg></div>
+</div></header>
+<nav class="toc" aria-label="文章目录"><div class="container toc-inner"><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="toc-list"><span aria-hidden="true">☰</span><span>目录</span></button><strong class="toc-label">认知路线</strong><ol class="toc-list" id="toc-list"><li><a href="#ch1">核心判断</a></li><li><a href="#ch2">量子风险</a></li><li><a href="#ch3">PQC 机制</a></li><li><a href="#ch4">Trustworthy</a></li><li><a href="#ch5">8000 架构</a></li><li><a href="#ch6">创新对比</a></li><li><a href="#ch7">落地路线</a></li><li><a href="#closing">结论</a></li><li><a href="#glossary">术语表</a></li></ol></div></nav>
+<main id="main">
+<section class="chapter" id="ch1"><div class="container">
+<p class="section-kicker">01 · 总论：先校准问题</p><h2>如果量子计算机还不能破密，我们为什么现在就要行动？</h2>
+<p class="lead">因为信息安全保护的是<strong>数据的有效保密期</strong>，不是今天的计算机能力。只要一份数据需要保密到未来，而攻击者今天能保存密文，那么风险已经发生；PQC 迁移的第一优先级，应是让被截获的会话无法在未来通过破解密钥交换被还原。</p>
+<div class="thesis-panel reveal"><div><span class="thesis-number">01</span><h3>先保护“钥匙交接”</h3><p>AES-256 这类对称加密仍被视为量子时代可用；脆弱点主要在用 DH/ECDH/RSA 建立会话密钥的阶段。先为 IPsec、MACsec、TLS、SSH 的密钥交换加入 ML-KEM。</p></div><div><span class="thesis-number">02</span><h3>再保护“谁有权开机”</h3><p>设备还要证明硬件是真的、启动代码没被替换、密钥没被导出。Cisco Trustworthy 用硬件根信任、Secure Boot、SUDI 和运行时防御建立可验证链条。</p></div><div><span class="thesis-number">03</span><h3>把迁移做成运营能力</h3><p>Secure Routers 8000 的价值不是单个算法，而是把安全处理器、硬件加速、IOS XE、统一策略和遥测放在一套可演进的平台上。</p></div></div>
+<div class="callout callout-warning"><span class="evidence-tag evidence-inference">边界声明</span><p><strong>“量子安全”不等于“绝对安全”。</strong>PQC 不会自动修复弱口令、终端失陷、错误授权、实现漏洞或供应链风险。本文将“PQC”“可信系统”“网络安全运营”分层讨论。</p></div>
+<div class="question-bridge"><span>下一问</span><p>风险到底藏在加密链条的哪一环？如果只升级算法，会不会修错地方？</p></div><p class="chapter-anchor">记忆锚点：<strong>Q-Day 是未来事件，HNDL 是今天的风险。</strong></p>
+</div></section>
+
+<section class="chapter" id="ch2"><div class="container">
+<p class="section-kicker">02 · 挑战：从数据寿命推导风险</p><h2>PQC 时代真正的风险和挑战是什么？</h2>
+<h3>第一性原理：机密性是一场“寿命不等式”</h3><p>一份设计图、并购材料或关键基础设施遥测是否值得现在升级，不取决于谁能准确预测 Q-Day，而取决于三个时间量：数据还要保密多久（<em>X</em>）、组织完成迁移要多久（<em>Y</em>）、距离可破解现有公钥密码的量子能力还有多久（<em>Z</em>）。当 <strong>X + Y &gt; Z</strong>，等待就等于接受未来泄密。</p>
+<div class="svg-scroll-wrapper reveal"><svg viewBox="0 0 1120 500" role="img" aria-labelledby="risk-title"><title id="risk-title">HNDL 风险寿命不等式</title><defs><marker id="ab" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#049fd9"/></marker></defs><rect x="30" y="30" width="1060" height="440" rx="22" fill="#fff"/><text x="70" y="82" class="svg-title">一份密文的两条时间线</text><line x1="110" y1="205" x2="1010" y2="205" stroke="#d4d8de" stroke-width="8"/><line x1="110" y1="205" x2="542" y2="205" stroke="#fbab2c" stroke-width="8"/><line x1="542" y1="205" x2="1010" y2="205" stroke="#e2231a" stroke-width="8"/><g class="svg-body" text-anchor="middle"><circle cx="110" cy="205" r="18" fill="#049fd9"/><text x="110" y="156">今天：密文被截获</text><circle cx="542" cy="205" r="18" fill="#fbab2c"/><text x="542" y="156">完成迁移</text><circle cx="790" cy="205" r="18" fill="#e2231a"/><text x="790" y="156">假设的 Q-Day</text><circle cx="1010" cy="205" r="18" fill="#0d274d"/><text x="1010" y="156">数据失效</text></g><path d="M112 345 C330 270 560 430 790 335" fill="none" stroke="#049fd9" stroke-width="4" marker-end="url(#ab)"/><g class="svg-body"><text x="90" y="385">攻击者：收集 → 保存 → 等待计算能力 → 追溯解密</text><text x="90" y="425" class="svg-emphasis">决策条件：X + Y &gt; Z，就不能等到量子计算机出现再迁移。</text></g></svg></div>
+<p class="figure-caption">图 1｜HNDL 是“未来追溯解密”风险。来源：S1 pp.4, 8–9, 13；S3 pp.34–36。公式为本文决策模型。</p>
+<div class="grid grid-2"><article class="card"><p class="concept-label">精准定义</p><h3>HNDL</h3><p><strong>Harvest Now, Decrypt Later</strong>：攻击者今天截获并保存密文，未来再推导私钥或会话密钥。</p><p class="boundary"><strong>不是什么：</strong>它不要求攻击者今天破解 AES，也不要求 Q-Day 日期可预测。</p></article><article class="card analogy-card"><p class="concept-label">精妙类比</p><h3>不会过期的保险箱</h3><p>攻击者今天打不开保险箱，却能把整只箱子搬走，等未来有“万能开锁机”再开。PQC 让今天的钥匙交接即使被录像，未来也无法复刻。</p></article></div>
+<h3>风险藏在哪一环？</h3><div class="table-scroll-wrapper"><table><thead><tr><th>环节</th><th>典型机制</th><th>量子风险</th><th>架构动作</th></tr></thead><tbody><tr><td>批量数据加密</td><td>AES-256</td><td>作为量子时代对称加密基线</td><td>足够密钥长度与高质量随机数</td></tr><tr><td>会话密钥建立</td><td>DH / ECDH / RSA</td><td>数学基础受大型量子计算威胁</td><td>引入 ML-KEM 混合交换</td></tr><tr><td>身份与签名</td><td>RSA / ECDSA</td><td>设备证书与软件签名也在风险面</td><td>规划 ML-DSA、LMS</td></tr><tr><td>系统实现</td><td>协议、密钥存储、启动链</td><td>PQC 也可能实现错误</td><td>硬件根信任、测试与算法敏捷性</td></tr></tbody></table></div>
+<p class="source-line">证据：S1 pp.6–9, 12；S3 pp.35–39；NIST FIPS 203/204/205。</p>
+<details class="evidence-drawer"><summary>标准与时间线：哪些是事实，哪些不是企业通用死线？</summary><div class="drawer-content"><p>NIST 于 2024-08-13 发布 FIPS 203（ML-KEM）、FIPS 204（ML-DSA）与 FIPS 205（SLH-DSA）。CNSA 2.0 面向美国国家安全系统；S1 p.7 概括为网络设备首选 2026、要求 2030。<strong>这不是所有企业在所有司法辖区的统一法定截止日。</strong></p><p class="correction-note"><strong>资料勘误：</strong>S1 p.12 写作 RFC 9730；IETF 正式标准是 <a href="https://www.rfc-editor.org/rfc/rfc9370.html">RFC 9370</a>，并使用 <a href="https://www.rfc-editor.org/rfc/rfc9242.html">RFC 9242</a> 的 IKE_INTERMEDIATE 交换。</p></div></details>
+<div class="question-bridge"><span>下一问</span><p>PQC 到底改变了什么？为什么更稳妥的路线不是“一刀切替换”？</p></div><p class="chapter-anchor">记忆锚点：<strong>先盘点“需要保密多久”，再讨论“量子计算还要多久”。</strong></p>
+</div></section>
+
+<section class="chapter" id="ch3"><div class="container">
+<p class="section-kicker">03 · 反思：密码升级不是换缩写</p><h2>PQC 如何保护钥匙交接，又为什么采用混合模式？</h2>
+<p class="lead">PQC 是<strong>设计为抵抗经典与量子攻击的公钥算法族</strong>。它不是量子通信，也不需要量子计算机运行。ML-KEM 通过公开信道建立共享秘密，再由这个秘密派生 AES 会话密钥。</p>
+<div class="grid grid-2"><article class="card"><p class="concept-label">精准定义</p><h3>ML-KEM</h3><p>NIST FIPS 203 的模块格密钥封装机制。接收方生成公私钥；发送方用公钥封装出密文与共享秘密；接收方解封装得到相同秘密。</p><p class="boundary"><strong>不是什么：</strong>它不直接替代 AES，也不是数字签名。</p></article><article class="card analogy-card"><p class="concept-label">精妙类比</p><h3>公开的“制锁模具”</h3><p>Bob 把制锁模具（公钥）放在门外；Alice 用它做出一次性锁盒与双方可重建的钥匙。路人能拿到模具和锁盒，却还原不了钥匙。</p></article></div>
+<div class="svg-scroll-wrapper reveal"><svg viewBox="0 0 1120 560" role="img" aria-labelledby="kem-title"><title id="kem-title">混合密钥交换流程</title><rect x="35" y="30" width="1050" height="500" rx="22" fill="#fff"/><text x="70" y="80" class="svg-title">两条不同数学道路，共同守住一个会话</text><g class="svg-body"><rect x="115" y="140" width="350" height="100" rx="16" fill="#f7f8fa" stroke="#9232ac" stroke-width="2"/><text x="155" y="182">传统共享秘密：ECDH / DH</text><text x="155" y="215" class="svg-small">成熟、可互操作，但受量子威胁</text><rect x="655" y="140" width="350" height="100" rx="16" fill="#f7f8fa" stroke="#67b346" stroke-width="2"/><text x="695" y="182">PQC 共享秘密：ML-KEM</text><text x="695" y="215" class="svg-small">抵抗已知量子攻击路线</text></g><path d="M465 190 H535 V330" fill="none" stroke="#9232ac" stroke-width="5"/><path d="M655 190 H585 V330" fill="none" stroke="#67b346" stroke-width="5"/><rect x="395" y="335" width="330" height="100" rx="50" fill="#005073"/><g fill="#fff" font-family="system-ui" text-anchor="middle"><text x="560" y="375" font-size="21" font-weight="700">组合派生</text><text x="560" y="407" font-size="17">AES-256 会话密钥</text></g><text x="150" y="485" class="svg-small">只要协议要求的组合秘密仍安全，最终会话密钥就不会只依赖单一新算法。</text></svg></div>
+<p class="figure-caption">图 2｜传统 + PQC 混合密钥交换。来源：S1 p.12；S3 pp.37–39；RFC 9370。</p>
+<h3>为什么先混合？</h3><div class="grid grid-3"><article class="card is-static"><h4>分散实现风险</h4><p>协议集成仍年轻；两类数学假设降低新实现单点失败风险。</p></article><article class="card is-static"><h4>保持互操作</h4><p><code>optional</code> 让新端点用混合交换、旧端点暂用经典交换；它是过渡，不是终点。</p></article><article class="card is-static"><h4>可测量地收紧</h4><p>先看协商成功率、MTU、CPU、密码引擎与隧道时间，再切换 required。</p></article></div>
+<h3>今天与明天的三条路径</h3><div class="table-scroll-wrapper"><table><thead><tr><th>路径</th><th>本质</th><th>优势</th><th>限制</th></tr></thead><tbody><tr><td>预置 PPK</td><td>绕过量子脆弱的非对称交换</td><td>快速保护高价值链路</td><td>分发、熵与轮换复杂</td></tr><tr><td>QKD / KMS（如 SKS）</td><td>外部或设备服务提供密钥</td><td>按需获取密钥</td><td>成本、标准与产品可用性需核验</td></tr><tr><td>协议内 ML-KEM</td><td>在 IKEv2、TLS、SSH 中加 PQC</td><td>沿用既有网络并获得密码敏捷性</td><td>双方兼容；验证分片、性能和降级</td></tr></tbody></table></div>
+<p class="source-line">来源：S1 pp.9–12；S3 pp.40–48；Cisco IOS XE PQC for IKEv2/SSH 指南。</p>
+<div class="question-bridge"><span>下一问</span><p>即使隧道用了 ML-KEM，谁能证明路由器本人是真的、第一条指令没被换掉？</p></div><p class="chapter-anchor">记忆锚点：<strong>PQC 保护钥匙的数学，Trustworthy 保护拿钥匙的设备。</strong></p>
+</div></section>
+
+<section class="chapter" id="ch4"><div class="container">
+<p class="section-kicker">04 · 启示：信任必须可验证</p><h2>什么是 Cisco Trustworthy，为什么路由器必须先证明自己？</h2>
+<p class="lead"><strong>Cisco Trustworthy 不是一个单独功能或认证标签</strong>，而是一组贯穿设计、供应链、硬件身份、启动验证、密钥服务与运行时防御的政策、流程和技术。目标是让设备给出证据：硬件身份可信，代码真实且未修改，启动链逐级验证，运行期仍受保护。</p>
+<div class="grid grid-2"><article class="card"><p class="concept-label">精准定义</p><h3>硬件根信任与信任链</h3><p><strong>硬件根信任</strong>是最先被信任、难以被软件重写的验证起点；<strong>信任链</strong>要求每一级代码执行前验证下一级。</p><p class="boundary"><strong>不是什么：</strong>Secure Boot 不代表运行中的软件永远没有漏洞。</p></article><article class="card analogy-card"><p class="concept-label">精妙类比</p><h3>机场的接力安检</h3><p>不是登机口只看一次证件，而是护照机构、值机、安检、登机口层层验证；上一关只把“已核验的人”交给下一关。任何一环不匹配，队伍就停下。</p></article></div>
+<div class="svg-scroll-wrapper reveal"><svg viewBox="0 0 1200 540" role="img" aria-labelledby="trust-title"><title id="trust-title">Cisco Trustworthy 信任链</title><defs><marker id="at" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#049fd9"/></marker></defs><rect x="30" y="30" width="1140" height="480" rx="22" fill="#fff"/><text x="70" y="82" class="svg-title">一台设备的“出生证明”与逐级验身</text><g class="svg-body" text-anchor="middle"><g><rect x="65" y="145" width="150" height="110" rx="16" fill="#0d274d"/><text x="140" y="188" fill="#fff">硬件锚点</text><text x="140" y="218" class="svg-small" fill="#fff">不可变起点</text></g><g><rect x="250" y="145" width="150" height="110" rx="16" fill="#eef0f3"/><text x="325" y="188">Microloader</text><text x="325" y="218" class="svg-small">第一段代码</text></g><g><rect x="435" y="145" width="150" height="110" rx="16" fill="#eef0f3"/><text x="510" y="188">Bootloader</text><text x="510" y="218" class="svg-small">验证 OS</text></g><g><rect x="620" y="145" width="150" height="110" rx="16" fill="#eef0f3"/><text x="695" y="188">IOS XE</text><text x="695" y="218" class="svg-small">验证应用</text></g><g><rect x="805" y="145" width="150" height="110" rx="16" fill="#eef0f3"/><text x="880" y="188">应用 / 服务</text><text x="880" y="218" class="svg-small">已签名镜像</text></g><g><rect x="990" y="145" width="150" height="110" rx="16" fill="#eef0f3"/><text x="1065" y="188">运行时防御</text><text x="1065" y="218" class="svg-small">ASLR / BOSC</text></g></g><g stroke="#049fd9" stroke-width="4" marker-end="url(#at)"><path d="M215 200 H238"/><path d="M400 200 H423"/><path d="M585 200 H608"/><path d="M770 200 H793"/><path d="M955 200 H978"/></g><rect x="120" y="345" width="960" height="100" rx="18" fill="#f7f8fa" stroke="#00bceb" stroke-width="2"/><g class="svg-body" text-anchor="middle"><text x="310" y="388">SUDI：制造时植入的唯一身份</text><text x="600" y="388">安全存储：私钥与凭据</text><text x="900" y="388">RNG：真实随机源熵</text><text x="600" y="422" class="svg-small">Trust Anchor Module 为 OS 与应用提供关键密码服务</text></g></svg></div>
+<p class="figure-caption">图 3｜经典 Trustworthy 信任链。来源：S2 pp.1–5；后量子启动链见 S3 p.30。</p>
+<h3>六块基石，各自堵住什么洞？</h3><div class="table-scroll-wrapper"><table><thead><tr><th>基石</th><th>精准作用</th><th>典型风险</th><th>边界</th></tr></thead><tbody>
+<tr><td>Image Signing</td><td>镜像哈希 + Cisco 私钥数字签名</td><td>发布或传输后被篡改</td><td>证明来源与完整性，不证明无漏洞</td></tr>
+<tr><td>Hardware-anchored Secure Boot</td><td>从抗篡改硬件开始逐级验签</td><td>ROMMON/Bootloader 被改写</td><td>覆盖启动完整性，非全部运行期风险</td></tr>
+<tr><td>Trust Anchor Module</td><td>安全存储、SUDI、随机数、密钥与密码服务</td><td>私钥导出、身份克隆、弱熵</td><td>具体能力按平台核对</td></tr>
+<tr><td>SUDI</td><td>制造时植入、绑定产品 ID/序列号并链接根 CA 的 X.509v3 身份</td><td>假冒设备与上线冒名</td><td>S2 所述凭据可为 RSA/ECDSA，也需纳入 PQC 迁移</td></tr>
+<tr><td>Runtime Defenses</td><td>ASLR、BOSC、X-space 降低代码注入利用率</td><td>运行期内存破坏</td><td>不替代漏洞修补</td></tr>
+<tr><td>Value Chain Security</td><td>制造与分销的物理、逻辑、技术控制</td><td>污染、仿冒与 IP 滥用</td><td>客户仍需采购与验收控制</td></tr>
+</tbody></table></div>
+<p class="source-line">来源：S2 pp.1–5。通用数据表不代表每个 Cisco 型号实现完全相同，应逐型号核对 security profile。</p>
+<h3>后量子启动链怎样升级？</h3><p>S3 p.30 展示：硬件锚点加载微加载器；微加载器用 LMS 验证 Bootloader；Bootloader 用 ML-DSA-87 验证 OS；OS 再用 ML-DSA-87 验证应用镜像。<strong>ML-KEM 建立秘密，ML-DSA/LMS 证明代码</strong>，二者不是同一个工具。</p>
+<div class="question-bridge"><span>下一问</span><p>当密钥交换与启动信任都要升级，路由器怎样同时承担更重的密码、安全和转发工作？</p></div><p class="chapter-anchor">记忆锚点：<strong>信任不是“相信品牌”，而是让每一级都拿出可验证凭据。</strong></p>
+</div></section>
+
+<section class="chapter" id="ch5"><div class="container">
+<p class="section-kicker">05 · 工具：网络与安全进入同一数据路径</p><h2>Cisco 8000 Series Secure Routers 如何应对 PQC 与融合安全？</h2>
+<p class="lead">架构答案是三层协同：<strong>Secure Networking Processor / Quantum Flow Processor 负责数据面与密码加速，IOS XE 提供可编程系统与单一镜像，Trust Anchor 与 PQC Secure Boot 保护平台自身</strong>。这不是在旧路由器旁边多放一个安全盒子，而是让路由、安全、密码与运维共享系统资源和可观测性。</p>
+<div class="svg-scroll-wrapper reveal"><svg viewBox="0 0 1200 650" role="img" aria-labelledby="arch-title"><title id="arch-title">Secure Routers 8000 分层架构</title><rect x="30" y="30" width="1140" height="590" rx="22" fill="#fff"/><text x="70" y="82" class="svg-title">一个数据包的旅程：先看清，再分工，再加速</text><g class="svg-body" text-anchor="middle"><rect x="80" y="135" width="170" height="90" rx="14" fill="#eef0f3" stroke="#049fd9" stroke-width="2"/><text x="165" y="172">Integrated NIC</text><text x="165" y="201" class="svg-small">1G / mGig / 10G / 25G</text><rect x="290" y="135" width="170" height="90" rx="14" fill="#eef0f3" stroke="#049fd9" stroke-width="2"/><text x="375" y="172">Parser + MCAM</text><text x="375" y="201" class="svg-small">解析与分类</text><rect x="500" y="135" width="170" height="90" rx="14" fill="#eef0f3" stroke="#049fd9" stroke-width="2"/><text x="585" y="172">Traffic Manager</text><text x="585" y="201" class="svg-small">缓存、调度、队列</text><rect x="710" y="135" width="170" height="90" rx="14" fill="#eef0f3" stroke="#049fd9" stroke-width="2"/><text x="795" y="172">Packet Distributor</text><text x="795" y="201" class="svg-small">流分配</text><rect x="920" y="135" width="170" height="90" rx="14" fill="#eef0f3" stroke="#049fd9" stroke-width="2"/><text x="1005" y="172">PPE 并行阵列</text><text x="1005" y="201" class="svg-small">可编程 uCode</text></g><g stroke="#049fd9" stroke-width="4"><path d="M250 180 H290"/><path d="M460 180 H500"/><path d="M670 180 H710"/><path d="M880 180 H920"/></g><g class="svg-body" text-anchor="middle"><rect x="145" y="315" width="270" height="115" rx="18" fill="#005073"/><text x="280" y="354" fill="#fff">Inline Crypto</text><text x="280" y="386" class="svg-small" fill="#fff">IPsec / MACsec / ML-KEM</text><rect x="465" y="315" width="270" height="115" rx="18" fill="#0d274d"/><text x="600" y="354" fill="#fff">Security Acceleration</text><text x="600" y="386" class="svg-small" fill="#fff">NGFW / DPI / IPS / AI-ready</text><rect x="785" y="315" width="270" height="115" rx="18" fill="#005073"/><text x="920" y="354" fill="#fff">Dynamic Resources</text><text x="920" y="386" class="svg-small" fill="#fff">数据面 ↔ 服务面</text></g><rect x="145" y="500" width="910" height="80" rx="18" fill="#f7f8fa" stroke="#00bceb" stroke-width="3"/><g class="svg-body" text-anchor="middle"><text x="330" y="548">IOS XE 单一镜像</text><text x="600" y="548">YANG / Telemetry / Python</text><text x="890" y="548">Autonomous / Controller</text></g><text x="80" y="605" class="svg-small">信任底座：Built-in Trust Anchor + PQC Secure Boot · 来源：S3 pp.20–30</text></svg></div>
+<p class="figure-caption">图 4｜Secure Routers 8000 的处理分层。组件位置为认知简化，不代表芯片物理版图。</p>
+<h3>Secure Networking Processor 为什么是关键？</h3><p><strong>精准定义：</strong>SNP 把多核包处理、流量管理、集成接口、内联密码、安全加速、AI/ML 引擎和 Trust Anchor 汇聚在专用处理架构中。<strong>类比：</strong>像机场联合作业中心，安检、分拣、跑道调度共享一张航班计划，而不是反复搬运乘客。<strong>边界：</strong>集成不等于零开销，仍须测量数据面、密码引擎与服务面资源。</p>
+<h3>协议栈如何落地 PQC？</h3><div class="table-scroll-wrapper"><table><thead><tr><th>协议 / 平面</th><th>PQC 机制</th><th>状态与验证点</th></tr></thead><tbody><tr><td>IKEv2 / IPsec</td><td>DH/ECDH + ML-KEM 共享秘密</td><td>S3 pp.40–44；查 <code>show crypto ikev2 sa detailed</code></td></tr><tr><td>DMVPN / FlexVPN</td><td>沿用 IKEv2 proposal 的 ML-KEM</td><td>先实验室验证 Hub/Spoke 兼容</td></tr><tr><td>MACsec + EAP-TLS</td><td>TLS 1.3 ML-KEM 保护 MSK 建立链</td><td>S3 pp.45–46；核对两端版本与证书策略</td></tr><tr><td>SSH</td><td><code>mlkem768x25519-sha256</code> 等混合 KEX</td><td>S3 p.47；Cisco 指南 2026-04-24</td></tr><tr><td>SD-WAN</td><td>管理面 TLS、控制面 IKEv2 加 ML-KEM</td><td>S3 p.48 标注 Coming, XE 26.2.1</td></tr><tr><td>Secure Boot</td><td>LMS 验 Bootloader；ML-DSA-87 验 OS/应用</td><td>S3 p.30；逐平台版本确认</td></tr></tbody></table></div>
+<details class="evidence-drawer"><summary>配置示意：如何从“可选”迁移到“强制”？</summary><div class="drawer-content"><pre><code>crypto ikev2 proposal pqc-transition
+ encryption aes-gcm-256
+ prf sha512
+ group 21
+ pqc mlkem768 optional
+!
+! 先验证共存，再切换强制策略
+! show crypto ikev2 sa detailed</code></pre><p>这是根据 S3 pp.41–44 整理的<strong>认知示例</strong>，不是生产基线。真实配置取决于版本、认证、FIPS 模式与变更流程。</p></div></details>
+<div class="question-bridge"><span>下一问</span><p>相比上一代，哪些变化只是“更快”，哪些真正改变架构边界？</p></div><p class="chapter-anchor">记忆锚点：<strong>融合的价值不是少一个盒子，而是少一次上下文切换、多一条可观测路径。</strong></p>
+</div></section>
+
+<section class="chapter" id="ch6"><div class="container">
+<p class="section-kicker">06 · 对比：创新要落到决策差异</p><h2>与上一代相比，有哪些不得不提的创新？</h2>
+<p class="lead">最重要的不是型号数量，而是四个边界被重画：<strong>密码从附加功能变成全栈能力，安全从串联设备变成内联处理，资源从固定分割变成按意图调配，端口与吞吐从“开安全就缩水”转向硬件加速</strong>。</p>
+<div class="comparison-ribbon reveal"><div><span>过去常见取舍</span><strong>路由性能 ↔ 安全深度</strong></div><div class="ribbon-arrow" aria-hidden="true">→</div><div><span>8000 的架构目标</span><strong>路由 + 密码 + 检测共享加速底座</strong></div></div>
+<div class="table-scroll-wrapper"><table><thead><tr><th>创新</th><th>上一代常见约束</th><th>8000 的变化</th><th>决策价值</th></tr></thead><tbody>
+<tr><td>全栈 PQC</td><td>经典公钥算法贯穿传输与启动</td><td>IPsec、MACsec、SSH、SD-WAN 路线与 PQC Secure Boot 共演进</td><td>同时覆盖链路密钥与平台启动</td></tr>
+<tr><td>SNP</td><td>安全服务争抢通用 CPU 或依赖外置设备</td><td>内联密码、包处理、安全加速、AI/ML ready、集成 NIC</td><td>降低服务链复杂度</td></tr>
+<tr><td>动态资源</td><td>数据面与服务面划分较刚性</td><td>按 routing/SD-WAN 或 NGFW/TE/TCP 优化意图调配</td><td>同一硬件服务不同站点角色</td></tr>
+<tr><td>第三代 QFP</td><td>吞吐与端口密度受限</td><td>S3 p.26：最高 240G 聚合 I/O、4×QFP、16 密码引擎、224 PPE×4 线程</td><td>支撑并行处理与复杂状态特性</td></tr>
+<tr><td>内建 Secure Firewall</td><td>路由与 NGFW 常是独立设备/策略域</td><td>L3–L7 + Identity FW、IPS、AMP、URL-F、TLS 解密并对接 SSE</td><td>策略与路径一致，也要统一监控故障域</td></tr>
+<tr><td>平台跨度</td><td>小分支到 DC 分裂为多套路线</td><td>8100–8600 覆盖小分支、园区、DC，扩展 10/25/100GE</td><td>统一安全与运营模型</td></tr>
+<tr><td>IOS XE 单镜像</td><td>自治与控制器模式运维差异</td><td>universalk9 支持 Autonomous / Controller</td><td>简化部署；许可与功能矩阵仍须核对</td></tr>
+</tbody></table></div>
+<p class="source-line">来源：S3 pp.20–33, 49, 57–69。上一代比较基线随系列不同，可能是 ISR1K、Catalyst 8200/8300、C8500L 或 C8500，不能混成同一基线。</p>
+<h3>型号亮点：把预告规格与已验证能力分开</h3><div class="table-scroll-wrapper"><table><thead><tr><th>型号 / 定位</th><th>会场资料规格</th><th>PQC / 安全</th><th>证据状态</th></tr></thead><tbody>
+<tr><td>8650-G2<br>DC / 聚合</td><td>540 Gbps 转发；220 Gbps IPsec；82 Gbps SD-WAN；6×100/40G + 20×10/1G</td><td>PQC IPsec、MACsec、SD-WAN、Secure Boot</td><td>S3 p.8：Coming XE 26.1.2；性能以正式数据表与条件为准</td></tr>
+<tr><td>8221L/8221/8225-G2<br>中型分支</td><td>5.6–19 Gbps 转发；3–5 Gbps IPsec；10G 铜/光 WAN</td><td>系列页标注 PQC IPsec/MACsec/SD-WAN 与 Secure Boot</td><td>S3 pp.9–13：Coming；interim，FCS 前可能变化</td></tr>
+<tr><td>8211-G2<br>较小分支</td><td>5.6 Gbps 转发；3 Gbps IPsec；2×1G combo WAN</td><td>同系列路线</td><td>S3 p.13：Coming XE 26.2.1，interim</td></tr>
+<tr><td>8151H-C / 8130H-G2<br>小分支</td><td>10G 铜 WAN；前者有 5G Rel.17 与 1 Gbps Threat Protection；后者 routing-only</td><td>PQC IPsec/SD-WAN 与 Secure Boot</td><td>S3 pp.16–18：Coming XE 26.1.3，interim</td></tr>
+<tr><td>8200 Unified Edge Node</td><td>1U 半宽；LAN/WAN/SASE/compute；2×25G 背板；360W PoE</td><td>PQC IPsec/MACsec/SD-WAN + Secure Boot</td><td>S3 pp.14–15：Coming XE 26.2.1，interim</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="evidence-tag evidence-fact">性能口径提醒</span><p>S3 的“最高 10× IPsec、6× Threat Protection”按不同系列对各自上一代比较，并带包长或 EMIX、功能组合条件。选型应看<strong>真实复合负载</strong>：NAT、QoS、DPI、NetFlow、IPsec/PQC、TLS 解密和 IPS 同时启用，而不是裸转发峰值。</p></div>
+<h3>创新的代价是什么？</h3><p>功能融合把容量工程从“每个盒子各算各的”变成“共享处理预算”。S3 pp.71–76 要求观察 RP CPU/内存、QFP DRAM、数据路径负载、密码引擎与 Secure Firewall 服务面。<strong>创新没有取消瓶颈，而是让瓶颈更可编程、更可观测。</strong></p>
+<div class="question-bridge"><span>下一问</span><p>组织应从哪里开始，怎样避免一次性“大爆炸”迁移？</p></div><p class="chapter-anchor">记忆锚点：<strong>真正的代际升级，是以前必须取舍的能力开始能够共存。</strong></p>
+</div></section>
+
+<section class="chapter" id="ch7"><div class="container">
+<p class="section-kicker">07 · 落地：把密码迁移变成风险工程</p><h2>如何规划一条可回退、可证明的 PQC 路线？</h2>
+<p class="lead">不要从“采购哪台路由器”开始；从“哪类数据最怕未来被解密、它经过哪些协议和设备、迁移窗口多长”开始。平台选型是风险排序后的结果。</p>
+<div class="roadmap reveal"><article><span>1</span><h3>发现</h3><p>盘点数据寿命、算法、证书、隧道、固件签名、根信任与依赖方。</p><em>产物：CBOM</em></article><article><span>2</span><h3>分级</h3><p>用 X + Y &gt; Z 排 HNDL 优先级，先保护长期机密。</p><em>产物：风险分层</em></article><article><span>3</span><h3>试点</h3><p>验证混合交换、MTU/分片、重协商、HA、性能与日志。</p><em>产物：互操作矩阵</em></article><article><span>4</span><h3>迁移</h3><p>先 optional 后 required；高风险网络优先并行 PQC Island。</p><em>产物：分波次计划</em></article><article><span>5</span><h3>证明</h3><p>监控算法、降级、QFP/密码引擎、证书与配置漂移。</p><em>产物：合规证据</em></article></div>
+<h3>热替换还是并行“PQC 岛”？</h3><div class="table-scroll-wrapper"><table><thead><tr><th>条件</th><th>Hub 热替换</th><th>并行 PQC Island</th><th>判断</th></tr></thead><tbody><tr><td>冗余成熟、资源紧张</td><td>排空流量逐台替换；optional 同时服务新旧 Spoke</td><td>需要新增 Hub、地址、二层承载与 NNI</td><td>可热替换，但演练回退</td></tr><tr><td>业务极敏感、资源充足</td><td>修改现有 Hub，耦合较高</td><td>新旧并行，NNI 保持跨域可达</td><td>优先并行岛</td></tr><tr><td>遗留跨度大</td><td>optional 方便但可能长期停留经典算法</td><td>新端点可进入强策略域</td><td>给 optional 明确退役日</td></tr><tr><td>回退</td><td>恢复原 Hub 硬件/配置</td><td>Spoke 重新归属遗留 Hub</td><td>都要验证路由、SA 与业务</td></tr></tbody></table></div>
+<p class="source-line">来源：Cisco《Quantum-Ready Migration Guide》（2026-05-06）、IOS XE IKEv2 PQC 指南与 S3 pp.41–44。本文不承诺“零停机”。</p>
+<h3>上线前十二项压力测试</h3><ol class="checklist"><li><strong>资产：</strong>哪些链路承载需要保密五年、十年或更久的数据？</li><li><strong>端点：</strong>平台、版本、许可与 FIPS 模式是否支持同一 ML-KEM 参数集？</li><li><strong>身份：</strong>隧道认证、SUDI、PKI 与镜像签名是否分别规划？</li><li><strong>协商：</strong>optional 会否静默降级？</li><li><strong>MTU：</strong>PQC 大报文是否触发分片、丢包或中间设备异常？</li><li><strong>容量：</strong>并发建隧道、重密钥、故障切换时峰值如何？</li><li><strong>复合负载：</strong>NAT、QoS、DPI、IPS、TLS 解密同时开启是否满足 SLO？</li><li><strong>HA：</strong>切换后 SA、路由与策略怎样恢复？</li><li><strong>互操作：</strong>第三方 VPN、SSH、交换机与 PKI 是否端到端成功？</li><li><strong>回退：</strong>条件、责任人、快照与恢复时间是否量化？</li><li><strong>证据：</strong>能否证明目标算法在用，而非只证明隧道连通？</li><li><strong>退役：</strong>经典算法退出日期由谁批准、谁追踪？</li></ol>
+<h3>运行期看什么？</h3><div class="grid grid-3"><article class="card is-static"><h4>控制面</h4><p>RP CPU/DRAM、IOSd、邻居与前缀。来源 S3 p.71。</p></article><article class="card is-static"><h4>数据与密码面</h4><p>QFP DRAM、处理负载、平均包长、Crypto Engine。来源 S3 pp.71, 73–75。</p></article><article class="card is-static"><h4>服务与安全面</h4><p>Secure Firewall 引擎、Snort CPU、服务面模板与 PQC 降级。来源 S3 p.76。</p></article></div>
+<div class="cta-panel"><div><p class="section-kicker">决策建议</p><h3>从一条最高价值链路开始</h3><p>选择数据寿命长、端点可控、具备冗余的场景，跑通“发现—混合—验证—强制—证明”。闭环跑通，PQC 才从产品功能变成组织能力。</p></div><a class="btn" href="#references">核对证据</a></div>
+<p class="chapter-anchor">记忆锚点：<strong>成功不是设备“支持 PQC”，而是你能证明高价值流量没有悄悄降级。</strong></p>
+</div></section>
+
+<section class="chapter closing" id="closing"><div class="container"><p class="section-kicker">08 · 总结：回到开篇</p><h2>未来的数据安全，取决于今天如何交付一把钥匙</h2><p class="lead">本文不是预测 Q-Day，而是把不可预测的日期改写成可执行的工程判断。</p><div class="grid grid-3 contribution-grid"><article><span>判断</span><h3>用数据寿命决策</h3><p>保密期与迁移期之和超过风险窗口，就应立即降低 HNDL 暴露。</p></article><article><span>架构</span><h3>数学与设备信任分层</h3><p>ML-KEM 保护密钥建立；ML-DSA/LMS 保护签名；Trustworthy 让身份和代码链可验证。</p></article><article><span>行动</span><h3>从混合走向强制</h3><p>8000 提供全栈 PQC 与融合安全底座；安全来自分阶段迁移、性能验证与持续证明。</p></article></div><blockquote>不要问“量子计算机什么时候能开锁”；先问“今天被搬走的保险箱，里面的秘密要保密到什么时候”。</blockquote></div></section>
+
+<section class="chapter" id="references"><div class="container"><p class="section-kicker">RF · Evidence Ledger</p><h2>参考资料与证据边界</h2><ol class="references-list">
+<li><strong>S1｜Cisco, Cryptography in a Post-Quantum World</strong>，2024，13 页。用于 HNDL、NIST/CNSA 概览、PPK/QKD/KMS 与混合迁移。原文件：<code>cisco-cryptography-in-a-post-quantum-world-overview.pdf</code>。p.12 的 RFC 9730 已按 RFC Editor 更正为 RFC 9370。</li>
+<li><strong>S2｜Cisco Trustworthy Technologies Data Sheet</strong>，页脚更新至 2024，5 页。用于 Image Signing、Secure Boot、TAm、SUDI、RNG、Runtime Defenses 与 Value Chain Security。原文件：<code>trustworthy-technologies-datasheet.pdf</code>。</li>
+<li><strong>S3｜BRKXAR-2027, Inside Cisco 8000 Series Secure Routers</strong>，Cisco Live 2026，82 页。用于型号路线、SNP/QFP/IOS XE、PQC Secure Boot、协议能力、用例与运维。Coming / interim / subject to change at FCS 均按路线图处理。</li>
+<li><a href="https://csrc.nist.gov/pubs/fips/203/final"><strong>NIST FIPS 203</strong></a>（ML-KEM），2024-08-13；页面列有 2025 errata。</li>
+<li><a href="https://csrc.nist.gov/pubs/fips/204/final"><strong>NIST FIPS 204</strong></a>（ML-DSA），2024-08-13；页面列有 2026 errata。</li>
+<li><a href="https://csrc.nist.gov/pubs/fips/205/final"><strong>NIST FIPS 205</strong></a>（SLH-DSA），2024-08-13。</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9370.html"><strong>RFC 9370</strong></a>，Multiple Key Exchanges in IKEv2；配合 <a href="https://www.rfc-editor.org/rfc/rfc9242.html">RFC 9242</a>。</li>
+<li><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios-xe/security-vpn/security-vpn/m-pqc-ikev2.html"><strong>Cisco IOS XE：PQC for IKEv2</strong></a>，检索 2026-09-10。</li>
+<li><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios-xe/security-vpn/security-vpn/pqc-for-ssh.html"><strong>Cisco IOS XE：PQC for SSHv2</strong></a>，更新 2026-04-24。</li>
+<li><a href="https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Quantum-Ready-Migration-Guide.html"><strong>Cisco Quantum-Ready Migration Guide</strong></a>，更新 2026-05-06。</li>
+<li><a href="https://www.cisco.com/site/us/en/products/collateral/networking/sdwan-routers/8000-secure-routers/8600-series-secure-routers-ds.html"><strong>Cisco 8600 Series Data Sheet</strong></a>，检索 2026-09-10。</li></ol>
+<div class="callout callout-warning"><span class="evidence-tag evidence-inference">使用限制</span><p>本文不替代逐型号数据表、Feature Navigator、发布说明、FIPS 证书、出口管制或当地监管意见。性能必须在目标版本、许可、报文分布和功能组合下复测。</p></div></div></section>
+
+<section class="chapter" id="glossary"><div class="container"><p class="section-kicker">GL · Shared Vocabulary</p><h2>完整术语表</h2><div class="glossary-grid">
+<article><h3>AES-256</h3><p>256 位密钥对称加密；像双方共有的一把高速保险柜钥匙。</p></article><article><h3>CBOM</h3><p>密码物料清单；记录算法、密钥、证书、协议与依赖的“配料表”。</p></article><article><h3>CNSA 2.0</h3><p>NSA 面向美国国家安全系统的算法套件，不是全球统一法规。</p></article><article><h3>CRQC / Q-Day</h3><p>足以破解主流公钥密码的量子计算机，以及其能力可用的时点。</p></article><article><h3>DH / ECDH</h3><p>经典密钥交换，其数学基础受大型量子计算威胁。</p></article><article><h3>DMVPN</h3><p>结合 mGRE、NHRP 与 IPsec/IKEv2 的动态多点 VPN。</p></article><article><h3>FIA</h3><p>QFP 数据路径功能调用序列，像数据包的工序单。</p></article><article><h3>HNDL</h3><p>先收密文、未来解密；风险在截获时已经形成。</p></article><article><h3>IKEv2</h3><p>为 IPsec 协商身份、算法与会话密钥的协议。</p></article><article><h3>KEM / ML-KEM</h3><p>密钥封装机制；ML-KEM 由 FIPS 203 标准化。</p></article><article><h3>LMS</h3><p>基于哈希的有状态数字签名，用于启动链早期验证。</p></article><article><h3>MACsec</h3><p>IEEE 802.1AE 二层链路加密。</p></article><article><h3>ML-DSA</h3><p>FIPS 204 模块格数字签名；证明来源和完整性，不建立会话秘密。</p></article><article><h3>PQC</h3><p>在经典计算机运行、设计为抵抗已知量子攻击的公钥密码。</p></article><article><h3>PPK</h3><p>后量子预共享密钥；快速但分发和轮换困难。</p></article><article><h3>QFP</h3><p>Cisco Quantum Flow Processor；这里的 Quantum 不等于量子计算。</p></article><article><h3>QKD</h3><p>量子密钥分发，与普通芯片运行的 PQC 不同。</p></article><article><h3>信任链</h3><p>从硬件根开始，一级验证下一级后才允许执行。</p></article><article><h3>Secure Boot</h3><p>启动时逐级验签，异常时停止加载。</p></article><article><h3>SNP</h3><p>融合包处理、内联密码、安全加速与流量管理的专用架构。</p></article><article><h3>SUDI</h3><p>制造时植入并链接根 CA 的 X.509v3 唯一设备身份。</p></article><article><h3>TAm</h3><p>Trust Anchor Module，提供 SUDI、安全存储、随机数与密钥服务。</p></article><article><h3>TLS / SSH</h3><p>应用传输与远程管理协议；其密钥交换需 PQC 化。</p></article><article><h3>算法敏捷性</h3><p>发现、替换、并行运行与退役密码算法的组织能力。</p></article>
+</div></div></section>
+
+</main>
+<footer class="article-footer"><div class="container"><p>《先收密文，后破密码》· Cisco 风格技术白皮书 · 版本 1.0 · 2026-09-10</p><p>本文不使用 Cisco 标志；材料仅供技术研究与方案讨论。</p></div></footer>
+<a class="back-to-top" href="#top" aria-label="返回顶部">↑</a><script src="cisco-article.js" defer></script>
+</body></html>
