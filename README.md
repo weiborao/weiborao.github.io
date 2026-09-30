@@ -9,6 +9,8 @@
 * `source/_posts/`：标准博客文章（Markdown）。
 * `source/*.html`：GenAI 生成的独立页面（如 `tetragon.html`）。
 
+首页顶部的“技术作品索引”由 `scripts/home_works_index.js` 在 Hexo 构建时生成，分类和链接直接取自 `source/works/index.html`。新增独立页面后，把它的链接加入 `source/works/index.html` 对应分类，重新运行 `npm run build`，首页索引就会同步更新。首页只展示作品集已收录的页面，不会自动公开 `source/` 中的其他 HTML。
+
 
 * **`scripts/`**：存放自定义 Hexo 插件/脚本。
 * `umami_global_injector.js`：负责全局注入统计代码。
